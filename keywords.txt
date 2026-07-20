@@ -1,0 +1,5 @@
+StimulusTestSetup	KEYWORD2
+StimulusTestLoop	KEYWORD2
+PrintToScreen	KEYWORD2
+RegistreerCallbackScreenTypeCharacter	KEYWORD2
+RegistreerCallbackScreenTypePixel	KEYWORD2
