@@ -1,51 +1,77 @@
-# Eerste modules
+# Toepassingsgebieden en schema-index
+
+Dit document onderscheidt de huidige implementatie van geplande toepassingsgebieden en vormt de centrale index voor elektronische schema's.
+
+## Statusoverzicht
+
+| Toepassingsgebied | Softwarestatus | Elektronische documentatie |
+|---|---|---|
+| Stimulus | geïmplementeerd | [STIMULUS.md](STIMULUS.md) |
+| Screen | gedeelde systeemlaag | [../Systeem/SCREEN.md](../Systeem/SCREEN.md) |
+| Ademhaling | gepland | nog geen gevalideerd schema |
+| Hartritme, HRV en coherentie | gepland | nog geen gevalideerd schema |
+| Biopotentiële signalen | gepland | nog geen gevalideerd schema |
+| Emotie-observatie | inhoudelijk gepland | afhankelijk van de uiteindelijk gekozen meetmodules |
+| Overige observatievaardigheden | toekomstig | nog niet bepaald |
+
+Een gepland toepassingsgebied mag niet als werkende libraryfunctionaliteit worden voorgesteld.
 
 ## 1. Stimulus
 
 ### Leerdoel
 
-Een unieke stimulus leren zetten en activeren met reproduceerbare kracht, duur en timing.
+Een stimulus met vingertikken reproduceerbaar leren zetten en activeren.
 
-### Eerste meetdoelen
+### Huidige meetgegevens
 
-- gebruikte vinger of vingers
-- één tot vier vingers
-- kracht per vinger
-- duur per aanraking
-- gelijktijdigheid of volgorde
-- activeringsmoment
-- afwijking tegenover een doelprofiel
+- één tot vier analoge sensoren;
+- duur per stimulus;
+- gemiddelde drukwaarde;
+- piekdrukwaarde in uitgebreide modus;
+- tijd tot piek;
+- opbouw- en afbouwsnelheid;
+- start- en eindsynchronisatie;
+- afwijking tegenover een nulmeting of doel.
 
-### Eerste scenario's
+### Scenario's
 
-Vier basisscenario's worden afzonderlijk beschreven en getest. De concrete scenario-inhoud blijft in de module-specificatie staan zodat code en documentatie gelijklopen.
+De repository bevat afzonderlijke voorbeelden voor:
 
-## 2. Emotie-observatie
+1. enkele tik;
+2. simultane tik;
+3. ineenstortend patroon;
+4. cocktail;
+5. een samengesteld demonstratievoorbeeld.
 
-### Leerdoel
+Zie [STIMULUS.md](STIMULUS.md) voor aansluiting, configuratie en interpretatiegrenzen.
 
-Sneller en nauwkeuriger leren observeren wanneer iemand kenmerken van een emotie vertoont.
+## 2. Ademhaling
 
-### Werkwijze
+Geplande meetdoelen zijn onder meer ademfrequentie, ritme, diepte, ademfase en waar mogelijk mond- of neusademhaling. De definitieve sensoren en elektronische schema's zijn nog niet vastgesteld. Een schema wordt pas opgenomen nadat de opstelling praktisch en inhoudelijk is gevalideerd.
 
-De deelnemer registreert eerst een observatie. Daarna worden relevante meetgegevens getoond. Het systeem maakt onderscheid tussen fysiologische verandering en emotionele interpretatie.
+## 3. Hartritme, HRV en coherentie
 
-## 3. Ademhaling en hartslag
+Geplande meetdoelen zijn hartslag en, mits een geldige meet- en analysemethode, HRV en coherentie. Sensor, samplekwaliteit, artefactdetectie en algoritmen moeten vóór implementatie expliciet worden gekozen en beschreven.
 
-### Leerdoel
+## 4. Biopotentiële signalen
 
-Observeren of ademhaling en hartslag werkelijk veranderen zoals verwacht of gevraagd.
+Dit toepassingsgebied is gereserveerd voor signalen zoals ECG, EMG of andere elektrische lichaamssignalen. Vanwege veiligheid, signaalkwaliteit en interpretatierisico's is nog geen schema als officieel referentieontwerp opgenomen.
 
-### Meetdoelen
+## 5. Emotie-observatie
 
-- ademfrequentie
-- ademritme
-- ademdiepte, voor zover de gekozen sensor dit betrouwbaar ondersteunt
-- in- en uitademfase
-- mond- of neusademhaling, indien de gekozen opstelling dit ondersteunt
-- hartslag
-- eventueel HRV en coherentie, mits geldige meet- en analysemethode
+Emotie-observatie is geen afzonderlijke enkelvoudige sensor. Zij kan later gebruikmaken van meerdere gevalideerde meetmodules. De documentatie zal steeds gemeten signalen, afgeleide patronen en menselijke interpretatie scheiden.
 
-## 4. Andere observatievaardigheden
+## Vereisten voor ieder toekomstig schema
 
-Nieuwe modules volgen hetzelfde patroon: observeer, meet, vergelijk, leer en herhaal.
+Een nieuw schema wordt pas als raadpleegbaar referentieschema opgenomen wanneer het minimaal bevat:
+
+- doel en versie;
+- board en sensorvariant;
+- volledig aansluitschema;
+- pinbezetting;
+- voeding en gemeenschappelijke massa;
+- componentwaarden;
+- kalibratie;
+- voorbeeldcode;
+- foutbronnen;
+- veiligheids- en interpretatiegrenzen.

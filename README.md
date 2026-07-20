@@ -1,67 +1,148 @@
 # GroeiAcademie Framework
 
-> Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten, dankzij een modulair open-sourceframework waarmee menselijke vaardigheden objectief gemeten, geoefend, ontwikkeld en onderzocht kunnen worden.
+> Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten.
 
-Het GroeiAcademie Framework is één modulair open-sourceframework waarmee menselijke vaardigheden objectief gemeten, geoefend, ontwikkeld en onderzocht kunnen worden.
-
-## Missie
-
-Het GroeiAcademie Framework bestaat enerzijds om beoefenaars van Neuro Linguïstisch Programmeren te helpen hun basisvaardigheden veel sneller naar een hoger niveau te brengen. Anderzijds maakt het framework het mogelijk om de impact van NLP-technieken op het brein en op waarneembare fysiologische processen te onderzoeken en zichtbaar te maken voor onderzoekers, biofeedback-onderzoekers, NLP-beoefenaars, NLP-trainers en leken.
+GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
 
 > **Meten is weten, in plaats van denken te weten.**
 
-## Eerste modules
+## Huidige status
 
-### Stimulus
+- versie: `0.9.78`;
+- ontwikkelfase: pre-1.0;
+- huidige implementatie: Stimulus en Screen;
+- gecompileerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
+- Arduino Lint: geen fouten en geen waarschuwingen;
+- licentie: nog in juridische review, zie [LICENSE.md](LICENSE.md).
 
-Meten van vingertikken om een unieke stimulus reproduceerbaar te leren zetten en activeren met dezelfde duur, kracht en timing. De eerste versie ondersteunt één tot vier vingers, vier basisscenario's en beoordeling van het juiste activeringsmoment.
+Emotie-observatie, ademhaling, hartslag en andere toepassingsgebieden staan in de inhoudelijke roadmap, maar zijn nog niet als volwaardige modules geïmplementeerd.
 
-### Emotie-observatie
+## Installatie
 
-Leren observeren wanneer iemand kenmerken van een emotie vertoont en de eigen observatie vergelijken met objectieve meetgegevens. Gemeten signalen en interpretaties blijven duidelijk gescheiden.
+### Via ZIP in Arduino IDE
 
-### Ademhaling en hartslag
+1. Download een release-ZIP van de repository.
+2. Open Arduino IDE.
+3. Kies **Sketch > Include Library > Add .ZIP Library**.
+4. Selecteer de ZIP.
+5. Open daarna een voorbeeld via **File > Examples > GroeiAcademie**.
 
-Ademhaling en hartslag volgen zodat een begeleider kan nagaan of een observatie, zoals trager inademen, overeenkomt met de werkelijkheid. Dit principe wordt later uitgebreid naar andere observatievaardigheden.
+### Handmatig
 
-## Doelgroepen
-
-Onderzoekers, biofeedback-onderzoekers, NLP-beoefenaars, NLP-trainers en leken.
-
-## Ondersteuning
-
-De eerste officiële omgeving is Arduino IDE. De eerste officieel ondersteunde boards zijn Arduino UNO R3 en Arduino UNO R4.
-
-## Architectuur
-
-Het project blijft één geïntegreerde library met samenwerkende onderdelen binnen de bestaande hoofdindeling:
+Plaats de map `GroeiAcademie` in de Arduino-librarymap:
 
 ```text
-lib/
-├── GroeiAcademie.h
-├── Hulpmiddelen/
-├── Sturingen/
-├── Systeem/
-├── Toepassingsgebieden/
-└── Uitbreidingskaarten/
+Documents/Arduino/libraries/GroeiAcademie/
 ```
 
-De eerste functionele module bevindt zich onder `Toepassingsgebieden/Stimulus`.
+Herstart Arduino IDE na de installatie.
 
-## Open source
+## Afhankelijkheid
 
-Iedereen mag het framework gebruiken. Verbeteringen aan het framework horen terug te vloeien naar de community. De definitieve licentie wordt gekozen op basis van dit wederkerigheidsprincipe.
+De huidige Screen-implementatie gebruikt:
+
+```text
+LiquidCrystal I2C
+```
+
+De exacte afhankelijkheid staat in `library.properties`.
+
+## Configuratie
+
+De belangrijkste configuratiebestanden zijn:
+
+```text
+src/Configuratie/SystemConfig.h
+src/Configuratie/StimulusConfig.h
+src/Configuratie/EmotieConfig.h
+```
+
+Controleer vóór compilatie in `SystemConfig.h` minstens:
+
+- `DEBUG`;
+- `I2C_ADRES`;
+- `ACTIEF_CHARACTER_SCREEN`;
+- `AANTAL_SENSOREN_AANWEZIG`;
+- `PIN_SENSOR_1` tot en met `PIN_SENSOR_4`;
+- `UNO_VERSION`.
+
+Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
+
+## Snel starten
+
+Gebruik bij voorkeur de publieke hoofdheader:
+
+```cpp
+#include <GroeiAcademie.h>
+```
+
+Beschikbare voorbeelden:
+
+```text
+examples/
+├── Screen/
+│   ├── Callback_CharacterScreen/
+│   └── Default_PrintToScreen/
+└── Stimulus/
+    ├── Scenario1_EnkelTik/
+    ├── Scenario2_Simultaan/
+    ├── Scenario3_Ineenstortend/
+    ├── Scenario4_Cocktail/
+    └── Tik_Enkele_Samen_Instrotend_Coctail/
+```
+
+## Librarystructuur
+
+```text
+GroeiAcademie/
+├── src/
+│   ├── GroeiAcademie.h
+│   ├── Screen.h
+│   ├── Stimulus.h
+│   ├── Configuratie/
+│   ├── Systeem/Screen/
+│   └── Toepassingsgebieden/Stimulus/
+├── examples/
+├── docs/
+├── library.properties
+├── keywords.txt
+└── README.md
+```
+
+Zie [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) voor verantwoordelijkheden en publieke headers.
+
+## Elektronische schema's
+
+De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md).
+
+Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/STIMULUS.md](docs/Toepassingsgebieden/STIMULUS.md):
+
+- het tekstuele aansluitschema;
+- de pinbezetting;
+- voeding en massa;
+- aandachtspunten voor druksensoren;
+- de relatie met `SystemConfig.h`.
+
+Er zijn in versie `0.9.78` nog geen afzonderlijke KiCad-, Fritzing-, PDF- of afbeeldingsbestanden in de repository opgenomen. De Markdown-documentatie is daarom voorlopig de gezaghebbende schema-informatie.
 
 ## Documentatie
 
-Begin bij:
+- [Project Constitution](PROJECT_CONSTITUTION.md)
+- [Architectuur](docs/ARCHITECTURE.md)
+- [Screen](docs/Systeem/SCREEN.md)
+- [Toepassingsgebieden en schema-index](docs/Toepassingsgebieden/MODULES.md)
+- [Stimulus](docs/Toepassingsgebieden/STIMULUS.md)
+- [Hardwareondersteuning](docs/HARDWARE_SUPPORT.md)
+- [Wetenschappelijke integriteit](docs/SCIENTIFIC_INTEGRITY.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Bijdragen](CONTRIBUTING.md)
+- [Beveiligingsbeleid](SECURITY.md)
 
-1. `PROJECT_CONSTITUTION.md`
-2. `SCIENTIFIC_INTEGRITY.md`
-3. `DESIGN_PHILOSOPHY.md`
-4. `ARCHITECTURE.md`
-5. `ROADMAP.md`
+## Belangrijke grenzen
 
-## Status
+- ADC-waarden zijn zonder afzonderlijke kalibratie geen absolute krachtwaarden.
+- Fysiologische signalen bewijzen niet automatisch een specifieke emotie of mentale toestand.
+- Het framework is geen medisch hulpmiddel.
+- Controleer altijd voeding, bedrading en componentdatasheets.
 
-Het project bevindt zich vóór versie 1.0. API, mapstructuur en meetprotocollen worden vóór de eerste publieke release gecontroleerd en bevroren.
+Zie [DISCLAIMER.md](DISCLAIMER.md).

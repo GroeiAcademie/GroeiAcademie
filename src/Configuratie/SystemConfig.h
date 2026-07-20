@@ -4,7 +4,7 @@
 // ============================================================================
 // MAG JE AANPASSEN NAAR EIGEN SETUP
 // ============================================================================
-//#define DEBUG // ENKEL wanneer DEBUG nodig, staan hier geen commentaar '//' tekens voor :)
+#define DEBUG // ENKEL wanneer DEBUG nodig, staan hier geen commentaar '//' tekens voor :)
 
 // ============================================================================
 // SCHERM ADRES & 

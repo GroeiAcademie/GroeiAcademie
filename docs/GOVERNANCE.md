@@ -2,26 +2,36 @@
 
 ## Doel
 
-Governance beschermt de missie, de technische samenhang en de positie van de community.
+De governance beschermt de missie, technische samenhang, wetenschappelijke integriteit en positie van de community.
 
-## Besluitvorming
+## Kleine wijzigingen
 
-Kleine correcties kunnen via pull request worden beoordeeld. Grote wijzigingen vereisen een issue en een gedocumenteerde beslissing.
+Correcties die geen publieke API, hardwareondersteuning, veiligheidsinformatie of projectbeleid wijzigen, kunnen rechtstreeks via een pull request worden beoordeeld.
 
-Grote wijzigingen zijn onder andere:
+## Grote wijzigingen
 
-- nieuwe publieke API
-- wijziging van de hoofdstructuur
-- nieuwe officiële hardwareondersteuning
-- wijziging van licentie
-- wijziging van missie of kernwaarden
-- opsplitsing in afzonderlijke libraries
-- commerciële afspraken die de community beïnvloeden
+Voor de volgende wijzigingen is eerst een issue en een gedocumenteerde beslissing nodig:
+
+- nieuwe of gewijzigde publieke API;
+- wijziging van de hoofdstructuur;
+- nieuw officieel ondersteund board;
+- nieuwe externe afhankelijkheid;
+- wijziging van een elektronisch referentieschema;
+- wijziging van meetgrenzen, kalibratie of veiligheidsinformatie;
+- nieuwe officiële meet- of interpretatieclaim;
+- licentiewijziging;
+- wijziging van missie of kernwaarden;
+- opsplitsing in afzonderlijke libraries;
+- commerciële afspraken met invloed op de community.
 
 ## Maintainers
 
-Maintainers bewaken kwaliteit en samenhang. Hun rol geeft geen eigendomsrecht over bijdragen van de community.
+Maintainers beoordelen bijdragen op technische kwaliteit, reproduceerbaarheid, documentatie, veiligheid en samenhang. Hun rol geeft geen eigendomsrecht over bijdragen van anderen.
 
-## Belangenconflicten
+## Transparantie
 
-Commerciële belangen worden vermeld wanneer zij een besluit kunnen beïnvloeden. De community mag niet worden benadeeld om een commerciële dienst of product te bevoordelen.
+Belangrijke besluiten worden opgenomen in [DECISION_LOG.md](DECISION_LOG.md). Belangenconflicten en relevante commerciële belangen worden gemeld wanneer zij een beslissing kunnen beïnvloeden.
+
+## Escalatie
+
+Gedragsproblemen volgen [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md). Beveiligings- en privacyproblemen volgen [../SECURITY.md](../SECURITY.md).

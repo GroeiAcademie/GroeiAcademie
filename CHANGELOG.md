@@ -1,38 +1,37 @@
 # Changelog
 
-## 0.9.78
+Alle betekenisvolle wijzigingen aan GroeiAcademie Framework worden in dit bestand bijgehouden.
 
-- `PrintToScreen()` uitgebreid tot vier tekstregels met `delayTussenPaginas`.
-- `ScreenCallback` ontvangt voortaan de volledige schermopdracht.
-- Character- en pixelcallbacks worden elk nog één keer per `PrintToScreen()`-aanroep uitgevoerd.
-- Callbackverantwoordelijkheden gedocumenteerd in `docs/SCREEN.md` en `Screen.h`.
-- Standaardondersteuning toegevoegd voor LCD1602, LCD1604, LCD2002, LCD2004 en LCD4002.
-- Voorbeelden voor standaarduitvoer en aangepaste charactercallback bijgewerkt.
-
-Alle betekenisvolle wijzigingen aan GroeiAcademie Framework worden hier bijgehouden.
+De versienummers volgen tijdens de pre-1.0-fase de versie in `library.properties`.
 
 ## [Unreleased]
 
-### Toegevoegd
+### Documentatie
 
-- Project Constitution
-- Project Values
-- Scientific Integrity
-- Research Philosophy
-- Governance
-- Decision Log
-- Terminology
-- Master Checklist
-- formele beschrijving van de eerste Stimulusmodule
-- afbakening van emotie-observatie
-- ademhalings- en hartslagobservatie als volgend toepassingsgebied
+- alle bestaande Markdown-documenten gecontroleerd en onderling afgestemd;
+- verouderde verwijzingen naar `lib/` vervangen door de werkelijke Arduino-librarystructuur onder `src/`;
+- interne links gecorrigeerd;
+- huidige en geplande modules duidelijker van elkaar onderscheiden;
+- documentatie voor elektronische schema's per toepassingsgebied toegevoegd;
+- installatie-, configuratie- en gebruiksinformatie uitgebreid;
+- status van UNO R3, UNO R4 Minima en UNO R4 WiFi verduidelijkt.
 
-### Gewijzigd
+### Nog open
 
-- positionering van technisch Arduino-framework naar geïntegreerd leer- en onderzoeksframework
-- doelgroepen uitgebreid met leken
-- community boven commerciële belangen expliciet vastgelegd
-- één geïntegreerde library als architectuurprincipe bevestigd
-- officiële eerste taal: Nederlands
-- officiële eerste boards: UNO R3 en UNO R4
+- definitieve licentiekeuze na juridische controle;
+- fysieke elektronische schemabestanden toevoegen naast de tekstuele aansluitschema's;
+- automatische compilatietests via GitHub Actions;
+- eerste publieke release en aanmelding bij Arduino Library Manager.
 
+## 0.9.78
+
+### Toegevoegd en gewijzigd
+
+- `PrintToScreen()` uitgebreid tot vier tekstregels met `delayTussenPaginas`;
+- `ScreenCallback` ontvangt de volledige schermopdracht;
+- character- en pixelcallbacks worden elk maximaal één keer per `PrintToScreen()`-aanroep uitgevoerd;
+- standaardondersteuning voor LCD1602, LCD1604, LCD2002, LCD2004 en LCD4002;
+- voorbeelden voor standaarduitvoer en een aangepaste charactercallback;
+- documentatie van de Screen-laag;
+- compilatie gecontroleerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
+- Arduino Lint uitgevoerd zonder fouten of waarschuwingen.

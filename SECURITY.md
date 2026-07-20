@@ -2,28 +2,39 @@
 
 ## Ondersteunde versies
 
-Zolang GroeiAcademie Framework zich in actieve, pre-1.0-ontwikkeling bevindt, wordt enkel de meest recente release ondersteund met beveiligingscorrecties.
+Tijdens de pre-1.0-ontwikkeling wordt alleen de meest recente gepubliceerde versie actief ondersteund met beveiligingscorrecties.
 
-## Wat hier gemeld wordt
+## Wat als beveiligingsprobleem geldt
 
-Dit beleid dekt kwetsbaarheden in de **software** van het framework: bijvoorbeeld fouten die tot onbetrouwbare metingen, onverwacht gedrag, of — bij toekomstige netwerkverbonden platformen zoals ESP32 — onveilige communicatie kunnen leiden.
+Meld onder dit beleid onder andere:
 
-Voor **hardwareveiligheid** (bedrading, voeding, sensorplaatsing) verwijzen we naar `DISCLAIMER.md`. Voor gewone bugs zonder veiligheids- of privacy-impact: gebruik gewoon een publieke issue, zie `CONTRIBUTING.md`.
+- softwarefouten die gevaarlijk of onverwacht hardwaregedrag kunnen veroorzaken;
+- buffer-, geheugen- of configuratiefouten met mogelijke veiligheidsimpact;
+- onbetrouwbare meetresultaten die door een programmeerfout als betrouwbaar worden voorgesteld;
+- onbedoelde blootstelling van persoonsgegevens of meetgegevens;
+- toekomstige fouten in netwerkcommunicatie of gegevensopslag.
 
-## Een kwetsbaarheid melden
+Een gewone functionele bug zonder veiligheids- of privacy-impact hoort in een publieke issue.
 
-Meld kwetsbaarheden met mogelijke veiligheids- of privacy-impact **niet** via een publieke issue, maar rechtstreeks via **info@groeiacademie.be**, met:
+## Vertrouwelijk melden
 
-- een omschrijving van het probleem en de mogelijke impact
-- stappen om het te reproduceren
-- de betrokken versie(s), board(s) en configuratie
+Meld een mogelijke kwetsbaarheid niet publiek wanneer misbruik of schade mogelijk is. Stuur een beschrijving naar **info@groeiacademie.be** met:
 
-## Wat je mag verwachten
+- betrokken versie en board;
+- configuratie en externe libraries;
+- stappen om het probleem te reproduceren;
+- verwachte en werkelijke uitkomst;
+- mogelijke impact;
+- voorgestelde oplossing, indien beschikbaar.
 
-- Ontvangstbevestiging binnen een redelijke termijn
-- Openheid over de voortgang van het onderzoek
-- Vermelding in `CHANGELOG.md` en, indien gewenst, in `AUTHORS.md` na oplossing, tenzij je anoniem wil blijven
+## Hardwareveiligheid
 
-## Toekomstige netwerkverbonden platformen
+Voor bedrading, voeding, sensorplaatsing en mechanische veiligheid geldt [DISCLAIMER.md](DISCLAIMER.md). Een fout in een gepubliceerd elektronisch schema met mogelijke schade hoort eveneens vertrouwelijk te worden gemeld.
 
-Zodra ESP32 of andere netwerkverbonden boards officieel ondersteund worden (zie `docs/HARDWARE_SUPPORT.md`), wordt dit beleid uitgebreid met richtlijnen specifiek voor netwerkcommunicatie en data-opslag.
+## Openbaarmaking
+
+Na onderzoek wordt bepaald wanneer en hoe een correctie en toelichting worden gepubliceerd. Een opgeloste kwetsbaarheid wordt waar passend in [CHANGELOG.md](CHANGELOG.md) vermeld.
+
+## Netwerkverbonden boards
+
+ESP32 en andere netwerkverbonden boards zijn momenteel niet officieel ondersteund. Zodra dat verandert, wordt dit beleid uitgebreid met concrete eisen voor authenticatie, opslag, transportbeveiliging en privacy.

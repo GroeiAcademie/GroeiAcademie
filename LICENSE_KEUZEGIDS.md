@@ -1,32 +1,49 @@
 # Licentiekeuzegids
 
+## Doel
+
+Deze keuzegids beschrijft de gewenste licentierichting. Zij is geen definitieve licentie en geen juridisch advies.
+
 ## Vastgelegde filosofie
 
-Iedereen mag het GroeiAcademie Framework gebruiken, zolang verbeteringen aan het framework terugvloeien naar de community.
+Het framework moet breed bruikbaar zijn, terwijl verbeteringen aan de kern zo veel mogelijk terugvloeien naar de community.
 
-## Meest relevante richtingen
+## Te beoordelen licentierichtingen
 
 ### GNU GPL v3
 
-Sterke wederkerigheid. Afgeleide distributies moeten onder dezelfde licentie beschikbaar blijven. Dit sluit het duidelijkst aan bij de wens dat verbeteringen terugvloeien, en kan integratie in gesloten software beperken.
+Sterke wederkerigheid. Verspreide afgeleide software moet in beginsel onder dezelfde licentie beschikbaar blijven. Dit beschermt openheid sterk, maar kan integratie in gesloten toepassingen beperken.
 
 ### GNU LGPL v3
 
-Wederkerigheid voor wijzigingen aan de library, met ruimere mogelijkheden om de library vanuit andere software te gebruiken. Dit kan geschikt zijn wanneer het framework breed inzetbaar moet zijn zonder alle omringende toepassingscode verplicht open te maken.
+Wederkerigheid voor de library zelf, met ruimere mogelijkheden om de library vanuit andere software te gebruiken. Juridisch moet worden nagegaan hoe statische koppeling binnen Arduino-builds wordt behandeld.
 
 ### Mozilla Public License 2.0
 
-Wederkerigheid op bestandsniveau. Wijzigingen aan MPL-bestanden blijven open, terwijl combinatie met andere code mogelijk blijft. Juridische geschiktheid voor Arduino-librarygebruik moet afzonderlijk worden nagegaan.
+Wederkerigheid op bestandsniveau. Gewijzigde MPL-bestanden blijven open, terwijl combinatie met andere code mogelijk blijft. De praktische geschiktheid voor een Arduino-library moet juridisch worden gecontroleerd.
 
-## Niet passend zonder heroverweging
+## Afzonderlijke onderdelen
 
-MIT en Apache 2.0 verplichten niet dat verbeteringen terugvloeien. Zij passen daarom niet vanzelfsprekend bij de vastgelegde filosofie.
+Er moet expliciet worden beslist of dezelfde of verschillende licenties gelden voor:
 
-## Nog juridisch te beslissen
+- broncode;
+- voorbeelden;
+- Markdown-documentatie;
+- elektronische schema's;
+- PCB- en CAD-bronbestanden;
+- afbeeldingen en meetgegevens.
 
-- Moet wederkerigheid gelden voor de volledige toepassing of alleen voor frameworkbestanden?
-- Hoe worden hardwareontwerpen en documentatie gelicentieerd?
-- Welke bijdragevoorwaarden zijn nodig?
-- Hoe wordt de verhouding met commerciële toepassingen beschreven?
+## Niet automatisch passend
 
-De definitieve licentie wordt pas gekozen na juridische controle. Deze keuzegids is geen juridisch advies.
+Permissieve licenties zoals MIT of Apache 2.0 verplichten niet dat verbeteringen terugvloeien. Zij passen daarom niet vanzelfsprekend bij de huidige projectfilosofie.
+
+## Juridisch te beslissen
+
+- geldt wederkerigheid voor de volledige toepassing of alleen voor frameworkbestanden;
+- welke verplichtingen gelden bij commercieel gebruik;
+- hoe bijdragen juridisch worden aanvaard;
+- hoe auteursrechtvermeldingen worden behouden;
+- welke licentie compatibel is met de gebruikte externe libraries;
+- hoe hardwareontwerpen en documentatie worden gelicentieerd.
+
+Tot de definitieve keuze geldt [LICENSE.md](LICENSE.md).

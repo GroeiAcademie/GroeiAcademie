@@ -1,69 +1,73 @@
 # Roadmap
 
-## Prioriteiten
+Deze roadmap beschrijft de ontwikkelrichting. Een item is pas voltooid wanneer code, voorbeelden, documentatie en relevante hardwarecontrole overeenstemmen.
 
-1. Community
-2. Reputatie
-3. Zichtbaarheid
+## Voltooid of aantoonbaar uitgevoerd
 
-Zichtbaarheid is een middel om een inhoudelijk sterke community op te bouwen.
+- Arduino-librarystructuur onder `src/`;
+- publieke hoofdheaders;
+- huidige Screen-laag;
+- huidige Stimulusmodule en vijf voorbeelden;
+- compilatie voor UNO R3, UNO R4 Minima en UNO R4 WiFi;
+- Arduino Lint zonder fouten en waarschuwingen;
+- eerste project-, community- en onderzoeksdocumentatie;
+- lokale Git-repository en private GitHub-repository.
 
-## Fase 0: fundament
+## Eerstvolgend
 
-- Project Constitution vastleggen
-- missie, visie en terminologie harmoniseren
-- licentierichting juridisch toetsen
-- wetenschappelijke integriteit vastleggen
+- alle Markdown-documentatie harmoniseren;
+- elektronische referentieschema's per geïmplementeerd toepassingsgebied vastleggen;
+- README en voorbeelden opnieuw controleren tegen de actuele API;
+- dependencywaarschuwing van de externe LCD-library documenteren;
+- schone installatie vanuit ZIP controleren;
+- repository-inhoud vóór eerste publieke commit en release auditen.
 
-## Fase 1: API en structuur bevriezen
+## Releasekwaliteit
 
-- publieke headers auditen
-- CPP-bestanden auditen
-- includes auditen
-- configuratie auditen
-- bestaande directorystructuur toetsen aan Arduino Library Manager
-- verantwoordelijkheden van modules vastleggen
+- alle voorbeelden automatisch compileren;
+- geheugenrapport voor UNO R3 vastleggen;
+- echte hardwaretests documenteren;
+- interne links en voorbeeldpaden controleren;
+- definitieve licentie kiezen;
+- release notes maken;
+- versie, tag en `library.properties` gelijk houden.
 
-## Fase 2: eerste modules valideren
+## GitHub
 
-- Stimulus: één tot vier vingers en vier basisscenario's
-- kracht, duur en timing valideren
-- voorbeelden en kalibratie uitwerken
-- eerste ademhalings- en hartslagprotocollen afbakenen
-- emotie-observatie wetenschappelijk correct formuleren
+- issue- en pull-requesttemplates;
+- GitHub Actions voor ondersteunde boards;
+- publieke repository zodra inhoud en licentie daarvoor gereed zijn;
+- eerste pre-release of release;
+- bijdrageproces testen.
 
-## Fase 3: releasekwaliteit
+## Arduino Library Manager
 
-- README en documentatie afronden
-- alle voorbeelden compileren
-- Arduino Lint
-- UNO R3 testen
-- UNO R4 testen
-- ZIP-installatie in schone Arduino IDE
+- publieke GitHub-repository;
+- geldige release-tag;
+- definitieve licentie;
+- `library.properties` en afhankelijkheden valideren;
+- `arduino-lint --library-manager submit` uitvoeren;
+- aanmelding volgens de actuele officiële Arduino-procedure.
 
-## Fase 4: GitHub en release
+## Nieuwe toepassingsgebieden
 
-- professionele repository
-- issue- en pull-requesttemplates
-- CI
-- tag en release notes
-- eerste publieke release
+Na stabilisatie van Stimulus:
 
-## Fase 5: Arduino Library Manager
+- ademhaling;
+- hartslag, HRV en coherentie;
+- biopotentiële signalen;
+- emotie-observatie;
+- aanvullende observatievaardigheden.
 
-- metadata valideren
-- release aanmelden
-- feedback verwerken
+Iedere nieuwe module krijgt vóór officiële ondersteuning:
 
-## Fase 6: community
+- afbakening van het meetdoel;
+- elektronische documentatie;
+- kalibratie;
+- voorbeelden;
+- foutbronnen en interpretatiegrenzen;
+- board- en geheugentests.
 
-- eerste gebruikerstests met NLP-beoefenaars en trainers
-- feedback publiceren
-- good first issues
-- bijdrageproces verfijnen
+## Later
 
-## Fase 7: uitbreiding
-
-- aanvullende observatievaardigheden
-- gevalideerde biofeedbackmodules
-- ESP32 pas na formele ondersteuningsbeslissing
+ESP32 en andere platformen worden alleen toegevoegd na een formele compatibiliteits- en veiligheidsbeslissing.

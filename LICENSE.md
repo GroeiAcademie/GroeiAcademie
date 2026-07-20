@@ -1,7 +1,9 @@
 # Licentie
 
-Nog niet definitief vastgelegd — in juridische review.
+De definitieve licentie voor GroeiAcademie Framework is nog niet vastgelegd en bevindt zich in juridische review.
 
-Zie `docs/LICENSE_KEUZEGIDS.md` voor de overwogen richtingen en de vastgelegde filosofie (verbeteringen aan het framework moeten terugvloeien naar de community).
+Totdat een definitieve licentie expliciet in deze repository is opgenomen, gelden voor de code, documentatie en hardwareontwerpen de normale auteursrechten. Hergebruik, wijziging of verspreiding is daardoor niet automatisch toegestaan, behalve voor zover de wet dit toelaat of GROEI ACADEMIE daarvoor schriftelijk toestemming geeft.
 
-Tot een definitieve licentie gekozen is, gelden alle rechten als voorbehouden (standaard auteursrecht) op de code, documentatie en hardwareontwerpen in deze repository.
+De gewenste licentierichting en open vragen staan in [LICENSE_KEUZEGIDS.md](LICENSE_KEUZEGIDS.md).
+
+Dit bestand is geen juridisch advies.

@@ -2,30 +2,81 @@
 
 ## Doel
 
-De centrale functie `PrintToScreen()` verstuurt één volledige schermopdracht naar de actieve uitvoerdoelen.
+De centrale functie `PrintToScreen()` verstuurt één volledige schermopdracht naar alle actieve uitvoerdoelen.
 
 ```cpp
-void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+void PrintToScreen(
+    const String& eersteRegel,
+    const String& tweedeRegel,
+    unsigned long delayTime = 0,
+    const String& action = "",
+    const String& derdeRegel = "",
+    const String& vierdeRegel = "",
+    unsigned long delayTussenPaginas = 0
+);
 ```
 
-De bestaande aanroepen met twee regels blijven geldig. Regel 3, regel 4 en `delayTussenPaginas` zijn optioneel.
+Aanroepen met alleen twee tekstregels blijven geldig.
 
-## Standaard characterscherm
-
-Zonder geregistreerde charactercallback gebruikt de library rechtstreeks `LiquidCrystal_I2C`.
-
-Op een scherm met vier regels worden de teksten geplaatst op regels `0`, `1`, `2` en `3`.
-
-Op een scherm met twee regels worden regel 1 en regel 2 als eerste pagina getoond. Wanneer regel 3 of regel 4 aanwezig is, wacht de library gedurende `delayTussenPaginas`, wist het scherm en toont beide teksten als tweede pagina op regels `0` en `1`.
-
-Na alle tekst wordt `delayTime` één keer uitgevoerd. Daarna wordt `action` toegevoegd.
-
-## Callbackprototype
-
-Beide registratiefuncties gebruiken hetzelfde callbacktype:
+## Publieke opname
 
 ```cpp
-typedef void (*ScreenCallback)(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
+#include <Screen.h>
+```
+
+of via de volledige library:
+
+```cpp
+#include <GroeiAcademie.h>
+```
+
+## Uitvoerdoelen
+
+De interne bitmaskerwaarden zijn:
+
+```cpp
+SCREEN_TYPE_NONE
+SCREEN_TYPE_SERIAL
+SCREEN_TYPE_CHARACTER
+SCREEN_TYPE_PIXELS
+```
+
+`SCREEN_OUTPUT` bepaalt welke uitvoerdoelen actief zijn. Meerdere doelen kunnen gelijktijdig actief zijn.
+
+## Characterscherm zonder callback
+
+Zonder geregistreerde charactercallback gebruikt de library `LiquidCrystal_I2C`.
+
+Ondersteunde configuratiewaarden:
+
+```cpp
+SCREEN_LCD1602
+SCREEN_LCD1604
+SCREEN_LCD2002
+SCREEN_LCD2004
+SCREEN_LCD4002
+```
+
+Op een scherm met vier regels worden de vier teksten op regels 0 tot en met 3 geplaatst.
+
+Op een scherm met twee regels verschijnen regel 1 en 2 als eerste pagina. Wanneer regel 3 of 4 niet leeg is, wacht de library `delayTussenPaginas`, wist het scherm en toont regel 3 en 4 als tweede pagina.
+
+Na de volledige tekstuitvoer wordt `delayTime` één keer uitgevoerd. Daarna wordt `action` verwerkt.
+
+## Callbacktype
+
+Character- en pixeluitvoer gebruiken hetzelfde callbacktype:
+
+```cpp
+typedef void (*ScreenCallback)(
+    const String& eersteRegel,
+    const String& tweedeRegel,
+    unsigned long delayTime,
+    const String& action,
+    const String& derdeRegel,
+    const String& vierdeRegel,
+    unsigned long delayTussenPaginas
+);
 ```
 
 Registratie:
@@ -35,32 +86,43 @@ RegistreerCallbackScreenTypeCharacter(MijnCharacterScreen);
 RegistreerCallbackScreenTypePixel(MijnPixelScreen);
 ```
 
-## Verantwoordelijkheid van een callback
+Met `nullptr` wordt voor characterschermen de standaardafhandeling gebruikt. Voor pixelschermen betekent `nullptr` dat geen aangepaste pixeluitvoer beschikbaar is.
 
-Een geregistreerde callback wordt exact één keer per `PrintToScreen()`-aanroep uitgevoerd. Ze ontvangt de volledige schermopdracht.
+## Verantwoordelijkheid van de callback
 
-Voor haar eigen schermtype neemt de callback alle controle over. Ze is verantwoordelijk voor:
+Een geregistreerde callback wordt voor haar schermtype exact één keer per `PrintToScreen()`-aanroep uitgevoerd en ontvangt de volledige opdracht.
 
-1. initialisatie van het scherm wanneer die niet elders gebeurt;
-2. wissen of behouden van de bestaande scherminhoud;
-3. tonen van regel 1 en regel 2;
-4. tonen van regel 3 en regel 4;
-5. paginering wanneer het scherm onvoldoende regels heeft;
-6. uitvoeren van `delayTussenPaginas` tussen beide pagina's;
-7. uitvoeren van `delayTime` nadat alle tekst werd getoond;
-8. daarna tonen of verwerken van `action`;
-9. cursorplaatsing, regelafbreking, afkapping en scrolling.
+De callback beheert zelf:
 
-`PrintToScreen()` voert voor een schermtype met geregistreerde callback geen aanvullende schermlogica, wachttijd of `action` uit.
+- initialisatie;
+- wissen of behouden van inhoud;
+- regelplaatsing;
+- paginering;
+- `delayTussenPaginas`;
+- `delayTime`;
+- `action`;
+- afkapping, scrolling en cursorlogica.
 
-## Character- en pixelcallback
+`PrintToScreen()` voegt voor dat schermtype daarna geen tweede schermbewerking of tweede wachttijd toe.
 
-De charactercallback en pixelcallback hebben bewust hetzelfde prototype. Daardoor ontvangen beide uitvoerlagen dezelfde informatie. De implementatie bepaalt hoe die informatie op het betreffende scherm wordt weergegeven.
+## Voorbeelden
 
-Een charactercallback kan bijvoorbeeld kiezen tussen twee pagina's op een LCD1602 en vier gelijktijdige regels op een LCD2004.
+- `examples/Screen/Default_PrintToScreen/Default_PrintToScreen.ino`
+- `examples/Screen/Callback_CharacterScreen/Callback_CharacterScreen.ino`
 
-Een pixelcallback kan de vier tekstregels vrij positioneren, afbreken, centreren of scrollen en kan `action` als tekst, symbool of grafisch element verwerken.
+## Elektronische aansluiting van een I2C-characterscherm
 
-## Meerdere actieve uitvoerdoelen
+Gebruik de I2C-pinnen die bij het gekozen Arduino-board horen. Sluit minimaal aan:
 
-`SCREEN_OUTPUT` kan Serial, één characterscherm en één pixelscherm combineren. De standaarduitvoer behoudt één centrale tijdlijn. Geregistreerde callbacks worden daarna elk één keer uitgevoerd en beheren hun eigen tijdlijn. Een blokkerende callback met `delay()` wordt daarom volledig afgewerkt voordat de volgende callback start.
+| LCD-module | Arduino |
+|---|---|
+| `VCC` | geschikte voedingsspanning volgens module |
+| `GND` | `GND` |
+| `SDA` | SDA-pin van het board |
+| `SCL` | SCL-pin van het board |
+
+Controleer het I2C-adres en pas `I2C_ADRES` in `src/Configuratie/SystemConfig.h` aan. Raadpleeg ook de datasheet van de gebruikte I2C-backpack, omdat voedingsspanning en pull-ups per module kunnen verschillen.
+
+## Beperkingen
+
+De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange wachttijden onderbreken dus andere verwerking. Een callback kan een andere aanpak kiezen, maar moet dan zelf de volledige schermopdracht correct afhandelen.

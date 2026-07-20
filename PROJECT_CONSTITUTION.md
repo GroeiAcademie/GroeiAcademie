@@ -91,18 +91,20 @@ De publieke API wordt pas uitgebreid wanneer de verantwoordelijkheid, naamgeving
 
 ## 11. Technische basis
 
-De eerste officiële ontwikkelomgeving is Arduino IDE.
+De eerste officiële ontwikkelomgeving is Arduino IDE. Arduino CLI wordt gebruikt voor reproduceerbare compilatiecontroles en Arduino Lint voor structurele validatie.
 
-De eerste officieel ondersteunde boards zijn:
+De huidige library is gecompileerd voor:
 
-- Arduino UNO R3
-- Arduino UNO R4
+- Arduino UNO R3;
+- Arduino UNO R4 Minima;
+- Arduino UNO R4 WiFi.
 
-Het framework blijft één geïntegreerde library. De bestaande functionele hoofdindeling blijft het uitgangspunt:
+Het framework blijft één geïntegreerde Arduino-library. De functionele indeling bevindt zich onder `src/`:
 
 ```text
-lib/
+src/
 ├── GroeiAcademie.h
+├── Configuratie/
 ├── Hulpmiddelen/
 ├── Sturingen/
 ├── Systeem/
@@ -110,7 +112,9 @@ lib/
 └── Uitbreidingskaarten/
 ```
 
-Een eventuele aanpassing naar de formele Arduino-librarystructuur wordt als afzonderlijke architectuur- en releasebeslissing vastgelegd. Functionele modules worden niet willekeurig als losse libraries afgesplitst.
+Niet elke map bevat in de huidige pre-1.0-versie al implementatie. Functionele modules worden niet zonder een expliciete architectuurbeslissing als losse libraries afgesplitst.
+
+Elektronische aansluitinformatie wordt per toepassingsgebied gedocumenteerd. Een schema vermeldt altijd de gebruikte boardvariant, pinnen, voeding, componentwaarden, sensorvariant en kalibratievoorwaarden.
 
 ## 12. Taal
 
