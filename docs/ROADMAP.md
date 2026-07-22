@@ -28,7 +28,7 @@ Deze roadmap beschrijft de ontwikkelrichting. Een item is pas voltooid wanneer c
 - geheugenrapport voor UNO R3 vastleggen;
 - echte hardwaretests documenteren;
 - interne links en voorbeeldpaden controleren;
-- definitieve licentie kiezen;
+- officiële GNU LGPL v3.0-or-later-licentie opnemen;
 - release notes maken;
 - versie, tag en `library.properties` gelijk houden.
 
@@ -44,7 +44,7 @@ Deze roadmap beschrijft de ontwikkelrichting. Een item is pas voltooid wanneer c
 
 - publieke GitHub-repository;
 - geldige release-tag;
-- definitieve licentie;
+- officiële GNU LGPL v3.0-or-later-licentie;
 - `library.properties` en afhankelijkheden valideren;
 - `arduino-lint --library-manager submit` uitvoeren;
 - aanmelding volgens de actuele officiële Arduino-procedure.
@@ -71,3 +71,19 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 ## Later
 
 ESP32 en andere platformen worden alleen toegevoegd na een formele compatibiliteits- en veiligheidsbeslissing.
+
+
+## API-stabiliteit vanaf v1.0
+
+De versies binnen `0.x` blijven ontwikkelversies waarin de publieke API nog kan wijzigen.
+
+Vanaf versie `1.0.0` geldt maximale API-stabiliteit:
+
+- publieke API's worden als stabiel beschouwd;
+- nieuwe functionaliteit wordt bij voorkeur toegevoegd zonder bestaande code te breken;
+- een vervangen API wordt eerst als deprecated gemarkeerd;
+- een deprecated API blijft minimaal één volledige major versie beschikbaar;
+- incompatibele wijzigingen en verwijderingen gebeuren uitsluitend in een major release;
+- verwijderingen worden vooraf aangekondigd in de changelog en een migratiegids.
+
+Het project volgt Semantic Versioning 2.0.0.

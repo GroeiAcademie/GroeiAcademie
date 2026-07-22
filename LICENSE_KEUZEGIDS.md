@@ -2,7 +2,7 @@
 
 ## Doel
 
-Deze keuzegids beschrijft de gewenste licentierichting. Zij is geen definitieve licentie en geen juridisch advies.
+Deze keuzegids documenteert de afweging die aan de definitieve licentiekeuze voorafging. Zij blijft behouden als historisch referentiedocument en is geen juridisch advies.
 
 ## Vastgelegde filosofie
 
@@ -37,7 +37,7 @@ Er moet expliciet worden beslist of dezelfde of verschillende licenties gelden v
 
 Permissieve licenties zoals MIT of Apache 2.0 verplichten niet dat verbeteringen terugvloeien. Zij passen daarom niet vanzelfsprekend bij de huidige projectfilosofie.
 
-## Juridisch te beslissen
+## Juridisch beoordeelde aandachtspunten
 
 - geldt wederkerigheid voor de volledige toepassing of alleen voor frameworkbestanden;
 - welke verplichtingen gelden bij commercieel gebruik;
@@ -46,4 +46,8 @@ Permissieve licenties zoals MIT of Apache 2.0 verplichten niet dat verbeteringen
 - welke licentie compatibel is met de gebruikte externe libraries;
 - hoe hardwareontwerpen en documentatie worden gelicentieerd.
 
-Tot de definitieve keuze geldt [LICENSE.md](LICENSE.md).
+## Definitieve keuze
+
+**Definitieve keuze: GNU LGPL v3.0-or-later.**
+
+De officiële licentietekst staat in [`LICENSE`](LICENSE). De projectspecifieke toelichting staat in [`LICENSE.md`](LICENSE.md).

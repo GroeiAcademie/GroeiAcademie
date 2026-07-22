@@ -2,6 +2,20 @@
 
 Bedankt dat je wilt bijdragen aan GroeiAcademie Framework.
 
+## Besluitvorming over bijdragen
+
+1. Iedereen mag bijdragen via GitHub Pull Requests.
+2. Iedereen mag ideeën, voorstellen, vragen en bugs melden via GitHub Issues.
+3. Grote wijzigingen worden bij voorkeur vooraf besproken voordat er ontwikkelingswerk wordt verricht.
+4. Alle bijdragen worden technisch beoordeeld op kwaliteit, consistentie, documentatie, prestaties en compatibiliteit.
+5. Niet elke bijdrage wordt automatisch opgenomen. Ook kwalitatief goede bijdragen kunnen worden afgewezen wanneer ze niet aansluiten bij de doelstellingen of de ontwikkeling van het project.
+6. De maintainers nemen de uiteindelijke beslissing over het al dan niet opnemen van een bijdrage.
+7. Bijdragen moeten aansluiten bij de visie, architectuur, kwaliteitsnormen en langetermijndoelstellingen van GroeiAcademie Framework.
+
+## Auteursrecht en CLA
+
+Er is geen Contributor License Agreement. Iedere contributor behoudt het copyright op zijn of haar eigen bijdragen. GroeiAcademie Framework blijft beheerd door **GROEI ACADEMIE BV**.
+
 ## Mogelijke bijdragen
 
 Bijdragen kunnen onder andere bestaan uit:

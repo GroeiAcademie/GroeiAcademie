@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "Gebruik deze gegevens om de GroeiAcademie Arduino Library te citeren."
+title: "GroeiAcademie Framework"
+type: software
+authors:
+  - family-names: "Peeters"
+    given-names: "Alex"
+version: "0.9.79"
+date-released: "2026-07-22"
+license: "LGPL-3.0-or-later"
+repository-code: "https://github.com/GROEI-ACADEMIE/GroeiAcademie"
+url: "https://groeiacademie.be/"

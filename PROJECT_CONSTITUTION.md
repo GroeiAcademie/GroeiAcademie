@@ -57,7 +57,7 @@ Deze module volgt ademhaling en hartslag tijdens oefeningen. Wanneer iemand gevr
 
 ## 8. Open-sourcebeginselen
 
-Iedereen mag het framework gebruiken. Verbeteringen aan het framework horen terug te vloeien naar de community. De definitieve licentie moet deze wederkerigheid juridisch passend ondersteunen.
+Iedereen mag het framework gebruiken. Verbeteringen aan het framework horen terug te vloeien naar de community. Het project gebruikt de GNU LGPL v3.0-or-later om deze wederkerigheid juridisch te ondersteunen.
 
 Bijdragen kunnen bestaan uit code, documentatie, vertalingen, voorbeelden, nieuwe modules, hardwaretests, meetprotocollen en code reviews.
 

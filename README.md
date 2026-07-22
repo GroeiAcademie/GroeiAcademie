@@ -13,7 +13,7 @@ GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oefenen
 - huidige implementatie: Stimulus en Screen;
 - gecompileerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
 - Arduino Lint: geen fouten en geen waarschuwingen;
-- licentie: nog in juridische review, zie [LICENSE.md](LICENSE.md).
+- licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
 Emotie-observatie, ademhaling, hartslag en andere toepassingsgebieden staan in de inhoudelijke roadmap, maar zijn nog niet als volwaardige modules geïmplementeerd.
 

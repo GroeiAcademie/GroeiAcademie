@@ -2,16 +2,14 @@
 
 ## Oprichter en hoofdauteur
 
-- **Alex Peeters**, GROEI ACADEMIE  
+- **Alex Peeters**, GROEI ACADEMIE BV  
   Architectuur, analyse, programmatie, hardware-integratie en technische documentatie.
 
-## Organisatie
+## Projectidentiteit
 
-- **GROEI ACADEMIE BV**  
-  Projectbeheer, inhoudelijke positionering en communitywerking.
+**GROEI ACADEMIE BV**  
+NLP Communicatie Instituut  
+Opleidingsinstituut en Expertisecentrum voor NLP, gelicentieerd door de Society of NLP™.
 
-## Bijdragers
+Dit bestand vermeldt uitsluitend de oorspronkelijke auteurs. Externe bijdragen worden later afzonderlijk bijgehouden zodra die er zijn.
 
-Bijdragen aan code, voorbeelden, documentatie, vertalingen, elektronische schema's, meetprotocollen, hardwaretests, foutmeldingen en reviews zijn welkom.
-
-Bijdragers kunnen hier worden vermeld nadat hun bijdrage is opgenomen. Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor de werkwijze.
