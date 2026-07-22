@@ -6,7 +6,7 @@ Dit document onderscheidt de huidige implementatie van geplande toepassingsgebie
 
 | Toepassingsgebied | Softwarestatus | Elektronische documentatie |
 |---|---|---|
-| Stimulus | geïmplementeerd | [STIMULUS.md](STIMULUS.md) |
+| Stimulus | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) |
 | Screen | gedeelde systeemlaag | [../Systeem/SCREEN.md](../Systeem/SCREEN.md) |
 | Ademhaling | gepland | nog geen gevalideerd schema |
 | Hartritme, HRV en coherentie | gepland | nog geen gevalideerd schema |
@@ -43,7 +43,7 @@ De repository bevat afzonderlijke voorbeelden voor:
 4. cocktail;
 5. een samengesteld demonstratievoorbeeld.
 
-Zie [STIMULUS.md](STIMULUS.md) voor aansluiting, configuratie en interpretatiegrenzen.
+Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen.
 
 ## 2. Ademhaling
 

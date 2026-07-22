@@ -34,4 +34,8 @@ Bijvoorbeeld:
 
 > **This project uses the GroeiAcademie Framework.**
 
+## Merknaam
+
+"GroeiAcademie" is een handelsnaam/merk van GROEI ACADEMIE BV. De naam, het logo en eventuele beeldmerken vallen **niet** onder de LGPL v3.0-or-later. De licentie dekt de software; ze geeft geen recht om de naam of het logo van GroeiAcademie te gebruiken op een manier die associatie, goedkeuring of herkomst vanuit GROEI ACADEMIE BV suggereert.
+
 Dit bestand is een projectspecifieke toelichting. Bij verschillen of onduidelijkheden is de officiële tekst in [`LICENSE`](LICENSE) bepalend.

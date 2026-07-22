@@ -6,22 +6,25 @@ De versienummers volgen tijdens de pre-1.0-fase de versie in `library.properties
 
 ## [Unreleased]
 
-### Documentatie
+### Nog open
 
-- alle bestaande Markdown-documenten gecontroleerd en onderling afgestemd;
+- fysieke elektronische schemabestanden toevoegen naast de tekstuele aansluitschema's;
+- automatische compilatietests via GitHub Actions;
+- eerste publieke release en aanmelding bij Arduino Library Manager.
+
+## 0.9.79
+
+### Toegevoegd en gewijzigd
+
+- alle `*.md`-bestanden in lijn gebracht met de definitieve keuze van de licentie: GNU LGPL v3.0-or-later;
+- `library.properties` gecorrigeerd naar `license=LGPL-3.0-or-later` (stond nog op GPL);
+- `LICENSE.md` aangevuld met een paragraaf over de merknaam: "GroeiAcademie" valt als handelsnaam/merk niet onder de LGPL;
 - verouderde verwijzingen naar `lib/` vervangen door de werkelijke Arduino-librarystructuur onder `src/`;
-- interne links gecorrigeerd;
+- gebroken interne links naar `STIMULUS.md` gecorrigeerd naar het werkelijke pad `Toepassingsgebieden/Stimulus/README.md`;
 - huidige en geplande modules duidelijker van elkaar onderscheiden;
 - documentatie voor elektronische schema's per toepassingsgebied toegevoegd;
 - installatie-, configuratie- en gebruiksinformatie uitgebreid;
 - status van UNO R3, UNO R4 Minima en UNO R4 WiFi verduidelijkt.
-
-### Nog open
-
-- definitieve licentiekeuze na juridische controle;
-- fysieke elektronische schemabestanden toevoegen naast de tekstuele aansluitschema's;
-- automatische compilatietests via GitHub Actions;
-- eerste publieke release en aanmelding bij Arduino Library Manager.
 
 ## 0.9.78
 

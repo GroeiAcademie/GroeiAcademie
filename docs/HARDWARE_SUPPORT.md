@@ -58,7 +58,7 @@ De huidige standaardpinnen zijn:
 | sensor 3 | `A2` |
 | sensor 4 | `A3` |
 
-De volledige aansluiting staat in [Toepassingsgebieden/STIMULUS.md](Toepassingsgebieden/STIMULUS.md).
+De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepassingsgebieden/Stimulus/README.md).
 
 ## ESP32
 

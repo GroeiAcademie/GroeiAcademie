@@ -115,7 +115,7 @@ Zie [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) voor verantwoordelijkheden en p
 
 De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md).
 
-Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/STIMULUS.md](docs/Toepassingsgebieden/STIMULUS.md):
+Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.md](docs/Toepassingsgebieden/Stimulus/README.md):
 
 - het tekstuele aansluitschema;
 - de pinbezetting;
@@ -131,7 +131,7 @@ Er zijn in versie `0.9.78` nog geen afzonderlijke KiCad-, Fritzing-, PDF- of afb
 - [Architectuur](docs/ARCHITECTURE.md)
 - [Screen](docs/Systeem/SCREEN.md)
 - [Toepassingsgebieden en schema-index](docs/Toepassingsgebieden/MODULES.md)
-- [Stimulus](docs/Toepassingsgebieden/STIMULUS.md)
+- [Stimulus](docs/Toepassingsgebieden/Stimulus/README.md)
 - [Hardwareondersteuning](docs/HARDWARE_SUPPORT.md)
 - [Wetenschappelijke integriteit](docs/SCIENTIFIC_INTEGRITY.md)
 - [Roadmap](docs/ROADMAP.md)
