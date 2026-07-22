@@ -2,15 +2,15 @@
 
 ## Inleiding
 
-GroeiAcademie Framework is ontstaan vanuit de behoeften van NLP-trainers, NLP-beoefenaars en onderzoekers. Ze wordt ontwikkeld voor iedereen die er baat bij heeft.
+Het GroeiAcademie Framework is ontstaan vanuit de behoeften van NLP-trainers, NLP-beoefenaars en onderzoekers. Ze wordt ontwikkeld voor iedereen die er baat bij heeft.
 
 ## Identiteit
 
-GroeiAcademie Framework is een open-sourceproject van GROEI ACADEMIE BV, NLP Communicatie Instituut, Opleidingsinstituut en Expertisecentrum voor NLP, gelicentieerd door de Society of NLP™.
+Het GroeiAcademie Framework is een open-sourceproject van GROEI ACADEMIE BV, NLP Communicatie Instituut, Opleidingsinstituut en Expertisecentrum voor NLP, gelicentieerd door de Society of NLP™.
 
 ## Licentiekeuze
 
-GroeiAcademie Framework kiest voor de **GNU Lesser General Public License v3.0-or-later**.
+Het GroeiAcademie Framework kiest voor de **GNU Lesser General Public License v3.0-or-later**.
 
 De officiële licentietekst staat in [`LICENSE`](LICENSE).
 
@@ -26,9 +26,9 @@ De officiële licentietekst staat in [`LICENSE`](LICENSE).
 
 ## Vrijwillige vermelding
 
-Gebruik je GroeiAcademie Framework in een hobbyproject, onderzoek, onderwijs of commercieel product? Dan nodigen we je van harte uit om je project vrijblijvend toe te voegen aan `GEBRUIKERS.md` zodra dat document wordt aangemaakt. Zo help je anderen ontdekken hoe de library in de praktijk wordt toegepast. Er is geen enkele verplichting; het is volledig vrijwillig.
+Gebruik je het GroeiAcademie Framework in een hobbyproject, onderzoek, onderwijs of commercieel product? Dan nodigen we je van harte uit om je project vrijblijvend toe te voegen aan `GEBRUIKERS.md` zodra dat document wordt aangemaakt. Zo help je anderen ontdekken hoe de library in de praktijk wordt toegepast. Er is geen enkele verplichting; het is volledig vrijwillig.
 
-Wanneer je GroeiAcademie Framework gebruikt, stellen we het op prijs als je in de documentatie, de About-pagina of de broncode een verwijzing opneemt naar de GitHub-repository van de GroeiAcademie Arduino Library.
+Wanneer je het GroeiAcademie Framework gebruikt, stellen we het op prijs als je in de documentatie, de About-pagina of de broncode een verwijzing opneemt naar de GitHub-repository van de GroeiAcademie Arduino Library.
 
 Bijvoorbeeld:
 

@@ -2,13 +2,13 @@
 
 > Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten.
 
-GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
+Het GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
 
 > **Meten is weten, in plaats van denken te weten.**
 
 ## Huidige status
 
-- versie: `0.9.78`;
+- versie: `0.9.79`;
 - ontwikkelfase: pre-1.0;
 - huidige implementatie: Stimulus en Screen;
 - gecompileerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;

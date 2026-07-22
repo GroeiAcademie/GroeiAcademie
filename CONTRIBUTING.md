@@ -1,6 +1,6 @@
 # Bijdragen
 
-Bedankt dat je wilt bijdragen aan GroeiAcademie Framework.
+Bedankt dat je wilt bijdragen aan het GroeiAcademie Framework.
 
 ## Besluitvorming over bijdragen
 
@@ -10,11 +10,11 @@ Bedankt dat je wilt bijdragen aan GroeiAcademie Framework.
 4. Alle bijdragen worden technisch beoordeeld op kwaliteit, consistentie, documentatie, prestaties en compatibiliteit.
 5. Niet elke bijdrage wordt automatisch opgenomen. Ook kwalitatief goede bijdragen kunnen worden afgewezen wanneer ze niet aansluiten bij de doelstellingen of de ontwikkeling van het project.
 6. De maintainers nemen de uiteindelijke beslissing over het al dan niet opnemen van een bijdrage.
-7. Bijdragen moeten aansluiten bij de visie, architectuur, kwaliteitsnormen en langetermijndoelstellingen van GroeiAcademie Framework.
+7. Bijdragen moeten aansluiten bij de visie, architectuur, kwaliteitsnormen en langetermijndoelstellingen van het GroeiAcademie Framework.
 
 ## Auteursrecht en CLA
 
-Er is geen Contributor License Agreement. Iedere contributor behoudt het copyright op zijn of haar eigen bijdragen. GroeiAcademie Framework blijft beheerd door **GROEI ACADEMIE BV**.
+Er is geen Contributor License Agreement. Iedere contributor behoudt het copyright op zijn of haar eigen bijdragen. Het GroeiAcademie Framework blijft beheerd door **GROEI ACADEMIE BV**.
 
 ## Mogelijke bijdragen
 

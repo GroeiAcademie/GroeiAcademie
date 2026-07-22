@@ -2,7 +2,7 @@
 
 ## Onze belofte
 
-Wij willen deelname aan GroeiAcademie Framework voor iedereen veilig, respectvol en toegankelijk maken, ongeacht achtergrond, ervaring, identiteit, beperking, opleiding of overtuiging.
+Wij willen deelname aan het GroeiAcademie Framework voor iedereen veilig, respectvol en toegankelijk maken, ongeacht achtergrond, ervaring, identiteit, beperking, opleiding of overtuiging.
 
 ## Gewenst gedrag
 
