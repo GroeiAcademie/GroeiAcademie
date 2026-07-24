@@ -4,11 +4,11 @@
 
 Het GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
 
-> **Meten is weten, in plaats van denken te weten.**
+> **Meten is Weten, in plaats van Denken te Weten.**
 
 ## Huidige status
 
-- versie: `0.9.79`;
+- versie: `0.10.00`;
 - ontwikkelfase: pre-1.0;
 - huidige implementatie: Stimulus en Screen;
 - gecompileerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
@@ -45,7 +45,11 @@ De huidige Screen-implementatie gebruikt:
 LiquidCrystal I2C
 ```
 
-De exacte afhankelijkheid staat in `library.properties`.
+De exacte, verplichte afhankelijkheid staat in `library.properties`.
+
+### Optionele afhankelijkheid: ADS1115-backend (Stimulus)
+
+Wanneer in `SystemConfig.h` `ADC_BACKEND` op `ADC_BACKEND_ADS1115` gezet wordt, is bijkomend de library **Adafruit ADS1X15** nodig (te installeren via Library Manager). Dit is bewust **geen** harde afhankelijkheid in `library.properties`: bij de standaardbackend (`ADC_BACKEND_NATIVE`) is deze library niet nodig, en de meeste gebruikers gebruiken de ingebouwde ADC.
 
 ## Configuratie
 
@@ -64,7 +68,8 @@ Controleer vóór compilatie in `SystemConfig.h` minstens:
 - `ACTIEF_CHARACTER_SCREEN`;
 - `AANTAL_SENSOREN_AANWEZIG`;
 - `PIN_SENSOR_1` tot en met `PIN_SENSOR_4`;
-- `UNO_VERSION`.
+- `UNO_VERSION`;
+- `ADC_BACKEND` (`ADC_BACKEND_NATIVE` of `ADC_BACKEND_ADS1115`) — zie hierboven bij Afhankelijkheid.
 
 Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
 

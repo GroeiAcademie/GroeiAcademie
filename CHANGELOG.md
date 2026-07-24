@@ -12,6 +12,18 @@ De versienummers volgen tijdens de pre-1.0-fase de versie in `library.properties
 - automatische compilatietests via GitHub Actions;
 - eerste publieke release en aanmelding bij Arduino Library Manager.
 
+## 0.10.00
+
+### Toegevoegd en gewijzigd
+
+- `ADC_BACKEND` (`ADC_BACKEND_NATIVE` / `ADC_BACKEND_ADS1115`) toegevoegd in `SystemConfig.h`, naast de bestaande `UNO_VERSION`-keuze;
+- `ADC_BITS`/`DELAY_US` uitgebreid met een derde geval voor de ADS1115-backend, zodat bestaande drempel- en margeberekeningen (via de `ADC(x)`-macro) automatisch correct herschalen;
+- nieuwe, backend-afhankelijke `RawAnalogRead()` in `Stimulus.cpp`, die alle drie bestaande directe `analogRead()`-aanroepen vervangt (`AnalogReadMetGekorigeerdeOffsets()`, `BepaalSensorOffsets()`, en de wegwerp-meting bij kanaalwissel in `MeetStimulus()`);
+- instelbare `WACHT_LOSLATEN_DELAY_MS` in `WachtTotAlleSensorsLosgelatenVoorTest()`, om onafgebroken I2C-bevraging te vermijden wanneer `ADC_BACKEND_ADS1115` actief is;
+- I2C-adres `0x48` gereserveerd voor de Stimulus-ADS1115, afgestemd op de geplande emotiemeetmodule (die `0x49`/`0x4A` zal gebruiken) om adresconflicten te vermijden bij gestapelde shields;
+- optionele afhankelijkheid **Adafruit ADS1X15** gedocumenteerd in `README.md` (bewust niet in `library.properties`, zie afweging aldaar) — enkel vereist bij `ADC_BACKEND_ADS1115`;
+- elektronisch schema en pinbezetting voor de ADS1115-variant van Stimulus (schema 1/2/3) toegevoegd als apart document, ter aanvulling op het bestaande tekstuele aansluitschema.
+
 ## 0.9.79
 
 ### Toegevoegd en gewijzigd

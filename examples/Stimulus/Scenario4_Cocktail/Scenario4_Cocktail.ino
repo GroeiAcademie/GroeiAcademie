@@ -141,6 +141,10 @@ void setup() {
   DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  InitialiseerADS1115();
+#endif
+
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   pinMode(PIN_TOETS_1, INPUT_PULLUP);
   pinMode(PIN_TOETS_2, INPUT_PULLUP);
@@ -202,7 +206,7 @@ void UitvoerenAlgoritmeCocktailTik() {
   PrintToScreen("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) analogRead(sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) RawAnalogRead(sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot alle te meten sensoren ingedrukt zijn geweest.
   int aantalGestarteSensoren = 0;

@@ -40,16 +40,19 @@
 // CONSTANTEN VOOR DE LCD-TEKSTEN (Als pure tekst-pointers)
 // ============================================================================
 
-#define _LCD_SCORE_TIKKRACHT    "TIKKRACHT "
-#define _LCD_SCORE_TIKTIJD      "TIKTIJD "  
+#define _LCD_SCORE_TIKKRACHT        "TIKKRACHT "
+#define _LCD_SCORE_TIKTIJD          "TIKTIJD "  
 
-#define _LCD_KRACHT_TE_ZACHT    "TE ZACHT"
-#define _LCD_KRACHT_TE_HARD     "TE HARD"
+#define _LCD_KRACHT_TE_ZACHT        "TE ZACHT"
+#define _LCD_KRACHT_TE_HARD         "TE HARD"
 
-#define _LCD_TIJD_TE_KORT       "TE KORT"
-#define _LCD_TIJD_TE_LANG       "TE LANG"
-#define _LCD_TIJD_METEN_STOPT   "WE STOPPEN ERMEE"
-#define _LCD_TIJD_TEVEEL_FOUT   "SLECHTE START :)"
+#define _LCD_TIJD_TE_KORT           "TE KORT"
+#define _LCD_TIJD_TE_LANG           "TE LANG"
+#define _LCD_TIJD_METEN_STOPT       "WE STOPPEN ERMEE"
+#define _LCD_TIJD_TEVEEL_FOUT       "SLECHTE START :)"
+
+#define _LCD_ADS1115_FOUT           "ADS1115"
+#define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
 
 // ============================================================================
 // CONSTANTEN VOOR DE PAUZETIJDEN (Delays)
@@ -117,6 +120,7 @@ int  EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKra
                        bool &nulmetingGoedgekeurd, unsigned long &nulmetingTikTijd, int &nulmetingTikKracht,
                        int &herhaling, int &aantalNulmetingPogingen);
 
+void InitialiseerADS1115();
 void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor);
 
 int  MaakSensorMask(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, bool testOpDRUKWAARDE = true);
@@ -126,6 +130,8 @@ SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sen
 
 int  MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin = -1, int exitOffset = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS);
 int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart = 0, int MaskGewensteActieveSensorsBijExit = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS, bool testOpDRUKWAARDE = true);
+
+int  RawAnalogRead(int sensorPin);
 
 void ResetAlleTellers();
 void ResetStimulusProfiel(StimulusProfiel &gemetenStimulus);
@@ -166,6 +172,5 @@ extern int TIK_TEST_ACTIEVE_VINGER;
 extern int TELLER_TIKTIJD_CORRECT, TELLER_TIKTIJD_TE_SNEL, TELLER_TIKTIJD_TE_TRAAG, TELLER_TIKTIJD_SYNCHROON; 
 extern int TELLER_TIKKRACHT_CORRECT, TELLER_TIKKRACHT_TE_ZACHT, TELLER_TIKKRACHT_TE_HARD, TELLER_TIKKRACHT_IN_BALANS; 
 extern int TELLER_INSTORTEND_CORRECT, TELLER_SIMULTANE_START_OK, TELLER_SIMULTANE_EIND_OK; 
-
 
 #endif

@@ -1,5 +1,36 @@
 #include "Stimulus.h"
 
+// ============================================================================
+// RawAnalogRead: backend-afhankelijke ruwe sensorlezing.
+// Losstaand van AnalogReadMetGekorigeerdeOffsets() omdat BepaalSensorOffsets()
+// en de wegwerp-meting in MeetStimulus() ook een ruwe lezing nodig hebben, zonder offsetcorrectie.
+// ============================================================================
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  #include <Adafruit_ADS1X15.h>
+  static Adafruit_ADS1115 ads;
+  static bool ads1115Aanwezig = false;
+
+  void InitialiseerADS1115() {
+    if (!ads.begin(ADS1115_I2C_ADDRESS)) {
+      ads1115Aanwezig = false;
+      PrintToScreen(_LCD_ADS1115_FOUT, _LCD_ADS1115_NIET_GEVONDEN, _LCD_LEESTIJD_FEEDBACK_MS);
+      return;
+    }
+
+    ads.setGain(GAIN_TWOTHIRDS);
+    ads1115Aanwezig = true;
+  }
+
+  int RawAnalogRead(int sensorPin) {
+    if (!ads1115Aanwezig) return 0;
+    return ads.readADC_SingleEnded(sensorPin);
+  }
+#else
+  int RawAnalogRead(int sensorPin) {
+    return analogRead(sensorPin);
+  }
+#endif
+
 const int sensorPin[4] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
 
 // ============================================================================
@@ -67,10 +98,10 @@ int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
     DEBUG_PRINTLN(waarde);
   }  
 #else
-  int waarde = analogRead(sensorPin) - offsetSensor;
+  int waarde = RawAnalogRead(sensorPin) - offsetSensor;
 #endif
 */
-  int waarde = analogRead(sensorPin) - offsetSensor;
+  int waarde = RawAnalogRead(sensorPin) - offsetSensor;
 
   if (waarde < 0) waarde = 0;
   return waarde;
@@ -112,7 +143,7 @@ void BepaalSensorOffsets() {
 
   while (millis() - startTijd < OFFSET_METING_TIJD_MS) {
     for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
-      int meting = analogRead(sensorPin[sensorNummer]);
+      int meting = RawAnalogRead(sensorPin[sensorNummer]);
       if (aantalMetingen > 1 && meting > hoogsteMeting[sensorNummer]) { hoogsteMeting[sensorNummer] = meting; }
 
 #ifdef DEBUG
@@ -339,7 +370,7 @@ int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimul
   ResetStimulusProfiel(gemetenStimulus);
 
   // Eerste meting weggooien: kanaalwissel-artefact ligt structureel boven drempel
-  analogRead(sensorPin);
+  RawAnalogRead(sensorPin);
 
   // Wanneer de meetsensor bij het binnenkomen al ingedrukt is, eerst wachten tot die volledig wordt losgelaten.
   while (AnalogReadMetGekorigeerdeOffsets(sensorPin, OffsetSensor) > TIK_MINIMALE_DRUKWAARDE);
@@ -986,5 +1017,7 @@ void WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensorenSimultaanTeMeten) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
       if (AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) alleSensorsLosgelaten = false;
     }
+
+    if (WACHT_LOSLATEN_DELAY_MS > 0) delay(WACHT_LOSLATEN_DELAY_MS);  // Voorkomt onafgebroken I2C-bevraging bij ADC_BACKEND_ADS1115.
   }
 }

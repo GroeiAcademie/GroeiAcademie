@@ -169,6 +169,10 @@ void setup() {
   DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  InitialiseerADS1115();
+#endif
+
   // RegistreerCallbackScreenTypeCharacter(MijnCharacterScreen);
   // RegistreerCallbackScreenTypePixel(MijnPixelScreen);
 
@@ -296,7 +300,7 @@ void UitvoerenAlgoritmeEnkelTik() {
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
-    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { analogRead(sensorPin[sensorNummer]); }
+    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { RawAnalogRead(sensorPin[sensorNummer]); }
      const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
 
     // bepaal welke sensor als eerste actief is
@@ -376,7 +380,7 @@ void UitvoerenAlgoritmeSimultaneTik () {
   PrintToScreen("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) analogRead(sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) RawAnalogRead(sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot twee sensoren ingedrukt zijn geweest.
   int eersteGekozenSensorNummer = -1, tweedeGekozenSensorNummer = -1;
@@ -474,7 +478,7 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
   PrintToScreen("", "", 0, LCD_S0_NU);
 
   // eerste meting smijten we weg, geeft een valse waarde
-  analogRead(PIN_SENSOR_1); analogRead(PIN_SENSOR_2);
+  RawAnalogRead(PIN_SENSOR_1); RawAnalogRead(PIN_SENSOR_2);
 
   // STAP A: Blijf wachten tot een vinger sensor 1 AANRAAKT
   while (AnalogReadMetGekorigeerdeOffsets(PIN_SENSOR_1, offsetSensor1) <= TIK_MINIMALE_DRUKWAARDE);
@@ -645,7 +649,7 @@ void UitvoerenAlgoritmeCocktailTik() {
   PrintToScreen("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) analogRead(sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) RawAnalogRead(sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot alle te meten sensoren ingedrukt zijn geweest.
   int aantalGestarteSensoren = 0;

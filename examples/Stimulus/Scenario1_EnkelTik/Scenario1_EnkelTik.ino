@@ -132,6 +132,10 @@ void setup() {
   DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  InitialiseerADS1115();
+#endif
+
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   pinMode(PIN_TOETS_1, INPUT_PULLUP);
   pinMode(PIN_TOETS_2, INPUT_PULLUP);
@@ -169,7 +173,7 @@ void UitvoerenAlgoritmeEnkelTik() {
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
-    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { analogRead(sensorPin[sensorNummer]); }
+    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { RawAnalogRead(sensorPin[sensorNummer]); }
      const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
 
     // bepaal welke sensor als eerste actief is
