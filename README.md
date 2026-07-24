@@ -8,7 +8,7 @@ Het GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oef
 
 ## Huidige status
 
-- versie: `0.10.00`;
+- versie: `0.10.0`;
 - ontwikkelfase: pre-1.0;
 - huidige implementatie: Stimulus en Screen;
 - gecompileerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;

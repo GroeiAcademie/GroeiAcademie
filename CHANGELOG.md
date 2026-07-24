@@ -4,15 +4,17 @@ Alle betekenisvolle wijzigingen aan GroeiAcademie Framework worden in dit bestan
 
 De versienummers volgen tijdens de pre-1.0-fase de versie in `library.properties`.
 
-## [Unreleased]
+## Unreleased
 
-### Nog open
+### Added
+- Voorbereiding van ADS1115 als alternatieve ADC-backend voor Stimulus.
+- Hardwaredocumentatie voor H5, H6 en H7.
+- Validatiesketch voor vergelijking tussen Arduino-ADC en ADS1115.
 
-- fysieke elektronische schemabestanden toevoegen naast de tekstuele aansluitschema's;
-- automatische compilatietests via GitHub Actions;
-- eerste publieke release en aanmelding bij Arduino Library Manager.
+### Status
+Deze ADS1115-lijn is aanwezig als werkversie richting v0.10.00 en is nog niet als definitief ondersteunde hardware gevalideerd.
 
-## 0.10.00
+## 0.10.0
 
 ### Toegevoegd en gewijzigd
 

@@ -1,4 +1,8 @@
+
 # Stimulus uitbreiding met ADS1115
+
+> Status: werkversie richting v0.10.0.
+> Deze ADS1115-route is voorbereid in schema, documentatie en code, maar nog niet definitief gevalideerd als stabiele hardwarelijn.
 
 **FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115**
 
