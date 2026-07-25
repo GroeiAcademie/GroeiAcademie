@@ -98,6 +98,8 @@ examples/
     └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
+`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica — ze dienen voor hardwarevalidatie (Arduino-ADC-route versus ADS1115-route vergelijken), niet als gewone gebruikersvoorbeelden. Zie `docs/Toepassingsgebieden/Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md`, hoofdstuk 18, voor het gebruik. De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
+
 ## Librarystructuur
 
 ```text

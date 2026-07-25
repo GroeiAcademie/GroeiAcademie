@@ -4,9 +4,13 @@
 > Status: opgenomen in v0.10.0 als softwarematige ADS1115-implementatie.
 > Hardwarevalidatie van de ADS1115-route is nog open.
 
+> **Gezaghebbende hardwarebron**: `Schematic_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.0_2026-07-25` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers, analoog aan H7. Figuur 1 hieronder (het generieke connectorschema) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
+
 **FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115**
 
-Figuur 1. Huidige Stimulus-schema met vier FSR402/RFP602-lijnen richting Arduino analoge ingangen, LCD 1602 I2C, keypad en Arduino UNO R4 Minima.
+Figuur 1 (historisch/conceptueel, niet onderhouden). Vroeger Stimulus-schema met vier FSR402/RFP602-lijnen richting Arduino analoge ingangen, LCD 1602 I2C, keypad en Arduino UNO R4 Minima. H6 stond hier nog als 1x4-pins vrouwelijke Dupont-connector — zie de gezaghebbende shield-PCB voor de actuele 4x2-jumpers-uitvoering.
+
+[Figuur 1 — historisch/conceptueel schema, PDF](Schematic_GroeiAcademie-v0.10.0_2026-07-25.pdf)
 
 ## DEEL 1 — Beslissing en uitgangspunt
 
@@ -49,7 +53,7 @@ Zonder I2C-multiplexer kan je maximaal vier ADS1115-modules op dezelfde I2C-bus 
 
 We gaan voor één schema waarin twee onafhankelijke bestukkingskeuzes mogelijk zijn, via Dupont-connectoren.
 
-De keuze voor het ADC-pad gebeurt door ofwel de ADS1115-module op H5 te plaatsen, ofwel geen ADS1115 te plaatsen en de vier analoge lijnen via draadbruggen van H5 naar H6 door te verbinden. H6 loopt daarna naar Arduino A0-A3. Daardoor zijn geen solder-jumpers per sensorlijn nodig.
+De keuze voor het ADC-pad gebeurt door ofwel de ADS1115-module op H5 te plaatsen, ofwel geen ADS1115 te plaatsen en in plaats daarvan de vier H6-jumpers te plaatsen op H5 pin 7-10. H6 loopt daarna naar Arduino A0-A3.
 
 De keuze voor de I2C-niveauconversie gebeurt apart: ofwel wordt de logic shifter geplaatst, ofwel worden draadbruggen gebruikt wanneer niveauconversie niet nodig is.
 
@@ -59,7 +63,7 @@ De keuze voor de I2C-niveauconversie gebeurt apart: ofwel wordt de logic shifter
 |---|---|---|
 | ADS1115 niet bestukt | FSR402/RFP602 OUT1-OUT4 naar Arduino A0-A3 | Arduino leest rechtstreeks met `analogRead()` |
 | ADS1115 bestukt | FSR402/RFP602 OUT1-OUT4 naar ADS1115 A0-A3 | Arduino leest via de I2C-bus |
-| Keuze via Dupont-connector | Ofwel ADS1115-module op H5, ofwel draadbruggen van H5 naar H6 waarna H6 naar Arduino A0-A3 loopt | Flexibel, geen solder-jumpers per sensorlijn nodig |
+| Keuze via connector/jumpers | Ofwel ADS1115-module op H5, ofwel de vier H6-jumpers geplaatst op H5 pin 7-10, waarna H6 naar Arduino A0-A3 loopt | Flexibel, geen solder-jumpers per sensorlijn nodig |
 
 ## 5. Hardware-aandachtspunten
 
@@ -87,14 +91,14 @@ In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo
 | H3 | 1x6 Dupont-connector aan de HV-zijde van de logic-shifter-footprint |
 | H4 | 1x6 Dupont-connector aan de LV-zijde van de logic-shifter-footprint |
 | H5 | 1x10 Dupont-connector voor de ADS1115-module en de vier analoge sensorlijnen |
-| H6 | 1x4 Dupont-connector die naar Arduino A0-A3 loopt voor directe Arduino-ADC |
+| H6 | 4x2 jumpers (2,54mm Dupont-steekmaat), analoog aan H7, geplaatst op H5 pin 7-10, die naar Arduino A0-A3 lopen voor directe Arduino-ADC |
 | H7 | ADDR-jumperveld voor de ADS1115-adreskeuze |
 
 ## 6. Twee footprints, telkens met twee bestukkingsopties
 
 ### 6.1 Direct ADC ofwel ADS1115
 
-H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en voor de vier analoge sensorlijnen. H6 is de 4-polige connector die naar Arduino A0-A3 loopt. H7 is uitsluitend het ADDR-jumperveld voor de ADS1115-adreskeuze.
+H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en voor de vier analoge sensorlijnen. H6 is het 4x2-jumperveld (analoog aan H7) dat op H5 pin 7-10 zit en vandaar naar Arduino A0-A3 loopt. H7 is uitsluitend het ADDR-jumperveld voor de ADS1115-adreskeuze.
 
 | Pinvolgorde H5, 10-polige ADS1115-connector | Functie |
 |---|---|
@@ -111,16 +115,16 @@ H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en voor de vie
 
 Bij de ADS1115-keuze wordt het ADS1115-bordje op H5 geplaatst. Daarna kies je via H7 het gewenste I2C-adres.
 
-Bij de Arduino-ADC-keuze wordt geen ADS1115-bordje op H5 geplaatst. Dan worden de vier analoge sensorlijnen met draadbruggen van H5 naar H6 doorverbonden. H6 is de connector die naar Arduino A0-A3 loopt.
+Bij de Arduino-ADC-keuze wordt geen ADS1115-bordje op H5 geplaatst. In plaats daarvan worden de vier H6-jumpers op H5 pin 7-10 geplaatst. H6 is het jumperveld dat naar Arduino A0-A3 loopt.
 
-| Draadbrug bij Arduino-ADC-keuze | Sensorlijn op H5 | Arduino-lijn via H6 | Betekenis |
+| H6-jumper op H5 pin 7-10 | Sensorlijn op H5 | Arduino-lijn via H6 | Betekenis |
 |---|---|---|---|
-| H5 pin 7 naar H6 pin 1 | ADS1115 A0-lijn | Arduino A0 | OUT1 naar Arduino A0 bij directe ADC |
-| H5 pin 8 naar H6 pin 2 | ADS1115 A1-lijn | Arduino A1 | OUT2 naar Arduino A1 bij directe ADC |
-| H5 pin 9 naar H6 pin 3 | ADS1115 A2-lijn | Arduino A2 | OUT3 naar Arduino A2 bij directe ADC |
-| H5 pin 10 naar H6 pin 4 | ADS1115 A3-lijn | Arduino A3 | OUT4 naar Arduino A3 bij directe ADC |
+| H5 pin 7 (H6 pin 1) | ADS1115 A0-lijn | Arduino A0 | OUT1 naar Arduino A0 bij directe ADC |
+| H5 pin 8 (H6 pin 2) | ADS1115 A1-lijn | Arduino A1 | OUT2 naar Arduino A1 bij directe ADC |
+| H5 pin 9 (H6 pin 3) | ADS1115 A2-lijn | Arduino A2 | OUT3 naar Arduino A2 bij directe ADC |
+| H5 pin 10 (H6 pin 4) | ADS1115 A3-lijn | Arduino A3 | OUT4 naar Arduino A3 bij directe ADC |
 
-Plaats nooit tegelijk de ADS1115-module op H5 én de H5-H6-draadbruggen. Anders kunnen dezelfde sensorlijnen tegelijk aan ADS1115 A0-A3 en Arduino A0-A3 hangen.
+Plaats nooit tegelijk de ADS1115-module op H5 én de H6-jumpers op H5 pin 7-10. Anders kunnen dezelfde sensorlijnen tegelijk aan ADS1115 A0-A3 en Arduino A0-A3 hangen.
 
 ### 6.2 Met of zonder logic shifter
 
@@ -144,7 +148,7 @@ Deze footprint is altijd fysiek aanwezig. Als niveauconversie nodig is, wordt de
 | ADC-pad | Wat wordt geplaatst? | Wat wordt gebruikt? | Codekeuze |
 |---|---|---|---|
 | ADS1115-pad | ADS1115-module op H5 | H5 gebruikt alle 10 pinnen: VCC, GND, SCL, SDA, ADDR, ALRT, A0, A1, A2, A3. Het adres wordt gekozen via H7. | `ADC_BACKEND_ADS1115` |
-| Direct Arduino-ADC-pad | Geen ADS1115-module op H5. Vier draadbruggen van H5 naar H6. | H5 pin 7 naar H6 pin 1 naar Arduino A0, H5 pin 8 naar H6 pin 2 naar Arduino A1, H5 pin 9 naar H6 pin 3 naar Arduino A2, H5 pin 10 naar H6 pin 4 naar Arduino A3. | `ADC_BACKEND_NATIVE` |
+| Direct Arduino-ADC-pad | Geen ADS1115-module op H5. De vier H6-jumpers geplaatst op H5 pin 7-10. | H5 pin 7/H6 pin 1 naar Arduino A0, H5 pin 8/H6 pin 2 naar Arduino A1, H5 pin 9/H6 pin 3 naar Arduino A2, H5 pin 10/H6 pin 4 naar Arduino A3. | `ADC_BACKEND_NATIVE` |
 
 ### 7.2 Bestukkingskeuze logic-shifter-footprint
 
@@ -155,7 +159,7 @@ Deze footprint is altijd fysiek aanwezig. Als niveauconversie nodig is, wordt de
 
 ## 8. ADDR-jumperveld H7
 
-H7 is het ADDR-jumperveld voor de ADS1115-adreskeuze. H7 is niet bedoeld om sensorlijnen naar Arduino A0-A3 door te verbinden. De H5-H6-draadbruggen horen alleen bij de directe Arduino-ADC-keuze.
+H7 is het ADDR-jumperveld voor de ADS1115-adreskeuze. H7 is niet bedoeld om sensorlijnen naar Arduino A0-A3 door te verbinden. De H6-jumpers op H5 pin 7-10 plaatsen hoort alleen bij de directe Arduino-ADC-keuze.
 
 Het ADDR-jumperveld is alleen relevant wanneer de ADS1115-module op H5 geplaatst wordt.
 
@@ -176,33 +180,33 @@ Silkscreen-label bij de 10-polige connector:
 ADS1115: VCC GND SCL SDA ADDR ALRT A0 A1 A2 A3
 ```
 
-Silkscreen-label bij de 4-polige doorverbinding:
+Silkscreen-label bij het H6-jumperveld:
 
 ```text
-ARD ADC: A0 A1 A2 A3
+H6 ARD-ADC: A0 A1 A2 A3
 ```
 
 Waarschuwingen:
 
-- H5: plaats ofwel het ADS1115-bordje, ofwel de H5-H6-draadbruggen voor directe Arduino-ADC. Nooit beide tegelijk.
+- H5: plaats ofwel het ADS1115-bordje, ofwel de vier H6-jumpers op H5 pin 7-10 voor directe Arduino-ADC. Nooit beide tegelijk.
 - H7: plaats altijd maar één ADDR-adresjumper tegelijk. H7 is uitsluitend voor de ADS1115-adreskeuze.
 - Logic-shifter-footprint H3/H4: IC = niveauconversie nodig. Draadbrug = zelfde logicaspanning. Nooit shifter-IC en draadbruggen tegelijk in dezelfde headers.
-- Standaardkeuze bij eerste testen: directe Arduino-ADC via H5-H6-draadbruggen naar Arduino A0-A3 en draadbruggen voor de I2C-bus wanneer geen niveauconversie nodig is.
+- Standaardkeuze bij eerste testen: directe Arduino-ADC via de H6-jumpers op H5 pin 7-10 naar Arduino A0-A3, en draadbruggen voor de I2C-bus wanneer geen niveauconversie nodig is.
 
 ## DEEL 3 — Pinaansluitingen
 
 ## 10. FSR402/RFP602
 
-### 10.1 Direct ADC via H5-H6-draadbruggen
+### 10.1 Direct ADC via de H6-jumpers op H5 pin 7-10
 
-Bij de directe Arduino-ADC-variant wordt geen ADS1115-bordje op H5 geplaatst. De vier analoge lijnen op H5 worden via draadbruggen naar H6 geleid. H6 loopt daarna naar Arduino A0-A3.
+Bij de directe Arduino-ADC-variant wordt geen ADS1115-bordje op H5 geplaatst. In plaats daarvan wordt H6 (4x2 jumpers, analoog aan H7) geplaatst op H5 pin 7-10. H6 loopt daarna naar Arduino A0-A3.
 
-| Draadbrug | Sensorlijn op H5 | Verbonden met Arduino via H6 | Opmerking |
+| H6-jumper | Sensorlijn op H5 | Verbonden met Arduino via H6 | Opmerking |
 |---|---|---|---|
-| H5 pin 7 naar H6 pin 1 | ADS1115 A0-lijn / OUT1 | Arduino A0 | Directe Arduino-ADC-meting |
-| H5 pin 8 naar H6 pin 2 | ADS1115 A1-lijn / OUT2 | Arduino A1 | Directe Arduino-ADC-meting |
-| H5 pin 9 naar H6 pin 3 | ADS1115 A2-lijn / OUT3 | Arduino A2 | Directe Arduino-ADC-meting |
-| H5 pin 10 naar H6 pin 4 | ADS1115 A3-lijn / OUT4 | Arduino A3 | Directe Arduino-ADC-meting |
+| H5 pin 7 (H6 pin 1) | ADS1115 A0-lijn / OUT1 | Arduino A0 | Directe Arduino-ADC-meting |
+| H5 pin 8 (H6 pin 2) | ADS1115 A1-lijn / OUT2 | Arduino A1 | Directe Arduino-ADC-meting |
+| H5 pin 9 (H6 pin 3) | ADS1115 A2-lijn / OUT3 | Arduino A2 | Directe Arduino-ADC-meting |
+| H5 pin 10 (H6 pin 4) | ADS1115 A3-lijn / OUT4 | Arduino A3 | Directe Arduino-ADC-meting |
 
 Controleer in het schema en op de silkscreen dat H6 pin 1 naar Arduino A0 loopt, H6 pin 2 naar Arduino A1, H6 pin 3 naar Arduino A2 en H6 pin 4 naar Arduino A3. H7 hoort hier niet bij; H7 blijft uitsluitend voor de ADDR-adreskeuze.
 
@@ -276,7 +280,7 @@ Gebruik deze bestukking wanneer de HV-zijde en LV-zijde een verschillende logica
 
 De logic-shifter-footprint is geen derde aparte keuze, maar een tweede onafhankelijke bestukkingskeuze: shifter plaatsen bij niveauverschil, of draadbruggen plaatsen wanneer beide zijden dezelfde logicaspanning gebruiken.
 
-De 10-polige ADS1115-connector en de 4-polige Arduino-ADC-doorverbinding worden duidelijk naast elkaar of logisch in elkaars buurt geplaatst, zodat onmiddellijk zichtbaar is welke keuze actief is.
+De 10-polige ADS1115-connector H5 en het H6-jumperveld worden duidelijk naast elkaar of logisch in elkaars buurt geplaatst, zodat onmiddellijk zichtbaar is welke keuze actief is.
 
 ## DEEL 4 — Huidige software-implementatie
 
@@ -426,7 +430,7 @@ Ik stel voor om nu vier dingen vast te leggen:
 |---|---|---|
 | Schema 1 | Stimulus direct ADC | FSR402/RFP602 naar Arduino A0-A3 |
 | Schema 2 | Stimulus ADS1115 | FSR402/RFP602 naar ADS1115 A0-A3, ADS1115 via de I2C-bus |
-| Schema 3 | Stimulus keuze via connector | ADS1115-module op H5 met adreskeuze via H7, of directe Arduino-ADC via H5-H6-draadbruggen naar Arduino A0-A3 |
+| Schema 3 | Stimulus keuze via connector/jumpers | ADS1115-module op H5 met adreskeuze via H7, of directe Arduino-ADC via de H6-jumpers op H5 pin 7-10 naar Arduino A0-A3 |
 | Code | Transparante uitleeslaag | `RawAnalogRead(int sensorPin)` met `ADC_BACKEND`-define, gebruikt door `AnalogReadMetGekorigeerdeOffsets(...)` |
 
 Daarmee blijft de huidige code bruikbaar, kan je later eenvoudig naar ADS1115 omschakelen, en voorkom je pinproblemen wanneer er extra componenten voor emoties bijkomen.
@@ -437,7 +441,7 @@ Daarmee blijft de huidige code bruikbaar, kan je later eenvoudig naar ADS1115 om
 
 Voorstel voor een objectieve vergelijking, uitvoerbaar met schema 3 zonder herbedrading:
 
-- Zelfde fysieke FSR402/RFP602-sensor, zelfde druk, eerst meten via directe Arduino-ADC met de H5-H6-draadbruggen naar Arduino A0-A3, daarna meten via de ADS1115-module op H5 met adreskeuze via H7.
+- Zelfde fysieke FSR402/RFP602-sensor, zelfde druk, eerst meten via directe Arduino-ADC met de H6-jumpers geplaatst op H5 pin 7-10 naar Arduino A0-A3, daarna meten via de ADS1115-module op H5 met adreskeuze via H7.
 - Vergelijk ruis: standaardafwijking bij constante druk.
 - Vergelijk lineariteit over het volledige drukbereik.
 - Controleer sample-timing: ADS1115 via I2C kost meer tijd per lezing dan `analogRead()`. Voor Stimulus, met trage druksignalen, is dat doorgaans geen probleem, maar dit moet wel gemeten worden.
@@ -445,11 +449,21 @@ Voorstel voor een objectieve vergelijking, uitvoerbaar met schema 3 zonder herbe
 
 ## 18. Validatiescripts
 
+### Status van de validatiescripts
+
+De validatiescripts zijn bewust zelfstandig gehouden. Ze gebruiken niet de volledige Stimulus-librarylogica, zodat de Arduino-ADC-route en ADS1115-route zuiver hardwarematig vergeleken kunnen worden.
+
+Gebruik:
+- `ADC_Validatie_Native` voor de directe Arduino-ADC-route.
+- `ADC_Validatie_ADS1115` voor de ADS1115-route.
+
+Deze scripts zijn bedoeld voor hardwarevalidatie, niet als gewone gebruikersvoorbeelden van de Stimulus-library.
+
 Er zijn twee aparte validatiescripts, zodat de Arduino-ADC-route en de ADS1115-route elk afzonderlijk getest kunnen worden zonder telkens dezelfde sketch handmatig om te zetten.
 
 | Script | Backend | Fysieke keuze |
 |---|---|---|
-| `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino` | `ADC_BACKEND_NATIVE` | Geen ADS1115 op H5. H5 pin 7-10 met draadbruggen naar H6 pin 1-4. H6 pin 1-4 loopt naar Arduino A0-A3. |
+| `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino` | `ADC_BACKEND_NATIVE` | Geen ADS1115 op H5. De vier H6-jumpers geplaatst op H5 pin 7-10. H6 pin 1-4 loopt naar Arduino A0-A3. |
 | `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino` | `ADC_BACKEND_ADS1115` | ADS1115-bordje op H5. Gewenst adres kiezen via H7. Standaard: ADDR naar GND, adres `0x48`. |
 
 In beide validatiescripts wordt dezelfde functiehandtekening gebruikt als in de Stimulus-code:

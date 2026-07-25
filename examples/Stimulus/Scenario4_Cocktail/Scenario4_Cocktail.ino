@@ -4,9 +4,6 @@
 // #include <GroeiAcademie.h> // alles van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
 #include <Stimulus.h>         // enkel module: Stimulus van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
 
-
-// Alex Peeters, 20260718, v0.975
-
 // ============================================================================
 // HARDWARE INSTELLINGEN (De pinnen van de Arduino UNO R3/R4)
 // ============================================================================

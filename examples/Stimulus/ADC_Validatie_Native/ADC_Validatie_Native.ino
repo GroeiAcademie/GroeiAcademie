@@ -1,7 +1,16 @@
 // ============================================================================
 // Stimulus — transparante ADC-laag + validatiesketch (Arduino-ADC)
 // ============================================================================
-// Doel: dezelfde 4 FSR402/RFP602-lijnen uitlezen via één vaste backend,
+// LET OP:
+// Dit is een zelfstandig hardware-validatiescript.
+// Het gebruikt bewust niet de volledige Stimulus-librarylogica.
+//
+// Voor gewone gebruikers:
+// Gebruik dit script alleen om de hardware te valideren.
+// Gebruik de normale Stimulus-voorbeelden om met de library zelf te werken.
+
+// Doel: de directe Arduino-ADC-route elektrisch en meetkundig testen zonder extra lagen,
+// door dezelfde 4 FSR402/RFP602-lijnen uit te lezen via één vaste backend,
 // zodat Arduino-ADC en ADS1115 afzonderlijk getest en vergeleken kunnen worden.
 //
 // Fysieke validatie:
