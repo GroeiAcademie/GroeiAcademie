@@ -89,11 +89,13 @@ examples/
 │   ├── Callback_CharacterScreen/
 │   └── Default_PrintToScreen/
 └── Stimulus/
+    ├── ADC_Validatie_Native/
+    ├── ADC_Validatie_ADS1115/
     ├── Scenario1_EnkelTik/
     ├── Scenario2_Simultaan/
     ├── Scenario3_Ineenstortend/
     ├── Scenario4_Cocktail/
-    └── Tik_Enkele_Samen_Instrotend_Coctail/
+    └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
 ## Librarystructuur
@@ -128,7 +130,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-Er zijn in versie `0.9.78` nog geen afzonderlijke KiCad-, Fritzing-, PDF- of afbeeldingsbestanden in de repository opgenomen. De Markdown-documentatie is daarom voorlopig de gezaghebbende schema-informatie.
+De ADS1115-hardwarelijn staat onder [docs/Toepassingsgebieden/Stimulus/Hardware/](docs/Toepassingsgebieden/Stimulus/Hardware/), met schema-exporten en de Markdown-documentatie [Stimulus_uitbreiding_ADS1115_v0.10.0.md](docs/Toepassingsgebieden/Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md).
 
 ## Documentatie
 

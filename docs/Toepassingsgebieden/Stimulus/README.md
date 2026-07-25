@@ -148,13 +148,15 @@ Voor reproduceerbare resultaten:
 
 ## Scenario's en voorbeelden
 
+- `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino`
+- `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino`
 - `examples/Stimulus/Scenario1_EnkelTik/Scenario1_EnkelTik.ino`
 - `examples/Stimulus/Scenario2_Simultaan/Scenario2_Simultaan.ino`
 - `examples/Stimulus/Scenario3_Ineenstortend/Scenario3_Ineenstortend.ino`
 - `examples/Stimulus/Scenario4_Cocktail/Scenario4_Cocktail.ino`
-- `examples/Stimulus/Tik_Enkele_Samen_Instrotend_Coctail/Tik_Enkele_Samen_Instrotend_Coctail.ino`
+- `examples/Stimulus/Tik_Enkele_Samen_Instortend_Cocktail/Tik_Enkele_Samen_Instortend_Cocktail.ino`
 
-De bestandsnaam van het samengestelde voorbeeld bevat historische spelfouten. Die naam wordt hier exact weergegeven omdat het pad in de huidige repository zo bestaat.
+De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke backends: directe Arduino-ADC en ADS1115.
 
 ## Veiligheid en interpretatie
 
@@ -167,4 +169,4 @@ De bestandsnaam van het samengestelde voorbeeld bevat historische spelfouten. Di
 
 ## Afzonderlijke schemabestanden
 
-In versie `0.9.78` zijn nog geen afzonderlijke KiCad-, Fritzing-, PDF- of PNG-schema's opgenomen. Het schema en de pinbezetting in dit document zijn daarom voorlopig de gezaghebbende elektronische documentatie.
+De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg staat in [Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md](Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md). Daarin worden H5, H6 en H7 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115.

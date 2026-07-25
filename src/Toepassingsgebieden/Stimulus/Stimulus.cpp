@@ -26,6 +26,9 @@
     return ads.readADC_SingleEnded(sensorPin);
   }
 #else
+  void InitialiseerADS1115() {
+  }
+
   int RawAnalogRead(int sensorPin) {
     return analogRead(sensorPin);
   }

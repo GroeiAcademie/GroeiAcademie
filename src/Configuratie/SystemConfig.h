@@ -25,7 +25,7 @@
 #define ADC_BACKEND_ADS1115  1          // externe 16-bit ADC via I2C
 
 #define ADC_BACKEND ADC_BACKEND_NATIVE  // wissel dit om van backend te wisselen
-#define ADS1115_I2C_ADDRESS  0x48       // gereserveerd adres, zie Stimulus_Schema_1_2_3.docx
+#define ADS1115_I2C_ADDRESS  0x48       // standaardadres via H7: ADDR naar GND
 
 // Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
 // Bij ADC_BACKEND_NATIVE blijft dit 0. Bij ADC_BACKEND_ADS1115 voorkomt dit dat de

@@ -6,13 +6,7 @@ De versienummers volgen tijdens de pre-1.0-fase de versie in `library.properties
 
 ## Unreleased
 
-### Added
-- Voorbereiding van ADS1115 als alternatieve ADC-backend voor Stimulus.
-- Hardwaredocumentatie voor H5, H6 en H7.
-- Validatiesketch voor vergelijking tussen Arduino-ADC en ADS1115.
-
-### Status
-Deze ADS1115-lijn is aanwezig als werkversie richting v0.10.00 en is nog niet als definitief ondersteunde hardware gevalideerd.
+Geen wijzigingen sinds `0.10.0`.
 
 ## 0.10.0
 
@@ -24,7 +18,10 @@ Deze ADS1115-lijn is aanwezig als werkversie richting v0.10.00 en is nog niet al
 - instelbare `WACHT_LOSLATEN_DELAY_MS` in `WachtTotAlleSensorsLosgelatenVoorTest()`, om onafgebroken I2C-bevraging te vermijden wanneer `ADC_BACKEND_ADS1115` actief is;
 - I2C-adres `0x48` gereserveerd voor de Stimulus-ADS1115, afgestemd op de geplande emotiemeetmodule (die `0x49`/`0x4A` zal gebruiken) om adresconflicten te vermijden bij gestapelde shields;
 - optionele afhankelijkheid **Adafruit ADS1X15** gedocumenteerd in `README.md` (bewust niet in `library.properties`, zie afweging aldaar) — enkel vereist bij `ADC_BACKEND_ADS1115`;
-- elektronisch schema en pinbezetting voor de ADS1115-variant van Stimulus (schema 1/2/3) toegevoegd als apart document, ter aanvulling op het bestaande tekstuele aansluitschema.
+- elektronisch schema en pinbezetting voor de ADS1115-variant van Stimulus toegevoegd onder `docs/Toepassingsgebieden/Stimulus/Hardware/`;
+- hardwaredocumentatie voor H5, H6 en H7 toegevoegd;
+- twee validatiescripts toegevoegd: `ADC_Validatie_Native` en `ADC_Validatie_ADS1115`;
+- samengesteld Stimulusvoorbeeld hernoemd naar `Tik_Enkele_Samen_Instortend_Cocktail`.
 
 ## 0.9.79
 

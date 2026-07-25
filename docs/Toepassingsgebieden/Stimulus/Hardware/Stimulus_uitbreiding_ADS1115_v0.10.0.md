@@ -1,8 +1,8 @@
 
 # Stimulus uitbreiding met ADS1115
 
-> Status: werkversie richting v0.10.0.
-> Deze ADS1115-route is voorbereid in schema, documentatie en code, maar nog niet definitief gevalideerd als stabiele hardwarelijn.
+> Status: opgenomen in v0.10.0 als softwarematige ADS1115-implementatie.
+> Hardwarevalidatie van de ADS1115-route is nog open.
 
 **FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115**
 
@@ -113,12 +113,12 @@ Bij de ADS1115-keuze wordt het ADS1115-bordje op H5 geplaatst. Daarna kies je vi
 
 Bij de Arduino-ADC-keuze wordt geen ADS1115-bordje op H5 geplaatst. Dan worden de vier analoge sensorlijnen met draadbruggen van H5 naar H6 doorverbonden. H6 is de connector die naar Arduino A0-A3 loopt.
 
-| Draadbrug bij Arduino-ADC-keuze | Betekenis |
-|---|---|
-| H5 pin 7 naar H6 pin 1 | Eerste fysieke doorbrug tussen H5 en H6 |
-| H5 pin 8 naar H6 pin 2 | Tweede fysieke doorbrug tussen H5 en H6 |
-| H5 pin 9 naar H6 pin 3 | Derde fysieke doorbrug tussen H5 en H6 |
-| H5 pin 10 naar H6 pin 4 | Vierde fysieke doorbrug tussen H5 en H6 |
+| Draadbrug bij Arduino-ADC-keuze | Sensorlijn op H5 | Arduino-lijn via H6 | Betekenis |
+|---|---|---|---|
+| H5 pin 7 naar H6 pin 1 | ADS1115 A0-lijn | Arduino A0 | OUT1 naar Arduino A0 bij directe ADC |
+| H5 pin 8 naar H6 pin 2 | ADS1115 A1-lijn | Arduino A1 | OUT2 naar Arduino A1 bij directe ADC |
+| H5 pin 9 naar H6 pin 3 | ADS1115 A2-lijn | Arduino A2 | OUT3 naar Arduino A2 bij directe ADC |
+| H5 pin 10 naar H6 pin 4 | ADS1115 A3-lijn | Arduino A3 | OUT4 naar Arduino A3 bij directe ADC |
 
 Plaats nooit tegelijk de ADS1115-module op H5 én de H5-H6-draadbruggen. Anders kunnen dezelfde sensorlijnen tegelijk aan ADS1115 A0-A3 en Arduino A0-A3 hangen.
 
@@ -144,7 +144,7 @@ Deze footprint is altijd fysiek aanwezig. Als niveauconversie nodig is, wordt de
 | ADC-pad | Wat wordt geplaatst? | Wat wordt gebruikt? | Codekeuze |
 |---|---|---|---|
 | ADS1115-pad | ADS1115-module op H5 | H5 gebruikt alle 10 pinnen: VCC, GND, SCL, SDA, ADDR, ALRT, A0, A1, A2, A3. Het adres wordt gekozen via H7. | `ADC_BACKEND_ADS1115` |
-| Direct Arduino-ADC-pad | Geen ADS1115-module op H5. Vier draadbruggen van H5 naar H6. | H5 pin 7 naar H6 pin 1, H5 pin 8 naar H6 pin 2, H5 pin 9 naar H6 pin 3, H5 pin 10 naar H6 pin 4. H6 loopt naar Arduino A0-A3. | `ADC_BACKEND_NATIVE` |
+| Direct Arduino-ADC-pad | Geen ADS1115-module op H5. Vier draadbruggen van H5 naar H6. | H5 pin 7 naar H6 pin 1 naar Arduino A0, H5 pin 8 naar H6 pin 2 naar Arduino A1, H5 pin 9 naar H6 pin 3 naar Arduino A2, H5 pin 10 naar H6 pin 4 naar Arduino A3. | `ADC_BACKEND_NATIVE` |
 
 ### 7.2 Bestukkingskeuze logic-shifter-footprint
 
@@ -197,14 +197,14 @@ Waarschuwingen:
 
 Bij de directe Arduino-ADC-variant wordt geen ADS1115-bordje op H5 geplaatst. De vier analoge lijnen op H5 worden via draadbruggen naar H6 geleid. H6 loopt daarna naar Arduino A0-A3.
 
-| Draadbrug | Verbinding richting Arduino | Opmerking |
-|---|---|---|
-| H5 pin 7 naar H6 pin 1 | H6 loopt naar één van de Arduino A0-A3-lijnen volgens het schema | Directe Arduino-ADC-meting |
-| H5 pin 8 naar H6 pin 2 | H6 loopt naar één van de Arduino A0-A3-lijnen volgens het schema | Directe Arduino-ADC-meting |
-| H5 pin 9 naar H6 pin 3 | H6 loopt naar één van de Arduino A0-A3-lijnen volgens het schema | Directe Arduino-ADC-meting |
-| H5 pin 10 naar H6 pin 4 | H6 loopt naar één van de Arduino A0-A3-lijnen volgens het schema | Directe Arduino-ADC-meting |
+| Draadbrug | Sensorlijn op H5 | Verbonden met Arduino via H6 | Opmerking |
+|---|---|---|---|
+| H5 pin 7 naar H6 pin 1 | ADS1115 A0-lijn / OUT1 | Arduino A0 | Directe Arduino-ADC-meting |
+| H5 pin 8 naar H6 pin 2 | ADS1115 A1-lijn / OUT2 | Arduino A1 | Directe Arduino-ADC-meting |
+| H5 pin 9 naar H6 pin 3 | ADS1115 A2-lijn / OUT3 | Arduino A2 | Directe Arduino-ADC-meting |
+| H5 pin 10 naar H6 pin 4 | ADS1115 A3-lijn / OUT4 | Arduino A3 | Directe Arduino-ADC-meting |
 
-Controleer in het schema en op de silkscreen dat de fysieke pinvolgorde H5 pin 7-10 naar H6 pin 1-4 gevolgd wordt. H7 hoort hier niet bij; H7 blijft uitsluitend voor de ADDR-adreskeuze.
+Controleer in het schema en op de silkscreen dat H6 pin 1 naar Arduino A0 loopt, H6 pin 2 naar Arduino A1, H6 pin 3 naar Arduino A2 en H6 pin 4 naar Arduino A3. H7 hoort hier niet bij; H7 blijft uitsluitend voor de ADDR-adreskeuze.
 
 ### 10.2 ADS1115 op 10-polige connector
 
@@ -443,11 +443,16 @@ Voorstel voor een objectieve vergelijking, uitvoerbaar met schema 3 zonder herbe
 - Controleer sample-timing: ADS1115 via I2C kost meer tijd per lezing dan `analogRead()`. Voor Stimulus, met trage druksignalen, is dat doorgaans geen probleem, maar dit moet wel gemeten worden.
 - Pas na deze vergelijking wordt bepaald of schema 2, ADS1115, de standaardkeuze wordt, of dat schema 1, directe ADC, volstaat en de ADS1115 optioneel blijft.
 
-## 18. Validatiescript — Stimulus_ADC_Validatie-v0.10.00.ino
+## 18. Validatiescripts
 
-Dit script valideert dezelfde vier FSR402/RFP602-lijnen via de twee mogelijke backends. Het gebruikt schema 3 met verwisselbare connectoren: eerst meten via directe Arduino-ADC met H5-H6-draadbruggen naar Arduino A0-A3, daarna meten via de ADS1115-module op H5 met adreskeuze via H7, en de resultaten vergelijken.
+Er zijn twee aparte validatiescripts, zodat de Arduino-ADC-route en de ADS1115-route elk afzonderlijk getest kunnen worden zonder telkens dezelfde sketch handmatig om te zetten.
 
-In dit validatiescript wordt dezelfde functiehandtekening gebruikt als in de Stimulus-code:
+| Script | Backend | Fysieke keuze |
+|---|---|---|
+| `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino` | `ADC_BACKEND_NATIVE` | Geen ADS1115 op H5. H5 pin 7-10 met draadbruggen naar H6 pin 1-4. H6 pin 1-4 loopt naar Arduino A0-A3. |
+| `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino` | `ADC_BACKEND_ADS1115` | ADS1115-bordje op H5. Gewenst adres kiezen via H7. Standaard: ADDR naar GND, adres `0x48`. |
+
+In beide validatiescripts wordt dezelfde functiehandtekening gebruikt als in de Stimulus-code:
 
 ```cpp
 int RawAnalogRead(int sensorPin)
@@ -455,162 +460,20 @@ int RawAnalogRead(int sensorPin)
 
 Bij `ADC_BACKEND_NATIVE` is `sensorPin` een Arduino-pin. Bij `ADC_BACKEND_ADS1115` is `sensorPin` een ADS1115-kanaalnummer.
 
+### 18.1 Arduino-ADC-validatie
+
+Gebruik `ADC_Validatie_Native.ino` om de directe Arduino-ADC-route te testen.
+
 ```cpp
-// ============================================================================
-// Stimulus — transparante ADC-laag + validatiesketch (Arduino-ADC vs ADS1115)
-// ============================================================================
-// Doel: dezelfde 4 FSR402/RFP602-lijnen uitlezen via twee mogelijke backends,
-// zonder dat de rest van de Stimulus-code hoeft te weten welke backend actief is.
-//
-// Gebruik voor validatie (schema 3, verwisselbare connectoren):
-// 1. Voor Arduino-ADC: plaats geen ADS1115 op H5 en verbind H5 pin 7-10 met H6 pin 1-4.
-// 2. Zet ADC_BACKEND hieronder op dezelfde kant (NATIVE).
-// 3. Flash, laat 10 seconden lopen, noteer de Serial-output (gemiddelde/stdev/min/max).
-// 4. Verwijder de H5-H6-draadbruggen, plaats de ADS1115 op H5, kies adres via H7, zet de #define om,
-//    herflash, herhaal de meting met dezelfde fysieke druk.
-// 5. Vergelijk beide resultaten.
-//
-// Vereist: Adafruit_ADS1X15-library wanneer ADC_BACKEND_ADS1115 actief is.
-// ============================================================================
-
-#include <Wire.h>
-
-#define ADC_BACKEND_NATIVE 0
-#define ADC_BACKEND_ADS1115 1
+// Zie examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino
 #define ADC_BACKEND ADC_BACKEND_NATIVE
+```
 
-#define ADS1115_I2C_ADDRESS 0x48
-#define STIMULUS_AANTAL_KANALEN 4
-#define DEBUG
+### 18.2 ADS1115-validatie
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  #include <Adafruit_ADS1X15.h>
-  Adafruit_ADS1115 ads;
-#endif
+Gebruik `ADC_Validatie_ADS1115.ino` om de ADS1115-route te testen.
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  #define PIN_SENSOR_1 0
-  #define PIN_SENSOR_2 1
-  #define PIN_SENSOR_3 2
-  #define PIN_SENSOR_4 3
-#else
-  #define PIN_SENSOR_1 A0
-  #define PIN_SENSOR_2 A1
-  #define PIN_SENSOR_3 A2
-  #define PIN_SENSOR_4 A3
-#endif
-
-const int sensorPin[STIMULUS_AANTAL_KANALEN] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
-bool ads1115Aanwezig = false;
-bool metingAfgerond = false;
-
-#ifndef PRINTTOSCREEN_BESTAAT_AL
-void PrintToScreen(const char* regel1, const char* regel2) {
-#ifdef DEBUG
-  Serial.print(F("[LCD] ")); Serial.print(regel1); Serial.print(F(" / ")); Serial.println(regel2);
-#endif
-}
-#endif
-
-void InitialiseerADS1115() {
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  if (!ads.begin(ADS1115_I2C_ADDRESS)) {
-#ifdef DEBUG
-    Serial.println(F("ADS1115 niet gevonden"));
-#endif
-    PrintToScreen("ADS1115", "niet gevonden");
-    ads1115Aanwezig = false;
-    return;
-  }
-  ads.setGain(GAIN_TWOTHIRDS);
-  ads1115Aanwezig = true;
-#else
-  ads1115Aanwezig = true;
-#endif
-}
-
-int RawAnalogRead(int sensorPin) {
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  if (!ads1115Aanwezig) return 0;
-  return ads.readADC_SingleEnded(sensorPin);
-#else
-  return analogRead(sensorPin);
-#endif
-}
-
-struct KanaalStats {
-  long n = 0;
-  double som = 0;
-  double somKwadraat = 0;
-  int minWaarde = 32767;
-  int maxWaarde = -32768;
-};
-
-KanaalStats stats[STIMULUS_AANTAL_KANALEN];
-
-void voegMetingToe(uint8_t kanaal, int waarde) {
-  KanaalStats &s = stats[kanaal];
-  s.n++;
-  s.som += waarde;
-  s.somKwadraat += (double)waarde * waarde;
-  if (waarde < s.minWaarde) s.minWaarde = waarde;
-  if (waarde > s.maxWaarde) s.maxWaarde = waarde;
-}
-
-void printStats() {
-  for (uint8_t k = 0; k < STIMULUS_AANTAL_KANALEN; k++) {
-    KanaalStats &s = stats[k];
-    if (s.n == 0) continue;
-    double gemiddelde = s.som / s.n;
-    double variantie = (s.somKwadraat / s.n) - (gemiddelde * gemiddelde);
-    double stdev = sqrt(variantie > 0 ? variantie : 0.0);
-    Serial.print(F("Kanaal ")); Serial.print(k);
-    Serial.print(F(": n=")); Serial.print(s.n);
-    Serial.print(F(" gemiddelde=")); Serial.print(gemiddelde, 2);
-    Serial.print(F(" stdev=")); Serial.print(stdev, 3);
-    Serial.print(F(" min=")); Serial.print(s.minWaarde);
-    Serial.print(F(" max=")); Serial.println(s.maxWaarde);
-  }
-}
-
-const unsigned long VALIDATIE_DUUR_MS = 10000UL;
-const unsigned long SAMPLE_INTERVAL_MS = 20UL;
-unsigned long tStart = 0;
-unsigned long laatsteSample = 0;
-
-void setup() {
-  Serial.begin(115200);
-  Wire.begin();
-  InitialiseerADS1115();
-
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  Serial.println(F("=== Validatie: backend = ADS1115 ==="));
-#else
-  Serial.println(F("=== Validatie: backend = Arduino-ADC ==="));
-#endif
-
-  Serial.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
-  tStart = millis();
-}
-
-void loop() {
-  if (metingAfgerond) return;
-
-  unsigned long nu = millis();
-
-  if (nu - laatsteSample >= SAMPLE_INTERVAL_MS) {
-    laatsteSample = nu;
-    for (uint8_t k = 0; k < STIMULUS_AANTAL_KANALEN; k++) {
-      int waarde = RawAnalogRead(sensorPin[k]);
-      voegMetingToe(k, waarde);
-    }
-  }
-
-  if (nu - tStart >= VALIDATIE_DUUR_MS) {
-    Serial.println(F("--- Resultaat ---"));
-    printStats();
-    Serial.println(F("Meting voltooid. Wissel connector + backend-define voor de andere kant, herflash."));
-    metingAfgerond = true;
-  }
-}
+```cpp
+// Zie examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino
+#define ADC_BACKEND ADC_BACKEND_ADS1115
 ```

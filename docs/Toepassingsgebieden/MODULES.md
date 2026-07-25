@@ -6,7 +6,7 @@ Dit document onderscheidt de huidige implementatie van geplande toepassingsgebie
 
 | Toepassingsgebied | Softwarestatus | Elektronische documentatie |
 |---|---|---|
-| Stimulus | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) |
+| Stimulus | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md](Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md) |
 | Screen | gedeelde systeemlaag | [../Systeem/SCREEN.md](../Systeem/SCREEN.md) |
 | Ademhaling | gepland | nog geen gevalideerd schema |
 | Hartritme, HRV en coherentie | gepland | nog geen gevalideerd schema |
@@ -43,7 +43,7 @@ De repository bevat afzonderlijke voorbeelden voor:
 4. cocktail;
 5. een samengesteld demonstratievoorbeeld.
 
-Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen.
+Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md](Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md) voor de ADS1115-hardwarelijn met H5, H6 en H7.
 
 ## 2. Ademhaling
 
