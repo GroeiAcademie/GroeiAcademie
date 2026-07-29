@@ -1,35 +1,88 @@
 #ifndef SYSTEM_CONFIG_H
 #define SYSTEM_CONFIG_H
 
+#include "../Systeem/Screen/ScreenTypes.h"
+
+#define LANGUAGE_NL
+// #define LANGUAGE_DE
+// #define LANGUAGE_EN
+// #define LANGUAGE_FR
+
+#if (defined(LANGUAGE_NL) + defined(LANGUAGE_DE) + defined(LANGUAGE_EN) + defined(LANGUAGE_FR)) == 0
+  #error Selecteer een taal in SystemConfig.h: LANGUAGE_NL, LANGUAGE_DE, LANGUAGE_EN of LANGUAGE_FR.
+#elif (defined(LANGUAGE_NL) + defined(LANGUAGE_DE) + defined(LANGUAGE_EN) + defined(LANGUAGE_FR)) > 1
+  #error Selecteer slechts een taal in SystemConfig.h.
+#endif
+
 // ============================================================================
 // MAG JE AANPASSEN NAAR EIGEN SETUP
 // ============================================================================
 #define DEBUG // ENKEL wanneer DEBUG nodig, staan hier geen commentaar '//' tekens voor :)
 
-// ============================================================================
-// SCHERM ADRES & 
-// ============================================================================
-// Characterscherm: I2C adres
-#define I2C_ADRES       0x27                   // Soms 0x32 of 0x3F
-#define ACTIEF_CHARACTER_SCREEN SCREEN_LCD1602 // Kies jouw resolutie (zie mogelijke Characterschermen in screen.h)
+#ifdef TRACE  // ENKEL wanneer TRACE nodig, staan hier geen commentaar '//' tekens voor :)
+  #ifndef DEBUG
+    #define DEBUG
+  #endif
+#endif
 
-// Hardwarematig aanwezig zijn 2 of 4 sensoren. Scenarios 1, 2 en 3 gebruiken 2 sensoren. Scenario 4 kan bij 4 aanwezige sensoren ook 3 sensoren gebruiken.
-#define AANTAL_SENSOREN_AANWEZIG 2 // DIT MAG MEN WEIZIGEN IN FUNCTIE VAN DE BESCHIKBARE HARDWARE
+// SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.
+// Combineer meerdere uitvoertypes met de bitwise OR-operator |.
+//
+// Mogelijke waarden:
+// 0 = geen uitvoer                                 (SCREEN_TYPE_NONE)
+// 1 = Serial                                       (SCREEN_TYPE_SERIAL)
+// 2 = CharacterScreen                              (SCREEN_TYPE_CHARACTER)
+// 3 = Serial + CharacterScreen
+// 4 = PixelScreen                                  (SCREEN_TYPE_PIXELS)
+// 5 = Serial + PixelScreen
+// 6 = CharacterScreen + PixelScreen
+// 7 = Serial + CharacterScreen + PixelScreen
+//
+// Wat hier niet geselecteerd wordt, wordt niet gecompileerd. Meerdere selecteren doe je door | tussen jouw keuzes te plaatsen.
+//
+// Opmerking:
+// Wanneer DEBUG actief is, voegt de library automatisch SCREEN_TYPE_SERIAL toe. Je hoeft SCREEN_TYPE_SERIAL dus niet zelf te selecteren voor debug-uitvoer.
+//
+// Kies hieronder welke schermuitvoer je wilt gebruiken; staat standaard op: CharacterScreen.
+#ifndef SCREEN_OUTPUT_CONFIG
+  #define SCREEN_OUTPUT_CONFIG SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS | SCREEN_TYPE_SERIAL
+#endif
+
+// ============================================================================
+// SCHERMEN
+// ============================================================================
+// Characterscherm
+#define I2C_ADRES                     0x27
+#define ACTIEF_CHARACTER_SCREEN       SCREEN_LCD1602
+#define LCD_LEESTIJD_FOUTMELDING_MS   2000UL
+
+// Pixelscherm
+#define ACTIEF_PIXEL_SCREEN           SCREEN_240X320
+
+#define PIXEL_SCREEN_CS               10
+#define PIXEL_SCREEN_DC               9
+#define PIXEL_SCREEN_RST              8
+
+#define PIXEL_SCREEN_ROTATION         0
+#define PIXEL_SCREEN_TEXT_SIZE        2
+#define PIXEL_SCREEN_TEXT_COLOR       0xFFFF
+#define PIXEL_SCREEN_BACKGROUND_COLOR 0x0000
 
 // ============================================================================
 // ADC BACKEND (naast UNO_VERSION)
 // ============================================================================
 // LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de Adafruit ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
-#define ADC_BACKEND_NATIVE   0          // ingebouwde ADC van de Arduino
-#define ADC_BACKEND_ADS1115  1          // externe 16-bit ADC via I2C
+#define AANTAL_SENSOREN_AANWEZIG  2
 
-#define ADC_BACKEND ADC_BACKEND_NATIVE  // wissel dit om van backend te wisselen
-#define ADS1115_I2C_ADDRESS  0x48       // standaardadres via H7: ADDR naar GND
+#define ADC_BACKEND_NATIVE        0                   // ingebouwde ADC van de Arduino
+#define ADC_BACKEND_ADS1115       1                   // externe 16-bit ADC via I2C
+
+#define ADC_BACKEND               ADC_BACKEND_NATIVE  // wissel dit om van backend te wisselen
+#define ADS1115_I2C_ADDRESS       0x48                // standaardadres via SW1: ADDR naar GND
 
 // Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
-// Bij ADC_BACKEND_NATIVE blijft dit 0. Bij ADC_BACKEND_ADS1115 voorkomt dit dat de
-// I2C-bus zonder onderbreking bevraagd wordt.
+// Bij ADC_BACKEND_NATIVE blijft dit 0. Bij ADC_BACKEND_ADS1115 voorkomt dit dat de I2C-bus zonder onderbreking bevraagd wordt.
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
   #define WACHT_LOSLATEN_DELAY_MS 5UL
 #else
@@ -49,7 +102,7 @@
   #define PIN_SENSOR_4 A3  // Analoge pin voor de  4de test-sensor
 #endif
 
-// Definieer type Arduino UNO (of ESP32)
+// Definieer type Arduino UNO R3 of R4
 #define UNO_VERSION   3  // R3=3 & R4=4
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
@@ -78,15 +131,14 @@
 // ============================================================================
 // DEBUG INSTELLINGEN 
 // ============================================================================
-#ifdef DEBUG
+#if defined(DEBUG) && (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
   #define DEBUG_PRINT(x)          Serial.print(x)
   #define DEBUG_PRINTLN(x)        Serial.println(x)
   #define DEBUG_PRINTLN2(x, f)    Serial.println(x, f)
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTLN2(x, f) 
+  #define DEBUG_PRINTLN2(x, f)
 #endif
 
 #endif
-

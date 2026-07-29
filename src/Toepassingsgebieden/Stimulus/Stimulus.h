@@ -4,6 +4,15 @@
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
 #include "../../Configuratie/StimulusConfig.h"
+#if defined(LANGUAGE_NL)
+  #include "../../Language/Library_NL.h"
+#elif defined(LANGUAGE_DE)
+  #include "../../Language/Library_DE.h"
+#elif defined(LANGUAGE_EN)
+  #include "../../Language/Library_EN.h"
+#elif defined(LANGUAGE_FR)
+  #include "../../Language/Library_FR.h"
+#endif
 #include "../../Systeem/Screen/Screen.h"
 
 // ============================================================================
@@ -40,19 +49,19 @@
 // CONSTANTEN VOOR DE LCD-TEKSTEN (Als pure tekst-pointers)
 // ============================================================================
 
-#define _LCD_SCORE_TIKKRACHT        "TIKKRACHT "
-#define _LCD_SCORE_TIKTIJD          "TIKTIJD "  
+//— MOVED #define _LCD_SCORE_TIKKRACHT        "TIKKRACHT "
+//— MOVED #define _LCD_SCORE_TIKTIJD          "TIKTIJD "  
 
-#define _LCD_KRACHT_TE_ZACHT        "TE ZACHT"
-#define _LCD_KRACHT_TE_HARD         "TE HARD"
+//— MOVED #define _LCD_KRACHT_TE_ZACHT        "TE ZACHT"
+//— MOVED #define _LCD_KRACHT_TE_HARD         "TE HARD"
 
-#define _LCD_TIJD_TE_KORT           "TE KORT"
-#define _LCD_TIJD_TE_LANG           "TE LANG"
-#define _LCD_TIJD_METEN_STOPT       "WE STOPPEN ERMEE"
-#define _LCD_TIJD_TEVEEL_FOUT       "SLECHTE START :)"
+//— MOVED #define _LCD_TIJD_TE_KORT           "TE KORT"
+//— MOVED #define _LCD_TIJD_TE_LANG           "TE LANG"
+//— MOVED #define _LCD_TIJD_METEN_STOPT       "WE STOPPEN ERMEE"
+//— MOVED #define _LCD_TIJD_TEVEEL_FOUT       "SLECHTE START :)"
 
-#define _LCD_ADS1115_FOUT           "ADS1115"
-#define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
+//— MOVED #define _LCD_ADS1115_FOUT           "ADS1115"
+//— MOVED #define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
 
 // ============================================================================
 // CONSTANTEN VOOR DE PAUZETIJDEN (Delays)

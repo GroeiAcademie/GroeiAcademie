@@ -2,78 +2,130 @@
 #define SCREEN_H
 
 #include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
 
-extern LiquidCrystal_I2C lcd;
-
-// SCHERM TYPES
-#define SCREEN_TYPE_NONE       0x00 // geen uitvoer
-#define SCREEN_TYPE_SERIAL     0x01 // gebruik seriële console
-#define SCREEN_TYPE_CHARACTER  0x02 // characterscherm
-#define SCREEN_TYPE_PIXELS     0x04 // pixelscherm
-
-// ============================================================================
-// SCHERMRESOLUTIES: enkel voor intern gebruik binnen de library
-// ============================================================================
-
-// Characterschermen: maximaal één keuze
-#define SCREEN_LCD1602  0x0010 // 2 regels van 16 karakters
-#define SCREEN_LCD1604  0x0020 // 4 regels van 16 karakters
-#define SCREEN_LCD2002  0x0030 // 2 regels van 20 karakters
-#define SCREEN_LCD2004  0x0040 // 4 regels van 20 karakters
-#define SCREEN_LCD4002  0x0050 // 2 regels van 40 karakters
-
-// Pixelschermen: maximaal één keuze
-#define SCREEN_128X32   0x0100 // 128x32 pixels
-#define SCREEN_128X64   0x0200 // 128x64 pixels
-#define SCREEN_128X160  0x0300 // 128x160 pixels
-#define SCREEN_240X240  0x0400 // 240x240 pixels
-#define SCREEN_240X320  0x0500 // 240x320 pixels
-#define SCREEN_320X480  0x0600 // 320x480 pixels
-#define SCREEN_480X320  0x0700 // 480x320 pixels
+#include "ScreenTypes.h"
 
 #include "../../Configuratie/SystemConfig.h"
+
+#ifndef SCREEN_OUTPUT_CONFIG
+  #error SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd.
+#endif
+
+#ifdef DEBUG
+  #define SCREEN_OUTPUT (SCREEN_OUTPUT_CONFIG | SCREEN_TYPE_SERIAL)
+#else
+  #define SCREEN_OUTPUT SCREEN_OUTPUT_CONFIG
+#endif
+
+#if ((SCREEN_OUTPUT) & ~(SCREEN_TYPE_SERIAL | SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
+  #error SCREEN_OUTPUT bevat een onbekende uitvoerbit. Gebruik alleen SCREEN_TYPE_NONE, SCREEN_TYPE_SERIAL, SCREEN_TYPE_CHARACTER en SCREEN_TYPE_PIXELS.
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+#include <LiquidCrystal_I2C.h>
+extern LiquidCrystal_I2C lcd;
 
 #if (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD1604 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004)
   #define ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS true
 #else
   #define ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS false
 #endif
+#endif // SCREEN_TYPE_CHARACTER
 
-// ============================================================================
-// SCREEN CALLBACK
-//
-// Een geregistreerde callback neemt de volledige uitvoer voor het betreffende
-// schermtype over. De callback wordt exact één keer per PrintToScreen()-aanroep
-// uitgevoerd en ontvangt de volledige schermopdracht.
-//
-// De callback is zelf verantwoordelijk voor:
-// 1. initialisatie van het scherm wanneer die niet elders gebeurt;
-// 2. wissen of behouden van de bestaande scherminhoud;
-// 3. tonen van eersteRegel en tweedeRegel;
-// 4. tonen van derdeRegel en vierdeRegel;
-// 5. paginering wanneer niet alle regels gelijktijdig passen;
-// 6. uitvoeren van delayTussenPaginas tussen beide pagina's;
-// 7. uitvoeren van delayTime nadat alle tekst werd getoond;
-// 8. daarna tonen of verwerken van action;
-// 9. cursorplaatsing, regelafbreking, afkapping en scrolling.
-//
-// PrintToScreen() voert voor dat schermtype geen aanvullende schermlogica,
-// wachttijd of action uit wanneer een callback geregistreerd is.
-// ============================================================================
-typedef void (*ScreenCallback)(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+#include <Adafruit_GFX.h>
+extern Adafruit_GFX* PixelScreen;
 
-// CALLBACKS REGISTREREN
-// nullptr bij CHARACTER gebruikt de standaardafhandeling via LiquidCrystal_I2C.
-// nullptr bij PIXELS geeft geen pixeluitvoer.
-void RegistreerCallbackScreenTypeCharacter(ScreenCallback callback);
-void RegistreerCallbackScreenTypePixel(ScreenCallback callback);
+#define FATAL_ZOEK_OP "ZOEK DIT NU OP"
 
-// CENTRALE PRINTFUNCTIE
+#if (ACTIEF_PIXEL_SCREEN == SCREEN_128X32)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 128
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 32
+#elif (ACTIEF_PIXEL_SCREEN == SCREEN_128X64)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 128
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 64
+#elif (ACTIEF_PIXEL_SCREEN == SCREEN_128X160)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 128
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 160
+#elif (ACTIEF_PIXEL_SCREEN == SCREEN_240X240)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 240
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 240
+#elif (ACTIEF_PIXEL_SCREEN == SCREEN_240X320)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 240
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 320
+#elif (ACTIEF_PIXEL_SCREEN == SCREEN_320X480)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 320
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 480
+#elif (ACTIEF_PIXEL_SCREEN == SCREEN_480X320)
+  #define ACTIEF_PIXEL_SCREEN_BREEDTE 480
+  #define ACTIEF_PIXEL_SCREEN_HOOGTE 320
+#else
+  #error ACTIEF_PIXEL_SCREEN bevat geen ondersteunde pixelschermresolutie.
+#endif
+
+#if (PIXEL_SCREEN_ROTATION > 3)
+  #error PIXEL_SCREEN_ROTATION moet 0, 1, 2 of 3 zijn.
+#endif
+
+extern bool ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS;
+
+enum class ScreenData : uint8_t {
+    // Geen expliciet informatietype opgegeven
+    TYPE_NONE,
+
+    // Informatief
+    TYPE_INFO,
+    TYPE_MESSAGE,
+    TYPE_NOTIFY,
+    TYPE_SUCCESS,
+
+    // Interactie
+    TYPE_PROMPT,
+    TYPE_CONFIRM,
+
+    // Waarschuwingen en fouten
+    TYPE_WARNING,
+    TYPE_ALERT,
+    TYPE_ERROR,
+    TYPE_CRITICAL,
+    TYPE_FATAL,
+    TYPE_ABORT,
+    TYPE_PANIC,
+
+    // Diagnose
+    TYPE_DEBUG,
+    TYPE_TRACE,
+
+    // Inhoud
+    TYPE_TEXT,
+    TYPE_GRAPHICS,
+    TYPE_VIDEO
+};
+#endif // SCREEN_TYPE_PIXELS
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+typedef void (*CharacterScreenCallback)(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
+void RegistreerCallbackScreenTypeCharacter(CharacterScreenCallback callback);
+extern CharacterScreenCallback CallbackScreenTypeCharacter;
+#endif // SCREEN_TYPE_CHARACTER
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+typedef void (*PixelScreenCallback)(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
+void RegistreerCallbackScreenTypePixel(PixelScreenCallback callback);
+extern PixelScreenCallback CallbackScreenTypePixel;
+
+bool PixelScreenConfigureren();
+
+void PixelScreenClear();
+void PixelScreenSetCursor(uint8_t kolom, uint8_t regel);
+void PixelScreenPrint(const String& tekst);
+void PixelScreenFoutmeldingWeergeven (const String& foutmelding);
+#endif // SCREEN_TYPE_PIXELS
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+void PrintToScreen(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+#endif // SCREEN_TYPE_PIXELS
+
 void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
 
-extern uint8_t SCREEN_OUTPUT;
-extern ScreenCallback CallbackScreenTypeCharacter;
-extern ScreenCallback CallbackScreenTypePixel;
-
-#endif
+#endif // SCREEN_H

@@ -2,31 +2,69 @@
 
 Bronbestand: [`../../src/Configuratie/SystemConfig.h`](../../src/Configuratie/SystemConfig.h)
 
-Instellingen die het hele framework raken: scherm, sensorpinnen, ADC-backend en debug-uitvoer. Dit is het eerste bestand om te controleren vóór compilatie (zie `README.md`).
+Instellingen die het hele framework raken: scherm, sensorpinnen, ADC-backend en debug-uitvoer.
 
-## DEBUG
+## DEBUG en TRACE
 
 ```cpp
 #define DEBUG
 ```
 
-Schakelt `DEBUG_PRINT`/`DEBUG_PRINTLN`/`DEBUG_PRINTLN2` in. Zonder `#define` (dus door de regel in commentaar te zetten) worden deze macro's leeg en verdwijnt alle Serial-uitvoer, ook die van `PrintToScreen()` (zie `docs/Systeem/SCREEN.md`).
+`TRACE` schakelt automatisch ook `DEBUG` in. `DEBUG` alleen maakt nog geen seriële uitvoer mogelijk: daarvoor moet ook `SCREEN_TYPE_SERIAL` in `SCREEN_OUTPUT` aanwezig zijn. Wanneer `SCREEN_OUTPUT` nog niet door de gebruiker werd ingesteld, kiest de standaardconfiguratie bij `DEBUG` voor Serial + CharacterScreen. Een zelf gedefinieerde `SCREEN_OUTPUT` wordt altijd gerespecteerd.
 
-**Let op UNO R3**: de combinatie van volledige functionaliteit + uitgebreide debuguitvoer kan de beschikbare flash overschrijden. Schakel `DEBUG` uit voor een normale UNO R3-build wanneer nodig.
+## SCREEN_OUTPUT
 
-## Scherm
+`SCREEN_OUTPUT` bepaalt tijdens het compileren welke uitvoertypen in de build aanwezig zijn. Wat niet geselecteerd wordt, wordt niet gecompileerd.
+
+| Waarde | Uitvoer |
+|---:|---|
+| 0 | geen uitvoer |
+| 1 | Serial |
+| 2 | CharacterScreen |
+| 3 | Serial + CharacterScreen |
+| 4 | PixelScreen |
+| 5 | Serial + PixelScreen |
+| 6 | CharacterScreen + PixelScreen |
+| 7 | Serial + CharacterScreen + PixelScreen |
+
+Meerdere typen worden gecombineerd met `|`, bijvoorbeeld:
+
+```cpp
+#define SCREEN_OUTPUT (SCREEN_TYPE_SERIAL | SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS)
+```
+
+De standaardkeuze is bij `DEBUG` Serial + CharacterScreen en zonder `DEBUG` alleen CharacterScreen.
+
+## Characterscherm
 
 | Define | Betekenis |
 |---|---|
-| `I2C_ADRES` | I2C-adres van het characterscherm. Standaard `0x27`, soms `0x32` of `0x3F` afhankelijk van de I2C-backpack. |
-| `ACTIEF_CHARACTER_SCREEN` | Welk schermtype actief is (bv. `SCREEN_LCD1602`). Zie `Screen.h` voor de volledige lijst ondersteunde formaten (LCD1602, LCD1604, LCD2002, LCD2004, LCD4002). |
+| `I2C_ADRES` | I2C-adres van het characterscherm. |
+| `ACTIEF_CHARACTER_SCREEN` | Concreet schermtype: `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` of `SCREEN_LCD4002`. |
+
+## PixelScreen
+
+| Define | Betekenis |
+|---|---|
+| `ACTIEF_PIXEL_SCREEN` | Concrete resolutie: `SCREEN_128X32`, `SCREEN_128X64`, `SCREEN_128X160`, `SCREEN_240X240`, `SCREEN_240X320`, `SCREEN_320X480` of `SCREEN_480X320`. |
+| `PIXEL_SCREEN_CS` | Chip-selectpin. |
+| `PIXEL_SCREEN_DC` | Data/commandpin. |
+| `PIXEL_SCREEN_RST` | Resetpin. |
+| `PIXEL_SCREEN_ROTATION` | Rotatie 0, 1, 2 of 3. |
+| `PIXEL_SCREEN_TEXT_SIZE` | Tekstgrootte voor het ingebouwde vaste Adafruit_GFX-font. |
+| `PIXEL_SCREEN_TEXT_COLOR` | 16-bits tekstkleur. |
+| `PIXEL_SCREEN_BACKGROUND_COLOR` | 16-bits achtergrondkleur. |
+
+Voor een ST7789 op Arduino UNO gebruikt hardware-SPI standaard `D11` als MOSI en `D13` als SCK. Wanneer `SCREEN_TYPE_PIXELS` niet geselecteerd is, is Adafruit_GFX niet nodig en wordt PixelScreen-code niet gecompileerd.
+
+Fatale PixelScreen-configuratiefouten gebruiken de codes `PS001` tot en met `PS004`. Zie [PixelScreen-foutcodes](../Systeem/PIXELSCREEN_FOUTCODES.md) voor het overzicht, de triggers en de oplossingen. Het nog open voorstel om numerieke rotaties later te vervangen of aan te vullen met leesbare oriëntatienamen staat in [PixelScreen-oriëntatievoorstel](../Systeem/PIXELSCREEN_ORIENTATIE_VOORSTEL.txt).
 
 ## Sensoren
 
 | Define | Betekenis |
 |---|---|
-| `AANTAL_SENSOREN_AANWEZIG` | Aantal fysiek aangesloten sensoren (2 of 4). Scenario's 1-3 gebruiken er 2, scenario 4 kan bij 4 aanwezige sensoren ook met 3 draaien. |
-| `PIN_SENSOR_1` .. `PIN_SENSOR_4` | Sensorpin per kanaal. Waarde en betekenis hangen af van `ADC_BACKEND` (zie hieronder). |
+| `AANTAL_SENSOREN_AANWEZIG` | Aantal fysiek aangesloten sensoren. |
+| `PIN_SENSOR_1` .. `PIN_SENSOR_4` | Sensorpin of ADS1115-kanaal, afhankelijk van `ADC_BACKEND`. |
 
 ## ADC_BACKEND
 
@@ -36,22 +74,14 @@ Schakelt `DEBUG_PRINT`/`DEBUG_PRINTLN`/`DEBUG_PRINTLN2` in. Zonder `#define` (du
 #define ADC_BACKEND ADC_BACKEND_NATIVE
 ```
 
-Bepaalt welke ADC de vier sensorkanalen uitleest:
+`ADC_BACKEND_NATIVE` gebruikt de ingebouwde Arduino-ADC. `ADC_BACKEND_ADS1115` gebruikt een externe ADS1115 via I2C en vereist de optionele library Adafruit ADS1X15.
 
-| Keuze | `ADC_BACKEND` | `PIN_SENSOR_1..4` betekent | Hardware |
-|---|---|---|---|
-| Directe Arduino-ADC | `ADC_BACKEND_NATIVE` | Arduino-analoogpin (`A0`..`A3`) | Niets extra — H6 rechtstreeks ingestoken op H5 pin 7-10 (zie `docs/Toepassingsgebieden/Stimulus/Hardware/`) |
-| ADS1115 | `ADC_BACKEND_ADS1115` | ADS1115-kanaalnummer (`0`..`3`) | ADS1115-module op H5. I2C-adres kiezen via H7. Standaard: ADDR naar GND, adres `0x48`. Vereist de optionele afhankelijkheid `Adafruit ADS1X15` (zie `README.md` — bewust niet in `library.properties`, enkel nodig bij deze keuze). |
-
-| Define | Betekenis |
-|---|---|
-| `ADS1115_I2C_ADDRESS` | Standaard `0x48`, via H7: ADDR naar GND. Gereserveerd voor Stimulus zodat een eventuele tweede ADS1115 (bv. een toekomstige emotiemeetmodule) op `0x49`/`0x4A` kan zitten zonder conflict. |
-| `WACHT_LOSLATEN_DELAY_MS` | Vertraging in de busy-wait-lus van `WachtTotAlleSensorsLosgelatenVoorTest()`. Bij `ADC_BACKEND_NATIVE` blijft dit `0`. Bij `ADC_BACKEND_ADS1115` staat dit op `5` ms, om te vermijden dat de I2C-bus zonder onderbreking bevraagd wordt. |
+`ADS1115_I2C_ADDRESS` bepaalt het adres. `WACHT_LOSLATEN_DELAY_MS` voorkomt bij ADS1115 dat de I2C-bus onafgebroken bevraagd wordt.
 
 ## UNO_VERSION en ADC-resolutie
 
 ```cpp
-#define UNO_VERSION   3   // R3=3, R4=4
+#define UNO_VERSION 3 // R3=3, R4=4
 ```
 
 | Combinatie | `ADC_BITS` | `DELAY_US` | Betekenis |
@@ -60,19 +90,7 @@ Bepaalt welke ADC de vier sensorkanalen uitleest:
 | `UNO_VERSION == 3` | 10 | 100 | Klassieke 10-bit ADC. |
 | `UNO_VERSION == 4` | 14 | 200 | UNO R4 Minima's ingebouwde 14-bit ADC. |
 
-`ADC_MAX` en de `ADC(x)`-macro herschalen elke drempelwaarde (zie `StimulusConfig.md`) naar de actieve resolutie:
-
-```cpp
-#define ADC_MAX ((1UL << ADC_BITS) - 1)
-
-#if ADC_BITS == 10
-  #define ADC(x) (x)
-#elif ADC_BITS == 14 || ADC_BITS == 15
-  #define ADC(x) (((x) * ADC_MAX) / 1023L)
-#endif
-```
-
-Alle drempels in `StimulusConfig.h` zijn geschreven als `ADC(...)`-uitdrukking, gebaseerd op een 10-bit referentie (0-1023). Wijzig nooit een kale drempelwaarde zonder de `ADC(...)`-wrapper — anders klopt de schaling niet meer bij `UNO_VERSION == 4` of `ADC_BACKEND_ADS1115`.
+`ADC_MAX` en `ADC(x)` herschalen drempelwaarden naar de actieve resolutie.
 
 ## DEBUG-macro's
 
@@ -82,4 +100,17 @@ DEBUG_PRINTLN(x)     // Serial.println(x)
 DEBUG_PRINTLN2(x, f) // Serial.println(x, f) — bv. voor hexadecimale uitvoer
 ```
 
-Merk op dat `PrintToScreen()` (zie `docs/Systeem/SCREEN.md`) zelf al naar Serial spiegelt wanneer `DEBUG` actief is — een aparte `DEBUG_PRINTLN()` vlak vóór een `PrintToScreen()`-aanroep is dan overbodige dubbele uitvoer.
+Deze macro's verwijzen alleen naar `Serial` wanneer zowel `DEBUG` als `SCREEN_TYPE_SERIAL` actief zijn.
+## Taalkeuze
+
+Selecteer in `SystemConfig.h` exact één taal. De vaste volgorde is NL, DE, EN en FR.
+
+```cpp
+#define LANGUAGE_NL
+// #define LANGUAGE_DE
+// #define LANGUAGE_EN
+// #define LANGUAGE_FR
+```
+
+De gekozen taal bepaalt welke `Library_XX.h`- en `Examples_XX.h`-tekstbestanden worden gebruikt. Datum-, getal-, land- en locale-instellingen behoren niet tot deze taalbestanden.
+

@@ -1,4 +1,6 @@
 # Windows
+*.bak
+*.cmd
 desktop.ini
 Thumbs.db
 

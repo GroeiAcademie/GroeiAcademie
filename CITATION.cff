@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: "Peeters"
     given-names: "Alex"
-version: "0.9.79"
-date-released: "2026-07-22"
+version: "0.10.1"
+date-released: "2026-07-26"
 license: "LGPL-3.0-or-later"
 repository-code: "https://github.com/GROEI-ACADEMIE/GroeiAcademie"
 url: "https://groeiacademie.be/"

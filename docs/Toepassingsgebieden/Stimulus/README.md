@@ -150,13 +150,14 @@ Voor reproduceerbare resultaten:
 
 - `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino`
 - `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino`
+- `examples/Stimulus/Hardware_Validatie_Shield_v0_10_1/Hardware_Validatie_Shield_v0_10_1.ino`
 - `examples/Stimulus/Scenario1_EnkelTik/Scenario1_EnkelTik.ino`
 - `examples/Stimulus/Scenario2_Simultaan/Scenario2_Simultaan.ino`
 - `examples/Stimulus/Scenario3_Ineenstortend/Scenario3_Ineenstortend.ino`
 - `examples/Stimulus/Scenario4_Cocktail/Scenario4_Cocktail.ino`
 - `examples/Stimulus/Tik_Enkele_Samen_Instortend_Cocktail/Tik_Enkele_Samen_Instortend_Cocktail.ino`
 
-De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke backends: directe Arduino-ADC en ADS1115.
+De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke backends: directe Arduino-ADC en ADS1115. `Hardware_Validatie_Shield_v0_10_1` controleert aanvullend de specifieke v0.10.1-shieldopbouw met I2C, CharacterScreen, TFT-SPI, ADS1115 en de analoge routes.
 
 ## Veiligheid en interpretatie
 
@@ -165,8 +166,8 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 - voorkom kortsluiting en trekbelasting op kabels;
 - gebruik ADC-waarden niet als absolute kracht zonder kalibratie;
 - vergelijk resultaten alleen binnen voldoende gelijkwaardige opstellingen;
-- zie [../../DISCLAIMER.md](../../DISCLAIMER.md) en [../SCIENTIFIC_INTEGRITY.md](../SCIENTIFIC_INTEGRITY.md).
+- zie [../../../DISCLAIMER.md](../../../DISCLAIMER.md) en [../../SCIENTIFIC_INTEGRITY.md](../../SCIENTIFIC_INTEGRITY.md).
 
 ## Afzonderlijke schemabestanden
 
-De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg staat in [Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md](Hardware/Stimulus_uitbreiding_ADS1115_v0.10.0.md). Daarin worden H5, H6 en H7 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115.
+De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg staat in [Hardware/Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md](Hardware/Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. Het afzonderlijke validatieprotocol staat in [Hardware/VALIDATIE_Shield_v0.10.1.md](Hardware/VALIDATIE_Shield_v0.10.1.md).

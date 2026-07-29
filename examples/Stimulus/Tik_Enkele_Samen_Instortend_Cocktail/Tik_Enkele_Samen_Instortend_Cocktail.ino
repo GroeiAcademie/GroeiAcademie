@@ -3,7 +3,12 @@
 // OPMERKING: De keuze tussen <GroeiAcademie.h> en <Stimulus.h> bepaalt enkel welke namen je sketch mag aanroepen (zichtbaarheid), niet wat er gecompileerd wordt.
 // #include <GroeiAcademie.h> // alles van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
 #include <Stimulus.h>         // enkel module: Stimulus van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
+#include <Configuratie/Examples.h>
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+#include <Adafruit_ST7789.h>
+Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
+#endif
 
 // ============================================================================
 // HARDWARE INSTELLINGEN (De pinnen van de Arduino UNO R3/R4)
@@ -24,72 +29,6 @@
 
 #define MINIMALE_WACHTTIJD_MS  500UL
 #define MAXIMALE_WACHTTIJD_MS  1500UL
-
-// ============================================================================
-// CONSTANTEN VOOR DE LCD-TEKSTEN (Als pure tekst-pointers)
-// ============================================================================
-#define LCD_SERIEEL_L1         "WACHT OP SERIELE"
-#define LCD_SERIEEL_L2         "VERBINDING ..."
-
-#define LCD_START_L1           " GROEI ACADEMIE"
-#define LCD_START_L2           " INITIALISEREN!"
-
-#define LCD_NULMETING_L1       "NULMETING:"
-#define LCD_NULMETING_L2       "Niets aanraken"
-
-#define LCD_MENU_L1            "1 ENKEL 2 SAMEN"
-#define LCD_MENU_L2            "3 INSTORTEND 4 ?"
-
-#define LCD_KEUZE_LEVELS_L1    "1 Start  2 Basic"
-#define LCD_KEUZE_LEVELS_L2    "3 Expert 4 Elite"
-#define LCD_KEUZE_LEVELS_L3    "Gekozen level: "
-
-#define LCD_FINALE_TITEL       "EINDE INOEFENEN"
-#define LCD_FINALE_SUCCES      "SUCCESVOL GEDAAN"
-
-#define LCD_S0_GEEF_STARTTIK   "Geef starttik"
-#define LCD_S0_TIK_AANHOUDEN   "Tik aanhouden"
-#define LCD_S0_NU              " NU"
-#define LCD_S0_NULMETING       "Nulmeting Tik"
-#define LCD_S0_EVEN_GEDULD     "Wees alert..."
-#define LCD_S0_LABEL_TIJDENS   "Tijdens "
-#define LCD_S0_LABEL_MS        "ms"
-
-#define LCD_S1_TITEL           "Exp. ENKELE TIK"
-
-#define LCD_S2_TITEL           "Exp. SIMULTAAN"
-#define LCD_S2_START_VERSCHIL  "START VERSCHILT"
-#define LCD_S2_TIJD_VERSCHILT  "TIJD VERSCHILT"
-#define LCD_S2_KIES_SENSOREN   "Tik Sensors 1&2"
-
-#define LCD_S3_TITEL           "Exp. INSTORTEND"
-#define LCD_S3_EXIT_SENSOREN   "4 SENSOREN NODIG"
-#define LCD_S3_STAP_1          "1ste stap"
-#define LCD_S3_STAP_2          "2de stap"
-#define LCD_S3_STAP_3_n        "3-nde stap"
-#define LCD_S3_SENSOR_1        "Sensor 1"
-#define LCD_S3_SENSOR_2        "Sensor 2"
-#define LCD_S3_SENSOR_1en2     "Sensors 1&2"
-
-#define LCD_S4_TITEL           "Exp. COCKTAILS"
-#define LCD_S4_START_VERSCHIL  "START VERSCHILT"
-#define LCD_S4_TIJD_VERSCHILT  "TIJD VERSCHILT"
-#define LCD_S4_SENSORS_TEXT    "KIES # SENSOREN"
-#define LCD_S4_SENSORS_KEUZE   "2=2, 3=3, 4=4"
-#define LCD_S4_SENSOREN        " SENSOREN"
-#define LCD_S4_START_TIJD      "START TIJD "
-#define LCD_S4_EIND_TIJD       "EIND TIJD "
-#define LCD_S4_SYNCROON_START  "SYNC. START "
-#define LCD_S4_SYNCROON_EINDE  "SYNC. EINDE "
-
-#define LCD_SCORE_TIKKRACHT    "TIKKRACHT "
-#define LCD_SCORE_TIKTIJD      "TIKTIJD "
-#define LCD_SCORE_KRACHT       "KRACHT "
-#define LCD_SCORE_TIJD         "TIJD "
-#define LCD_SCORE_SYNCHROON    "SYNCHROON "
-#define LCD_SCORE_IN_BALANS    "IN BALANS "
-#define LCD_SCORE_INSTORTEND   "INSTORTEND "
-#define LCD_SCORE_PERCENTAGE   "%"
 
 // ============================================================================
 // CONSTANTEN VOOR DE PAUZETIJDEN (Delays)
@@ -157,8 +96,16 @@ void setup() {
   analogReadResolution(14);
 #endif  
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   lcd.init();      // set up the LCD's number of columns and rows
   lcd.backlight(); // turn on the backlight
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
+  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
+  PixelScreen = &pixelScreen;
+  PixelScreenConfigureren();
+#endif
   PrintToScreen(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
 #ifdef DEBUG
@@ -221,6 +168,7 @@ void loop() {
 // VOORBEELD CALLBACK VOOR EEN CARACTER SCREEN
 // ============================================================================
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) {
   if (eersteRegel != "" || tweedeRegel != "") {
     String eersteRegelLC = eersteRegel; eersteRegelLC.toLowerCase();
@@ -251,6 +199,7 @@ void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, u
     lcd.print(actionLC);
   }
 }
+#endif
 
 // ============================================================================
 // VOORBEELD CALLBACK VOOR EEN PIXEL SCREEN
@@ -831,7 +780,7 @@ void ToonEindScoreScenario2() {
 }
 
 void ToonEindScoreScenario3() {
-  //--2. Stap 1 = 1 punt, stap 2 = 1 punt, stap 3 = INSTORTEND_AANTAL_STAPPEN punten
+  // Stap 1 = 1 punt, stap 2 = 1 punt, stap 3 = INSTORTEND_AANTAL_STAPPEN punten
   int totaalAantalKeren     = TEST_AANTAL_KEER_HERHALEN * 3; // VergelijkStimulus() wordt per ronde 3 keer aangeroepen.
   int percentageTikTijdOk   = (TELLER_TIKTIJD_CORRECT * 100) / totaalAantalKeren;
   int percentageTikKrachtOk = (TELLER_TIKKRACHT_CORRECT * 100) / totaalAantalKeren;

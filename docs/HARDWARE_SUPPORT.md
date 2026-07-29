@@ -47,6 +47,12 @@ Standaardconfiguratie:
 
 Controleer het werkelijke I2C-adres van de module. Veelvoorkomende adressen zijn `0x27` en `0x3F`; de configuratie vermeldt ook `0x32`.
 
+### PixelScreen
+
+PixelScreen wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` in `SCREEN_OUTPUT` staat. De algemene Screen-laag gebruikt `Adafruit_GFX`; de concrete displaydriver wordt door de toepassing geïnitialiseerd. Voor een ST7789 op Arduino UNO zijn `D11` (MOSI) en `D13` (SCK) de hardware-SPI-pinnen. `CS`, `DC` en `RST` zijn configureerbaar.
+
+Controleer de voeding en logicaniveaus van de concrete displaymodule. Bij de universele shieldopbouw wordt ofwel de levelshifter geplaatst, ofwel worden de vijf overeenkomstige draadbruggen geplaatst. Plaats nooit beide tegelijk.
+
 ### Stimulus-sensoren
 
 De huidige standaardpinnen zijn:
@@ -59,6 +65,12 @@ De huidige standaardpinnen zijn:
 | sensor 4 | `A3` |
 
 De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepassingsgebieden/Stimulus/README.md).
+
+### Specifiek v0.10.1-shield
+
+Voor het actuele UNO R3/R4-shield zijn de schema-exporten, assemblagekeuzes en validatiestappen opgenomen onder `docs/Toepassingsgebieden/Stimulus/Hardware/`. Gebruik `examples/Stimulus/Hardware_Validatie_Shield_v0_10_1/Hardware_Validatie_Shield_v0_10_1.ino` samen met [VALIDATIE_Shield_v0.10.1.md](Toepassingsgebieden/Stimulus/Hardware/VALIDATIE_Shield_v0.10.1.md).
+
+De TFT-route gebruikt ofwel de levelshifter, ofwel de vijf draadbruggen. Plaats nooit beide tegelijk.
 
 ## ESP32
 

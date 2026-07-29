@@ -1,16 +1,16 @@
 
-# Stimulus uitbreiding met ADS1115
+# Stimulus uitbreiding met ADS1115 en TFTSPI
 
-> Status: opgenomen in v0.10.0 als softwarematige ADS1115-implementatie.
-> Hardwarevalidatie van de ADS1115-route is nog open.
+> Status: werkdocument v0.10.1. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding uit v0.10.0.
+> Deze versie documenteert aanvullend de TFTSPI-uitbreiding en de gewijzigde connectorfuncties in het v0.10.1-shieldschema.
 
-> **Gezaghebbende hardwarebron**: `Schematic_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.0_2026-07-25` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers, analoog aan H7. Figuur 1 hieronder (het generieke connectorschema) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
+> **Gezaghebbende hardwarebron**: `Schematic_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.1_2026-07-27` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in dit v0.10.1-schema de 1x7 TFTSPI-displayconnector. Figuur 1 hieronder (het generieke connectorschema uit v0.10.0) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
 
-**FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115**
+**FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115, met TFTSPI-uitbreiding**
 
 Figuur 1 (historisch/conceptueel, niet onderhouden). Vroeger Stimulus-schema met vier FSR402/RFP602-lijnen richting Arduino analoge ingangen, LCD 1602 I2C, keypad en Arduino UNO R4 Minima. H6 stond hier nog als 1x4-pins vrouwelijke Dupont-connector — zie de gezaghebbende shield-PCB voor de actuele 4x2-jumpers-uitvoering.
 
-[Figuur 1 — historisch/conceptueel schema, PDF](Schematic_GroeiAcademie-v0.10.0_2026-07-25.pdf)
+Figuur 1 — historisch/conceptueel schema: niet opgenomen in deze release; gebruik voor bouw en validatie uitsluitend de actuele v0.10.1-tekeningset.
 
 ## DEEL 1 — Beslissing en uitgangspunt
 
@@ -22,7 +22,7 @@ In de versie zonder ADS1115 gaan de vier FSR402/RFP602-lijnen naar A0-A1 bij twe
 
 In de versie met ADS1115 gaan diezelfde vier lijnen naar A0-A3 van de ADS1115. De Arduino leest dan via de I2C-bus.
 
-De gekozen hardware-opzet is geen reeks solder-jumpers per sensorlijn. We gaan voor één schema waarin twee onafhankelijke bestukkingskeuzes mogelijk zijn, via Dupont-connectoren.
+De gekozen hardware-opzet is geen reeks solder-jumpers per sensorlijn. We gaan voor één schema waarin meerdere onafhankelijke bestukkingskeuzes mogelijk zijn, via Dupont-connectoren.
 
 ## 2. I2C-adres
 
@@ -33,13 +33,13 @@ Je kiest dus niet per kanaal een adres, wel per ADS1115-chip of module.
 | ADDR-pin verbonden met | I2C-adres | Gebruik |
 |---|---:|---|
 | ADDR naar GND | 0x48 | Standaard voor Stimulus |
-| ADDR naar VDD | 0x49 | Tweede ADS1115 op dezelfde I2C-bus, bijvoorbeeld emotiemeting |
+| ADDR naar VCC | 0x49 | Tweede ADS1115 op dezelfde I2C-bus, bijvoorbeeld emotiemeting |
 | ADDR naar SDA | 0x4A | Derde ADS1115 op dezelfde I2C-bus |
 | ADDR naar SCL | 0x4B | Vierde ADS1115 op dezelfde I2C-bus |
 
 Per ADS1115 kan je het adres kiezen met de ADDR-pin. De vier adressen zijn 0x48, 0x49, 0x4A en 0x4B. Daardoor kan je tot vier ADS1115-modules op dezelfde I2C-bus zetten. Voor de Stimulus-uitbreiding is één ADS1115 voldoende voor de vier FSR402/RFP602-lijnen.
 
-De ADDR-adreskeuze gebeurt via een apart jumperveld. Er mag altijd maar één adresjumper tegelijk geplaatst zijn. Voor Stimulus is de standaard ADDR naar GND, dus adres 0x48.
+De ADDR-adreskeuze gebeurt in het v0.10.1-shieldschema via SW1. Er mag altijd maar één SW1-schakelaar tegelijk ON staan. Voor Stimulus is de standaard ADDR naar GND, dus adres 0x48.
 
 Zonder I2C-multiplexer kan je maximaal vier ADS1115-modules op dezelfde I2C-bus zetten. Dat geeft maximaal 4 modules x 4 single-ended kanalen = 16 analoge ingangen.
 
@@ -51,7 +51,7 @@ Zonder I2C-multiplexer kan je maximaal vier ADS1115-modules op dezelfde I2C-bus 
 | Met ADS1115 | FSR402/RFP602 naar ADS1115 A0-A3 | Arduino analoge pinnen blijven vrijer, hogere ADC-resolutie, uitbreidbaar |
 | Beide tegelijk | Niet doen voor dezelfde sensorlijnen | Voorkomt dubbele belasting, verwarring en meetfouten |
 
-We gaan voor één schema waarin twee onafhankelijke bestukkingskeuzes mogelijk zijn, via Dupont-connectoren.
+We gaan voor één schema waarin meerdere onafhankelijke bestukkingskeuzes mogelijk zijn, via Dupont-connectoren.
 
 De keuze voor het ADC-pad gebeurt door ofwel de ADS1115-module op H5 te plaatsen, ofwel geen ADS1115 te plaatsen en in plaats daarvan de vier H6-jumpers te plaatsen op H5 pin 7-10. H6 loopt daarna naar Arduino A0-A3.
 
@@ -69,7 +69,7 @@ De keuze voor de I2C-niveauconversie gebeurt apart: ofwel wordt de logic shifter
 
 | Punt | Opmerking |
 |---|---|
-| Voeding ADS1115 | Als de FSR402/RFP602-spanningsdelers op 5V staan, moet de ADS1115-opstelling 5V-ingangen veilig aankunnen. De analoge ingang mag niet boven VDD komen. |
+| Voeding ADS1115 | Als de FSR402/RFP602-spanningsdelers op 5V staan, moet de ADS1115-opstelling 5V-ingangen veilig aankunnen. De analoge ingang mag niet boven de voedingsspanning van de ADS1115 komen. |
 | I2C-bus | LCD en ADS1115 mogen samen op SDA/SCL, zolang adressen niet botsen en pull-ups niet te zwaar worden. |
 | Logic shifter | In het huidige schema staat al een quad logic shifter voor de I2C-bus. Bepaal per buszijde of de ADS1115 op 5V of 3V3 zit. |
 | GND | Arduino, ADS1115, sensor-spanningsdelers en eventuele externe voeding moeten een gemeenschappelijke GND hebben. |
@@ -78,27 +78,35 @@ De keuze voor de I2C-niveauconversie gebeurt apart: ofwel wordt de logic shifter
 
 De ADS1115 kan op dezelfde I2C-bus als het LCD. Wanneer de ADS1115 en de LCD beide op 5V werken, is voor de ADS1115 geen extra logic shifter nodig. Als één onderdeel op 3V3 werkt, moet duidelijk vastliggen aan welke zijde van de logic shifter de ADS1115 wordt aangesloten.
 
-De footprint voor de logic shifter mag twee functies krijgen: ofwel wordt de quad logic shifter geplaatst wanneer niveauconversie nodig is, ofwel worden de overeenkomstige kanaalparen rechtstreeks met draadbruggen verbonden wanneer beide zijden dezelfde logicaspanning gebruiken. GND blijft gemeenschappelijk.
+De logic-shifter-footprints mogen twee functies krijgen: ofwel wordt de quad logic shifter geplaatst wanneer niveauconversie nodig is, ofwel worden de overeenkomstige kanaalparen rechtstreeks met draadbruggen verbonden wanneer beide zijden dezelfde logicaspanning gebruiken. GND blijft gemeenschappelijk. U3 wordt gedeeld gebruikt voor LCD-I2C en TFT-RST. U8 wordt gebruikt voor TFTSPI SCL, SDA, DC en CS.
 
-## DEEL 2 — Eén schema, twee onafhankelijke bestukkingskeuzes
+## DEEL 2 — Eén schema, meerdere onafhankelijke bestukkingskeuzes
 
-In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo blijft de Markdown rechtstreeks bruikbaar naast het schema.
+In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo blijft de Markdown rechtstreeks bruikbaar naast het schema. In v0.10.1 zijn er drie onafhankelijke keuzes: het ADC-pad, de I2C-niveauconversie en de TFTSPI-niveauconversie.
 
 | Referentie | Functie in het schema |
 |---|---|
-| H1 | 1x5 Dupont-connector voor de 1x4 keymatrix |
-| H2 | 1x4 Dupont-connector voor LCD via I2C-bus |
-| H3 | 1x6 Dupont-connector aan de HV-zijde van de logic-shifter-footprint |
-| H4 | 1x6 Dupont-connector aan de LV-zijde van de logic-shifter-footprint |
+| H1 | 1x5 Dupont-connector van de keypadlijnen naar U2 |
+| H2 | 1x4 Dupont-connector van LCD1 naar de LCD-I2C-bus |
+| H3 | 1x6 Dupont-connector aan één zijde van U3. Bevat GND, VCC, RST, SDA en SCL. U3 wordt kanaal per kanaal gebruikt; H3/H4 zijn dus niet zuiver “LCD-zijde” versus “Arduino-zijde”. |
+| H4 | 1x6 Dupont-connector aan de andere zijde van U3. Bevat de overeenkomstige GND-, VCC-, RST-, SDA- en SCL-lijnen via U3 of draadbruggen. |
 | H5 | 1x10 Dupont-connector voor de ADS1115-module en de vier analoge sensorlijnen |
-| H6 | 4x2 jumpers (2,54mm Dupont-steekmaat), analoog aan H7, geplaatst op H5 pin 7-10, die naar Arduino A0-A3 lopen voor directe Arduino-ADC |
-| H7 | ADDR-jumperveld voor de ADS1115-adreskeuze |
+| H6 | 4x2 jumpers, geplaatst op H5 pin 7-10, die naar Arduino A0-A3 lopen voor directe Arduino-ADC wanneer er geen ADS1115-bordje op H5 geplaatst is |
+| H7 | 3-pin jumper voor voedingskeuze van het FSR/ADS1115-pad: 5V of 3V3 |
+| H8 | 1x7 Dupont-connector voor GMT020-02 / 2.0 inch TFTSPI-display |
+| H9 | 1x6 Dupont-connector aan de TFT-zijde van de TFTSPI logic-shifter-footprint U8 |
+| H10 | 1x6 Dupont-connector aan de Arduino-zijde van de TFTSPI logic-shifter-footprint U8 |
+| SW1 | 4-kanaals DIP-switch voor ADS1115 ADDR-keuze |
+| U1 | Arduino UNO R3/R4 |
+| U2 | 1x4 keymatrix |
+| U3 | Quad logic shifter voor LCD-I2C en TFT-RST |
+| U8 | Quad logic shifter voor TFTSPI SCL, SDA, DC en CS |
 
-## 6. Twee footprints, telkens met twee bestukkingsopties
+## 6. Bestukkingsopties per footprint
 
 ### 6.1 Direct ADC ofwel ADS1115
 
-H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en voor de vier analoge sensorlijnen. H6 is het 4x2-jumperveld (analoog aan H7) dat op H5 pin 7-10 zit en vandaar naar Arduino A0-A3 loopt. H7 is uitsluitend het ADDR-jumperveld voor de ADS1115-adreskeuze.
+H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en voor de vier analoge sensorlijnen. H6 is het 4x2-jumperveld dat op H5 pin 7-10 zit en vandaar naar Arduino A0-A3 loopt. H7, de 3-pin jumper 5V/3V3, is in v0.10.1 uitsluitend de voedingskeuze voor het FSR/ADS1115-pad. SW1 is uitsluitend de ADDR-keuze voor de ADS1115-adreskeuze. H8 is de TFTSPI-displayconnector.
 
 | Pinvolgorde H5, 10-polige ADS1115-connector | Functie |
 |---|---|
@@ -113,9 +121,9 @@ H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en voor de vie
 | Pin 9 | A2 |
 | Pin 10 | A3 |
 
-Bij de ADS1115-keuze wordt het ADS1115-bordje op H5 geplaatst. Daarna kies je via H7 het gewenste I2C-adres.
+Bij de ADS1115-keuze wordt het ADS1115-bordje op H5 geplaatst. Daarna kies je via SW1 het gewenste I2C-adres.
 
-Bij de Arduino-ADC-keuze wordt geen ADS1115-bordje op H5 geplaatst. In plaats daarvan worden de vier H6-jumpers op H5 pin 7-10 geplaatst. H6 is het jumperveld dat naar Arduino A0-A3 loopt.
+Bij de Arduino-ADC-keuze wordt geen ADS1115-bordje op H5 geplaatst. In plaats daarvan worden de vier H6-jumpers op H5 pin 7-10 geplaatst. H6 is het jumperveld dat naar Arduino A0-A3 loopt. De 3-pin jumper 5V/3V3 kiest alleen de voeding van het FSR/ADS1115-pad en verandert niets aan de keuze tussen ADS1115 en directe Arduino-ADC.
 
 | H6-jumper op H5 pin 7-10 | Sensorlijn op H5 | Arduino-lijn via H6 | Betekenis |
 |---|---|---|---|
@@ -128,7 +136,7 @@ Plaats nooit tegelijk de ADS1115-module op H5 én de H6-jumpers op H5 pin 7-10. 
 
 ### 6.2 Met of zonder logic shifter
 
-De logic-shifter-footprint bestaat uit twee vrouwelijke headers: 2 rijen x 6 pinnen, 2,54mm steek, rijen op 5-pinnen-afstand van elkaar.
+De logic-shifter-footprints bestaan uit twee 1x6 Dupont-headers rond de quad logic shifter. U3 wordt gebruikt voor LCD-I2C en TFT-RST. U8 wordt gebruikt voor TFTSPI SCL, SDA, DC en CS.
 
 | HV-zijde | LV-zijde |
 |---|---|
@@ -139,7 +147,7 @@ De logic-shifter-footprint bestaat uit twee vrouwelijke headers: 2 rijen x 6 pin
 | HV3 | LV3 |
 | HV4 | LV4 |
 
-Deze footprint is altijd fysiek aanwezig. Als niveauconversie nodig is, wordt de quad logic shifter geplaatst. Als beide zijden dezelfde logicaspanning gebruiken, worden draadbruggen geplaatst.
+De footprints zijn fysiek aanwezig. Als niveauconversie nodig is, wordt de quad logic shifter geplaatst. Als beide zijden dezelfde logicaspanning gebruiken, worden draadbruggen geplaatst. Plaats nooit tegelijk een shifter-IC én draadbruggen op hetzelfde kanaalpaar.
 
 ## 7. Bestukkingstabellen
 
@@ -147,30 +155,52 @@ Deze footprint is altijd fysiek aanwezig. Als niveauconversie nodig is, wordt de
 
 | ADC-pad | Wat wordt geplaatst? | Wat wordt gebruikt? | Codekeuze |
 |---|---|---|---|
-| ADS1115-pad | ADS1115-module op H5 | H5 gebruikt alle 10 pinnen: VCC, GND, SCL, SDA, ADDR, ALRT, A0, A1, A2, A3. Het adres wordt gekozen via H7. | `ADC_BACKEND_ADS1115` |
+| ADS1115-pad | ADS1115-module op H5 | H5 gebruikt alle 10 pinnen: VCC, GND, SCL, SDA, ADDR, ALRT, A0, A1, A2, A3. Het adres wordt gekozen via SW1. | `ADC_BACKEND_ADS1115` |
 | Direct Arduino-ADC-pad | Geen ADS1115-module op H5. De vier H6-jumpers geplaatst op H5 pin 7-10. | H5 pin 7/H6 pin 1 naar Arduino A0, H5 pin 8/H6 pin 2 naar Arduino A1, H5 pin 9/H6 pin 3 naar Arduino A2, H5 pin 10/H6 pin 4 naar Arduino A3. | `ADC_BACKEND_NATIVE` |
 
-### 7.2 Bestukkingskeuze logic-shifter-footprint
+### 7.2 Bestukkingskeuze U3 voor LCD-I2C en TFT-RST
 
-| I2C-logica | Wat wordt geplaatst? | Verbinding | Gevolg |
+U3 wordt gedeeld gebruikt. Daarom worden H3 en H4 niet als één vaste “LCD-zijde” en één vaste “Arduino-zijde” beschreven. De functie ligt per kanaal vast.
+
+| Keuze | Wat wordt geplaatst? | Verbinding | Gevolg |
 |---|---|---|---|
-| Met niveauconversie | Quad logic shifter | SDA en SCL lopen via overeenkomstige HV/LV-kanaalparen | Nodig wanneer HV- en LV-zijde verschillende logicaspanning gebruiken |
-| Zonder niveauconversie | Draadbruggen in dezelfde headers | HV1 naar LV1, HV2 naar LV2, HV3 naar LV3, HV4 naar LV4 en gedeelde GND | Voor situaties waarin beide zijden dezelfde logicaspanning gebruiken |
+| Met niveauconversie | Quad logic shifter U3 | U3 HV3/HV4 lopen naar LCD1 via H2 voor SDA/SCL. U3 HV1 wordt gebruikt aan de Arduino-zijde van TFT RST. | LCD-I2C en TFT-RST kunnen via U3 over verschillende logicaspanningen lopen |
+| Zonder niveauconversie | Draadbruggen in de overeenkomstige H3/H4-kanaalparen | De gebruikte kanaalparen voor RST, SDA en SCL worden rechtstreeks doorverbonden. | Alleen gebruiken wanneer beide zijden dezelfde logicaspanning gebruiken |
 
-## 8. ADDR-jumperveld H7
+### 7.3 Bestukkingskeuze U8 voor TFTSPI
 
-H7 is het ADDR-jumperveld voor de ADS1115-adreskeuze. H7 is niet bedoeld om sensorlijnen naar Arduino A0-A3 door te verbinden. De H6-jumpers op H5 pin 7-10 plaatsen hoort alleen bij de directe Arduino-ADC-keuze.
+| Keuze | Wat wordt geplaatst? | Verbinding | Gevolg |
+|---|---|---|---|
+| Met niveauconversie | Quad logic shifter U8, plus U3-kanaal HV1/LV1 voor RST | U8 verwerkt TFTSPI SCL, SDA, DC en CS. U3 verwerkt TFT RST. | Alle vijf TFTSPI-stuurlijnen krijgen niveauconversie |
+| Zonder niveauconversie | Vijf draadbruggen in de overeenkomstige kanaalparen | Vier draadbruggen voor SCL, SDA, DC en CS via U8-pad, plus één draadbrug voor RST via U3-pad. | Alleen gebruiken wanneer Arduino en TFT dezelfde logicaspanning gebruiken |
 
-Het ADDR-jumperveld is alleen relevant wanneer de ADS1115-module op H5 geplaatst wordt.
+## 8. ADDR-keuze via SW1 en voedingskeuze via H7
 
-| H7 verbindt ADDR met | I2C-adres | Gebruik |
+### 8.1 ADDR-keuze via SW1
+
+SW1 bepaalt het I2C-adres van de ADS1115-module op H5. SW1 verbindt de ADDR-pin met één van vier mogelijke signalen.
+
+| SW1 verbindt ADDR met | I2C-adres | Gebruik |
 |---|---:|---|
 | GND | 0x48 | Standaard voor Stimulus |
-| VDD | 0x49 | Tweede ADS1115 op dezelfde bus, bijvoorbeeld emotiemeting |
-| SDA | 0x4A | Derde ADS1115 op dezelfde bus |
-| SCL | 0x4B | Vierde ADS1115 op dezelfde bus |
+| VCC | 0x49 | Tweede ADS1115 op dezelfde I2C-bus, bijvoorbeeld emotiemeting |
+| SDA | 0x4A | Derde ADS1115 op dezelfde I2C-bus |
+| SCL | 0x4B | Vierde ADS1115 op dezelfde I2C-bus |
 
-Er mag altijd maar één adresjumper tegelijk geplaatst zijn. Voor Stimulus is de standaardkeuze H7: ADDR naar GND, dus adres 0x48.
+Er mag altijd maar één SW1-schakelaar tegelijk ON staan. Voor Stimulus is de standaardkeuze ADDR naar GND, dus adres 0x48.
+
+SW1 is alleen relevant wanneer de ADS1115-module op H5 geplaatst wordt. SW1 is niet bedoeld om sensorlijnen naar Arduino A0-A3 door te verbinden. De H6-jumpers op H5 pin 7-10 plaatsen hoort alleen bij de directe Arduino-ADC-keuze.
+
+### 8.2 Voedingskeuze via H7, de 3-pin jumper 5V/3V3
+
+H7, de 3-pin jumper naast het FSR/ADS1115-pad, kiest de voedingsspanning van dat pad. H7 is niet de ADS1115-adreskeuze en is ook niet de TFTSPI-displayconnector H8.
+
+| Jumperkeuze | Betekenis |
+|---|---|
+| 5V | FSR-spanningsdelers en ADS1115-pad werken op 5V |
+| 3V3 | FSR-spanningsdelers en ADS1115-pad werken op 3V3 |
+
+Let op: de analoge ingang van de ADS1115 mag nooit boven de voedingsspanning van de ADS1115 komen. Gebruik dus geen 5V-sensoruitgang wanneer de ADS1115 op 3V3 gevoed wordt.
 
 ## 9. Waarschuwingen op silkscreen
 
@@ -186,11 +216,22 @@ Silkscreen-label bij het H6-jumperveld:
 H6 ARD-ADC: A0 A1 A2 A3
 ```
 
+Silkscreen-label bij TFTSPI:
+
+```text
+TFTSPI: SCL=SCK SDA=MOSI
+U8: SCL SDA CS DC
+U3: RST
+SHIFTER OR 5 BRIDGES, NEVER BOTH
+```
+
 Waarschuwingen:
 
-- H5: plaats ofwel het ADS1115-bordje, ofwel de vier H6-jumpers op H5 pin 7-10 voor directe Arduino-ADC. Nooit beide tegelijk.
-- H7: plaats altijd maar één ADDR-adresjumper tegelijk. H7 is uitsluitend voor de ADS1115-adreskeuze.
-- Logic-shifter-footprint H3/H4: IC = niveauconversie nodig. Draadbrug = zelfde logicaspanning. Nooit shifter-IC en draadbruggen tegelijk in dezelfde headers.
+- H5/H6: plaats ofwel het ADS1115-bordje op H5, ofwel de vier H6-jumpers op H5 pin 7-10 voor directe Arduino-ADC. Nooit beide tegelijk.
+- SW1: plaats altijd maar één ADDR-schakelaar tegelijk ON. SW1 is uitsluitend voor de ADS1115-adreskeuze.
+- H7 voedingskeuze 5V/3V3: plaats één jumper voor de voedingskeuze van het FSR/ADS1115-pad: 5V of 3V3.
+- Logic-shifter-footprint U3/H3/H4: IC = niveauconversie nodig. Draadbrug = zelfde logicaspanning. Nooit shifter-IC en draadbruggen tegelijk in dezelfde kanaalparen.
+- TFTSPI U8/U3: gebruik ofwel logic-shifters, ofwel vijf draadbruggen wanneer geen niveauconversie nodig is. Nooit shifter-IC en draadbruggen tegelijk op dezelfde kanaalparen.
 - Standaardkeuze bij eerste testen: directe Arduino-ADC via de H6-jumpers op H5 pin 7-10 naar Arduino A0-A3, en draadbruggen voor de I2C-bus wanneer geen niveauconversie nodig is.
 
 ## DEEL 3 — Pinaansluitingen
@@ -199,7 +240,7 @@ Waarschuwingen:
 
 ### 10.1 Direct ADC via de H6-jumpers op H5 pin 7-10
 
-Bij de directe Arduino-ADC-variant wordt geen ADS1115-bordje op H5 geplaatst. In plaats daarvan wordt H6 (4x2 jumpers, analoog aan H7) geplaatst op H5 pin 7-10. H6 loopt daarna naar Arduino A0-A3.
+Bij de directe Arduino-ADC-variant wordt geen ADS1115-bordje op H5 geplaatst. In plaats daarvan wordt H6 (4x2 jumpers) geplaatst op H5 pin 7-10. H6 loopt daarna naar Arduino A0-A3.
 
 | H6-jumper | Sensorlijn op H5 | Verbonden met Arduino via H6 | Opmerking |
 |---|---|---|---|
@@ -208,7 +249,7 @@ Bij de directe Arduino-ADC-variant wordt geen ADS1115-bordje op H5 geplaatst. In
 | H5 pin 9 (H6 pin 3) | ADS1115 A2-lijn / OUT3 | Arduino A2 | Directe Arduino-ADC-meting |
 | H5 pin 10 (H6 pin 4) | ADS1115 A3-lijn / OUT4 | Arduino A3 | Directe Arduino-ADC-meting |
 
-Controleer in het schema en op de silkscreen dat H6 pin 1 naar Arduino A0 loopt, H6 pin 2 naar Arduino A1, H6 pin 3 naar Arduino A2 en H6 pin 4 naar Arduino A3. H7 hoort hier niet bij; H7 blijft uitsluitend voor de ADDR-adreskeuze.
+Controleer in het schema en op de silkscreen dat H6 pin 1 naar Arduino A0 loopt, H6 pin 2 naar Arduino A1, H6 pin 3 naar Arduino A2 en H6 pin 4 naar Arduino A3. SW1 hoort hier niet bij; SW1 blijft uitsluitend voor de ADDR-adreskeuze. H7 hoort hier ook niet bij; H7 is uitsluitend de voedingskeuze voor het FSR/ADS1115-pad. H8 is de TFTSPI-displayconnector.
 
 ### 10.2 ADS1115 op 10-polige connector
 
@@ -220,15 +261,15 @@ De 10-polige ADS1115-connector heeft deze pinnen:
 VCC, GND, SCL, SDA, ADDR, ALRT, A0, A1, A2, A3
 ```
 
-ADDR wordt via H7 gekozen. Standaard is ADDR naar GND voor adres 0x48. ALRT wordt mee voorzien op H5, ook wanneer deze in de huidige Stimulus-code nog niet gebruikt wordt.
+ADDR wordt via SW1 gekozen. Standaard is ADDR naar GND voor adres 0x48. De 3-pin jumper 5V/3V3 kiest de voedingsspanning voor het FSR/ADS1115-pad. ALRT wordt mee voorzien op H5, ook wanneer deze in de huidige Stimulus-code nog niet gebruikt wordt.
 
 | Connector-pin | Verbonden met | Verbinding richting Arduino | Opmerking |
 |---|---|---|---|
-| VCC | 5V-voedingsrail | Arduino 5V of gedeelde 5V-rail | Voeding ADS1115-module |
+| VCC | Voedingsrail gekozen via de 3-pin jumper 5V/3V3 | Arduino 5V of 3V3, volgens jumperkeuze | Voeding ADS1115-module en FSR/ADS1115-pad |
 | GND | Gemeenschappelijke massa | Arduino GND | Massa gemeenschappelijk met sensoren en I2C-bus |
 | SCL | I2C SCL | Arduino SCL via logic shifter of draadbrug | Clocklijn I2C |
 | SDA | I2C SDA | Arduino SDA via logic shifter of draadbrug | Datalijn I2C |
-| ADDR | H7 ADDR-jumperveld | Geen Arduino-pin nodig | Bepaalt I2C-adres; standaard ADDR naar GND = 0x48 |
+| ADDR | SW1 ADDR-keuze | Geen Arduino-pin nodig | Bepaalt I2C-adres; standaard ADDR naar GND = 0x48 |
 | ALRT | Voorzien / reserve | Eventueel later naar digitale interruptpin | Niet gebruikt in huidige Stimulus-code |
 | A0 | FSR402/RFP602 OUT1 | Arduino leest via I2C | ADS1115 kanaal 0 |
 | A1 | FSR402/RFP602 OUT2 | Arduino leest via I2C | ADS1115 kanaal 1 |
@@ -239,7 +280,7 @@ ADDR wordt via H7 gekozen. Standaard is ADDR naar GND voor adres 0x48. ALRT word
 
 Met LCD xxxx worden de ondersteunde character-LCD-formaten bedoeld die via een I2C-backpack op dezelfde I2C-bus kunnen hangen.
 
-De LCD gebruikt dezelfde I2C-bus als de ADS1115. Het LCD-adres blijft apart ingesteld via `I2C_ADRES`; het ADS1115-adres via `ADS1115_I2C_ADDRESS` en het ADDR-jumperveld.
+De LCD gebruikt dezelfde I2C-bus als de ADS1115. Het LCD-adres blijft apart ingesteld via `I2C_ADRES`; het ADS1115-adres via `ADS1115_I2C_ADDRESS` en SW1.
 
 ### 11.1 LCD/I2C-pinnen
 
@@ -264,31 +305,106 @@ De LCD gebruikt dezelfde I2C-bus als de ADS1115. Het LCD-adres blijft apart inge
 
 Gebruik deze bestukking wanneer Arduino, LCD-backpack en ADS1115 op dezelfde I2C-logicaspanning werken. In dat geval worden de overeenkomstige kanaalparen in de logic-shifter-footprint rechtstreeks doorverbonden met draadbruggen.
 
-### 11.4 Met logic shifter
+### 11.4 Met logic shifter U3
 
-Gebruik deze bestukking wanneer de HV-zijde en LV-zijde een verschillende logicaspanning hebben. SDA en SCL lopen dan elk via één overeenkomstig kanaalpaar van de quad logic shifter.
+Gebruik deze bestukking wanneer de componentzijde en Arduino-zijde een verschillende logicaspanning hebben. U3 wordt gedeeld gebruikt voor LCD-I2C en TFT-RST. Daarom worden H3 en H4 niet beschreven als één vaste “LCD-zijde” en één vaste “Arduino-zijde”; de functie ligt per kanaal vast. De onderstaande toewijzing is geen voorstel meer, maar de vast bedrade kanaaltoewijzing in het v0.10.1-schema.
 
-| Kanaalpaar | Signaal | HV-zijde | LV-zijde | Opmerking |
-|---|---|---|---|---|
-| HV1 naar LV1 | SDA | Hoge logicaspanning | Lage logicaspanning | I2C-datalijn |
-| HV2 naar LV2 | SCL | Hoge logicaspanning | Lage logicaspanning | I2C-clocklijn |
-| HV3 naar LV3 | Reserve | Hoge logicaspanning | Lage logicaspanning | Vrij voor later |
-| HV4 naar LV4 | Reserve | Hoge logicaspanning | Lage logicaspanning | Vrij voor later |
-| HV / LV / GND | Voeding en massa | HV naar hoge spanning | LV naar lage spanning | GND gemeenschappelijk |
+| U3-kanaal | Functie in dit schema |
+|---|---|
+| HV1/LV1 | TFT RST-lijn. HV1 loopt naar de Arduino-zijde van de RST-sturing. |
+| HV2/LV2 | Reserve / niet gebruikt |
+| HV3/LV3 | LCD SDA-lijn. HV3 gaat naar LCD1 via H2; de overeenkomstige zijde loopt naar de Arduino-I2C-bus. |
+| HV4/LV4 | LCD SCL-lijn. HV4 gaat naar LCD1 via H2; de overeenkomstige zijde loopt naar de Arduino-I2C-bus. |
+| HV / LV / GND | Voeding en gemeenschappelijke massa van U3 |
 
-### 11.5 Uitwerking LCD-aansluiting en logic-shifter-footprint
+Hoewel de kanalen van een quad logic shifter elektrisch vergelijkbaar zijn, geldt voor deze print de bovenstaande vaste schema-toewijzing.
 
-De logic-shifter-footprint is geen derde aparte keuze, maar een tweede onafhankelijke bestukkingskeuze: shifter plaatsen bij niveauverschil, of draadbruggen plaatsen wanneer beide zijden dezelfde logicaspanning gebruiken.
+### 11.5 Uitwerking LCD-aansluiting en logic-shifter-footprint U3
+
+U3 is geen derde aparte keuze, maar een tweede onafhankelijke bestukkingskeuze: shifter plaatsen bij niveauverschil, of draadbruggen plaatsen wanneer beide zijden dezelfde logicaspanning gebruiken.
+
+Voor LCD-I2C worden U3-kanaal HV3/LV3 voor SDA en U3-kanaal HV4/LV4 voor SCL gebruikt. Voor TFTSPI wordt U3-kanaal HV1/LV1 gebruikt voor RST.
 
 De 10-polige ADS1115-connector H5 en het H6-jumperveld worden duidelijk naast elkaar of logisch in elkaars buurt geplaatst, zodat onmiddellijk zichtbaar is welke keuze actief is.
 
+## 12. TFTSPI GMT020-02 via H8
+
+H8 is de 1x7 Dupont-connector voor het GMT020-02 / 2.0 inch TFTSPI-display.
+
+| H8-pin | TFT-signaal | Betekenis |
+|---|---|---|
+| 1 | GND | Massa |
+| 2 | VCC | Voeding van het TFT-display |
+| 3 | SCL | SPI-clock, Arduino SCK |
+| 4 | SDA | SPI-data, Arduino MOSI |
+| 5 | RST | Resetlijn van het TFT-display |
+| 6 | DC | Data/Command-select |
+| 7 | CS | Chip Select |
+
+Bij dit display zijn SDA en SCL geen I2C-signalen. Ze worden gebruikt als SPI-signalen.
+
+| TFT-label | SPI-betekenis | Arduino UNO-lijn |
+|---|---|---|
+| SCL | SCK / clock | D13 / SCK |
+| SDA | MOSI / data out | D11 / MOSI |
+| CS | Chip Select | D10 |
+| DC | Data/Command | D9 |
+| RST | Reset | D8 |
+
+### 12.1 Pinconflictcontrole TFTSPI en keymatrix
+
+De keymatrix via H1 gebruikt Arduino D2, D3, D4 en D5, met GND als gemeenschappelijke lijn naar U2.
+
+Het TFTSPI-display via H8 gebruikt Arduino D8, D9, D10, D11 en D13.
+
+Er is daardoor geen pinconflict tussen de keymatrix en TFTSPI.
+
+### 12.2 Optionele TFTSPI-afhankelijkheid
+
+Voor het GMT020-02 / 2.0 inch TFTSPI-display wordt uitgegaan van een ST7789V-compatibele driverchip met 4-wire SPI.
+
+Gebruik bijvoorbeeld:
+- `Adafruit GFX Library`
+- `Adafruit ST7735 and ST7789 Library`
+
+Deze bibliotheken zijn alleen nodig wanneer de TFTSPI-route effectief gebruikt wordt. Ze horen daarom niet verplicht in `library.properties` zolang de basis-Stimulus-library ook zonder TFTSPI moet kunnen compileren.
+
+Bij gebruik van een andere TFTSPI-module moet de driverchip opnieuw gecontroleerd worden.
+
+### 12.3 TFTSPI logic-shifting via U8 en U3
+
+Het GMT020-02 TFTSPI-display gebruikt vijf stuurlijnen.
+
+| TFT-signaal | Arduino-lijn | Level-shifting |
+|---|---|---|
+| SCL | D13 / SCK | via U8 |
+| SDA | D11 / MOSI | via U8 |
+| CS | D10 | via U8 |
+| DC | D9 | via U8 |
+| RST | D8 | via U3 |
+
+U8 is de hoofd-logic-shifter voor de vier TFTSPI-lijnen SCL, SDA, CS en DC. H9 is de TFT-zijde van U8. H10 is de Arduino-zijde van U8. De vijfde TFTSPI-lijn, RST, loopt via kanaal HV1/LV1 van U3.
+
+Wanneer niveauconversie nodig is, worden U8 en U3 als logic shifters geplaatst.
+
+Wanneer geen niveauconversie nodig is, worden geen shifter-IC’s geplaatst en worden de vijf overeenkomstige signaalparen met draadbruggen verbonden.
+
+| Keuze | Bestukking | Gevolg |
+|---|---|---|
+| Met niveauconversie | U8 geplaatst voor SCL, SDA, CS, DC. U3-kanaal HV1/LV1 gebruikt voor RST. | Arduino-logica en TFT-logica mogen verschillend zijn |
+| Zonder niveauconversie | Vijf draadbruggen geplaatst in plaats van de shifterkanalen | Alleen gebruiken wanneer Arduino en TFT dezelfde logicaspanning gebruiken |
+
+Plaats nooit tegelijk een logic-shifter-IC én draadbruggen op dezelfde kanaalparen.
+
 ## DEEL 4 — Huidige software-implementatie
 
-## 12. Backend-define
+## 13. Backend-define
 
 De huidige code gebruikt niet langer `STIMULUS_USE_ADS1115` of `STIMULUS_ADC_BACKEND_*`. De actuele configuratie gebruikt `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115` in `SystemConfig.h`.
 
 Praktische consequentie: bij `ADC_BACKEND_NATIVE` is Adafruit ADS1X15 niet nodig. Bij `ADC_BACKEND_ADS1115` moet de Adafruit ADS1X15-library geïnstalleerd zijn.
+
+Voor TFTSPI zijn de grafische bibliotheken alleen nodig wanneer de TFTSPI-route effectief gebruikt wordt. In dat geval zijn `Adafruit GFX Library` en `Adafruit ST7735 and ST7789 Library` de bedoelde optionele afhankelijkheden voor een ST7789V-compatibel GMT020-02-display.
 
 ```cpp
 // ============================================================================
@@ -345,7 +461,7 @@ Praktische consequentie: bij `ADC_BACKEND_NATIVE` is Adafruit ADS1X15 niet nodig
 #endif
 ```
 
-## 13. Transparante uitleesfunctie
+## 14. Transparante uitleesfunctie
 
 De rest van de Stimulus-code hoeft niet rechtstreeks te weten of de waarde via Arduino ADC of via ADS1115 gelezen wordt. De huidige transparante laag bestaat uit `RawAnalogRead(int sensorPin)`, `sensorPin[4]` en `AnalogReadMetGekorigeerdeOffsets(...)`.
 
@@ -376,7 +492,7 @@ int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
 
 Bij `ADC_BACKEND_NATIVE` bevat `sensorPin[]` Arduino-pinnen A0-A3. Bij `ADC_BACKEND_ADS1115` bevat `sensorPin[]` ADS1115-kanaalnummers 0-3. Daardoor kan de rest van de code dezelfde uitleeslaag blijven gebruiken.
 
-## 14. Initialisatie bij ADS1115
+## 15. Initialisatie bij ADS1115
 
 Bij ADS1115 controleert de code bij het opstarten of de module aanwezig is. Bij niet aanwezig: foutmelding op het scherm, geen `while(1)`-blokkade, en terug naar de gewone flow.
 
@@ -413,7 +529,7 @@ Er staat in deze ADS1115-initialisatie geen `while(1)`. De fout wordt getoond, d
 
 Let op: de analoge ingang van de ADS1115 mag niet boven de voedingsspanning van de ADS1115 komen. Als de FSR402/RFP602-spanningsdelers op 5V werken, moet de ADS1115 dus ook passend gevoed en aangesloten worden.
 
-## 15. Mappingtabel voor de huidige code
+## 16. Mappingtabel voor de huidige code
 
 | Sensorlijn | Zonder ADS1115 | Met ADS1115 | Huidige code |
 |---|---|---|---|
@@ -422,7 +538,7 @@ Let op: de analoge ingang van de ADS1115 mag niet boven de voedingsspanning van 
 | FSR402/RFP602 3 | Arduino A2 | ADS1115 A2 | `sensorPin[2]` naar `RawAnalogRead(sensorPin[2])` |
 | FSR402/RFP602 4 | Arduino A3 | ADS1115 A3 | `sensorPin[3]` naar `RawAnalogRead(sensorPin[3])` |
 
-## 16. Aanbevolen beslissing voor nu
+## 17. Aanbevolen beslissing voor nu
 
 Ik stel voor om nu vier dingen vast te leggen:
 
@@ -430,24 +546,25 @@ Ik stel voor om nu vier dingen vast te leggen:
 |---|---|---|
 | Schema 1 | Stimulus direct ADC | FSR402/RFP602 naar Arduino A0-A3 |
 | Schema 2 | Stimulus ADS1115 | FSR402/RFP602 naar ADS1115 A0-A3, ADS1115 via de I2C-bus |
-| Schema 3 | Stimulus keuze via connector/jumpers | ADS1115-module op H5 met adreskeuze via H7, of directe Arduino-ADC via de H6-jumpers op H5 pin 7-10 naar Arduino A0-A3 |
+| Schema 3 | Stimulus keuze via connector/jumpers | ADS1115-module op H5 met adreskeuze via SW1, of directe Arduino-ADC via de H6-jumpers op H5 pin 7-10 naar Arduino A0-A3 |
+| Schema 4 | Stimulus TFTSPI | GMT020-02 / 2.0 inch TFTSPI via H8. SCL/SDA/CS/DC via U8, RST via U3, of vijf draadbruggen wanneer geen niveauconversie nodig is |
 | Code | Transparante uitleeslaag | `RawAnalogRead(int sensorPin)` met `ADC_BACKEND`-define, gebruikt door `AnalogReadMetGekorigeerdeOffsets(...)` |
 
 Daarmee blijft de huidige code bruikbaar, kan je later eenvoudig naar ADS1115 omschakelen, en voorkom je pinproblemen wanneer er extra componenten voor emoties bijkomen.
 
 ## DEEL 5 — Validatie
 
-## 17. Validatiestap: wanneer is ADS1115 betrouwbaar?
+## 18. Validatiestap: wanneer is ADS1115 betrouwbaar?
 
 Voorstel voor een objectieve vergelijking, uitvoerbaar met schema 3 zonder herbedrading:
 
-- Zelfde fysieke FSR402/RFP602-sensor, zelfde druk, eerst meten via directe Arduino-ADC met de H6-jumpers geplaatst op H5 pin 7-10 naar Arduino A0-A3, daarna meten via de ADS1115-module op H5 met adreskeuze via H7.
+- Zelfde fysieke FSR402/RFP602-sensor, zelfde druk, eerst meten via directe Arduino-ADC met de H6-jumpers geplaatst op H5 pin 7-10 naar Arduino A0-A3, daarna meten via de ADS1115-module op H5 met adreskeuze via SW1.
 - Vergelijk ruis: standaardafwijking bij constante druk.
 - Vergelijk lineariteit over het volledige drukbereik.
 - Controleer sample-timing: ADS1115 via I2C kost meer tijd per lezing dan `analogRead()`. Voor Stimulus, met trage druksignalen, is dat doorgaans geen probleem, maar dit moet wel gemeten worden.
 - Pas na deze vergelijking wordt bepaald of schema 2, ADS1115, de standaardkeuze wordt, of dat schema 1, directe ADC, volstaat en de ADS1115 optioneel blijft.
 
-## 18. Validatiescripts
+## 19. Validatiescripts
 
 ### Status van de validatiescripts
 
@@ -464,7 +581,7 @@ Er zijn twee aparte validatiescripts, zodat de Arduino-ADC-route en de ADS1115-r
 | Script | Backend | Fysieke keuze |
 |---|---|---|
 | `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino` | `ADC_BACKEND_NATIVE` | Geen ADS1115 op H5. De vier H6-jumpers geplaatst op H5 pin 7-10. H6 pin 1-4 loopt naar Arduino A0-A3. |
-| `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino` | `ADC_BACKEND_ADS1115` | ADS1115-bordje op H5. Gewenst adres kiezen via H7. Standaard: ADDR naar GND, adres `0x48`. |
+| `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino` | `ADC_BACKEND_ADS1115` | ADS1115-bordje op H5. Gewenst adres kiezen via SW1. Standaard: ADDR naar GND, adres `0x48`. |
 
 In beide validatiescripts wordt dezelfde functiehandtekening gebruikt als in de Stimulus-code:
 
@@ -474,7 +591,7 @@ int RawAnalogRead(int sensorPin)
 
 Bij `ADC_BACKEND_NATIVE` is `sensorPin` een Arduino-pin. Bij `ADC_BACKEND_ADS1115` is `sensorPin` een ADS1115-kanaalnummer.
 
-### 18.1 Arduino-ADC-validatie
+### 19.1 Arduino-ADC-validatie
 
 Gebruik `ADC_Validatie_Native.ino` om de directe Arduino-ADC-route te testen.
 
@@ -483,7 +600,7 @@ Gebruik `ADC_Validatie_Native.ino` om de directe Arduino-ADC-route te testen.
 #define ADC_BACKEND ADC_BACKEND_NATIVE
 ```
 
-### 18.2 ADS1115-validatie
+### 19.2 ADS1115-validatie
 
 Gebruik `ADC_Validatie_ADS1115.ino` om de ADS1115-route te testen.
 
@@ -491,3 +608,22 @@ Gebruik `ADC_Validatie_ADS1115.ino` om de ADS1115-route te testen.
 // Zie examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino
 #define ADC_BACKEND ADC_BACKEND_ADS1115
 ```
+
+
+## Levelshifter of draadbruggen
+
+Plaats voor de TFT-SPI-signalen ofwel de levelshiftermodule, ofwel de vijf draadbruggen. Plaats nooit beide tegelijk. De HV-zijde hoort aan de 5 V-Arduinozijde; de LV-zijde hoort aan de 3,3 V-displayzijde.
+
+
+## 20. Actuele bestandenset v0.10.1
+
+De tekeningset en bronbestanden voor deze hardwareversie zijn:
+
+- `SCH_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.1_2026-07-27.json`;
+- `Schematic_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.1_2026-07-27.pdf`;
+- `Schematic_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.1_2026-07-27.png`;
+- `Schematic_GroeiAcademie-Arduino_Uno_R3-R4_Shield-v0.10.1_2026-07-27.svg`;
+- `Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md`;
+- `VALIDATIE_Shield_v0.10.1.md`.
+
+De volledige shieldvalidatie gebeurt met `examples/Stimulus/Hardware_Validatie_Shield_v0_10_1/Hardware_Validatie_Shield_v0_10_1.ino`. Dit script vult de twee afzonderlijke ADC-validaties aan en vervangt ze niet.

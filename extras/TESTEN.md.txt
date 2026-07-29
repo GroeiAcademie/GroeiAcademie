@@ -1,0 +1,96 @@
+# Testprocedure
+
+Elke release van het GroeiAcademie Framework wordt vóór publicatie automatisch gevalideerd. Hierdoor wordt gecontroleerd dat de library voldoet aan de kwaliteitsvereisten van het project en compatibel blijft met de ondersteunde Arduino-platformen.
+
+## Uit te voeren script
+
+Alle testen worden uitgevoerd met:
+
+```
+extras/test/TestLibrary.bat
+```
+
+## Teststappen
+
+### 1. Arduino LINT
+
+Controle:
+
+```
+arduino-lint --library-manager submit
+```
+
+Doel:
+
+- controle op de vereisten van de Arduino Library Manager;
+- controle van metadata;
+- controle van de directorystructuur;
+- controle van de librarybestanden.
+
+---
+
+### 2. Compilatietesten
+
+Alle voorbeelden worden automatisch gecompileerd.
+
+#### Geteste boards
+
+- Arduino Uno R3
+- Arduino Uno R4 Minima
+- Arduino Uno R4 WiFi
+
+#### Geteste voorbeelden
+
+Alle submappen van:
+
+```
+examples/Screen/
+```
+
+en
+
+```
+examples/Stimulus/
+```
+
+---
+
+### 3. Schermconfiguratie
+
+Tijdens de compilatie wordt `SCREEN_OUTPUT_CONFIG` automatisch bepaald op basis van de mapnaam van het voorbeeld.
+
+| Voorbeeld | SCREEN_OUTPUT_CONFIG |
+|-----------|----------------------|
+| CharacterScreen | SCREEN_TYPE_CHARACTER |
+| PixelScreen | SCREEN_TYPE_PIXELS |
+| CharacterScreen_PixelScreen | SCREEN_TYPE_CHARACTER \| SCREEN_TYPE_PIXELS |
+
+Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` toe.
+
+---
+
+### 4. Foutafhandeling
+
+Bij een compilatiefout:
+
+- wordt de fout weergegeven;
+- pauzeert het script zodat de fout bekeken kan worden;
+- gaat de test verder met het volgende voorbeeld.
+
+Hierdoor worden altijd alle testen uitgevoerd.
+
+---
+
+### 5. Samenvatting
+
+Na afloop wordt automatisch weergegeven:
+
+- totaal aantal uitgevoerde testen;
+- aantal succesvolle testen;
+- aantal mislukte testen.
+
+De resultaten van elke officiële release worden bijgehouden in:
+
+```
+extras/test/TESTRESULTATEN.md
+```

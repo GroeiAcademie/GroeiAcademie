@@ -54,7 +54,7 @@ Gebruikt als `doelTikTijd`-parameter in `VergelijkStimulus()`: `> 0` = expliciet
 | `TIK_MINIMALE_DRUKWAARDE` | `ADC(50)` | 0-50: geen druk, filtert elektronische ruis op de sensoren |
 | `TIKKRACHT_MINIMALE_COMFORT_GRENS` | `ADC(200)` | 200-499: lichte druk, minimum voor een bruikbare stimulus |
 | `TIKKRACHT_MAXIMALE_COMFORT_GRENS` | `ADC(800)` | 800-1023: stevige druk, maximum om blessures/blauwe plekken te voorkomen |
-| `SCENARIO_GEWENSTE_TIKKRACHT_ADC` | `ADC(400)` | Gewenste tikkracht — **TODO in de code zelf**: nog voor later, niet actief gebruikt |
+| `SCENARIO_GEWENSTE_TIKKRACHT_ADC` | `ADC(400)` | Gewenste tikkracht — voor later, niet actief gebruikt |
 
 ## Offsetbepaling
 
@@ -70,7 +70,7 @@ Gebruikt als `doelTikTijd`-parameter in `VergelijkStimulus()`: `> 0` = expliciet
 |---|---|
 | `EXIT_TIKTIJD_MS` | 3000 — achterdeur: na deze tijd kan de oefening verlaten worden |
 | `EXIT_NO_ACTION_MS` | 9000 — timeout bij geen enkele actie |
-| `MINIMALE_TIKTIJD_MS` | 100 — **TODO in de code zelf**: fysiologisch onderbouwde ondergrens nog te bepalen |
-| `MAXIMALE_TIKTIJD_MS` | 2000 — **TODO in de code zelf**: fysiologisch onderbouwde bovengrens nog te bepalen |
+| `MINIMALE_TIKTIJD_MS` | 100 — Fysiologisch onderbouwde ondergrens nog te bepalen |
+| `MAXIMALE_TIKTIJD_MS` | 2000 — Fysiologisch onderbouwde bovengrens nog te bepalen |
 
-Twee TODO's staan dus letterlijk zo in de brontekst (`SCENARIO_GEWENSTE_TIKKRACHT_ADC`, en het `MINIMALE_TIKTIJD_MS`/`MAXIMALE_TIKTIJD_MS`-paar) — dit document herhaalt ze zodat ze ook zichtbaar zijn zonder de header open te klikken, maar lost ze niet op.
+

@@ -80,3 +80,7 @@ De tekstuele basisdocumentatie staat in het betrokken document onder `docs/Toepa
 ## Communitybeginsel
 
 Bijdragen moeten de transparantie, reproduceerbaarheid en bruikbaarheid van het open framework versterken. Zie ook [PROJECT_CONSTITUTION.md](PROJECT_CONSTITUTION.md), [docs/SCIENTIFIC_INTEGRITY.md](docs/SCIENTIFIC_INTEGRITY.md) en [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Validatie
+
+Voer vóór elke Pull Request of release steeds de volledige validatie uit.

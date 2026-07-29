@@ -28,7 +28,7 @@ De officiële licentietekst staat in [`LICENSE`](LICENSE).
 
 Gebruik je het GroeiAcademie Framework in een hobbyproject, onderzoek, onderwijs of commercieel product? Dan nodigen we je van harte uit om je project vrijblijvend toe te voegen aan `GEBRUIKERS.md` zodra dat document wordt aangemaakt. Zo help je anderen ontdekken hoe de library in de praktijk wordt toegepast. Er is geen enkele verplichting; het is volledig vrijwillig.
 
-Wanneer je het GroeiAcademie Framework gebruikt, stellen we het op prijs als je in de documentatie, de About-pagina of de broncode een verwijzing opneemt naar de GitHub-repository van de GroeiAcademie Arduino Library.
+Wanneer je het GroeiAcademie Framework gebruikt, stellen we het op prijs als je in de documentatie, de About-pagina of de broncode een verwijzing opneemt naar de GitHub-repository van het GroeiAcademie Framework.
 
 Bijvoorbeeld:
 

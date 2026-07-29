@@ -111,7 +111,7 @@ De headers direct onder `src/` leiden door naar de interne moduleheaders. Intern
 
 ## Afhankelijkheden
 
-Externe libraries worden uitsluitend toegevoegd wanneer zij functioneel nodig zijn en in `library.properties` worden gedeclareerd. De huidige afhankelijkheid is `LiquidCrystal I2C`.
+Verplichte externe libraries worden uitsluitend toegevoegd wanneer zij functioneel nodig zijn en in `library.properties` gedeclareerd. Compile-time optionele hardwareafhankelijkheden worden gedocumenteerd bij de bijbehorende configuratie en voorbeelden. De huidige verplichte afhankelijkheid is `LiquidCrystal I2C`; Adafruit GFX, een concrete PixelScreen-driver en Adafruit ADS1X15 zijn alleen nodig wanneer de overeenkomstige compile-time keuze actief is.
 
 ## Samenwerking tussen modules
 

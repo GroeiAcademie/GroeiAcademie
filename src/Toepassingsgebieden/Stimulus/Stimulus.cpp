@@ -85,8 +85,7 @@ unsigned long TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = DEFAULT_TOEGESTANE_MARGE
 // ============================================================================
 
 int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
-/*
-#ifdef DEBUG
+#ifdef TRACE
   int raw = analogRead(sensorPin);
   int waarde = raw - offsetSensor;
 
@@ -103,8 +102,6 @@ int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
 #else
   int waarde = RawAnalogRead(sensorPin) - offsetSensor;
 #endif
-*/
-  int waarde = RawAnalogRead(sensorPin) - offsetSensor;
 
   if (waarde < 0) waarde = 0;
   return waarde;
@@ -140,7 +137,7 @@ void BepaalSensorOffsets() {
   int hoogsteMeting[4] = { 0, 0, 0, 0 };
   unsigned long startTijd = millis();
 
-#ifdef DEBUG
+#ifdef TRACE
    DEBUG_PRINTLN("---------------------");
 #endif
 
@@ -149,7 +146,7 @@ void BepaalSensorOffsets() {
       int meting = RawAnalogRead(sensorPin[sensorNummer]);
       if (aantalMetingen > 1 && meting > hoogsteMeting[sensorNummer]) { hoogsteMeting[sensorNummer] = meting; }
 
-#ifdef DEBUG
+#ifdef TRACE
       DEBUG_PRINT("Meting sensor ");
       DEBUG_PRINT(sensorNummer + 1);
       DEBUG_PRINT(" = ");
@@ -578,7 +575,7 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
 
     // for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
 
-    if (MaskGewensteActieveSensorsBijExit != 0) { // TODO
+    if (MaskGewensteActieveSensorsBijExit != 0) { 
       // Maak het mask rechtstreeks op basis van de zojuist gelezen actuele drukwaarden.
       int sensorMask = MaakSensorMask(sensor, aantalSensorenSimultaanTeMeten, true);
 
@@ -690,15 +687,6 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
   for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) BerekenEindStimulus(sensor[sensorNummer], gemetenStimulus[sensorNummer]);
 
   synchronisatie[0] = MaakSynchronisatieProfielAlleSensoren(sensor, aantalSensorenSimultaanTeMeten, gemetenStimulus);
-
-  /* TODO: mag weg eens de nieuwe code grondig getest is :)
-  synchronisatie[0] = MaakSynchronisatieProfiel(sensor, 0, 1, gemetenStimulus);
-
-  if (aantalSensorenSimultaanTeMeten == 4) {
-    synchronisatie[1] = MaakSynchronisatieProfiel(sensor, 0, 2, gemetenStimulus);
-    synchronisatie[2] = MaakSynchronisatieProfiel(sensor, 0, 3, gemetenStimulus);
-  }
-  */
 
 #ifdef DEBUG
   DEBUG_PRINTLN("=== SIMULTANE METING ===");

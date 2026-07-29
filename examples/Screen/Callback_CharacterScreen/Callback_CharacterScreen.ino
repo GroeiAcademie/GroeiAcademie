@@ -1,12 +1,18 @@
 #include <Wire.h>
 #include <Screen.h>
 
+#if !(SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  #error Stel SCREEN_OUTPUT in SystemConfig.h in met SCREEN_TYPE_CHARACTER.
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  #error Dit voorbeeld verwacht dat SCREEN_TYPE_PIXELS niet gezet is. Gebruik Callback_PixelScreen.ino voor een pixelscherm, of zet SCREEN_TYPE_PIXELS terug uit SCREEN_OUTPUT om dit voorbeeld te testen.
+#endif
+
 #define LEESTIJD_VOORBEELD_MS       2000UL
 #define WACHTTIJD_TUSSEN_PAGINAS_MS 1500UL
 
 // Deze callback neemt de volledige characterschermuitvoer over.
-// PrintToScreen() roept haar exact één keer aan en voert voor dit schermtype
-// zelf geen aanvullende schermlogica, wachttijd of action meer uit.
+// PrintToScreen() roept haar exact één keer aan en voert voor dit schermtype zelf geen aanvullende schermlogica, wachttijd of action meer uit.
 void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) {
   if (eersteRegel != "" || tweedeRegel != "") {
     String eersteRegelLC = eersteRegel; eersteRegelLC.toLowerCase();
@@ -41,8 +47,6 @@ void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, u
 void setup() {
   lcd.init();
   lcd.backlight();
-
-  SCREEN_OUTPUT = SCREEN_TYPE_CHARACTER;
   RegistreerCallbackScreenTypeCharacter(MijnCharacterScreen);
 }
 

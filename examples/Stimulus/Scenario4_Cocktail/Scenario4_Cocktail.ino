@@ -3,6 +3,12 @@
 // OPMERKING: De keuze tussen <GroeiAcademie.h> en <Stimulus.h> bepaalt enkel welke namen je sketch mag aanroepen (zichtbaarheid), niet wat er gecompileerd wordt.
 // #include <GroeiAcademie.h> // alles van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
 #include <Stimulus.h>         // enkel module: Stimulus van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
+#include <Configuratie/Examples.h>
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+#include <Adafruit_ST7789.h>
+Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
+#endif
 
 // ============================================================================
 // HARDWARE INSTELLINGEN (De pinnen van de Arduino UNO R3/R4)
@@ -10,7 +16,7 @@
 #define SERIAL_BAUDRATE 115200UL
 
 // Hardwarematig aanwezig zijn 2 of 4 sensoren. Scenarios 1, 2 en 3 gebruiken 2 sensoren. Scenario 4 kan bij 4 aanwezige sensoren ook 3 sensoren gebruiken.
-// #define AANTAL_SENSOREN_AANWEZIG   2 // MAG MEN WEIZIGEN IN FUNCTIE VAN DE BESCHIKBARE HARDWARE  // TODO WAAR?
+// #define AANTAL_SENSOREN_AANWEZIG   2 // MAG MEN WEIZIGEN IN FUNCTIE VAN DE BESCHIKBARE HARDWARE 
 
 // Definieer de pinnen voor het 1x4 keypad
 #define PIN_TOETS_1   3  // Gekoppeld aan Digitale Pin 3 (vb: Level 1: Start)
@@ -23,53 +29,6 @@
 
 #define MINIMALE_WACHTTIJD_MS  500UL
 #define MAXIMALE_WACHTTIJD_MS  1500UL
-
-// ============================================================================
-// CONSTANTEN VOOR DE LCD-TEKSTEN (Als pure tekst-pointers)
-// ============================================================================
-#define LCD_SERIEEL_L1         "WACHT OP SERIELE"
-#define LCD_SERIEEL_L2         "VERBINDING ..."
-
-#define LCD_START_L1           " GROEI ACADEMIE"
-#define LCD_START_L2           " INITIALISEREN!"
-
-#define LCD_NULMETING_L1       "NULMETING:"
-#define LCD_NULMETING_L2       "Niets aanraken"
-
-#define LCD_KEUZE_LEVELS_L1    "1 Start  2 Basic"
-#define LCD_KEUZE_LEVELS_L2    "3 Expert 4 Elite"
-#define LCD_KEUZE_LEVELS_L3    "Gekozen level: "
-
-#define LCD_FINALE_TITEL       "EINDE INOEFENEN"
-#define LCD_FINALE_SUCCES      "SUCCESVOL GEDAAN"
-
-#define LCD_S0_GEEF_STARTTIK   "Geef starttik"
-#define LCD_S0_TIK_AANHOUDEN   "Tik aanhouden"
-#define LCD_S0_NU              " NU"
-#define LCD_S0_NULMETING       "Nulmeting Tik"
-#define LCD_S0_EVEN_GEDULD     "Wees alert..."
-#define LCD_S0_LABEL_TIJDENS   "Tijdens "
-#define LCD_S0_LABEL_MS        "ms"
-
-#define LCD_S4_TITEL           "Exp. COCKTAILS"
-#define LCD_S4_START_VERSCHIL  "START VERSCHILT"
-#define LCD_S4_TIJD_VERSCHILT  "TIJD VERSCHILT"
-#define LCD_S4_SENSORS_TEXT    "KIES # SENSOREN"
-#define LCD_S4_SENSORS_KEUZE   "2=2, 3=3, 4=4"
-#define LCD_S4_SENSOREN        " SENSOREN"
-#define LCD_S4_START_TIJD      "START TIJD "
-#define LCD_S4_EIND_TIJD       "EIND TIJD "
-#define LCD_S4_SYNCROON_START  "SYNC. START "
-#define LCD_S4_SYNCROON_EINDE  "SYNC. EINDE "
-
-#define LCD_SCORE_TIKKRACHT    "TIKKRACHT "
-#define LCD_SCORE_TIKTIJD      "TIKTIJD "
-#define LCD_SCORE_KRACHT       "KRACHT "
-#define LCD_SCORE_TIJD         "TIJD "
-#define LCD_SCORE_SYNCHROON    "SYNCHROON "
-#define LCD_SCORE_IN_BALANS    "IN BALANS "
-#define LCD_SCORE_INSTORTEND   "INSTORTEND "
-#define LCD_SCORE_PERCENTAGE   "%"
 
 // ============================================================================
 // CONSTANTEN VOOR DE PAUZETIJDEN (Delays)
@@ -103,7 +62,7 @@
 #define INSTORTEND_SCORING_GRADUEEL  2  // tijd en kracht worden apart gescoord, elk goed voor de helft van de stappenpunten, geeft meer nuance bij hogere levels (level 4)
 
 // INSTORTEND SCORINGSVORM (enkel gebruikt bij Scenario 3, stap 3)
-int instortendOfGradueel = INSTORTEND_SCORING_BINAIR; // Kan verhoogd worden met instortendOfGradueel++ na succesvolle sessies (net als stimulusVersie) // TODO WAAROM HIER?
+int instortendOfGradueel = INSTORTEND_SCORING_BINAIR; // Kan verhoogd worden met instortendOfGradueel++ na succesvolle sessies (net als stimulusVersie) 
 
 // ============================================================================
 // ============================================================================
@@ -128,8 +87,16 @@ void setup() {
   analogReadResolution(14);
 #endif  
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   lcd.init();      // set up the LCD's number of columns and rows
   lcd.backlight(); // turn on the backlight
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
+  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
+  PixelScreen = &pixelScreen;
+  PixelScreenConfigureren();
+#endif
   PrintToScreen(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
 #ifdef DEBUG
