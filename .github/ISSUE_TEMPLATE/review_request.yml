@@ -1,0 +1,33 @@
+name: Review request
+description: Vraag een inhoudelijke review van code, documentatie, hardware, elektronica of een meetprotocol.
+title: "[Review]: "
+labels: ["review"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Wat wil je laten beoordelen?
+      options:
+        - Code
+        - Documentatie
+        - Hardware
+        - Elektronica
+        - Example
+        - Meetprotocol
+        - Anders
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Onderwerp en afbakening
+      description: Beschrijf wat moet worden beoordeeld en waarop de reviewer moet letten.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Bestanden, links en testresultaten
+      description: Voeg de relevante bestanden, links, schema's, meetresultaten of Pull Request toe.
+    validations:
+      required: true

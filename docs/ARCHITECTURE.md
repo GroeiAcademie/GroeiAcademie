@@ -4,39 +4,56 @@
 
 GroeiAcademie Framework wordt als één samenwerkende Arduino-library ontwikkeld. Functionele onderdelen worden niet zonder expliciete reden opgesplitst in afzonderlijke libraries.
 
-## Bestaande hoofdstructuur
+## Huidige hoofdstructuur
 
 ```text
 GroeiAcademie/
 ├── src/
 │   ├── GroeiAcademie.h
+│   ├── Screen.h
+│   ├── Stimulus.h
+│   ├── SystemConfig.h
 │   ├── Configuratie/
+│   │   ├── Examples.h
+│   │   ├── ExamplesConfig.h
 │   │   ├── StimulusConfig.h
-│   │   └── SystemConfig.h
+│   │   ├── SystemConfig.h
+│   │   └── UserConfig_template.h
+│   ├── Language/
+│   │   ├── Examples_XX.h
+│   │   ├── Library_XX.h
+│   │   ├── UserExample_XX_template.h
+│   │   └── UserLibrary_XX_template.h
 │   ├── Hulpmiddelen/
 │   ├── Sturingen/
 │   ├── Systeem/
-│   │   ├── Screen/
-│   │   │   ├── Screen.h
-│   │   │   └── Screen.cpp
-│   │   └── ...
+│   │   └── Screen/
+│   │       ├── Screen.h
+│   │       ├── Screen.cpp
+│   │       └── ScreenTypes.h
 │   ├── Toepassingsgebieden/
-│   │   ├── Stimulus/
-│   │   │   ├── Stimulus.h
-│   │   │   └── Stimulus.cpp
-│   │   └── ...
+│   │   └── Stimulus/
+│   │       ├── Stimulus.h
+│   │       └── Stimulus.cpp
 │   └── Uitbreidingskaarten/
 ├── docs/
 │   ├── Configuratie/
+│   │   ├── ExamplesConfig.md
+│   │   ├── README.md
+│   │   ├── StimulusConfig.md
+│   │   ├── SystemConfig.md
+│   │   ├── UserConfig.md
+│   │   └── UserLanguage.md
 │   ├── Hulpmiddelen/
 │   ├── Sturingen/
 │   ├── Systeem/
+│   │   ├── PIXELSCREEN_FOUTCODES.md
 │   │   └── SCREEN.md
 │   ├── Toepassingsgebieden/
-│   │   ├── Stimulus/
-│   │   │   ├── Hardware/
-│   │   │   └── README.md
-│   │   └── ...
+│   │   ├── MODULES.md
+│   │   └── Stimulus/
+│   │       ├── Hardware/
+│   │       └── README.md
 │   ├── Uitbreidingskaarten/
 │   ├── ARCHITECTURE.md
 │   ├── COMMUNITY_GUIDE.md
@@ -45,34 +62,40 @@ GroeiAcademie/
 │   ├── GOVERNANCE.md
 │   ├── HARDWARE_SUPPORT.md
 │   ├── PROJECT_VALUES.md
-│   ├── RESEARCH_PHILOSPHY.md
+│   ├── RESEARCH_PHILOSOPHY.md
 │   ├── ROADMAP.md
-│   ├── SCIENTIC_INTEGRITY.md
+│   ├── SCIENTIFIC_INTEGRITY.md
 │   └── TERMINOLOGY.md
 ├── examples/
-│   ├── Screen/
-│   │   └── ...
-│   ├── Stimulus/
-│   │   └── ...
+│   ├── Systeem/
+│   │   ├── ADC_Validatie/
+│   │   │   └── ...
+│   │   └── Screen/
+│   │       └── ...
+│   └── Toepassingsgebieden/
+│       └── Stimulus/
+│           └── ...
 ├── extras/
+├── .github/
+│   └── FUNDING.yml
 ├── keywords.txt
 ├── library.properties
 ├── AUTHORS.md
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
+├── CONTRIBUTORS.md
 ├── DISCLAIMER.md
-├── keywords.txt
-├── library.proporties
 ├── LICENSE.md
 ├── LICENSE_KEUZEGIDS.md
 ├── PROJECT_CONSTITUTION.md
 ├── README.md
-└── SECURITY.md
-
+├── SECURITY.md
+├── SPONSORS.md
+└── TRADEMARKS.md
 ```
 
-Niet elke gereserveerde map bevat al broncode. De huidige implementatie bestaat uit de Screen-laag en de Stimulusmodule.
+Niet elke gereserveerde domeinmap bevat al broncode. De huidige implementatie bestaat uit de Screen-laag en de Stimulusmodule.
 
 ## Publieke headers
 
@@ -89,13 +112,29 @@ Daarnaast worden volgens `library.properties` ook deze publieke headers aangebod
 #include <Stimulus.h>
 ```
 
-De headers direct onder `src/` leiden door naar de interne moduleheaders. Interne code hoort geen paden uit de voorbeeldprojecten te vereisen.
+De headers direct onder `src/` leiden door naar de interne moduleheaders. Interne code vereist geen paden uit voorbeeldprojecten.
+
+## Configuratiemodel
+
+`src/Configuratie/SystemConfig.h` bevat de officiële standaardwaarden en validaties. Voor blijvende persoonlijke instellingen kopieert de gebruiker `UserConfig_template.h` vóór gebruik naar `UserConfig.h` in dezelfde map. `UserConfig.h` is optioneel.
+
+De centrale laadvolgorde is:
+
+```text
+vaste keuzewaarden
+→ eventueel UserConfig.h
+→ fallbackwaarden en validaties uit SystemConfig.h
+```
+
+Globale compilerdefinities kunnen waarden vóór deze laadvolgorde vastleggen. Gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in, omdat `Screen.cpp` en `Stimulus.cpp` afzonderlijk van de sketch worden gecompileerd.
+
+`ExamplesConfig.h` bevat uitsluitend gedeelde instellingen van de voorbeeldprogramma's. `StimulusConfig.h` bevat de vaste en configureerbare grenzen van de Stimulusmodule.
 
 ## Verantwoordelijkheden
 
 ### Configuratie
 
-`src/Configuratie/` bevat compile-time-instellingen zoals boardkeuze, ADC-resolutie, sensorpinnen, schermconfiguratie en meetgrenzen.
+`src/Configuratie/` bevat boardkeuze, ADC-backend, sensorpinnen, schermconfiguratie, voorbeeldinstellingen en Stimulusgrenzen.
 
 ### Systeem
 
@@ -111,19 +150,22 @@ De headers direct onder `src/` leiden door naar de interne moduleheaders. Intern
 
 ## Afhankelijkheden
 
-Verplichte externe libraries worden uitsluitend toegevoegd wanneer zij functioneel nodig zijn en in `library.properties` gedeclareerd. Compile-time optionele hardwareafhankelijkheden worden gedocumenteerd bij de bijbehorende configuratie en voorbeelden. De huidige verplichte afhankelijkheid is `LiquidCrystal I2C`; Adafruit GFX, een concrete PixelScreen-driver en Adafruit ADS1X15 zijn alleen nodig wanneer de overeenkomstige compile-time keuze actief is.
+De in `library.properties` gedeclareerde dependencies zijn:
+
+- LiquidCrystal I2C;
+- Adafruit GFX Library;
+- Adafruit ST7735 and ST7789 Library;
+- Adafruit ADS1X15.
+
+Niet iedere build gebruikt alle code uit deze libraries. `SCREEN_OUTPUT_CONFIG` en `ADC_BACKEND` bepalen welke GroeiAcademie-broncode werkelijk wordt gecompileerd. De dependencies blijven gedeclareerd zodat de meegeleverde CharacterScreen-, PixelScreen- en ADS1115-voorbeelden na installatie beschikbaar zijn.
 
 ## Samenwerking tussen modules
 
 Modules communiceren via expliciete headers, functies en datastructuren. Rechtstreekse afhankelijkheden worden beperkt. Screen is een gedeelde uitvoerlaag die door toepassingsmodules kan worden gebruikt.
 
-## Configuratie en draagbaarheid
-
-De huidige configuratie gebruikt preprocessorinstellingen in de library zelf. Dat is bruikbaar voor de pre-1.0-fase, maar wijzigingen door de gebruiker kunnen bij een library-update worden overschreven. Een stabieler configuratiemodel blijft een architectuurpunt voor vóór versie 1.0.
-
 ## Elektronische documentatie
 
-Elektronische schema's worden per toepassingsgebied beschreven, niet in de softwarearchitectuur verborgen. De index staat in [Toepassingsgebieden/MODULES.md](Toepassingsgebieden/MODULES.md).
+Elektronische schema's worden per toepassingsgebied beschreven. De index staat in [Toepassingsgebieden/MODULES.md](Toepassingsgebieden/MODULES.md).
 
 Een geldig schema vermeldt:
 

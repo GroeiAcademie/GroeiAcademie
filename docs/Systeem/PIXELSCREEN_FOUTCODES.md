@@ -173,14 +173,18 @@ if (ruweKolommen < PIXELGRID_MIN_KOLOMMEN || ruweRegels < PIXELGRID_MIN_RIJEN)
 
 ### Betekenis
 
-De beschikbare PixelScreen-resolutie en de gekozen `PIXEL_SCREEN_TEXT_SIZE` leveren een berekend tekstgrid op dat kleiner is dan de minimale ondersteunde indeling van 16 kolommen bij 2 regels.
+De beschikbare PixelScreen-resolutie, buitenmarge, tekstgrootte en witruimte leveren een berekend tekstgrid op dat kleiner is dan de minimale ondersteunde indeling van 16 kolommen bij 2 regels.
 
 ### Berekening
 
 ```cpp
-ruweKolommen = PixelScreen->width()  / (6 * PIXEL_SCREEN_TEXT_SIZE);
-ruweRegels   = PixelScreen->height() / (8 * PIXEL_SCREEN_TEXT_SIZE);
+bruikbareBreedte = PixelScreen->width() - (2 * PIXEL_SCREEN_MARGIN);
+bruikbareHoogte = PixelScreen->height() - (2 * PIXEL_SCREEN_MARGIN);
+ruweKolommen = (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) / PixelScreenKarakterStap();
+ruweRegels = (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) / PixelScreenRegelStap();
 ```
+
+`PixelScreenKarakterStap()` combineert de vaste karakterbreedte, `PIXEL_SCREEN_TEXT_SIZE` en `PIXEL_SCREEN_CHARACTER_SPACING`. `PixelScreenRegelStap()` combineert de vaste karakterhoogte, `PIXEL_SCREEN_TEXT_SIZE` en `PIXEL_SCREEN_LINE_SPACING`.
 
 De minimumvoorwaarden zijn:
 
@@ -195,6 +199,9 @@ Controleer:
 
 - `ACTIEF_PIXEL_SCREEN`;
 - `PIXEL_SCREEN_TEXT_SIZE`;
+- `PIXEL_SCREEN_MARGIN`;
+- `PIXEL_SCREEN_CHARACTER_SPACING`;
+- `PIXEL_SCREEN_LINE_SPACING`;
 - `PixelScreen->width()`;
 - `PixelScreen->height()`;
 - of de schermrotatie de beschikbare breedte en hoogte beïnvloedt zoals verwacht.
@@ -205,4 +212,4 @@ De standaard PixelScreen-uitvoer kan de minimale tekstweergave van 16×2 niet ga
 
 ### Oplossing
 
-Gebruik een kleinere `PIXEL_SCREEN_TEXT_SIZE`, kies een PixelScreen met een grotere bruikbare resolutie of corrigeer de schermconfiguratie wanneer de gemeten breedte en hoogte niet kloppen.
+Gebruik een kleinere `PIXEL_SCREEN_TEXT_SIZE`, verklein `PIXEL_SCREEN_MARGIN`, `PIXEL_SCREEN_CHARACTER_SPACING` of `PIXEL_SCREEN_LINE_SPACING`, kies een PixelScreen met een grotere bruikbare resolutie of corrigeer de schermconfiguratie wanneer de gemeten breedte en hoogte niet kloppen.

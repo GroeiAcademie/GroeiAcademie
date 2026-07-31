@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Contact met de maintainers
+    url: mailto:support@groeiacademie.be
+    about: Voor rechtstreeks overleg met de maintainers.

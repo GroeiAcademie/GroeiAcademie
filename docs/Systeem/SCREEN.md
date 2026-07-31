@@ -47,7 +47,7 @@ Op een scherm met vier regels worden de vier teksten op regels 0 tot en met 3 ge
 
 ## PixelScreen zonder callback
 
-Fatale configuratiefouten van het PixelScreen worden gemeld met een korte code zoals `PS001`. De volledige betekenis en oplossing staan in [PixelScreen-foutcodes](PIXELSCREEN_FOUTCODES.md). Wanneer CharacterScreen niet actief is, forceert de library voor deze melding Serial op 115200 baud. Het afzonderlijke [voorstel voor leesbare PixelScreen-oriëntaties](PIXELSCREEN_ORIENTATIE_VOORSTEL.txt) is nog niet in de code geïmplementeerd.
+Fatale configuratiefouten van het PixelScreen worden gemeld met een korte code zoals `PS001`. De volledige betekenis en oplossing staan in [PixelScreen-foutcodes](PIXELSCREEN_FOUTCODES.md). Wanneer CharacterScreen niet actief is, forceert de library voor deze melding Serial op 115200 baud.
 
 De toepassing initialiseert de concrete displaydriver en registreert die daarna via de algemene `Adafruit_GFX*`-pointer:
 
@@ -58,9 +58,9 @@ PixelScreen = &pixelScreen;
 PixelScreenConfigureren();
 ```
 
-`PixelScreenConfigureren()` initialiseert niet de concrete hardwaredriver. De functie controleert de geregistreerde `Adafruit_GFX`-instantie, houdt rekening met rotatie 0 tot en met 3, berekent het tekstgrid en stelt tekstgrootte, tekstkleur, achtergrondkleur en tekstomloop in.
+`PixelScreenConfigureren()` initialiseert niet de concrete hardwaredriver. De functie controleert de geregistreerde `Adafruit_GFX`-instantie, houdt rekening met rotatie 0 tot en met 3, trekt de ingestelde buitenmarges van de beschikbare schermruimte af, berekent het tekstgrid en stelt tekstgrootte, tekstkleur, achtergrondkleur en tekstomloop in.
 
-Zonder geregistreerde pixelcallback verwerkt de standaarduitvoer alleen `ScreenData::TYPE_NONE`. De tekst wordt met het ingebouwde vaste Adafruit_GFX-font in een gecentreerd grid van minimaal 16×2 en maximaal 40×4 geplaatst. Voor andere fonts, vrije pixelposities, grafieken of andere `ScreenData`-typen is een pixelcallback bedoeld. De standaard cursoradministratie gaat uit van eenvoudige tekens; UTF-8-tekens kunnen meerdere bytes tellen en worden niet volledig ondersteund.
+Zonder geregistreerde pixelcallback verwerkt de standaarduitvoer alleen `ScreenData::TYPE_NONE`. De tekst wordt met het ingebouwde vaste Adafruit_GFX-font in een gecentreerd grid van minimaal 16×2 en maximaal 40×4 geplaatst. `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING` bepalen de extra witruimte tussen tekens en regels. Om karakterafstand mogelijk te maken, plaatst de standaarduitvoer ieder teken afzonderlijk op de berekende cursorpositie. Voor andere fonts, vrije pixelposities, grafieken of andere `ScreenData`-typen is een pixelcallback bedoeld. De standaard cursoradministratie gaat uit van eenvoudige tekens; UTF-8-tekens kunnen meerdere bytes tellen en worden niet volledig ondersteund.
 
 ## ScreenData
 
@@ -106,15 +106,17 @@ RegistreerCallbackScreenTypePixel(MijnPixelScreen);
 
 Met `nullptr` wordt voor beide schermtypen de standaardafhandeling gebruikt. Voor PixelScreen geldt die standaardafhandeling alleen voor `ScreenData::TYPE_NONE`.
 
-Een callback beheert zelf wissen, regelplaatsing, paginering, wachttijden, `action`, afkapping, scrolling en cursorlogica. De callback wordt exact één keer aangeroepen en ontvangt altijd de volledige oorspronkelijke opdracht, ook wanneer daarnaast een ander schermtype standaarduitvoer gebruikt.
+Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregistreerd zijn. Ze kunnen dezelfde informatie synchroon weergeven of elk een ander doel hebben. De library dwingt tussen beide callbacks geen synchronisatie af. Wanneer synchroon gedrag gewenst is, is de gebruiker verantwoordelijk voor de onderlinge timing en voor het voorkomen dat `delayTime` of `delayTussenPaginas` door beide callbacks wordt uitgevoerd.
+
+Een callback beheert zelf wissen, regelplaatsing, paginering, wachttijden, `action`, afkapping, scrolling en cursorlogica. De callback wordt exact één keer aangeroepen. Wanneer een standaardscherm actief is, voert de standaarduitvoer de toepasselijke wachttijden uit en ontvangen de callbacks daarvoor `0`. Wanneer geen standaardscherm actief is, ontvangen de callbacks de oorspronkelijke waarden.
 
 ## Voorbeelden
 
-- `examples/Screen/Default_CharacterScreen/Default_CharacterScreen.ino`
-- `examples/Screen/Default_PixelScreen/Default_PixelScreen.ino`
-- `examples/Screen/Default_CharacterScreen_PixelScreen/Default_CharacterScreen_PixelScreen.ino`
-- `examples/Screen/Callback_CharacterScreen/Callback_CharacterScreen.ino`
-- `examples/Screen/Callback_PixelScreen/Callback_PixelScreen.ino`
+- `examples/Systeem/Screen/Default_CharacterScreen/Default_CharacterScreen.ino`
+- `examples/Systeem/Screen/Default_PixelScreen/Default_PixelScreen.ino`
+- `examples/Systeem/Screen/Default_CharacterScreen_PixelScreen/Default_CharacterScreen_PixelScreen.ino`
+- `examples/Systeem/Screen/Callback_CharacterScreen/Callback_CharacterScreen.ino`
+- `examples/Systeem/Screen/Callback_PixelScreen/Callback_PixelScreen.ino`
 
 ## Aansluitingen
 
@@ -136,7 +138,7 @@ De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange w
 4. `delayTime` wordt exact één keer voor de standaarduitvoer uitgevoerd;
 5. `action` wordt daarna op alle actieve standaardschermen getoond.
 
-CharacterScreen en PixelScreen blijven bij gecombineerde standaarduitvoer synchroon. Een geregistreerde callback wordt exact één keer aangeroepen en ontvangt altijd de volledige oorspronkelijke opdracht: `delayTime`, `action`, `derdeRegel`, `vierdeRegel` en `delayTussenPaginas` worden niet door de Background aangepast. De callback beheert voor haar eigen schermtype zelf het tekenen en de wachttijden.
+CharacterScreen en PixelScreen blijven bij gecombineerde standaarduitvoer synchroon. Een geregistreerde callback wordt exact één keer aangeroepen. `action`, `derdeRegel` en `vierdeRegel` worden ongewijzigd doorgegeven. Wanneer een standaardscherm actief is, ontvangt de callback voor `delayTime` en `delayTussenPaginas` de waarde `0`, omdat de standaarduitvoer de toepasselijke wachttijden al afhandelt. Wanneer geen standaardscherm actief is, ontvangt de callback de oorspronkelijke wachttijden. Bij gelijktijdige CharacterScreen- en PixelScreen-callbacks is de gebruiker verantwoordelijk voor de gewenste synchronisatie en voor het voorkomen van dubbele wachttijden.
 
 `PixelScreenConfigureren()` wordt na de hardware-initialisatie en rotatie één keer aangeroepen. De gekozen hardware, driver, resolutie en rotatie liggen voor die gecompileerde sketch vast. Bij andere schermhardware wordt de sketch aangepast, opnieuw gecompileerd en opnieuw geüpload.
 

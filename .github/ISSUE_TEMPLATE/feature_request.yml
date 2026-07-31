@@ -1,0 +1,29 @@
+name: Feature request
+description: Stel ontbrekende of nieuwe functionaliteit voor.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Welke functionaliteit ontbreekt?
+      description: Beschrijf de behoefte en het beoogde gebruik.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Voorgestelde werking
+      description: Beschrijf hoe de functionaliteit volgens jou zou kunnen werken.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Mogelijke impact
+      description: Vermeld mogelijke gevolgen voor architectuur, publieke API, hardware, dependencies, geheugen, opslagruimte of processortijd.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Bestaande alternatieven
+      description: Vermeld welke bestaande mogelijkheden je al hebt onderzocht.

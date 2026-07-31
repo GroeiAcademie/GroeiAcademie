@@ -61,7 +61,7 @@ De standaardwaarden uit `src/Configuratie/SystemConfig.h` zijn:
 | sensor 3 | `A2` |
 | sensor 4 | `A3` |
 
-`AANTAL_SENSOREN_AANWEZIG` bepaalt of de opstelling twee of vier sensoren gebruikt.
+`AANTAL_SENSOREN_AANWEZIG` bepaalt of de opstelling twee of vier sensoren gebruikt. `SystemConfig.h` weigert iedere andere waarde tijdens het compileren.
 
 ### Aansluiting per resistieve druksensor
 
@@ -90,7 +90,7 @@ Alle sensoren en de Arduino moeten een gemeenschappelijke massa gebruiken.
 ```text
 Sensorcircuit 1 uitgang  -> A0
 Sensorcircuit 2 uitgang  -> A1
-Sensorcircuit 3 uitgang  -> A2  (alleen bij 3 of 4 sensoren)
+Sensorcircuit 3 uitgang  -> A2  (alleen bij 4 sensoren)
 Sensorcircuit 4 uitgang  -> A3  (alleen bij 4 sensoren)
 Alle GND-punten          -> Arduino GND
 Voeding sensorcircuits   -> geschikte VCC volgens board en sensor
@@ -103,20 +103,36 @@ Sluit een kale resistieve sensor niet aan alsof zij zelf een analoge spanning ge
 Voor UNO R3:
 
 ```cpp
-#define UNO_VERSION 3
+#define BOARD_VERSION BOARD_UNO_R3
 ```
 
 De huidige configuratie gebruikt dan 10-bit ADC-schaal en `DELAY_US 100`.
 
-Voor UNO R4:
+Voor UNO R4 Minima:
 
 ```cpp
-#define UNO_VERSION 4
+#define BOARD_VERSION BOARD_UNO_R4_MINIMA
 ```
 
-De huidige configuratie gebruikt dan 14-bit ADC-schaal en `DELAY_US 200`.
+Voor UNO R4 WiFi:
 
-Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
+```cpp
+#define BOARD_VERSION BOARD_UNO_R4_WIFI
+```
+
+Beide UNO R4-keuzes gebruiken 14-bit ADC-schaal en `DELAY_US 200`.
+
+Voor Wemos D1 R32:
+
+```cpp
+#define BOARD_VERSION BOARD_ESP32_UNO
+```
+
+De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons op de concrete Wemos D1 R32-opstelling.
+
+Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
+
+`ADC_Validatie_Native.ino` is een zelfstandig hardwarevalidatiescript en gebruikt daarom een eigen `BOARD_VERSION`-keuze in het script zelf. De gewone Stimulusvoorbeelden gebruiken de centrale configuratie uit `UserConfig.h` en `SystemConfig.h`.
 
 ## Configuratiegrenzen
 
@@ -148,16 +164,15 @@ Voor reproduceerbare resultaten:
 
 ## Scenario's en voorbeelden
 
-- `examples/Stimulus/ADC_Validatie_Native/ADC_Validatie_Native.ino`
-- `examples/Stimulus/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino`
-- `examples/Stimulus/Hardware_Validatie_Shield_v0_10_1/Hardware_Validatie_Shield_v0_10_1.ino`
-- `examples/Stimulus/Scenario1_EnkelTik/Scenario1_EnkelTik.ino`
-- `examples/Stimulus/Scenario2_Simultaan/Scenario2_Simultaan.ino`
-- `examples/Stimulus/Scenario3_Ineenstortend/Scenario3_Ineenstortend.ino`
-- `examples/Stimulus/Scenario4_Cocktail/Scenario4_Cocktail.ino`
-- `examples/Stimulus/Tik_Enkele_Samen_Instortend_Cocktail/Tik_Enkele_Samen_Instortend_Cocktail.ino`
+- `examples/Systeem/ADC_Validatie/ADC_Validatie_Native/ADC_Validatie_Native.ino`
+- `examples/Systeem/ADC_Validatie/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino`
+- `examples/Toepassingsgebieden/Stimulus/Scenario1_EnkelTik/Scenario1_EnkelTik.ino`
+- `examples/Toepassingsgebieden/Stimulus/Scenario2_Simultaan/Scenario2_Simultaan.ino`
+- `examples/Toepassingsgebieden/Stimulus/Scenario3_Ineenstortend/Scenario3_Ineenstortend.ino`
+- `examples/Toepassingsgebieden/Stimulus/Scenario4_Cocktail/Scenario4_Cocktail.ino`
+- `examples/Toepassingsgebieden/Stimulus/Tik_Enkele_Samen_Instortend_Cocktail/Tik_Enkele_Samen_Instortend_Cocktail.ino`
 
-De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke backends: directe Arduino-ADC en ADS1115. `Hardware_Validatie_Shield_v0_10_1` controleert aanvullend de specifieke v0.10.1-shieldopbouw met I2C, CharacterScreen, TFT-SPI, ADS1115 en de analoge routes.
+De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke backends: directe Arduino-ADC en ADS1115. De volledige fysieke shieldopbouw en de bijbehorende validatiestappen staan in de hardwarebeschrijving en de afzonderlijke handleiding.
 
 ## Veiligheid en interpretatie
 
@@ -170,4 +185,19 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 
 ## Afzonderlijke schemabestanden
 
-De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg staat in [Hardware/Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md](Hardware/Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. Het afzonderlijke validatieprotocol staat in [Hardware/VALIDATIE_Shield_v0.10.1.md](Hardware/VALIDATIE_Shield_v0.10.1.md).
+De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg staat in [Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md](Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. De praktische validatiestappen staan in [Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md](Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+
+
+### BOARD_ESP32_UNO
+
+Arduino Uno R3-vormfactor ESP32-boardprofiel.
+
+#### Reeds getest en ondersteund
+- Wemos D1 R32
+- TTGO D1 R32
+
+#### Verwacht compatibel
+- Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino ESP32-core.
+
+#### Nog niet getest
+- Aan te vullen na validatie.

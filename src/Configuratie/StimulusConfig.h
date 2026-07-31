@@ -19,11 +19,14 @@
 #define DEFAULT_TOEGESTANE_MARGE_TIKTIJD      30
 #define DEFAULT_TOEGESTANE_MARGE_TIKKRACHT    25
 
-#define DEFAULT_TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS 100UL
 
 // Minimale en maximale factor t.o.v. de nulmeting voor de duur van stap 3 (de lange aanhoudtik)
-#define INSTORTEND_MINIMALE_FACTOR  3 // kortste toegelaten duur van stap 3 (in veelvouden van de nulmeting)
-#define INSTORTEND_MAXIMALE_FACTOR  7 // langste toegelaten duur van stap 3 (in veelvouden van de nulmeting)
+#ifndef INSTORTEND_MINIMALE_FACTOR
+  #define INSTORTEND_MINIMALE_FACTOR  3 // kortste toegelaten duur van stap 3 (in veelvouden van de nulmeting)
+#endif
+#ifndef INSTORTEND_MAXIMALE_FACTOR
+  #define INSTORTEND_MAXIMALE_FACTOR  7 // langste toegelaten duur van stap 3 (in veelvouden van de nulmeting)
+#endif
 // OPGEPAST: INSTORTEND_MINIMALE_FACTOR + INSTORTEND_MAXIMALE_FACTOR moeten een EVEN getal zijn!
 
 #define INSTORTEND_TOV_NULMETING          0
@@ -41,7 +44,7 @@
 #define TIKKRACHT_MAXIMALE_COMFORT_GRENS ADC(800)  // from 800 to 1023 -> big squeeze
 
 // De gewenste tikkracht)
-#define SCENARIO_GEWENSTE_TIKKRACHT_ADC ADC(400)   // TODO: voor later
+#define SCENARIO_GEWENSTE_TIKKRACHT_ADC ADC(400)   // de praktijk zal uitwijzen wat de ideale default waarde is
 
 // Om de OFFSET te bepalen
 #define OFFSET_METING_TIJD_MS   2000UL

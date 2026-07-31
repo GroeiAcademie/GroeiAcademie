@@ -11,10 +11,12 @@
   #error SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd.
 #endif
 
-#ifdef DEBUG
-  #define SCREEN_OUTPUT (SCREEN_OUTPUT_CONFIG | SCREEN_TYPE_SERIAL)
-#else
-  #define SCREEN_OUTPUT SCREEN_OUTPUT_CONFIG
+#ifndef SCREEN_OUTPUT
+  #ifdef DEBUG
+    #define SCREEN_OUTPUT (SCREEN_OUTPUT_CONFIG | SCREEN_TYPE_SERIAL)
+  #else
+    #define SCREEN_OUTPUT SCREEN_OUTPUT_CONFIG
+  #endif
 #endif
 
 #if ((SCREEN_OUTPUT) & ~(SCREEN_TYPE_SERIAL | SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
@@ -35,8 +37,6 @@ extern LiquidCrystal_I2C lcd;
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
 #include <Adafruit_GFX.h>
 extern Adafruit_GFX* PixelScreen;
-
-#define FATAL_ZOEK_OP "ZOEK DIT NU OP"
 
 #if (ACTIEF_PIXEL_SCREEN == SCREEN_128X32)
   #define ACTIEF_PIXEL_SCREEN_BREEDTE 128

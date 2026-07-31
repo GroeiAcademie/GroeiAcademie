@@ -1,0 +1,32 @@
+// ============================================================================
+// Default PixelScreen
+// ============================================================================
+// ============================================================================
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7789.h>
+#include <Screen.h>
+#include <Configuratie/ExamplesConfig.h>
+
+// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino
+// structureel niet: Screen.cpp wordt als apart bestand gecompileerd en ziet
+// een #define hier nooit. Zet SCREEN_TYPE_PIXELS daarom in UserConfig.h
+// (kopieer van UserConfig_template.h) of rechtstreeks in SystemConfig.h.
+// Onderstaande controle geeft een duidelijke foutmelding als dat nog niet
+// gebeurd is, in plaats van de sketch stil te laten falen.
+#if !(SCREEN_OUTPUT_CONFIG & SCREEN_TYPE_PIXELS)
+  #error Stel SCREEN_OUTPUT_CONFIG in UserConfig.h of SystemConfig.h in op (minstens) SCREEN_TYPE_PIXELS.
+#else
+
+Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
+
+void setup() {
+  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
+  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
+  PixelScreen = &pixelScreen;
+  PixelScreenConfigureren();
+}
+
+void loop() {
+  while (true) PrintToScreen( "EERSTE REGEL", "TWEEDE REGEL", LEESTIJD_VOORBEELD_MS, " NU", "DERDE REGEL", "VIERDE REGEL", WACHTTIJD_TUSSEN_PAGINAS_MS);
+}
+#endif

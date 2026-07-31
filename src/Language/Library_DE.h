@@ -4,29 +4,61 @@
 //=========================================================
 // FATAL
 //=========================================================
+#ifndef FATAL_ZOEK_OP
+  #define FATAL_ZOEK_OP "ZOEK DIT NU OP"
+#endif
+
 // PixelScreen
-#define _FATAL_PS001 "FATAL: PS001" // PixelScreen niet gekoppeld
-#define _FATAL_PS002 "FATAL: PS002" // Omgewisselde breedte en hoogte komen niet overeen
-#define _FATAL_PS003 "FATAL: PS003" // Niet-omgewisselde breedte en hoogte komen niet overeen
-#define _FATAL_PS004 "FATAL: PS004" // Tekstgrid kleiner dan 16x2
+#ifndef _FATAL_PS001
+  #define _FATAL_PS001 "FATAL: PS001" // PixelScreen niet gekoppeld
+#endif
+#ifndef _FATAL_PS002
+  #define _FATAL_PS002 "FATAL: PS002" // Omgewisselde breedte en hoogte komen niet overeen
+#endif
+#ifndef _FATAL_PS003
+  #define _FATAL_PS003 "FATAL: PS003" // Niet-omgewisselde breedte en hoogte komen niet overeen
+#endif
+#ifndef _FATAL_PS004
+  #define _FATAL_PS004 "FATAL: PS004" // Tekstgrid kleiner dan 16x2
+#endif
 
 //=========================================================
 // LCD
 //=========================================================
 // ADS1115
-#define _LCD_ADS1115_FOUT           "ADS1115"
-#define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
+#ifndef _LCD_ADS1115_FOUT
+  #define _LCD_ADS1115_FOUT           "ADS1115"
+#endif
+#ifndef _LCD_ADS1115_NIET_GEVONDEN
+  #define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
+#endif
 
 // Stimulus
-#define _LCD_KRACHT_TE_HARD         "TE HARD"
-#define _LCD_KRACHT_TE_ZACHT        "TE ZACHT"
+#ifndef _LCD_KRACHT_TE_HARD
+  #define _LCD_KRACHT_TE_HARD         "TE HARD"
+#endif
+#ifndef _LCD_KRACHT_TE_ZACHT
+  #define _LCD_KRACHT_TE_ZACHT        "TE ZACHT"
+#endif
 
-#define _LCD_SCORE_TIKKRACHT        "TIKKRACHT "
-#define _LCD_SCORE_TIKTIJD          "TIKTIJD "
+#ifndef _LCD_SCORE_TIKKRACHT
+  #define _LCD_SCORE_TIKKRACHT        "TIKKRACHT "
+#endif
+#ifndef _LCD_SCORE_TIKTIJD
+  #define _LCD_SCORE_TIKTIJD          "TIKTIJD "
+#endif
 
-#define _LCD_TIJD_METEN_STOPT       "WE STOPPEN ERMEE"
-#define _LCD_TIJD_TEVEEL_FOUT       "SLECHTE START :)"
-#define _LCD_TIJD_TE_KORT           "TE KORT"
-#define _LCD_TIJD_TE_LANG           "TE LANG"
+#ifndef _LCD_TIJD_METEN_STOPT
+  #define _LCD_TIJD_METEN_STOPT       "WE STOPPEN ERMEE"
+#endif
+#ifndef _LCD_TIJD_TEVEEL_FOUT
+  #define _LCD_TIJD_TEVEEL_FOUT       "SLECHTE START :)"
+#endif
+#ifndef _LCD_TIJD_TE_KORT
+  #define _LCD_TIJD_TE_KORT           "TE KORT"
+#endif
+#ifndef _LCD_TIJD_TE_LANG
+  #define _LCD_TIJD_TE_LANG           "TE LANG"
+#endif
 
 #endif

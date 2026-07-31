@@ -86,7 +86,7 @@ unsigned long TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = DEFAULT_TOEGESTANE_MARGE
 
 int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
 #ifdef TRACE
-  int raw = analogRead(sensorPin);
+  int raw = RawAnalogRead(sensorPin);
   int waarde = raw - offsetSensor;
 
   if (waarde < 0) {

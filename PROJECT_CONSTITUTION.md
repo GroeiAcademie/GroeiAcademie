@@ -12,6 +12,8 @@ Het GroeiAcademie Framework bestaat enerzijds om beoefenaars van Neuro Linguïst
 
 Het framework wil de afstand verkleinen tussen wat iemand denkt waar te nemen of beheersen en wat objectief kan worden gemeten. Het ondersteunt leren, oefenen, kalibreren, onderzoeken en aantonen.
 
+Zie [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md) voor hoe deze missie concreet wordt uitgewerkt in toepassingsgebieden, en [docs/Toepassingsgebieden/SENSOR_INVENTARIS.md](docs/Toepassingsgebieden/SENSOR_INVENTARIS.md) voor de sensoren die daarvoor al ter beschikking zijn.
+
 ## 3. Visie
 
 > Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten, dankzij een modulair open-sourceframework waarmee menselijke vaardigheden objectief gemeten, geoefend, ontwikkeld en onderzocht kunnen worden.

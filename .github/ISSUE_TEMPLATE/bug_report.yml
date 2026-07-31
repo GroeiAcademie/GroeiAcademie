@@ -1,0 +1,37 @@
+name: Bug report
+description: Meld een fout of onverwacht gedrag in het GroeiAcademie FrameWork.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Beschrijving van het probleem
+      description: Beschrijf duidelijk wat er fout gaat.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Stappen om het probleem te reproduceren
+      description: Beschrijf stap voor stap hoe het probleem opnieuw kan worden vastgesteld.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Verwacht gedrag
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Testomgeving
+      description: Vermeld Arduino IDE-versie, boardpakket, board, hardware, configuratie en externe libraries met versienummers.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logbestanden, meetresultaten, afbeeldingen of video
+      description: Voeg relevante informatie of links toe.

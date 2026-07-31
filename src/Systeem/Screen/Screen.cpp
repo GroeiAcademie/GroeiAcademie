@@ -1,11 +1,31 @@
 #include "Screen.h"
 #if defined(LANGUAGE_NL)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_NL.h")
+      #include "../../Language/UserLibrary_NL.h"
+    #endif
+  #endif
   #include "../../Language/Library_NL.h"
 #elif defined(LANGUAGE_DE)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_DE.h")
+      #include "../../Language/UserLibrary_DE.h"
+    #endif
+  #endif
   #include "../../Language/Library_DE.h"
 #elif defined(LANGUAGE_EN)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_EN.h")
+      #include "../../Language/UserLibrary_EN.h"
+    #endif
+  #endif
   #include "../../Language/Library_EN.h"
 #elif defined(LANGUAGE_FR)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_FR.h")
+      #include "../../Language/UserLibrary_FR.h"
+    #endif
+  #endif
   #include "../../Language/Library_FR.h"
 #endif
 
@@ -39,8 +59,17 @@ static PixelScreenStatus pixelScreenStatus = { false, true, 0, 0, 0, 0, 0, 0 };
 
 #define PIXELGRID_MIN_KOLOMMEN 16
 #define PIXELGRID_MAX_KOLOMMEN 40
+
 #define PIXELGRID_MIN_RIJEN     2
 #define PIXELGRID_MAX_RIJEN     4
+
+#define PIXEL_SCREEN_CHARACTER_WIDTH  6
+#define PIXEL_SCREEN_CHARACTER_HEIGHT 8
+
+static int16_t PixelScreenKarakterBreedte() { return PIXEL_SCREEN_CHARACTER_WIDTH * PIXEL_SCREEN_TEXT_SIZE; }
+static int16_t PixelScreenKarakterStap() { return PixelScreenKarakterBreedte() + PIXEL_SCREEN_CHARACTER_SPACING; }
+static int16_t PixelScreenRegelHoogte() { return PIXEL_SCREEN_CHARACTER_HEIGHT * PIXEL_SCREEN_TEXT_SIZE; }
+static int16_t PixelScreenRegelStap() { return PixelScreenRegelHoogte() + PIXEL_SCREEN_LINE_SPACING; }
 
 static uint8_t PixelGridClamp(int32_t waarde, uint8_t minimum, uint8_t maximum) {
   if (waarde < minimum) return minimum;
@@ -67,8 +96,11 @@ bool PixelScreenConfigureren() {
   if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) { pixelScreenStatus.pixelScreenActief = false; PixelScreenFoutmeldingWeergeven (_FATAL_PS003); return false; }
 #endif
 
-  int32_t ruweKolommen = PixelScreen->width()  / (6 * PIXEL_SCREEN_TEXT_SIZE);
-  int32_t ruweRegels   = PixelScreen->height() / (8 * PIXEL_SCREEN_TEXT_SIZE);
+  int16_t bruikbareBreedte = PixelScreen->width() - (2 * PIXEL_SCREEN_MARGIN);
+  int16_t bruikbareHoogte = PixelScreen->height() - (2 * PIXEL_SCREEN_MARGIN);
+  
+  int32_t ruweKolommen = (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) / PixelScreenKarakterStap();
+  int32_t ruweRegels = (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) / PixelScreenRegelStap();
 
   // Minimumvereiste (16x2, dezelfde ondergrens als de kleinste ondersteunde characterscherm-resolutie) niet gehaald: geen pixeluitvoer voor TYPE_NONE.
   if (ruweKolommen < PIXELGRID_MIN_KOLOMMEN || ruweRegels < PIXELGRID_MIN_RIJEN) {
@@ -81,12 +113,14 @@ bool PixelScreenConfigureren() {
   pixelScreenStatus.aantalRegels   = PixelGridClamp(ruweRegels,   PIXELGRID_MIN_RIJEN,     PIXELGRID_MAX_RIJEN);
 
   // Centreren: restruimte gelijk verdelen links/rechts en boven/onder.
-  int16_t gridBreedtePx = pixelScreenStatus.aantalKolommen * 6 * PIXEL_SCREEN_TEXT_SIZE;
-  int16_t gridHoogtePx  = pixelScreenStatus.aantalRegels   * 8 * PIXEL_SCREEN_TEXT_SIZE;
-  pixelScreenStatus.offsetX = (PixelScreen->width()  - gridBreedtePx) / 2;
-  pixelScreenStatus.offsetY = (PixelScreen->height() - gridHoogtePx)  / 2;
-  if (pixelScreenStatus.offsetX < 0) pixelScreenStatus.offsetX = 0;
-  if (pixelScreenStatus.offsetY < 0) pixelScreenStatus.offsetY = 0;
+  int16_t gridBreedtePx = pixelScreenStatus.aantalKolommen * PixelScreenKarakterBreedte() + (pixelScreenStatus.aantalKolommen - 1) * PIXEL_SCREEN_CHARACTER_SPACING;
+  int16_t gridHoogtePx = pixelScreenStatus.aantalRegels * PixelScreenRegelHoogte() + (pixelScreenStatus.aantalRegels - 1) * PIXEL_SCREEN_LINE_SPACING;
+  
+  pixelScreenStatus.offsetX = PIXEL_SCREEN_MARGIN + (bruikbareBreedte - gridBreedtePx) / 2;
+  pixelScreenStatus.offsetY = PIXEL_SCREEN_MARGIN + (bruikbareHoogte - gridHoogtePx) / 2;
+  
+  if (pixelScreenStatus.offsetX < PIXEL_SCREEN_MARGIN) pixelScreenStatus.offsetX = PIXEL_SCREEN_MARGIN;
+  if (pixelScreenStatus.offsetY < PIXEL_SCREEN_MARGIN) pixelScreenStatus.offsetY = PIXEL_SCREEN_MARGIN;
 
   ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS = pixelScreenStatus.aantalRegels >= 4;
   PixelScreen->setTextSize(PIXEL_SCREEN_TEXT_SIZE);
@@ -106,12 +140,17 @@ void PixelScreenSetCursor(uint8_t kolom, uint8_t regel) {
   if (!PixelScreenConfigureren()) return;
   pixelScreenStatus.cursorKolom = kolom;
   pixelScreenStatus.cursorRegel = regel;
-  PixelScreen->setCursor(pixelScreenStatus.offsetX + kolom * 6 * PIXEL_SCREEN_TEXT_SIZE, pixelScreenStatus.offsetY + regel * 8 * PIXEL_SCREEN_TEXT_SIZE);
+  PixelScreen->setCursor(pixelScreenStatus.offsetX + kolom * PixelScreenKarakterStap(), pixelScreenStatus.offsetY + regel * PixelScreenRegelStap());
 }
 
 void PixelScreenPrint(const String& tekst) {
   if (!PixelScreenConfigureren()) return;
-  PixelScreen->print(tekst);
+  
+  for (uint16_t index = 0; index < tekst.length(); index++) {
+    PixelScreen->setCursor(pixelScreenStatus.offsetX + (pixelScreenStatus.cursorKolom + index) * PixelScreenKarakterStap(), pixelScreenStatus.offsetY + pixelScreenStatus.cursorRegel * PixelScreenRegelStap());
+    PixelScreen->print(tekst[index]);
+  }
+
   pixelScreenStatus.cursorKolom += tekst.length();
   
   while (pixelScreenStatus.cursorKolom >= pixelScreenStatus.aantalKolommen) {
@@ -198,13 +237,18 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #endif
 #endif
 
+    bool tweedePaginaNodig = false;
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+    tweedePaginaNodig = tweedePaginaNodig || (characterScreenActief && !ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+    tweedePaginaNodig = tweedePaginaNodig || (pixelScreenActief && !ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS);
+#endif
+    if (tweedePaginaNodig && delayTussenPaginas) delay(delayTussenPaginas);
+
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
     if (characterScreenActief) {
-      if (!ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS) {
-        if (delayTussenPaginas) delay(delayTussenPaginas);
-        lcd.clear();
-      }
-      
+      if (!ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS) lcd.clear();
       lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); lcd.print(derdeRegel);
       lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); lcd.print(vierdeRegel);
     }
@@ -212,11 +256,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
     if (pixelScreenActief) {
-      if (!ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS) {
-        if (delayTussenPaginas) delay(delayTussenPaginas);
-        PixelScreenClear();
-      }
-
+      if (!ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS) PixelScreenClear();
       PixelScreenSetCursor(0, ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS ? 2 : 0); PixelScreenPrint(derdeRegel);
       PixelScreenSetCursor(0, ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS ? 3 : 1); PixelScreenPrint(vierdeRegel);
     }

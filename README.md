@@ -8,11 +8,11 @@ Het GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oef
 
 ## Huidige status
 
-- versie: `0.10.1`;
-- ontwikkelfase: pre-1.0;
+- versie: `1.0.0`;
+- ontwikkelfase: 1.0.0;
 - huidige implementatie: Stimulus en Screen;
-- gecompileerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
-- Arduino Lint: geen fouten en geen waarschuwingen;
+- compilatiematrix uitgevoerd voor Arduino UNO R3, UNO R4 Minima, UNO R4 WiFi en Wemos D1 R32 (ESP32): 240 succesvol, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
+- Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
 Emotie-observatie, ademhaling, hartslag en andere toepassingsgebieden staan in de inhoudelijke roadmap, maar zijn nog niet als volwaardige modules geïmplementeerd.
@@ -37,6 +37,10 @@ Documents/Arduino/libraries/GroeiAcademie/
 
 Herstart Arduino IDE na de installatie.
 
+### Wemos D1 R32
+
+Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer daarna `ESP32 Dev Module`. De compilatietests gebruiken hiervoor FQBN `esp32:esp32:esp32`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
+
 ## Kwaliteitscontrole
 
 Elke officiële release van deze library wordt automatisch gevalideerd.
@@ -48,39 +52,48 @@ De validatie omvat:
 - Arduino Uno R3
 - Arduino Uno R4 Minima
 - Arduino Uno R4 WiFi
+- Wemos D1 R32 via ESP32 Dev Module
 
 Meer informatie:
 
-- `extras/test/TESTEN.md`
-- `extras/test/TESTRESULTATEN.md`
+- `extras/TESTEN.md`
+- `extras/TESTRESULTATEN.md`
 
-## Afhankelijkheid
+## Afhankelijkheden
 
-De standaard CharacterScreen-implementatie gebruikt:
+De verplichte afhankelijkheden staan in `library.properties`:
 
 ```text
 LiquidCrystal I2C
+Adafruit GFX Library
+Adafruit ST7735 and ST7789 Library
+Adafruit ADS1X15
 ```
 
-De exacte, verplichte afhankelijkheid staat in `library.properties`. Wanneer `SCREEN_TYPE_PIXELS` geselecteerd wordt, zijn daarnaast `Adafruit GFX Library` en de concrete displaydriver nodig, bijvoorbeeld `Adafruit ST7735 and ST7789 Library`. Deze PixelScreen-afhankelijkheden zijn compile-time optioneel en daarom niet als harde afhankelijkheid in `library.properties` opgenomen.
-
-### Optionele afhankelijkheid: ADS1115-backend (Stimulus)
-
-Wanneer in `SystemConfig.h` `ADC_BACKEND` op `ADC_BACKEND_ADS1115` gezet wordt, is bijkomend de library **Adafruit ADS1X15** nodig (te installeren via Library Manager). Dit is bewust **geen** harde afhankelijkheid in `library.properties`: bij de standaardbackend (`ADC_BACKEND_NATIVE`) is deze library niet nodig, en de meeste gebruikers gebruiken de ingebouwde ADC.
+Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG` en `ADC_BACKEND` bepalen welke onderdelen werkelijk worden gecompileerd.
 
 ## Configuratie
 
-De belangrijkste configuratiebestanden zijn:
+De configuratie- en taalbestanden zijn:
 
 ```text
 src/Configuratie/SystemConfig.h
+src/Configuratie/UserConfig_template.h
+src/Configuratie/Examples.h
 src/Configuratie/StimulusConfig.h
+
+src/Language/Examples_XX.h
+src/Language/Library_XX.h
+src/Language/UserExample_XX_template.h
+src/Language/UserLibrary_XX_template.h
 ```
 
-Controleer vóór compilatie in `SystemConfig.h` minstens:
+Kopieer `UserConfig_template.h` vóór gebruik naar `UserConfig.h` wanneer je blijvende persoonlijke instellingen nodig hebt. Zonder `UserConfig.h` gebruikt de library de standaardwaarden uit `SystemConfig.h`. Kopieer voor persoonlijke voorbeeldteksten `UserExample_XX_template.h` naar `UserExample_XX.h` en voor persoonlijke libraryteksten `UserLibrary_XX_template.h` naar `UserLibrary_XX.h`. De actieve gebruikersbestanden blijven naast hun templates staan, worden vóór de overeenkomstige officiële fallbackwaarden geladen en staan in `.gitignore`. `src/Configuratie/Examples.h` blijft de wrapper waarmee de voorbeeldprogramma's de gekozen `UserExample_XX.h` en `Examples_XX.h` laden.
+
+Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilatie minstens:
 
 - `DEBUG`;
-- `SCREEN_OUTPUT`;
+- `SCREEN_OUTPUT_CONFIG`;
 - `I2C_ADRES`;
 - `ACTIEF_CHARACTER_SCREEN`;
 - `ACTIEF_PIXEL_SCREEN`;
@@ -88,7 +101,7 @@ Controleer vóór compilatie in `SystemConfig.h` minstens:
 - `PIXEL_SCREEN_ROTATION`;
 - `AANTAL_SENSOREN_AANWEZIG`;
 - `PIN_SENSOR_1` tot en met `PIN_SENSOR_4`;
-- `UNO_VERSION`;
+- `BOARD_VERSION`;
 - `ADC_BACKEND` (`ADC_BACKEND_NATIVE` of `ADC_BACKEND_ADS1115`) — zie hierboven bij Afhankelijkheid.
 
 Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
@@ -105,24 +118,26 @@ Beschikbare voorbeelden:
 
 ```text
 examples/
-├── Screen/
-│   ├── Callback_CharacterScreen/
-│   ├── Callback_PixelScreen/
-│   ├── Default_CharacterScreen/
-│   ├── Default_PixelScreen/
-│   └── Default_CharacterScreen_PixelScreen/
-└── Stimulus/
-    ├── ADC_Validatie_Native/
-    ├── ADC_Validatie_ADS1115/
-    ├── Hardware_Validatie_Shield_v0_10_1/
-    ├── Scenario1_EnkelTik/
-    ├── Scenario2_Simultaan/
-    ├── Scenario3_Ineenstortend/
-    ├── Scenario4_Cocktail/
-    └── Tik_Enkele_Samen_Instortend_Cocktail/
+├── Systeem/
+│   ├── ADC_Validatie/
+│   │   ├── ADC_Validatie_Native/
+│   │   └── ADC_Validatie_ADS1115/
+│   └── Screen/
+│       ├── Callback_CharacterScreen/
+│       ├── Callback_PixelScreen/
+│       ├── Default_CharacterScreen/
+│       ├── Default_PixelScreen/
+│       └── Default_CharacterScreen_PixelScreen/
+└── Toepassingsgebieden/
+    └── Stimulus/
+        ├── Scenario1_EnkelTik/
+        ├── Scenario2_Simultaan/
+        ├── Scenario3_Ineenstortend/
+        ├── Scenario4_Cocktail/
+        └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
-`ADC_Validatie_Native`, `ADC_Validatie_ADS1115` en `Hardware_Validatie_Shield_v0_10_1` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica — ze dienen voor hardwarevalidatie (Arduino-ADC-route versus ADS1115-route vergelijken en het volledige v0.10.1-shield controleren), niet als gewone gebruikersvoorbeelden. Zie `docs/Toepassingsgebieden/Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md`, hoofdstuk 18, voor het gebruik. De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
+`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en [Handleiding GroeiAcademie Stimulus Hardware Validatie v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
 
 ## Librarystructuur
 
@@ -144,6 +159,10 @@ GroeiAcademie/
 
 Zie [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) voor verantwoordelijkheden en publieke headers.
 
+### Meerdere ScreenCallbacks
+
+Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregistreerd zijn. Ze kunnen dezelfde informatie synchroon weergeven of elk een ander doel hebben. De library dwingt geen synchronisatie tussen beide callbacks af. Wanneer beide callbacks tegelijk actief zijn, is de gebruiker verantwoordelijk voor de gewenste synchronisatie, de onderlinge timing en het voorkomen dat `delayTime` of `delayTussenPaginas` door beide callbacks wordt uitgevoerd.
+
 ## Elektronische schema's
 
 De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md).
@@ -156,7 +175,11 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Toepassingsgebieden/Stimulus/Hardware/](docs/Toepassingsgebieden/Stimulus/Hardware/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de centrale Markdown-documentatie [Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md](docs/Toepassingsgebieden/Stimulus/Hardware/Stimulus_uitbreiding_ADS1115_TFTSPI_v0.10.1.md) en het validatieprotocol [VALIDATIE_Shield_v0.10.1.md](docs/Toepassingsgebieden/Stimulus/Hardware/VALIDATIE_Shield_v0.10.1.md).
+De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Toepassingsgebieden/Stimulus/Hardware/](docs/Toepassingsgebieden/Stimulus/Hardware/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en de [handleiding voor de hardwarevalidatie v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+
+## Geplande uitbreidingen
+
+Aangevraagde en goedgekeurde uitbreidingen voor volgende releases staan in [de roadmap](docs/ROADMAP.md). De PixelScreen-laag ondersteunt nu een instelbare buitenmarge, witruimte tussen tekens en regels en een automatisch gecentreerd tekstgrid op basis van de werkelijk bruikbare schermruimte.
 
 ## Documentatie
 
@@ -164,7 +187,6 @@ De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Toepassingsgebieden/Stimulu
 - [Architectuur](docs/ARCHITECTURE.md)
 - [Screen](docs/Systeem/SCREEN.md)
 - [PixelScreen-foutcodes](docs/Systeem/PIXELSCREEN_FOUTCODES.md)
-- [Voorstel voor leesbare PixelScreen-oriëntaties](docs/Systeem/PIXELSCREEN_ORIENTATIE_VOORSTEL.txt)
 - [Toepassingsgebieden en schema-index](docs/Toepassingsgebieden/MODULES.md)
 - [Stimulus](docs/Toepassingsgebieden/Stimulus/README.md)
 - [Hardwareondersteuning](docs/HARDWARE_SUPPORT.md)

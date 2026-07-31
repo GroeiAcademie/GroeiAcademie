@@ -2,7 +2,7 @@
 
 Bronbestand: [`../../src/Configuratie/StimulusConfig.h`](../../src/Configuratie/StimulusConfig.h)
 
-Instellingen specifiek voor de Stimulus-toepassing (VINGERTEST): meetversie, marges, drempels en timeouts. Deze waarden zijn softwareconfiguratie. Ze zijn geen universele fysiologische normen. Waar een define via `ADC(...)` geschreven is, herschaalt die automatisch mee met `ADC_BACKEND`/`UNO_VERSION` uit `SystemConfig.h` — zie `SystemConfig.md`.
+Instellingen specifiek voor de Stimulus-toepassing (VINGERTEST): meetversie, marges, drempels en timeouts. Deze waarden zijn softwareconfiguratie. Ze zijn geen universele fysiologische normen. Waar een define via `ADC(...)` geschreven is, herschaalt die automatisch mee met `ADC_BACKEND`/`BOARD_VERSION` uit `SystemConfig.h` — zie `SystemConfig.md`.
 
 ## Stimulusversie
 

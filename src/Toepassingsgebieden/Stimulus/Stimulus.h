@@ -5,12 +5,32 @@
 #include "../../Configuratie/SystemConfig.h"
 #include "../../Configuratie/StimulusConfig.h"
 #if defined(LANGUAGE_NL)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_NL.h")
+      #include "../../Language/UserLibrary_NL.h"
+    #endif
+  #endif
   #include "../../Language/Library_NL.h"
 #elif defined(LANGUAGE_DE)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_DE.h")
+      #include "../../Language/UserLibrary_DE.h"
+    #endif
+  #endif
   #include "../../Language/Library_DE.h"
 #elif defined(LANGUAGE_EN)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_EN.h")
+      #include "../../Language/UserLibrary_EN.h"
+    #endif
+  #endif
   #include "../../Language/Library_EN.h"
 #elif defined(LANGUAGE_FR)
+  #if defined(__has_include)
+    #if __has_include("../../Language/UserLibrary_FR.h")
+      #include "../../Language/UserLibrary_FR.h"
+    #endif
+  #endif
   #include "../../Language/Library_FR.h"
 #endif
 #include "../../Systeem/Screen/Screen.h"
