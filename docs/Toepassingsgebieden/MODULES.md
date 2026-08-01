@@ -12,10 +12,10 @@ Een toepassingsgebied doorloopt de volgende statussen, van eerste denkspoor tot 
 2. **ter-discussie**, wordt inhoudelijk besproken;
 3. **ter-beoordeling**, een concreet voorstel ligt er en wordt beoordeeld;
 4. **goedgekeurd**, aanvaard als richting, nog niet op de agenda van een release;
-5. **gepland**, staat effectief op de agenda, zie `ROADMAP.md`;
+5. **gepland**, staat effectief op de agenda, zie [ROADMAP](../ROADMAP.md);
 6. **geïmplementeerd**.
 
-Zie `docs/GOVERNANCE.md` voor hoe een nieuw voorstel deze statussen doorloopt.
+Zie [Governance](../../GOVERNANCE.md) voor hoe een nieuw voorstel deze statussen doorloopt.
 
 ## Statusoverzicht
 

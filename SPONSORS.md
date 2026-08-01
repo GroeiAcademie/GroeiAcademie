@@ -17,17 +17,17 @@ Voor wie gewoon een bedrag wil geven, ongeacht de hoogte, zonder overleg of proc
 
 | Bedrag | Naam |
 |---|---|
-| € 5 | **De Warme Supporter** — een lekkere filterkoffie om te laten zien dat je achter ons staat. |
-| € 15 | **De Sfeermaker** — een luxe cappuccino met extra schuim voor net dat beetje extra motivatie. |
+| € 5 | **Warme Supporter** — een lekkere filterkoffie om te laten zien dat je achter ons staat. |
+| € 15 | **Sfeermaker** — een luxe cappuccino met extra schuim voor net dat beetje extra motivatie. |
 | € 35 | **Koffie met Gebak** — een complete traktatie om een mooie mijlpaal van ons project te vieren. |
-| € 75 | **De Thuisbarista** — jij investeert in kwalitatieve bonen zodat we wekenlang vooruit kunnen. |
-| € 150 | **De Strippenkaart** — jouw structurele sympathie zorgt voor een dagelijkse boost op de werkvloer. |
-| € 500 | **De Koffiemachine** — dankzij jou staat de belangrijkste infrastructuur van ons project als een huis. |
-| € 1000 | **De Stamtafel** — jij financiert de plek waar alles samenkomt en verdient een ereplaats aan de stamtafel. Bij deze tier bezorgen we je, net als onze workshopdeelnemers, een certificaat. |
+| € 75 | **Thuisbarista** — jij investeert in kwalitatieve bonen zodat we wekenlang vooruit kunnen. |
+| € 150 | **Strippenkaart** — jouw structurele sympathie zorgt voor een dagelijkse boost op de werkvloer. |
+| € 500 | **Koffiemachine** — dankzij jou staat de belangrijkste infrastructuur van ons project als een huis. |
+| € 1000 | **Eretafel** — jij financiert de plek waar alles samenkomt en verdient een ereplaats aan de stamtafel. Bij deze bijdrage bezorgen we je, net als onze workshopdeelnemers, een certificaat. |
 
-Wil je liever een ander bedrag doneren dan de bovenstaande tiers? Dat kan ook via hetzelfde webshopproduct.
+Wil je liever een ander bedrag doneren dan de bovenstaande bedragen? Dat kan ook via hetzelfde webshopproduct.
 
-Elke donatie blijft standaard volledig anoniem, ongeacht het bedrag of de tier — ook bij "De Stamtafel." Donaties verschijnen nooit op de sponsorlijst hieronder, want daar is geen toestemmings- of vermeldingsstap voor voorzien. Wil je toch publiek erkend worden voor een grotere donatie? Neem dan contact op via het sponsoringpad hieronder — vanaf dat moment loopt het via sponsoring, niet via de webshop.
+Elke donatie blijft standaard volledig anoniem, ongeacht het bedrag — ook bij "Eretafel." Donaties verschijnen nooit op de sponsorlijst hieronder, want daar is geen toestemmings- of vermeldingsstap voor voorzien. Wil je toch publiek erkend worden voor een grotere donatie? Neem dan contact op via het sponsoringpad hieronder — vanaf dat moment loopt het via sponsoring, niet via de webshop.
 
 ## Sponsoring
 
@@ -42,14 +42,57 @@ Vermeld bij voorkeur welke vorm van steun je aanbiedt, of het eenmalig of terugk
 
 Sponsoring hoeft niet enkel financieel te zijn. We verwelkomen ook:
 
-- **Financiële steun** — eenmalig of terugkerend;
-- **Hardware** — ontwikkelborden, sensoren en meetapparatuur, in eigendom of in bruikleen;
-- **PCB-productie** — printplaten en assemblage voor testdoeleinden;
-- **Testmateriaal** — componenten, kabels, voedingen en behuizingen;
-- **Softwarelicenties** — tools die ontwikkeling, ontwerp, testen of documentatie ondersteunen;
-- **Tijd en expertise** — gespecialiseerde productie, metingen, validatie of advies;
-- **Praktische ondersteuning** — andere vormen, in overleg.
+- **Financiële steun** — geldelijke bijdragen, eenmalig of terugkerend;
+- **Apparatuur** — 3D-printers, oscilloscopen, logic analyzers, soldeerstations, heteluchtstations, labvoedingen, krimptangen, boormachines en montagegereedschap voor prototyping, productie, assemblage, metingen en testen;
+- **Accessoires** — aanvullende onderdelen of toebehoren om onze apparatuur uit te breiden;
+- **Gereedschap** — handgereedschap voor het bouwen, monteren, onderhouden en afwerken van prototypes en apparatuur;
+- **Hardware** — ontwikkelborden, sensoren, meetmodules, displays en andere elektronische of mechanische componenten voor prototypes, testopstellingen en het uiteindelijke systeem;
+- **PCB-productie** — PCB-fabricage, prototypeseries, assemblage en bestukking;
+- **Softwarelicenties** — PCB-ontwerpsoftware, CAD-software, meetsoftware, ontwikkeltools en documentatietools die ontwikkeling, ontwerp, testen of documentatie ondersteunen;
+- **Testmateriaal** — breadboards, testkabels, krokodillenklemmen, jumper wires, adapters, connectoren en tijdelijke testbehuizingen voor het opbouwen, aansluiten en controleren van testopstellingen;
+- **Tijd en expertise** — advies, gespecialiseerde productie, metingen, kalibratie, validatie, elektronicaontwerp, mechanisch ontwerp en productieondersteuning;
+- **Verbruiksmaterialen** — soldeersel, flux, krimpkous, filamenten, lijm, tape, draad, reinigingsmiddelen en andere materialen die tijdens het bouwen, testen en produceren worden verbruikt;
+- **Praktische ondersteuning** — transport, opslag, toegang tot een werkruimte, tijdelijke hulp bij een concrete taak en andere vormen van ondersteuning, in overleg;
 
+### Waarvoor we momenteel sponsoring zoeken
+
+Binnen de bovenstaande vormen van sponsoring zoeken we momenteel concreet steun voor:
+
+- **Apparatuur**
+  - 3D-printer Bambu Lab X2D Combo;
+  - Oscilloscoop: Siglent SDS814X HD of Siglent SDS1104X HD;
+  - Logic analyzer: Siglent SLA1016;
+  - Polar H10 / Movesense;
+  - Soldeerstation: Weller WE 1010 of JBC CD-2BQF;
+  - USB-microscoop of inspectiemicroscoop voor PCB’s en kleine soldeerverbindingen.
+
+- **Accessoires**
+  - Hotend Expansion Kit voor Bambu Lab X2D;
+  - Vision Encoder voor Bambu Lab X2D;
+  - CyberBrick Time-lapse Kit voor Bambu Lab X2D;
+  - TPU Feed Assist Module voor Bambu Lab X2D;
+  - YOOPAI Filament opbergdoos, set van 8 containers voor 3D-printerfilament;
+  - USB-pomp, 3D-printerfilament.
+
+- **Gereedschap**
+  - Schroevendraaiers;
+  - Hazet 823 driehoekige schraper.
+
+ - **Hardware**
+  - MyoWare 2.0: geeft continu een EMG-signaal door tijdens de meting;
+  - MAX30205: levert continu temperatuurdata tijdens de meting;
+  - Piëzo-ademhalingsband, levert continu ademhalingsdata tijdens de meting.
+
+- **Verbruiksmaterialen**
+  - Glue Sticks voor Bambu Lab 3D-printer;
+  - Liquid Glue voor Bambu Lab 3D-printer;
+  - Lubricant Grease voor Bambu Lab 3D-printer;
+  - PLA Pure-filament voor 3D-printers, in verschillende kleuren;
+  - PETG Basic-filament voor 3D-printers, in verschillende kleuren;
+  - PTFE Tubes voor Bambu Lab 3D-printer;
+  - Verschillende hotends/nozzles voor 3D-printer Bambu Lab X2D;
+  - Loctite 195906 Instant Lijm 454.
+ 
 ### Sponsoring van een specifieke feature
 
 Sponsoring van een specifieke feature kan worden gebruikt om de technische, functionele en praktische haalbaarheid ervan te onderzoeken — bijvoorbeeld onderzoek, hardware, prototypes, ontwikkeling, testen of documentatie.

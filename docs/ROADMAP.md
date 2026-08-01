@@ -121,7 +121,7 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 ## 4. Hardware ROADMAP
 
 - Native ADC en ADS1115 op de bedoelde hardware valideren;
-- Wemos D1 R32 hardwarematig valideren en de status afzonderlijk van compilatieondersteuning documenteren;
+- WEMOS D1 R32 is sinds v1.0.0 hardwarematig getest en goedgekeurd; fysieke validatie van TTGO D1 R32 en andere compatibele borden afzonderlijk vastleggen;
 - hardwareprofielen per ondersteund moederbord vastleggen;
 - pinmapping, werkspanning en logische niveaus per hardwareprofiel valideren;
 - sensorcontact, beweging, storing en andere foutbronnen detecteren en rapporteren;
@@ -145,24 +145,29 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 
 ### GitHub en community
 
-Vanaf v1.0.0:
+Reeds voltooid:
 
-- publieke repository zodra inhoud en licentie daarvoor gereed zijn;
-- `CONTRIBUTING.md`, `CONTRIBUTORS.md`, `SPONSORS.md` en `TRADEMARKS.md` publiceren;
-- `.github/FUNDING.yml` activeren met een werkelijk bereikbaar contact- of financieringskanaal;
-- issue- en pull-requesttemplates voorzien;
-- bijdrageproces testen;
+- publieke repository;
+- `CONTRIBUTING.md`, `CONTRIBUTORS.md`, `SPONSORS.md` en `TRADEMARKS.md` gepubliceerd;
+- `.github/FUNDING.yml` opgenomen;
+- issue- en pull-requesttemplates opgenomen.
+
+Nog gepland:
+
+- bijdrageproces in de praktijk verder testen;
 - enkele duidelijk afgebakende `good first issue`-taken voorzien;
 - GitHub Actions voor ondersteunde boards voorzien wanneer deze teststroom definitief is.
 
 ### Arduino Library Manager
 
-- publieke GitHub-repository;
-- geldige release-tag;
-- officiële GNU LGPL v3.0-or-later-licentie;
-- `library.properties` en afhankelijkheden valideren;
-- `arduino-lint --library-manager submit` uitvoeren;
-- aanmelding volgens de actuele officiële Arduino-procedure.
+Voltooid:
+
+- publieke GitHub-repository beschikbaar;
+- geldige release-tag gepubliceerd;
+- officiële GNU LGPL v3.0-or-later-licentie opgenomen;
+- `library.properties` en afhankelijkheden gevalideerd;
+- `arduino-lint --library-manager submit` uitgevoerd;
+- aanmelding geaccepteerd en opgenomen in de Arduino Library Manager-index.
 
 ## 6. Validatie & experimenten
 
@@ -183,19 +188,14 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 ## 7. Releases / versies / planning
 
-### Nodig vóór definitieve vrijgave van v1.0.0
+### v1.0.0 — voltooid
 
-- de nog lopende actuele testresultaten beoordelen;
-- Arduino Lint opnieuw uitvoeren en het definitieve resultaat vastleggen;
-- geheugenrapport voor UNO R3 opnieuw vastleggen;
-- Native ADC en ADS1115 op de bedoelde hardware valideren;
-- Wemos D1 R32 hardwarematig valideren en de status afzonderlijk van compilatieondersteuning documenteren;
-- interne documentatie en voorbeeldpaden opnieuw controleren;
-- schone installatie vanuit ZIP controleren;
-- versie, tag, changelog en `library.properties` gelijk houden;
-- `CONTRIBUTORS.md`, `SPONSORS.md`, `TRADEMARKS.md` en de oproepteksten publiceren;
-- `.github/FUNDING.yml` activeren;
-- release-notities voor v1.0.0 afronden.
+- eerste publieke alpha-release vrijgegeven;
+- definitieve compilatiematrix en Arduino LINT uitgevoerd;
+- WEMOS D1 R32 getest en goedgekeurd;
+- versie, tag, changelog en `library.properties` gelijkgetrokken;
+- project-, community-, hardware- en release-documentatie gepubliceerd;
+- Arduino Library Manager-aanmelding ingediend en nadien geaccepteerd.
 
 ### Na v1.0.0
 

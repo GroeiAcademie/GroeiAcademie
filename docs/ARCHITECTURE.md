@@ -2,7 +2,7 @@
 
 ## Eén geïntegreerde library
 
-GroeiAcademie Framework wordt als één samenwerkende Arduino-library ontwikkeld. Functionele onderdelen worden niet zonder expliciete reden opgesplitst in afzonderlijke libraries.
+GroeiAcademie FrameWork wordt als één samenwerkende Arduino-library ontwikkeld. Functionele onderdelen worden niet zonder expliciete reden opgesplitst in afzonderlijke libraries.
 
 ## Huidige hoofdstructuur
 
@@ -51,6 +51,7 @@ GroeiAcademie/
 │   │   └── SCREEN.md
 │   ├── Toepassingsgebieden/
 │   │   ├── MODULES.md
+│   │   ├── SENSOR_INVENTARIS.md
 │   │   └── Stimulus/
 │   │       ├── Hardware/
 │   │       └── README.md
@@ -59,7 +60,6 @@ GroeiAcademie/
 │   ├── COMMUNITY_GUIDE.md
 │   ├── DECISION_LOG.md
 │   ├── DESIGN_PHILOSOPHY.md
-│   ├── GOVERNANCE.md
 │   ├── HARDWARE_SUPPORT.md
 │   ├── PROJECT_VALUES.md
 │   ├── RESEARCH_PHILOSOPHY.md
@@ -77,19 +77,24 @@ GroeiAcademie/
 │           └── ...
 ├── extras/
 ├── .github/
-│   └── FUNDING.yml
+│   ├── FUNDING.yml
+│   └── ISSUE_TEMPLATE/
 ├── keywords.txt
 ├── library.properties
+├── CITATION.cff
+├── LICENSE
 ├── AUTHORS.md
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── CONTRIBUTORS.md
 ├── DISCLAIMER.md
+├── GOVERNANCE.md
 ├── LICENSE.md
 ├── LICENSE_KEUZEGIDS.md
 ├── PROJECT_CONSTITUTION.md
 ├── README.md
+├── oproep-sponsors-contributors.md
 ├── SECURITY.md
 ├── SPONSORS.md
 └── TRADEMARKS.md
@@ -165,7 +170,7 @@ Modules communiceren via expliciete headers, functies en datastructuren. Rechtst
 
 ## Elektronische documentatie
 
-Elektronische schema's worden per toepassingsgebied beschreven. De index staat in [Toepassingsgebieden/MODULES.md](Toepassingsgebieden/MODULES.md).
+Elektronische schema's worden per toepassingsgebied beschreven. De index staat in [Toepassingsgebieden/MODULES.md](Toepassingsgebieden/MODULES.md). De beschikbare sensoren en modules staan afzonderlijk in [Toepassingsgebieden/SENSOR_INVENTARIS.md](Toepassingsgebieden/SENSOR_INVENTARIS.md).
 
 Een geldig schema vermeldt:
 

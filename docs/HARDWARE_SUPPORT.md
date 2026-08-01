@@ -9,8 +9,10 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke statussen.
 | Arduino UNO R3 | `avr` | voorbeelden opgenomen in de compilatiematrix; vier gekende geheugenbeperkingen bij de grootste gecombineerde sketch | relevante hardwaretests blijven per opstelling vast te leggen |
 | Arduino UNO R4 Minima | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen |
 | Arduino UNO R4 WiFi | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen; netwerkfuncties maken geen deel uit van de library |
-| Wemos D1 R32 via ESP32 Dev Module | `esp32` | voorbeelden opgenomen in de compilatiematrix | volledige hardwarevalidatie blijft nodig |
-| TTGO D1 R32 | `esp32` | geen afzonderlijk resultaat vastgelegd in `extras/TESTRESULTATEN.md` | compatibiliteit en hardwarewerking nog afzonderlijk vastleggen |
+| WEMOS D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0 |
+| TTGO D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | hetzelfde boardprofiel als WEMOS D1 R32; geen afzonderlijk fysiek testresultaat vastgelegd | fysieke hardwarevalidatie nog afzonderlijk vastleggen |
+
+WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Het gebruik van hetzelfde boardprofiel door TTGO D1 R32 of een compatibel bord bewijst niet automatisch dat ook dat fysieke bord afzonderlijk is gevalideerd.
 
 De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata van die externe library. Een board geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
 
@@ -81,7 +83,7 @@ De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbrugg
 
 ## ESP32
 
-Voor `BOARD_ESP32_UNO` is de configuratie voorbereid op 12-bit ADC-uitlezing en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. De Wemos D1 R32 gebruikt 3,3 V-logica; controleer voeding, analoge ingangsspanning, shieldcompatibiliteit, timing, geheugen, callbacks en dependencies tijdens de hardwarevalidatie. Netwerkfuncties maken geen deel uit van de huidige library.
+Voor `BOARD_ESP32_UNO` is de configuratie voorbereid op 12-bit ADC-uitlezing en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. ESP32-borden met dit profiel gebruiken 3,3 V-logica. Controleer bij TTGO D1 R32 en andere compatibele borden voeding, analoge ingangsspanning, shieldcompatibiliteit, timing, geheugen, callbacks en dependencies tijdens hun afzonderlijke hardwarevalidatie. Netwerkfuncties maken geen deel uit van de huidige library.
 
 ## Sensorbeoordeling
 

@@ -2,13 +2,13 @@
 
 ## 1. Naam en karakter
 
-De officiële projectnaam is **GroeiAcademie Framework**.
+De officiële projectnaam is **GroeiAcademie FrameWork**.
 
-Het GroeiAcademie Framework is één geïntegreerd, modulair open-sourceframework voor het objectief meten, oefenen, ontwikkelen en onderzoeken van menselijke vaardigheden. Arduino is het eerste implementatieplatform. De technologie ondersteunt de missie en is geen doel op zich.
+Het GroeiAcademie FrameWork is één geïntegreerd, modulair open-sourceframework voor het objectief meten, oefenen, ontwikkelen en onderzoeken van menselijke vaardigheden. Arduino is het eerste implementatieplatform. De technologie ondersteunt de missie en is geen doel op zich.
 
 ## 2. Missie
 
-Het GroeiAcademie Framework bestaat enerzijds om beoefenaars van Neuro Linguïstisch Programmeren te helpen hun basisvaardigheden veel sneller naar een hoger niveau te brengen. Anderzijds maakt het framework het mogelijk om de impact van NLP-technieken op het brein en op waarneembare fysiologische processen te onderzoeken en zichtbaar te maken voor onderzoekers, biofeedback-onderzoekers, NLP-beoefenaars, NLP-trainers en leken.
+Het GroeiAcademie FrameWork bestaat enerzijds om beoefenaars van Neuro Linguïstisch Programmeren te helpen hun basisvaardigheden veel sneller naar een hoger niveau te brengen. Anderzijds maakt het framework het mogelijk om de impact van NLP-technieken op het brein en op waarneembare fysiologische processen te onderzoeken en zichtbaar te maken voor onderzoekers, biofeedback-onderzoekers, NLP-beoefenaars, NLP-trainers en leken.
 
 Het framework wil de afstand verkleinen tussen wat iemand denkt waar te nemen of beheersen en wat objectief kan worden gemeten. Het ondersteunt leren, oefenen, kalibreren, onderzoeken en aantonen.
 
@@ -39,7 +39,7 @@ Het framework richt zich eveneens tot leken. Zij moeten op een begrijpelijke man
 
 ## 6. Unieke positie
 
-Het GroeiAcademie Framework is geen losse verzameling sensoren. Het beoogt een modulair totaalpakket rond menselijke basisvaardigheden. Elke module verbindt een concrete vaardigheid met reproduceerbare oefenscenario's, objectieve metingen en bruikbare feedback.
+Het GroeiAcademie FrameWork is geen losse verzameling sensoren. Het beoogt een modulair totaalpakket rond menselijke basisvaardigheden. Elke module verbindt een concrete vaardigheid met reproduceerbare oefenscenario's, objectieve metingen en bruikbare feedback.
 
 De eerste toepassing ligt binnen NLP. De architectuur blijft ruim genoeg voor verwante toepassingen in biofeedback, observatie, communicatie, coaching, leren en onderzoek.
 
@@ -124,7 +124,7 @@ De officiële documentatie wordt eerst in het Nederlands ontwikkeld en inhoudeli
 
 ## 13. Community boven commercie
 
-Het GroeiAcademie Framework mag nooit een commerciële instelling worden ten koste van de community.
+Het GroeiAcademie FrameWork mag nooit een commerciële instelling worden ten koste van de community.
 
 Commerciële diensten, hardware, trainingen of ondersteuning mogen het open project ondersteunen. Zij mogen de vrije toegang, wederkerigheid, transparantie of invloed van de community niet ondergraven.
 

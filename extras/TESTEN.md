@@ -1,6 +1,6 @@
 # Testprocedure
 
-Elke release van het GroeiAcademie Framework wordt vóór publicatie automatisch gevalideerd. Hierdoor wordt gecontroleerd dat de library voldoet aan de kwaliteitsvereisten van het project en compatibel blijft met de ondersteunde Arduino-platformen.
+Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meegeleverde testscripts gevalideerd. Hierdoor wordt gecontroleerd dat de library voldoet aan de kwaliteitsvereisten van het project en compatibel blijft met de ondersteunde Arduino-platformen.
 
 ## Uit te voeren script
 
@@ -43,9 +43,9 @@ Alle voorbeelden worden automatisch gecompileerd. Iedere compilatie gebruikt `--
 - Arduino UNO R3 met FQBN `arduino:avr:uno` en `BOARD_VERSION=BOARD_UNO_R3`;
 - Arduino UNO R4 Minima met FQBN `arduino:renesas_uno:minima` en `BOARD_VERSION=BOARD_UNO_R4_MINIMA`;
 - Arduino UNO R4 WiFi met FQBN `arduino:renesas_uno:unor4wifi` en `BOARD_VERSION=BOARD_UNO_R4_WIFI`;
-- Wemos D1 R32 via `ESP32 Dev Module`, met FQBN `esp32:esp32:esp32` en `BOARD_VERSION=BOARD_ESP32_UNO`.
+- ESP32-borden in Arduino Uno R3-vormfactor via boardprofiel `WEMOS D1 R32`, met FQBN `esp32:esp32:d1_uno32` en `BOARD_VERSION=BOARD_ESP32_UNO`.
 
-Voor Wemos D1 R32 moet via Arduino Boards Manager `esp32 by Espressif Systems` geïnstalleerd zijn. Kies daarna `ESP32 Dev Module`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt samen met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
+Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor moet via Arduino Boards Manager `esp32 by Espressif Systems` geïnstalleerd zijn. Kies daarna het boardprofiel `WEMOS D1 R32`. De testscripts gebruiken FQBN `esp32:esp32:d1_uno32`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt samen met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
 
 De batch koppelt iedere FQBN expliciet aan de overeenkomstige `BOARD_VERSION`.
 
@@ -114,12 +114,13 @@ extras/TESTRESULTATEN.md
 
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
-#### Reeds getest en ondersteund
-- Wemos D1 R32
-- TTGO D1 R32
+#### Getest en ondersteund sinds v1.0.0
+- WEMOS D1 R32.
+
+#### Hetzelfde boardprofiel
+- TTGO D1 R32 gebruikt eveneens FQBN `esp32:esp32:d1_uno32`.
 
 #### Verwacht compatibel
-- Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino ESP32-core.
+- Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino-ESP32-core.
 
-#### Nog niet getest
-- Aan te vullen na validatie.
+De fysieke hardwarevalidatie van TTGO D1 R32 en andere compatibele borden wordt afzonderlijk vastgelegd zodra die is uitgevoerd.

@@ -30,12 +30,11 @@ Maintainers beoordelen bijdragen op technische kwaliteit, reproduceerbaarheid, d
 
 ## Transparantie
 
-Belangrijke besluiten worden opgenomen in [DECISION_LOG.md](DECISION_LOG.md). Belangenconflicten en relevante commerciële belangen worden gemeld wanneer zij een beslissing kunnen beïnvloeden.
+Belangrijke besluiten worden opgenomen in [docs/DECISION_LOG.md](docs/DECISION_LOG.md). Belangenconflicten en relevante commerciële belangen worden gemeld wanneer zij een beslissing kunnen beïnvloeden.
 
 ## Escalatie
 
-Gedragsproblemen volgen [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md). Beveiligings- en privacyproblemen volgen [../SECURITY.md](../SECURITY.md).
-
+Gedragsproblemen volgen [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Beveiligings- en privacyproblemen volgen [SECURITY.md](SECURITY.md).
 
 ## Beoordeling van bijdragen
 
@@ -45,7 +44,7 @@ Gedragsproblemen volgen [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md). Beveilig
 4. Alle bijdragen worden technisch beoordeeld op kwaliteit, consistentie, documentatie, prestaties en compatibiliteit.
 5. Niet elke bijdrage wordt automatisch opgenomen. Ook kwalitatief goede bijdragen kunnen worden afgewezen wanneer ze niet aansluiten bij de doelstellingen of de ontwikkeling van het project.
 6. De maintainers nemen de uiteindelijke beslissing over het al dan niet opnemen van een bijdrage.
-7. Bijdragen moeten aansluiten bij de visie, architectuur, kwaliteitsnormen en langetermijndoelstellingen van GroeiAcademie Framework.
+7. Bijdragen moeten aansluiten bij de visie, architectuur, kwaliteitsnormen en langetermijndoelstellingen van GroeiAcademie FrameWork.
 
 ## Aanvaarding van nieuwe features
 
@@ -54,7 +53,7 @@ Een nieuw voorstel voor een toepassingsgebied start als **kandidaat-idee** en do
 Een nieuwe feature wordt alleen opgenomen wanneer zij:
 
 1. een reëel probleem oplost of een aantoonbare meerwaarde biedt;
-2. aansluit bij de visie van GroeiAcademie Framework;
+2. aansluit bij de visie van GroeiAcademie FrameWork;
 3. de kwaliteit, betrouwbaarheid, nauwkeurigheid, gebruiksvriendelijkheid of onderhoudbaarheid verhoogt;
 4. geen bestaande API breekt, of het vastgelegde deprecationbeleid respecteert;
 5. voldoende getest is;

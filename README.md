@@ -1,21 +1,21 @@
-# GroeiAcademie Framework
+# GroeiAcademie FrameWork
 
 > Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten.
 
-Het GroeiAcademie Framework is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
+Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
 
 > **Meten is Weten, in plaats van Denken te Weten.**
 
 ## Huidige status
 
-- versie: `1.0.0`;
-- ontwikkelfase: 1.0.0;
-- huidige implementatie: Stimulus en Screen;
-- compilatiematrix uitgevoerd voor Arduino UNO R3, UNO R4 Minima, UNO R4 WiFi en Wemos D1 R32 (ESP32): 240 succesvol, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
+- versie: `1.0.1`;
+- ontwikkelfase: alpha;
+- huidige implementatie: de Stimulusmodule en de gedeelde Screen-systeemlaag;
+- compilatiematrix uitgevoerd voor Arduino UNO R3, UNO R4 Minima, UNO R4 WiFi en ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`: 188 compilaties uitgevoerd, waarvan 184 succesvol, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
-Emotie-observatie, ademhaling, hartslag en andere toepassingsgebieden staan in de inhoudelijke roadmap, maar zijn nog niet als volwaardige modules geïmplementeerd.
+De actuele status van de geïmplementeerde en geplande toepassingsgebieden staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md).
 
 ## Installatie
 
@@ -29,21 +29,27 @@ Emotie-observatie, ademhaling, hartslag en andere toepassingsgebieden staan in d
 
 ### Handmatig
 
-Plaats de map `GroeiAcademie` in de Arduino-librarymap:
+Plaats de map `GroeiAcademie` in de `libraries`-map van de ingestelde Arduino-sketchbooklocatie. De gebruikelijke standaardlocaties zijn:
 
 ```text
-Documents/Arduino/libraries/GroeiAcademie/
+Linux:   ~/Arduino/libraries/GroeiAcademie/
+
+macOS:   ~/Documents/Arduino/libraries/GroeiAcademie/
+macOS:   /Users/<gebruikersnaam>/Documents/Arduino/libraries/GroeiAcademie/
+
+Windows: Documents/Arduino/libraries/GroeiAcademie/
+Windows: C:\Users\<gebruikersnaam>\Documents\Arduino\libraries\GroeiAcademie\
 ```
 
 Herstart Arduino IDE na de installatie.
 
-### Wemos D1 R32
+### ESP32-borden in Arduino Uno R3-vormfactor
 
-Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer daarna `ESP32 Dev Module`. De compilatietests gebruiken hiervoor FQBN `esp32:esp32:esp32`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
+Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer daarna het boardprofiel `WEMOS D1 R32`. De compilatietests gebruiken FQBN `esp32:esp32:d1_uno32`. Dit boardprofiel wordt gebruikt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen. Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
 
 ## Kwaliteitscontrole
 
-Elke officiële release van deze library wordt automatisch gevalideerd.
+Elke officiële release van deze library wordt vóór publicatie met de meegeleverde testscripts gevalideerd.
 
 De validatie omvat:
 
@@ -52,12 +58,12 @@ De validatie omvat:
 - Arduino Uno R3
 - Arduino Uno R4 Minima
 - Arduino Uno R4 WiFi
-- Wemos D1 R32 via ESP32 Dev Module
+- ESP32-borden via boardprofiel WEMOS D1 R32 (`esp32:esp32:d1_uno32`)
 
 Meer informatie:
 
-- `extras/TESTEN.md`
-- `extras/TESTRESULTATEN.md`
+- [Testprocedure](extras/TESTEN.md)
+- [Testresultaten](extras/TESTRESULTATEN.md)
 
 ## Afhankelijkheden
 
@@ -179,18 +185,23 @@ De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Toepassingsgebieden/Stimulu
 
 ## Geplande uitbreidingen
 
-Aangevraagde en goedgekeurde uitbreidingen voor volgende releases staan in [de roadmap](docs/ROADMAP.md). De PixelScreen-laag ondersteunt nu een instelbare buitenmarge, witruimte tussen tekens en regels en een automatisch gecentreerd tekstgrid op basis van de werkelijk bruikbare schermruimte.
+Aangevraagde en goedgekeurde uitbreidingen voor volgende releases staan in [de roadmap](docs/ROADMAP.md).
 
 ## Documentatie
 
 - [Project Constitution](PROJECT_CONSTITUTION.md)
 - [Architectuur](docs/ARCHITECTURE.md)
+- [Configuratie](docs/Configuratie/README.md)
 - [Screen](docs/Systeem/SCREEN.md)
 - [PixelScreen-foutcodes](docs/Systeem/PIXELSCREEN_FOUTCODES.md)
 - [Toepassingsgebieden en schema-index](docs/Toepassingsgebieden/MODULES.md)
+- [Sensorinventaris](docs/Toepassingsgebieden/SENSOR_INVENTARIS.md)
 - [Stimulus](docs/Toepassingsgebieden/Stimulus/README.md)
 - [Hardwareondersteuning](docs/HARDWARE_SUPPORT.md)
 - [Wetenschappelijke integriteit](docs/SCIENTIFIC_INTEGRITY.md)
+- [Communitygids](docs/COMMUNITY_GUIDE.md)
+- [Terminologie](docs/TERMINOLOGY.md)
+- [Beslissingslogboek](docs/DECISION_LOG.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Bijdragen](CONTRIBUTING.md)
 - [Beveiligingsbeleid](SECURITY.md)

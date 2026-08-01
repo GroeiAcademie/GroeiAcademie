@@ -2,7 +2,7 @@
 
 ## Status
 
-Stimulus is het eerste geïmplementeerde toepassingsgebied van GroeiAcademie Framework. De module bevindt zich in:
+Stimulus is het eerste geïmplementeerde toepassingsgebied van GroeiAcademie FrameWork. De module bevindt zich in:
 
 ```text
 src/Toepassingsgebieden/Stimulus/
@@ -81,7 +81,7 @@ GND
 
 Voor sensor 1 wordt `Ax` bijvoorbeeld `A0`, voor sensor 2 `A1`.
 
-De vaste weerstand moet passen bij het weerstandsbereik van de werkelijk gebruikte sensor. De repository legt in versie `0.9.78` nog geen universele weerstandswaarde vast, omdat die afhangt van sensorvariant, gewenste gevoeligheid en voedingsspanning. Noteer de gekozen waarde bij iedere meetopstelling.
+De vaste weerstand moet passen bij het weerstandsbereik van de werkelijk gebruikte sensor. De repository legt in versie `1.0.0` nog geen universele weerstandswaarde vast, omdat die afhangt van sensorvariant, gewenste gevoeligheid en voedingsspanning. Noteer de gekozen waarde bij iedere meetopstelling.
 
 Alle sensoren en de Arduino moeten een gemeenschappelijke massa gebruiken.
 
@@ -122,13 +122,13 @@ Voor UNO R4 WiFi:
 
 Beide UNO R4-keuzes gebruiken 14-bit ADC-schaal en `DELAY_US 200`.
 
-Voor Wemos D1 R32:
+Voor ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`, waaronder WEMOS D1 R32 en TTGO D1 R32:
 
 ```cpp
 #define BOARD_VERSION BOARD_ESP32_UNO
 ```
 
-De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons op de concrete Wemos D1 R32-opstelling.
+De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
 
 Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
 
@@ -193,8 +193,8 @@ De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg s
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
 #### Reeds getest en ondersteund
-- Wemos D1 R32
-- TTGO D1 R32
+- WEMOS D1 R32: getest en goedgekeurd sinds v1.0.0;
+- TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
 
 #### Verwacht compatibel
 - Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino ESP32-core.

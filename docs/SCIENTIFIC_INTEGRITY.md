@@ -2,7 +2,7 @@
 
 ## Doel
 
-Dit document bepaalt hoe GroeiAcademie Framework omgaat met metingen, analyses, interpretaties en claims.
+Dit document bepaalt hoe GroeiAcademie FrameWork omgaat met metingen, analyses, interpretaties en claims.
 
 ## Meetniveaus
 

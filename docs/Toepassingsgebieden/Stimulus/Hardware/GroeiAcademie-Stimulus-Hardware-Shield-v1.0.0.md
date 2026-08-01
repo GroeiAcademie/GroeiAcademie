@@ -1,10 +1,10 @@
 
 # Stimulus uitbreiding met ADS1115 en TFTSPI
 
-> Status: werkdocument v1.0.0. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding uit v0.10.0.
+> Status: werkdocument v1.0.0. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding.
 > Deze versie documenteert aanvullend de TFTSPI-uitbreiding en de gewijzigde connectorfuncties in het v1.0.0-shieldschema.
 
-> **Gezaghebbende hardwarebron**: `Schematic_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in dit v1.0.0-schema de 1x7 TFTSPI-displayconnector. Figuur 1 hieronder (het generieke connectorschema uit v0.10.0) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
+> **Gezaghebbende hardwarebron**: `Schematic_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in dit v1.0.0-schema de 1x7 TFTSPI-displayconnector. Figuur 1 hieronder (het generieke connectorschema uit v1.0.0) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
 
 **FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115, met TFTSPI-uitbreiding**
 
@@ -660,8 +660,8 @@ De twee afzonderlijke voorbeelden `ADC_Validatie_Native` en `ADC_Validatie_ADS11
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
 #### Reeds getest en ondersteund
-- Wemos D1 R32
-- TTGO D1 R32
+- WEMOS D1 R32: getest en goedgekeurd sinds v1.0.0;
+- TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
 
 #### Verwacht compatibel
 - Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino ESP32-core.

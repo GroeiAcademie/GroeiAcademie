@@ -1,12 +1,12 @@
 cff-version: 1.2.0
-message: "Gebruik deze gegevens om het GroeiAcademie Framework te citeren."
-title: "GroeiAcademie Framework"
+message: "Gebruik deze gegevens om het GroeiAcademie FrameWork te citeren."
+title: "GroeiAcademie FrameWork"
 type: software
 authors:
   - family-names: "Peeters"
     given-names: "Alex"
-version: "1.0.0"
-date-released: "2026-07-29"
+version: "1.0.1"
+date-released: "2026-08-01"
 license: "LGPL-3.0-or-later"
 repository-code: "https://github.com/GROEI-ACADEMIE/GroeiAcademie"
 url: "https://groeiacademie.be/"

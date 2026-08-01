@@ -7,7 +7,13 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 | Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte UNO R3-geheugenbeperkingen | Onverwachte fouten |
 |--------|-------|:------------:|------------:|---:|------------------------------------:|-------------------:|
 | v1.0.0 | 31-07-2026 | ✅ (1 bekende, onschadelijke waarschuwing) | 188 | 184 | 4 | 0 |
-| v0.10.1 | 27-07-2026 | ✅ | 39 | 39 | 0 | 0 |
+
+
+---
+
+# v1.0.1
+
+v1.0.1 bevat uitsluitend documentatiecorrecties en gebruikt ongewijzigd dezelfde codebasis en testresultaten als v1.0.0.
 
 ---
 
@@ -78,47 +84,4 @@ De compiler meldt voor deze vier combinaties dat de `text section` de beschikbar
 - ✅ 184 compilaties succesvol uitgevoerd;
 - ✅ 4 gekende UNO R3-geheugenbeperkingen exact geïdentificeerd;
 - ✅ 0 onverwachte compilatiefouten;
-- ✅ release gevalideerd.
-
----
-
-# v0.10.1
-
-**Datum**
-
-27-07-2026
-
-## Arduino LINT
-
-Status
-
-✅ Geslaagd
-
-## Compilatietesten
-
-### Geteste boards
-
-- Arduino UNO R3;
-- Arduino UNO R4 Minima;
-- Arduino UNO R4 WiFi.
-
-### Resultaat
-
-```text
-============================================================
-TESTRESULTAAT
-============================================================
-Totaal getest : 39
-OK bevonden   : 39
-Mislukt       : 0
-============================================================
-Alle 39 testen zijn OK bevonden.
-============================================================
-```
-
-## Conclusie
-
-- ✅ Arduino LINT succesvol uitgevoerd;
-- ✅ alle voorbeelden compileren succesvol;
-- ✅ geen compilatiefouten gevonden;
 - ✅ release gevalideerd.

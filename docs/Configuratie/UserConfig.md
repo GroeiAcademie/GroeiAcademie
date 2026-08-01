@@ -102,7 +102,7 @@ Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel 
 
 ### BOARD_ESP32_UNO
 
-`BOARD_ESP32_UNO` is het configuratieprofiel voor Arduino Uno R3-vormfactor ESP32-borden. De compilatiematrix vermeldt Wemos D1 R32 via `ESP32 Dev Module`. Hardwarevalidatie en compatibiliteit met andere varianten, waaronder TTGO D1 R32, moeten afzonderlijk worden vastgelegd.
+`BOARD_ESP32_UNO` is het configuratieprofiel voor Arduino Uno R3-vormfactor ESP32-borden. De compilatiematrix gebruikt boardprofiel `WEMOS D1 R32` met FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor. WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd; de fysieke hardwarevalidatie van andere varianten wordt afzonderlijk vastgelegd.
 
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen

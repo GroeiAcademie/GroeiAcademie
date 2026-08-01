@@ -4,7 +4,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D001 Projectnaam
 
-**Besluit:** GroeiAcademie Framework.
+**Besluit:** GroeiAcademie FrameWork.
 
 ## D002 Eerste doel
 
@@ -69,7 +69,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D017 Copyright
 
-**Besluit:** iedere contributor behoudt het copyright op zijn of haar eigen bijdragen. GroeiAcademie Framework blijft beheerd door GROEI ACADEMIE BV.
+**Besluit:** iedere contributor behoudt het copyright op zijn of haar eigen bijdragen. GroeiAcademie FrameWork blijft beheerd door GROEI ACADEMIE BV.
 
 ## D018 Ondersteuningsniveaus
 

@@ -64,7 +64,7 @@ Bijhorende documenten zijn onder andere:
 1.5) Bijhorende software
 ==============================================================================
 
-De hardwarevalidatie wordt uitgevoerd met de officiële validatiesoftware van het GroeiAcademie Framework.
+De hardwarevalidatie wordt uitgevoerd met de officiële validatiesoftware van het GroeiAcademie FrameWork.
 
 De software bepaalt automatisch welke hardware aanwezig is, welke hardware ondersteund wordt en welke validatiestappen uitgevoerd moeten worden.
 
@@ -80,19 +80,20 @@ Tijdens versie v1.0.0 worden volgende moederborden ondersteund:
 
 • Arduino UNO R4 WiFi;
 
-• Wemos D1 R32 (ESP32) (experimenteel).
+• WEMOS D1 R32 (ESP32), getest en goedgekeurd sinds v1.0.0.
+• TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor gebruiken hetzelfde boardprofiel; hun fysieke hardwarevalidatie wordt afzonderlijk vastgelegd.
 
 Ondersteuning voor bijkomende moederborden kan in latere versies toegevoegd worden.
 
 ==============================================================================
-1.6.1) Arduino IDE voorbereiden voor Wemos D1 R32 (ESP32)
+1.6.1) Arduino IDE voorbereiden voor ESP32-borden in Arduino Uno R3-vormfactor
 ==============================================================================
 
 Installeer via Arduino Boards Manager het boardpakket `esp32 by Espressif Systems`.
 
-Selecteer daarna in Arduino IDE het board `ESP32 Dev Module`.
+Selecteer daarna in Arduino IDE het boardprofiel `WEMOS D1 R32`.
 
-De automatische compilatietesten gebruiken hiervoor de FQBN `esp32:esp32:esp32`.
+De compilatietests gebruiken hiervoor FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen.
 
 Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
 
@@ -268,7 +269,7 @@ Tijdens versie v1.0.0 worden volgende moederborden ondersteund:
 • Arduino UNO R3
 • Arduino UNO R4 Minima
 • Arduino UNO R4 WiFi
-• Wemos D1 R32 (ESP32) (experimenteel, wordt tijdens v1.0.0 gevalideerd)
+• WEMOS D1 R32 (ESP32), getest en goedgekeurd sinds v1.0.0
 
 ------------------------------------------------------------------------------
 
@@ -279,7 +280,7 @@ Welk moederbord wordt gebruikt?
 □ Arduino UNO R3
 □ Arduino UNO R4 Minima
 □ Arduino UNO R4 WiFi
-□ Wemos D1 R32 (ESP32) (experimenteel)
+□ WEMOS D1 R32 (ESP32)
 
 ------------------------------------------------------------------------------
 
@@ -486,7 +487,7 @@ Indien antwoord = 3V3
 
 Controleer of het geselecteerde moederbord met een logicaniveau van 3V3 werkt.
 
-Voor de Wemos D1 R32 (ESP32) (experimenteel) is de werkspanning 3V3.
+Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden met boardprofiel `esp32:esp32:d1_uno32` is de werkspanning 3V3.
 
 Controleer eveneens of alle aangesloten uitbreidingsmodules geschikt zijn voor gebruik met 3V3.
 

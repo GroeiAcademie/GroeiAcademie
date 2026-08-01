@@ -2,7 +2,7 @@
 
 ## Welkom
 
-De community rond GroeiAcademie Framework brengt mensen samen uit onder andere elektronica, software, onderzoek, biofeedback, onderwijs, NLP en ervaringsgerichte begeleiding.
+De community rond GroeiAcademie FrameWork brengt mensen samen uit onder andere elektronica, software, onderzoek, biofeedback, onderwijs, NLP en ervaringsgerichte begeleiding.
 
 ## Bijdragen zonder code
 
