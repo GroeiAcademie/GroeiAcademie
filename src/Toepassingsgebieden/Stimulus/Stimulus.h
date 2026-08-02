@@ -141,21 +141,17 @@ struct SynchronisatieProfiel {
 // ============================================================================
 int  AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offset);
 
-int  BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge);
 void BepaalSensorOffsets();
-void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus);
 
 int  EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKracht,
                        bool &nulmetingGoedgekeurd, unsigned long &nulmetingTikTijd, int &nulmetingTikKracht,
                        int &herhaling, int &aantalNulmetingPogingen);
 
 void InitialiseerADS1115();
-void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor);
 
-int  MaakSensorMask(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, bool testOpDRUKWAARDE = true);
-
+// Bewust extern gehouden als voorbereide bouwsteen voor toekomstige paarsgewijze
+// synchronisatie, ondanks dat ze momenteel nergens wordt aangeroepen (D020).
 SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int sensorA, int sensorB, StimulusProfiel gemetenStimulus[]);
-SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]);
 
 int  MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin = -1, int exitOffset = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS);
 int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart = 0, int MaskGewensteActieveSensorsBijExit = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS, bool testOpDRUKWAARDE = true);
@@ -163,16 +159,21 @@ int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensoren
 int  RawAnalogRead(int sensorPin);
 
 void ResetAlleTellers();
-void ResetStimulusProfiel(StimulusProfiel &gemetenStimulus);
-void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie);
 
 // doelTikTijd: > 0 = expliciete milliseconden, 0 = nulmeting, -1/-2/-3 = instortende moeilijkheidsgraad.
 void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, bool &TijdCorrect, bool &KrachtCorrect, long doelTikTijd = INSTORTEND_TOV_NULMETING, char *instortendExtraTeken = nullptr);
 
 void VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatieProfiel &gemeten);
-void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor);
 
 void WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensoren);
+
+// ============================================================================
+// D020: BepaalAantalSensorenSynchroon(), BerekenEindStimulus(), InitialiseerSensorStart(),
+// MaakSensorMask(), MaakSynchronisatieProfielAlleSensoren(), ResetStimulusProfiel(),
+// ResetSynchronisatieProfiel() en VerwerkSensor() dienden uitsluitend als interne bouwsteen
+// en zijn niet langer publiek. Hun prototypes staan nu als static forward declarations
+// bovenaan Stimulus.cpp.
+// ============================================================================
 
 // ============================================================================
 // STATUSTELLERS EN VARIABELEN

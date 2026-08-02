@@ -1,6 +1,21 @@
 #include "Stimulus.h"
 
 // ============================================================================
+// Interne hulpfuncties (D020): dienen uitsluitend als bouwsteen binnen dit
+// bestand, worden door geen enkel voorbeeld of ander bronbestand aangeroepen,
+// en zijn daarom niet langer publiek gedeclareerd in Stimulus.h.
+// ============================================================================
+static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]);
+
+static int  BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge);
+static void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus);
+static void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor);
+static int  MaakSensorMask(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, bool testOpDRUKWAARDE = true);
+static void ResetStimulusProfiel(StimulusProfiel &gemetenStimulus);
+static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie);
+static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor);
+
+// ============================================================================
 // RawAnalogRead: backend-afhankelijke ruwe sensorlezing.
 // Losstaand van AnalogReadMetGekorigeerdeOffsets() omdat BepaalSensorOffsets()
 // en de wegwerp-meting in MeetStimulus() ook een ruwe lezing nodig hebben, zonder offsetcorrectie.
@@ -107,7 +122,7 @@ int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
   return waarde;
 }
 
-int BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge) {
+static int BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge) {
   int grootsteAantalSensorenSynchroon = 0;
 
   for (int eersteSensor = 0; eersteSensor < aantalSensoren; eersteSensor++) {
@@ -185,7 +200,7 @@ void BepaalSensorOffsets() {
 #endif
 }
 
-void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus) {
+static void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus) {
   // TIKTIJD
   if (sensor.sensorGestart && sensor.eindTikTijd > sensor.startTikTijd) gemetenStimulus.TikTijd = sensor.eindTikTijd - sensor.startTikTijd;
 
@@ -261,7 +276,7 @@ int EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKrac
   return 0;  // Fallback
 }
 
-void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor) {
+static void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor) {
   sensor.sensorGestart             = true;
 
   sensor.startTikTijd              = nu;
@@ -274,7 +289,7 @@ void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor) {
   sensor.aantalTikKrachtMetingen   = 1;
 }
 
-int MaakSensorMask(SensorMeetStatus sensor[], int aantalSensoren, bool testOpDRUKWAARDE) {
+static int MaakSensorMask(SensorMeetStatus sensor[], int aantalSensoren, bool testOpDRUKWAARDE) {
   int sensorMask = 0b0000;
 
   for (int sensorNummer = 0; sensorNummer < aantalSensoren; sensorNummer++) {
@@ -301,7 +316,7 @@ SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int s
   return synchronisatie;
 }
 
-SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]) {
+static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]) {
   SynchronisatieProfiel synchronisatie;
   ResetSynchronisatieProfiel(synchronisatie);
 
@@ -747,7 +762,7 @@ void ResetAlleTellers() {
   TELLER_SIMULTANE_EIND_OK   = 0;
 }
 
-void ResetStimulusProfiel(StimulusProfiel &stimulus) {
+static void ResetStimulusProfiel(StimulusProfiel &stimulus) {
   stimulus.TikTijd              = 0;
   stimulus.gemiddeldeTikKracht  = 0;
   stimulus.hoogsteTikKracht     = 0;
@@ -756,7 +771,7 @@ void ResetStimulusProfiel(StimulusProfiel &stimulus) {
   stimulus.afbouwSnelheid       = 0;
 }
 
-void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
+static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
   synchronisatie.verschilStartTijd             = 0;
   synchronisatie.verschilEindTijd              = 0;
   synchronisatie.verschilTikTijd               = 0;
@@ -978,7 +993,7 @@ void VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatiePro
 #endif
 }
 
-void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor) {
+static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor) {
   if (!sensor.sensorGestart && !sensor.sensorKlaar && sensor.actueleTikKracht > TIK_MINIMALE_DRUKWAARDE) InitialiseerSensorStart(nu, sensor);
 
   if (sensor.sensorGestart && !sensor.sensorKlaar) {

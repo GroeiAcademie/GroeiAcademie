@@ -78,3 +78,9 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 ## D019 API-stabiliteit en Semantic Versioning
 
 **Besluit:** `0.x` zijn ontwikkelversies waarin de API nog kan wijzigen. Vanaf `1.0.0` gelden maximale API-stabiliteit, het vastgelegde deprecationbeleid en Semantic Versioning 2.0.0.
+
+## D020 Zichtbaarheid van interne hulpfuncties
+
+**Besluit:** functies die uitsluitend als bouwsteen dienen binnen één bronbestand van de library — en door geen enkel voorbeeld of extern bekende gebruiker rechtstreeks worden aangeroepen — krijgen interne (`static`) zichtbaarheid in plaats van een publiek prototype in de header. Dit geldt met terugwerkende kracht voor twaalf functies uit de Screen- en Stimulus-laag die abusievelijk publiek stonden: `BepaalAantalSensorenSynchroon()`, `BerekenEindStimulus()`, `InitialiseerSensorStart()`, `MaakSensorMask()`, `MaakSynchronisatieProfielAlleSensoren()`, `ResetStimulusProfiel()`, `ResetSynchronisatieProfiel()`, `VerwerkSensor()`, `PixelScreenClear()`, `PixelScreenSetCursor()`, `PixelScreenPrint()` en `PixelScreenFoutmeldingWeergeven()`. `MaakSynchronisatieProfiel()` blijft bewust extern staan, ondanks dat ze momenteel nergens gebruikt wordt, als voorbereide bouwsteen voor toekomstige paarsgewijze synchronisatie.
+
+**Context:** dit wordt uitgevoerd terwijl v1.0.0/v1.0.1 nog maar zeer kort in de Library Manager staan en er geen gekende externe gebruikers zijn — de kost van deze correctie neemt met de tijd toe onder het API-stabiliteitsbeleid (D019).

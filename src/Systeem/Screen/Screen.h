@@ -116,10 +116,12 @@ extern PixelScreenCallback CallbackScreenTypePixel;
 
 bool PixelScreenConfigureren();
 
-void PixelScreenClear();
-void PixelScreenSetCursor(uint8_t kolom, uint8_t regel);
-void PixelScreenPrint(const String& tekst);
-void PixelScreenFoutmeldingWeergeven (const String& foutmelding);
+// ============================================================================
+// D020: PixelScreenClear(), PixelScreenSetCursor(), PixelScreenPrint() en
+// PixelScreenFoutmeldingWeergeven() dienden uitsluitend als interne bouwsteen
+// en zijn niet langer publiek. Hun prototypes staan nu als static forward
+// declarations bovenaan Screen.cpp.
+// ============================================================================
 #endif // SCREEN_TYPE_PIXELS
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)

@@ -4,6 +4,15 @@ Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestan
 
 De versienummers volgen de versie in `library.properties`.
 
+## 1.0.2
+
+### Screen- en Stimulus-laag — API-oppervlak verkleind
+
+- twaalf functies die uitsluitend intern als bouwsteen dienden, zijn niet langer publiek gedeclareerd (interne/`static` zichtbaarheid): `BepaalAantalSensorenSynchroon()`, `BerekenEindStimulus()`, `InitialiseerSensorStart()`, `MaakSensorMask()`, `MaakSynchronisatieProfielAlleSensoren()`, `ResetStimulusProfiel()`, `ResetSynchronisatieProfiel()`, `VerwerkSensor()`, `PixelScreenClear()`, `PixelScreenSetCursor()`, `PixelScreenPrint()` en `PixelScreenFoutmeldingWeergeven()`;
+- geen van deze wijzigingen raakt een bestaand voorbeeld: alle twaalf functies werden al uitsluitend intern gebruikt, nooit door een `.ino`;
+- `MaakSynchronisatieProfiel()` blijft bewust publiek, als voorbereide bouwsteen voor toekomstige paarsgewijze synchronisatie (zie `docs/DECISION_LOG.md`, D020);
+- geen functionele of gedragswijziging: enkel de zichtbaarheid van deze functies is aangepast.
+
 ## 1.0.1
 
 ### Documentatie

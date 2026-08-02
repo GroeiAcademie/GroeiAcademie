@@ -79,6 +79,16 @@ static uint8_t PixelGridClamp(int32_t waarde, uint8_t minimum, uint8_t maximum) 
 
 void RegistreerCallbackScreenTypePixel(PixelScreenCallback callback) { CallbackScreenTypePixel = callback; }
 
+// ============================================================================
+// Interne hulpfuncties (D020): dienen uitsluitend als bouwsteen binnen dit
+// bestand, worden door geen enkel voorbeeld of ander bronbestand aangeroepen,
+// en zijn daarom niet langer publiek gedeclareerd in Screen.h.
+// ============================================================================
+static void PixelScreenClear();
+static void PixelScreenSetCursor(uint8_t kolom, uint8_t regel);
+static void PixelScreenPrint(const String& tekst);
+static void PixelScreenFoutmeldingWeergeven(const String& foutmelding);
+
 bool PixelScreenConfigureren() {
   if (!PixelScreen) {
     pixelScreenStatus.gecontroleerd = true;
@@ -129,21 +139,21 @@ bool PixelScreenConfigureren() {
   return true;
 }
 
-void PixelScreenClear() {
+static void PixelScreenClear() {
   if (!PixelScreenConfigureren()) return;
   PixelScreen->fillScreen(PIXEL_SCREEN_BACKGROUND_COLOR);
   pixelScreenStatus.cursorKolom = 0;
   pixelScreenStatus.cursorRegel = 0;
 }
 
-void PixelScreenSetCursor(uint8_t kolom, uint8_t regel) {
+static void PixelScreenSetCursor(uint8_t kolom, uint8_t regel) {
   if (!PixelScreenConfigureren()) return;
   pixelScreenStatus.cursorKolom = kolom;
   pixelScreenStatus.cursorRegel = regel;
   PixelScreen->setCursor(pixelScreenStatus.offsetX + kolom * PixelScreenKarakterStap(), pixelScreenStatus.offsetY + regel * PixelScreenRegelStap());
 }
 
-void PixelScreenPrint(const String& tekst) {
+static void PixelScreenPrint(const String& tekst) {
   if (!PixelScreenConfigureren()) return;
   
   for (uint16_t index = 0; index < tekst.length(); index++) {
@@ -159,7 +169,7 @@ void PixelScreenPrint(const String& tekst) {
   }
 }
 
-void PixelScreenFoutmeldingWeergeven (const String& foutmelding) {
+static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   if (CallbackScreenTypeCharacter) {
     CallbackScreenTypeCharacter(foutmelding, FATAL_ZOEK_OP, LCD_LEESTIJD_FOUTMELDING_MS, "", "", "", 0);
