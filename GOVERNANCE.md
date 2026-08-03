@@ -14,7 +14,7 @@ Voor de volgende wijzigingen is eerst een issue en een gedocumenteerde beslissin
 
 - nieuwe of gewijzigde publieke API;
 - wijziging van de hoofdstructuur;
-- nieuw officieel ondersteund board;
+- nieuw officieel ondersteund Arduino Uno R3-vormfactorbord;
 - nieuwe externe afhankelijkheid;
 - wijziging van een elektronisch referentieschema;
 - wijziging van meetgrenzen, kalibratie of veiligheidsinformatie;

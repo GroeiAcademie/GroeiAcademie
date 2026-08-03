@@ -69,10 +69,10 @@ De hardwarevalidatie wordt uitgevoerd met de officiële validatiesoftware van he
 De software bepaalt automatisch welke hardware aanwezig is, welke hardware ondersteund wordt en welke validatiestappen uitgevoerd moeten worden.
 
 ==============================================================================
-1.6) Ondersteunde moederborden
+1.6) Ondersteunde Arduino Uno R3-vormfactorborden
 ==============================================================================
 
-Tijdens versie v1.0.0 worden volgende moederborden ondersteund:
+Tijdens versie v1.0.0 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
 
 • Arduino UNO R3;
 
@@ -83,7 +83,7 @@ Tijdens versie v1.0.0 worden volgende moederborden ondersteund:
 • WEMOS D1 R32 (ESP32), getest en goedgekeurd sinds v1.0.0.
 • TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor gebruiken hetzelfde boardprofiel; hun fysieke hardwarevalidatie wordt afzonderlijk vastgelegd.
 
-Ondersteuning voor bijkomende moederborden kan in latere versies toegevoegd worden.
+Ondersteuning voor bijkomende Arduino Uno R3-vormfactorborden kan in latere versies toegevoegd worden.
 
 ==============================================================================
 1.6.1) Arduino IDE voorbereiden voor ESP32-borden in Arduino Uno R3-vormfactor
@@ -95,7 +95,7 @@ Selecteer daarna in Arduino IDE het boardprofiel `WEMOS D1 R32`.
 
 De compilatietests gebruiken hiervoor FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen.
 
-Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
+Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als Arduino Uno R3-vormfactorbord geselecteerd.
 
 ==============================================================================
 1.7) Ondersteunde hardware
@@ -125,13 +125,13 @@ Dit document bestaat uit drie opeenvolgende rondes.
 
 Ronde 1: Hardware-inventarisatie.
 
-Het GroeiAcademie Stimulus Hardware Shield ligt spanningsloos op tafel naast het moederbord.
+Het GroeiAcademie Stimulus Hardware Shield ligt spanningsloos op tafel naast het Arduino Uno R3-vormfactorbord.
 
 Alle visuele inventarisatie en fysieke controles worden uitgevoerd.
 
 Ronde 2: Automatische hardwarevalidatie.
 
-Het GroeiAcademie Stimulus Hardware Shield wordt op het moederbord geplaatst en krijgt spanning.
+Het GroeiAcademie Stimulus Hardware Shield wordt op het Arduino Uno R3-vormfactorbord geplaatst en krijgt spanning.
 
 De software voert automatische testen uit zonder gebruikersinteractie.
 
@@ -257,14 +257,14 @@ hardwareconfiguratie.
 ******************************************************************************
 
 ==============================================================================
-3.1) Controleren welk moederbord gebruikt wordt
+3.1) Controleren welk Arduino Uno R3-vormfactorbord gebruikt wordt
 ==============================================================================
 
 Doel
 
-Het GroeiAcademie Stimulus Hardware Shield ondersteunt meerdere Arduino-compatibele moederborden. Het gekozen moederbord bepaalt onder andere de beschikbare ADC, de werkspanning van het FSR402/RFP602-circuit, de softwareconfiguratie en welke hardwaretesten automatisch uitgevoerd kunnen worden.
+Het GroeiAcademie Stimulus Hardware Shield ondersteunt meerdere Arduino-compatibele Arduino Uno R3-vormfactorborden. Het gekozen Arduino Uno R3-vormfactorbord bepaalt onder andere de beschikbare ADC, de werkspanning van het FSR402/RFP602-circuit, de softwareconfiguratie en welke hardwaretesten automatisch uitgevoerd kunnen worden.
 
-Tijdens versie v1.0.0 worden volgende moederborden ondersteund:
+Tijdens versie v1.0.0 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
 
 • Arduino UNO R3
 • Arduino UNO R4 Minima
@@ -275,7 +275,7 @@ Tijdens versie v1.0.0 worden volgende moederborden ondersteund:
 
 Gebruikersvraag
 
-Welk moederbord wordt gebruikt?
+Welk Arduino Uno R3-vormfactorbord wordt gebruikt?
 
 □ Arduino UNO R3
 □ Arduino UNO R4 Minima
@@ -449,13 +449,13 @@ Deze informatie bepaalt later:
 
 Doel
 
-Het GroeiAcademie Stimulus Hardware Shield ondersteunt zowel 5V- als 3V3-moederborden.
+Het GroeiAcademie Stimulus Hardware Shield ondersteunt zowel 5V- als 3V3-Arduino Uno R3-vormfactorborden.
 
 De werkspanning van het FSR402/RFP602-circuit wordt geselecteerd met jumper H7.
 
 Deze werkspanning bepaalt eveneens de voedingsspanning van een eventueel aanwezige ADS1115-module.
 
-De gekozen spanning moet overeenkomen met het geselecteerde moederbord en met alle aangesloten uitbreidingsmodules.
+De gekozen spanning moet overeenkomen met het geselecteerde Arduino Uno R3-vormfactorbord en met alle aangesloten uitbreidingsmodules.
 
 Visuele controle
 
@@ -477,7 +477,7 @@ In welke positie staat de jumper op connector H7?
 
 Indien antwoord = 5V
 
-Controleer of deze instelling overeenkomt met het geselecteerde moederbord.
+Controleer of deze instelling overeenkomt met het geselecteerde Arduino Uno R3-vormfactorbord.
 
 Voor de Arduino UNO R3 en de Arduino UNO R4 Minima/WiFi is dit momenteel de standaardconfiguratie.
 
@@ -485,7 +485,7 @@ De werkspanning wordt geregistreerd als 5V.
 
 Indien antwoord = 3V3
 
-Controleer of het geselecteerde moederbord met een logicaniveau van 3V3 werkt.
+Controleer of het geselecteerde Arduino Uno R3-vormfactorbord met een logicaniveau van 3V3 werkt.
 
 Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden met boardprofiel `esp32:esp32:d1_uno32` is de werkspanning 3V3.
 
@@ -530,7 +530,7 @@ Hierbij worden alle sensormetingen uitgevoerd via de externe 16-bit analoog-naar
 
 Configuratie 2
 
-De sensoren worden rechtstreeks uitgelezen via de analoge ingangen van het geselecteerde moederbord.
+De sensoren worden rechtstreeks uitgelezen via de analoge ingangen van het geselecteerde Arduino Uno R3-vormfactorbord.
 
 Slechts één van beide configuraties mag gelijktijdig gebruikt worden.
 
@@ -542,7 +542,7 @@ Controleer connector H5.
 
 Wanneer op H5 een ADS1115-module geplaatst is, worden de sensoren via de ADS1115 uitgelezen.
 
-Wanneer H5 leeg is, worden de sensoren rechtstreeks verbonden met de analoge ingangen van het moederbord via de H6-jumpers.
+Wanneer H5 leeg is, worden de sensoren rechtstreeks verbonden met de analoge ingangen van het Arduino Uno R3-vormfactorbord via de H6-jumpers.
 
 Gebruikersvraag
 
@@ -561,7 +561,7 @@ De inventarisatie gaat verder met:
 
 Indien antwoord = Via directe ADC-metingen
 
-Het GroeiAcademie Stimulus Hardware Shield gebruikt de interne ADC van het geselecteerde moederbord.
+Het GroeiAcademie Stimulus Hardware Shield gebruikt de interne ADC van het geselecteerde Arduino Uno R3-vormfactorbord.
 
 De inventarisatie gaat verder met:
 
@@ -752,11 +752,11 @@ Wanneer de FSR402/RFP602-sensoren via directe ADC-metingen uitgelezen worden, wo
 
 Doel
 
-Wanneer geen ADS1115-module gebruikt wordt, worden de FSR402/RFP602-sensoren rechtstreeks verbonden met de interne ADC van het geselecteerde moederbord.
+Wanneer geen ADS1115-module gebruikt wordt, worden de FSR402/RFP602-sensoren rechtstreeks verbonden met de interne ADC van het geselecteerde Arduino Uno R3-vormfactorbord.
 
 Deze verbinding wordt gerealiseerd met de vier H6-jumpers.
 
-Iedere H6-jumper verbindt één sensorlijn met één analoge ingang van het moederbord.
+Iedere H6-jumper verbindt één sensorlijn met één analoge ingang van het Arduino Uno R3-vormfactorbord.
 
 Visuele controle
 
@@ -793,7 +793,7 @@ Controleer nogmaals dat:
 • iedere jumper volledig geplaatst is;
 • iedere sensorlijn met de juiste analoge ingang verbonden wordt.
 
-Het GroeiAcademie Stimulus Hardware Shield is nu correct voorbereid voor metingen via de interne ADC van het geselecteerde moederbord.
+Het GroeiAcademie Stimulus Hardware Shield is nu correct voorbereid voor metingen via de interne ADC van het geselecteerde Arduino Uno R3-vormfactorbord.
 
 Indien antwoord = Nee
 
@@ -808,7 +808,7 @@ Corrigeer de opstelling en herhaal daarna deze controle.
 
 Resultaat
 
-Het GroeiAcademie Stimulus Hardware Shield wordt geconfigureerd voor gebruik met de interne ADC van het geselecteerde moederbord.
+Het GroeiAcademie Stimulus Hardware Shield wordt geconfigureerd voor gebruik met de interne ADC van het geselecteerde Arduino Uno R3-vormfactorbord.
 
 Deze configuratie wordt gebruikt tijdens alle verdere sensormetingen.
 
@@ -1156,7 +1156,7 @@ De software weet hierdoor of het PixelScreen via Quad Logic Level Shifters of vi
 
 Na de hardware-inventarisatie beschikt de software over een volledig overzicht van de aanwezige hardware.
 
-Het GroeiAcademie Stimulus Hardware Shield is tijdens deze tweede ronde op het geselecteerde moederbord geplaatst en staat onder spanning.
+Het GroeiAcademie Stimulus Hardware Shield is tijdens deze tweede ronde op het geselecteerde Arduino Uno R3-vormfactorbord geplaatst en staat onder spanning.
 
 Tijdens de automatische hardwaredetectie controleert de software zonder gebruikersinteractie welke onderdelen daadwerkelijk bereikbaar zijn en correct communiceren.
 
@@ -1290,7 +1290,7 @@ De software controleert of de geselecteerde ADC gebruikt kan worden.
 
 Automatische controles
 
-Wanneer gekozen werd voor de interne ADC van het moederbord, worden de overeenkomstige analoge ingangen gecontroleerd.
+Wanneer gekozen werd voor de interne ADC van het Arduino Uno R3-vormfactorbord, worden de overeenkomstige analoge ingangen gecontroleerd.
 
 Wanneer gekozen werd voor de ADS1115-module, worden de vier ADS1115-kanalen gecontroleerd.
 
@@ -1322,19 +1322,19 @@ Wanneer één of meerdere controles mislukken, wordt de hardwarevalidatie onderb
 5.1) Doel
 ==============================================================================
 
-Na de hardware-inventarisatie wordt het GroeiAcademie Stimulus Hardware Shield op het geselecteerde moederbord geplaatst en krijgt het spanning.
+Na de hardware-inventarisatie wordt het GroeiAcademie Stimulus Hardware Shield op het geselecteerde Arduino Uno R3-vormfactorbord geplaatst en krijgt het spanning.
 
 Tijdens deze tweede ronde voert de software uitsluitend automatische testen uit waarvoor geen gebruikersinteractie nodig is.
 
 Wanneer een automatische controle mislukt, wordt de automatische hardwarevalidatie onderbroken voordat de derde ronde gestart wordt.
 
 ==============================================================================
-5.2) Automatische controles na de keuze van het moederbord
+5.2) Automatische controles na de keuze van het Arduino Uno R3-vormfactorbord
 ==============================================================================
 
 Automatische controles
 
-Na de keuze van het moederbord past de software automatisch de verdere hardwarevalidatie aan.
+Na de keuze van het Arduino Uno R3-vormfactorbord past de software automatisch de verdere hardwarevalidatie aan.
 
 Hierbij worden onder andere ingesteld:
 
@@ -1342,9 +1342,9 @@ Hierbij worden onder andere ingesteld:
 • juiste I²C-configuratie;
 • juiste SPI-configuratie;
 • juiste werkspanning van het FSR402/RFP602-circuit;
-• juiste hardwaretesten voor het gekozen moederbord.
+• juiste hardwaretesten voor het gekozen Arduino Uno R3-vormfactorbord.
 
-Wanneer later een hardwareconfiguratie gekozen wordt die niet overeenkomt met de mogelijkheden van het geselecteerde moederbord, wordt de gebruiker hiervan verwittigd.
+Wanneer later een hardwareconfiguratie gekozen wordt die niet overeenkomt met de mogelijkheden van het geselecteerde Arduino Uno R3-vormfactorbord, wordt de gebruiker hiervan verwittigd.
 
 ==============================================================================
 5.3) Automatische controles van de sensorconfiguratie FSR402/RFP602
@@ -1367,7 +1367,7 @@ Automatische controles
 
 Na de inventarisatie controleert de software automatisch:
 
-• of de gekozen werkspanning overeenkomt met het geselecteerde moederbord;
+• of de gekozen werkspanning overeenkomt met het geselecteerde Arduino Uno R3-vormfactorbord;
 • of de gekozen werkspanning overeenkomt met de verdere hardwareconfiguratie;
 • of de juiste softwareconfiguratie geselecteerd kan worden.
 
@@ -1412,7 +1412,7 @@ Wanneer geen ADS1115 op dit adres gevonden wordt, ontvangt de gebruiker een fout
 
 Automatische controles
 
-Tijdens de hardwarevalidatie gebruikt de software uitsluitend de interne ADC van het geselecteerde moederbord.
+Tijdens de hardwarevalidatie gebruikt de software uitsluitend de interne ADC van het geselecteerde Arduino Uno R3-vormfactorbord.
 
 Alle controles die betrekking hebben op de ADS1115 worden automatisch overgeslagen.
 
@@ -1479,7 +1479,7 @@ Wanneer een automatische controle niet overeenkomt met de geïnventariseerde con
 
 Na de hardware-inventarisatie, de automatische hardwaredetectie en de hardwarevalidatie zonder gebruikersinteractie wordt de hardwarevalidatie met gebruikersinteractie uitgevoerd.
 
-Het GroeiAcademie Stimulus Hardware Shield blijft tijdens deze derde ronde op het geselecteerde moederbord geplaatst en onder spanning.
+Het GroeiAcademie Stimulus Hardware Shield blijft tijdens deze derde ronde op het geselecteerde Arduino Uno R3-vormfactorbord geplaatst en onder spanning.
 
 Tijdens deze fase worden de hardwaretesten uitgevoerd waarvoor gebruikersinteractie nodig is en wordt gecontroleerd of alle aanwezige hardware correct functioneert.
 
@@ -1521,7 +1521,7 @@ Controleer of alle noodzakelijke voedingsspanningen aanwezig zijn.
 
 Automatische controles
 
-Wanneer het moederbord dit ondersteunt, controleert de software de beschikbare voedingsspanningen.
+Wanneer het Arduino Uno R3-vormfactorbord dit ondersteunt, controleert de software de beschikbare voedingsspanningen.
 
 Visuele controles
 
@@ -1866,7 +1866,7 @@ Daarnaast bevat het rapport:
 
 • gebruikte versie van het GroeiAcademie Stimulus Hardware Shield;
 
-• geselecteerd moederbord;
+• geselecteerd Arduino Uno R3-vormfactorbord;
 
 • gebruikte hardwareconfiguratie;
 

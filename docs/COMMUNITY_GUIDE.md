@@ -19,7 +19,7 @@ Ook zonder programmeerwerk kun je bijdragen door:
 
 Beschrijf bij een test:
 - gebruikte libraryversie;
-- board en boardcore;
+- Arduino Uno R3-vormfactorbord en boardcore;
 - sensor- of schermvariant;
 - voedingsspanning en bedrading;
 - gebruikte voorbeeldcode;

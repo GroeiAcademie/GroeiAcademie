@@ -18,7 +18,7 @@ Controleer vóór ingebruikname altijd:
 - kalibratie;
 - warmteontwikkeling en kortsluiting.
 
-Gebruik nooit uitsluitend een tekening of voorbeeld zonder de datasheets van de gebruikte componenten en het gebruikte board te controleren.
+Gebruik nooit uitsluitend een tekening of voorbeeld zonder de datasheets van de gebruikte componenten en het gebruikte Arduino Uno R3-vormfactorbord te controleren.
 
 ## Metingen en interpretaties
 

@@ -93,7 +93,7 @@ Sensorcircuit 2 uitgang  -> A1
 Sensorcircuit 3 uitgang  -> A2  (alleen bij 4 sensoren)
 Sensorcircuit 4 uitgang  -> A3  (alleen bij 4 sensoren)
 Alle GND-punten          -> Arduino GND
-Voeding sensorcircuits   -> geschikte VCC volgens board en sensor
+Voeding sensorcircuits   -> geschikte VCC volgens Arduino Uno R3-vormfactorbord en sensor
 ```
 
 Sluit een kale resistieve sensor niet aan alsof zij zelf een analoge spanning genereert. Zij maakt deel uit van een spanningsdeler of geschikte meetmodule.
@@ -158,7 +158,7 @@ Voor reproduceerbare resultaten:
 
 - monteer elke sensor op dezelfde manier;
 - wijzig de spanningsdeler niet tussen nulmeting en test;
-- gebruik dezelfde board- en ADC-configuratie;
+- gebruik dezelfde Arduino Uno R3-vormfactorbord- en ADC-configuratie;
 - laat sensoren volledig los vóór de volgende meting;
 - voer opnieuw een nulmeting uit na mechanische of elektrische wijzigingen.
 

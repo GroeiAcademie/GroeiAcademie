@@ -4,6 +4,17 @@ Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestan
 
 De versienummers volgen de versie in `library.properties`.
 
+## 1.0.3
+
+### Documentatie
+
+- terminologie consequent gemaakt: "board"/"moederbord" vervangen door de volledige, exacte term "Arduino Uno R3-vormfactorbord(en)" doorheen de documentatie, met uitzondering van Arduino's eigen productterminologie (`Arduino Boards Manager`, `boardprofiel`) en de al bestaande vaste samenstelling "ESP32-borden in Arduino Uno R3-vormfactor";
+- `SPONSORS.md`: nieuwe kandidaat-Arduino Uno R3-vormfactorborden toegevoegd (Cytron Maker Uno RP2040, SB Components Ardi32, STM32 Nucleo-F401RE);
+- `docs/ROADMAP.md`: statustabellen toegevoegd voor Arduino Uno R3-vormfactorborden en sensoren, met verwijzing naar `SPONSORS.md`;
+- `docs/Toepassingsgebieden/SENSOR_INVENTARIS.md`: piëzo-ademhalingsband toegevoegd; referentie-/validatie-apparaten (NeuroSky MindWave Mobile 2, Mindfield eSense, MindFlex) apart van kandidaat-sensoren vermeld;
+- `docs/HARDWARE_SUPPORT.md`: tabel met interne ADC-resolutie per Arduino Uno R3-vormfactorbord toegevoegd;
+- geen codewijziging: gebruikt ongewijzigd de codebasis van v1.0.2.
+
 ## 1.0.2
 
 ### Screen- en Stimulus-laag — API-oppervlak verkleind
@@ -11,7 +22,8 @@ De versienummers volgen de versie in `library.properties`.
 - twaalf functies die uitsluitend intern als bouwsteen dienden, zijn niet langer publiek gedeclareerd (interne/`static` zichtbaarheid): `BepaalAantalSensorenSynchroon()`, `BerekenEindStimulus()`, `InitialiseerSensorStart()`, `MaakSensorMask()`, `MaakSynchronisatieProfielAlleSensoren()`, `ResetStimulusProfiel()`, `ResetSynchronisatieProfiel()`, `VerwerkSensor()`, `PixelScreenClear()`, `PixelScreenSetCursor()`, `PixelScreenPrint()` en `PixelScreenFoutmeldingWeergeven()`;
 - geen van deze wijzigingen raakt een bestaand voorbeeld: alle twaalf functies werden al uitsluitend intern gebruikt, nooit door een `.ino`;
 - `MaakSynchronisatieProfiel()` blijft bewust publiek, als voorbereide bouwsteen voor toekomstige paarsgewijze synchronisatie (zie `docs/DECISION_LOG.md`, D020);
-- geen functionele of gedragswijziging: enkel de zichtbaarheid van deze functies is aangepast.
+- geen functionele of gedragswijziging: enkel de zichtbaarheid van deze functies is aangepast;
+- dit was een bewuste, eenmalige correctie van het te ruime v1.0.0-API-oppervlak, uitgevoerd terwijl er nog geen gekende externe gebruikers waren.
 
 ## 1.0.1
 

@@ -198,7 +198,7 @@ Emotie-observatie is geen afzonderlijke enkelvoudige sensor. Zij kan later gebru
 Een nieuw schema wordt pas als raadpleegbaar referentieschema opgenomen wanneer het minimaal bevat:
 
 - doel en versie;
-- board en sensorvariant;
+- Arduino Uno R3-vormfactorbord en sensorvariant;
 - volledig aansluitschema;
 - pinbezetting;
 - voeding en gemeenschappelijke massa;

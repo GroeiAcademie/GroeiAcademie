@@ -18,7 +18,7 @@ Een onderzoek beschrijft minimaal:
 
 1. vraag en hypothese;
 2. deelnemer en context;
-3. board, sensoren en elektronisch schema;
+3. Arduino Uno R3-vormfactorbord, sensoren en elektronisch schema;
 4. software- en configuratieversie;
 5. kalibratie;
 6. protocol en instructies;

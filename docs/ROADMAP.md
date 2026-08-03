@@ -116,18 +116,66 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 - kalibratie;
 - voorbeelden;
 - foutbronnen en interpretatiegrenzen;
-- board- en geheugentests.
+- Arduino Uno R3-vormfactorbord- en geheugentests.
 
 ## 4. Hardware ROADMAP
 
 - Native ADC en ADS1115 op de bedoelde hardware valideren;
 - WEMOS D1 R32 is sinds v1.0.0 hardwarematig getest en goedgekeurd; fysieke validatie van TTGO D1 R32 en andere compatibele borden afzonderlijk vastleggen;
-- hardwareprofielen per ondersteund moederbord vastleggen;
+- hardwareprofielen per ondersteund Arduino Uno R3-vormfactorbord vastleggen;
 - pinmapping, werkspanning en logische niveaus per hardwareprofiel valideren;
 - sensorcontact, beweging, storing en andere foutbronnen detecteren en rapporteren;
 - hardwarevalidatie voor CharacterScreen en PixelScreen behouden;
-- hardwarevalidatie uitbreiden wanneer nieuwe sensoren, schermen, keymatrices of moederborden officieel worden toegevoegd;
+- hardwarevalidatie uitbreiden wanneer nieuwe sensoren, schermen, keymatrices of Arduino Uno R3-vormfactorborden officieel worden toegevoegd;
 - configuratie- en validatieresultaten reproduceerbaar documenteren.
+
+### Arduino Uno R3-vormfactorborden
+
+Status volgens de [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#statuslegende).
+
+| Arduino Uno R3-vormfactorbord | Status |
+|---|---|
+| Arduino UNO R3 | geïmplementeerd |
+| Arduino UNO R4 Minima | geïmplementeerd |
+| Arduino UNO R4 WiFi | geïmplementeerd |
+| Cytron Maker Uno RP2040 | kandidaat-idee |
+| SB Components Ardi32 | kandidaat-idee |
+| STM32 Nucleo-F401RE | kandidaat-idee |
+| TTGO D1 R32 | geïmplementeerd |
+| WEMOS D1 R32 | geïmplementeerd |
+
+Zie ook [SPONSORS.md](../SPONSORS.md) voor de Arduino Uno R3-vormfactorborden die momenteel als kandidaat open staan voor sponsoring.
+
+### Sensoren
+
+Status volgens dezelfde [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#statuslegende).
+
+| Sensor | Status |
+|---|---|
+| AD8232 | kandidaat-idee |
+| ADXL345 | kandidaat-idee |
+| BioAmp EXG Pill | ter-discussie |
+| BME688 | kandidaat-idee |
+| DS18B20 | kandidaat-idee |
+| ECG EMG Shield DuinoPeak | kandidaat-idee |
+| Grove GSR | kandidaat-idee |
+| INMP441 | kandidaat-idee |
+| MAX30102 | kandidaat-idee |
+| MCU-6701 | kandidaat-idee |
+| MR60BHA2 | kandidaat-idee |
+| MPU6050 | kandidaat-idee |
+| MPU6500 | kandidaat-idee |
+| NeuroSky TGAM | kandidaat-idee |
+| Piëzo-ademhalingsband (×2, borst + buik) | kandidaat-idee |
+| Pulse Sensor | kandidaat-idee |
+| Seed Studio 60 GHz mmWave Sensor | kandidaat-idee |
+| SCD41 | kandidaat-idee |
+| SDP810-125PA | kandidaat-idee |
+| VL6180X | kandidaat-idee |
+
+Referentie-/validatie-apparaten (geen kandidaat-sensoren, dienen om te controleren of onze eigen hardware dezelfde signaalpatronen kan tonen als een gevestigd consumentenapparaat): NeuroSky MindWave Mobile 2, Mindfield eSense, MindFlex.
+
+Naast deze lijst bevinden zich in [SENSOR_INVENTARIS.md](Toepassingsgebieden/SENSOR_INVENTARIS.md) nog andere, alternatieve sensoren die nog verder onderzocht moeten worden voordat hun status bepaald kan worden.
 
 ## 5. Software ROADMAP
 
@@ -156,7 +204,7 @@ Nog gepland:
 
 - bijdrageproces in de praktijk verder testen;
 - enkele duidelijk afgebakende `good first issue`-taken voorzien;
-- GitHub Actions voor ondersteunde boards voorzien wanneer deze teststroom definitief is.
+- GitHub Actions voor ondersteunde Arduino Uno R3-vormfactorborden voorzien wanneer deze teststroom definitief is.
 
 ### Arduino Library Manager
 
@@ -182,7 +230,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 - Native ADC en ADS1115 hardwarematig valideren;
 - schone installatie vanuit ZIP controleren;
 - interne documentatie en voorbeeldpaden controleren;
-- testresultaten per board, backend, schermconfiguratie en hardwareprofiel bewaren;
+- testresultaten per Arduino Uno R3-vormfactorbord, backend, schermconfiguratie en hardwareprofiel bewaren;
 - betrouwbaarheid, foutbronnen en interpretatiegrenzen per meetmodule documenteren;
 - experimenten zo opbouwen dat baseline, stimulus, interventie, herstel en vergelijking afzonderlijk beoordeeld kunnen worden.
 

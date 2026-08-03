@@ -89,7 +89,7 @@ Selecteer het bord met één regel:
 #define BOARD_VERSION BOARD_UNO_R3
 ```
 
-`SystemConfig.h` leidt `ADC_BITS` automatisch af uit `ADC_BACKEND` en `BOARD_VERSION`. `DELAY_US` blijft via `UserConfig.h` aanpasbaar en krijgt anders de board- en backendafhankelijke fallback uit `SystemConfig.h`. Voor `BOARD_ESP32_UNO` blijft `DELAY_US 0` een te valideren keuze voor de concrete meetopstelling; zie `SystemConfig.md`.
+`SystemConfig.h` leidt `ADC_BITS` automatisch af uit `ADC_BACKEND` en `BOARD_VERSION`. `DELAY_US` blijft via `UserConfig.h` aanpasbaar en krijgt anders de van het Arduino Uno R3-vormfactorbord en de backend afhankelijke fallback uit `SystemConfig.h`. Voor `BOARD_ESP32_UNO` blijft `DELAY_US 0` een te valideren keuze voor de concrete meetopstelling; zie `SystemConfig.md`.
 
 ## Actief gebruikersbestand
 

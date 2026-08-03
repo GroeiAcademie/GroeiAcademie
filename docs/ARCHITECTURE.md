@@ -174,7 +174,7 @@ Elektronische schema's worden per toepassingsgebied beschreven. De index staat i
 
 Een geldig schema vermeldt:
 
-- board en boardvariant;
+- Arduino Uno R3-vormfactorbord en boardvariant;
 - pinbezetting;
 - voeding en gemeenschappelijke massa;
 - componentwaarden;

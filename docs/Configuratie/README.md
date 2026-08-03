@@ -9,7 +9,7 @@ Deze map documenteert de configuratiebestanden uit `src/Configuratie/`.
 | [UserLanguage.md](UserLanguage.md) | `../../src/Language/UserExample_XX_template.h` en `../../src/Language/UserLibrary_XX_template.h` | blijvende persoonlijke teksten per gekozen taal |
 | [StimulusConfig.md](StimulusConfig.md) | [`../../src/Configuratie/StimulusConfig.h`](../../src/Configuratie/StimulusConfig.h) | drempels, marges en timingwaarden voor Stimulus |
 
-Configuratie gebeurt compile-time via `#define`-waarden. Wijzigingen vragen dus een nieuwe compilatie en upload naar het Arduino-board.
+Configuratie gebeurt compile-time via `#define`-waarden. Wijzigingen vragen dus een nieuwe compilatie en upload naar het Arduino Uno R3-vormfactorbord.
 
 ## Persoonlijke configuratie
 

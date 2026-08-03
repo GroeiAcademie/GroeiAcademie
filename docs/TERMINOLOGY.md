@@ -54,4 +54,4 @@ Een referentiemeting waarmee latere uitvoeringen binnen dezelfde opstelling en s
 
 ## Ondersteund
 
-Een board, sensor of functie is alleen officieel ondersteund wanneer de relevante code, voorbeelden en documentatie zijn gecontroleerd. Alleen het bestaan van voorbereidende code of een map is onvoldoende.
+Een Arduino Uno R3-vormfactorbord, sensor of functie is alleen officieel ondersteund wanneer de relevante code, voorbeelden en documentatie zijn gecontroleerd. Alleen het bestaan van voorbereidende code of een map is onvoldoende.

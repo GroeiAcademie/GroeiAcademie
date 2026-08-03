@@ -20,7 +20,7 @@ Een gewone functionele bug zonder veiligheids- of privacy-impact hoort in een pu
 
 Meld een mogelijke kwetsbaarheid niet publiek wanneer misbruik of schade mogelijk is. Stuur een beschrijving naar **info@groeiacademie.be** met:
 
-- betrokken versie en board;
+- betrokken versie en Arduino Uno R3-vormfactorbord;
 - configuratie en externe libraries;
 - stappen om het probleem te reproduceren;
 - verwachte en werkelijke uitkomst;
@@ -35,6 +35,6 @@ Voor bedrading, voeding, sensorplaatsing en mechanische veiligheid geldt [DISCLA
 
 Na onderzoek wordt bepaald wanneer en hoe een correctie en toelichting worden gepubliceerd. Een opgeloste kwetsbaarheid wordt waar passend in [CHANGELOG.md](CHANGELOG.md) vermeld.
 
-## Netwerkverbonden boards
+## Netwerkverbonden Arduino Uno R3-vormfactorborden
 
-ESP32 en andere netwerkverbonden boards zijn momenteel niet officieel ondersteund. Zodra dat verandert, wordt dit beleid uitgebreid met concrete eisen voor authenticatie, opslag, transportbeveiliging en privacy.
+ESP32 en andere netwerkverbonden Arduino Uno R3-vormfactorborden zijn momenteel niet officieel ondersteund. Zodra dat verandert, wordt dit beleid uitgebreid met concrete eisen voor authenticatie, opslag, transportbeveiliging en privacy.

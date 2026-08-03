@@ -2,7 +2,7 @@
 
 Dit document toont welke sensoren en modules al ter beschikking zijn voor het GroeiAcademie FrameWork. Het is een **inventaris van beschikbare voorraad, geen gevalideerd schema**. Zie [MODULES.md](MODULES.md) voor de NLP-toepassingsgebieden die deze sensoren zouden kunnen dienen, en voor de vereisten waaraan een schema moet voldoen vóór het als referentieontwerp wordt opgenomen.
 
-Meerdere sensoren hieronder meten hetzelfde of een overlappend signaal. Er is nog geen keuze gemaakt voor een "officieel ondersteunde" sensor per signaal, zoals `docs/HARDWARE_SUPPORT.md` dat wel al doet voor boards. Deze inventaris toont dus alle beschikbare opties naast elkaar, niet een voorkeur.
+Meerdere sensoren hieronder meten hetzelfde of een overlappend signaal. Er is nog geen keuze gemaakt voor een "officieel ondersteunde" sensor per signaal, zoals `docs/HARDWARE_SUPPORT.md` dat wel al doet voor Arduino Uno R3-vormfactorborden. Deze inventaris toont dus alle beschikbare opties naast elkaar, niet een voorkeur.
 
 ## Aanraking, capacitieve bediening en gebruikersinput
 
@@ -15,6 +15,7 @@ Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registrer
 
 ## Ademhaling
 
+* Piëzo-ademhalingsband, mechanische ademhalingsmeting via rekstrook (×2 nodig: borst + buik, voor onderscheid tussen tempo en type ademhaling)
 * MR60BHA2, contactloze ademhaling en hartslag via 60 GHz mmWave (Human Breathing and Heartbeat Sensor, 60GHz mm Wave)
 * SDP810-125PA, drukverschillen en luchtstroom (Druksensor ±0018PSI, ±0125kPa)
 * INMP441, ademgeluid via digitale microfoon (Omnidirectionele microfoonmodule MEMS, I2S-interface, ESP32-module)
@@ -56,8 +57,12 @@ Toepasbaar voor borst- en buikbeweging, lichaamshouding, beweging, tremor, react
 * BioAmp EXG Pill (BIOAMPEXPPILL), signalen van publicatiekwaliteit, ECG, EEG, EMG en EOG
 * AD8232, ECG-meetmodule, hartslagmeter-sensorkit met klinische nauwkeurigheid
 * NeuroSky TGAM, brainwave sensor module, EEG
-* MindFlex, EEG-gebaseerde toepassing (MindFlex Mattel)
+
+Referentie-/validatie-apparaten (geen kandidaat-sensoren voor integratie — dienen om te controleren of eigen hardware zoals BioAmp/NeuroSky TGAM dezelfde brainwave-patronen kan tonen als een gevestigd consumentenapparaat):
+
 * NeuroSky MindWave Mobile 2, EEG
+* Mindfield eSense, zie Hartslag, HRV en hartcoherentie
+* MindFlex, EEG-gebaseerde toepassing (MindFlex Mattel)
 
 Belangrijk onderscheid:
 

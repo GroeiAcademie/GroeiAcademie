@@ -38,14 +38,14 @@ Een mislukte Arduino LINT wordt afzonderlijk bijgehouden en maakt de volledige r
 
 Alle voorbeelden worden automatisch gecompileerd. Iedere compilatie gebruikt `--clean --jobs 1`, zodat geen oude buildcache wordt hergebruikt en de compilaties na elkaar worden uitgevoerd.
 
-#### Geteste boards
+#### Geteste Arduino Uno R3-vormfactorborden
 
 - Arduino UNO R3 met FQBN `arduino:avr:uno` en `BOARD_VERSION=BOARD_UNO_R3`;
 - Arduino UNO R4 Minima met FQBN `arduino:renesas_uno:minima` en `BOARD_VERSION=BOARD_UNO_R4_MINIMA`;
 - Arduino UNO R4 WiFi met FQBN `arduino:renesas_uno:unor4wifi` en `BOARD_VERSION=BOARD_UNO_R4_WIFI`;
 - ESP32-borden in Arduino Uno R3-vormfactor via boardprofiel `WEMOS D1 R32`, met FQBN `esp32:esp32:d1_uno32` en `BOARD_VERSION=BOARD_ESP32_UNO`.
 
-Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor moet via Arduino Boards Manager `esp32 by Espressif Systems` geïnstalleerd zijn. Kies daarna het boardprofiel `WEMOS D1 R32`. De testscripts gebruiken FQBN `esp32:esp32:d1_uno32`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt samen met het ESP32-boardpakket geïnstalleerd en wordt niet als board geselecteerd.
+Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor moet via Arduino Boards Manager `esp32 by Espressif Systems` geïnstalleerd zijn. Kies daarna het boardprofiel `WEMOS D1 R32`. De testscripts gebruiken FQBN `esp32:esp32:d1_uno32`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt samen met het ESP32-boardpakket geïnstalleerd en wordt niet als Arduino Uno R3-vormfactorbord geselecteerd.
 
 De batch koppelt iedere FQBN expliciet aan de overeenkomstige `BOARD_VERSION`.
 

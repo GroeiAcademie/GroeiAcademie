@@ -62,7 +62,7 @@ Voor elke meetmodule worden vastgelegd:
 - filters en algoritmen;
 - foutbronnen;
 - referentiemethode;
-- ondersteunde boards;
+- ondersteunde Arduino Uno R3-vormfactorborden;
 - softwareversie;
 - grenzen van interpretatie.
 

@@ -84,3 +84,9 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 **Besluit:** functies die uitsluitend als bouwsteen dienen binnen één bronbestand van de library — en door geen enkel voorbeeld of extern bekende gebruiker rechtstreeks worden aangeroepen — krijgen interne (`static`) zichtbaarheid in plaats van een publiek prototype in de header. Dit geldt met terugwerkende kracht voor twaalf functies uit de Screen- en Stimulus-laag die abusievelijk publiek stonden: `BepaalAantalSensorenSynchroon()`, `BerekenEindStimulus()`, `InitialiseerSensorStart()`, `MaakSensorMask()`, `MaakSynchronisatieProfielAlleSensoren()`, `ResetStimulusProfiel()`, `ResetSynchronisatieProfiel()`, `VerwerkSensor()`, `PixelScreenClear()`, `PixelScreenSetCursor()`, `PixelScreenPrint()` en `PixelScreenFoutmeldingWeergeven()`. `MaakSynchronisatieProfiel()` blijft bewust extern staan, ondanks dat ze momenteel nergens gebruikt wordt, als voorbereide bouwsteen voor toekomstige paarsgewijze synchronisatie.
 
 **Context:** dit wordt uitgevoerd terwijl v1.0.0/v1.0.1 nog maar zeer kort in de Library Manager staan en er geen gekende externe gebruikers zijn — de kost van deze correctie neemt met de tijd toe onder het API-stabiliteitsbeleid (D019).
+
+## D021 Terminologie: "board" vs. "Arduino Uno R3-vormfactorbord"
+
+**Besluit:** doorheen de documentatie wordt de generieke term "board"/"moederbord" vervangen door de volledige, exacte term "Arduino Uno R3-vormfactorbord(en)" wanneer een fysiek bord bedoeld wordt. Uitzonderingen: Arduino's eigen productterminologie (`Arduino Boards Manager`, `boardprofiel`) blijft ongewijzigd, evenals de al bestaande vaste samenstelling "ESP32-borden in Arduino Uno R3-vormfactor" en letterlijke citaten van compiler-uitvoer. Historische titels in dit logboek (bv. D006) worden niet met terugwerkende kracht herschreven.
+
+**Context:** met v1.0.3 voor het eerst consequent doorgevoerd over de volledige documentatie.

@@ -4,7 +4,7 @@
 
 Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke statussen.
 
-| Board | Architectuur | Compilatiestatus in de repository | Hardwarestatus |
+| Arduino Uno R3-vormfactorbord | Architectuur | Compilatiestatus in de repository | Hardwarestatus |
 |---|---|---|---|
 | Arduino UNO R3 | `avr` | voorbeelden opgenomen in de compilatiematrix; vier gekende geheugenbeperkingen bij de grootste gecombineerde sketch | relevante hardwaretests blijven per opstelling vast te leggen |
 | Arduino UNO R4 Minima | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen |
@@ -14,7 +14,17 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke statussen.
 
 WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Het gebruik van hetzelfde boardprofiel door TTGO D1 R32 of een compatibel bord bewijst niet automatisch dat ook dat fysieke bord afzonderlijk is gevalideerd.
 
-De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata van die externe library. Een board geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
+De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata van die externe library. Een Arduino Uno R3-vormfactorbord geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
+
+## ADC-resolutie per Arduino Uno R3-vormfactorbord
+
+| Arduino Uno R3-vormfactorbord | Interne ADC-resolutie | Opmerking |
+|---|---|---|
+| Arduino UNO R3 | 10-bit | zeer lineair, geen hoogfrequente storing |
+| Arduino UNO R4 Minima/WiFi | 14-bit (standaard 10-bit, instelbaar via `analogReadResolution(14)`) | WiFi-variant heeft iets meer stralingsruis; bron: docs.arduino.cc |
+| WEMOS D1 R32 / TTGO D1 R32 | 12-bit | sterk niet-lineair (S-curve), dead-zones onder 0,1V en boven 3,2V zonder externe ADC |
+
+Voor precisiemetingen wordt de externe **ADS1115** (16-bit, I2C) aanbevolen boven elk van de bovenstaande interne ADC's — zie `examples/Systeem/ADC_Validatie/ADC_Validatie_ADS1115/`.
 
 ## Configuratie
 
@@ -96,6 +106,6 @@ Een sensor wordt per meetdoel beoordeeld op:
 - comfort en plaatsing;
 - mechanische reproduceerbaarheid;
 - elektrische veiligheid;
-- compatibiliteit met de ADC en voedingsspanning van het board.
+- compatibiliteit met de ADC en voedingsspanning van het Arduino Uno R3-vormfactorbord.
 
 Geschiktheid voor één meetdoel impliceert geen geschiktheid voor een ander meetdoel.

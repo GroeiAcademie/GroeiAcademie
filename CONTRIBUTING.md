@@ -28,7 +28,7 @@ Grote wijzigingen aan de architectuur, publieke API, hardwareondersteuning of pr
 
 ### Hardware
 
-Bijdragen aan fysieke onderdelen, sensoren, ontwikkelborden, schermen, connectoren, behuizingen en testopstellingen.
+Bijdragen aan fysieke onderdelen, sensoren, Arduino Uno R3-vormfactorborden, schermen, connectoren, behuizingen en testopstellingen.
 
 ### Elektronica
 
@@ -36,7 +36,7 @@ Bijdragen aan schema's, bedrading, voedingen, spanningsniveaus, signaalcondition
 
 ### Testers
 
-Testen van code, `examples`, hardware en combinaties daarvan op ondersteunde boards en configuraties. Ook een enkel testresultaat op één board is een waardevolle bijdrage — dat hoeft geen volledige validatie te zijn.
+Testen van code, `examples`, hardware en combinaties daarvan op ondersteunde Arduino Uno R3-vormfactorborden en configuraties. Ook een enkel testresultaat op één Arduino Uno R3-vormfactorbord is een waardevolle bijdrage — dat hoeft geen volledige validatie te zijn.
 
 ### Vertalingen
 
@@ -58,7 +58,7 @@ Duidelijk beschrijven van fouten, onverwacht gedrag of problemen, met voldoende 
 
 Deze checklist is niet vereist voor kleine bijdragen (zie hierboven).
 
-Bijdragen aan code en `examples` worden volledig, werkend, getest en gedocumenteerd ingediend. De contributor vermeldt duidelijk op welke ondersteunde boards, hardware en configuraties de bijdrage is getest en voegt de testresultaten toe. Wanneer dat relevant is, mag ook een video van de uitgevoerde tests worden toegevoegd.
+Bijdragen aan code en `examples` worden volledig, werkend, getest en gedocumenteerd ingediend. De contributor vermeldt duidelijk op welke ondersteunde Arduino Uno R3-vormfactorborden, hardware en configuraties de bijdrage is getest en voegt de testresultaten toe. Wanneer dat relevant is, mag ook een video van de uitgevoerde tests worden toegevoegd.
 
 Een bestaande functienaam wijzigen, een parameter toevoegen of verwijderen of bestaand gedrag aanpassen: eerst voorstellen via een GitHub Discussion.
 
@@ -92,7 +92,7 @@ Bij elke technische bijdrage vermeldt de contributor de exacte versienummers van
 
 Een technische bijdrage toont waar relevant aan dat bestaande functionaliteit niet wordt gebroken, door de relevante bestaande tests opnieuw uit te voeren en de resultaten toe te voegen.
 
-Een technische bijdrage wordt getest op de officieel ondersteunde boards die de contributor zelf ter beschikking heeft. De contributor vermeldt duidelijk welke boards zijn getest en voor welke boards nog validatie nodig is. Voor ontbrekende tests kan een beroep worden gedaan op contributors die zich als tester aanbieden.
+Een technische bijdrage wordt getest op de officieel ondersteunde Arduino Uno R3-vormfactorborden die de contributor zelf ter beschikking heeft. De contributor vermeldt duidelijk welke Arduino Uno R3-vormfactorborden zijn getest en voor welke nog validatie nodig is. Voor ontbrekende tests kan een beroep worden gedaan op contributors die zich als tester aanbieden.
 
 Een bijdrage die nieuwe configuratie-opties, `#define`s of instellingen toevoegt, bevat veilige standaardwaarden zodat bestaande gebruikers niets hoeven aan te passen, en documenteert duidelijk waar die instelling thuishoort en wat de gevolgen van elke mogelijke waarde zijn.
 

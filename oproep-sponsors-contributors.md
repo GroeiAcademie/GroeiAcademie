@@ -16,7 +16,7 @@ We zoeken:
 
 - **Contributors** voor code, voorbeelden, documentatie, vertalingen, meetprotocollen, hardware- en elektronicatests, bugmeldingen, reviews, onderzoek en communityondersteuning. Ook een kleine bijdrage; een typfix, één extra voorbeeld, een vertaling; is welkom en vraagt geen uitgebreide procedure. Zie `CONTRIBUTING.md` en `CONTRIBUTORS.md`.
 - **Donaties**, snel en eenmalig — een kopje koffie voor het project, zonder overleg of proces. Zie `SPONSORS.md`.
-- **Sponsors** voor financiële of materiële steun, zoals ontwikkelborden, sensoren, meetapparatuur, PCB-productie, testmateriaal of softwarelicenties. Zie `SPONSORS.md`.
+- **Sponsors** voor financiële of materiële steun, zoals Arduino Uno R3-vormfactorborden, sensoren, meetapparatuur, PCB-productie, testmateriaal of softwarelicenties. Zie `SPONSORS.md`.
 
 Grote wijzigingen worden eerst besproken. De maintainers bewaken de architectuur, kwaliteit en onafhankelijkheid van het project en beslissen over opname.
 
@@ -70,4 +70,4 @@ Het project verbindt Arduino, sensormetingen, biofeedback en toepassingen binnen
 - Gebruik voor sponsoring het privécontactkanaal uit `SPONSORS.md`; voor donaties verwijs je rechtstreeks naar de webshoplink uit `SPONSORS.md`.
 - Maak enkele kleine, duidelijk afgebakende issues met het label `good first issue`.
 - Benoem per oproep concreet welke hulp op dat moment nodig is.
-- Maak geen claims over officiële board- of hardwareondersteuning die nog niet gevalideerd is.
+- Maak geen claims over officiële Arduino Uno R3-vormfactorbord- of hardwareondersteuning die nog niet gevalideerd is.

@@ -79,9 +79,12 @@ Binnen de bovenstaande vormen van sponsoring zoeken we momenteel concreet steun 
   - Hazet 823 driehoekige schraper.
 
  - **Hardware**
-  - MyoWare 2.0: geeft continu een EMG-signaal door tijdens de meting;
+  - Cytron Maker Uno RP2040 (~$15): Arduino Uno R3-vormfactorbord, kandidaat voor unieke PIO-precisietiming;
   - MAX30205: levert continu temperatuurdata tijdens de meting;
-  - Piëzo-ademhalingsband, levert continu ademhalingsdata tijdens de meting.
+  - MyoWare 2.0: geeft continu een EMG-signaal door tijdens de meting;
+  - Piëzo-ademhalingsband, levert continu ademhalingsdata tijdens de meting;
+  - SB Components Ardi32 (~€26-35): Arduino Uno R3-vormfactorbord, kandidaat voor sterkste rekenkracht/geheugen (ESP32-S3, 16 MB Flash, 8 MB PSRAM).
+  - STM32 Nucleo-F401RE (~€13-19): Arduino Uno R3-vormfactorbord, kandidaat voor beste interne ADC-referentiekwaliteit;
 
 - **Verbruiksmaterialen**
   - Glue Sticks voor Bambu Lab 3D-printer;
