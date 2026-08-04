@@ -21,8 +21,7 @@ void setup() {
   Serial.begin(115200);
 #endif
 
-  lcd.init();
-  lcd.backlight();
+  CharacterScreenConfigureren();
 }
 
 void loop() {

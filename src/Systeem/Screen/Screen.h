@@ -107,6 +107,21 @@ enum class ScreenData : uint8_t {
 typedef void (*CharacterScreenCallback)(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
 void RegistreerCallbackScreenTypeCharacter(CharacterScreenCallback callback);
 extern CharacterScreenCallback CallbackScreenTypeCharacter;
+
+// D022/D023: CHARACTERSCREEN_I2C_ADRES_MODUS bepaalt hoe CharacterScreenConfigureren()
+// omgaat met het I2C-adres van het characterscherm (default in SystemConfig.h).
+//   0 = geen scan, enkel de handdruk-check op het geconfigureerde I2C_ADRES (kleinste footprint).
+//   1 = scan + rapporteren via de foutmelding, geen zelfherstel (standaard).
+//   2 = scan + automatisch herbouwen op het gevonden adres (placement-new), nooit hercompileren.
+#if (CHARACTERSCREEN_I2C_ADRES_MODUS < 0) || (CHARACTERSCREEN_I2C_ADRES_MODUS > 2)
+  #error CHARACTERSCREEN_I2C_ADRES_MODUS moet 0, 1 of 2 zijn.
+#endif
+
+// O2/D024-vervolg: opnieuwProberen=true dwingt een nieuwe configuratiepoging af,
+// ook na een eerdere mislukking — standaard false, dus bestaande aanroepen
+// (zonder argument) blijven exact hetzelfde werken. Niet automatisch herhalen
+// (bv. in loop()): elke poging doet een echte I2C-transactie.
+bool CharacterScreenConfigureren(bool opnieuwProberen = false);
 #endif // SCREEN_TYPE_CHARACTER
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
@@ -114,7 +129,7 @@ typedef void (*PixelScreenCallback)(ScreenData screenData, const String& eersteR
 void RegistreerCallbackScreenTypePixel(PixelScreenCallback callback);
 extern PixelScreenCallback CallbackScreenTypePixel;
 
-bool PixelScreenConfigureren();
+bool PixelScreenConfigureren(bool opnieuwProberen = false);
 
 // ============================================================================
 // D020: PixelScreenClear(), PixelScreenSetCursor(), PixelScreenPrint() en
@@ -129,5 +144,9 @@ void PrintToScreen(ScreenData screenData, const String& eersteRegel, const Strin
 #endif // SCREEN_TYPE_PIXELS
 
 void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+
+// D022: optionele gemakslaag, geen deprecatie van CharacterScreenConfigureren()/
+// PixelScreenConfigureren() — die blijven de granulaire, expliciete route.
+void ScreensConfigureren(bool opnieuwProberen = false);
 
 #endif // SCREEN_H

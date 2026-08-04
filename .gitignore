@@ -9,6 +9,7 @@ Thumbs.db
 
 # Arduino
 *.tmp
+UserConfig.h
 
 # Visual Studio Code
 .vscode/

@@ -25,13 +25,16 @@ void setup() {
   Serial.begin(115200);
 #endif
 
-  lcd.init();
-  lcd.backlight();
-
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
   pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
   PixelScreen = &pixelScreen;
-  PixelScreenConfigureren();
+
+  // ScreensConfigureren() roept, aan de hand van SCREEN_OUTPUT, automatisch
+  // CharacterScreenConfigureren() en/of PixelScreenConfigureren() aan — geen
+  // deprecatie van de losse functies, dit is enkel een optionele gemakslaag.
+  // Wil je granulaire controle (bv. één scherm pas later configureren), gebruik
+  // dan de losse functies zoals in de andere Screen-voorbeelden.
+  ScreensConfigureren();
 }
 
 void loop() {

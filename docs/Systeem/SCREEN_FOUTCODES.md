@@ -1,13 +1,20 @@
-# PixelScreen-foutcodes
+# Screen-foutcodes
 
-Wanneer een fatale fout verhindert dat de geselecteerde PixelScreen-uitvoer betrouwbaar kan werken, toont de library een korte foutmelding:
+Wanneer een fatale fout verhindert dat de geselecteerde CharacterScreen- of PixelScreen-uitvoer betrouwbaar kan werken, toont de library een korte foutmelding:
+
+```text
+FATAL: CSxxx
+ZOEK DIT NU OP
+```
+
+of
 
 ```text
 FATAL: PSxxx
 ZOEK DIT NU OP
 ```
 
-Wanneer CharacterScreen actief is, verschijnt deze melding op het CharacterScreen. Wanneer CharacterScreen niet actief is, forceert de library Serial op 115200 baud en verschijnt dezelfde melding in de Serial Monitor. `DEBUG` en `SCREEN_TYPE_SERIAL` zijn daarvoor niet vereist. Wanneer CharacterScreen actief is, wordt Serial voor deze foutmelding niet geforceerd.
+De twee schermtypes vallen wederzijds op elkaar terug: een PixelScreen-fout verschijnt op het CharacterScreen wanneer dat correct geconfigureerd en actief is; een CharacterScreen-fout verschijnt op het PixelScreen wanneer dát correct geconfigureerd en actief is. Is geen van beide beschikbaar, dan forceert de library Serial op 115200 baud en verschijnt dezelfde melding in de Serial Monitor. `DEBUG` en `SCREEN_TYPE_SERIAL` zijn daarvoor niet vereist. Is het andere schermtype wel beschikbaar, dan wordt Serial voor deze foutmelding niet geforceerd. Geen van beide foutmeldingsfuncties roept zelf een configuratiefunctie aan — dat voorkomt een oneindige lus (zie `docs/DECISION_LOG.md`, D022).
 
 De volledige betekenis, controle en oplossing staan hieronder bij de gemelde foutcode.
 
@@ -15,10 +22,168 @@ De volledige betekenis, controle en oplossing staan hieronder bij de gemelde fou
 
 | Foutcode | Betekenis |
 |---|---|
+| [CS000: CharacterScreenConfigureren() niet aangeroepen](#cs000) | De ingebouwde characterschermhardware is niet expliciet geconfigureerd vóór de eerste `PrintToScreen()`-aanroep. |
+| [CS001: geen I2C-antwoord](#cs001) | Geen enkel geprobeerd I2C-adres reageerde op de handdruk-check. |
+| [CS002: scherm gevonden op ander I2C-adres](#cs002) | Enkel bij `CHARACTERSCREEN_I2C_ADRES_MODUS = 1`: het scherm reageerde op een ander adres dan het geconfigureerde `I2C_ADRES`. |
+| [PS000: PixelScreenConfigureren() niet aangeroepen](#ps000) | De ingebouwde pixelschermhardware is niet expliciet geconfigureerd vóór de eerste `PrintToScreen()`-aanroep. |
 | [PS001: PixelScreen niet gekoppeld](#ps001) | De algemene `PixelScreen`-pointer verwijst niet naar het geïnitialiseerde schermobject. |
 | [PS002: Omgewisselde breedte en hoogte komen niet overeen](#ps002) | Bij rotatie 1 of 3 komen de gemeten afmetingen niet overeen met de omgewisselde ingestelde afmetingen. |
 | [PS003: Niet-omgewisselde breedte en hoogte komen niet overeen](#ps003) | Bij rotatie 0 of 2 komen de gemeten afmetingen niet overeen met de ingestelde afmetingen. |
 | [PS004: Tekstgrid kleiner dan 16×2](#ps004) | De resolutie en tekstgrootte leveren minder dan 16 kolommen of minder dan 2 regels op. |
+
+<a id="cs000"></a>
+## CS000 — CharacterScreenConfigureren() niet aangeroepen
+
+### Melding
+
+```text
+FATAL: CS000
+ZOEK DIT NU OP
+```
+
+### Trigger
+
+```cpp
+if (!characterScreenStatus.gecontroleerd)
+```
+
+### Betekenis
+
+`PrintToScreen()` werd aangeroepen terwijl `CharacterScreenConfigureren()` (rechtstreeks, of via `ScreensConfigureren()`) nog nooit werd aangeroepen voor CharacterScreen-uitvoer.
+
+### Controle
+
+Controleer of `setup()` één van deze aanroepen bevat:
+
+```cpp
+CharacterScreenConfigureren();
+```
+
+of
+
+```cpp
+ScreensConfigureren();
+```
+
+### Gevolg
+
+De library kan niet garanderen dat het characterscherm werkt, en toont daarom geen normale uitvoer via CharacterScreen totdat dit is opgelost.
+
+### Oplossing
+
+Roep `CharacterScreenConfigureren()` (of `ScreensConfigureren()`) aan in `setup()`, vóór de eerste `PrintToScreen()`-aanroep.
+
+<a id="cs001"></a>
+## CS001 — Geen I2C-antwoord
+
+### Melding
+
+```text
+FATAL: CS001
+ZOEK DIT NU OP
+```
+
+### Trigger
+
+```cpp
+Wire.beginTransmission(...); 
+if (Wire.endTransmission() != 0)
+```
+
+### Betekenis
+
+Geen enkel geprobeerd I2C-adres gaf een ACK terug. Bij `CHARACTERSCREEN_I2C_ADRES_MODUS = 0` is dat enkel het geconfigureerde `I2C_ADRES`; bij modus 1 of 2 is dat `I2C_ADRES` gevolgd door de kandidatenlijst (`0x27`, `0x3F`).
+
+### Controle
+
+Controleer:
+
+- de bekabeling (SDA/SCL, voeding, GND);
+- of het scherm effectief een I2C-backpack heeft (geen rechtstreekse parallelle LCD);
+- `I2C_ADRES` in `UserConfig.h`;
+- eventueel met een apart I2C-scannerschetsje welk adres het scherm werkelijk gebruikt.
+
+### Gevolg
+
+De library kan het characterscherm niet aanspreken en schakelt de CharacterScreen-uitvoer voor deze configuratie niet betrouwbaar in.
+
+### Oplossing
+
+Herstel de I2C-verbinding of pas `I2C_ADRES` aan. Overweeg `CHARACTERSCREEN_I2C_ADRES_MODUS = 1` of `2` wanneer het adres regelmatig wisselt (zie `docs/DECISION_LOG.md`, D023).
+
+<a id="cs002"></a>
+## CS002 — Scherm gevonden op ander I2C-adres
+
+### Melding
+
+```text
+FATAL: CS002 0xNN
+ZOEK DIT NU OP
+```
+
+`0xNN` is het effectief gevonden adres.
+
+### Trigger
+
+Enkel bij `CHARACTERSCREEN_I2C_ADRES_MODUS = 1`, wanneer een kandidaat-adres wél reageert maar dat niet het geconfigureerde `I2C_ADRES` is.
+
+### Betekenis
+
+Het scherm werkt, maar niet op het adres dat in `UserConfig.h` staat.
+
+### Controle
+
+Vergelijk het gemelde `0xNN` met de huidige `I2C_ADRES`-instelling.
+
+### Gevolg
+
+Geen zelfherstel in modus 1 — de configuratie wordt als mislukt beschouwd totdat `I2C_ADRES` overeenstemt met het werkelijke adres.
+
+### Oplossing
+
+Pas `I2C_ADRES` aan naar het gemelde adres en hercompileer. Overweeg modus `2` wanneer je liever geen hercompilatie wil bij een wisselend adres (zie de afweging in `docs/DECISION_LOG.md`, D023).
+
+<a id="ps000"></a>
+## PS000 — PixelScreenConfigureren() niet aangeroepen
+
+### Melding
+
+```text
+FATAL: PS000
+ZOEK DIT NU OP
+```
+
+### Trigger
+
+```cpp
+if (!pixelScreenStatus.gecontroleerd)
+```
+
+### Betekenis
+
+`PrintToScreen()` werd aangeroepen terwijl `PixelScreenConfigureren()` (rechtstreeks, of via `ScreensConfigureren()`) nog nooit werd aangeroepen voor PixelScreen-uitvoer.
+
+### Controle
+
+Controleer of `setup()`, ná het koppelen van `PixelScreen`, één van deze aanroepen bevat:
+
+```cpp
+PixelScreenConfigureren();
+```
+
+of
+
+```cpp
+ScreensConfigureren();
+```
+
+### Gevolg
+
+De library kan niet garanderen dat het pixelscherm werkt, en toont daarom geen normale uitvoer via PixelScreen totdat dit is opgelost.
+
+### Oplossing
+
+Roep `PixelScreenConfigureren()` (of `ScreensConfigureren()`) aan in `setup()`, ná het koppelen van `PixelScreen` en vóór de eerste `PrintToScreen()`-aanroep.
 
 <a id="ps001"></a>
 ## PS001 — PixelScreen niet gekoppeld

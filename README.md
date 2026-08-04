@@ -8,7 +8,7 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 
 ## Huidige status
 
-- versie: `1.0.3`;
+- versie: `1.0.4`;
 - ontwikkelfase: alpha;
 - huidige implementatie: de Stimulusmodule en de gedeelde Screen-systeemlaag;
 - compilatiematrix uitgevoerd voor Arduino UNO R3, UNO R4 Minima, UNO R4 WiFi en ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`: 188 compilaties uitgevoerd, waarvan 184 succesvol, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
@@ -193,7 +193,7 @@ Aangevraagde en goedgekeurde uitbreidingen voor volgende releases staan in [de r
 - [Architectuur](docs/ARCHITECTURE.md)
 - [Configuratie](docs/Configuratie/README.md)
 - [Screen](docs/Systeem/SCREEN.md)
-- [PixelScreen-foutcodes](docs/Systeem/PIXELSCREEN_FOUTCODES.md)
+- [Screen-foutcodes](docs/Systeem/SCREEN_FOUTCODES.md)
 - [Toepassingsgebieden en schema-index](docs/Toepassingsgebieden/MODULES.md)
 - [Sensorinventaris](docs/Toepassingsgebieden/SENSOR_INVENTARIS.md)
 - [Stimulus](docs/Toepassingsgebieden/Stimulus/README.md)

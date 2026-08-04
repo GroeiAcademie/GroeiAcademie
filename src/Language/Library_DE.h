@@ -8,7 +8,21 @@
   #define FATAL_ZOEK_OP "ZOEK DIT NU OP"
 #endif
 
+// CharacterScreen
+#ifndef _FATAL_CS000
+  #define _FATAL_CS000 "FATAL: CS000" // CharacterScreenConfigureren() niet aangeroepen
+#endif
+#ifndef _FATAL_CS001
+  #define _FATAL_CS001 "FATAL: CS001" // Geen I2C-antwoord op geen enkel geprobeerd adres
+#endif
+#ifndef _FATAL_CS002
+  #define _FATAL_CS002 "FATAL: CS002" // Scherm gevonden op ander I2C-adres dan I2C_ADRES (modus 1)
+#endif
+
 // PixelScreen
+#ifndef _FATAL_PS000
+  #define _FATAL_PS000 "FATAL: PS000" // PixelScreenConfigureren() niet aangeroepen
+#endif
 #ifndef _FATAL_PS001
   #define _FATAL_PS001 "FATAL: PS001" // PixelScreen niet gekoppeld
 #endif

@@ -56,8 +56,7 @@ void setup() {
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  lcd.init();      // set up the LCD's number of columns and rows
-  lcd.backlight(); // turn on the backlight
+  CharacterScreenConfigureren(); // I2C-handdruk + lcd.init()/backlight()
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);

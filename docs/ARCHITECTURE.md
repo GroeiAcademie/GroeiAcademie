@@ -47,7 +47,7 @@ GroeiAcademie/
 │   ├── Hulpmiddelen/
 │   ├── Sturingen/
 │   ├── Systeem/
-│   │   ├── PIXELSCREEN_FOUTCODES.md
+│   │   ├── SCREEN_FOUTCODES.md
 │   │   └── SCREEN.md
 │   ├── Toepassingsgebieden/
 │   │   ├── MODULES.md

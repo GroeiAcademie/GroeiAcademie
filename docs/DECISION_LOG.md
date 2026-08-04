@@ -90,3 +90,29 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 **Besluit:** doorheen de documentatie wordt de generieke term "board"/"moederbord" vervangen door de volledige, exacte term "Arduino Uno R3-vormfactorbord(en)" wanneer een fysiek bord bedoeld wordt. Uitzonderingen: Arduino's eigen productterminologie (`Arduino Boards Manager`, `boardprofiel`) blijft ongewijzigd, evenals de al bestaande vaste samenstelling "ESP32-borden in Arduino Uno R3-vormfactor" en letterlijke citaten van compiler-uitvoer. Historische titels in dit logboek (bv. D006) worden niet met terugwerkende kracht herschreven.
 
 **Context:** met v1.0.3 voor het eerst consequent doorgevoerd over de volledige documentatie.
+
+## D022 Screen-configuratie: verplicht en expliciet, geen impliciete auto-configuratie
+
+**Besluit:** `CharacterScreenConfigureren()` wordt toegevoegd, symmetrisch met de bestaande `PixelScreenConfigureren()` — beide doen een echte hardwarecontrole (I2C-handdruk resp. resolutiecontrole), bewaren enkel hun eigen status en foutcode, en tonen zelf niets. `PrintToScreenIntern()` controleert voortaan vooraan of de vereiste configuratiefunctie is aangeroepen en toont, maximaal één keer, de gepaste foutmelding (`CS000`/`PS000` bij een vergeten aanroep, de opgeslagen foutcode bij een mislukte configuratie) — daarna stopt die aanroep. De bestaande impliciete auto-configuratie van `PixelScreen` (`if (pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief) PixelScreenConfigureren();`) wordt volledig verwijderd, zonder fallback. `ScreensConfigureren()` wordt toegevoegd als optionele gemakslaag die, aan de hand van `SCREEN_OUTPUT`, enkel de nodige configuratiefunctie(s) aanroept — de losse `CharacterScreenConfigureren()`/`PixelScreenConfigureren()` blijven gewoon publiek en worden niet gedeprecieerd, want `PixelScreenConfigureren()` wordt al in 8 van de 12 voorbeelden rechtstreeks gebruikt.
+
+**Gevolg, bewust aanvaard:** een sketch die vandaag werkt zonder expliciete `PixelScreenConfigureren()`-aanroep (steunend op de verwijderde impliciete auto-configuratie) werkt na deze wijziging niet meer — dit is een bewuste breaking change.
+
+**Context:** dezelfde redenering als D020 — nog geen gekende externe gebruikers, dus nu bijna kosteloos; later zou dit een verplichte deprecatiecyclus vereisen (D019).
+
+## D023 CHARACTERSCREEN_I2C_ADRES_MODUS
+
+**Besluit:** `CharacterScreenConfigureren()` krijgt een instelbare `CHARACTERSCREEN_I2C_ADRES_MODUS` (default `1`) om om te gaan met I2C-characterschermen waarvan het adres niet vooraf gekend is:
+
+- **0** — geen scan, enkel de bestaande handdruk-check op het geconfigureerde `I2C_ADRES`. Kleinste footprint; voor boards die tegen hun geheugengrens zitten (bv. gekende UNO R3-beperkingen, zie `extras/TESTRESULTATEN.md`).
+- **1** (standaard) — scan van een korte kandidatenlijst (`I2C_ADRES`, dan `0x27`, `0x3F`) en rapporteren via de foutmelding (`CS002`, met het gevonden adres erin), geen zelfherstel. Voor normaal gebruik en overal waar reproduceerbaarheid/betrouwbaarheid telt (onderzoek, metingen, meerdere I2C-apparaten op de bus).
+- **2** — scan + automatisch herbouwen van het `lcd`-object op het gevonden adres via placement-new (`lcd.~LiquidCrystal_I2C(); new (&lcd) LiquidCrystal_I2C(...);`), zodat `lcd.`-aanroepen in bestaande voorbeelden en gebruikerscode ongewijzigd blijven werken. Nooit meer hercompileren bij een ander scherm/adres. Enkel voor actief ontwikkelen met wisselende schermen, geen ander I2C-apparaat op de bus, geen lopende metingen — de scan controleert enkel of een apparaat op dat adres reageert (ACK), niet of het effectief een LCD-scherm is.
+
+**Overwogen en verworpen:** een generieke `BETATESTER`-vlag die "alles wat nog niet in alpha zit" zou aanzetten — verworpen omdat dit een tweede, parallel classificatiesysteem naast de bestaande ondersteuningsniveaus (D018) zou zetten voor precies één concreet experiment. Bewaard als aantekening in `docs/ROADMAP.md` voor wanneer een tweede, onafhankelijk experiment opduikt. Hergebruik van `DEBUG` voor dit doel werd eveneens verworpen: `DEBUG` betekent vandaag uitsluitend extra Serial-logging, en een DEBUG-build zou daardoor een ander Screen-gedrag krijgen dan de release-build — precies het omgekeerde van wat een DEBUG-build hoort te doen.
+
+**Context:** aanleiding was een concrete situatie (LCD2004-schermen met onbekend/wisselend I2C-adres, wens om niet telkens te moeten hercompileren).
+
+## D024 Configuratiecontrole geldt enkel voor de ingebouwde hardware
+
+**Besluit:** het configuratiecontroleblok in `PrintToScreenIntern()` (dat `CS000`/`PS000` toont bij een vergeten configuratie-aanroep) geldt enkel wanneer er geen callback geregistreerd is voor dat schermtype. Is er een `CallbackScreenTypeCharacter`/`CallbackScreenTypePixel` geregistreerd, dan wordt die callback niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is — de callback-gebruiker blijft zelf verantwoordelijk voor het al dan niet configureren van de ingebouwde hardware, indien die callback ze nog gebruikt.
+
+**Context:** `SCREEN_TYPE_CHARACTER`/`SCREEN_TYPE_PIXELS` vertegenwoordigen zo consequent "er is uitvoer van dit type gewenst", niet specifiek "de ingebouwde hardware moet werken" — in lijn met hoe de rest van `PrintToScreenIntern()` een callback al als volledig apart pad behandelde. Naar aanleiding van code review, vóór publicatie van v1.0.4.

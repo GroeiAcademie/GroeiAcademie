@@ -50,8 +50,7 @@ void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, u
 }
 
 void setup() {
-  lcd.init();
-  lcd.backlight();
+  CharacterScreenConfigureren();
   RegistreerCallbackScreenTypeCharacter(MijnCharacterScreen);
 }
 

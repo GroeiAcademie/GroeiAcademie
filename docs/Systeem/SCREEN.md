@@ -47,7 +47,7 @@ Op een scherm met vier regels worden de vier teksten op regels 0 tot en met 3 ge
 
 ## PixelScreen zonder callback
 
-Fatale configuratiefouten van het PixelScreen worden gemeld met een korte code zoals `PS001`. De volledige betekenis en oplossing staan in [PixelScreen-foutcodes](PIXELSCREEN_FOUTCODES.md). Wanneer CharacterScreen niet actief is, forceert de library voor deze melding Serial op 115200 baud.
+Fatale configuratiefouten van CharacterScreen en PixelScreen worden gemeld met een korte code zoals `CS000` of `PS001`. De volledige betekenis en oplossing staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Is geen van beide schermtypes beschikbaar, dan forceert de library voor deze melding Serial op 115200 baud.
 
 De toepassing initialiseert de concrete displaydriver en registreert die daarna via de algemene `Adafruit_GFX*`-pointer:
 

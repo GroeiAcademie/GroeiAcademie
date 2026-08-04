@@ -138,6 +138,7 @@ Status volgens de [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#s
 | Arduino UNO R3 | geïmplementeerd |
 | Arduino UNO R4 Minima | geïmplementeerd |
 | Arduino UNO R4 WiFi | geïmplementeerd |
+| Arduino ESP32-S3 38pin V4 Expension Board (ESP32-WROOM-32U) | kandidaat-idee |
 | Cytron Maker Uno RP2040 | kandidaat-idee |
 | SB Components Ardi32 | kandidaat-idee |
 | STM32 Nucleo-F401RE | kandidaat-idee |
@@ -146,32 +147,78 @@ Status volgens de [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#s
 
 Zie ook [SPONSORS.md](../SPONSORS.md) voor de Arduino Uno R3-vormfactorborden die momenteel als kandidaat open staan voor sponsoring.
 
+### Schermen
+
+Status volgens dezelfde [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#statuslegende).
+
+Selectiecriterium: parallelle (8-bits) interfaces worden uitgesloten wegens te veel benodigde pinnen voor gelijktijdig gebruik met een meetopstelling. SPI en I2C zijn beide toegestane alternatieven, geen van beide wordt op voorhand uitgesloten.
+
+| Scherm | Interface | Status |
+|---|---|---|
+| 2.4 inch TFT 240x320 LCD-scherm ST7789V v1.3 | op zoek naar SPI/I2C-alternatief (huidig exemplaar: parallel) | ter-discussie |
+| 2.8 inch TFT 240x320 LCD-scherm ST7789V v1.1 | op zoek naar SPI/I2C-alternatief (huidig exemplaar: parallel) | ter-discussie |
+| 3.5 inch TFT 480x320 LCD-scherm ILI9486 met touchpen en SD Card Socket for Arduino Board Module - TFT LCD SHIELD | op zoek naar SPI/I2C-alternatief (huidig exemplaar: parallel) | ter-discussie |
+
+De drie momenteel beschikbare exemplaren zijn alle drie parallelle uitvoeringen en voldoen op dit moment niet aan het selectiecriterium. De zoektocht gaat dus niet over deze exemplaren zelf, maar over het vinden van SPI- of I2C-varianten van hetzelfde schermtype, of een alternatief scherm dat wél SPI of I2C gebruikt.
+
+I2C als alternatieve, nog te testen interface voor PixelScreen (naast SPI), bijvoorbeeld een SSD1306 OLED-scherm. Kan dezelfde I2C-bus delen met het characterscherm, mits een verschillend adres.
+
+### Input-apparaten
+
+Deze reeks wordt getest en geëvalueerd. Er bestaat vandaag geen generieke input-laag in de library; deze lijst maakt zichtbaar waarmee gewerkt wordt, zonder dat al beslist is wat, of in welke vorm, dit als gedeelde functionaliteit wordt uitgewerkt.
+
+| Apparaat | Status |
+|---|---|
+| JoyStick Shield Funduino v1.A | ter-discussie |
+| PS2 JoyStick Shield Funduino V3_200907.S | ter-discussie |
+| meArm.WDT - XY-joystickmodule met dubbele as | ter-discussie |
+| 1x4 button TTP224 | ter-discussie |
+| 4x4 button TTP229 / HW136 | ter-discussie |
+| 4x1 buttons (enkel toetsen, GND, K1-K4) | ter-discussie |
+| 4x2 buttons (enkel toetsen, GND, K1-K8) | ter-discussie |
+| 4x4 buttons (enkel toetsen, C1-C4 en R1-R4) | ter-discussie |
+| 4x3 Membraan Schakelaar Toetsenbord (flat 7) | ter-discussie |
+| 4x5 Membraan Schakelaar Toetsenbord (flat 9) | ter-discussie |
+| HW-139 (touch sensors) | ter-discussie |
+| IR HX1838 Infrarood Afstandsbediening, IR ontvanger voor 38kHz IR signalen | ter-discussie |
+
+### Bouwstenen
+
+Generieke elektronica-bouwstenen, niet gebonden aan één specifiek toepassingsgebied. Kunnen zowel de input-laag als toekomstige sensor- of schermuitbreidingen ondersteunen.
+
+| Bouwsteen | Status |
+|---|---|
+| PCF8574 Remote 8-Bit I/O Expander for I2C Bus | ter-discussie |
+| AT41 (quad logic level shifter) | ter-discussie |
+| CD74HC4067 (16 kanaals multiplexor) | ter-discussie |
+
 ### Sensoren
 
 Status volgens dezelfde [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#statuslegende).
 
 | Sensor | Status |
 |---|---|
-| AD8232 | kandidaat-idee |
-| ADXL345 | kandidaat-idee |
-| BioAmp EXG Pill | ter-discussie |
-| BME688 | kandidaat-idee |
-| DS18B20 | kandidaat-idee |
-| ECG EMG Shield DuinoPeak | kandidaat-idee |
-| Grove GSR | kandidaat-idee |
-| INMP441 | kandidaat-idee |
-| MAX30102 | kandidaat-idee |
-| MCU-6701 | kandidaat-idee |
-| MR60BHA2 | kandidaat-idee |
-| MPU6050 | kandidaat-idee |
-| MPU6500 | kandidaat-idee |
-| NeuroSky TGAM | kandidaat-idee |
-| Piëzo-ademhalingsband (×2, borst + buik) | kandidaat-idee |
-| Pulse Sensor | kandidaat-idee |
-| Seed Studio 60 GHz mmWave Sensor | kandidaat-idee |
-| SCD41 | kandidaat-idee |
-| SDP810-125PA | kandidaat-idee |
-| VL6180X | kandidaat-idee |
+| AD8232 | ter-beoordeling |
+| ADXL345 | ter-beoordeling |
+| BioAmp EXG Pill | ter-beoordeling |
+| BME688 | ter-beoordeling |
+| DS18B20 | ter-beoordeling |
+| ECG EMG Shield DuinoPeak | ter-beoordeling |
+| Grove GSR | ter-beoordeling |
+| INMP441 | ter-beoordeling |
+| MAX30102 | ter-beoordeling |
+| MCU-6701 | ter-beoordeling |
+| MR60BHA2 | ter-beoordeling |
+| MPU6050 | ter-beoordeling |
+| MPU6500 | ter-beoordeling |
+| NeuroSky TGAM | ter-beoordeling |
+| Piëzo-ademhalingsband (×2, borst + buik) | ter-beoordeling |
+| Pulse Sensor | ter-beoordeling |
+| Seed Studio 60 GHz mmWave Sensor | ter-beoordeling |
+| SCD41 | ter-beoordeling |
+| SDP810-125PA | ter-beoordeling |
+| VL6180X | ter-beoordeling |
+| VL53L0X | kandidaat-idee |
 
 Referentie-/validatie-apparaten (geen kandidaat-sensoren, dienen om te controleren of onze eigen hardware dezelfde signaalpatronen kan tonen als een gevestigd consumentenapparaat): NeuroSky MindWave Mobile 2, Mindfield eSense, MindFlex.
 
@@ -236,7 +283,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 ## 7. Releases / versies / planning
 
-### v1.0.0 — voltooid
+### v1.0.0 (voltooid)
 
 - eerste publieke alpha-release vrijgegeven;
 - definitieve compilatiematrix en Arduino LINT uitgevoerd;
@@ -251,3 +298,14 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 - uitbreidingen die geen bestaande API breken in minor releases opnemen;
 - nieuwe hardware- en toepassingsgebieden pas als officieel ondersteund aanduiden na hun eigen validatiebeslissing;
 - incompatibele wijzigingen uitsluitend in een nieuwe major release uitvoeren.
+
+### Aantekening: generiek opt-in-mechanisme voor experimentele functies
+
+Bij `CHARACTERSCREEN_I2C_ADRES_MODUS` (zie `docs/DECISION_LOG.md`, D023) werd een generieke
+`BETATESTER`-vlag overwogen om functies die nog niet in alpha zitten toch al testbaar te
+maken. Bewust niet gebouwd: voor precies één concreet experiment een brede infrastructuur
+optuigen is voorbarig, en het zou een tweede, parallel classificatiesysteem naast de
+bestaande ondersteuningsniveaus (D018) creëren. Wanneer een tweede, onafhankelijk
+experiment opduikt dat hetzelfde soort opt-in nodig heeft, is dit het moment om een
+generiek mechanisme alsnog te overwegen, met dan twee concrete gevallen om de opzet aan
+te toetsen in plaats van één.

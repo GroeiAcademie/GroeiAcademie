@@ -104,7 +104,7 @@ Voor een ST7789 op Arduino UNO gebruikt hardware-SPI de officiële functies `MOS
 
 De standaard PixelScreen-laag berekent de bruikbare breedte en hoogte na aftrek van tweemaal `PIXEL_SCREEN_MARGIN`. Het aantal kolommen en regels wordt daarna bepaald met de vaste Adafruit_GFX-karakterafmetingen, `PIXEL_SCREEN_TEXT_SIZE`, `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING`. Het resulterende grid wordt binnen de bruikbare ruimte gecentreerd.
 
-Fatale PixelScreen-configuratiefouten gebruiken de codes `PS001` tot en met `PS004`. Zie [PixelScreen-foutcodes](../Systeem/PIXELSCREEN_FOUTCODES.md).
+Fatale Screen-configuratiefouten gebruiken de codes `CS000`–`CS002` (CharacterScreen) en `PS000`–`PS004` (PixelScreen). Zie [Screen-foutcodes](../Systeem/SCREEN_FOUTCODES.md).
 
 ## Sensoren
 

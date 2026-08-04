@@ -189,6 +189,11 @@
 #ifndef I2C_ADRES
   #define I2C_ADRES                     0x27
 #endif
+// D023: 0 = geen scan (kleinste footprint), 1 = scan + rapporteren (standaard),
+// 2 = scan + automatisch herbouwen op het gevonden adres. Zie docs/DECISION_LOG.md, D023.
+#ifndef CHARACTERSCREEN_I2C_ADRES_MODUS
+  #define CHARACTERSCREEN_I2C_ADRES_MODUS 1
+#endif
 #ifndef ACTIEF_CHARACTER_SCREEN
   #define ACTIEF_CHARACTER_SCREEN       SCREEN_LCD1602
 #endif

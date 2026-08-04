@@ -4,6 +4,24 @@ Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestan
 
 De versienummers volgen de versie in `library.properties`.
 
+## 1.0.4
+
+### Screen-laag — CharacterScreen-configuratie, symmetrisch met PixelScreen
+
+- **Nieuw:** `CharacterScreenConfigureren()` — doet een echte I2C-handdruk vóór `lcd.init()`/`lcd.backlight()`, symmetrisch met de bestaande `PixelScreenConfigureren()`. Vervangt de rechtstreekse `lcd.init(); lcd.backlight();`-aanroepen in alle betrokken voorbeelden;
+- **Nieuw:** `ScreensConfigureren()` — optionele gemakslaag die, aan de hand van `SCREEN_OUTPUT`, automatisch enkel de nodige configuratiefunctie(s) aanroept. Geen deprecatie van `CharacterScreenConfigureren()`/`PixelScreenConfigureren()`, die blijven de granulaire, expliciete route (zie `docs/DECISION_LOG.md`, D022);
+- **Nieuw:** `CHARACTERSCREEN_I2C_ADRES_MODUS` (0/1/2, standaard `1`) — laat `CharacterScreenConfigureren()` een kort lijstje bekende I2C-adressen aftasten wanneer het geconfigureerde `I2C_ADRES` niet reageert, met per modus een ander gevolg (geen scan / scan + rapporteren / scan + automatisch herbouwen). Zie `docs/DECISION_LOG.md`, D023, en de impact-tabel in `UserConfig_template.h`;
+- **Breaking change, bewust aanvaard:** de impliciete auto-configuratie van het pixelscherm (`if (pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief) PixelScreenConfigureren();`) is volledig verwijderd, zonder fallback. Een sketch die vandaag werkt zonder expliciete `PixelScreenConfigureren()`-aanroep, werkt na deze update niet meer. Aanvaard omdat er nog geen gekende externe gebruikers zijn (zelfde redenering als D020);
+- `PrintToScreenIntern()` toont voortaan, maximaal één keer, een duidelijke foutmelding (`CS000`/`PS000` bij een vergeten configuratie-aanroep, de opgeslagen foutcode bij een mislukte configuratie) in plaats van de aanroep stil te laten mislukken;
+- nieuwe foutcodes `_FATAL_CS000`, `_FATAL_CS001`, `_FATAL_CS002` en `_FATAL_PS000` toegevoegd aan de vier taalbestanden; bestaande `_FATAL_PS001`–`_FATAL_PS004` ongewijzigd;
+- `PixelScreenFoutmeldingWeergeven()` gebruikt voortaan enkel een reeds geconfigureerd en werkend characterscherm als terugvalpad (voorheen onvoorwaardelijk); nieuwe, symmetrische `CharacterScreenFoutmeldingWeergeven()` doet hetzelfde in de andere richting;
+- **Vereist een volledige nieuwe testronde** (niet overgenomen van v1.0.0): dit wijzigt echt gedrag, in tegenstelling tot v1.0.2/v1.0.3. Resultaten volgen in `extras/TESTRESULTATEN.md` zodra de compilatiematrix op echte hardware is uitgevoerd — inclusief empirische bevestiging van de placement-new (modus 2) op AVR (UNO R3);
+- **Bugfix tijdens eigen validatie ontdekt (vóór publicatie):** `PixelScreenConfigureren()` zette `pixelScreenActief` niet op `true` bij een geslaagde configuratie, waardoor `PrintToScreenIntern()` een geslaagde pixelscherm-configuratie als mislukt beschouwde. Bij CHARACTER+PIXELS samen leidde dit tot een lege foutmelding op het characterscherm en geen enkele uitvoer op het pixelscherm. Gecorrigeerd vóór release;
+- `docs/Systeem/PIXELSCREEN_FOUTCODES.md` hernoemd naar `docs/Systeem/SCREEN_FOUTCODES.md` en aangevuld met `CS000`, `CS001`, `CS002` en `PS000` — voorheen enkel PS001–PS004 gedocumenteerd, waardoor de nieuwe CharacterScreen-foutcodes nergens terug te vinden waren voor wie de "ZOEK DIT NU OP"-instructie opvolgde;
+- **Naar aanleiding van code review, vóór publicatie:** het configuratiecontroleblok in `PrintToScreenIntern()` geldt voortaan enkel voor de ingebouwde hardware — is er een callback geregistreerd, dan wordt die niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is (zie `docs/DECISION_LOG.md`, D024);
+- **Naar aanleiding van code review, vóór publicatie:** `PixelScreenPrint()` tekent niet langer buiten het berekende grid — tekst die niet meer past binnen de resterende kolommen/regels wordt afgekapt in plaats van zichtbaar buiten het grid getekend; `cursorRegel` wordt begrensd zodat opeenvolgende te lange teksten nooit onder het grid kunnen belanden;
+- **Nieuw:** `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()` krijgen een optionele `opnieuwProberen`-parameter (standaard `false`, dus geen enkel bestaand voorbeeld hoeft aangepast). Enkel bij expliciet `true` wordt een eerder gecontroleerde configuratie opnieuw geprobeerd — nuttig na een fysieke aansluiting tijdens het draaien, zonder reset van de microcontroller. Niet bedoeld om automatisch (bv. in `loop()`) aan te roepen: elke poging doet een echte I2C-transactie.
+
 ## 1.0.3
 
 ### Documentatie

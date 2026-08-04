@@ -33,10 +33,95 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C lcd(I2C_ADRES, (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2002 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 20 : (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD4002 ? 40 : 16), (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD1604 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 4 : 2);
+#if (CHARACTERSCREEN_I2C_ADRES_MODUS == 2)
+#include <new>
+#endif
+
+#define CHARACTERSCREEN_KOLOMMEN ((ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2002 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 20 : (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD4002 ? 40 : 16))
+#define CHARACTERSCREEN_REGELS   ((ACTIEF_CHARACTER_SCREEN == SCREEN_LCD1604 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 4 : 2)
+
+LiquidCrystal_I2C lcd(I2C_ADRES, CHARACTERSCREEN_KOLOMMEN, CHARACTERSCREEN_REGELS);
 CharacterScreenCallback CallbackScreenTypeCharacter = nullptr;
 
 void RegistreerCallbackScreenTypeCharacter(CharacterScreenCallback callback) { CallbackScreenTypeCharacter = callback; }
+
+struct CharacterScreenStatus {
+  bool gecontroleerd;
+  bool characterScreenActief;
+  const char* foutmelding;
+  bool foutmeldingWeergegeven;
+};
+static CharacterScreenStatus characterScreenStatus = { false, false, nullptr, false };
+
+// ============================================================================
+// Interne hulpfunctie (D022): dient uitsluitend als bouwsteen binnen dit
+// bestand, wordt door geen enkel voorbeeld of ander bronbestand aangeroepen.
+// ============================================================================
+static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding);
+
+bool CharacterScreenConfigureren(bool opnieuwProberen) {
+  if (characterScreenStatus.gecontroleerd && !opnieuwProberen) return characterScreenStatus.characterScreenActief;
+  characterScreenStatus.gecontroleerd = true;
+  characterScreenStatus.foutmeldingWeergegeven = false;
+
+  Wire.begin();
+
+#if (CHARACTERSCREEN_I2C_ADRES_MODUS == 0)
+  // Geen scan: enkel de handdruk-check op het geconfigureerde I2C_ADRES.
+  Wire.beginTransmission(I2C_ADRES);
+  if (Wire.endTransmission() != 0) {
+    characterScreenStatus.characterScreenActief = false;
+    characterScreenStatus.foutmelding = _FATAL_CS001;
+    return false;
+  }
+#else
+  // Modus 1 en 2: kandidatenlijst aftasten, I2C_ADRES eerst geprobeerd.
+  const uint8_t characterScreenI2CKandidaten[] = { I2C_ADRES, 0x27, 0x3F };
+  const uint8_t characterScreenI2CAantalKandidaten = sizeof(characterScreenI2CKandidaten) / sizeof(characterScreenI2CKandidaten[0]);
+  uint8_t characterScreenI2CGevonden = 0;
+  bool characterScreenI2CGevondenOk = false;
+
+  for (uint8_t i = 0; i < characterScreenI2CAantalKandidaten && !characterScreenI2CGevondenOk; i++) {
+    bool reedsGeprobeerd = false;
+    for (uint8_t j = 0; j < i; j++) {
+      if (characterScreenI2CKandidaten[j] == characterScreenI2CKandidaten[i]) { reedsGeprobeerd = true; break; }
+    }
+    if (reedsGeprobeerd) continue;
+
+    Wire.beginTransmission(characterScreenI2CKandidaten[i]);
+    if (Wire.endTransmission() == 0) {
+      characterScreenI2CGevonden = characterScreenI2CKandidaten[i];
+      characterScreenI2CGevondenOk = true;
+    }
+  }
+
+  if (!characterScreenI2CGevondenOk) {
+    characterScreenStatus.characterScreenActief = false;
+    characterScreenStatus.foutmelding = _FATAL_CS001;
+    return false;
+  }
+
+  if (characterScreenI2CGevonden != I2C_ADRES) {
+#if (CHARACTERSCREEN_I2C_ADRES_MODUS == 1)
+    // Enkel rapporteren, niet zelf herstellen: de gevonden waarde in de melding opnemen.
+    static char characterScreenFoutmeldingBuffer[24];
+    snprintf(characterScreenFoutmeldingBuffer, sizeof(characterScreenFoutmeldingBuffer), "%s 0x%02X", _FATAL_CS002, characterScreenI2CGevonden);
+    characterScreenStatus.characterScreenActief = false;
+    characterScreenStatus.foutmelding = characterScreenFoutmeldingBuffer;
+    return false;
+#elif (CHARACTERSCREEN_I2C_ADRES_MODUS == 2)
+    // Zelfherstellend: lcd op exact dezelfde geheugenplek herbouwen met het gevonden adres.
+    lcd.~LiquidCrystal_I2C();
+    new (&lcd) LiquidCrystal_I2C(characterScreenI2CGevonden, CHARACTERSCREEN_KOLOMMEN, CHARACTERSCREEN_REGELS);
+#endif
+  }
+#endif // CHARACTERSCREEN_I2C_ADRES_MODUS
+
+  lcd.init();
+  lcd.backlight();
+  characterScreenStatus.characterScreenActief = true;
+  return true;
+}
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
@@ -47,6 +132,8 @@ bool ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS = false;
 struct PixelScreenStatus {
   bool gecontroleerd;
   bool pixelScreenActief;
+  const char* foutmelding;
+  bool foutmeldingWeergegeven;
   uint8_t aantalKolommen;
   uint8_t aantalRegels;
   int16_t offsetX;
@@ -55,7 +142,7 @@ struct PixelScreenStatus {
   uint8_t cursorRegel;
 };
 
-static PixelScreenStatus pixelScreenStatus = { false, true, 0, 0, 0, 0, 0, 0 };
+static PixelScreenStatus pixelScreenStatus = { false, false, nullptr, false, 0, 0, 0, 0, 0, 0 };
 
 #define PIXELGRID_MIN_KOLOMMEN 16
 #define PIXELGRID_MAX_KOLOMMEN 40
@@ -89,21 +176,21 @@ static void PixelScreenSetCursor(uint8_t kolom, uint8_t regel);
 static void PixelScreenPrint(const String& tekst);
 static void PixelScreenFoutmeldingWeergeven(const String& foutmelding);
 
-bool PixelScreenConfigureren() {
+bool PixelScreenConfigureren(bool opnieuwProberen) {
+  if (pixelScreenStatus.gecontroleerd && !opnieuwProberen) return pixelScreenStatus.pixelScreenActief;
+  pixelScreenStatus.gecontroleerd = true;
+  pixelScreenStatus.foutmeldingWeergegeven = false;
+
   if (!PixelScreen) {
-    pixelScreenStatus.gecontroleerd = true;
     pixelScreenStatus.pixelScreenActief = false;
-    PixelScreenFoutmeldingWeergeven (_FATAL_PS001);
+    pixelScreenStatus.foutmelding = _FATAL_PS001;
     return false;
   }
 
-  if (pixelScreenStatus.gecontroleerd) return pixelScreenStatus.pixelScreenActief;
-
-  pixelScreenStatus.gecontroleerd = true;
 #if (PIXEL_SCREEN_ROTATION == 1 || PIXEL_SCREEN_ROTATION == 3)
-  if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) { pixelScreenStatus.pixelScreenActief = false; PixelScreenFoutmeldingWeergeven (_FATAL_PS002); return false; }
+  if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) { pixelScreenStatus.pixelScreenActief = false; pixelScreenStatus.foutmelding = _FATAL_PS002; return false; }
 #else
-  if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) { pixelScreenStatus.pixelScreenActief = false; PixelScreenFoutmeldingWeergeven (_FATAL_PS003); return false; }
+  if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) { pixelScreenStatus.pixelScreenActief = false; pixelScreenStatus.foutmelding = _FATAL_PS003; return false; }
 #endif
 
   int16_t bruikbareBreedte = PixelScreen->width() - (2 * PIXEL_SCREEN_MARGIN);
@@ -115,7 +202,7 @@ bool PixelScreenConfigureren() {
   // Minimumvereiste (16x2, dezelfde ondergrens als de kleinste ondersteunde characterscherm-resolutie) niet gehaald: geen pixeluitvoer voor TYPE_NONE.
   if (ruweKolommen < PIXELGRID_MIN_KOLOMMEN || ruweRegels < PIXELGRID_MIN_RIJEN) {
     pixelScreenStatus.pixelScreenActief = false;
-    PixelScreenFoutmeldingWeergeven (_FATAL_PS004);
+    pixelScreenStatus.foutmelding = _FATAL_PS004;
     return false;
   }
 
@@ -136,6 +223,7 @@ bool PixelScreenConfigureren() {
   PixelScreen->setTextSize(PIXEL_SCREEN_TEXT_SIZE);
   PixelScreen->setTextColor(PIXEL_SCREEN_TEXT_COLOR, PIXEL_SCREEN_BACKGROUND_COLOR);
   PixelScreen->setTextWrap(false);
+  pixelScreenStatus.pixelScreenActief = true;
   return true;
 }
 
@@ -155,37 +243,78 @@ static void PixelScreenSetCursor(uint8_t kolom, uint8_t regel) {
 
 static void PixelScreenPrint(const String& tekst) {
   if (!PixelScreenConfigureren()) return;
-  
+
   for (uint16_t index = 0; index < tekst.length(); index++) {
+    // Enkel tekenen zolang de positie binnen het berekende grid valt,
+    // geen automatische regelsprong (dat blijft de verantwoordelijkheid van de aanroeper,
+    // die met vaste regel-indelingen werkt); tekst die niet meer past,
+    // wordt afgekapt in plaats van buiten het grid getekend.
+    if (pixelScreenStatus.cursorRegel >= pixelScreenStatus.aantalRegels) break;
+    if (pixelScreenStatus.cursorKolom + index >= pixelScreenStatus.aantalKolommen) break;
+
     PixelScreen->setCursor(pixelScreenStatus.offsetX + (pixelScreenStatus.cursorKolom + index) * PixelScreenKarakterStap(), pixelScreenStatus.offsetY + pixelScreenStatus.cursorRegel * PixelScreenRegelStap());
     PixelScreen->print(tekst[index]);
   }
 
   pixelScreenStatus.cursorKolom += tekst.length();
-  
+
   while (pixelScreenStatus.cursorKolom >= pixelScreenStatus.aantalKolommen) {
     pixelScreenStatus.cursorKolom -= pixelScreenStatus.aantalKolommen;
     pixelScreenStatus.cursorRegel++;
+  }
+
+  // Begrenzen zodat opeenvolgende te lange teksten nooit onder het grid belanden.
+  if (pixelScreenStatus.cursorRegel >= pixelScreenStatus.aantalRegels) {
+    pixelScreenStatus.cursorRegel = pixelScreenStatus.aantalRegels > 0 ? pixelScreenStatus.aantalRegels - 1 : 0;
   }
 }
 
 static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if (CallbackScreenTypeCharacter) {
-    CallbackScreenTypeCharacter(foutmelding, FATAL_ZOEK_OP, LCD_LEESTIJD_FOUTMELDING_MS, "", "", "", 0);
-  } else {
-    lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(foutmelding);
-    lcd.setCursor(0, 1); lcd.print(FATAL_ZOEK_OP);
-    delay(LCD_LEESTIJD_FOUTMELDING_MS);
+  if (characterScreenStatus.gecontroleerd && characterScreenStatus.characterScreenActief) {
+    if (CallbackScreenTypeCharacter) {
+      CallbackScreenTypeCharacter(foutmelding, FATAL_ZOEK_OP, LCD_LEESTIJD_FOUTMELDING_MS, "", "", "", 0);
+    } else {
+      lcd.clear();
+      lcd.setCursor(0, 0); lcd.print(foutmelding);
+      lcd.setCursor(0, 1); lcd.print(FATAL_ZOEK_OP);
+      delay(LCD_LEESTIJD_FOUTMELDING_MS);
+    }
+    return;
   }
 #endif
 
-#if !(SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   Serial.begin(115200);
   Serial.println(foutmelding);
   Serial.println(FATAL_ZOEK_OP);
+}
 #endif
+
+// ============================================================================
+// CharacterScreenFoutmeldingWeergeven: gebruikt enkel een reeds geconfigureerd
+// en werkend pixelscherm als terugvalpad; roept zelf nooit een configuratie-
+// functie aan (voorkomt een oneindige lus). Staat buiten het PIXELS-blok,
+// want ze moet ook bestaan wanneer enkel CHARACTER actief is.
+// ============================================================================
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (pixelScreenStatus.gecontroleerd && pixelScreenStatus.pixelScreenActief) {
+    if (CallbackScreenTypePixel) {
+      CallbackScreenTypePixel(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, LCD_LEESTIJD_FOUTMELDING_MS, "", "", "", 0);
+    } else {
+      PixelScreenClear();
+      PixelScreenSetCursor(0, 0); PixelScreenPrint(foutmelding);
+      PixelScreenSetCursor(0, 1); PixelScreenPrint(FATAL_ZOEK_OP);
+      delay(LCD_LEESTIJD_FOUTMELDING_MS);
+    }
+    return;
+  }
+#endif
+
+  Serial.begin(115200);
+  Serial.println(foutmelding);
+  Serial.println(FATAL_ZOEK_OP);
 }
 #endif
 
@@ -198,13 +327,50 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   (void)delayTussenPaginas;
 #endif
 
+  // --------------------------------------------------------------------------
+  // D022: verplichte, expliciete configuratie — geen impliciete auto-
+  // configuratie meer. Een vergeten of mislukte configuratie wordt hier
+  // gemeld (maximaal één keer) in plaats van stilzwijgend gecorrigeerd.
+  // --------------------------------------------------------------------------
+  bool configuratiefoutWeergegeven = false;
+
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  const bool characterScreenActief = !CallbackScreenTypeCharacter;
+  // Enkel afdwingen voor de ingebouwde hardware, een geregistreerde callback
+  // vervangt die volledig en is de eigen verantwoordelijkheid van de gebruiker.
+  if (!CallbackScreenTypeCharacter) {
+    if (!characterScreenStatus.gecontroleerd) {
+      CharacterScreenFoutmeldingWeergeven(_FATAL_CS000);
+      configuratiefoutWeergegeven = true;
+    } else if (!characterScreenStatus.characterScreenActief && !characterScreenStatus.foutmeldingWeergegeven) {
+      CharacterScreenFoutmeldingWeergeven(characterScreenStatus.foutmelding);
+      characterScreenStatus.foutmeldingWeergegeven = true;
+      configuratiefoutWeergegeven = true;
+    }
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  // Zelfde redenering: enkel afdwingen wanneer er geen callback geregistreerd is.
+  if (!CallbackScreenTypePixel) {
+    if (!pixelScreenStatus.gecontroleerd) {
+      PixelScreenFoutmeldingWeergeven(_FATAL_PS000);
+      configuratiefoutWeergegeven = true;
+    } else if (!pixelScreenStatus.pixelScreenActief && !pixelScreenStatus.foutmeldingWeergegeven) {
+      PixelScreenFoutmeldingWeergeven(pixelScreenStatus.foutmelding);
+      pixelScreenStatus.foutmeldingWeergegeven = true;
+      configuratiefoutWeergegeven = true;
+    }
+  }
+#endif
+
+  if (configuratiefoutWeergegeven) return;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  const bool characterScreenActief = !CallbackScreenTypeCharacter && characterScreenStatus.characterScreenActief;
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   const bool pixelScreenGeselecteerd = !CallbackScreenTypePixel && screenData == ScreenData::TYPE_NONE;
-  if (pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief) PixelScreenConfigureren();
   const bool pixelScreenActief = pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief;
 #endif
 
@@ -331,3 +497,17 @@ void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigne
 #else
 void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintToScreenIntern(eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
 #endif
+
+// ============================================================================
+// D022: optionele gemakslaag. Roept enkel de configuratiefunctie(s) aan die
+// volgens SCREEN_OUTPUT nodig zijn — geen deprecatie van de losse,
+// granulaire CharacterScreenConfigureren()/PixelScreenConfigureren().
+// ============================================================================
+void ScreensConfigureren(bool opnieuwProberen) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  CharacterScreenConfigureren(opnieuwProberen);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  PixelScreenConfigureren(opnieuwProberen);
+#endif
+}

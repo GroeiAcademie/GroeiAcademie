@@ -83,6 +83,22 @@
 #ifndef I2C_ADRES
 // #define I2C_ADRES                     0x27
 #endif
+// CHARACTERSCREEN_I2C_ADRES_MODUS — impact per waarde (zie ook docs/DECISION_LOG.md, D023):
+//   0 = geen scan, enkel de handdruk-check op I2C_ADRES. Kleinste footprint.
+//       Gebruik dit wanneer het board tegen zijn geheugengrens zit (bv. UNO R3-grensgevallen).
+//   1 = scan (I2C_ADRES, daarna 0x27, 0x3F) + rapporteren via de foutmelding, geen
+//       zelfherstel. Bij een ander gevonden adres: melding tonen, één keer hercompileren
+//       met het juiste I2C_ADRES. STANDAARD — gebruik dit in elke opstelling waar
+//       reproduceerbare, voorspelbare resultaten tellen (onderzoek, metingen, meerdere
+//       I2C-apparaten op dezelfde bus).
+//   2 = scan + automatisch herbouwen (placement-new) op het gevonden adres. Nooit meer
+//       hercompileren bij een ander scherm/adres. Gebruik dit enkel tijdens actief
+//       ontwikkelen met wisselende schermen, wanneer er geen ander I2C-apparaat op de bus
+//       hangt en er geen metingen worden vastgelegd — de scan controleert enkel of een
+//       apparaat op dat adres reageert (ACK), niet of het effectief een LCD-scherm is.
+#ifndef CHARACTERSCREEN_I2C_ADRES_MODUS
+// #define CHARACTERSCREEN_I2C_ADRES_MODUS 1
+#endif
 #ifndef ACTIEF_CHARACTER_SCREEN
 // #define ACTIEF_CHARACTER_SCREEN       SCREEN_LCD1602
 #endif
