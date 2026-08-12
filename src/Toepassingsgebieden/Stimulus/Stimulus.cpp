@@ -26,7 +26,7 @@ static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, Sen
   static bool ads1115Aanwezig = false;
 
   void InitialiseerADS1115() {
-    if (!ads.begin(ADS1115_I2C_ADDRESS)) {
+    if (!ads.begin(I2C_ADDRESS_ADS1115)) {
       ads1115Aanwezig = false;
       PrintToScreen(_LCD_ADS1115_FOUT, _LCD_ADS1115_NIET_GEVONDEN, _LCD_LEESTIJD_FEEDBACK_MS);
       return;
@@ -170,7 +170,7 @@ void BepaalSensorOffsets() {
     }
 
     aantalMetingen++;
-    delay(5);
+    delay(STIMULUS_OFFSET_METING_PAUZE_MS);
   }
 
   offsetSensor1 = hoogsteMeting[0] + OFFSET_VEILIGHEIDSMARGE;

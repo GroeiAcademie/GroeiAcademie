@@ -18,7 +18,13 @@ UserConfig.h
 .idea/
 
 # Build output
+
 build/
 src/Configuratie/UserConfig.h
-src/Language/UserExample_*.h
+
+# Eigen taalbestanden gebruikers niet meenemen
+src/Language/UserExample_*.h*
 src/Language/UserLibrary_*.h
+
+# Templates moeten WEL mee
+!src/Language/UserLibrary_*_template.h

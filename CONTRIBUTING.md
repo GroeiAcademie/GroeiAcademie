@@ -28,7 +28,7 @@ Grote wijzigingen aan de architectuur, publieke API, hardwareondersteuning of pr
 
 ### Hardware
 
-Bijdragen aan fysieke onderdelen, sensoren, Arduino Uno R3-vormfactorborden, schermen, connectoren, behuizingen en testopstellingen.
+Bijdragen aan fysieke onderdelen, sensoren, Arduino Uno R3-vormfactorborden, schermen, connectoren, behuizingen en testopstellingen. Draagt de bijdrage een sensor of module met elektroden op de huid bij (GSR, ECG, EMG en gelijkaardig)? Lees dan eerst [docs/Toepassingsgebieden/VEILIGHEID.md](docs/Toepassingsgebieden/VEILIGHEID.md).
 
 ### Elektronica
 

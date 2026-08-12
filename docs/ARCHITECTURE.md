@@ -10,6 +10,7 @@ GroeiAcademie FrameWork wordt als één samenwerkende Arduino-library ontwikkeld
 GroeiAcademie/
 ├── src/
 │   ├── GroeiAcademie.h
+│   ├── Input.h
 │   ├── Screen.h
 │   ├── Stimulus.h
 │   ├── SystemConfig.h
@@ -24,9 +25,11 @@ GroeiAcademie/
 │   │   ├── Library_XX.h
 │   │   ├── UserExample_XX_template.h
 │   │   └── UserLibrary_XX_template.h
-│   ├── Hulpmiddelen/
-│   ├── Sturingen/
 │   ├── Systeem/
+│   │   ├── Input/
+│   │   │   ├── Input.h
+│   │   │   ├── Input.cpp
+│   │   │   └── InputTypes.h
 │   │   └── Screen/
 │   │       ├── Screen.h
 │   │       ├── Screen.cpp
@@ -44,9 +47,8 @@ GroeiAcademie/
 │   │   ├── SystemConfig.md
 │   │   ├── UserConfig.md
 │   │   └── UserLanguage.md
-│   ├── Hulpmiddelen/
-│   ├── Sturingen/
 │   ├── Systeem/
+│   │   ├── INPUT.md
 │   │   ├── SCREEN_FOUTCODES.md
 │   │   └── SCREEN.md
 │   ├── Toepassingsgebieden/
@@ -100,7 +102,7 @@ GroeiAcademie/
 └── TRADEMARKS.md
 ```
 
-Niet elke gereserveerde domeinmap bevat al broncode. De huidige implementatie bestaat uit de Screen-laag en de Stimulusmodule.
+Niet elke gereserveerde domeinmap bevat al broncode. De huidige implementatie bestaat uit de gedeelde Screen- en Input-lagen en de Stimulusmodule.
 
 ## Publieke headers
 
@@ -110,9 +112,10 @@ Gebruikers kunnen de volledige library opnemen met:
 #include <GroeiAcademie.h>
 ```
 
-Daarnaast worden volgens `library.properties` ook deze publieke headers aangeboden:
+Daarnaast zijn de publieke moduleheaders rechtstreeks beschikbaar:
 
 ```cpp
+#include <Input.h>
 #include <Screen.h>
 #include <Stimulus.h>
 ```
@@ -131,7 +134,7 @@ vaste keuzewaarden
 → fallbackwaarden en validaties uit SystemConfig.h
 ```
 
-Globale compilerdefinities kunnen waarden vóór deze laadvolgorde vastleggen. Gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in, omdat `Screen.cpp` en `Stimulus.cpp` afzonderlijk van de sketch worden gecompileerd.
+Globale compilerdefinities kunnen waarden vóór deze laadvolgorde vastleggen. Gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in, omdat `Input.cpp`, `Screen.cpp` en `Stimulus.cpp` afzonderlijk van de sketch worden gecompileerd.
 
 `ExamplesConfig.h` bevat uitsluitend gedeelde instellingen van de voorbeeldprogramma's. `StimulusConfig.h` bevat de vaste en configureerbare grenzen van de Stimulusmodule.
 
@@ -143,7 +146,7 @@ Globale compilerdefinities kunnen waarden vóór deze laadvolgorde vastleggen. G
 
 ### Systeem
 
-`src/Systeem/` bevat frameworkbrede voorzieningen. De huidige systeemmodule is `Screen`.
+`src/Systeem/` bevat frameworkbrede voorzieningen. De huidige systeemmodules zijn `Screen` en `Input`.
 
 ### Toepassingsgebieden
 
@@ -151,7 +154,7 @@ Globale compilerdefinities kunnen waarden vóór deze laadvolgorde vastleggen. G
 
 ### Gereserveerde domeinen
 
-`Hulpmiddelen`, `Sturingen` en `Uitbreidingskaarten` zijn gereserveerde functionele domeinen. Lege mappen vormen geen ondersteunde functionaliteit.
+`src/Uitbreidingskaarten/` is een gereserveerd, leeg functioneel domein. `docs/Uitbreidingskaarten/` bevat wel degelijk inhoud (hardware-documentatie per uitbreidingskaart, bv. het Stimulus Shield-schema).
 
 ## Afhankelijkheden
 
@@ -160,13 +163,15 @@ De in `library.properties` gedeclareerde dependencies zijn:
 - LiquidCrystal I2C;
 - Adafruit GFX Library;
 - Adafruit ST7735 and ST7789 Library;
-- Adafruit ADS1X15.
+- Adafruit ADS1X15;
+- PCF8574;
+- IRremote.
 
-Niet iedere build gebruikt alle code uit deze libraries. `SCREEN_OUTPUT_CONFIG` en `ADC_BACKEND` bepalen welke GroeiAcademie-broncode werkelijk wordt gecompileerd. De dependencies blijven gedeclareerd zodat de meegeleverde CharacterScreen-, PixelScreen- en ADS1115-voorbeelden na installatie beschikbaar zijn.
+Niet iedere build gebruikt alle code uit deze libraries. `SCREEN_OUTPUT_CONFIG`, `ADC_BACKEND` en `INPUT_KANAAL_CONFIG` bepalen welke GroeiAcademie-broncode werkelijk wordt gecompileerd. De dependencies blijven gedeclareerd zodat de meegeleverde CharacterScreen-, PixelScreen- en ADS1115-voorbeelden na installatie beschikbaar zijn.
 
 ## Samenwerking tussen modules
 
-Modules communiceren via expliciete headers, functies en datastructuren. Rechtstreekse afhankelijkheden worden beperkt. Screen is een gedeelde uitvoerlaag die door toepassingsmodules kan worden gebruikt.
+Modules communiceren via expliciete headers, functies en datastructuren. Rechtstreekse afhankelijkheden worden beperkt. Screen is de gedeelde uitvoerlaag; Input is de gedeelde invoerlaag. Toepassingsmodules kunnen beide systeemlagen gebruiken zonder zelf de concrete scherm- of invoerbackend te moeten implementeren.
 
 ## Elektronische documentatie
 

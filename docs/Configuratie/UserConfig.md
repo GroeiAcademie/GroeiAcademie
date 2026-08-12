@@ -61,6 +61,29 @@ De PixelScreen-instellingen blijven in `UserConfig_template.h` standaard uitgeco
 
 `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` voegt witruimte tussen tekens toe en `PIXEL_SCREEN_LINE_SPACING` voegt witruimte tussen regels toe. Deze drie waarden beïnvloeden rechtstreeks hoeveel kolommen en regels in het automatisch gecentreerde tekstgrid passen.
 
+## Input
+
+De Input-laag wordt via `UserConfig.h` geconfigureerd met dezelfde voorrangsregel als de overige gebruikersinstellingen.
+
+Belangrijkste instellingen:
+
+```cpp
+// #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
+// #define KEYPAD_TYPE KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
+// #define I2C_ADDRESS_PCF8574 0x20
+// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D2
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_3x4
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_17_TOETSEN
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
+// #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
+```
+
+Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`.
+
+Voor HX1838 kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. `HX1838_BRON_CODES` bepaalt of de vaste mapping, EEPROM of de fallbackvolgorde gebruikt wordt. Bij `HX1838_BRON_CODES_DEFINE` zijn respectievelijk 12, 17 of 21 ingevulde codes vereist, afhankelijk van de gekozen `HX1838_TOETSENINDELING`.
+
+De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken.
+
 ## ADC-backend
 
 De vaste keuzewaarden `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115` worden door `SystemConfig.h` beschikbaar gemaakt vóór `UserConfig.h` wordt geladen. Daardoor kunnen de gewone en backendafhankelijke instellingen in `UserConfig.h` deze namen veilig gebruiken.
@@ -77,10 +100,13 @@ Het template bevat de huidige instelbare waarden voor:
 `BOARD_VERSION` blijft een algemene boardkeuze en staat buiten de keuze tussen de Native ADC en ADS1115. De beschikbare waarden zijn:
 
 ```cpp
-#define BOARD_UNO_R3        0
-#define BOARD_UNO_R4_MINIMA 1
-#define BOARD_UNO_R4_WIFI   2
-#define BOARD_ESP32_UNO     3
+#define BOARD_UNO_R3                     0
+#define BOARD_UNO_R4_MINIMA              1
+#define BOARD_UNO_R4_WIFI                2
+#define BOARD_ARDI32                     3
+#define BOARD_CYTRON_MAKER_UNO_RP2040    4
+#define BOARD_ESP32_UNO                  5
+#define BOARD_NUCLEO_F401RE              6
 ```
 
 Selecteer het bord met één regel:
@@ -108,3 +134,10 @@ Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
 `SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_UNO` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIN_TOETS_1` tot en met `PIN_TOETS_4`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken deze shieldnamen. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
+
+
+Beschikbare HX1838-toetsenindelingen:
+
+- `HX1838_TOETSENINDELING_3x4`: remote met 17 toetsen; enkel de 12 toetsen van de 3x4-matrix (1-9, *, 0, #) worden gebruikt;
+- `HX1838_TOETSENINDELING_REMOTE_17_TOETSEN`: alle 17 toetsen, inclusief navigatie (UP, DOWN, OK, LEFT, RIGHT);
+- `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`: remote met 21 toetsen, inclusief de MP3-toetsen.

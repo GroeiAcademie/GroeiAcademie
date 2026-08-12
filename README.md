@@ -2,16 +2,16 @@
 
 > Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten.
 
-Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en een gedeelde **Screen**-laag.
+Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en de gedeelde systeemlagen **Screen** en **Input**.
 
 > **Meten is Weten, in plaats van Denken te Weten.**
 
 ## Huidige status
 
-- versie: `1.0.4`;
+- versie: `1.1.0`;
 - ontwikkelfase: alpha;
-- huidige implementatie: de Stimulusmodule en de gedeelde Screen-systeemlaag;
-- compilatiematrix uitgevoerd voor Arduino UNO R3, UNO R4 Minima, UNO R4 WiFi en ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`: 188 compilaties uitgevoerd, waarvan 184 succesvol, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
+- huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
+- v1.1.0-validatie: voer `extras/TestLibraryAlles.cmd` uit; de volledige uitvoer wordt samengebracht in `extras/TestLibraryAlles.txt` en de definitieve releaseresultaten horen in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
@@ -54,11 +54,14 @@ Elke officiële release van deze library wordt vóór publicatie met de meegelev
 De validatie omvat:
 
 - Arduino LINT (Library Manager)
-- compilatie van alle voorbeelden
-- Arduino Uno R3
-- Arduino Uno R4 Minima
-- Arduino Uno R4 WiFi
-- ESP32-borden via boardprofiel WEMOS D1 R32 (`esp32:esp32:d1_uno32`)
+- compilatie van alle voorbeelden;
+- afzonderlijke Input-validatie met geldige en bewust ongeldige configuraties;
+- menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag()`-API;
+- Arduino Uno R3;
+- Arduino Uno R4 Minima;
+- Arduino Uno R4 WiFi;
+- ESP32-borden via boardprofiel WEMOS D1 R32 (`esp32:esp32:d1_uno32`);
+- experimentele acceptatiecompilaties voor de nieuwe v1.1.0-boardprofielen, zonder invloed op PASS/FAIL van de officieel ondersteunde boards.
 
 Meer informatie:
 
@@ -74,9 +77,11 @@ LiquidCrystal I2C
 Adafruit GFX Library
 Adafruit ST7735 and ST7789 Library
 Adafruit ADS1X15
+PCF8574 (>=0.4.0)
+IRremote
 ```
 
-Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG` en `ADC_BACKEND` bepalen welke onderdelen werkelijk worden gecompileerd.
+Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `ADC_BACKEND` en `INPUT_KANAAL_CONFIG` bepalen welke onderdelen werkelijk worden gecompileerd.
 
 ## Configuratie
 

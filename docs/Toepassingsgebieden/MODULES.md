@@ -4,6 +4,8 @@ Dit document onderscheidt de huidige implementatie van geplande toepassingsgebie
 
 Zie [SENSOR_INVENTARIS.md](SENSOR_INVENTARIS.md) voor de sensoren en modules die al ter beschikking zijn. Die inventaris is geen gevalideerd schema en dient enkel om te tonen welke hardware al aanwezig is om onderstaande toepassingsgebieden te verwezenlijken.
 
+Zie [VEILIGHEID.md](VEILIGHEID.md) voor elektrische veiligheid, lekstroom en isolatie bij toepassingsgebieden met elektroden op de huid. Dit document is de algemene, terugkerende referentie voor de veiligheids- en interpretatiegrenzen die "Vereisten voor ieder toekomstig schema" hieronder verplicht stelt; een nieuw schema hoeft dit dus niet elke keer opnieuw uit te schrijven, enkel te verwijzen en waar nodig aan te vullen met wat specifiek is voor die sensor.
+
 ## Statuslegende
 
 Een toepassingsgebied doorloopt de volgende statussen, van eerste denkspoor tot uitvoering:
@@ -206,4 +208,4 @@ Een nieuw schema wordt pas als raadpleegbaar referentieschema opgenomen wanneer 
 - kalibratie;
 - voorbeeldcode;
 - foutbronnen;
-- veiligheids- en interpretatiegrenzen.
+- veiligheids- en interpretatiegrenzen, zie [VEILIGHEID.md](VEILIGHEID.md) voor de algemene elektrische veiligheid bij elektroden op de huid.

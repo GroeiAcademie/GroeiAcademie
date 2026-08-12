@@ -7,10 +7,10 @@ Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meeg
 De testscripts staan onder `extras/`:
 
 ```text
-TestLibraryStage1.cmd
-TestLibraryStage2.cmd
-TestLibraryStage3.cmd
-TestLibraryStage3metLogbestand.cmd
+
+
+TestLibraryGereleased.cmd
+TestLibraryGereleased.cmd
 ```
 
 De scripts laten een aanwezige `UserConfig.h` actief. De configuratievolgorde tijdens de tests is: compilerdefinitie, actieve definitie in het `.ino`-voorbeeld, `UserConfig.h` en ten slotte de standaardwaarde uit `SystemConfig.h`. De actieve exampledefaults die door de compiler kunnen worden overschreven staan daarom onder `#ifndef`.
@@ -69,7 +69,7 @@ Tijdens de compilatie wordt `SCREEN_OUTPUT_CONFIG` waar nodig door het testscrip
 | PixelScreen | SCREEN_TYPE_PIXELS |
 | CharacterScreen_PixelScreen | SCREEN_TYPE_CHARACTER \| SCREEN_TYPE_PIXELS |
 
-`TestLibraryStage3.cmd` en `TestLibraryStage3metLogbestand.cmd` compileren ieder Stimulusvoorbeeld met `SCREEN_OUTPUT_CONFIG` 0 tot en met 7.
+`TestLibraryGereleased.cmd` en `TestLibraryGereleased.cmd` compileren ieder Stimulusvoorbeeld met `SCREEN_OUTPUT_CONFIG` 0 tot en met 7.
 
 Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` toe.
 
@@ -124,3 +124,36 @@ Arduino Uno R3-vormfactor ESP32-boardprofiel.
 - Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino-ESP32-core.
 
 De fysieke hardwarevalidatie van TTGO D1 R32 en andere compatibele borden wordt afzonderlijk vastgelegd zodra die is uitgevoerd.
+
+## Input-validatie voor v1.1.0
+
+`TestLibraryNieuwInput.cmd` test geldige Input-configuraties en rapporteert officiële en acceptatieboards afzonderlijk. Acceptatieboards hebben geen invloed op release-PASS/FAIL.
+
+`TestLibraryNieuwInputOngeldig.cmd` test configuraties die bewust door compile-time validatie geweigerd moeten worden.
+
+`TestLibraryAlles.cmd` combineert de nieuwe Input-tests van deze release met de volledige, reeds gereleasede basis.
+
+### Padkeuze van de Windows-tests
+
+De nieuwe Input-tests gebruiken dezelfde padkeuze als `TestLibraryGereleased.cmd`:
+
+Het eerste bestaande pad wordt `BASE_PATH`; `arduino-cli` wordt vervolgens als `%BASE_PATH%\arduino-cli` gebruikt.
+
+`TestLibraryInputmetLogbestand.cmd` voert beide Input-tests uit en schrijft de volledige console-uitvoer ook naar `TestLibraryInputmetLogbestand.txt`.
+
+
+### Volledige testsuite in één opdracht
+
+Start `TestLibraryAlles.cmd` om de volledige v1.1.0-validatie uit te voeren. Dit script roept eerst de nieuwe Input-tests van deze release op (geldig, dan verwacht ongeldig), en pas daarna de volledige, reeds gereleasede basis (`TestLibraryGereleased.cmd`), en schrijft alle console-uitvoer samen naar `TestLibraryAlles.txt`.
+
+De in `INPUT_STIMULUS_TESTS` opgesomde Stimulus-testvoorbeelden onder `examples/Systeem/Input/Input_Test_...` worden door `TestLibraryNieuwInput.cmd` mee gecompileerd. De originele Stimulus-voorbeelden blijven ongewijzigd.
+
+
+
+### Input_Test conversie
+
+De `Input_Test_...`-voorbeelden zijn kopieën van de bestaande Stimulus-voorbeelden. De originele Stimulus-bestanden blijven ongewijzigd. In de testkopieën worden de vier fysieke toetsaanslagen via `InputConfigureren()` en `OpvragenHuidigeToetsAanslag(true)` ingelezen. De bestaande keuzevolgorde en toepassingsfuncties blijven behouden.
+
+`InputTestConversieControle.txt` rapporteert per testvoorbeeld hoeveel Input-aanroepen aanwezig zijn en of nog actieve rechtstreekse `digitalRead(PIN_TOETS_x)`-aanroepen overblijven.
+
+Start `TestLibraryAlles.cmd` voor de volledige testsuite. Alle deeltestuitvoer wordt samengebracht in `TestLibraryAlles.txt`.

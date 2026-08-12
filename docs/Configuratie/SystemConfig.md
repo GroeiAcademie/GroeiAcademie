@@ -82,7 +82,7 @@ Kies in `UserConfig.h` bewust de gewenste uitvoertypes. Wat niet in `SCREEN_OUTP
 |---|---|
 | `I2C_ADRES` | I2C-adres van het characterscherm. |
 | `ACTIEF_CHARACTER_SCREEN` | Concreet schermtype: `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` of `SCREEN_LCD4002`. |
-| `LCD_LEESTIJD_FOUTMELDING_MS` | Standaardleestijd voor een foutmelding. |
+| `FATAL_LEESTIJD_MS` | Standaardleestijd voor een FATAL. |
 
 ## PixelScreen
 
@@ -137,10 +137,13 @@ De gebruiker kiest:
 `BOARD_VERSION` vervangt `UNO_VERSION`, is onafhankelijk van de backendkeuze en staat vóór de berekening van de backendafhankelijke resolutie. De vaste keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
 
 ```cpp
-#define BOARD_UNO_R3        0
-#define BOARD_UNO_R4_MINIMA 1
-#define BOARD_UNO_R4_WIFI   2
-#define BOARD_ESP32_UNO     3
+#define BOARD_UNO_R3                     0
+#define BOARD_UNO_R4_MINIMA              1
+#define BOARD_UNO_R4_WIFI                2
+#define BOARD_ARDI32                     3
+#define BOARD_CYTRON_MAKER_UNO_RP2040    4
+#define BOARD_ESP32_UNO                  5
+#define BOARD_NUCLEO_F401RE              6
 ```
 
 De gebruiker kiest:
@@ -157,7 +160,7 @@ De gebruiker kiest:
 | `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_UNO_R4_WIFI` | 14 | 200 | Arduino UNO R4 WiFi met 14-bit ADC. |
 | `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_ESP32_UNO` | 12 | 0 | Wemos D1 R32 met de standaard 12-bit resolutie van de Arduino-ESP32-core. |
 
-Voor `BOARD_ESP32_UNO` betekent `DELAY_US 0` dat de GroeiAcademie-library geen extra wachttijd tussen samples toevoegt. De conversietijd van de boardcore blijft bestaan. Voor WEMOS D1 R32 is deze instelling sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
+Voor `BOARD_ESP32_UNO` betekent `DELAY_US 0` dat de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toevoegt. De conversietijd van de boardcore blijft bestaan. Voor WEMOS D1 R32 is deze instelling sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
 
 `ADC_MAX` en `ADC(x)` worden door `SystemConfig.h` uit `ADC_BITS` afgeleid. `ADC(x)` ondersteunt 10, 12, 14 en 15 bits. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan.
 
@@ -171,6 +174,51 @@ DEBUG_PRINTLN2(x, f)
 
 Deze macro's verwijzen naar `Serial` wanneer `DEBUG` actief is. De Screen-laag voegt in dat geval automatisch `SCREEN_TYPE_SERIAL` aan de effectieve `SCREEN_OUTPUT` toe.
 
+
+### WEMOS D1 R32 — officiële Espressif-pinmapping
+
+Gebruik in Arduino IDE:
+
+- Boards Manager package: `esp32 by Espressif Systems`
+- Board: `WEMOS D1 R32`
+- FQBN: `esp32:esp32:d1_uno32`
+- automatische boardmacro: `ARDUINO_D1_UNO32`
+
+De specifieke Espressif-boardvariant `d1_uno32` levert zelf de vertaling van de Arduino-headernamen naar de echte ESP32-GPIO's:
+
+| Arduino-header | ESP32 GPIO |
+|---|---:|
+| D0 / RX | 3 |
+| D1 / TX | 1 |
+| D2 | 26 |
+| D3 | 25 |
+| D4 | 17 |
+| D5 | 16 |
+| D6 | 27 |
+| D7 | 14 |
+| D8 | 12 |
+| D9 | 13 |
+| D10 / SS | 5 |
+| D11 / MOSI | 23 |
+| D12 / MISO | 19 |
+| D13 / SCK | 18 |
+
+De analoge header is:
+
+| Arduino-header | ESP32 GPIO | ADC-kanaal |
+|---|---:|---|
+| A0 | 2 | ADC2_CH2 |
+| A1 | 4 | ADC2_CH0 |
+| A2 | 35 | ADC1_CH7 |
+| A3 | 34 | ADC1_CH6 |
+| A4 | 36 | ADC1_CH0 |
+| A5 | 39 | ADC1_CH3 |
+
+Op dit board zijn `A4` en `A5` niet dezelfde pinnen als de I2C-functies. De specifieke Espressif-variant definieert `SDA` als GPIO21 en `SCL` als GPIO22. GPIO34, GPIO35, GPIO36 en GPIO39 zijn input-only en hebben geen interne pull-up/pull-down. De ESP32-GPIO's werken op 3,3 V-logica.
+
+`WEMOS D1 R32` en `DOIT ESPduino32` zijn afzonderlijke boarddefinities in de Espressif Arduino-core en worden in deze documentatie niet als synoniemen behandeld.
+
+Bron voor de board- en pinmapping: de officiële `boards.txt` en `variants/d1_uno32/pins_arduino.h` van `arduino-esp32` door Espressif Systems.
 
 ### BOARD_ESP32_UNO
 

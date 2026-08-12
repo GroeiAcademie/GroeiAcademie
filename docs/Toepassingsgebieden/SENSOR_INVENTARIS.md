@@ -1,6 +1,6 @@
 # Sensorinventaris
 
-Dit document toont welke sensoren en modules al ter beschikking zijn voor het GroeiAcademie FrameWork. Het is een **inventaris van beschikbare voorraad, geen gevalideerd schema**. Zie [MODULES.md](MODULES.md) voor de NLP-toepassingsgebieden die deze sensoren zouden kunnen dienen, en voor de vereisten waaraan een schema moet voldoen vóór het als referentieontwerp wordt opgenomen.
+Dit document toont welke sensoren en modules al ter beschikking zijn voor het GroeiAcademie FrameWork. Het is een **inventaris van beschikbare voorraad, geen gevalideerd schema**. Zie [MODULES.md](MODULES.md) voor de NLP-toepassingsgebieden die deze sensoren zouden kunnen dienen, en voor de vereisten waaraan een schema moet voldoen vóór het als referentieontwerp wordt opgenomen. Zie [VEILIGHEID.md](VEILIGHEID.md) voor de elektrische veiligheid van sensoren met huidcontact, met name relevant voor de sectie "Bio-elektrische en biopotentiële signalen" hieronder.
 
 Meerdere sensoren hieronder meten hetzelfde of een overlappend signaal. Er is nog geen keuze gemaakt voor een "officieel ondersteunde" sensor per signaal, zoals `docs/HARDWARE_SUPPORT.md` dat wel al doet voor Arduino Uno R3-vormfactorborden. Deze inventaris toont dus alle beschikbare opties naast elkaar, niet een voorkeur.
 

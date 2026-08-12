@@ -3,5 +3,6 @@
 
 #include "Screen.h"
 #include "Stimulus.h"
+#include "Input.h"
 
 #endif

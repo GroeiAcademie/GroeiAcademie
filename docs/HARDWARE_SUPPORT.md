@@ -6,15 +6,60 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke statussen.
 
 | Arduino Uno R3-vormfactorbord | Architectuur | Compilatiestatus in de repository | Hardwarestatus |
 |---|---|---|---|
-| Arduino UNO R3 | `avr` | voorbeelden opgenomen in de compilatiematrix; vier gekende geheugenbeperkingen bij de grootste gecombineerde sketch | relevante hardwaretests blijven per opstelling vast te leggen |
-| Arduino UNO R4 Minima | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen |
-| Arduino UNO R4 WiFi | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen; netwerkfuncties maken geen deel uit van de library |
-| WEMOS D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0 |
+| Arduino UNO R3 | `avr` | voorbeelden opgenomen in de compilatiematrix; vier gekende geheugenbeperkingen bij de grootste gecombineerde sketch | getest en goedgekeurd sinds v1.0.0 |
+| Arduino UNO R4 Minima | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0 |
+| Arduino UNO R4 WiFi | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0; netwerkfuncties maken geen deel uit van de library |
+| WEMOS D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen |
 | TTGO D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | hetzelfde boardprofiel als WEMOS D1 R32; geen afzonderlijk fysiek testresultaat vastgelegd | fysieke hardwarevalidatie nog afzonderlijk vastleggen |
 
-WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Het gebruik van hetzelfde boardprofiel door TTGO D1 R32 of een compatibel bord bewijst niet automatisch dat ook dat fysieke bord afzonderlijk is gevalideerd.
+Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi zijn sinds v1.0.0 getest en goedgekeurd. WEMOS D1 R32 en TTGO D1 R32 delen hetzelfde boardprofiel; dat bewijst niet automatisch dat elk van deze fysieke borden afzonderlijk is gevalideerd, en relevante hardwaretests blijven per opstelling vast te leggen.
 
 De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata van die externe library. Een Arduino Uno R3-vormfactorbord geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
+
+## Vereiste Arduino IDE-boardselecties
+
+| Ondersteund board | Boards Manager package / core | Exacte boardselectie in Arduino IDE | Pinstrategie |
+|---|---|---|---|
+| Arduino Uno R3 | `Arduino AVR Boards by Arduino` | `Arduino Uno` | standaardmapping van de boardcore |
+| Arduino UNO R4 Minima | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 Minima` | standaardmapping van de boardcore |
+| Arduino UNO R4 WiFi | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 WiFi` | standaardmapping van de boardcore |
+| WEMOS D1 R32 | `esp32 by Espressif Systems` | `WEMOS D1 R32` | specifieke `d1_uno32`-mapping van de Espressif-core |
+| TTGO D1 R32 | `esp32 by Espressif Systems` | `WEMOS D1 R32` binnen het huidige ondersteunde profiel | dezelfde D1-R32-coremapping; fysieke hardwarevalidatie blijft afzonderlijk |
+| Cytron Maker Uno RP2040 | `Raspberry Pi Pico/RP2040 by Earle F. Philhower, III` | `Cytron Maker Uno RP2040` | standaardmapping van de specifieke Cytron-boardvariant |
+| STM32 Nucleo-F401RE | `STM32 MCU based boards by STMicroelectronics` | `Nucleo-64` met part number `NUCLEO_F401RE` | standaardmapping van STM32duino |
+| SB Components Ardi-32 | `esp32 by Espressif Systems` | `ESP32S3 Dev Module` | de generieke boardselectie kent de fysieke Arduino-Uno-header van de Ardi-32 niet; `BOARD_VERSION BOARD_ARDI32` moet daarom via `UserConfig.h` expliciet gekozen worden en de eigen Ardi-32-headerpinmapping moet afzonderlijk vastgelegd worden |
+
+Voor WEMOS D1 R32 gebruikt de GroeiAcademie FrameWork-library de door Espressif geleverde `D0` tot en met `D13`-namen. De core vertaalt deze zelf naar GPIO3, GPIO1, GPIO26, GPIO25, GPIO17, GPIO16, GPIO27, GPIO14, GPIO12, GPIO13, GPIO5, GPIO23, GPIO19 en GPIO18. `A0..A5` zijn respectievelijk GPIO2, GPIO4, GPIO35, GPIO34, GPIO36 en GPIO39. De afzonderlijke I2C-functies zijn `SDA=GPIO21` en `SCL=GPIO22`; `A4` en `A5` zijn op dit board dus niet de I2C-pinnen.
+
+
+### SB Components Ardi-32 — eigen Arduino-Uno-headermapping
+
+SB Components schrijft voor om in Arduino IDE de boardselectie `ESP32S3 Dev Module` uit `esp32 by Espressif Systems` te gebruiken. Die generieke boardvariant kent de fysieke Arduino-Uno-header van de Ardi-32 niet. Daarom gebruikt `SystemConfig.h` bij `BOARD_VERSION == BOARD_ARDI32` een eigen mapping.
+
+| Arduino-header | ESP32-S3 GPIO |
+|---|---:|
+| D0 / RX | 44 |
+| D1 / TX | 43 |
+| D2 | 5 |
+| D3 | 6 |
+| D4 | 7 |
+| D5 | 8 |
+| D6 | 9 |
+| D7 | 10 |
+| D8 | 11 |
+| D9 | 12 |
+| D10 / SS | 13 |
+| D11 / MOSI | 14 |
+| D12 / MISO | 21 |
+| D13 / SCK | 47 |
+| A0 | 1 |
+| A1 | 2 |
+| A2 | 3 |
+| A3 | 4 |
+| A4 / SDA | 17 |
+| A5 / SCL | 18 |
+
+Omdat de fabrikant een generieke `ESP32S3 Dev Module` laat selecteren, kan de Arduino-toolchain de Ardi-32 niet automatisch als `BOARD_ARDI32` herkennen. Zet daarom voor dit board expliciet `#define BOARD_VERSION BOARD_ARDI32` in `UserConfig.h`. Een instelling in `UserConfig.h` heeft voorrang op automatische boarddetectie.
 
 ## ADC-resolutie per Arduino Uno R3-vormfactorbord
 
@@ -37,10 +82,13 @@ Kopieer voor persoonlijke instellingen `src/Configuratie/UserConfig_template.h` 
 Mogelijke waarden:
 
 ```cpp
-#define BOARD_UNO_R3        0
-#define BOARD_UNO_R4_MINIMA 1
-#define BOARD_UNO_R4_WIFI   2
-#define BOARD_ESP32_UNO     3
+#define BOARD_UNO_R3                     0
+#define BOARD_UNO_R4_MINIMA              1
+#define BOARD_UNO_R4_WIFI                2
+#define BOARD_ARDI32                     3
+#define BOARD_CYTRON_MAKER_UNO_RP2040    4
+#define BOARD_ESP32_UNO                  5
+#define BOARD_NUCLEO_F401RE              6
 ```
 
 De configuratie bepaalt onder andere `ADC_BITS`, `ADC_MAX`, `DELAY_US` en de schaalmacro `ADC(x)`.
@@ -93,7 +141,7 @@ De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbrugg
 
 ## ESP32
 
-Voor `BOARD_ESP32_UNO` is de configuratie voorbereid op 12-bit ADC-uitlezing en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. ESP32-borden met dit profiel gebruiken 3,3 V-logica. Controleer bij TTGO D1 R32 en andere compatibele borden voeding, analoge ingangsspanning, shieldcompatibiliteit, timing, geheugen, callbacks en dependencies tijdens hun afzonderlijke hardwarevalidatie. Netwerkfuncties maken geen deel uit van de huidige library.
+Voor `BOARD_ESP32_UNO` is de configuratie voorbereid op 12-bit ADC-uitlezing en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. ESP32-borden met dit profiel gebruiken 3,3 V-logica. Controleer bij TTGO D1 R32 en andere compatibele borden voeding, analoge ingangsspanning, shieldcompatibiliteit, timing, geheugen, callbacks en dependencies tijdens hun afzonderlijke hardwarevalidatie. Netwerkfuncties maken geen deel uit van de huidige library.
 
 ## Sensorbeoordeling
 
@@ -109,3 +157,14 @@ Een sensor wordt per meetdoel beoordeeld op:
 - compatibiliteit met de ADC en voedingsspanning van het Arduino Uno R3-vormfactorbord.
 
 Geschiktheid voor één meetdoel impliceert geen geschiktheid voor een ander meetdoel.
+
+
+### SB Components Ardi-32 — bevestigde onboard GPIO's
+
+De officiële SB Components-documentatie bevestigt voor de onboard randapparatuur:
+
+- onboard LED: GPIO8
+- onboard buzzer: GPIO40
+
+Deze waarden bevestigen niet automatisch de Arduino-Uno-header D0-D13/A0-A5-mapping. De volledige headermapping blijft daarom voorlopig als uitgeschakeld in `SystemConfig.h` totdat elke lijn rechtstreeks aan de officiële SB Components-hardwarebron is geverifieerd.
+

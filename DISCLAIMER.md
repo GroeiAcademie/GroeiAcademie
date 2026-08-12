@@ -30,4 +30,6 @@ Een ADC-waarde is niet automatisch een natuurkundige krachtwaarde. Om newton, gr
 
 Het framework is geen medisch hulpmiddel. Biofeedback en andere meetgegevens vormen geen diagnose en vervangen geen professioneel medisch advies, onderzoek of behandeling.
 
+Voor toepassingsgebieden met elektroden op de huid (GSR, ECG, EMG en gelijkaardige metingen): zie [docs/Toepassingsgebieden/VEILIGHEID.md](docs/Toepassingsgebieden/VEILIGHEID.md) voor elektrische veiligheid, lekstroom en isolatie. Dat document is geen certificering en geen juridisch advies; laat het nakijken door iemand met de juiste bevoegdheid voor je met elektroden op mensen meet.
+
 Zie ook [docs/SCIENTIFIC_INTEGRITY.md](docs/SCIENTIFIC_INTEGRITY.md) en [SECURITY.md](SECURITY.md).

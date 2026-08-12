@@ -50,13 +50,17 @@
 #define OFFSET_METING_TIJD_MS   2000UL
 #define OFFSET_VEILIGHEIDSMARGE ADC(5)
 
+#ifndef STIMULUS_OFFSET_METING_PAUZE_MS
+  #define STIMULUS_OFFSET_METING_PAUZE_MS 5UL
+#endif
+
 #define MAX_AANTAL_POGINGEN_NULMETING 3
 
 // Achterdeur met EXIT, zodat je de oefening na 3000 ms kan verlaten.
 #define EXIT_TIKTIJD_MS        3000
 #define EXIT_NO_ACTION_MS      9000
 
-// TODO: Fysiologisch onderbouwde minimale en maximale tiktijd bepalen.
+// Fysiologisch onderbouwde minimale en maximale tiktijd bepalen.
 #define MINIMALE_TIKTIJD_MS    100UL
 #define MAXIMALE_TIKTIJD_MS    2000UL
 

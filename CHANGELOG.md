@@ -4,6 +4,41 @@ Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestan
 
 De versienummers volgen de versie in `library.properties`.
 
+## 1.1.0
+
+### Input-laag
+
+- nieuwe gedeelde `System/Input`-laag toegevoegd naast Screen;
+- `INPUT_KANAAL_CONFIG` als bitmask met `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574` en `INPUT_TYPE_HX1838`;
+- `KEYPAD_TYPE` toegevoegd voor de fysiek gebruikte keypadindeling;
+- publieke `InputKanaal`, `InputResultaat`, `InputResultaten` en `StatusOpvragenToetsAanslagen` toegevoegd;
+- publieke `OpvragenHuidigeToetsAanslag(bool wachten = true)` toegevoegd met Tik-compatibele blokkerende werking;
+- publieke `OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1)` voorbereid; in v1.1.0 is `MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN` nog `1` en geeft een andere waarde `NIET_GEIMPLEMENTEERD`;
+- functiekoppeling via `OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag()` toegevoegd;
+- `MappingTussenToetsaanslagEnUitTeVoerenFunctie` koppelt een toetsopschrift rechtstreeks aan een functiepointer; het eerder overbodige tekstveld voor de functienaam is niet opgenomen in de definitieve v1.1.0-API;
+- `ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag()` toegevoegd: één vaste mapping kan zonder mappingparameter gebruikt worden, terwijl meerdere menu's dezelfde publieke functienaam gebruiken door de gewenste mapping-array mee te geven; de arraylengte wordt daarbij compile-time afgeleid;
+- `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4` is de standaard keypadindeling wanneer geen `KEYPAD_TYPE` is opgegeven;
+- PCF8574-backend toegevoegd met canoniek I2C-adres `I2C_ADDRESS_PCF8574`; referentie-/testmodule OTRONIC OT8980;
+- HX1838-backend toegevoegd met configureerbare 12-, 17- en 21-toetsenindelingen en configureerbare codebron via `HX1838_BRON_CODES`;
+- Input-gerelateerde Arduino IDE-keywords en dependencies `PCF8574 (>=0.4.0)` en `IRremote` toegevoegd.
+
+### Input-tests
+
+- `TestLibraryNieuwInput.cmd` toegevoegd voor geldige Input-configuraties en de Input-testvoorbeelden;
+- `TestLibraryNieuwInputOngeldig.cmd` toegevoegd voor configuraties die bewust door compile-time validatie geweigerd moeten worden;
+- `TestLibraryAlles.cmd` toegevoegd als centrale ingang: eerst de nieuwe Input-tests van deze release, dan de volledige, reeds gereleasede basis (`TestLibraryGereleased.cmd`), met één gecombineerd logbestand;
+- officiële boards en experimentele acceptatieboards worden afzonderlijk gerapporteerd; acceptatieresultaten beïnvloeden het officiële release-PASS/FAIL niet.
+
+### Boards en hardware
+
+- boardindeling uitgebreid met `BOARD_ARDI32`, `BOARD_CYTRON_MAKER_UNO_RP2040` en `BOARD_NUCLEO_F401RE` als experimentele v1.1.0-ondersteuning;
+- het Stimulus Shield v1.1.0-schema en de bijhorende documentatie bevatten de PCF8574-uitbreiding naast het bestaande directe keymatrixpad;
+- de nieuwe boards blijven in acceptatiefase tot hun fysieke hardwarevalidatie is afgerond.
+
+### Documentatie
+
+- `README.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/Systeem/INPUT.md`, `docs/Configuratie/UserConfig.md`, `extras/TESTEN.md` en de Stimulus Shield v1.1.0-documentatie afgestemd op de Input-laag en v1.1.0-status.
+
 ## 1.0.4
 
 ### Screen-laag — CharacterScreen-configuratie, symmetrisch met PixelScreen

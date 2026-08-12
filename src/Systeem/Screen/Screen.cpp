@@ -64,7 +64,11 @@ bool CharacterScreenConfigureren(bool opnieuwProberen) {
   characterScreenStatus.gecontroleerd = true;
   characterScreenStatus.foutmeldingWeergegeven = false;
 
+#if BOARD_VERSION == BOARD_ARDI32
+  Wire.begin(ARDUINO_UNO_SHIELD_PIN_SDA, ARDUINO_UNO_SHIELD_PIN_SCL);
+#else
   Wire.begin();
+#endif
 
 #if (CHARACTERSCREEN_I2C_ADRES_MODUS == 0)
   // Geen scan: enkel de handdruk-check op het geconfigureerde I2C_ADRES.
@@ -273,12 +277,12 @@ static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   if (characterScreenStatus.gecontroleerd && characterScreenStatus.characterScreenActief) {
     if (CallbackScreenTypeCharacter) {
-      CallbackScreenTypeCharacter(foutmelding, FATAL_ZOEK_OP, LCD_LEESTIJD_FOUTMELDING_MS, "", "", "", 0);
+      CallbackScreenTypeCharacter(foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
     } else {
       lcd.clear();
       lcd.setCursor(0, 0); lcd.print(foutmelding);
       lcd.setCursor(0, 1); lcd.print(FATAL_ZOEK_OP);
-      delay(LCD_LEESTIJD_FOUTMELDING_MS);
+      delay(FATAL_LEESTIJD_MS);
     }
     return;
   }
@@ -301,12 +305,12 @@ static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   if (pixelScreenStatus.gecontroleerd && pixelScreenStatus.pixelScreenActief) {
     if (CallbackScreenTypePixel) {
-      CallbackScreenTypePixel(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, LCD_LEESTIJD_FOUTMELDING_MS, "", "", "", 0);
+      CallbackScreenTypePixel(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
     } else {
       PixelScreenClear();
       PixelScreenSetCursor(0, 0); PixelScreenPrint(foutmelding);
       PixelScreenSetCursor(0, 1); PixelScreenPrint(FATAL_ZOEK_OP);
-      delay(LCD_LEESTIJD_FOUTMELDING_MS);
+      delay(FATAL_LEESTIJD_MS);
     }
     return;
   }

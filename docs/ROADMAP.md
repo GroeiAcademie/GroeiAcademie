@@ -165,7 +165,7 @@ I2C als alternatieve, nog te testen interface voor PixelScreen (naast SPI), bijv
 
 ### Input-apparaten
 
-Deze reeks wordt getest en geëvalueerd. Er bestaat vandaag geen generieke input-laag in de library; deze lijst maakt zichtbaar waarmee gewerkt wordt, zonder dat al beslist is wat, of in welke vorm, dit als gedeelde functionaliteit wordt uitgewerkt.
+Vanaf v1.1.0 bestaat een gedeelde `System/Input`-laag. `INPUT_KANAAL_CONFIG` selecteert de actieve invoerbackend(s), `KEYPAD_TYPE` beschrijft het fysieke keypad en de publieke Input-API levert de toetsaanslag onafhankelijk van DIGITAL, PCF8574 of HX1838. Onderstaande hardware blijft per type afzonderlijk te valideren; opname in de Input-laag betekent niet automatisch dat ieder fysiek exemplaar al hardwarematig goedgekeurd is.
 
 | Apparaat | Status |
 |---|---|
@@ -180,7 +180,7 @@ Deze reeks wordt getest en geëvalueerd. Er bestaat vandaag geen generieke input
 | 4x3 Membraan Schakelaar Toetsenbord (flat 7) | ter-discussie |
 | 4x5 Membraan Schakelaar Toetsenbord (flat 9) | ter-discussie |
 | HW-139 (touch sensors) | ter-discussie |
-| IR HX1838 Infrarood Afstandsbediening, IR ontvanger voor 38kHz IR signalen | ter-discussie |
+| IR HX1838 Infrarood Afstandsbediening, IR ontvanger voor 38kHz IR signalen | softwarematig opgenomen in Input v1.1.0; fysieke validatie per remote/ontvanger |
 
 ### Bouwstenen
 
@@ -188,7 +188,7 @@ Generieke elektronica-bouwstenen, niet gebonden aan één specifiek toepassingsg
 
 | Bouwsteen | Status |
 |---|---|
-| PCF8574 Remote 8-Bit I/O Expander for I2C Bus | ter-discussie |
+| PCF8574 Remote 8-Bit I/O Expander for I2C Bus | softwarematig opgenomen in Input v1.1.0; OTRONIC OT8980 is referentie-/testmodule |
 | AT41 (quad logic level shifter) | ter-discussie |
 | CD74HC4067 (16 kanaals multiplexor) | ter-discussie |
 
@@ -199,15 +199,30 @@ Status volgens dezelfde [statuslegende in MODULES.md](Toepassingsgebieden/MODULE
 | Sensor | Status |
 |---|---|
 | AD8232 | ter-beoordeling |
+| AHT10 | kandidaat-idee |
 | ADXL345 | ter-beoordeling |
 | BioAmp EXG Pill | ter-beoordeling |
+| BME680 | kandidaat-idee |
 | BME688 | ter-beoordeling |
+| DHT23 | kandidaat-idee |
 | DS18B20 | ter-beoordeling |
 | ECG EMG Shield DuinoPeak | ter-beoordeling |
 | Grove GSR | ter-beoordeling |
+| HC-SR04 | kandidaat-idee |
+| HC-SR04P | kandidaat-idee |
+| HC-SR501 | kandidaat-idee |
+| HY-SRF05 | kandidaat-idee |
 | INMP441 | ter-beoordeling |
+| LD2410D | kandidaat-idee |
+| LD2450 | kandidaat-idee |
+| LM75A | kandidaat-idee |
+| LM35DZ | kandidaat-idee |
+| MAX4466 | kandidaat-idee |
+| MAX9814 | kandidaat-idee |
 | MAX30102 | ter-beoordeling |
 | MCU-6701 | ter-beoordeling |
+| MF52A | kandidaat-idee |
+| MF52D | kandidaat-idee |
 | MR60BHA2 | ter-beoordeling |
 | MPU6050 | ter-beoordeling |
 | MPU6500 | ter-beoordeling |

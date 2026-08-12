@@ -128,7 +128,7 @@ Voor ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`, waaronder WEMOS D1 R3
 #define BOARD_VERSION BOARD_ESP32_UNO
 ```
 
-De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie-library geen extra wachttijd tussen samples toe. WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
+De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
 
 Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
 
