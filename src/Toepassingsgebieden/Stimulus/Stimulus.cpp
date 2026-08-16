@@ -22,10 +22,16 @@ static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, Sen
 // ============================================================================
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
   #include <Adafruit_ADS1X15.h>
+  #include "../../Systeem/GedeeldeBus/GedeeldeBus.h"
   static Adafruit_ADS1115 ads;
   static bool ads1115Aanwezig = false;
 
   void InitialiseerADS1115() {
+    // Wire expliciet via GedeeldeBus initialiseren VOOR ads.begin() aangeroepen wordt. 
+    // Zonder dit zou de ADS1115-library zelf, intern, Wire.begin() zonder board-specifieke SDA/SCL-pinnen kunnen aanroepen,
+    // wat op ARDI32 tot een verkeerde pinconfiguratie zou leiden als dit nog vóór Screen/Input gebeurt.
+    GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
+
     if (!ads.begin(I2C_ADDRESS_ADS1115)) {
       ads1115Aanwezig = false;
       PrintToScreen(_LCD_ADS1115_FOUT, _LCD_ADS1115_NIET_GEVONDEN, _LCD_LEESTIJD_FEEDBACK_MS);

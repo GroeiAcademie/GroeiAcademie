@@ -7,10 +7,14 @@ Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meeg
 De testscripts staan onder `extras/`:
 
 ```text
-
-
 TestLibraryGereleased.cmd
-TestLibraryGereleased.cmd
+TestLibraryGereleasedOngeldig.cmd
+TestLibraryNieuw.cmd
+TestLibraryNieuwOngeldig.cmd
+TestLibraryDependency.cmd
+TestLibraryMappingControle.cmd
+TestLibraryStatusReport.cmd
+TestLibraryAllesEnMaakStatusReport.cmd
 ```
 
 De scripts laten een aanwezige `UserConfig.h` actief. De configuratievolgorde tijdens de tests is: compilerdefinitie, actieve definitie in het `.ino`-voorbeeld, `UserConfig.h` en ten slotte de standaardwaarde uit `SystemConfig.h`. De actieve exampledefaults die door de compiler kunnen worden overschreven staan daarom onder `#ifndef`.
@@ -127,11 +131,11 @@ De fysieke hardwarevalidatie van TTGO D1 R32 en andere compatibele borden wordt 
 
 ## Input-validatie voor v1.1.0
 
-`TestLibraryNieuwInput.cmd` test geldige Input-configuraties en rapporteert officiële en acceptatieboards afzonderlijk. Acceptatieboards hebben geen invloed op release-PASS/FAIL.
+`TestLibraryNieuw.cmd` test geldige Input-configuraties en rapporteert officiële en acceptatieboards afzonderlijk. Acceptatieboards hebben geen invloed op release-PASS/FAIL. Dit omvat ook `KEYPAD_TYPE_USER_DEFINED_DIRECT`/`KEYPAD_TYPE_USER_DEFINED_MATRIX`, via de eigen voorbeelden `InputkanalenUserDefinedDirect.ino`/`InputkanalenUserDefinedMatrix.ino` (die hun eigen, ingebouwde standaardwaarden gebruiken, geen `UserConfig.h`-aanpassing nodig om te compileren).
 
-`TestLibraryNieuwInputOngeldig.cmd` test configuraties die bewust door compile-time validatie geweigerd moeten worden.
+`TestLibraryNieuwOngeldig.cmd` test configuraties die bewust door compile-time validatie geweigerd moeten worden.
 
-`TestLibraryAlles.cmd` combineert de nieuwe Input-tests van deze release met de volledige, reeds gereleasede basis.
+`TestLibraryAllesEnMaakStatusReport.cmd` combineert de nieuwe Input-tests van deze release met de volledige, reeds gereleasede basis.
 
 ### Padkeuze van de Windows-tests
 
@@ -139,14 +143,14 @@ De nieuwe Input-tests gebruiken dezelfde padkeuze als `TestLibraryGereleased.cmd
 
 Het eerste bestaande pad wordt `BASE_PATH`; `arduino-cli` wordt vervolgens als `%BASE_PATH%\arduino-cli` gebruikt.
 
-`TestLibraryInputmetLogbestand.cmd` voert beide Input-tests uit en schrijft de volledige console-uitvoer ook naar `TestLibraryInputmetLogbestand.txt`.
+Elk van de vier testscripts (`TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd`, `TestLibraryNieuwOngeldig.cmd`) schrijft zijn eigen volledige console-uitvoer naar een gelijknamig `.txt`-logbestand. `TestLibraryStatusReport.cmd` voegt die vier logbestanden samen tot één `TestLibraryStatusReport.txt`, met een overzicht vooraan.
 
 
 ### Volledige testsuite in één opdracht
 
-Start `TestLibraryAlles.cmd` om de volledige v1.1.0-validatie uit te voeren. Dit script roept eerst de nieuwe Input-tests van deze release op (geldig, dan verwacht ongeldig), en pas daarna de volledige, reeds gereleasede basis (`TestLibraryGereleased.cmd`), en schrijft alle console-uitvoer samen naar `TestLibraryAlles.txt`.
+Start `TestLibraryAllesEnMaakStatusReport.cmd` om de volledige v1.1.0-validatie uit te voeren. Dit script roept na elkaar `TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd` en `TestLibraryNieuwOngeldig.cmd` op (telkens met `--no-pause`), en roept vervolgens `TestLibraryStatusReport.cmd` op om alle vier de logbestanden samen te voegen tot `TestLibraryStatusReport.txt`. Het script slaagt enkel wanneer alle vijf de onderliggende aanroepen slagen.
 
-De in `INPUT_STIMULUS_TESTS` opgesomde Stimulus-testvoorbeelden onder `examples/Systeem/Input/Input_Test_...` worden door `TestLibraryNieuwInput.cmd` mee gecompileerd. De originele Stimulus-voorbeelden blijven ongewijzigd.
+De in `INPUT_STIMULUS_TESTS` opgesomde Stimulus-testvoorbeelden onder `examples/Systeem/Input/Input_Test_...` worden door `TestLibraryNieuw.cmd` mee gecompileerd. De originele Stimulus-voorbeelden blijven ongewijzigd.
 
 
 
@@ -156,4 +160,25 @@ De `Input_Test_...`-voorbeelden zijn kopieën van de bestaande Stimulus-voorbeel
 
 `InputTestConversieControle.txt` rapporteert per testvoorbeeld hoeveel Input-aanroepen aanwezig zijn en of nog actieve rechtstreekse `digitalRead(PIN_TOETS_x)`-aanroepen overblijven.
 
-Start `TestLibraryAlles.cmd` voor de volledige testsuite. Alle deeltestuitvoer wordt samengebracht in `TestLibraryAlles.txt`.
+Start `TestLibraryAllesEnMaakStatusReport.cmd` voor de volledige testsuite. Alle deeltestuitvoer wordt samengebracht in `TestLibraryStatusReport.txt`.
+
+## Mapping-volledigheidscontrole
+
+`TestLibraryMappingControle.cmd` controleert of `mappingTestMenu[]` in elk van de drie
+Input-voorbeelden (`InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino`, `InputkanalenHX1838.ino`)
+alle opschriften bevat die het bijhorende `KEYPAD_TYPE`/`HX1838_TOETSENINDELING` via `KEY_LAYOUT[]`/
+`IR_KEY_LAYOUT[]` in `Input.cpp` kan opleveren. Een ontbrekend opschrift meldt zich stilzwijgend
+als "niets gebeurt bij een toetsdruk", zonder compilatiefout of waarschuwing: dit script vangt dat
+alsnog op, vóór een release.
+
+Werking: het script doorloopt een handmatig opgebouwde referentietabel (welk type welke opschriften
+verwacht) en controleert per combinatie of die opschriften letterlijk voorkomen in het betrokken
+`.ino`-bestand.
+
+**Belangrijke beperking:** de controle is tekstueel, niet `#if`/`#elif`-bewust. Ze bevestigt dat een
+opschrift ergens in het bestand voorkomt, niet dat het in de juiste voorwaardelijke tak staat. Een
+opschrift dat per ongeluk in de verkeerde tak terechtkomt, wordt dus niet gedetecteerd.
+
+**Onderhoud:** bij een nieuw `KEYPAD_TYPE`, een nieuwe `HX1838_TOETSENINDELING`, of een wijziging aan
+een bestaande `KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` in `Input.cpp`, moet de referentietabel in dit script
+zelf mee bijgewerkt worden. Er is geen automatische koppeling tussen dit script en `Input.cpp`.

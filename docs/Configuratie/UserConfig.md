@@ -82,7 +82,7 @@ Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE
 
 Voor HX1838 kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. `HX1838_BRON_CODES` bepaalt of de vaste mapping, EEPROM of de fallbackvolgorde gebruikt wordt. Bij `HX1838_BRON_CODES_DEFINE` zijn respectievelijk 12, 17 of 21 ingevulde codes vereist, afhankelijk van de gekozen `HX1838_TOETSENINDELING`.
 
-De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken.
+De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken. Voor `INPUT_TYPE_DIGITAL` gebeurt dit per `KEYPAD_TYPE`: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden standaard D3,D2,D5,D4. De oude `PIN_TOETS_1` tot en met `PIN_TOETS_4` blijven voor backward compatibility ondersteund en hebben voorrang wanneer ze expliciet in `UserConfig.h` zijn ingesteld.
 
 ## ADC-backend
 
@@ -133,7 +133,7 @@ Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel 
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
-`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_UNO` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIN_TOETS_1` tot en met `PIN_TOETS_4`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken deze shieldnamen. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
+`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_UNO` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. De keypad-specifieke `KEYPAD_PIN_...`-mapping voor `INPUT_TYPE_DIGITAL` gebruikt deze shieldnamen en wordt daarna gekoppeld aan de bestaande `PIN_TOETS_1` tot en met `PIN_TOETS_4`; `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
 
 
 Beschikbare HX1838-toetsenindelingen:

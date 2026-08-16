@@ -11,7 +11,7 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 - versie: `1.1.0`;
 - ontwikkelfase: alpha;
 - huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
-- v1.1.0-validatie: voer `extras/TestLibraryAlles.cmd` uit; de volledige uitvoer wordt samengebracht in `extras/TestLibraryAlles.txt` en de definitieve releaseresultaten horen in `extras/TESTRESULTATEN.md`;
+- v1.1.0-validatie: voer `extras/TestLibraryAllesEnMaakStatusReport.cmd` uit; de vier individuele testcycli worden uitgevoerd en `extras/TestLibraryStatusReport.cmd` maakt daaruit `extras/TestLibraryStatusReport.txt`; de definitieve releaseresultaten horen in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
@@ -56,7 +56,7 @@ De validatie omvat:
 - Arduino LINT (Library Manager)
 - compilatie van alle voorbeelden;
 - afzonderlijke Input-validatie met geldige en bewust ongeldige configuraties;
-- menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag()`-API;
+- menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
 - Arduino Uno R3;
 - Arduino Uno R4 Minima;
 - Arduino Uno R4 WiFi;

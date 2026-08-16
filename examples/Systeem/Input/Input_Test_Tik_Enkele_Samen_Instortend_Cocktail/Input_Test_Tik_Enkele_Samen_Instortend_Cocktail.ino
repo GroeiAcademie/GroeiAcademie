@@ -22,7 +22,7 @@
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
 // #define INPUT_KANAAL_CONFIG (INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838)
 //
-// Alleen de toetsen met opschrift 1 t.e.m. 4 worden in deze test gebruikt.
+// Alleen de toetsen met opschrift 1 t.e.m. 4, of S1 t.e.m. S4, worden in deze test gebruikt.
 // Dit geldt ook wanneer het gekozen keypad of de HX1838-remote meer toetsen heeft.
 #ifndef INPUT_TEST_GEBRUIK_FUNCTIEMAPPING
   #define INPUT_TEST_GEBRUIK_FUNCTIEMAPPING 0
@@ -36,6 +36,17 @@
 #include <Adafruit_ST7789.h>
 Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
 #endif
+
+// Vergelijkt het opschrift van de ingedrukte toets met een positie (1-4), ongeacht of het
+// actieve keypad de cijfernotatie ("1") of de S-notatie ("S1") gebruikt voor die positie.
+bool ToetsPositieIngedrukt(const char* opschrift, int positie) {
+  if (opschrift == nullptr) return false;
+  char cijferNotatie[3];
+  char sNotatie[4];
+  snprintf(cijferNotatie, sizeof(cijferNotatie), "%d", positie);
+  snprintf(sNotatie, sizeof(sNotatie), "S%d", positie);
+  return strcmp(opschrift, cijferNotatie) == 0 || strcmp(opschrift, sNotatie) == 0;
+}
 
 
 // INSTORTEND SCORINGSVORM (enkel gebruikt bij Scenario 3, stap 3)
@@ -129,24 +140,24 @@ void loop() {
 
   while (true) {
     #if INPUT_TEST_GEBRUIK_FUNCTIEMAPPING
-      ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingKeuzeMenu);
+      UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingKeuzeMenu);
       break;
     #else
       InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
       const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
-    if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_1) == 0) {
+    if (ToetsPositieIngedrukt(opschriftToetsAanslag, 1)) {
       //-- while (digitalRead(PIN_TOETS_1) == LOW);
       UitvoerenAlgoritmeEnkelTik();
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_2) == 0) {
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {
       //-- while (digitalRead(PIN_TOETS_2) == LOW);
       UitvoerenAlgoritmeSimultaneTik();
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_3) == 0) {
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {
       //-- while (digitalRead(PIN_TOETS_3) == LOW);
       UitvoerenAlgoritmeIneenstortendeTik();
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_4) == 0) {
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {
       //-- while (digitalRead(PIN_TOETS_4) == LOW);
       UitvoerenAlgoritmeCocktailTik();
       break;
@@ -308,7 +319,7 @@ void UitvoerenAlgoritmeEnkelTik() {
 // ALGORITME 2: SIMULTANE TIK (Scenario 2)
 // ============================================================================
 
-void UitvoerenAlgoritmeSimultaneTik () {
+void UitvoerenAlgoritmeSimultaneTik() {
   const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
 
   ResetAlleTellers();
@@ -568,15 +579,15 @@ void UitvoerenAlgoritmeCocktailTik() {
   while (true) {
     InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
     const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
-    if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_2) == 0) {
+    if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {
       //-- while (digitalRead(PIN_TOETS_2) == LOW);
       aantalSensorenSimultaanTeMeten = 2;
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_3) == 0) {
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {
       //-- while (digitalRead(PIN_TOETS_3) == LOW);
       aantalSensorenSimultaanTeMeten = 3;
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_4) == 0) {
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {
       //-- while (digitalRead(PIN_TOETS_4) == LOW);
       aantalSensorenSimultaanTeMeten = 4;
       break;
@@ -805,7 +816,7 @@ void ToonMenuKiesEnStelLevelIn() {
   while (true) {
     InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
     const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
-    if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_1) == 0) {  // Start
+    if (ToetsPositieIngedrukt(opschriftToetsAanslag, 1)) {  // Start
       //-- while (digitalRead(PIN_TOETS_1) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 150UL;
       TOEGESTANE_MARGE_TIKTIJD   = 30;
@@ -815,7 +826,7 @@ void ToonMenuKiesEnStelLevelIn() {
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 1;
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_2) == 0) {  // Basic
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {  // Basic
       //-- while (digitalRead(PIN_TOETS_2) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 100UL;
       TOEGESTANE_MARGE_TIKTIJD   = 20;
@@ -825,7 +836,7 @@ void ToonMenuKiesEnStelLevelIn() {
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 2;
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_3) == 0) {  // Expert
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {  // Expert
       //-- while (digitalRead(PIN_TOETS_3) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 75UL;
       TOEGESTANE_MARGE_TIKTIJD   = 15;
@@ -835,7 +846,7 @@ void ToonMenuKiesEnStelLevelIn() {
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 3;
       break;
-    } else if (opschriftToetsAanslag != nullptr && strcmp(opschriftToetsAanslag, _LABEL_OPSCHRIFT_4) == 0) {  // Elite
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {  // Elite
       //-- while (digitalRead(PIN_TOETS_4) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 50UL;
       TOEGESTANE_MARGE_TIKTIJD   = 10;

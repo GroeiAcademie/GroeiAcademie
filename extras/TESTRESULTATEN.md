@@ -15,24 +15,24 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 
 # v1.0.4
 
-**Nog niet gevalideerd — deze sectie is een plaatshouder.** v1.0.4 wijzigt echt gedrag
-(nieuwe `CharacterScreenConfigureren()`, verwijderde impliciete auto-configuratie,
-`CHARACTERSCREEN_I2C_ADRES_MODUS`) en gebruikt daarom nadrukkelijk **niet** de testresultaten
-van v1.0.0 — in tegenstelling tot v1.0.1/v1.0.2/v1.0.3. Vóór publicatie moet minstens het
-volgende bevestigd worden op echte hardware, over de volledige compilatiematrix (Arduino
-UNO R3, UNO R4 Minima, UNO R4 WiFi, Wemos D1 R32):
+**Datum**
 
-- de volledige 188-compilatiereeks opnieuw, met de bijgewerkte voorbeelden;
-- `CHARACTERSCREEN_I2C_ADRES_MODUS = 2` (placement-new) compileert en werkt correct op AVR
-  (UNO R3) — dit gebruikt `<new>`, wat op sommige AVR-toolchains een aanvullende
-  `operator new(size_t, void*)`-definitie kan vereisen (zie `docs/DECISION_LOG.md`, D023);
-- `CHARACTERSCREEN_I2C_ADRES_MODUS = 1`: de `snprintf`-gevulde foutmelding (`CS002`, met het
-  gevonden I2C-adres) toont de verwachte tekst wanneer het scherm op een ander adres dan
-  het geconfigureerde `I2C_ADRES` reageert;
-- de flashruimte-impact van modus 0 versus 1/2, gezien de vier al gekende
-  UNO R3-geheugenbeperkingen.
+04-08-2026
 
-Resultaten volgen hier zodra deze validatie is uitgevoerd.
+## Arduino LINT
+
+Status
+
+✅ Geslaagd — alle onverwachte controles zijn OK bevonden.
+
+## Compilatietesten
+
+- totaal: 188
+- OK: 184
+- verwachte UNO R3-geheugenbeperkingen: 4
+- onverwachte fouten: 0
+
+**Eindstatus: GESLAAGD**
 
 ---
 

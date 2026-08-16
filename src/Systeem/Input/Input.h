@@ -34,7 +34,7 @@
     #error TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED moet TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW of TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH zijn.
   #endif
 
-  #if KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4 && KEYPAD_TYPE != KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4
+  #if KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4 && KEYPAD_TYPE != KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4 && KEYPAD_TYPE != KEYPAD_TYPE_USER_DEFINED_DIRECT && KEYPAD_TYPE != KEYPAD_TYPE_USER_DEFINED_MATRIX
     #error INPUT_TYPE_PCF8574 ondersteunt alleen de gedefinieerde keypads die maximaal acht signaallijnen nodig hebben.
   #endif
 #endif
@@ -84,6 +84,10 @@ struct MappingTussenOpschriftEnWeergavetekst {
     #define AANTAL_KEYPAD_TOETSEN 16
   #elif KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5
     #define AANTAL_KEYPAD_TOETSEN 20
+  #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
+    #define AANTAL_KEYPAD_TOETSEN KEYPAD_GENERIEK_AANTAL_PINNEN
+  #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
+    #define AANTAL_KEYPAD_TOETSEN (KEYPAD_GENERIEK_AANTAL_RIJEN * KEYPAD_GENERIEK_AANTAL_KOLOMMEN)
   #else
     #error Ongeldige KEYPAD_TYPE voor AANTAL_KEYPAD_TOETSEN.
   #endif
@@ -156,6 +160,23 @@ struct MappingTussenToetsaanslagEnUitTeVoerenFunctie {
 #endif
 };
 
+// Apart type, enkel voor mappings die het argumenten-veld (void*) willen gebruiken.
+// Raakt InputFunctie/MappingTussenToetsaanslagEnUitTeVoerenFunctie hierboven niet aan.
+typedef void (*InputFunctieMetArgumenten)(void* argumenten);
+
+struct MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten {
+  const char* opschriftToetsAanslag;
+  InputFunctieMetArgumenten functie;
+  void* argumenten;
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  InputFunctieMetArgumenten functieBijLoslaten;
+  void* argumentenBijLoslaten;
+  InputFunctieMetArgumenten functieBijLangIndrukken;
+  void* argumentenBijLangIndrukken;
+  unsigned long langIndrukkenDrempelMs;
+#endif
+};
+
 extern const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTussenToetsaanslagEnUitTeVoerenFunctie[];
 
 extern const byte aantalToetsFuncties;
@@ -168,6 +189,29 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieV
   for (size_t i = 0; i < N; i++) { if (strcmp(mapping[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) return &mapping[i]; }
   return nullptr;
 }
+
+template <size_t N>
+const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
+  if (opschriftToetsAanslag == nullptr) return nullptr;
+  for (size_t i = 0; i < N; i++) { if (strcmp(mapping[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) return &mapping[i]; }
+  return nullptr;
+}
+
+#ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
+// Interne werkfunctie, geïmplementeerd in Input.cpp waar KEY_LAYOUT/IR_KEY_LAYOUT voor het actief gecompileerde KEYPAD_TYPE/HX1838_TOETSENINDELING gekend zijn.
+// Niet rechtstreeks door de gebruiker aan te roepen, gebruik ControleerMappingVolledigheid().
+void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag[], byte aantalEntries);
+
+// Controleert of mapping elk opschrift bevat dat het actief gecompileerde KEYPAD_TYPE (of HX1838_TOETSENINDELING) kan opleveren, en meldt via Serial welke ontbreken.
+// Enkel bedoeld om tijdens het testen op te roepen, bijvoorbeeld eenmalig in setup(), niet in productiecode: dit voegt Serial-afhankelijkheid en extra flashgebruik toe.
+// Enkel beschikbaar wanneer INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN in UserConfig.h staat.
+template <size_t N>
+void ControleerMappingVolledigheid(const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
+  const char* opschriftToetsAanslag[N];
+  for (size_t i = 0; i < N; i++) opschriftToetsAanslag[i] = mapping[i].opschriftToetsAanslag;
+  ControleerMappingVolledigheidIntern(opschriftToetsAanslag, N);
+}
+#endif
 
 // ============================================================================
 // PUBLIEKE API
@@ -189,10 +233,10 @@ void InputConfigureren();
 InputResultaat OpvragenHuidigeToetsAanslag(bool wachten = true);
 InputResultaten OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1);
 
-void ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true);
+void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true);
 
 template <size_t N>
-void ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
+void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
   InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
   if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
   const MappingTussenToetsaanslagEnUitTeVoerenFunctie* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
@@ -210,6 +254,28 @@ void ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const
 #endif
 
   if (gevondenMapping->functie != nullptr) gevondenMapping->functie();
+}
+
+// Variant voor mappings die het argumenten-veld (void*) gebruiken. Zelfde werking, andere types.
+template <size_t N>
+void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
+  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
+  if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
+  if (gevondenMapping == nullptr) return;
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  if (invoer.gebeurtenis == InputGebeurtenis::LOSGELATEN) {
+    if (gevondenMapping->functieBijLoslaten != nullptr) gevondenMapping->functieBijLoslaten(gevondenMapping->argumentenBijLoslaten);
+    return;
+  }
+  if (invoer.gebeurtenis == InputGebeurtenis::LANG_INDRUKKEN) {
+    if (gevondenMapping->functieBijLangIndrukken != nullptr) gevondenMapping->functieBijLangIndrukken(gevondenMapping->argumentenBijLangIndrukken);
+    return;
+  }
+#endif
+
+  if (gevondenMapping->functie != nullptr) gevondenMapping->functie(gevondenMapping->argumenten);
 }
 
 #endif // INPUT_H

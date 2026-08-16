@@ -84,92 +84,145 @@
 // #define I2C_ADDRESS_PCF8574 0x20
 #endif
 
-// PCF8574-logische aansluitingen. Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
-// PCF8574_PIN_P0 t.e.m. PCF8574_PIN_P7 zijn vaste hardware-identiteiten en worden niet aangepast.
+// INPUT_TYPE_DIGITAL: fysieke keypad-aansluitingen op de Arduino Uno-shieldheader.
+// Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
+// De standaardvolgorde is D2,D3,D4,D5; uitsluitend de twee membraan-directtypes gebruiken standaard de gedraaide D3,D2,D5,D4-volgorde.
+// Bestaande PIN_TOETS_1..4-definities blijven ondersteund en hebben voorrang voor backward compatibility.
+#if defined(INPUT_KANAAL_CONFIG) && (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+  #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
+// #define KEYPAD_PIN_K1 ARDUINO_UNO_SHIELD_PIN_D2
+// #define KEYPAD_PIN_K2 ARDUINO_UNO_SHIELD_PIN_D3
+// #define KEYPAD_PIN_K3 ARDUINO_UNO_SHIELD_PIN_D4
+// #define KEYPAD_PIN_K4 ARDUINO_UNO_SHIELD_PIN_D5
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
+// #define KEYPAD_PIN_L1 ARDUINO_UNO_SHIELD_PIN_D2
+// #define KEYPAD_PIN_L2 ARDUINO_UNO_SHIELD_PIN_D3
+// #define KEYPAD_PIN_R1 ARDUINO_UNO_SHIELD_PIN_D4
+// #define KEYPAD_PIN_R2 ARDUINO_UNO_SHIELD_PIN_D5
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
+// #define KEYPAD_PIN_1 ARDUINO_UNO_SHIELD_PIN_D3
+// #define KEYPAD_PIN_2 ARDUINO_UNO_SHIELD_PIN_D2
+// #define KEYPAD_PIN_3 ARDUINO_UNO_SHIELD_PIN_D5
+// #define KEYPAD_PIN_4 ARDUINO_UNO_SHIELD_PIN_D4
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
+// #define KEYPAD_PIN_1 ARDUINO_UNO_SHIELD_PIN_D3
+// #define KEYPAD_PIN_2 ARDUINO_UNO_SHIELD_PIN_D2
+// #define KEYPAD_PIN_3 ARDUINO_UNO_SHIELD_PIN_D5
+// #define KEYPAD_PIN_4 ARDUINO_UNO_SHIELD_PIN_D4
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
+// #define KEYPAD_PIN_OUT1 ARDUINO_UNO_SHIELD_PIN_D2
+// #define KEYPAD_PIN_OUT2 ARDUINO_UNO_SHIELD_PIN_D3
+// #define KEYPAD_PIN_OUT3 ARDUINO_UNO_SHIELD_PIN_D4
+// #define KEYPAD_PIN_OUT4 ARDUINO_UNO_SHIELD_PIN_D5
+  #endif
+#endif
 
-#if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-// #define KEYPAD_PIN_K1 PCF8574_PIN_P1
-// #define KEYPAD_PIN_K2 PCF8574_PIN_P0
-// #define KEYPAD_PIN_K3 PCF8574_PIN_P3
-// #define KEYPAD_PIN_K4 PCF8574_PIN_P2
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4
-// #define KEYPAD_PIN_K1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_K2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_K3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_K4 PCF8574_PIN_P3
-// #define KEYPAD_PIN_K5 PCF8574_PIN_P4
-// #define KEYPAD_PIN_K6 PCF8574_PIN_P5
-// #define KEYPAD_PIN_K7 PCF8574_PIN_P6
-// #define KEYPAD_PIN_K8 PCF8574_PIN_P7
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-// #define KEYPAD_PIN_L1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_L2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_R1 PCF8574_PIN_P2
-// #define KEYPAD_PIN_R2 PCF8574_PIN_P3
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4
-// #define KEYPAD_PIN_C4 PCF8574_PIN_P0
-// #define KEYPAD_PIN_C3 PCF8574_PIN_P1
-// #define KEYPAD_PIN_C2 PCF8574_PIN_P2
-// #define KEYPAD_PIN_C1 PCF8574_PIN_P3
-// #define KEYPAD_PIN_R1 PCF8574_PIN_P4
-// #define KEYPAD_PIN_R2 PCF8574_PIN_P5
-// #define KEYPAD_PIN_R3 PCF8574_PIN_P6
-// #define KEYPAD_PIN_R4 PCF8574_PIN_P7
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
-// #define KEYPAD_PIN_K1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_K2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_K3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_K4 PCF8574_PIN_P3
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-// #define KEYPAD_PIN_K1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_K2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_K3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_K4 PCF8574_PIN_P3
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4
-// #define KEYPAD_PIN_R1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_C1 PCF8574_PIN_P1
-// #define KEYPAD_PIN_C2 PCF8574_PIN_P2
-// #define KEYPAD_PIN_C3 PCF8574_PIN_P3
-// #define KEYPAD_PIN_C4 PCF8574_PIN_P4
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4
-// #define KEYPAD_PIN_R1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_R2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_C1 PCF8574_PIN_P2
-// #define KEYPAD_PIN_C2 PCF8574_PIN_P3
-// #define KEYPAD_PIN_C3 PCF8574_PIN_P4
-// #define KEYPAD_PIN_C4 PCF8574_PIN_P5
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3
-// #define KEYPAD_PIN_R1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_R2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_R3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_R4 PCF8574_PIN_P3
-// #define KEYPAD_PIN_C1 PCF8574_PIN_P4
-// #define KEYPAD_PIN_C2 PCF8574_PIN_P5
-// #define KEYPAD_PIN_C3 PCF8574_PIN_P6
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4
-// #define KEYPAD_PIN_R1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_R2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_R3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_R4 PCF8574_PIN_P3
-// #define KEYPAD_PIN_C1 PCF8574_PIN_P4
-// #define KEYPAD_PIN_C2 PCF8574_PIN_P5
-// #define KEYPAD_PIN_C3 PCF8574_PIN_P6
-// #define KEYPAD_PIN_C4 PCF8574_PIN_P7
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-// #define KEYPAD_PIN_K1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_K2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_K3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_K4 PCF8574_PIN_P3
-#elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4
-// Via de 8 parallelle uitgangen op PCF8574 P0-P7 kunnen enkel de eerste 8 toetsen uitgelezen worden.
-// #define KEYPAD_PIN_K1 PCF8574_PIN_P0
-// #define KEYPAD_PIN_K2 PCF8574_PIN_P1
-// #define KEYPAD_PIN_K3 PCF8574_PIN_P2
-// #define KEYPAD_PIN_K4 PCF8574_PIN_P3
-// #define KEYPAD_PIN_K5 PCF8574_PIN_P4
-// #define KEYPAD_PIN_K6 PCF8574_PIN_P5
-// #define KEYPAD_PIN_K7 PCF8574_PIN_P6
-// #define KEYPAD_PIN_K8 PCF8574_PIN_P7
+// INPUT_TYPE_PCF8574: logische aansluitingen op PCF8574 P0-P7.
+// Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
+// PCF8574_PIN_P0 t.e.m. PCF8574_PIN_P7 zijn vaste hardware-identiteiten en worden niet aangepast.
+#if defined(INPUT_KANAAL_CONFIG) && (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+  #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
+  // Experimenteel: eigen directe PCF8574-configuratie. Zie docs/Systeem/INPUT.md.
+  // Let op: dit zijn PCF8574-pinnen P0 t.e.m. P7, geen Arduino-pinnummers.
+  // #define KEYPAD_GENERIEK_AANTAL_PINNEN 4
+  // #define KEYPAD_GENERIEK_PINNEN {PCF8574_PIN_P0, PCF8574_PIN_P1, PCF8574_PIN_P2, PCF8574_PIN_P3}
+  // #define KEYPAD_GENERIEK_KEY_LAYOUT { {"1", "Toets 1"}, {"2", "Toets 2"}, {"3", "Toets 3"}, {"4", "Toets 4"} }
+  // #define KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
+  // Experimenteel: eigen matrix-PCF8574-configuratie. Zie docs/Systeem/INPUT.md.
+  // Let op: rijen + kolommen samen maximaal 8 PCF8574-pinnen.
+  // #define KEYPAD_GENERIEK_AANTAL_RIJEN     2
+  // #define KEYPAD_GENERIEK_AANTAL_KOLOMMEN  2
+  // #define KEYPAD_GENERIEK_RIJ_PINNEN       {PCF8574_PIN_P0, PCF8574_PIN_P1}
+  // #define KEYPAD_GENERIEK_KOLOM_PINNEN     {PCF8574_PIN_P2, PCF8574_PIN_P3}
+  // #define KEYPAD_GENERIEK_KEY_LAYOUT { \
+  //   {"1", "Toets 1"}, {"2", "Toets 2"}, \
+  //   {"3", "Toets 3"}, {"4", "Toets 4"} \
+  // }
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
+  // #define KEYPAD_PIN_K1 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_K2 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_K3 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_K4 PCF8574_PIN_P2
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4
+  // #define KEYPAD_PIN_K1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_K2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_K3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_K4 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_K5 PCF8574_PIN_P4
+  // #define KEYPAD_PIN_K6 PCF8574_PIN_P5
+  // #define KEYPAD_PIN_K7 PCF8574_PIN_P6
+  // #define KEYPAD_PIN_K8 PCF8574_PIN_P7
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
+  // #define KEYPAD_PIN_L1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_L2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_R1 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_R2 PCF8574_PIN_P3
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4
+  // #define KEYPAD_PIN_C4 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_C3 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_C2 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_C1 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_R1 PCF8574_PIN_P4
+  // #define KEYPAD_PIN_R2 PCF8574_PIN_P5
+  // #define KEYPAD_PIN_R3 PCF8574_PIN_P6
+  // #define KEYPAD_PIN_R4 PCF8574_PIN_P7
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
+  // #define KEYPAD_PIN_1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_4 PCF8574_PIN_P3
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
+  // #define KEYPAD_PIN_1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_4 PCF8574_PIN_P3
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4
+  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_C1 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_C2 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_C3 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_C4 PCF8574_PIN_P4
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4
+  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_R2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_C1 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_C2 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_C3 PCF8574_PIN_P4
+  // #define KEYPAD_PIN_C4 PCF8574_PIN_P5
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3
+  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_R2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_R3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_R4 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_C1 PCF8574_PIN_P4
+  // #define KEYPAD_PIN_C2 PCF8574_PIN_P5
+  // #define KEYPAD_PIN_C3 PCF8574_PIN_P6
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4
+  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_R2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_R3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_R4 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_C1 PCF8574_PIN_P4
+  // #define KEYPAD_PIN_C2 PCF8574_PIN_P5
+  // #define KEYPAD_PIN_C3 PCF8574_PIN_P6
+  // #define KEYPAD_PIN_C4 PCF8574_PIN_P7
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
+  // #define KEYPAD_PIN_OUT1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_OUT2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_OUT3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_OUT4 PCF8574_PIN_P3
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4
+  // Via de 8 parallelle uitgangen op PCF8574 P0-P7 kunnen enkel de eerste 8 toetsen uitgelezen worden.
+  // #define KEYPAD_PIN_OUT1 PCF8574_PIN_P0
+  // #define KEYPAD_PIN_OUT2 PCF8574_PIN_P1
+  // #define KEYPAD_PIN_OUT3 PCF8574_PIN_P2
+  // #define KEYPAD_PIN_OUT4 PCF8574_PIN_P3
+  // #define KEYPAD_PIN_OUT5 PCF8574_PIN_P4
+  // #define KEYPAD_PIN_OUT6 PCF8574_PIN_P5
+  // #define KEYPAD_PIN_OUT7 PCF8574_PIN_P6
+  // #define KEYPAD_PIN_OUT8 PCF8574_PIN_P7
+  #endif
 #endif
 
 #ifndef TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED
@@ -224,34 +277,40 @@
 // CH-=0x45, CH=0x46, CH+=0x47, PREV=0x44, NEXT=0x40, PLAY=0x43, -=0x07, +=0x15, EQ=0x09, 0=0x16, 100+=0x19, 200+=0x0D, 1=0x0C, 2=0x18, 3=0x5E, 4=0x08, 5=0x1C, 6=0x5A, 7=0x42, 8=0x52, 9=0x4A.
 
 // Arduino Uno-shieldheaderpinnen. Alleen activeren wanneer de geselecteerde boardcore een afwijkende mapping nodig heeft.
-// #define ARDUINO_UNO_SHIELD_PIN_D0  0
-// #define ARDUINO_UNO_SHIELD_PIN_D1  1
-// #define ARDUINO_UNO_SHIELD_PIN_D2  2
-// #define ARDUINO_UNO_SHIELD_PIN_D3  3
-// #define ARDUINO_UNO_SHIELD_PIN_D4  4
-// #define ARDUINO_UNO_SHIELD_PIN_D5  5
-// #define ARDUINO_UNO_SHIELD_PIN_D6  6
-// #define ARDUINO_UNO_SHIELD_PIN_D7  7
-// #define ARDUINO_UNO_SHIELD_PIN_D8  8
-// #define ARDUINO_UNO_SHIELD_PIN_D9  9
-// #define ARDUINO_UNO_SHIELD_PIN_D10 10
-// #define ARDUINO_UNO_SHIELD_PIN_D11 11
-// #define ARDUINO_UNO_SHIELD_PIN_D12 12
-// #define ARDUINO_UNO_SHIELD_PIN_D13 13
-// #define ARDUINO_UNO_SHIELD_PIN_A0  A0
-// #define ARDUINO_UNO_SHIELD_PIN_A1  A1
-// #define ARDUINO_UNO_SHIELD_PIN_A2  A2
-// #define ARDUINO_UNO_SHIELD_PIN_A3  A3
-// #define ARDUINO_UNO_SHIELD_PIN_A4  A4
-// #define ARDUINO_UNO_SHIELD_PIN_A5  A5
-// #define ARDUINO_UNO_SHIELD_PIN_SDA SDA
-// #define ARDUINO_UNO_SHIELD_PIN_SCL SCL
-// #define ARDUINO_UNO_SHIELD_PIN_SS   SS
-// #define ARDUINO_UNO_SHIELD_PIN_MOSI MOSI
-// #define ARDUINO_UNO_SHIELD_PIN_MISO MISO
-// #define ARDUINO_UNO_SHIELD_PIN_SCK  SCK
+// Voor BOARD_ARDI32 kan de officiële shieldmapping leesbaar genoteerd worden als:
+// Arduino Uno-shieldlabel -> ARDI-32 schemanaam -> ESP32-S3 GPIO.
+// Laat dit blok normaal uitgeschakeld: SystemConfig.h bevat de standaardmapping.
+// Gebruik ARDI32_GPIOxx-labels in plaats van kale cijfers, zodat de mapping controleerbaar blijft.
+// #define ARDUINO_UNO_SHIELD_PIN_D0   ARDI32_GPIO18  // D0  / RX      / GPIO18
+// #define ARDUINO_UNO_SHIELD_PIN_D1   ARDI32_GPIO17  // D1  / TX      / GPIO17
+// #define ARDUINO_UNO_SHIELD_PIN_D2   ARDI32_GPIO1   // D2  / CS_2    / GPIO1
+// #define ARDUINO_UNO_SHIELD_PIN_D3   ARDI32_GPIO42  // D3  / CLK_2   / GPIO42
+// #define ARDUINO_UNO_SHIELD_PIN_D4   ARDI32_GPIO41  // D4  / MISO_2  / GPIO41
+// #define ARDUINO_UNO_SHIELD_PIN_D5   ARDI32_GPIO2   // D5  / MOSI_2  / GPIO2
+// #define ARDUINO_UNO_SHIELD_PIN_D6   ARDI32_GPIO9   // D6  / GPIO9   / GPIO9
+// #define ARDUINO_UNO_SHIELD_PIN_D7   ARDI32_GPIO14  // D7  / GPIO14  / GPIO14
+// #define ARDUINO_UNO_SHIELD_PIN_D8   ARDI32_GPIO47  // D8  / GPIO47  / GPIO47
+// #define ARDUINO_UNO_SHIELD_PIN_D9   ARDI32_GPIO21  // D9  / GPIO21  / GPIO21
+// #define ARDUINO_UNO_SHIELD_PIN_D10  ARDI32_GPIO10  // D10 / CS_1    / GPIO10
+// #define ARDUINO_UNO_SHIELD_PIN_D11  ARDI32_GPIO11  // D11 / MOSI_1  / GPIO11
+// #define ARDUINO_UNO_SHIELD_PIN_D12  ARDI32_GPIO13  // D12 / MISO_1  / GPIO13
+// #define ARDUINO_UNO_SHIELD_PIN_D13  ARDI32_GPIO12  // D13 / CLK_1   / GPIO12
+// #define ARDUINO_UNO_SHIELD_PIN_A0   ARDI32_GPIO4   // A0  / A0      / GPIO4
+// #define ARDUINO_UNO_SHIELD_PIN_A1   ARDI32_GPIO5   // A1  / A3      / GPIO5
+// #define ARDUINO_UNO_SHIELD_PIN_A2   ARDI32_GPIO6   // A2  / A6      / GPIO6
+// #define ARDUINO_UNO_SHIELD_PIN_A3   ARDI32_GPIO7   // A3  / A7      / GPIO7
+// #define ARDUINO_UNO_SHIELD_PIN_A4   ARDI32_GPIO15  // A4  / A4      / GPIO15
+// #define ARDUINO_UNO_SHIELD_PIN_A5   ARDI32_GPIO16  // A5  / A5      / GPIO16
+// #define ARDUINO_UNO_SHIELD_PIN_SDA  ARDI32_GPIO38  // SDA / SDA     / GPIO38
+// #define ARDUINO_UNO_SHIELD_PIN_SCL  ARDI32_GPIO39  // SCL / SCL     / GPIO39
+// #define ARDUINO_UNO_SHIELD_PIN_SS   ARDUINO_UNO_SHIELD_PIN_D10
+// #define ARDUINO_UNO_SHIELD_PIN_MOSI ARDUINO_UNO_SHIELD_PIN_D11
+// #define ARDUINO_UNO_SHIELD_PIN_MISO ARDUINO_UNO_SHIELD_PIN_D12
+// #define ARDUINO_UNO_SHIELD_PIN_SCK  ARDUINO_UNO_SHIELD_PIN_D13
 
-// Definieer de pinnen voor het 1x4 keypad
+// Backward compatibility: bestaande configuraties met PIN_TOETS_1..4 blijven ondersteund.
+// Gebruik voor nieuwe INPUT_TYPE_DIGITAL-configuraties bij voorkeur de keypad-specifieke KEYPAD_PIN_...-mapping hierboven.
+// Wanneer PIN_TOETS_1..4 expliciet gedefinieerd worden, hebben ze voorrang op de DIGITAL-defaultmapping.
 // #define PIN_TOETS_1 ARDUINO_UNO_SHIELD_PIN_D3
 // #define PIN_TOETS_2 ARDUINO_UNO_SHIELD_PIN_D2
 // #define PIN_TOETS_3 ARDUINO_UNO_SHIELD_PIN_D5
@@ -275,6 +334,11 @@
 #ifndef INPUT_DEBOUNCE_MS
 // #define INPUT_DEBOUNCE_MS 25UL
 #endif
+
+// Schakelt ControleerMappingVolledigheid() in. 
+// Enkel bedoeld voor tijdens het testen: meldt via Serial welke opschriften van het gecompileerde KEYPAD_TYPE/HX1838_TOETSENINDELING ontbreken in een mapping die je zelf als argument meegeeft. 
+// Kost extra flashgeheugen en Serial-afhankelijkheid, standaard uit. Niet aanraden om aan te laten in productiecode.
+// #define INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
 
 #ifndef HX1838_KALIBRATIE_TOETS_PAUZE_MS
 // #define HX1838_KALIBRATIE_TOETS_PAUZE_MS 300UL
@@ -357,6 +421,27 @@
 #ifndef PIXEL_SCREEN_BACKGROUND_COLOR
 // #define PIXEL_SCREEN_BACKGROUND_COLOR 0x0000
 #endif
+#ifndef PIXEL_SCREEN_KLEUR_FATAL
+// #define PIXEL_SCREEN_KLEUR_FATAL      0xF800
+#endif
+#ifndef PIXEL_SCREEN_KLEUR_ERROR
+// #define PIXEL_SCREEN_KLEUR_ERROR      0xFC00
+#endif
+#ifndef PIXEL_SCREEN_KLEUR_WARNING
+// #define PIXEL_SCREEN_KLEUR_WARNING    0xFFE0
+#endif
+#ifndef PIXEL_SCREEN_KLEUR_INFO
+// #define PIXEL_SCREEN_KLEUR_INFO       0x07FF
+#endif
+#ifndef PIXEL_SCREEN_KLEUR_CRITICAL
+// #define PIXEL_SCREEN_KLEUR_CRITICAL   0xF81F
+#endif
+#ifndef PIXEL_SCREEN_KLEUR_ABORT
+// #define PIXEL_SCREEN_KLEUR_ABORT      0x780F
+#endif
+#ifndef PIXEL_SCREEN_KLEUR_PANIC
+// #define PIXEL_SCREEN_KLEUR_PANIC      0xFFFF
+#endif
 
 // ============================================================================
 // BOARD_VERSION
@@ -368,6 +453,14 @@
 // - Aanvullend ondersteund (experimenteel), geen aparte hardwarevalidatiestatus vastgelegd: BOARD_ARDI32, BOARD_CYTRON_MAKER_UNO_RP2040, BOARD_NUCLEO_F401RE.
 #ifndef BOARD_VERSION
 // #define BOARD_VERSION BOARD_UNO_R3   // wissel dit om van bord te wisselen
+#endif
+
+// BOARD_ID: generieke, per-fysiek-bord-identiteit. Wijzig per fysiek bord,
+// bijvoorbeeld wanneer meerdere borden met elkaar moeten communiceren en
+// elkaar moeten kunnen onderscheiden. Nog zonder functioneel effect zolang
+// er geen bord-overschrijdende communicatie gebruikt wordt.
+#ifndef BOARD_ID
+// #define BOARD_ID 1   // wijzig dit per fysiek bord
 #endif
 
 // ============================================================================

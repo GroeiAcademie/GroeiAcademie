@@ -28,3 +28,6 @@ src/Language/UserLibrary_*.h
 
 # Templates moeten WEL mee
 !src/Language/UserLibrary_*_template.h
+
+# Privé-bestanden niet meenemen
+/prive/

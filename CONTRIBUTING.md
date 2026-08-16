@@ -26,6 +26,8 @@ Hardwaretests en meetresultaten delen: via een GitHub Discussion, een Pull Reque
 
 Grote wijzigingen aan de architectuur, publieke API, hardwareondersteuning of projectstructuur: eerst voorstellen via een GitHub Discussion en pas uitvoeren na akkoord van de maintainers. Voor rechtstreeks overleg met de maintainers kun je contact opnemen via `support@groeiacademie.be`.
 
+Loopt er een experimentele architecturale pilot waarover we graag meedenken? Zie `docs/Pilots/` voor een overzicht, met per pilot een korte aankondiging en de openstaande vragen waarover feedback welkom is.
+
 ### Hardware
 
 Bijdragen aan fysieke onderdelen, sensoren, Arduino Uno R3-vormfactorborden, schermen, connectoren, behuizingen en testopstellingen. Draagt de bijdrage een sensor of module met elektroden op de huid bij (GSR, ECG, EMG en gelijkaardig)? Lees dan eerst [docs/Toepassingsgebieden/VEILIGHEID.md](docs/Toepassingsgebieden/VEILIGHEID.md).

@@ -18,23 +18,46 @@ De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata 
 
 ## Vereiste Arduino IDE-boardselecties
 
-| Ondersteund board | Boards Manager package / core | Exacte boardselectie in Arduino IDE | Pinstrategie |
-|---|---|---|---|
-| Arduino Uno R3 | `Arduino AVR Boards by Arduino` | `Arduino Uno` | standaardmapping van de boardcore |
-| Arduino UNO R4 Minima | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 Minima` | standaardmapping van de boardcore |
-| Arduino UNO R4 WiFi | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 WiFi` | standaardmapping van de boardcore |
-| WEMOS D1 R32 | `esp32 by Espressif Systems` | `WEMOS D1 R32` | specifieke `d1_uno32`-mapping van de Espressif-core |
-| TTGO D1 R32 | `esp32 by Espressif Systems` | `WEMOS D1 R32` binnen het huidige ondersteunde profiel | dezelfde D1-R32-coremapping; fysieke hardwarevalidatie blijft afzonderlijk |
-| Cytron Maker Uno RP2040 | `Raspberry Pi Pico/RP2040 by Earle F. Philhower, III` | `Cytron Maker Uno RP2040` | standaardmapping van de specifieke Cytron-boardvariant |
-| STM32 Nucleo-F401RE | `STM32 MCU based boards by STMicroelectronics` | `Nucleo-64` met part number `NUCLEO_F401RE` | standaardmapping van STM32duino |
-| SB Components Ardi-32 | `esp32 by Espressif Systems` | `ESP32S3 Dev Module` | de generieke boardselectie kent de fysieke Arduino-Uno-header van de Ardi-32 niet; `BOARD_VERSION BOARD_ARDI32` moet daarom via `UserConfig.h` expliciet gekozen worden en de eigen Ardi-32-headerpinmapping moet afzonderlijk vastgelegd worden |
+| Boardnaam | FQBN | Platform-ID | Boards Manager package / core | Exacte boardselectie in Arduino IDE | Pinstrategie |
+|---|---|---|---|---|---|
+| Arduino UNO R3 | `arduino:avr:uno` | `arduino:avr` | `Arduino AVR Boards by Arduino` | `Arduino Uno` | standaardmapping van de boardcore |
+| Arduino UNO R4 Minima | `arduino:renesas_uno:minima` | `arduino:renesas_uno` | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 Minima` | standaardmapping van de boardcore |
+| Arduino UNO R4 WiFi | `arduino:renesas_uno:unor4wifi` | `arduino:renesas_uno` | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 WiFi` | standaardmapping van de boardcore |
+| WeMos D1 R32 | `esp32:esp32:d1_uno32` | `esp32:esp32` | `esp32 by Espressif Systems` | `WEMOS D1 R32` | specifieke `d1_uno32`-mapping van de Espressif-core |
+| TTGO D1 R32 | `esp32:esp32:d1_uno32` | `esp32:esp32` | `esp32 by Espressif Systems` | `WEMOS D1 R32` binnen het huidige ondersteunde profiel | dezelfde D1-R32-coremapping; fysieke hardwarevalidatie blijft afzonderlijk |
+| Cytron Maker Uno RP2040 | `rp2040:rp2040:cytron_maker_uno_rp2040` | `rp2040:rp2040` | `Raspberry Pi Pico/RP2040/RP2350 by Earle F. Philhower, III` | `Cytron Maker Uno RP2040` | standaardmapping van de specifieke Cytron-boardvariant |
+| STMicroelectronics Nucleo-F401RE | `STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE` | `STMicroelectronics:stm32` | `STM32 MCU based boards by STMicroelectronics` | `Nucleo-64` met part number `NUCLEO_F401RE` | standaardmapping van STM32duino |
+| SB Components Ardi32 | `esp32:esp32:esp32s3` | `esp32:esp32` | `esp32 by Espressif Systems` | `ESP32S3 Dev Module` | de generieke boardselectie kent de fysieke Arduino-Uno-header van de Ardi32 niet; `BOARD_VERSION BOARD_ARDI32` moet daarom via `UserConfig.h` expliciet gekozen worden en de eigen Ardi32-headerpinmapping moet afzonderlijk vastgelegd worden |
+
+### Referentiebeelden boards
+
+| Boardnaam | Referentiebeeld(en) |
+|---|---|
+| Arduino UNO R3 | [Arduino UNO R3.jpg](Systeem/Screenshots/Arduino%20UNO%20R3.jpg) |
+| Arduino UNO R4 Minima | [Arduino UNO R4 Minima.jpg](Systeem/Screenshots/Arduino%20UNO%20R4%20Minima.jpg) |
+| Arduino UNO R4 WiFi | [Arduino UNO R4 WiFi.jpg](Systeem/Screenshots/Arduino%20UNO%20R4%20WiFi.jpg) |
+| WeMos D1 R32 | [voorkant](Systeem/Screenshots/WeMos%20D1%20R32-voorkant.png) · [achterkant](Systeem/Screenshots/WeMos%20D1%20R32-achterkant.jpg) |
+| Cytron Maker Uno RP2040 | [voorkant](Systeem/Screenshots/Cytron%20Maker%20Uno%20RP2040-voorkant.jpg) · [achterkant](Systeem/Screenshots/Cytron%20Maker%20Uno%20RP2040-achterkant.jpg) |
+| STMicroelectronics Nucleo-F401RE | [voorkant](Systeem/Screenshots/STMicroelectronics%20Nucleo-F401RE-voorkant.webp) |
+| SB Components Ardi32 | [voorkant](Systeem/Screenshots/SB%20Components%20Ardi32.jpeg) · [achterkant](Systeem/Screenshots/SB%20Components%20Ardi32-achterkant.jpg) |
+
+### Additional Boards Manager URLs voor third-party boardplatforms
+
+De standaard Arduino- en Espressif-platforms worden via de gekende package-indexen van Arduino IDE/Arduino CLI beheerd. Voor de twee third-party boardplatforms hieronder gebruikt `extras/TestBoardplatformsDependency.cmd` expliciet deze aanvullende package-indexen wanneer automatische installatie nodig is:
+
+| Boardplatform | Platform-ID | Additional Boards Manager URL |
+|---|---|---|
+| Cytron Maker Uno RP2040 | `rp2040:rp2040` | `https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json` |
+| STMicroelectronics Nucleo-F401RE | `STMicroelectronics:stm32` | `https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json` |
+
+`extras/TestBoardplatformsDependency.cmd` controleert de geïnstalleerde cores via `arduino-cli core list`. Wanneer een van deze twee third-party platforms ontbreekt en automatische installatie gekozen wordt, voegt het script eerst de overeenkomstige URL toe via `arduino-cli config add board_manager.additional_urls`, werkt daarna de package-index bij met `arduino-cli core update-index` en installeert vervolgens het platform met `arduino-cli core install`.
 
 Voor WEMOS D1 R32 gebruikt de GroeiAcademie FrameWork-library de door Espressif geleverde `D0` tot en met `D13`-namen. De core vertaalt deze zelf naar GPIO3, GPIO1, GPIO26, GPIO25, GPIO17, GPIO16, GPIO27, GPIO14, GPIO12, GPIO13, GPIO5, GPIO23, GPIO19 en GPIO18. `A0..A5` zijn respectievelijk GPIO2, GPIO4, GPIO35, GPIO34, GPIO36 en GPIO39. De afzonderlijke I2C-functies zijn `SDA=GPIO21` en `SCL=GPIO22`; `A4` en `A5` zijn op dit board dus niet de I2C-pinnen.
 
 
 ### SB Components Ardi-32 — eigen Arduino-Uno-headermapping
 
-SB Components schrijft voor om in Arduino IDE de boardselectie `ESP32S3 Dev Module` uit `esp32 by Espressif Systems` te gebruiken. Die generieke boardvariant kent de fysieke Arduino-Uno-header van de Ardi-32 niet. Daarom gebruikt `SystemConfig.h` bij `BOARD_VERSION == BOARD_ARDI32` een eigen mapping.
+SB Components schrijft voor om in Arduino IDE de boardselectie `ESP32S3 Dev Module` uit `esp32 by Espressif Systems` te gebruiken. Die generieke boardvariant kent de fysieke Arduino-Uno-header van de Ardi-32 niet. `SystemConfig.h` bevat daarom bij `BOARD_VERSION == BOARD_ARDI32` een afzonderlijke Ardi32-configuratietak, maar de volledige Arduino-Uno-headermapping daarin blijft voorlopig uitgeschakeld totdat elke lijn rechtstreeks aan de officiële SB Components-hardwarebron is geverifieerd.
 
 | Arduino-header | ESP32-S3 GPIO |
 |---|---:|
@@ -167,4 +190,12 @@ De officiële SB Components-documentatie bevestigt voor de onboard randapparatuu
 - onboard buzzer: GPIO40
 
 Deze waarden bevestigen niet automatisch de Arduino-Uno-header D0-D13/A0-A5-mapping. De volledige headermapping blijft daarom voorlopig als uitgeschakeld in `SystemConfig.h` totdat elke lijn rechtstreeks aan de officiële SB Components-hardwarebron is geverifieerd.
+
+### Acceptance-validatie SB Components Ardi32
+
+De acceptance-compilaties voor `SB Components Ardi32` gebruiken `esp32:esp32:esp32s3` met `BOARD_VERSION=BOARD_ARDI32`.
+
+Zolang de Arduino-Uno-headermapping voor `BOARD_ARDI32` in `SystemConfig.h` bewust uitgeschakeld blijft, kunnen acceptance-tests die gebruikmaken van D0-D13, A0-A5, SDA/SCL of andere Arduino-Uno-headerpinnen niet succesvol compileren.
+
+Deze acceptance-fouten zijn daarom een bekende tijdelijke beperking en hebben geen release-impact. Zij worden pas opnieuw als volledig valide beschouwd nadat de Ardi32-headermapping rechtstreeks aan de officiële SB Components-hardwarebron is bevestigd en geactiveerd.
 

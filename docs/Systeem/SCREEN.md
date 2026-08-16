@@ -88,6 +88,26 @@ TYPE_GRAPHICS
 TYPE_VIDEO
 ```
 
+### Kleuren per type (PixelScreen)
+
+`SystemConfig.h` definieert vier `#ifndef`-beschermde RGB565-kleuren, bedoeld om in een zelfgeschreven PixelScreen-callback per `ScreenData`-type een andere tekstkleur te tonen:
+
+```cpp
+PIXEL_SCREEN_KLEUR_FATAL    // 0xF800, rood
+PIXEL_SCREEN_KLEUR_ERROR    // 0xFC00, oranje
+PIXEL_SCREEN_KLEUR_WARNING  // 0xFFE0, geel
+PIXEL_SCREEN_KLEUR_INFO     // 0x07FF, cyaan
+PIXEL_SCREEN_KLEUR_CRITICAL // 0xF81F, magenta
+PIXEL_SCREEN_KLEUR_ABORT    // 0x780F, paars
+PIXEL_SCREEN_KLEUR_PANIC    // 0xFFFF, wit
+```
+
+Ruwe RGB565-hexwaarden, niet gebonden aan een specifieke driverbibliotheek (zoals `ST77XX_RED`), zodat ze werken ongeacht welk PixelScreen-driver gebruikt wordt. `examples/Systeem/Screen/Callback_PixelScreen/Callback_PixelScreen.ino` toont hoe dit in de callback toegepast wordt via een `switch` op `screenData`.
+
+### TYPE_FATAL, TYPE_PANIC, TYPE_ABORT, TYPE_CRITICAL: gegarandeerde Serial-terugval
+
+Wanneer `PrintToScreen()` met een van deze vier types aangeroepen wordt terwijl geen enkel scherm en geen enkele callback beschikbaar is, forceert `PrintToScreenIntern()` `Serial.begin(115200)` en toont de melding daar, naar analogie van de bestaande `FATAL: CSxxx`/`PSxxx`-terugval (zie `SCREEN_FOUTCODES.md`). Dit is een bewuste uitzondering: enkel voor deze vier types, en enkel onder deze specifieke voorwaarde. Is er wél een scherm of callback actief, dan lopen ze gewoon via het normale pad hierboven.
+
 ## Callbacktypen
 
 Character en Pixel gebruiken afzonderlijke callbacktypen. De Pixel-callback ontvangt als eerste argument ook `ScreenData`.

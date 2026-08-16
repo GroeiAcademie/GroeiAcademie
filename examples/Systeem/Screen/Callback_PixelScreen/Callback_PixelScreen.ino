@@ -22,13 +22,25 @@ Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
 void MijnPixelScreen(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) {
   if (screenData == ScreenData::TYPE_NONE) return;
 
+  uint16_t kleur;
+  switch (screenData) {
+    case ScreenData::TYPE_FATAL:    kleur = PIXEL_SCREEN_KLEUR_FATAL;    break;
+    case ScreenData::TYPE_ERROR:    kleur = PIXEL_SCREEN_KLEUR_ERROR;    break;
+    case ScreenData::TYPE_WARNING:  kleur = PIXEL_SCREEN_KLEUR_WARNING;  break;
+    case ScreenData::TYPE_INFO:     kleur = PIXEL_SCREEN_KLEUR_INFO;     break;
+    case ScreenData::TYPE_CRITICAL: kleur = PIXEL_SCREEN_KLEUR_CRITICAL; break;
+    case ScreenData::TYPE_ABORT:    kleur = PIXEL_SCREEN_KLEUR_ABORT;    break;
+    case ScreenData::TYPE_PANIC:    kleur = PIXEL_SCREEN_KLEUR_PANIC;    break;
+    default:                        kleur = PIXEL_SCREEN_TEXT_COLOR;     break;
+  }
+
   if (eersteRegel != "" || tweedeRegel != "") {
     String eersteRegelLC = eersteRegel; eersteRegelLC.toLowerCase();
     String tweedeRegelLC = tweedeRegel; tweedeRegelLC.toLowerCase();
 
     pixelScreen.fillScreen(PIXEL_SCREEN_BACKGROUND_COLOR);
     pixelScreen.setTextSize(PIXEL_SCREEN_TEXT_SIZE);
-    pixelScreen.setTextColor(PIXEL_SCREEN_TEXT_COLOR, PIXEL_SCREEN_BACKGROUND_COLOR);
+    pixelScreen.setTextColor(kleur, PIXEL_SCREEN_BACKGROUND_COLOR);
     pixelScreen.setCursor(0, 0); pixelScreen.print(eersteRegelLC);
     pixelScreen.setCursor(0, 8 * PIXEL_SCREEN_TEXT_SIZE); pixelScreen.print(tweedeRegelLC);
   }

@@ -32,6 +32,7 @@
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include "../GedeeldeBus/GedeeldeBus.h"
 
 #if (CHARACTERSCREEN_I2C_ADRES_MODUS == 2)
 #include <new>
@@ -64,11 +65,8 @@ bool CharacterScreenConfigureren(bool opnieuwProberen) {
   characterScreenStatus.gecontroleerd = true;
   characterScreenStatus.foutmeldingWeergegeven = false;
 
-#if BOARD_VERSION == BOARD_ARDI32
-  Wire.begin(ARDUINO_UNO_SHIELD_PIN_SDA, ARDUINO_UNO_SHIELD_PIN_SCL);
-#else
-  Wire.begin();
-#endif
+  // businitialisatie loopt nu via GedeeldeBus (Systeem/GedeeldeBus/),gedragsbehoudend t.o.v. de vorige, hier lokaal herhaalde ARDI32-logica.
+  GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
 
 #if (CHARACTERSCREEN_I2C_ADRES_MODUS == 0)
   // Geen scan: enkel de handdruk-check op het geconfigureerde I2C_ADRES.
@@ -288,6 +286,8 @@ static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
   }
 #endif
 
+  // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
+  // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
   Serial.begin(115200);
   Serial.println(foutmelding);
   Serial.println(FATAL_ZOEK_OP);
@@ -316,6 +316,8 @@ static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
   }
 #endif
 
+  // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
+  // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
   Serial.begin(115200);
   Serial.println(foutmelding);
   Serial.println(FATAL_ZOEK_OP);
@@ -376,6 +378,24 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   const bool pixelScreenGeselecteerd = !CallbackScreenTypePixel && screenData == ScreenData::TYPE_NONE;
   const bool pixelScreenActief = pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief;
+
+  // Zelfde garantie als CharacterScreenFoutmeldingWeergeven/PixelScreenFoutmeldingWeergeven (CS000/PS000): een TYPE_FATAL/TYPE_PANIC/TYPE_ABORT/TYPE_CRITICAL-melding mag nooit stil verdwijnen. 
+  // Enkel van toepassing wanneer geen enkel scherm en geen enkele callback beschikbaar is; is er wel een scherm of callback, 
+  // dan loopt dit gewoon via het normale, verdere pad hieronder.
+  // Bewuste uitzondering: net als bij CS000/PS000 hierboven, niet binnen DEBUG of SCREEN_TYPE_SERIAL, want dit ís de garantie zelf.
+  if (screenData == ScreenData::TYPE_FATAL || screenData == ScreenData::TYPE_PANIC || screenData == ScreenData::TYPE_ABORT || screenData == ScreenData::TYPE_CRITICAL) {
+    bool geenEnkelScreenBeschikbaar = !CallbackScreenTypePixel && !pixelScreenActief;
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+    geenEnkelScreenBeschikbaar = geenEnkelScreenBeschikbaar && !CallbackScreenTypeCharacter && !characterScreenActief;
+#endif
+    if (geenEnkelScreenBeschikbaar) {
+      Serial.begin(115200);
+      if (eersteRegel != "") Serial.println(eersteRegel);
+      if (tweedeRegel != "") Serial.println(tweedeRegel);
+      if (delayTime) delay(delayTime);
+      return;
+    }
+  }
 #endif
 
   // --------------------------------------------------------------------------

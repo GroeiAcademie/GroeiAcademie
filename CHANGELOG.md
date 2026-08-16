@@ -6,6 +6,16 @@ De versienummers volgen de versie in `library.properties`.
 
 ## 1.1.0
 
+### Gedeelde bus-eigendom (voor release toegevoegd, geen API-wijziging)
+
+- nieuw `Systeem/GedeeldeBus`-bestand toegevoegd: neutrale, gedeelde Wire(I2C)/SPI-initialisatie, onafhankelijk van Input/Screen/Stimulus;
+- `Screen.cpp`, `Input.cpp` (PCF8574-tak) en `Stimulus.cpp` (`InitialiseerADS1115()`) riepen voorheen elk apart `Wire.begin()` aan, met identieke maar afzonderlijk onderhouden board-specifieke logica (ARDI32 gebruikt aparte SDA/SCL-pinnen); dit is nu gecentraliseerd via `GedeeldeBusInitialiseren()`, gedragsbehoudend;
+- concreet risico verholpen: bij gelijktijdig gebruik van bijvoorbeeld Input met PCF8574 én een I2C-scherm was er voorheen geen garantie op conflictvrije businitialisatie;
+- ARDI32-pinmapping (`ARDI32_GPIOxx`-constanten in `SystemConfig.h`) geverifieerd tegen het officiële Ardi-32-schema (SB Components), niet langer uitgecommentarieerde, onbevestigde `TODO`-waarden;
+- `BOARD_ID` toegevoegd aan `SystemConfig.h`, met voorbeeldregel in `UserConfig_template.h`: generieke, per-fysiek-bord-identiteit, vooruitziend, nog zonder functioneel effect in deze versie;
+- `docs/Pilots/` toegevoegd, met een aankondiging van de experimentele v1.2.0-Sensoren-kernel-pilot en een oproep aan bijdragers om mee na te denken over de nog openstaande architecturale vragen;
+- `CONTRIBUTING.md`: korte verwijzing naar `docs/Pilots/` toegevoegd.
+
 ### Input-laag
 
 - nieuwe gedeelde `System/Input`-laag toegevoegd naast Screen;
@@ -16,8 +26,11 @@ De versienummers volgen de versie in `library.properties`.
 - publieke `OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1)` voorbereid; in v1.1.0 is `MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN` nog `1` en geeft een andere waarde `NIET_GEIMPLEMENTEERD`;
 - functiekoppeling via `OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag()` toegevoegd;
 - `MappingTussenToetsaanslagEnUitTeVoerenFunctie` koppelt een toetsopschrift rechtstreeks aan een functiepointer; het eerder overbodige tekstveld voor de functienaam is niet opgenomen in de definitieve v1.1.0-API;
-- `ToonMenuEnUitVoerenFunctieVolgensMappingMetToetsAanslag()` toegevoegd: één vaste mapping kan zonder mappingparameter gebruikt worden, terwijl meerdere menu's dezelfde publieke functienaam gebruiken door de gewenste mapping-array mee te geven; de arraylengte wordt daarbij compile-time afgeleid;
+- `UitVoerenFunctieVolgensMappingMetToetsAanslag()` toegevoegd: één vaste mapping kan zonder mappingparameter gebruikt worden, terwijl meerdere menu's dezelfde publieke functienaam gebruiken door de gewenste mapping-array mee te geven; de arraylengte wordt daarbij compile-time afgeleid;
+- `InputFunctieMetArgumenten`/`MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten` toegevoegd: volledig apart, tweede type naast `InputFunctie`/`MappingTussenToetsaanslagEnUitTeVoerenFunctie`, met een `void* argumenten`-veld dat aan de gekoppelde functie wordt doorgegeven; raakt het eerste type op geen enkele manier;
+- `KEYPAD_TYPE_USER_DEFINED_DIRECT`/`KEYPAD_TYPE_USER_DEFINED_MATRIX` toegevoegd, experimenteel, enkel bij `INPUT_TYPE_PCF8574`: laat toe een nieuw, fysiek keypad te testen zonder de bibliotheek zelf aan te passen, door pinnen, `KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED` en de opschriftkoppeling volledig in `UserConfig.h` in te stellen; ontbrekende, vereiste instellingen geven een leesbare `#error`-tekst tijdens het compileren;
 - `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4` is de standaard keypadindeling wanneer geen `KEYPAD_TYPE` is opgegeven;
+- DIGITAL-pinmapping per `KEYPAD_TYPE` toegevoegd: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden D3,D2,D5,D4; bestaande `PIN_TOETS_1..4` blijven als backward-compatibilitylaag ondersteund;
 - PCF8574-backend toegevoegd met canoniek I2C-adres `I2C_ADDRESS_PCF8574`; referentie-/testmodule OTRONIC OT8980;
 - HX1838-backend toegevoegd met configureerbare 12-, 17- en 21-toetsenindelingen en configureerbare codebron via `HX1838_BRON_CODES`;
 - Input-gerelateerde Arduino IDE-keywords en dependencies `PCF8574 (>=0.4.0)` en `IRremote` toegevoegd.
@@ -26,7 +39,7 @@ De versienummers volgen de versie in `library.properties`.
 
 - `TestLibraryNieuwInput.cmd` toegevoegd voor geldige Input-configuraties en de Input-testvoorbeelden;
 - `TestLibraryNieuwInputOngeldig.cmd` toegevoegd voor configuraties die bewust door compile-time validatie geweigerd moeten worden;
-- `TestLibraryAlles.cmd` toegevoegd als centrale ingang: eerst de nieuwe Input-tests van deze release, dan de volledige, reeds gereleasede basis (`TestLibraryGereleased.cmd`), met één gecombineerd logbestand;
+- `TestLibraryAllesEnMaakStatusReport.cmd` toegevoegd als centrale ingang voor de vier individuele testcycli (`TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd` en `TestLibraryNieuwOngeldig.cmd`); `TestLibraryStatusReport.cmd` maakt daaruit het officiële `TestLibraryStatusReport.txt`;
 - officiële boards en experimentele acceptatieboards worden afzonderlijk gerapporteerd; acceptatieresultaten beïnvloeden het officiële release-PASS/FAIL niet.
 
 ### Boards en hardware

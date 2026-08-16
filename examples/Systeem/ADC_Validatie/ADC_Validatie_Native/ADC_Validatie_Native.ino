@@ -28,10 +28,13 @@
 #define ADC_BACKEND_ADS1115 1
 #define ADC_BACKEND ADC_BACKEND_NATIVE
 
-#define BOARD_UNO_R3        0
-#define BOARD_UNO_R4_MINIMA 1
-#define BOARD_UNO_R4_WIFI   2
-#define BOARD_ESP32_UNO     3
+#define BOARD_UNO_R3                     0
+#define BOARD_UNO_R4_MINIMA              1
+#define BOARD_UNO_R4_WIFI                2
+#define BOARD_ARDI32                     3
+#define BOARD_CYTRON_MAKER_UNO_RP2040    4
+#define BOARD_ESP32_UNO                  5
+#define BOARD_NUCLEO_F401RE              6
 
 #ifndef BOARD_VERSION
   #define BOARD_VERSION BOARD_UNO_R3
@@ -41,8 +44,14 @@
   #define ADC_BITS 10
 #elif (BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI)
   #define ADC_BITS 14
+#elif BOARD_VERSION == BOARD_ARDI32
+  #define ADC_BITS 12      // ESP32-S3 Arduino core: analogRead() standaard 12-bit
 #elif BOARD_VERSION == BOARD_ESP32_UNO
-  #define ADC_BITS 12
+  #define ADC_BITS 12      // zie kanttekening in docs/Configuratie/SystemConfig.md
+#elif BOARD_VERSION == BOARD_CYTRON_MAKER_UNO_RP2040
+  #define ADC_BITS 10      // Earle Philhower RP2040 core: analogReadResolution() standaard 10-bit
+#elif BOARD_VERSION == BOARD_NUCLEO_F401RE
+  #define ADC_BITS 10      // STM32duino: analogRead() standaard 10-bit voor Arduino-compatibiliteit
 #else
   #error Selecteer een geldige BOARD_VERSION.
 #endif

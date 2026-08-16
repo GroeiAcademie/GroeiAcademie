@@ -9,4 +9,4 @@ Bronbestand: [`../../src/Configuratie/ExamplesConfig.h`](../../src/Configuratie/
 #include <Configuratie/ExamplesConfig.h>
 ```
 
-De header bevat onder meer `SERIAL_BAUDRATE`, de voorbeeldwachttijden, de leestijden, de aantallen sensoren per testalgoritme en de twee instortende scoringsvormen. Hardwaredefaults zoals `PIN_TOETS_1` tot en met `PIN_TOETS_4` blijven in `SystemConfig.h` en kunnen via `UserConfig.h` worden overschreven.
+De header bevat onder meer `SERIAL_BAUDRATE`, de voorbeeldwachttijden, de leestijden, de aantallen sensoren per testalgoritme en de twee instortende scoringsvormen. De DIGITAL-keypadmapping blijft in `SystemConfig.h`: nieuwe configuraties gebruiken de keypad-specifieke `KEYPAD_PIN_...`-namen; `PIN_TOETS_1` tot en met `PIN_TOETS_4` blijven als backward-compatibilitylaag via `UserConfig.h` overschrijfbaar.

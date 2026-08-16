@@ -41,7 +41,7 @@ Adafruit_ADS1115 ads;
 
 const int sensorPin[STIMULUS_AANTAL_KANALEN] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
 bool ads1115Aanwezig = false;
-bool metingAfgerond = false;
+bool metingAfgerond  = false;
 
 #ifndef PRINTTOSCREEN_BESTAAT_AL
 void PrintToScreen(const char* regel1, const char* regel2) {
