@@ -37,9 +37,9 @@ De versienummers volgen de versie in `library.properties`.
 
 ### Input-tests
 
-- `TestLibraryNieuwInput.cmd` toegevoegd voor geldige Input-configuraties en de Input-testvoorbeelden;
-- `TestLibraryNieuwInputOngeldig.cmd` toegevoegd voor configuraties die bewust door compile-time validatie geweigerd moeten worden;
-- `TestLibraryAllesEnMaakStatusReport.cmd` toegevoegd als centrale ingang voor de vier individuele testcycli (`TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd` en `TestLibraryNieuwOngeldig.cmd`); `TestLibraryStatusReport.cmd` maakt daaruit het officiële `TestLibraryStatusReport.txt`;
+- interne maintainer-tests toegevoegd voor geldige Input-configuraties en de Input-testvoorbeelden;
+- interne negatieve tests toegevoegd voor configuraties die bewust door compile-time validatie geweigerd moeten worden;
+- de vier compilecycli worden afzonderlijk uitgevoerd en hun logs worden daarna samengevoegd tot één statusrapport; de gedeelde Windows-testscripts en `LokalePaden_template.cmd` worden mee gepubliceerd, alleen het machinespecifieke `extras/LokalePaden.cmd` blijft via `.gitignore` lokaal;
 - officiële boards en experimentele acceptatieboards worden afzonderlijk gerapporteerd; acceptatieresultaten beïnvloeden het officiële release-PASS/FAIL niet.
 
 ### Boards en hardware
@@ -47,6 +47,17 @@ De versienummers volgen de versie in `library.properties`.
 - boardindeling uitgebreid met `BOARD_ARDI32`, `BOARD_CYTRON_MAKER_UNO_RP2040` en `BOARD_NUCLEO_F401RE` als experimentele v1.1.0-ondersteuning;
 - het Stimulus Shield v1.1.0-schema en de bijhorende documentatie bevatten de PCF8574-uitbreiding naast het bestaande directe keymatrixpad;
 - de nieuwe boards blijven in acceptatiefase tot hun fysieke hardwarevalidatie is afgerond.
+
+### Correcties vóór publicatie
+
+- uitgebreide non-blocking Input verwerkt de debounce-/stabiele toestand nu ook bij `wachten=false`; de timeouttimer wordt in `InputConfigureren()` gestart en `TIMEOUT_GEEN_INVOER` blijft ook via `OpvragenHuidigeToetsAanslagen()` zichtbaar;
+- UserDefined-keypadvoorbeelden vereisen hun volledige `KEYPAD_GENERIEK_...`-configuratie op buildniveau (`UserConfig.h` in normaal gebruik) en gebruiken hun expliciete `mappingTestMenu` correct;
+- generieke UserDefined-keypads krijgen compile-time controles op layoutlengte, pinbereik, dubbele pinnen en overlappende rij-/kolompinnen;
+- runtimefouten van de PCF8574 worden gelatcht en gemeld; HX1838-kalibratie en -verificatie hebben een configureerbare timeout;
+- CharacterScreen-autodetectie slaat het geconfigureerde PCF8574-inputadres over; `SCREEN_TYPE_SERIAL` blijft gekoppeld aan de bestaande `DEBUG`-werking van de Screen-laag;
+- `MeetStimulus()` kan niet meer onbeperkt wachten op een reeds ingedrukte sensor; simultane meting onderscheidt een geforceerd niet-loslaten van normaal loslaten en synchronisatiestatistieken gebruiken alleen daadwerkelijk gestarte sensoren;
+- berekeningen met `MARGE_FACTOR` vallen bij een ongeldige waarde terug op `DEFAULT_MARGE_FACTOR`;
+- de negatieve compiletests verifiëren de verwachte `#error`-tekst, de mappingcontrole gebruikt volledige opschriftlijsten en automatische boarddetectie krijgt afzonderlijke compiledekking.
 
 ### Documentatie
 
@@ -165,7 +176,7 @@ De versienummers volgen de versie in `library.properties`.
 ### Hardware en elektronische schema's
 
 - documentatie voor elektronische schema's per toepassingsgebied toegevoegd;
-- elektronisch schema en pinbezetting voor de ADS1115-variant van Stimulus toegevoegd onder `docs/Toepassingsgebieden/Stimulus/Hardware/`;
+- elektronisch schema en pinbezetting voor de ADS1115-variant van Stimulus toegevoegd onder `docs/Uitbreidingskaarten/Stimulus Shield v1.0.0/`;
 - hardwaredocumentatie voor H5, H6 en H7 toegevoegd;
 - hardwaredocumentatie en schema uitgebreid met TFT-SPI, levelshifter en draadbruggen;
 - een hardwarevalidatieprogramma toegevoegd voor de specifieke UNO R3/R4-shieldhardware;

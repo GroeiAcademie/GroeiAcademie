@@ -62,6 +62,10 @@
 #ifndef _INPUT_HX1838_KALIBRATIE_UITVOEREN
   #define _INPUT_HX1838_KALIBRATIE_UITVOEREN                       "CALIBRATION"
 #endif
+#ifndef _INPUT_HX1838_KALIBRATIE_TIMEOUT
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT                          "TIMEOUT"
+#endif
+
 #ifndef _INPUT_HX1838_KALIBRATIE_OPGESLAGEN
   #define _INPUT_HX1838_KALIBRATIE_OPGESLAGEN                      "SAVED"
 #endif
@@ -137,6 +141,10 @@
 
 #ifndef _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL
   #define _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL           "Calibration complete. Press all keys again to verify."
+#endif
+
+#ifndef _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL                   "IR calibration aborted: timeout."
 #endif
 
 #ifndef _INPUT_HX1838_KALIBRATIE_OPGESLAGEN_SERIAL

@@ -1,0 +1,159 @@
+@echo off
+cls
+if exist "TestLibraryStatusReport.txt" del /q "TestLibraryStatusReport.txt" >nul 2>&1
+:: Controleer of het script al via PowerShell met logging draait.
+if "%~1"=="--logged" goto :MAIN_SCRIPT
+
+:: Start het script opnieuw op, toon de uitvoer én bewaar het afzonderlijke logbestand.
+:: De exitcode van de interne run wordt expliciet teruggegeven aan de aanroeper.
+if exist "TestLibraryNieuwOngeldig.txt" del /q "TestLibraryNieuwOngeldig.txt" >nul 2>&1
+powershell -NoProfile -Command "& { & '%~f0' --logged %* 2>&1 | Tee-Object -FilePath '%~dp0TestLibraryNieuwOngeldig.txt'; exit $LASTEXITCODE }"
+set "SCRIPT_RESULT=%errorlevel%"
+exit /b %SCRIPT_RESULT%
+
+:MAIN_SCRIPT
+setlocal enabledelayedexpansion
+pushd "%~dp0.."
+:: Bepaal welk pad bestaat
+:: Zoek arduino-cli via PATH; anders via extras\LokalePaden.cmd (lokaal, niet gedeeld -
+:: zie extras\LokalePaden_template.cmd om aan te maken). Geen paden van specifieke
+:: personen/machines in dit gedeelde script.
+where arduino-cli >nul 2>&1
+if not errorlevel 1 (
+    for /f "delims=" %%P in ('where arduino-cli') do set "CLI_PATH=%%~dpnP"
+) else if exist "extras\LokalePaden.cmd" (
+    call "extras\LokalePaden.cmd"
+) else (
+    echo arduino-cli niet gevonden via PATH, en extras\LokalePaden.cmd bestaat niet.
+    echo Kopieer extras\LokalePaden_template.cmd naar extras\LokalePaden.cmd en vul
+    echo daarin het pad naar arduino-cli in, of voeg arduino-cli toe aan PATH.
+        if /I not "%~2"=="--no-pause" pause
+        exit /b 1
+)
+
+
+
+goto :MAIN
+
+
+:EXPECT_FAIL
+set /A TESTS+=1
+if not "!TEST_FLAGS:INPUT_TYPE_PCF8574=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574"
+) else if not "!TEST_FLAGS:INPUT_TYPE_DIGITAL=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenDIGITAL"
+) else if not "!TEST_FLAGS:INPUT_TYPE_HX1838=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenHX1838"
+) else (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenDIGITAL"
+)
+"%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS! -DBOARD_VERSION=BOARD_UNO_R3" "%EXAMPLE%" >"%TEMP%\GA_InputInvalid.txt" 2>&1
+set "COMPILE_RESULT=!errorlevel!"
+if "!COMPILE_RESULT!"=="0" (
+    echo [FOUT] !TEST_NAAM! compileerde onverwacht.
+    set /A FAIL+=1
+) else (
+    findstr /C:"!VERWACHTE_FOUT!" "%TEMP%\GA_InputInvalid.txt" >nul
+    if errorlevel 1 (
+        echo [FOUT] !TEST_NAAM! faalde om een andere reden dan verwacht.
+        type "%TEMP%\GA_InputInvalid.txt"
+        set /A FAIL+=1
+    ) else (
+        echo [OK] !TEST_NAAM! correct geweigerd: !VERWACHTE_FOUT!
+        set /A OK+=1
+    )
+)
+del "%TEMP%\GA_InputInvalid.txt" >nul 2>&1
+goto :eof
+
+:MAIN
+set "BOARD=arduino:avr:uno"
+set /A TESTS=0
+set /A OK=0
+set /A FAIL=0
+
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL|INPUT_TYPE_PCF8574"
+set "VERWACHTE_FOUT=Geldige INPUT_KANAAL_CONFIG:"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | INPUT_TYPE_HX1838"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL|INPUT_TYPE_HX1838"
+set "VERWACHTE_FOUT=Geldige INPUT_KANAAL_CONFIG:"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL|INPUT_TYPE_PCF8574|INPUT_TYPE_HX1838"
+set "VERWACHTE_FOUT=Geldige INPUT_KANAAL_CONFIG:"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_KANAAL_CONFIG | ONBEKENDE INPUT-BIT"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=8"
+set "VERWACHTE_FOUT=INPUT_KANAAL_CONFIG bevat een onbekend invoertype."
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE_MEMBRAAN_MATRIX_4x5=34 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5"
+set "VERWACHTE_FOUT=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4"
+set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE_MEMBRAAN_MATRIX_4x5=34 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5"
+set "VERWACHTE_FOUT=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen"
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | SCREEN_TYPE_CHARACTER | I2C_ADDRESS_PCF8574 = I2C_ADDRESS_CHARACTER_SCREEN"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DSCREEN_OUTPUT_CONFIG=SCREEN_TYPE_CHARACTER -DI2C_ADDRESS_PCF8574=0x27 -DI2C_ADDRESS_CHARACTER_SCREEN=0x27"
+set "VERWACHTE_FOUT=I2C_ADDRESS_PCF8574 mag niet gelijk zijn aan I2C_ADDRESS_CHARACTER_SCREEN."
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_HX1838 | HX1838_BRON_CODES = 99"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_BRON_CODES=99"
+set "VERWACHTE_FOUT=Ongeldige HX1838_BRON_CODES."
+call :EXPECT_FAIL
+set "TEST_NAAM=INPUT_TYPE_HX1838 | HX1838_TOETSENINDELING = 99"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_TOETSENINDELING=99"
+set "VERWACHTE_FOUT=Ongeldige HX1838_TOETSENINDELING."
+call :EXPECT_FAIL
+set "TEST_NAAM=HX1838_BRON_CODES_DEFINE | HX1838_TOETSENINDELING_3x4 | onvolledige mapping"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_BRON_CODES=HX1838_BRON_CODES_DEFINE -DHX1838_TOETSENINDELING=HX1838_TOETSENINDELING_3x4"
+set "VERWACHTE_FOUT=HX1838_BRON_CODES_DEFINE vereist een volledige 12-toetsenmapping."
+call :EXPECT_FAIL
+set "TEST_NAAM=HX1838_BRON_CODES_DEFINE | HX1838_TOETSENINDELING_REMOTE_17_TOETSEN | onvolledige mapping"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_BRON_CODES=HX1838_BRON_CODES_DEFINE -DHX1838_TOETSENINDELING=HX1838_TOETSENINDELING_REMOTE_17_TOETSEN"
+set "VERWACHTE_FOUT=HX1838_BRON_CODES_DEFINE vereist een volledige 17-toetsenmapping."
+call :EXPECT_FAIL
+set "TEST_NAAM=HX1838_BRON_CODES_DEFINE | HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3 | onvolledige mapping"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_BRON_CODES=HX1838_BRON_CODES_DEFINE -DHX1838_TOETSENINDELING=HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3"
+set "VERWACHTE_FOUT=HX1838_BRON_CODES_DEFINE vereist een volledige 21-toetsenmapping."
+call :EXPECT_FAIL
+
+echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!
+popd
+echo === TEST VOLLEDIG AFGEROND ===
+if /I not "%~2"=="--no-pause" (
+    <nul set /p =[EINDE] Testen voltooid. Druk op een toets om af te sluiten... & pause >nul
+    echo.
+)
+if !FAIL!==0 (exit /b 0) else exit /b 1

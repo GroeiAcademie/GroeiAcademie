@@ -1,6 +1,5 @@
 # Windows
 *.bak
-*.cmd
 desktop.ini
 Thumbs.db
 
@@ -28,6 +27,10 @@ src/Language/UserLibrary_*.h
 
 # Templates moeten WEL mee
 !src/Language/UserLibrary_*_template.h
+!src/Language/UserExample_*_template.h
 
 # Privé-bestanden niet meenemen
 /prive/
+
+# Lokale, persoonlijke testpaden niet meenemen; het template wel
+extras/LokalePaden.cmd

@@ -6,7 +6,7 @@
 // ============================================================================
 // GedeeldeBus: neutrale, gedeelde Wire(I2C)/SPI-initialisatie.
 //
-// AANLEIDING (v1.1.1-patch): Screen.cpp, Input.cpp (PCF8574-tak) en
+// AANLEIDING: Screen.cpp, Input.cpp (PCF8574-tak) en
 // Stimulus.cpp (InitialiseerADS1115()) riepen elk onafhankelijk Wire.begin()
 // aan, met identieke, maar apart onderhouden board-specifieke logica
 // (ARDI32 gebruikt aparte SDA/SCL-pinnen, andere boards de standaard
@@ -17,7 +17,7 @@
 // onafhankelijke, los te testen subsystemen. GedeeldeBus kent geen van drie;
 // ze regelt uitsluitend businitialisatie, verder niets.
 //
-// GEDRAGSBEHOUDEND: dit is een PATCH (v1.1.0 → v1.1.1), geen API-wijziging.
+// GEDRAGSBEHOUDEND: deze wijziging is vóór v1.1.0 samengevoegd en wijzigt de publieke API niet.
 // De board-specifieke ARDI32-logica die voorheen apart in Screen.cpp en
 // Input.cpp stond, is hier samengevoegd, met exact hetzelfde gedrag.
 //
@@ -26,6 +26,8 @@
 // eerste aanroep initialiseert de bus effectief.
 // ============================================================================
 
+// SPI-ondersteuning is voorbereid voor toekomstig gebruik. In v1.1.0 heeft
+// GedeeldeBusType::SPI nog geen actieve aanroeper in Input, Screen of Stimulus.
 enum class GedeeldeBusType : byte {
   I2C = 0,
   SPI = 1

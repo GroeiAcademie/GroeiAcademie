@@ -70,8 +70,8 @@ struct MappingTussenOpschriftEnWeergavetekst {
 };
 
 // ============================================================================
-// TOETSENINDELING: door de gebruiker zelf ingevuld in de .ino, afhankelijk van het gekozen KEYPAD_TYPE/HX1838_TOETSENINDELING. 
-// Input.cpp bevat de scanlogica en de vaste indeling waarmee een positie aan opschrift/weergavetekst wordt gekoppeld.
+// TOETSENINDELING: Input.cpp bevat de scanlogica en de vaste indelingen waarmee een positie aan opschrift/weergavetekst wordt gekoppeld. 
+// Bij de twee KEYPAD_TYPE_USER_DEFINED_...-types komt KEY_LAYOUT uit de KEYPAD_GENERIEK_... configuratie in UserConfig.h; een .ino kan de apart gecompileerde Input.cpp niet configureren.
 // ============================================================================
 #if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
   #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
@@ -183,6 +183,25 @@ extern const byte aantalToetsFuncties;
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag);
 
+// --- Interne koppeling voor mapping-bewuste LANG_INDRUKKEN-detectie (niet rechtstreeks gebruiken) ---
+// OpvragenHuidigeToetsAanslag() moet, om te weten of/wanneer een LANG_INDRUKKEN-gebeurtenis
+// gegenereerd wordt, ergens een lang-indrukken-drempel (in ms) opvragen voor de toets die nu
+// stabiel ingedrukt is. Standaard gebeurt dat via het globale mappingTussenToetsaanslagEnUitTeVoerenFunctie[]
+// hierboven. De UitVoerenFunctieVolgensMappingMetToetsAanslag-templates verderop in dit bestand
+// zetten deze koppeling vlak vóór de aanroep om naar hún eigen, expliciet meegegeven mapping, zodat
+// ook toepassingen met meerdere menu's (elk met een eigen mapping-array) LANG_INDRUKKEN correct krijgen.
+typedef unsigned long (*LangIndrukkenDrempelOpzoekerFunctie)(const char* opschriftToetsAanslag);
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+extern const MappingTussenToetsaanslagEnUitTeVoerenFunctie* _actieveMappingVoorLangIndrukken;
+extern byte _actieveMappingAantalVoorLangIndrukken;
+unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMapping(const char* opschriftToetsAanslag);
+
+extern const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* _actieveMappingMetArgumentenVoorLangIndrukken;
+extern byte _actieveMappingMetArgumentenAantalVoorLangIndrukken;
+unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten(const char* opschriftToetsAanslag);
+#endif
+
 template <size_t N>
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
   if (opschriftToetsAanslag == nullptr) return nullptr;
@@ -231,13 +250,26 @@ void InputConfigureren();
 // teruggegeven InputResultaat kan dan ook InputGebeurtenis::LOSGELATEN, ::LANG_INDRUKKEN of ::TIMEOUT_GEEN_INVOER zijn niet enkel ::TOETSAANSLAG. 
 // Zonder die schakelaar blijft het gedrag exact zoals voorheen.
 InputResultaat OpvragenHuidigeToetsAanslag(bool wachten = true);
+
+// Zelfde werking als hierboven, maar de LANG_INDRUKKEN-drempel wordt via drempelOpzoeker() opgevraagd
+// in plaats van via het globale mappingTussenToetsaanslagEnUitTeVoerenFunctie[]-array. Wordt gebruikt
+// door de UitVoerenFunctieVolgensMappingMetToetsAanslag-templates hieronder; niet bedoeld voor rechtstreeks
+// gebruik in een sketch (gebruik daarvoor gewoon de mapping-templates).
+InputResultaat OpvragenHuidigeToetsAanslag(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker);
+
 InputResultaten OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1);
 
 void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true);
 
 template <size_t N>
 void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  _actieveMappingVoorLangIndrukken = mapping;
+  _actieveMappingAantalVoorLangIndrukken = (byte)N;
+  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten, _LangIndrukkenDrempelOpzoekerViaActieveMapping);
+#else
   InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
+#endif
   if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
   const MappingTussenToetsaanslagEnUitTeVoerenFunctie* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
   if (gevondenMapping == nullptr) return;
@@ -259,7 +291,13 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTu
 // Variant voor mappings die het argumenten-veld (void*) gebruiken. Zelfde werking, andere types.
 template <size_t N>
 void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  _actieveMappingMetArgumentenVoorLangIndrukken = mapping;
+  _actieveMappingMetArgumentenAantalVoorLangIndrukken = (byte)N;
+  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten, _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten);
+#else
   InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
+#endif
   if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
   const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
   if (gevondenMapping == nullptr) return;

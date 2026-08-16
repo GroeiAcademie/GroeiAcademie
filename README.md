@@ -11,7 +11,7 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 - versie: `1.1.0`;
 - ontwikkelfase: alpha;
 - huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
-- v1.1.0-validatie: voer `extras/TestLibraryAllesEnMaakStatusReport.cmd` uit; de vier individuele testcycli worden uitgevoerd en `extras/TestLibraryStatusReport.cmd` maakt daaruit `extras/TestLibraryStatusReport.txt`; de definitieve releaseresultaten horen in `extras/TESTRESULTATEN.md`;
+- de interne releasetests worden in vier afzonderlijke testcycli uitgevoerd; de definitieve releaseresultaten worden vastgelegd in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
@@ -49,7 +49,7 @@ Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer 
 
 ## Kwaliteitscontrole
 
-Elke officiële release van deze library wordt vóór publicatie met de meegeleverde testscripts gevalideerd.
+Elke officiële release van deze library wordt vóór publicatie met de meegeleverde Windows-releasetests gevalideerd. Alleen `extras/LokalePaden.cmd` is machinespecifiek en wordt via `.gitignore` niet gepubliceerd; `extras/LokalePaden_template.cmd` en de gedeelde testscripts maken wel deel uit van de library.
 
 De validatie omvat:
 
@@ -105,6 +105,9 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 
 - `DEBUG`;
 - `SCREEN_OUTPUT_CONFIG`;
+- `INPUT_KANAAL_CONFIG`;
+- `KEYPAD_TYPE` en, bij een UserDefined-keypad, alle vereiste `KEYPAD_GENERIEK_...`-instellingen;
+- `I2C_ADDRESS_PCF8574` wanneer `INPUT_TYPE_PCF8574` gebruikt wordt;
 - `I2C_ADRES`;
 - `ACTIEF_CHARACTER_SCREEN`;
 - `ACTIEF_PIXEL_SCREEN`;
@@ -133,12 +136,18 @@ examples/
 │   ├── ADC_Validatie/
 │   │   ├── ADC_Validatie_Native/
 │   │   └── ADC_Validatie_ADS1115/
-│   └── Screen/
-│       ├── Callback_CharacterScreen/
-│       ├── Callback_PixelScreen/
-│       ├── Default_CharacterScreen/
-│       ├── Default_PixelScreen/
-│       └── Default_CharacterScreen_PixelScreen/
+│   ├── Screen/
+│   │   ├── Callback_CharacterScreen/
+│   │   ├── Callback_PixelScreen/
+│   │   ├── Default_CharacterScreen/
+│   │   ├── Default_PixelScreen/
+│   │   └── Default_CharacterScreen_PixelScreen/
+│   └── Input/
+│       ├── InputkanalenDIGITAL/
+│       ├── InputkanalenPCF8574/
+│       ├── InputkanalenHX1838/
+│       ├── InputkanalenPCF8574UserDefinedDirect/
+│       └── InputkanalenPCF8574UserDefinedMatrix/
 └── Toepassingsgebieden/
     └── Stimulus/
         ├── Scenario1_EnkelTik/
@@ -148,7 +157,7 @@ examples/
         └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
-`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en [Handleiding GroeiAcademie Stimulus Hardware Validatie v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
+`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en [Handleiding GroeiAcademie Stimulus Hardware Validatie v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
 
 ## Librarystructuur
 
@@ -160,6 +169,8 @@ GroeiAcademie/
 │   ├── Stimulus.h
 │   ├── Configuratie/
 │   ├── Systeem/Screen/        # Screen.h, Screen.cpp en ScreenTypes.h
+│   ├── Systeem/Input/         # Input.h, Input.cpp en InputTypes.h
+│   ├── Systeem/GedeeldeBus/   # gedeelde I2C/SPI-businitialisatie
 │   └── Toepassingsgebieden/Stimulus/
 ├── examples/
 ├── docs/
@@ -176,7 +187,7 @@ Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregist
 
 ## Elektronische schema's
 
-De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md).
+De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release staat onder [Stimulus Shield v1.1.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
 
 Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.md](docs/Toepassingsgebieden/Stimulus/README.md):
 
@@ -186,7 +197,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Toepassingsgebieden/Stimulus/Hardware/](docs/Toepassingsgebieden/Stimulus/Hardware/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en de [handleiding voor de hardwarevalidatie v1.0.0](docs/Toepassingsgebieden/Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Uitbreidingskaarten/](docs/Uitbreidingskaarten/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en de [handleiding voor de hardwarevalidatie v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
 
 ## Geplande uitbreidingen
 

@@ -37,11 +37,13 @@ SCREEN_TYPE_CHARACTER
 SCREEN_TYPE_PIXELS
 ```
 
-Meerdere uitvoerdoelen worden gecombineerd met `|`. `DEBUG` geeft alleen seriële uitvoer wanneer `SCREEN_TYPE_SERIAL` meegecompileerd is.
+Meerdere uitvoerdoelen worden gecombineerd met `|`. De standaard seriële `PrintToScreen()`-uitvoer via `SCREEN_TYPE_SERIAL` volgt de bestaande `DEBUG`-werking: wanneer `DEBUG` actief is, voegt `Screen.h` `SCREEN_TYPE_SERIAL` automatisch toe aan de effectieve `SCREEN_OUTPUT` en wordt de seriële debuguitvoer beschikbaar. De afzonderlijke foutfallback voor kritieke schermfouten kan Serial bewust rechtstreeks forceren; zie `SCREEN_FOUTCODES.md`.
 
 ## Characterscherm zonder callback
 
 Zonder geregistreerde charactercallback gebruikt de library `LiquidCrystal_I2C`. Ondersteunde schermen zijn `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` en `SCREEN_LCD4002`.
+
+Bij CharacterScreen-autodetectie (I2C-adresmodus 1 of 2) worden de fallbackadressen 0x27 en 0x3F niet als schermkandidaat gebruikt wanneer hetzelfde adres via `I2C_ADDRESS_PCF8574` voor de actieve PCF8574-Input-backend is gereserveerd. Een kale I2C-ACK van de Input-expander kan daardoor niet meer als fallback-LCD worden gekozen.
 
 Op een scherm met vier regels worden de vier teksten op regels 0 tot en met 3 geplaatst. Op een scherm met twee regels verschijnen regel 1 en 2 als eerste pagina. Wanneer regel 3 of 4 niet leeg is, wacht de library `delayTussenPaginas`, wist het scherm en toont regel 3 en 4 als tweede pagina. Na de volledige tekstuitvoer wordt `delayTime` één keer uitgevoerd. Daarna wordt `action` verwerkt.
 
@@ -149,6 +151,8 @@ Een SPI-PixelScreen op Arduino UNO gebruikt voor hardware-SPI standaard `D11` al
 De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange wachttijden onderbreken andere verwerking.
 
 ## Uitvoeringscontract
+
+`PrintToScreen()` verwerkt de standaarduitvoer in deze volgorde. Bij Serial-only geldt Serial eveneens als standaardscherm voor `delayTime` en `action`; wanneer CharacterScreen en/of PixelScreen meegecompileerd zijn, blijft hun bestaande timing-/callbackcontract bepalend en verandert een aanvullend Serial-doel dat contract niet.
 
 `PrintToScreen()` verwerkt de standaarduitvoer in deze volgorde:
 

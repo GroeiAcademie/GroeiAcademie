@@ -1,10 +1,8 @@
 # Testprocedure
 
-Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meegeleverde testscripts gevalideerd. Hierdoor wordt gecontroleerd dat de library voldoet aan de kwaliteitsvereisten van het project en compatibel blijft met de ondersteunde Arduino-platformen.
+Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meegeleverde testscripts gevalideerd. De gedeelde Windows-`.cmd`-scripts staan onder `extras/` en maken deel uit van de library. Alleen `extras/LokalePaden.cmd` is machinespecifiek en wordt via `.gitignore` niet gepubliceerd; `extras/LokalePaden_template.cmd` wordt wel meegeleverd.
 
-## Uit te voeren script
-
-De testscripts staan onder `extras/`:
+## Testscripts
 
 ```text
 TestLibraryGereleased.cmd
@@ -12,173 +10,116 @@ TestLibraryGereleasedOngeldig.cmd
 TestLibraryNieuw.cmd
 TestLibraryNieuwOngeldig.cmd
 TestLibraryDependency.cmd
+TestBoardplatformsDependency.cmd
 TestLibraryMappingControle.cmd
 TestLibraryStatusReport.cmd
-TestLibraryAllesEnMaakStatusReport.cmd
+LokalePaden_template.cmd
 ```
 
-De scripts laten een aanwezige `UserConfig.h` actief. De configuratievolgorde tijdens de tests is: compilerdefinitie, actieve definitie in het `.ino`-voorbeeld, `UserConfig.h` en ten slotte de standaardwaarde uit `SystemConfig.h`. De actieve exampledefaults die door de compiler kunnen worden overschreven staan daarom onder `#ifndef`.
+`TestLibraryAllesEnMaakStatusReport.cmd` bestaat niet meer. De vier compilecycli worden afzonderlijk uitgevoerd. Daarna kan `TestLibraryStatusReport.cmd` hun vier logbestanden samenvoegen tot `TestLibraryStatusReport.txt`. `TestLibraryMappingControle.cmd` is een afzonderlijke tekstuele controle en wordt niet door het statusrapport uitgevoerd.
+
+## Padkeuze van de Windows-tests
+
+De scripts zoeken `arduino-cli` eerst via Windows `PATH`. Wanneer dat niet lukt, wordt `extras/LokalePaden.cmd` geladen. Maak dat lokale bestand indien nodig door `extras/LokalePaden_template.cmd` naar `extras/LokalePaden.cmd` te kopiëren en daar de paden van de eigen machine in te vullen. Het lokale bestand staat in `.gitignore` en wordt niet gepubliceerd.
+
+`TestLibraryGereleased.cmd` zoekt `arduino-lint` eveneens via `PATH`. Wanneer `arduino-lint` daar niet gevonden wordt en `LINT_PATH` niet via `LokalePaden.cmd` is ingesteld, probeert het script `arduino-lint` in dezelfde map als `arduino-cli`.
+
+## Schone testconfiguratie
+
+Alle echte `arduino-cli compile`-aanroepen in de vier compilecycli definiëren `GROEIACADEMIE_IGNORE_USER_CONFIG`. Een eventueel lokaal `src/Configuratie/UserConfig.h` wordt tijdens die compiletests dus bewust genegeerd. De testconfiguratie bestaat uit de expliciete compilerdefinities van het betrokken testgeval plus de fallbacks van `SystemConfig.h`.
+
+Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en configureert geen apart gecompileerd librarybestand zoals `Input.cpp`, `Screen.cpp` of `Stimulus.cpp`. UserDefined-keypadtests geven de benodigde `KEYPAD_GENERIEK_...`-waarden daarom expliciet als compilerdefinities mee; in normaal gebruik horen die instellingen in `UserConfig.h`.
 
 ## Teststappen
 
-### 1. Arduino LINT
+### 1. Dependencies en boardplatforms
 
-Controle:
+`TestLibraryDependency.cmd` vergelijkt de vereiste libraries met de geïnstalleerde libraries en kan ontbrekende dependencies desgewenst via `arduino-cli lib install` installeren. De lijst wordt handmatig uit `library.properties` onderhouden.
 
-```text
-arduino-lint --library-manager submit
-```
+`TestBoardplatformsDependency.cmd` vergelijkt de vereiste boardplatforms met `arduino-cli core list`. Voor Cytron Maker Uno RP2040 en STMicroelectronics Nucleo-F401RE kan het script bij automatische installatie eerst de benodigde Additional Boards Manager URL toevoegen, daarna de package-index bijwerken en het platform installeren.
 
-Doel:
+Deze twee dependency-scripts zijn voorbereidende controles; zij maken geen deel uit van de vier compilelogs die `TestLibraryStatusReport.cmd` samenvoegt.
 
-- controle op de vereisten van de Arduino Library Manager;
-- controle van metadata;
-- controle van de directorystructuur;
-- controle van de librarybestanden.
+### 2. Gereleasede basis — `TestLibraryGereleased.cmd`
 
-Een mislukte Arduino LINT wordt afzonderlijk bijgehouden en maakt de volledige releasevalidatie ongeldig.
+Dit script:
 
-### 2. Compilatietesten
+- voert `arduino-lint --library-manager update` uit;
+- voert statische configuratiecontroles uit;
+- test de officiële boards Arduino UNO R3, Arduino UNO R4 Minima, Arduino UNO R4 WiFi en WEMOS D1 R32 (`esp32:esp32:d1_uno32`);
+- compileert voor elk officieel board eerst `InputkanalenDIGITAL` zonder geforceerde `-DBOARD_VERSION`, zodat de automatische boarddetectie in `SystemConfig.h` werkelijk wordt getest;
+- compileert daarna de bestaande voorbeelden recursief, met `examples/Systeem/Input/` uitgesloten omdat die configuratiematrix afzonderlijk door `TestLibraryNieuw.cmd` wordt behandeld;
+- compileert Stimulusvoorbeelden met `SCREEN_OUTPUT_CONFIG` 0 tot en met 7;
+- gebruikt `--jobs 1` om iedere compile sequentieel uit te voeren.
 
-Alle voorbeelden worden automatisch gecompileerd. Iedere compilatie gebruikt `--clean --jobs 1`, zodat geen oude buildcache wordt hergebruikt en de compilaties na elkaar worden uitgevoerd.
+De bekende UNO R3-geheugenbeperking van `Tik_Enkele_Samen_Instortend_Cocktail` wordt alleen als verwachte geheugenbeperking geclassificeerd wanneer de compiler letterlijk `text section exceeds available space in board` meldt voor de betrokken PixelScreen-combinaties. Iedere andere fout blijft een testfout.
 
-#### Geteste Arduino Uno R3-vormfactorborden
+### 3. Negatieve gereleasede configuraties — `TestLibraryGereleasedOngeldig.cmd`
 
-- Arduino UNO R3 met FQBN `arduino:avr:uno` en `BOARD_VERSION=BOARD_UNO_R3`;
-- Arduino UNO R4 Minima met FQBN `arduino:renesas_uno:minima` en `BOARD_VERSION=BOARD_UNO_R4_MINIMA`;
-- Arduino UNO R4 WiFi met FQBN `arduino:renesas_uno:unor4wifi` en `BOARD_VERSION=BOARD_UNO_R4_WIFI`;
-- ESP32-borden in Arduino Uno R3-vormfactor via boardprofiel `WEMOS D1 R32`, met FQBN `esp32:esp32:d1_uno32` en `BOARD_VERSION=BOARD_ESP32_UNO`.
+Deze test compileert bewust ongeldige configuraties. Een negatieve test is alleen geslaagd wanneer:
 
-Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor moet via Arduino Boards Manager `esp32 by Espressif Systems` geïnstalleerd zijn. Kies daarna het boardprofiel `WEMOS D1 R32`. De testscripts gebruiken FQBN `esp32:esp32:d1_uno32`. Een toolpakket zoals `esp32:esp-rv32@2601` wordt samen met het ESP32-boardpakket geïnstalleerd en wordt niet als Arduino Uno R3-vormfactorbord geselecteerd.
+1. de compilatie faalt; en
+2. de output de specifiek verwachte `#error`-tekst bevat.
 
-De batch koppelt iedere FQBN expliciet aan de overeenkomstige `BOARD_VERSION`.
+Een fout pad, ontbrekende dependency of andere toevallige compilerfout kan daardoor niet als vals-positieve `[OK]` doorgaan.
 
-#### Geteste voorbeelden
+### 4. Input-validatie v1.1.0 — `TestLibraryNieuw.cmd`
 
-Alle `.ino`-bestanden onder:
+De officiële releaseboards zijn:
 
-```text
-examples/
-```
+- Arduino UNO R3;
+- Arduino UNO R4 Minima;
+- Arduino UNO R4 WiFi;
+- WEMOS D1 R32 / hetzelfde `esp32:esp32:d1_uno32`-profiel.
 
-worden recursief gevonden. Nieuwe examples en nieuwe submappen worden daardoor automatisch meegenomen.
+Daarnaast worden als acceptatieboards gecompileerd:
 
-### 3. Schermconfiguratie
+- Cytron Maker Uno RP2040;
+- STMicroelectronics Nucleo-F401RE;
+- SB Components Ardi32.
 
-Tijdens de compilatie wordt `SCREEN_OUTPUT_CONFIG` waar nodig door het testscript opgegeven. Een actieve `UserConfig.h` blijft geladen; het `#ifndef` rond `SCREEN_OUTPUT_CONFIG` voorkomt dat die testwaarde opnieuw wordt gedefinieerd.
+Acceptatieboards worden afzonderlijk gerapporteerd en hebben geen invloed op het officiële release-PASS/FAIL.
 
-| Voorbeeld | SCREEN_OUTPUT_CONFIG |
-|-----------|----------------------|
-| CharacterScreen | SCREEN_TYPE_CHARACTER |
-| PixelScreen | SCREEN_TYPE_PIXELS |
-| CharacterScreen_PixelScreen | SCREEN_TYPE_CHARACTER \| SCREEN_TYPE_PIXELS |
+`TestLibraryNieuw.cmd` compileert de geldige Input-configuratiematrix voor DIGITAL, PCF8574, HX1838, PCF8574+HX1838, de twee UserDefined-keypads en de uitgebreide non-blocking Input-configuratie. Voor de UserDefined-tests worden de benodigde `KEYPAD_GENERIEK_...`-definities expliciet op compiler-/buildniveau meegegeven.
 
-`TestLibraryGereleased.cmd` en `TestLibraryGereleased.cmd` compileren ieder Stimulusvoorbeeld met `SCREEN_OUTPUT_CONFIG` 0 tot en met 7.
-
-Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` toe.
-
-### 4. Gekende UNO R3-geheugenbeperking
-
-Het samengestelde voorbeeld `Tik_Enkele_Samen_Instortend_Cocktail` overschrijdt op Arduino UNO R3 het beschikbare programmageheugen bij `SCREEN_OUTPUT_CONFIG` 4, 5, 6 en 7. Deze vier combinaties worden uitsluitend als verwachte geheugenbeperking geregistreerd wanneer de compiler meldt:
+De twee voorbeelden heten:
 
 ```text
-text section exceeds available space in board
+examples/Systeem/Input/InputkanalenPCF8574UserDefinedDirect/InputkanalenPCF8574UserDefinedDirect.ino
+examples/Systeem/Input/InputkanalenPCF8574UserDefinedMatrix/InputkanalenPCF8574UserDefinedMatrix.ino
 ```
 
-De vier combinaties tellen niet als succesvol gecompileerd en evenmin als onverwachte compilatiefout. Iedere andere fout, ook binnen deze combinaties, blijft een onverwachte compilatiefout.
+De compiletest met `INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` geeft compiledekking aan dit codepad. Gedrag zoals debounce, loslaten, lang indrukken en timeout blijft daarnaast runtime-/hardwaregedrag.
 
-### 5. Foutafhandeling
+De vijf `Input_Test_...`-Stimulus-testvoorbeelden worden eveneens gecompileerd. De oorspronkelijke Stimulusvoorbeelden blijven daarbij afzonderlijke voorbeelden.
 
-Bij een onverwachte compilatiefout:
+### 5. Negatieve Input-configuraties — `TestLibraryNieuwOngeldig.cmd`
 
-- wordt de fout weergegeven;
-- pauzeert het script zodat de fout bekeken kan worden;
-- gaat de test verder met het volgende voorbeeld.
+Ook hier geldt: een bewust ongeldige configuratie is alleen `[OK]` wanneer de compilatie faalt én de specifiek verwachte fouttekst voorkomt. Hierdoor wordt de compile-time validatie zelf getest in plaats van alleen het bestaan van eender welke compilerfout.
 
-Hierdoor worden altijd alle testen uitgevoerd.
+### 6. Mapping-volledigheidscontrole — `TestLibraryMappingControle.cmd`
 
-### 6. Samenvatting
+`TestLibraryMappingControle.cmd` controleert tekstueel of `mappingTestMenu[]` in `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino` alle opschriften bevat die de betrokken `KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` kan opleveren. De referentielijsten bevatten de volledige opschriftenset van de gecontroleerde types.
 
-Na afloop wordt automatisch weergegeven:
+De controle is tekstueel en niet `#if`/`#elif`-bewust. Zij bevestigt dus dat een opschrift in het bestand aanwezig is, niet dat het noodzakelijk in de juiste voorwaardelijke tak staat. Bij nieuwe of gewijzigde keypadtypes moet de referentietabel in het script mee bijgewerkt worden.
 
-- totaal aantal uitgevoerde compilaties;
-- aantal succesvolle compilaties;
-- aantal verwachte UNO R3-geheugenbeperkingen;
-- aantal onverwachte compilatiefouten;
-- resultaat van Arduino LINT.
+### 7. Statusrapport — `TestLibraryStatusReport.cmd`
 
-De resultaten van elke officiële release worden bijgehouden in:
+De vier compilecycli schrijven elk hun eigen logbestand:
+
+```text
+TestLibraryGereleased.txt
+TestLibraryGereleasedOngeldig.txt
+TestLibraryNieuw.txt
+TestLibraryNieuwOngeldig.txt
+```
+
+Nadat deze vier scripts afzonderlijk zijn uitgevoerd, voegt `TestLibraryStatusReport.cmd` ze samen tot `TestLibraryStatusReport.txt` en beoordeelt de releasegerichte samenvattingen. De mappingcontrole blijft een afzonderlijke stap.
+
+## Definitieve releaseresultaten
+
+De definitieve resultaten van een officiële release worden pas na de volledige testcyclus vastgelegd in:
 
 ```text
 extras/TESTRESULTATEN.md
 ```
-
-
-### BOARD_ESP32_UNO
-
-Arduino Uno R3-vormfactor ESP32-boardprofiel.
-
-#### Getest en ondersteund sinds v1.0.0
-- WEMOS D1 R32.
-
-#### Hetzelfde boardprofiel
-- TTGO D1 R32 gebruikt eveneens FQBN `esp32:esp32:d1_uno32`.
-
-#### Verwacht compatibel
-- Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino-ESP32-core.
-
-De fysieke hardwarevalidatie van TTGO D1 R32 en andere compatibele borden wordt afzonderlijk vastgelegd zodra die is uitgevoerd.
-
-## Input-validatie voor v1.1.0
-
-`TestLibraryNieuw.cmd` test geldige Input-configuraties en rapporteert officiële en acceptatieboards afzonderlijk. Acceptatieboards hebben geen invloed op release-PASS/FAIL. Dit omvat ook `KEYPAD_TYPE_USER_DEFINED_DIRECT`/`KEYPAD_TYPE_USER_DEFINED_MATRIX`, via de eigen voorbeelden `InputkanalenUserDefinedDirect.ino`/`InputkanalenUserDefinedMatrix.ino` (die hun eigen, ingebouwde standaardwaarden gebruiken, geen `UserConfig.h`-aanpassing nodig om te compileren).
-
-`TestLibraryNieuwOngeldig.cmd` test configuraties die bewust door compile-time validatie geweigerd moeten worden.
-
-`TestLibraryAllesEnMaakStatusReport.cmd` combineert de nieuwe Input-tests van deze release met de volledige, reeds gereleasede basis.
-
-### Padkeuze van de Windows-tests
-
-De nieuwe Input-tests gebruiken dezelfde padkeuze als `TestLibraryGereleased.cmd`:
-
-Het eerste bestaande pad wordt `BASE_PATH`; `arduino-cli` wordt vervolgens als `%BASE_PATH%\arduino-cli` gebruikt.
-
-Elk van de vier testscripts (`TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd`, `TestLibraryNieuwOngeldig.cmd`) schrijft zijn eigen volledige console-uitvoer naar een gelijknamig `.txt`-logbestand. `TestLibraryStatusReport.cmd` voegt die vier logbestanden samen tot één `TestLibraryStatusReport.txt`, met een overzicht vooraan.
-
-
-### Volledige testsuite in één opdracht
-
-Start `TestLibraryAllesEnMaakStatusReport.cmd` om de volledige v1.1.0-validatie uit te voeren. Dit script roept na elkaar `TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd` en `TestLibraryNieuwOngeldig.cmd` op (telkens met `--no-pause`), en roept vervolgens `TestLibraryStatusReport.cmd` op om alle vier de logbestanden samen te voegen tot `TestLibraryStatusReport.txt`. Het script slaagt enkel wanneer alle vijf de onderliggende aanroepen slagen.
-
-De in `INPUT_STIMULUS_TESTS` opgesomde Stimulus-testvoorbeelden onder `examples/Systeem/Input/Input_Test_...` worden door `TestLibraryNieuw.cmd` mee gecompileerd. De originele Stimulus-voorbeelden blijven ongewijzigd.
-
-
-
-### Input_Test conversie
-
-De `Input_Test_...`-voorbeelden zijn kopieën van de bestaande Stimulus-voorbeelden. De originele Stimulus-bestanden blijven ongewijzigd. In de testkopieën worden de vier fysieke toetsaanslagen via `InputConfigureren()` en `OpvragenHuidigeToetsAanslag(true)` ingelezen. De bestaande keuzevolgorde en toepassingsfuncties blijven behouden.
-
-`InputTestConversieControle.txt` rapporteert per testvoorbeeld hoeveel Input-aanroepen aanwezig zijn en of nog actieve rechtstreekse `digitalRead(PIN_TOETS_x)`-aanroepen overblijven.
-
-Start `TestLibraryAllesEnMaakStatusReport.cmd` voor de volledige testsuite. Alle deeltestuitvoer wordt samengebracht in `TestLibraryStatusReport.txt`.
-
-## Mapping-volledigheidscontrole
-
-`TestLibraryMappingControle.cmd` controleert of `mappingTestMenu[]` in elk van de drie
-Input-voorbeelden (`InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino`, `InputkanalenHX1838.ino`)
-alle opschriften bevat die het bijhorende `KEYPAD_TYPE`/`HX1838_TOETSENINDELING` via `KEY_LAYOUT[]`/
-`IR_KEY_LAYOUT[]` in `Input.cpp` kan opleveren. Een ontbrekend opschrift meldt zich stilzwijgend
-als "niets gebeurt bij een toetsdruk", zonder compilatiefout of waarschuwing: dit script vangt dat
-alsnog op, vóór een release.
-
-Werking: het script doorloopt een handmatig opgebouwde referentietabel (welk type welke opschriften
-verwacht) en controleert per combinatie of die opschriften letterlijk voorkomen in het betrokken
-`.ino`-bestand.
-
-**Belangrijke beperking:** de controle is tekstueel, niet `#if`/`#elif`-bewust. Ze bevestigt dat een
-opschrift ergens in het bestand voorkomt, niet dat het in de juiste voorwaardelijke tak staat. Een
-opschrift dat per ongeluk in de verkeerde tak terechtkomt, wordt dus niet gedetecteerd.
-
-**Onderhoud:** bij een nieuw `KEYPAD_TYPE`, een nieuwe `HX1838_TOETSENINDELING`, of een wijziging aan
-een bestaande `KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` in `Input.cpp`, moet de referentietabel in dit script
-zelf mee bijgewerkt worden. Er is geen automatische koppeling tussen dit script en `Input.cpp`.

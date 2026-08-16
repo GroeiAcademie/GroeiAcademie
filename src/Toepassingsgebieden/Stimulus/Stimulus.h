@@ -51,6 +51,7 @@
 #define EXIT_VOORWAARDE_EXITSENSOR_INGEDRUKT          8
 #define EXIT_VOORWAARDE_NO_ACTION_TIMEOUT             9
 #define EXIT_VOORWAARDE_AANTAL_SENSOREN_ONGELDIG     10
+#define EXIT_VOORWAARDE_SENSOR_NIET_LOSGELATEN       11
 
 // EXITSTATUS DIE DE MEETFUNCTIE TERUGGEEFT
 #define EXIT_STATUS_GEEN                             EXIT_VOORWAARDE_GEEN
@@ -64,6 +65,7 @@
 #define EXIT_STATUS_EXITSENSOR_INGEDRUKT             EXIT_VOORWAARDE_EXITSENSOR_INGEDRUKT
 #define EXIT_STATUS_NO_ACTION_TIMEOUT                EXIT_VOORWAARDE_NO_ACTION_TIMEOUT
 #define EXIT_STATUS_AANTAL_SENSOREN_ONGELDIG         EXIT_VOORWAARDE_AANTAL_SENSOREN_ONGELDIG
+#define EXIT_STATUS_SENSOR_NIET_LOSGELATEN           EXIT_VOORWAARDE_SENSOR_NIET_LOSGELATEN
 
 // ============================================================================
 // CONSTANTEN VOOR DE LCD-TEKSTEN (Als pure tekst-pointers)
@@ -154,7 +156,7 @@ void InitialiseerADS1115();
 SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int sensorA, int sensorB, StimulusProfiel gemetenStimulus[]);
 
 int  MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin = -1, int exitOffset = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS);
-int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart = 0, int MaskGewensteActieveSensorsBijExit = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS, bool testOpDRUKWAARDE = true);
+int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart = 0, int MaskGewensteActieveSensorsBijExit = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS, bool testOpDRUKWAARDE = true, unsigned long maxOnsynchroniciteitMs = EXIT_TIKTIJD_MS);
 
 int  RawAnalogRead(int sensorPin);
 

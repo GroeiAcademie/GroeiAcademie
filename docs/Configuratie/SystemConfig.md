@@ -45,7 +45,7 @@ Meer dan één actieve taal veroorzaakt bewust een compilerfout. De gekozen taal
 
 `DEBUG` en `TRACE` zijn standaard uitgeschakeld. `UserConfig.h` bepaalt of ze actief zijn. `TRACE` schakelt automatisch ook `DEBUG` in.
 
-Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` toe aan de effectieve `SCREEN_OUTPUT`.
+Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` toe aan de effectieve `SCREEN_OUTPUT`. De standaard seriële `PrintToScreen()`-uitvoer volgt daarbij de bestaande `DEBUG`-werking.
 
 ## SCREEN_OUTPUT_CONFIG en SCREEN_OUTPUT
 

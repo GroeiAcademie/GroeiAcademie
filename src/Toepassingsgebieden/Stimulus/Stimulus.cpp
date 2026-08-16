@@ -79,6 +79,11 @@ bool KrachtCorrect              = false;
 // MARGE_FACTOR t.o.v. de nulmeting
 int MARGE_FACTOR                = DEFAULT_MARGE_FACTOR;
 
+static unsigned long MargeDeler() {
+  int margeFactor = (MARGE_FACTOR > 0) ? MARGE_FACTOR : DEFAULT_MARGE_FACTOR;
+  return (unsigned long)margeFactor * 100UL;
+}
+
 int TIK_TEST_ACTIEVE_VINGER     = -1;
 
 int TELLER_TIKTIJD_CORRECT      = 0;
@@ -328,59 +333,53 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
 
   unsigned long startTijden[4] = { 0, 0, 0, 0 };
   unsigned long eindTijden[4] = { 0, 0, 0, 0 };
-
-  unsigned long eersteStartTijd  = sensor[0].startTikTijd;
-  unsigned long laatsteStartTijd = sensor[0].startTikTijd;
-
-  unsigned long eersteEindTijd   = sensor[0].eindTikTijd;
-  unsigned long laatsteEindTijd  = sensor[0].eindTikTijd;
-
-  unsigned long kortsteTikTijd   = gemetenStimulus[0].TikTijd;
-  unsigned long langsteTikTijd   = gemetenStimulus[0].TikTijd;
-
-  int laagsteGemiddeldeTikKracht = gemetenStimulus[0].gemiddeldeTikKracht;
-  int laagsteHoogsteTikKracht    = gemetenStimulus[0].hoogsteTikKracht;
-
-  int hoogsteGemiddeldeTikKracht = gemetenStimulus[0].gemiddeldeTikKracht;
-  int hoogsteHoogsteTikKracht    = gemetenStimulus[0].hoogsteTikKracht;
-
-  unsigned long totaleTikTijd = 0;
+  unsigned long eersteStartTijd = 0, laatsteStartTijd = 0, eersteEindTijd = 0, laatsteEindTijd = 0;
+  unsigned long kortsteTikTijd = 0, langsteTikTijd = 0, totaleTikTijd = 0;
+  int laagsteGemiddeldeTikKracht = 0, hoogsteGemiddeldeTikKracht = 0;
+  int laagsteHoogsteTikKracht = 0, hoogsteHoogsteTikKracht = 0;
+  int aantalGestarteSensoren = 0;
 
   for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-    startTijden[sensorNummer] = sensor[sensorNummer].startTikTijd;
-    eindTijden[sensorNummer] = sensor[sensorNummer].eindTikTijd;
+    if (!sensor[sensorNummer].sensorGestart) continue;
+
+    startTijden[aantalGestarteSensoren] = sensor[sensorNummer].startTikTijd;
+    eindTijden[aantalGestarteSensoren] = sensor[sensorNummer].eindTikTijd;
     totaleTikTijd += gemetenStimulus[sensorNummer].TikTijd;
 
-    if (sensorNummer > 0) {
-      if (sensor[sensorNummer].startTikTijd < eersteStartTijd)  eersteStartTijd = sensor[sensorNummer].startTikTijd;
+    if (aantalGestarteSensoren == 0) {
+      eersteStartTijd = laatsteStartTijd = sensor[sensorNummer].startTikTijd;
+      eersteEindTijd = laatsteEindTijd = sensor[sensorNummer].eindTikTijd;
+      kortsteTikTijd = langsteTikTijd = gemetenStimulus[sensorNummer].TikTijd;
+      laagsteGemiddeldeTikKracht = hoogsteGemiddeldeTikKracht = gemetenStimulus[sensorNummer].gemiddeldeTikKracht;
+      laagsteHoogsteTikKracht = hoogsteHoogsteTikKracht = gemetenStimulus[sensorNummer].hoogsteTikKracht;
+    } else {
+      if (sensor[sensorNummer].startTikTijd < eersteStartTijd) eersteStartTijd = sensor[sensorNummer].startTikTijd;
       if (sensor[sensorNummer].startTikTijd > laatsteStartTijd) laatsteStartTijd = sensor[sensorNummer].startTikTijd;
-
-      if (sensor[sensorNummer].eindTikTijd < eersteEindTijd)  eersteEindTijd = sensor[sensorNummer].eindTikTijd;
+      if (sensor[sensorNummer].eindTikTijd < eersteEindTijd) eersteEindTijd = sensor[sensorNummer].eindTikTijd;
       if (sensor[sensorNummer].eindTikTijd > laatsteEindTijd) laatsteEindTijd = sensor[sensorNummer].eindTikTijd;
-
       if (gemetenStimulus[sensorNummer].TikTijd < kortsteTikTijd) kortsteTikTijd = gemetenStimulus[sensorNummer].TikTijd;
       if (gemetenStimulus[sensorNummer].TikTijd > langsteTikTijd) langsteTikTijd = gemetenStimulus[sensorNummer].TikTijd;
-
       if (gemetenStimulus[sensorNummer].gemiddeldeTikKracht < laagsteGemiddeldeTikKracht) laagsteGemiddeldeTikKracht = gemetenStimulus[sensorNummer].gemiddeldeTikKracht;
       if (gemetenStimulus[sensorNummer].gemiddeldeTikKracht > hoogsteGemiddeldeTikKracht) hoogsteGemiddeldeTikKracht = gemetenStimulus[sensorNummer].gemiddeldeTikKracht;
-
       if (gemetenStimulus[sensorNummer].hoogsteTikKracht < laagsteHoogsteTikKracht) laagsteHoogsteTikKracht = gemetenStimulus[sensorNummer].hoogsteTikKracht;
       if (gemetenStimulus[sensorNummer].hoogsteTikKracht > hoogsteHoogsteTikKracht) hoogsteHoogsteTikKracht = gemetenStimulus[sensorNummer].hoogsteTikKracht;
     }
+
+    aantalGestarteSensoren++;
   }
 
+  if (aantalGestarteSensoren == 0) return synchronisatie;
+
   synchronisatie.verschilStartTijd = laatsteStartTijd - eersteStartTijd;
-  synchronisatie.verschilEindTijd  = laatsteEindTijd - eersteEindTijd;
-  synchronisatie.verschilTikTijd   = langsteTikTijd - kortsteTikTijd;
-
+  synchronisatie.verschilEindTijd = laatsteEindTijd - eersteEindTijd;
+  synchronisatie.verschilTikTijd = langsteTikTijd - kortsteTikTijd;
   synchronisatie.verschilGemiddeldeTikKracht = hoogsteGemiddeldeTikKracht - laagsteGemiddeldeTikKracht;
-  synchronisatie.verschilHoogsteTikKracht    = hoogsteHoogsteTikKracht - laagsteHoogsteTikKracht;
+  synchronisatie.verschilHoogsteTikKracht = hoogsteHoogsteTikKracht - laagsteHoogsteTikKracht;
 
-  unsigned long gemiddeldeTikTijd = totaleTikTijd / aantalSensorenSimultaanTeMeten;
-  unsigned long toegestaneMargeEindTijd = (gemiddeldeTikTijd * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
-
-  synchronisatie.aantalSensorenSynchroonStart = BepaalAantalSensorenSynchroon(startTijden, aantalSensorenSimultaanTeMeten, TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
-  synchronisatie.aantalSensorenSynchroonEinde = BepaalAantalSensorenSynchroon(eindTijden, aantalSensorenSimultaanTeMeten, toegestaneMargeEindTijd);
+  unsigned long gemiddeldeTikTijd = totaleTikTijd / aantalGestarteSensoren;
+  unsigned long toegestaneMargeEindTijd = (gemiddeldeTikTijd * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
+  synchronisatie.aantalSensorenSynchroonStart = BepaalAantalSensorenSynchroon(startTijden, aantalGestarteSensoren, TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
+  synchronisatie.aantalSensorenSynchroonEinde = BepaalAantalSensorenSynchroon(eindTijden, aantalGestarteSensoren, toegestaneMargeEindTijd);
 
   return synchronisatie;
 }
@@ -393,12 +392,17 @@ int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimul
   // Eerste meting weggooien: kanaalwissel-artefact ligt structureel boven drempel
   RawAnalogRead(sensorPin);
 
+  unsigned long timeoutNoActionMs = (timeoutMs > EXIT_NO_ACTION_MS) ? timeoutMs : EXIT_NO_ACTION_MS;
+
   // Wanneer de meetsensor bij het binnenkomen al ingedrukt is, eerst wachten tot die volledig wordt losgelaten.
-  while (AnalogReadMetGekorigeerdeOffsets(sensorPin, OffsetSensor) > TIK_MINIMALE_DRUKWAARDE);
+  unsigned long startWachtenOpLoslaten = millis();
+  while (AnalogReadMetGekorigeerdeOffsets(sensorPin, OffsetSensor) > TIK_MINIMALE_DRUKWAARDE) {
+    if (millis() - startWachtenOpLoslaten >= timeoutNoActionMs) return EXIT_STATUS_NO_ACTION_TIMEOUT;
+    delayMicroseconds(DELAY_US);
+  }
 
   // Daarna pas wachten op een nieuwe geldige druk.
   unsigned long startWachtenOpActie = millis();
-  unsigned long timeoutNoActionMs = (timeoutMs > EXIT_NO_ACTION_MS) ? timeoutMs : EXIT_NO_ACTION_MS;
 
   sensor.actueleTikKracht = 0;
 
@@ -684,6 +688,7 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
       if (sensor[sensorNummer].sensorGestart && !sensor[sensorNummer].sensorKlaar && nu - sensor[sensorNummer].startTikTijd > EXIT_TIKTIJD_MS) {
         sensor[sensorNummer].eindTikTijd = nu;
         sensor[sensorNummer].sensorKlaar = true;
+        if (exitStatus == EXIT_STATUS_GEEN) exitStatus = EXIT_STATUS_SENSOR_NIET_LOSGELATEN;
       }
     }
 
@@ -790,7 +795,7 @@ static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
 // doelTikTijd: > 0 = expliciete milliseconden, 0 = nulmeting, -1/-2/-3 = instortende moeilijkheidsgraad.
 void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, bool &TijdCorrect, bool &KrachtCorrect, long doelTikTijd, char *instortendExtraTeken) {
   unsigned long referentieTikTijd = (doelTikTijd > INSTORTEND_TOV_NULMETING) ? doelTikTijd : nulmeting.TikTijd;
-  unsigned long margeTikTijd = (referentieTikTijd * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
+  unsigned long margeTikTijd = (referentieTikTijd * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
   unsigned long minimaleTikTijd = 0, maximaleTikTijd = 0; // Ondergrens wordt later veilig op nul begrensd om unsigned-underflow te vermijden.
 
   TijdCorrect   = false;
@@ -837,7 +842,7 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
     }
   }
 
-  int margeTikKracht = (nulmeting.gemiddeldeTikKracht * TOEGESTANE_MARGE_TIKKRACHT) / (MARGE_FACTOR * 100UL);
+  int margeTikKracht = (nulmeting.gemiddeldeTikKracht * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
 
 #ifdef DEBUG
   DEBUG_PRINTLN("---------------------");
@@ -890,7 +895,7 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
   }
 
   if (stimulusVersie == STIMULUS_EXTENDED) {
-    int margePiekTikKracht = (nulmeting.hoogsteTikKracht * TOEGESTANE_MARGE_TIKKRACHT) / (MARGE_FACTOR * 100UL);
+    int margePiekTikKracht = (nulmeting.hoogsteTikKracht * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
     bool piekTikKrachtCorrect = true;
 
     if (gemeten.hoogsteTikKracht < (nulmeting.hoogsteTikKracht - margePiekTikKracht)) {
@@ -899,7 +904,7 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
       piekTikKrachtCorrect = false;
     }
 
-    unsigned long margeTijdTotPiekTikKracht = (nulmeting.tijdTotPiekTikKracht * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
+    unsigned long margeTijdTotPiekTikKracht = (nulmeting.tijdTotPiekTikKracht * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
     bool tijdTotPiekTikKrachtCorrect = true;
 
     if (gemeten.tijdTotPiekTikKracht < (nulmeting.tijdTotPiekTikKracht - margeTijdTotPiekTikKracht)) {
@@ -908,7 +913,7 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
       tijdTotPiekTikKrachtCorrect = false;
     }
 
-    int margeOpbouwSnelheid = (nulmeting.opbouwSnelheid * TOEGESTANE_MARGE_TIKKRACHT) / (MARGE_FACTOR * 100UL);
+    int margeOpbouwSnelheid = (nulmeting.opbouwSnelheid * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
     bool opbouwSnelheidCorrect = true;
 
     if (gemeten.opbouwSnelheid < (nulmeting.opbouwSnelheid - margeOpbouwSnelheid)) {
@@ -917,7 +922,7 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
       opbouwSnelheidCorrect = false;
     }
 
-    int margeAfbouwSnelheid = (nulmeting.afbouwSnelheid * TOEGESTANE_MARGE_TIKKRACHT) / (MARGE_FACTOR * 100UL);
+    int margeAfbouwSnelheid = (nulmeting.afbouwSnelheid * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
     bool afbouwSnelheidCorrect = true;
 
     if (gemeten.afbouwSnelheid < (nulmeting.afbouwSnelheid - margeAfbouwSnelheid)) {
@@ -951,16 +956,16 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
 }
 
 void VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatieProfiel &gemeten) {
-  unsigned long margeStartTijd = (nulmeting.verschilStartTijd  * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
-  unsigned long margeTikTijd   = (nulmeting.verschilTikTijd  * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
+  unsigned long margeStartTijd = (nulmeting.verschilStartTijd  * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
+  unsigned long margeTikTijd   = (nulmeting.verschilTikTijd  * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
 
   bool synchronisatieCorrect = true;
   if (gemeten.verschilStartTijd > nulmeting.verschilStartTijd + margeStartTijd) { synchronisatieCorrect = false; }
   if (gemeten.verschilTikTijd > nulmeting.verschilTikTijd + margeTikTijd) { synchronisatieCorrect = false; }
   if (synchronisatieCorrect) { TELLER_TIKTIJD_SYNCHROON++; }
 
-  int margeGemiddeldeTikKracht = (nulmeting.verschilGemiddeldeTikKracht  * TOEGESTANE_MARGE_TIKKRACHT) / (MARGE_FACTOR * 100UL);
-  int margeHoogsteTikKracht    = (nulmeting.verschilHoogsteTikKracht  * TOEGESTANE_MARGE_TIKKRACHT) / (MARGE_FACTOR * 100UL);
+  int margeGemiddeldeTikKracht = (nulmeting.verschilGemiddeldeTikKracht  * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
+  int margeHoogsteTikKracht    = (nulmeting.verschilHoogsteTikKracht  * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
 
   bool krachtInBalans = true;
   if (gemeten.verschilGemiddeldeTikKracht > nulmeting.verschilGemiddeldeTikKracht + margeGemiddeldeTikKracht) { krachtInBalans = false; }
@@ -1020,6 +1025,7 @@ static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, Sen
 }
 
 void WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensorenSimultaanTeMeten) {
+  if (aantalSensorenSimultaanTeMeten < 1 || aantalSensorenSimultaanTeMeten > 4) return;
   const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
   bool alleSensorsLosgelaten = false;
 

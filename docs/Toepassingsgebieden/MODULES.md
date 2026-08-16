@@ -23,7 +23,7 @@ Zie [Governance](../../GOVERNANCE.md) voor hoe een nieuw voorstel deze statussen
 
 | Toepassingsgebied | Softwarestatus | Elektronische documentatie |
 |---|---|---|
-| Stimulus en conditionering | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md](Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) |
+| Stimulus en conditionering | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [GroeiAcademie Stimulus Hardware Shield v1.0.0](../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) |
 | Screen | gedeelde systeemlaag | [../Systeem/SCREEN.md](../Systeem/SCREEN.md) |
 | Ademhaling | kandidaat-idee | nog geen gevalideerd schema |
 | Hartslag, HRV en hartcoherentie | kandidaat-idee | nog geen gevalideerd schema |
@@ -80,7 +80,7 @@ De repository bevat afzonderlijke voorbeelden voor:
 4. cocktail;
 5. een samengesteld demonstratievoorbeeld.
 
-Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md](Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) voor de actuele ADS1115- en TFTSPI-hardwarelijn met H5, H6, H7 en H8. Het validatieprotocol staat in [Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md](Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [GroeiAcademie Stimulus Hardware Shield v1.0.0](../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) voor de actuele ADS1115- en TFTSPI-hardwarelijn met H5, H6, H7 en H8. Het validatieprotocol staat in [Handleiding hardwarevalidatie v1.0.0](../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
 
 ## 2. Ademhaling
 

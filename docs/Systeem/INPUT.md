@@ -11,7 +11,7 @@ De gecompileerde dependencies hangen af van `INPUT_KANAAL_CONFIG`:
 
 ## HX1838-kalibratie
 
-De huidige testimplementatie start bij ontbrekende of ongeldige EEPROM-kalibratie automatisch de kalibratieprocedure. Voor de definitieve `System/Input`-laag blijft als werkpunt staan dat kalibratie niet onnodig automatisch mag worden afgedwongen en dat de gewenste expliciete herkalibratieroute nog wordt vastgelegd.
+De huidige implementatie start bij ontbrekende of ongeldige EEPROM-kalibratie automatisch de kalibratieprocedure. Iedere te kalibreren toets en de aansluitende verificatiefase hebben een wachttijd begrensd door `HX1838_KALIBRATIE_TIMEOUT_MS` (standaard 30000 ms). Bij timeout wordt de kalibratie afgebroken en wordt geen onvolledige mapping opgeslagen. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
 `HX1838_BRON_CODES` bepaalt expliciet welke bron gebruikt wordt. `HX1838_BRON_CODES_DEFINE` vereist een volledige vaste mapping; `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM en kalibreert wanneer geen geldige EEPROM-mapping aanwezig is; `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` gebruikt een volledige vaste mapping wanneer die beschikbaar is en valt anders terug op EEPROM en zo nodig kalibratie. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
 
 ## Platformafhankelijke opslag
@@ -67,7 +67,7 @@ De referentie-/testmodule voor de I2C-naar-IO-uitbreiding is de OTRONIC OT8980. 
 
 `OpvragenHuidigeToetsAanslag(true)` bewaart de bestaande Tik-werking: een vorige fysieke aanslag moet eerst los zijn, daarna wordt gewacht op één nieuwe aanslag en bij een fysiek keypad wordt opnieuw op loslaten gewacht vóór het resultaat wordt doorgegeven.
 
-`OpvragenHuidigeToetsAanslag(false)` blokkeert niet. Bij een fysiek keypad wordt de huidige eerste gevonden positie teruggegeven; bij HX1838 wordt een ontvangen IR-gebeurtenis teruggegeven.
+`OpvragenHuidigeToetsAanslag(false)` blokkeert niet. Met de uitgebreide gebeurtenisschakelaar actief loopt een fysiek keypad bij iedere poll door dezelfde debounce-/stabiele-toestandsverwerking; zonder die schakelaar blijft het oorspronkelijke directe non-blocking gedrag behouden. Bij HX1838 wordt een ontvangen IR-gebeurtenis teruggegeven.
 
 De enkelvoudige API `OpvragenHuidigeToetsAanslag()` geeft maximaal één aanslag per aanroep terug.
 
@@ -86,8 +86,8 @@ Daarnaast bestaat een volledig apart, tweede type, `InputFunctieMetArgumenten`/`
 Standaard uitgeschakeld, om geen extra geheugen te verbruiken op geheugenarme boards. Inschakelen via `#define INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` in `UserConfig.h`. Enkel van toepassing bij `OpvragenHuidigeToetsAanslag(false)`; bij `wachten=true` blokkeert de bestaande code toch al tot loslaten, dus daar valt niets nieuws te detecteren.
 
 - **Loslaten**: geeft de positie terug die net losgelaten werd, als apart `InputResultaat` met `gebeurtenis = LOSGELATEN`. Wanneer voor die toets `functieBijLoslaten` is ingesteld, voert `UitVoerenFunctieVolgensMappingMetToetsAanslag()` die functie uit.
-- **Lang indrukken**: per toets optioneel in te stellen via `functieBijLangIndrukken` en `langIndrukkenDrempelMs` in `MappingTussenToetsaanslagEnUitTeVoerenFunctie`. Wanneer `OpvragenHuidigeToetsAanslag(false)` een `LANG_INDRUKKEN`-gebeurtenis teruggeeft, voert `UitVoerenFunctieVolgensMappingMetToetsAanslag()` de gekoppelde `functieBijLangIndrukken` uit. De gewone `functie` blijft gekoppeld aan `TOETSAANSLAG`.
-- **Timeout bij geen invoer**: `INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS`, standaard `0` (geen timeout, huidig gedrag). Bij een waarde groter dan 0 geeft `OpvragenHuidigeToetsAanslag(false)` een `InputResultaat` met `gebeurtenis = TIMEOUT_GEEN_INVOER` terug wanneer gedurende die tijd geen enkel kanaal iets gemeld heeft.
+- **Lang indrukken**: per toets optioneel in te stellen via `functieBijLangIndrukken` en `langIndrukkenDrempelMs` in `MappingTussenToetsaanslagEnUitTeVoerenFunctie`. Wanneer `OpvragenHuidigeToetsAanslag(false)` een `LANG_INDRUKKEN`-gebeurtenis teruggeeft, voert `UitVoerenFunctieVolgensMappingMetToetsAanslag()` de gekoppelde `functieBijLangIndrukken` uit. De gewone `functie` blijft gekoppeld aan `TOETSAANSLAG`. Bij een expliciet meegegeven mapping wordt `langIndrukkenDrempelMs` uit die werkelijk gebruikte mapping opgezocht.
+- **Timeout bij geen invoer**: `INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS`, standaard `0` (geen timeout, huidig gedrag). Bij een waarde groter dan 0 start de timer in `InputConfigureren()` en geeft `OpvragenHuidigeToetsAanslag(false)` na die periode een `InputResultaat` met `gebeurtenis = TIMEOUT_GEEN_INVOER` terug. Ook de huidige enkelvoudig geïmplementeerde `OpvragenHuidigeToetsAanslagen(..., 1)` geeft dit timeoutresultaat door.
 
 `INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` is de v1.1.0-configuratieschakelaar voor de optionele uitgebreide gebeurtenissen.
 
@@ -149,34 +149,26 @@ Input-voorbeelden) die niet elk opschrift bevat dat het gecompileerde `KEYPAD_TY
 niet-gevonden opschrift gebeurt er gewoon stilzwijgend niets bij die toetsdruk.
 
 `ControleerMappingVolledigheid(mapping)` controleert dit tijdens het draaien: ze doorloopt
-`KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` van het actief gecompileerde type, en meldt via `Serial` (enkel
-wanneer `DEBUG` en `SCREEN_TYPE_SERIAL` actief zijn, via dezelfde route als de rest van
-`PrintToScreen()`) welke opschriften in de meegegeven mapping ontbreken.
+`KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` van het actief gecompileerde type en meldt ontbrekende
+opschriften via `PrintToScreen()`. Daardoor volgt de controle dezelfde geselecteerde uitvoerdoelen
+als de rest van de Screen-laag; seriële standaarduitvoer via `PrintToScreen()` volgt daarbij de bestaande
+`DEBUG`-werking van de Screen-laag.
 
 Enkel beschikbaar wanneer `INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN` in `UserConfig.h` gedefinieerd
 is. Zonder die define bestaat de functie nergens in het gecompileerde programma: geen extra
 flashgebruik, geen `Serial`-afhankelijkheid. Bedoeld om tijdens het testen op te roepen (bijvoorbeeld
 eenmalig in `setup()`, ná `InputConfigureren()`), niet om in productiecode te laten staan.
 
-Voor een volledigheidscontrole die geen upload of aangesloten board vereist, zie
-`extras/TestLibraryMappingControle.cmd` (zie `extras/TESTEN.md`).
+De releasevalidatie bevat daarnaast een tekstuele volledigheidscontrole die geen upload of aangesloten board vereist. De gedeelde Windows-testscripts staan onder `extras/` en worden mee gepubliceerd. Alleen `extras/LokalePaden.cmd` is machinespecifiek en blijft via `.gitignore` lokaal; `extras/LokalePaden_template.cmd` wordt wel meegeleverd.
 
 ## Generiek keypad (experimenteel)
 
-`KEYPAD_TYPE_USER_DEFINED_DIRECT` en `KEYPAD_TYPE_USER_DEFINED_MATRIX` laten toe om een nieuw,
-fysiek keypad te testen zonder de bibliotheek zelf aan te passen. Pinnen, het HIGH/LOW-gedrag
-(`KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED`) en de koppeling tussen positie en opschrift
-(`KEYPAD_GENERIEK_KEY_LAYOUT`) worden volledig in `UserConfig.h` ingesteld, zie
-`UserConfig_template.h` voor het volledige voorbeeld.
+`KEYPAD_TYPE_USER_DEFINED_DIRECT` en `KEYPAD_TYPE_USER_DEFINED_MATRIX` laten toe om een nieuw fysiek keypad te testen zonder de bibliotheek zelf aan te passen. Alle vereiste `KEYPAD_GENERIEK_...`-instellingen worden in normaal gebruik volledig in `UserConfig.h` vastgelegd; definities in een `.ino` kunnen het apart gecompileerde `Input.cpp` niet configureren. Zie `UserConfig_template.h` en de twee UserDefined-voorbeelden voor een volledige configuratie.
 
-Enkel beschikbaar bij `INPUT_TYPE_PCF8574`. `KEYPAD_GENERIEK_PINNEN`/`_RIJ_PINNEN`/`_KOLOM_PINNEN`
-zijn bitposities op de PCF8574 (0 t.e.m. 7), geen Arduino-pinnummers. Elke ontbrekende, vereiste
-instelling geeft een letterlijke, leesbare `#error`-tekst tijdens het compileren.
+Enkel beschikbaar bij `INPUT_TYPE_PCF8574`. `KEYPAD_GENERIEK_PINNEN`/`_RIJ_PINNEN`/`_KOLOM_PINNEN` zijn bitposities op de PCF8574 (0 t.e.m. 7), geen Arduino-pinnummers. De build controleert voor UserDefined-keypads de vereiste instellingen, het verwachte aantal layoutentries, het pinbereik, dubbele pinnen en bij matrices ook overlap tussen rij- en kolompinnen.
 
-`examples/Systeem/Input/InputkanalenUserDefinedDirect.ino`/`InputkanalenUserDefinedMatrix.ino`
-zijn werkende, meteen compileerbare voorbeelden, elk met eigen, ingebouwde standaardwaarden
-(`#ifndef`), die overschreven worden zodra `UserConfig.h` de eigen instellingen bevat.
+Bij `KEYPAD_TYPE_USER_DEFINED_DIRECT` bepaalt `KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED` of een toets active-low of active-high wordt gelezen. `KEYPAD_TYPE_USER_DEFINED_MATRIX` gebruikt de vaste matrixscan van `Input.cpp` en is **altijd active-low**: de geselecteerde rij wordt laag gemaakt en een ingedrukte toets wordt als lage kolomingang gedetecteerd. Een generieke matrix moet dus active-low worden bekabeld.
 
-Dit is bewust een experimenteel pad: eens een configuratie bewezen werkt, kan ze overgezet
-worden naar een echt, benoemd `KEYPAD_TYPE_...` in `InputTypes.h`, met documentatie en
-screenshot zoals de bestaande, officieel ondersteunde types.
+`examples/Systeem/Input/InputkanalenPCF8574UserDefinedDirect/InputkanalenPCF8574UserDefinedDirect.ino` en `examples/Systeem/Input/InputkanalenPCF8574UserDefinedMatrix/InputkanalenPCF8574UserDefinedMatrix.ino` bevatten de vereiste configuratie als commentaarvoorbeeld, maar definiëren die waarden niet zelf. De expliciete `mappingTestMenu` wordt aangeroepen met `UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu)`.
+
+Dit blijft bewust een experimenteel pad: eens een configuratie bewezen werkt, kan ze overgezet worden naar een echt, benoemd `KEYPAD_TYPE_...` in `InputTypes.h`, met documentatie en screenshot zoals de bestaande, officieel ondersteunde types.

@@ -29,6 +29,15 @@
   #include "../../Language/Library_FR.h"
 #endif
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+static bool serialScreenGeconfigureerd = false;
+static void SerialScreenConfigureren() {
+  if (serialScreenGeconfigureerd) return;
+  Serial.begin(115200);
+  serialScreenGeconfigureerd = true;
+}
+#endif
+
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -89,6 +98,9 @@ bool CharacterScreenConfigureren(bool opnieuwProberen) {
       if (characterScreenI2CKandidaten[j] == characterScreenI2CKandidaten[i]) { reedsGeprobeerd = true; break; }
     }
     if (reedsGeprobeerd) continue;
+#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+    if (characterScreenI2CKandidaten[i] == I2C_ADDRESS_PCF8574) continue;
+#endif
 
     Wire.beginTransmission(characterScreenI2CKandidaten[i]);
     if (Wire.endTransmission() == 0) {
@@ -404,6 +416,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   if (eersteRegel != "" || tweedeRegel != "") {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
+    SerialScreenConfigureren();
     DEBUG_PRINTLN(eersteRegel);
     DEBUG_PRINTLN(tweedeRegel);
 #endif
@@ -432,6 +445,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   if (derdeRegel != "" || vierdeRegel != "") {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
+    SerialScreenConfigureren();
     DEBUG_PRINTLN(derdeRegel);
     DEBUG_PRINTLN(vierdeRegel);
 #endif
@@ -474,6 +488,9 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   standaardScreenActief = standaardScreenActief || pixelScreenActief;
 #endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL) && !(SCREEN_OUTPUT & (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
+  standaardScreenActief = true;
+#endif
 
   if (standaardScreenActief) {
     if (delayTime) delay(delayTime);
@@ -491,7 +508,10 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
-  if (action != "") DEBUG_PRINTLN(action);
+  if (action != "") {
+    SerialScreenConfigureren();
+    Serial.println(action);
+  }
 #endif
 #endif
 

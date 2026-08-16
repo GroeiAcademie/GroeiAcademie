@@ -59,6 +59,10 @@
 #ifndef _INPUT_HX1838_KALIBRATIE_UITVOEREN
   #define _INPUT_HX1838_KALIBRATIE_UITVOEREN                       "KALIBRATIE"
 #endif
+#ifndef _INPUT_HX1838_KALIBRATIE_TIMEOUT
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT                          "TIME-OUT"
+#endif
+
 #ifndef _INPUT_HX1838_KALIBRATIE_OPGESLAGEN
   #define _INPUT_HX1838_KALIBRATIE_OPGESLAGEN                      "OPGESLAGEN"
 #endif
@@ -134,6 +138,10 @@
 
 #ifndef _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL
   #define _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL           "Kalibratie klaar. Druk alle toetsen opnieuw in ter controle."
+#endif
+
+#ifndef _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL                   "IR-kalibratie afgebroken: timeout."
 #endif
 
 #ifndef _INPUT_HX1838_KALIBRATIE_OPGESLAGEN_SERIAL

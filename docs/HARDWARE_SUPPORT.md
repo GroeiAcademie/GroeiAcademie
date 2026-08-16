@@ -43,44 +43,46 @@ De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata 
 
 ### Additional Boards Manager URLs voor third-party boardplatforms
 
-De standaard Arduino- en Espressif-platforms worden via de gekende package-indexen van Arduino IDE/Arduino CLI beheerd. Voor de twee third-party boardplatforms hieronder gebruikt `extras/TestBoardplatformsDependency.cmd` expliciet deze aanvullende package-indexen wanneer automatische installatie nodig is:
+De standaard Arduino- en Espressif-platforms worden via de gekende package-indexen van Arduino IDE/Arduino CLI beheerd. Voor de twee third-party boardplatforms hieronder gebruikt de interne releasevalidatie expliciet deze aanvullende package-indexen wanneer automatische installatie nodig is:
 
 | Boardplatform | Platform-ID | Additional Boards Manager URL |
 |---|---|---|
 | Cytron Maker Uno RP2040 | `rp2040:rp2040` | `https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json` |
 | STMicroelectronics Nucleo-F401RE | `STMicroelectronics:stm32` | `https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json` |
 
-`extras/TestBoardplatformsDependency.cmd` controleert de geïnstalleerde cores via `arduino-cli core list`. Wanneer een van deze twee third-party platforms ontbreekt en automatische installatie gekozen wordt, voegt het script eerst de overeenkomstige URL toe via `arduino-cli config add board_manager.additional_urls`, werkt daarna de package-index bij met `arduino-cli core update-index` en installeert vervolgens het platform met `arduino-cli core install`.
+De meegeleverde maintainer-tooling controleert de geïnstalleerde cores via `arduino-cli core list`. Wanneer een van deze twee third-party platforms ontbreekt en automatische installatie gekozen wordt, wordt eerst de overeenkomstige URL toegevoegd via `arduino-cli config add board_manager.additional_urls`, daarna de package-index bijgewerkt met `arduino-cli core update-index` en vervolgens het platform geïnstalleerd met `arduino-cli core install`. De gedeelde Windows-testscripts worden mee gepubliceerd; alleen het machinespecifieke `extras/LokalePaden.cmd` blijft via `.gitignore` lokaal.
 
 Voor WEMOS D1 R32 gebruikt de GroeiAcademie FrameWork-library de door Espressif geleverde `D0` tot en met `D13`-namen. De core vertaalt deze zelf naar GPIO3, GPIO1, GPIO26, GPIO25, GPIO17, GPIO16, GPIO27, GPIO14, GPIO12, GPIO13, GPIO5, GPIO23, GPIO19 en GPIO18. `A0..A5` zijn respectievelijk GPIO2, GPIO4, GPIO35, GPIO34, GPIO36 en GPIO39. De afzonderlijke I2C-functies zijn `SDA=GPIO21` en `SCL=GPIO22`; `A4` en `A5` zijn op dit board dus niet de I2C-pinnen.
 
 
 ### SB Components Ardi-32 — eigen Arduino-Uno-headermapping
 
-SB Components schrijft voor om in Arduino IDE de boardselectie `ESP32S3 Dev Module` uit `esp32 by Espressif Systems` te gebruiken. Die generieke boardvariant kent de fysieke Arduino-Uno-header van de Ardi-32 niet. `SystemConfig.h` bevat daarom bij `BOARD_VERSION == BOARD_ARDI32` een afzonderlijke Ardi32-configuratietak, maar de volledige Arduino-Uno-headermapping daarin blijft voorlopig uitgeschakeld totdat elke lijn rechtstreeks aan de officiële SB Components-hardwarebron is geverifieerd.
+SB Components gebruikt in Arduino IDE de generieke boardselectie `ESP32S3 Dev Module`. Die boardvariant kent de fysieke Arduino-Uno-header van de Ardi-32 niet. `SystemConfig.h` is daarom voor de library de bron van waarheid: bij `BOARD_VERSION == BOARD_ARDI32` gebruikt de code onderstaande expliciete headerpinmapping.
 
 | Arduino-header | ESP32-S3 GPIO |
 |---|---:|
-| D0 / RX | 44 |
-| D1 / TX | 43 |
-| D2 | 5 |
-| D3 | 6 |
-| D4 | 7 |
-| D5 | 8 |
+| D0 / RX | 18 |
+| D1 / TX | 17 |
+| D2 | 1 |
+| D3 | 42 |
+| D4 | 41 |
+| D5 | 2 |
 | D6 | 9 |
-| D7 | 10 |
-| D8 | 11 |
-| D9 | 12 |
-| D10 / SS | 13 |
-| D11 / MOSI | 14 |
-| D12 / MISO | 21 |
-| D13 / SCK | 47 |
-| A0 | 1 |
-| A1 | 2 |
-| A2 | 3 |
-| A3 | 4 |
-| A4 / SDA | 17 |
-| A5 / SCL | 18 |
+| D7 | 14 |
+| D8 | 47 |
+| D9 | 21 |
+| D10 / SS | 10 |
+| D11 / MOSI | 11 |
+| D12 / MISO | 13 |
+| D13 / SCK | 12 |
+| A0 | 4 |
+| A1 | 5 |
+| A2 | 6 |
+| A3 | 7 |
+| A4 | 15 |
+| A5 | 16 |
+| SDA | 38 |
+| SCL | 39 |
 
 Omdat de fabrikant een generieke `ESP32S3 Dev Module` laat selecteren, kan de Arduino-toolchain de Ardi-32 niet automatisch als `BOARD_ARDI32` herkennen. Zet daarom voor dit board expliciet `#define BOARD_VERSION BOARD_ARDI32` in `UserConfig.h`. Een instelling in `UserConfig.h` heeft voorrang op automatische boarddetectie.
 
@@ -158,7 +160,7 @@ De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepa
 
 ### GroeiAcademie Stimulus Hardware Shield v1.0.0
 
-Voor het actuele shield zijn de schema-exporten, assemblagekeuzes en validatiestappen opgenomen onder `docs/Toepassingsgebieden/Stimulus/Hardware/`. Gebruik de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](Toepassingsgebieden/Stimulus/Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) samen met de [handleiding voor de hardwarevalidatie v1.0.0](Toepassingsgebieden/Stimulus/Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+Voor het actuele shield zijn de schema-exporten, assemblagekeuzes en validatiestappen opgenomen onder `docs/Uitbreidingskaarten/Stimulus Shield v1.0.0/`. Gebruik de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) samen met de [handleiding voor de hardwarevalidatie v1.0.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
 
 De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbruggen: zes tussen H9 en H10 en één tussen H3 pin 1 en H4 pin 1. Plaats nooit beide tegelijk.
 

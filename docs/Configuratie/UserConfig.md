@@ -40,7 +40,7 @@ Zonder actief `UserConfig.h` blijven `DEBUG` en `TRACE` uitgeschakeld.
 
 ## Schermuitvoer
 
-De gebruiker stelt `SCREEN_OUTPUT_CONFIG` in. `SCREEN_OUTPUT` is de door de library afgeleide effectieve waarde. Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` aan `SCREEN_OUTPUT` toe.
+De gebruiker stelt `SCREEN_OUTPUT_CONFIG` in. `SCREEN_OUTPUT` is de door de library afgeleide effectieve waarde. Wanneer `DEBUG` actief is, voegt de library automatisch `SCREEN_TYPE_SERIAL` aan `SCREEN_OUTPUT` toe. De standaard seriële `PrintToScreen()`-uitvoer volgt de bestaande `DEBUG`-werking.
 
 ```cpp
 // #define SCREEN_OUTPUT_CONFIG SCREEN_TYPE_NONE
@@ -141,3 +141,7 @@ Beschikbare HX1838-toetsenindelingen:
 - `HX1838_TOETSENINDELING_3x4`: remote met 17 toetsen; enkel de 12 toetsen van de 3x4-matrix (1-9, *, 0, #) worden gebruikt;
 - `HX1838_TOETSENINDELING_REMOTE_17_TOETSEN`: alle 17 toetsen, inclusief navigatie (UP, DOWN, OK, LEFT, RIGHT);
 - `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`: remote met 21 toetsen, inclusief de MP3-toetsen.
+
+## Input-specifieke gebruikersinstellingen
+
+UserDefined PCF8574-keypads moeten al hun vereiste `KEYPAD_GENERIEK_...`-instellingen in `UserConfig.h` krijgen; een `.ino`-define bereikt `Input.cpp` niet. Voor HX1838 begrenst `HX1838_KALIBRATIE_TIMEOUT_MS` (standaard 30000 ms) de wachttijd tijdens kalibratie en verificatie.

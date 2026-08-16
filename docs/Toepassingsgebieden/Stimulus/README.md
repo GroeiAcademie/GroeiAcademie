@@ -185,7 +185,7 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 
 ## Afzonderlijke schemabestanden
 
-De ADS1115-hardwarelijn staat onder [Hardware/](Hardware/). De centrale uitleg staat in [Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md](Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. De praktische validatiestappen staan in [Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md](Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+De ADS1115-hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De centrale uitleg staat in [Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. De praktische validatiestappen staan in [Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
 
 
 ### BOARD_ESP32_UNO

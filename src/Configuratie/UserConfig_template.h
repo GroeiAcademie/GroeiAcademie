@@ -123,6 +123,7 @@
 #if defined(INPUT_KANAAL_CONFIG) && (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
   #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
   // Experimenteel: eigen directe PCF8574-configuratie. Zie docs/Systeem/INPUT.md.
+  // Verwijder de // voor de benodigde #define-regels en pas de waarden aan je eigen keypad aan.
   // Let op: dit zijn PCF8574-pinnen P0 t.e.m. P7, geen Arduino-pinnummers.
   // #define KEYPAD_GENERIEK_AANTAL_PINNEN 4
   // #define KEYPAD_GENERIEK_PINNEN {PCF8574_PIN_P0, PCF8574_PIN_P1, PCF8574_PIN_P2, PCF8574_PIN_P3}
@@ -130,14 +131,18 @@
   // #define KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
   // Experimenteel: eigen matrix-PCF8574-configuratie. Zie docs/Systeem/INPUT.md.
-  // Let op: rijen + kolommen samen maximaal 8 PCF8574-pinnen.
-  // #define KEYPAD_GENERIEK_AANTAL_RIJEN     2
-  // #define KEYPAD_GENERIEK_AANTAL_KOLOMMEN  2
-  // #define KEYPAD_GENERIEK_RIJ_PINNEN       {PCF8574_PIN_P0, PCF8574_PIN_P1}
-  // #define KEYPAD_GENERIEK_KOLOM_PINNEN     {PCF8574_PIN_P2, PCF8574_PIN_P3}
+  // Verwijder de // voor de benodigde #define-regels en pas de waarden aan je eigen matrix aan.
+  // Let op: rijen + kolommen samen maximaal 8 PCF8574-pinnen; generieke matrices zijn active-low.
+  // Onderstaand 4x3-profiel komt overeen met examples/Systeem/Input/InputkanalenPCF8574UserDefinedMatrix.
+  // #define KEYPAD_GENERIEK_AANTAL_RIJEN     4
+  // #define KEYPAD_GENERIEK_AANTAL_KOLOMMEN  3
+  // #define KEYPAD_GENERIEK_RIJ_PINNEN       {PCF8574_PIN_P0, PCF8574_PIN_P1, PCF8574_PIN_P2, PCF8574_PIN_P3}
+  // #define KEYPAD_GENERIEK_KOLOM_PINNEN     {PCF8574_PIN_P4, PCF8574_PIN_P5, PCF8574_PIN_P6}
   // #define KEYPAD_GENERIEK_KEY_LAYOUT { \
-  //   {"1", "Toets 1"}, {"2", "Toets 2"}, \
-  //   {"3", "Toets 3"}, {"4", "Toets 4"} \
+  //   {"1", "Toets 1"}, {"2", "Toets 2"}, {"3", "Toets 3"}, \
+  //   {"4", "Toets 4"}, {"5", "Toets 5"}, {"6", "Toets 6"}, \
+  //   {"7", "Toets 7"}, {"8", "Toets 8"}, {"9", "Toets 9"}, \
+  //   {"*", "Toets *"}, {"0", "Toets 0"}, {"#", "Toets #"} \
   // }
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
   // #define KEYPAD_PIN_K1 PCF8574_PIN_P1
@@ -342,6 +347,10 @@
 
 #ifndef HX1838_KALIBRATIE_TOETS_PAUZE_MS
 // #define HX1838_KALIBRATIE_TOETS_PAUZE_MS 300UL
+#endif
+
+#ifndef HX1838_KALIBRATIE_TIMEOUT_MS
+// #define HX1838_KALIBRATIE_TIMEOUT_MS 30000UL
 #endif
 
 // ============================================================================

@@ -62,6 +62,10 @@
 #ifndef _INPUT_HX1838_KALIBRATIE_UITVOEREN
   #define _INPUT_HX1838_KALIBRATIE_UITVOEREN                       "CALIBRAGE"
 #endif
+#ifndef _INPUT_HX1838_KALIBRATIE_TIMEOUT
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT                          "DELAI DEPASSE"
+#endif
+
 #ifndef _INPUT_HX1838_KALIBRATIE_OPGESLAGEN
   #define _INPUT_HX1838_KALIBRATIE_OPGESLAGEN                      "ENREGISTRE"
 #endif
@@ -137,6 +141,10 @@
 
 #ifndef _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL
   #define _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL           "Calibrage terminé. Appuyez de nouveau sur toutes les touches pour contrôle."
+#endif
+
+#ifndef _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL                   "Calibrage IR interrompu : délai dépassé."
 #endif
 
 #ifndef _INPUT_HX1838_KALIBRATIE_OPGESLAGEN_SERIAL

@@ -180,6 +180,49 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieV
   return nullptr;
 }
 
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+static unsigned long _StandaardLangIndrukkenDrempelOpzoeker(const char* opschriftToetsAanslag) {
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctie* regel = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(opschriftToetsAanslag);
+  if (regel == nullptr || regel->functieBijLangIndrukken == nullptr) return 0;
+  return regel->langIndrukkenDrempelMs;
+}
+#else
+static unsigned long _StandaardLangIndrukkenDrempelOpzoeker(const char* opschriftToetsAanslag) {
+  (void)opschriftToetsAanslag;
+  return 0;
+}
+#endif
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+const MappingTussenToetsaanslagEnUitTeVoerenFunctie* _actieveMappingVoorLangIndrukken = nullptr;
+byte _actieveMappingAantalVoorLangIndrukken = 0;
+
+unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMapping(const char* opschriftToetsAanslag) {
+  if (_actieveMappingVoorLangIndrukken == nullptr || opschriftToetsAanslag == nullptr) return 0;
+  for (byte i = 0; i < _actieveMappingAantalVoorLangIndrukken; i++) {
+    if (strcmp(_actieveMappingVoorLangIndrukken[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
+      if (_actieveMappingVoorLangIndrukken[i].functieBijLangIndrukken == nullptr) return 0;
+      return _actieveMappingVoorLangIndrukken[i].langIndrukkenDrempelMs;
+    }
+  }
+  return 0;
+}
+
+const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* _actieveMappingMetArgumentenVoorLangIndrukken = nullptr;
+byte _actieveMappingMetArgumentenAantalVoorLangIndrukken = 0;
+
+unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten(const char* opschriftToetsAanslag) {
+  if (_actieveMappingMetArgumentenVoorLangIndrukken == nullptr || opschriftToetsAanslag == nullptr) return 0;
+  for (byte i = 0; i < _actieveMappingMetArgumentenAantalVoorLangIndrukken; i++) {
+    if (strcmp(_actieveMappingMetArgumentenVoorLangIndrukken[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
+      if (_actieveMappingMetArgumentenVoorLangIndrukken[i].functieBijLangIndrukken == nullptr) return 0;
+      return _actieveMappingMetArgumentenVoorLangIndrukken[i].langIndrukkenDrempelMs;
+    }
+  }
+  return 0;
+}
+#endif
+
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
 // ============================================================================
 // MAPPING-VOLLEDIGHEIDSCONTROLE (enkel bedoeld om tijdens het testen op te roepen)
@@ -254,6 +297,15 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 // PCF8574 PINMAPPING EN LAAGSTE-NIVEAUFUNCTIES
 // ============================================================================
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+  template <size_t N>
+  constexpr bool PCF8574PinnenBinnenBereik(const byte (&pinnen)[N], size_t index = 0) { return index >= N ? true : (pinnen[index] <= 7 && PCF8574PinnenBinnenBereik(pinnen, index + 1)); }
+
+  template <size_t N>
+  constexpr bool PCF8574PinnenUniek(const byte (&pinnen)[N], size_t eerste = 0, size_t tweede = 1) { return eerste >= N ? true : (tweede >= N ? PCF8574PinnenUniek(pinnen, eerste + 1, eerste + 2) : (pinnen[eerste] != pinnen[tweede] && PCF8574PinnenUniek(pinnen, eerste, tweede + 1))); }
+
+  template <size_t N, size_t M>
+  constexpr bool PCF8574PinnenNietOverlappend(const byte (&eerste)[N], const byte (&tweede)[M], size_t eersteIndex = 0, size_t tweedeIndex = 0) { return eersteIndex >= N ? true : (tweedeIndex >= M ? PCF8574PinnenNietOverlappend(eerste, tweede, eersteIndex + 1, 0) : (eerste[eersteIndex] != tweede[tweedeIndex] && PCF8574PinnenNietOverlappend(eerste, tweede, eersteIndex, tweedeIndex + 1))); }
+
   #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
     #define KEYPAD_IS_DIRECT
     static const byte AANTAL_DIRECT_PINNEN = 4;
@@ -313,14 +365,19 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     static const byte TOETS_PINNEN[AANTAL_DIRECT_PINNEN] = {KEYPAD_PIN_OUT1, KEYPAD_PIN_OUT2, KEYPAD_PIN_OUT3, KEYPAD_PIN_OUT4, KEYPAD_PIN_OUT5, KEYPAD_PIN_OUT6, KEYPAD_PIN_OUT7, KEYPAD_PIN_OUT8};
   #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
     #define KEYPAD_IS_DIRECT
-    static const byte AANTAL_DIRECT_PINNEN = KEYPAD_GENERIEK_AANTAL_PINNEN;
-    static const byte TOETS_PINNEN[AANTAL_DIRECT_PINNEN] = KEYPAD_GENERIEK_PINNEN;
+    static_assert(KEYPAD_GENERIEK_AANTAL_PINNEN > 0, "Het directe generieke keypad moet minstens één PCF8574-pin gebruiken.");
+    static_assert(KEYPAD_GENERIEK_AANTAL_PINNEN <= 8, "Het directe generieke keypad gebruikt meer dan 8 PCF8574-pinnen.");
+    static constexpr byte AANTAL_DIRECT_PINNEN = KEYPAD_GENERIEK_AANTAL_PINNEN;
+    static constexpr byte TOETS_PINNEN[AANTAL_DIRECT_PINNEN] = KEYPAD_GENERIEK_PINNEN;
   #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
     #define KEYPAD_IS_MATRIX
-    static const byte AANTAL_RIJEN = KEYPAD_GENERIEK_AANTAL_RIJEN;
-    static const byte AANTAL_KOLOMMEN = KEYPAD_GENERIEK_AANTAL_KOLOMMEN;
-    static const byte RIJ_PINNEN[AANTAL_RIJEN] = KEYPAD_GENERIEK_RIJ_PINNEN;
-    static const byte KOLOM_PINNEN[AANTAL_KOLOMMEN] = KEYPAD_GENERIEK_KOLOM_PINNEN;
+    static_assert(KEYPAD_GENERIEK_AANTAL_RIJEN > 0, "Het generieke matrixkeypad moet minstens één rij hebben.");
+    static_assert(KEYPAD_GENERIEK_AANTAL_KOLOMMEN > 0, "Het generieke matrixkeypad moet minstens één kolom hebben.");
+    static_assert((KEYPAD_GENERIEK_AANTAL_RIJEN + KEYPAD_GENERIEK_AANTAL_KOLOMMEN) <= 8, "Het generieke matrixkeypad gebruikt meer dan 8 PCF8574-pinnen.");
+    static constexpr byte AANTAL_RIJEN = KEYPAD_GENERIEK_AANTAL_RIJEN;
+    static constexpr byte AANTAL_KOLOMMEN = KEYPAD_GENERIEK_AANTAL_KOLOMMEN;
+    static constexpr byte RIJ_PINNEN[AANTAL_RIJEN] = KEYPAD_GENERIEK_RIJ_PINNEN;
+    static constexpr byte KOLOM_PINNEN[AANTAL_KOLOMMEN] = KEYPAD_GENERIEK_KOLOM_PINNEN;
   #endif
 
   #if defined(KEYPAD_IS_DIRECT)
@@ -328,6 +385,17 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #endif
   #if defined(KEYPAD_IS_MATRIX)
     static_assert((AANTAL_RIJEN + AANTAL_KOLOMMEN) <= 8, "De matrix gebruikt meer dan 8 PCF8574-pinnen.");
+  #endif
+
+  #if KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
+    static_assert((sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])) == AANTAL_DIRECT_PINNEN, "KEYPAD_GENERIEK_KEY_LAYOUT moet exact één entry per directe keypadpin bevatten.");
+    static_assert(PCF8574PinnenBinnenBereik(TOETS_PINNEN), "KEYPAD_GENERIEK_PINNEN mag alleen PCF8574-bitposities 0 t.e.m. 7 bevatten.");
+    static_assert(PCF8574PinnenUniek(TOETS_PINNEN), "KEYPAD_GENERIEK_PINNEN bevat dubbele PCF8574-pinnen.");
+  #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
+    static_assert((sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])) == (AANTAL_RIJEN * AANTAL_KOLOMMEN), "KEYPAD_GENERIEK_KEY_LAYOUT moet exact één entry per matrixpositie bevatten.");
+    static_assert(PCF8574PinnenBinnenBereik(RIJ_PINNEN) && PCF8574PinnenBinnenBereik(KOLOM_PINNEN), "KEYPAD_GENERIEK_RIJ_PINNEN en KEYPAD_GENERIEK_KOLOM_PINNEN mogen alleen PCF8574-bitposities 0 t.e.m. 7 bevatten.");
+    static_assert(PCF8574PinnenUniek(RIJ_PINNEN) && PCF8574PinnenUniek(KOLOM_PINNEN), "De generieke matrix bevat dubbele rij- of kolompinnen.");
+    static_assert(PCF8574PinnenNietOverlappend(RIJ_PINNEN, KOLOM_PINNEN), "Dezelfde PCF8574-pin mag niet tegelijk rij- en kolompin zijn.");
   #endif
 
   static PCF8574 pcf8574(I2C_ADDRESS_PCF8574);
@@ -338,14 +406,33 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   static bool pcf8574Bereikbaar = true;
   static bool pcf8574FoutmeldingWeergegeven = false;
 
+  static void PCF8574OnbereikbaarMelden() {
+    pcf8574Bereikbaar = false;
+    if (pcf8574FoutmeldingWeergegeven) return;
+    static char pcf8574AdresBuffer[17];
+    snprintf(pcf8574AdresBuffer, sizeof(pcf8574AdresBuffer), "I2C-adres: 0x%02X", I2C_ADDRESS_PCF8574);
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+    PrintToScreen(ScreenData::TYPE_FATAL, _FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
+#else
+    PrintToScreen(_FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
+#endif
+    pcf8574FoutmeldingWeergegeven = true;
+  }
+
   static bool PCF8574poortPatroonMatrixUitlezenInstellen(byte waarde) {
+    if (!pcf8574Bereikbaar) return false;
     pcf8574.write8(waarde);
-    return pcf8574.lastError() == PCF8574_OK;
+    if (pcf8574.lastError() == PCF8574_OK) return true;
+    PCF8574OnbereikbaarMelden();
+    return false;
   }
 
   static bool PCF8574poortPatroonUitlezen(byte& waarde) {
+    if (!pcf8574Bereikbaar) return false;
     waarde = pcf8574.read8();
-    return pcf8574.lastError() == PCF8574_OK;
+    if (pcf8574.lastError() == PCF8574_OK) return true;
+    PCF8574OnbereikbaarMelden();
+    return false;
   }
 
   #if defined(KEYPAD_IS_DIRECT)
@@ -441,6 +528,10 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       return 0;
     #endif
   }
+#endif
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 #endif
 
 // ============================================================================
@@ -562,26 +653,28 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     return -1;
   }
 
-  static void HX1838toetsKalibreren(byte index) {
+  static bool HX1838toetsKalibreren(byte index) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
     Serial.print(_INPUT_HX1838_DRUK_NU_OP_SERIAL);
     Serial.println(IR_KEY_LAYOUT[index].weergavetekst);
 #endif
     PrintToScreen(_INPUT_HX1838_DRUK_NU_OP, IR_KEY_LAYOUT[index].weergavetekst, 0);
 
-    while (true) {
+    unsigned long startWachten = millis();
+    while ((millis() - startWachten) < HX1838_KALIBRATIE_TIMEOUT_MS) {
       if (IrReceiver.decode()) {
         if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
           irCodes[index] = IrReceiver.decodedIRData.command;
           IrReceiver.resume();
-          break;
+          delay(HX1838_KALIBRATIE_TOETS_PAUZE_MS);
+          return true;
         }
 
         IrReceiver.resume();
       }
     }
-    
-    delay(HX1838_KALIBRATIE_TOETS_PAUZE_MS);
+
+    return false;
   }
 
   static void HX1838kalibratieOpslaan() {
@@ -604,7 +697,7 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     return true;
   }
 
-  static void HX1838kalibratieVerifieren() {
+  static bool HX1838kalibratieVerifieren() {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
     Serial.println(_INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL);
 #endif
@@ -613,8 +706,10 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     bool geverifieerd[AANTAL_IR_TOETSEN];
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) geverifieerd[i] = false;
     byte aantalGeverifieerd = 0;
+    unsigned long laatsteHerkenning = millis();
 
     while (aantalGeverifieerd < AANTAL_IR_TOETSEN) {
+      if ((millis() - laatsteHerkenning) >= HX1838_KALIBRATIE_TIMEOUT_MS) return false;
       if (IrReceiver.decode()) {
         if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
           int index = HX1838indexUitZoekenVoorSignaal(IrReceiver.decodedIRData.command);
@@ -622,6 +717,7 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
           if (index >= 0 && !geverifieerd[index]) {
             geverifieerd[index] = true;
             aantalGeverifieerd++;
+            laatsteHerkenning = millis();
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
             Serial.print(_INPUT_HX1838_TOETS_HERKEND_SERIAL);
             Serial.println(IR_KEY_LAYOUT[index].weergavetekst);
@@ -636,14 +732,28 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 
     PrintToScreen(_INPUT_HX1838_CONTROLE_GESLAAGD, "", 2000);
     HX1838kalibratieOpslaan();
+    return true;
   }
 
   static void HX1838kalibratieUitvoeren() {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
     Serial.println(_INPUT_HX1838_KALIBRATIE_GESTART_SERIAL);
 #endif
-    for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) HX1838toetsKalibreren(i);
-    HX1838kalibratieVerifieren();
+    for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
+      if (!HX1838toetsKalibreren(i)) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+        Serial.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
+#endif
+        PrintToScreen(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
+        return;
+      }
+    }
+    if (!HX1838kalibratieVerifieren()) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+      Serial.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
+#endif
+      PrintToScreen(_INPUT_HX1838_CONTROLE, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
+    }
   }
 
   static int HX1838uitLezenToetsAanslag() {
@@ -689,20 +799,10 @@ void InputConfigureren() {
   // businitialisatie loopt nu via GedeeldeBus (Systeem/GedeeldeBus/), gedragsbehoudend t.o.v. de vorige, hier lokaal herhaalde ARDI32-logica.
   GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
     if (!pcf8574.begin(0xFF)) {
-      pcf8574Bereikbaar = false;
-      
-      if (!pcf8574FoutmeldingWeergegeven) {
-        static char pcf8574AdresBuffer[17];
-        snprintf(pcf8574AdresBuffer, sizeof(pcf8574AdresBuffer), "I2C-adres: 0x%02X", I2C_ADDRESS_PCF8574);
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-        PrintToScreen(ScreenData::TYPE_FATAL, _FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
-#else
-        PrintToScreen(_FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
-#endif
-        pcf8574FoutmeldingWeergegeven = true;
-      }
+      PCF8574OnbereikbaarMelden();
     } else {
       pcf8574Bereikbaar = true;
+      pcf8574FoutmeldingWeergegeven = false;
     }
   #endif
 
@@ -745,13 +845,21 @@ void InputConfigureren() {
       }
     #endif
   #endif
+
+  #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+    laatsteInvoerTijdstipVoorTimeout = millis();
+    #if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+      vorigeRauweKeypadPositie = 0;
+      stabieleKeypadPositie = 0;
+      keypadWijzigingSinds = millis();
+      laatstePositieVoorLoslatenDetectie = 0;
+      keypadDrukBeginTijd = 0;
+      langIndrukkenAlGemeldVoorHuidigeDruk = false;
+    #endif
+  #endif
 }
 
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
-#endif
-
-InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
+static InputResultaat OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker) {
   InputResultaat resultaat = {InputKanaal::NONE, 0, nullptr};
 
   #if INPUT_KANAAL_CONFIG == INPUT_TYPE_NONE
@@ -769,7 +877,11 @@ InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
 
   while (true) {
     #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
-      int positieKeypad = wachten ? KeypadUitLezenToetsAanslag() : KeypadUitLezenRuweData();
+      #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+        int positieKeypad = KeypadUitLezenToetsAanslag();
+      #else
+        int positieKeypad = wachten ? KeypadUitLezenToetsAanslag() : KeypadUitLezenRuweData();
+      #endif
 
       if (positieKeypad > 0 && positieKeypad <= AANTAL_KEYPAD_TOETSEN) {
         #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
@@ -795,9 +907,9 @@ InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
 
         const char* opschriftVoorDrempel = (stabieleKeypadPositie > 0 && stabieleKeypadPositie <= AANTAL_KEYPAD_TOETSEN) ? KEY_LAYOUT[stabieleKeypadPositie - 1].opschrift : nullptr;
         if (opschriftVoorDrempel != nullptr) {
-          const MappingTussenToetsaanslagEnUitTeVoerenFunctie* regel = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(opschriftVoorDrempel);
-          if (regel != nullptr && regel->functieBijLangIndrukken != nullptr) {
-            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(regel->langIndrukkenDrempelMs);
+          unsigned long langIndrukkenDrempelMs = drempelOpzoeker(opschriftVoorDrempel);
+          if (langIndrukkenDrempelMs > 0) {
+            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMs);
             if (langIndrukkenPositie > 0) {
               laatsteInvoerTijdstipVoorTimeout = millis();
               return {InputKanaal::DIGITAL, langIndrukkenPositie, KEY_LAYOUT[langIndrukkenPositie - 1].opschrift, InputGebeurtenis::LANG_INDRUKKEN};
@@ -807,7 +919,11 @@ InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
       }
       #endif
     #elif (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
-      int positieKeypad = wachten ? KeypadUitLezenToetsAanslag() : KeypadUitLezenRuweData();
+      #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+        int positieKeypad = KeypadUitLezenToetsAanslag();
+      #else
+        int positieKeypad = wachten ? KeypadUitLezenToetsAanslag() : KeypadUitLezenRuweData();
+      #endif
 
       if (positieKeypad > 0 && positieKeypad <= AANTAL_KEYPAD_TOETSEN) {
         #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
@@ -833,9 +949,9 @@ InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
 
         const char* opschriftVoorDrempel = (stabieleKeypadPositie > 0 && stabieleKeypadPositie <= AANTAL_KEYPAD_TOETSEN) ? KEY_LAYOUT[stabieleKeypadPositie - 1].opschrift : nullptr;
         if (opschriftVoorDrempel != nullptr) {
-          const MappingTussenToetsaanslagEnUitTeVoerenFunctie* regel = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(opschriftVoorDrempel);
-          if (regel != nullptr && regel->functieBijLangIndrukken != nullptr) {
-            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(regel->langIndrukkenDrempelMs);
+          unsigned long langIndrukkenDrempelMs = drempelOpzoeker(opschriftVoorDrempel);
+          if (langIndrukkenDrempelMs > 0) {
+            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMs);
             if (langIndrukkenPositie > 0) {
               laatsteInvoerTijdstipVoorTimeout = millis();
               return {InputKanaal::PCF8574, langIndrukkenPositie, KEY_LAYOUT[langIndrukkenPositie - 1].opschrift, InputGebeurtenis::LANG_INDRUKKEN};
@@ -868,6 +984,14 @@ InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
   }
 }
 
+InputResultaat OpvragenHuidigeToetsAanslag(bool wachten) {
+  return OpvragenHuidigeToetsAanslagIntern(wachten, _StandaardLangIndrukkenDrempelOpzoeker);
+}
+
+InputResultaat OpvragenHuidigeToetsAanslag(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker) {
+  return OpvragenHuidigeToetsAanslagIntern(wachten, drempelOpzoeker);
+}
+
 InputResultaten OpvragenHuidigeToetsAanslagen(bool wachten, byte aantalSimultaan) {
   InputResultaten resultaten = { StatusOpvragenToetsAanslagen::GEEN, 0, {{InputKanaal::NONE, 0, nullptr}} };
 
@@ -877,6 +1001,14 @@ InputResultaten OpvragenHuidigeToetsAanslagen(bool wachten, byte aantalSimultaan
   }
 
   InputResultaat resultaat = OpvragenHuidigeToetsAanslag(wachten);
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  if (resultaat.inputKanaal == InputKanaal::NONE && resultaat.gebeurtenis == InputGebeurtenis::TIMEOUT_GEEN_INVOER) {
+    resultaten.status = StatusOpvragenToetsAanslagen::GELDIG;
+    resultaten.aantalToetsAanslagen = 1;
+    resultaten.toetsAanslagen[0] = resultaat;
+    return resultaten;
+  }
+#endif
   if (resultaat.inputKanaal == InputKanaal::NONE) return resultaten;
 
   resultaten.status = StatusOpvragenToetsAanslagen::GELDIG;
