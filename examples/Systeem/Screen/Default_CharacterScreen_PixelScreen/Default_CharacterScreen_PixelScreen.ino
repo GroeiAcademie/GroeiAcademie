@@ -22,7 +22,8 @@ Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
 
 void setup() {
 #if defined(DEBUG) && (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  Serial.begin(115200);
+  Serial.begin(SERIAL_BAUDRATE);
+  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
 #endif
 
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);

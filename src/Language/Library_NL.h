@@ -20,6 +20,12 @@
 #define _FATAL_PS003 "FATAL: PS003" // Niet-omgewisselde breedte en hoogte komen niet overeen
 #define _FATAL_PS004 "FATAL: PS004" // Tekstgrid kleiner dan 16x2
 
+//=========================================================
+// CRITICAL
+//=========================================================
+// SerialScreen
+#define _CRITICAL_SS001 "CRITICAL: SS001" // SerialScreen niet beschikbaar na SERIAL_CONNECT_TIMEOUT_MS
+
 // InputKanalen
 #define _FATAL_IN000 "FATAL: IN000" // PCF8574 niet bereikbaar op ingesteld I2C-adres
 
@@ -67,12 +73,16 @@
   #define _INPUT_HX1838_KALIBRATIE_OPGESLAGEN                      "OPGESLAGEN"
 #endif
 
-#ifndef _INPUT_HX1838_KALIBRATIE_GELADEN
-  #define _INPUT_HX1838_KALIBRATIE_GELADEN                         "KALIBR. GELADEN"
+#ifndef _INPUT_HX1838_MAPPING_EEPROM_GELADEN
+  #define _INPUT_HX1838_MAPPING_EEPROM_GELADEN                     "MAPPING GELADEN"
 #endif
 
 #ifndef _INPUT_HX1838_MAPPING_GELADEN
   #define _INPUT_HX1838_MAPPING_GELADEN                            "MAPPING GELADEN"
+#endif
+
+#ifndef _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT
+  #define _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT                "IR PIN FOUT"
 #endif
 
 // Input Type: PCF8574
@@ -128,12 +138,16 @@
   #define _INPUT_HX1838_TOETS_HERKEND_SERIAL                       "Herkend: "
 #endif
 
-#ifndef _INPUT_HX1838_KALIBRATIE_GELADEN_SERIAL
-  #define _INPUT_HX1838_KALIBRATIE_GELADEN_SERIAL                  "Bestaande IR-kalibratie geladen."
+#ifndef _INPUT_HX1838_MAPPING_EEPROM_GELADEN_SERIAL
+  #define _INPUT_HX1838_MAPPING_EEPROM_GELADEN_SERIAL              "IR-mapping uit EEPROM geladen:"
 #endif
 
 #ifndef _INPUT_HX1838_KALIBRATIE_GESTART_SERIAL
   #define _INPUT_HX1838_KALIBRATIE_GESTART_SERIAL                  "=== IR-kalibratie gestart ==="
+#endif
+
+#ifndef _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL
+  #define _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL         "IR-ontvanger: interrupt kon niet gekoppeld worden aan HX1838_ONTVANGER_PIN."
 #endif
 
 #ifndef _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL
@@ -149,7 +163,37 @@
 #endif
 
 #ifndef _INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL
-  #define _INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL              "Standaard IR-mapping uit configuratie geladen."
+  #define _INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL              "Standaard IR-mapping uit configuratie geladen:"
+#endif
+
+#ifndef _INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG
+  #define _INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG                  "MAPPING ONVOLLEDIG"
+#endif
+
+#ifndef _INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL
+  #define _INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL           "Vaste IR-mapping in UserConfig.h is onvolledig, niet alle HX1838_CODE_x zijn ingevuld."
+#endif
+
+#ifndef _INPUT_HX1838_DEBUG_FAALDE
+  #define _INPUT_HX1838_DEBUG_FAALDE                                      "faalde"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_MAGIC_MISMATCH
+  #define _INPUT_HX1838_DEBUG_MAGIC_MISMATCH                              "magic mismatch"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_VERSIE_MISMATCH
+  #define _INPUT_HX1838_DEBUG_VERSIE_MISMATCH                             "versie mismatch"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_TOETSENINDELING_MISMATCH
+  #define _INPUT_HX1838_DEBUG_TOETSENINDELING_MISMATCH                    "toetsenindeling mismatch"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_ALLE_TOETSEN_GEKALIBREER_START_VERIFICATIE
+  #define _INPUT_HX1838_DEBUG_ALLE_TOETSEN_GEKALIBREER_START_VERIFICATIE  "alle toetsen gekalibreerd, start verificatie"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_VOOR_INIT
+  #define _INPUT_HX1838_DEBUG_VOOR_INIT                                   "voor init"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_NA_INIT
+  #define _INPUT_HX1838_DEBUG_NA_INIT                                     "na init"
 #endif
 
 // Input Type: PCF8574

@@ -32,7 +32,7 @@ De versienummers volgen de versie in `library.properties`.
 - `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4` is de standaard keypadindeling wanneer geen `KEYPAD_TYPE` is opgegeven;
 - DIGITAL-pinmapping per `KEYPAD_TYPE` toegevoegd: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden D3,D2,D5,D4; bestaande `PIN_TOETS_1..4` blijven als backward-compatibilitylaag ondersteund;
 - PCF8574-backend toegevoegd met canoniek I2C-adres `I2C_ADDRESS_PCF8574`; referentie-/testmodule OTRONIC OT8980;
-- HX1838-backend toegevoegd met configureerbare 12-, 17- en 21-toetsenindelingen en configureerbare codebron via `HX1838_BRON_CODES`;
+- HX1838-backend toegevoegd met configureerbare 17- en 21-toetsenindelingen en configureerbare codebron via `HX1838_BRON_CODES`; HX1838 bevindt zich in v1.1.0 nog in experimentele fase;
 - Input-gerelateerde Arduino IDE-keywords en dependencies `PCF8574 (>=0.4.0)` en `IRremote` toegevoegd.
 
 ### Input-tests

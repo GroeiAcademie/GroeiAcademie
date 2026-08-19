@@ -1,6 +1,6 @@
 @echo off
 cls
-if exist "TestLibraryStatusReport.txt" del /q "TestLibraryStatusReport.txt" >nul 2>&1
+if exist "%~dp0TestLibraryStatusReport.txt" del /q "%~dp0TestLibraryStatusReport.txt" >nul 2>&1
 setlocal enabledelayedexpansion
 
 :: Werk altijd vanuit de hoofdmap van de library, ook wanneer dit script vanuit extras wordt gestart.
@@ -123,6 +123,11 @@ for %%B in (%BOARDS%) do (
     set "AUTO_BOARD_RESULT=!errorlevel!"
     type "!AUTO_BOARD_LOG!"
     if "!AUTO_BOARD_RESULT!"=="0" (
+        set "GEHEUGEN_BOARD=%%B"
+        set "GEHEUGEN_BESTAND=InputkanalenDIGITAL.ino"
+        set "GEHEUGEN_TEST=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 | SCREEN_OUTPUT_CONFIG=SCREEN_TYPE_NONE | AUTOMATISCHE BOARDDETECTIE ZONDER -DBOARD_VERSION"
+        set "GEHEUGEN_STATUS=OK"
+        call :REGISTREER_GEHEUGENGEBRUIK "!AUTO_BOARD_LOG!"
         set /A OK+=1
     ) else (
         set /A FAIL+=1
@@ -183,6 +188,24 @@ for %%B in (%BOARDS%) do (
             if defined ACTIVE_SCREEN_OUTPUT echo SCREEN_OUTPUT_CONFIG=!ACTIVE_SCREEN_OUTPUT!
             if defined LOCAL_ADC_BACKEND echo ADC_BACKEND=!LOCAL_ADC_BACKEND!
             if "!DEBUG_TEST!"=="1" echo DEBUG actief
+            set "GEHEUGEN_BOARD=%%B"
+            set "GEHEUGEN_BESTAND=%%~nxF"
+            set "GEHEUGEN_TEST=-"
+            if defined ACTIVE_SCREEN_OUTPUT set "GEHEUGEN_TEST=SCREEN_OUTPUT_CONFIG=!ACTIVE_SCREEN_OUTPUT!"
+            if defined LOCAL_ADC_BACKEND (
+                if "!GEHEUGEN_TEST!"=="-" (
+                    set "GEHEUGEN_TEST=ADC_BACKEND=!LOCAL_ADC_BACKEND!"
+                ) else (
+                    set "GEHEUGEN_TEST=!GEHEUGEN_TEST! | ADC_BACKEND=!LOCAL_ADC_BACKEND!"
+                )
+            )
+            if "!DEBUG_TEST!"=="1" (
+                if "!GEHEUGEN_TEST!"=="-" (
+                    set "GEHEUGEN_TEST=DEBUG"
+                ) else (
+                    set "GEHEUGEN_TEST=!GEHEUGEN_TEST! | DEBUG"
+                )
+            )
             set /A TESTS+=1
             set "COMPILE_LOG=%TEMP%\GroeiAcademieCompile_!RANDOM!_!RANDOM!.txt"
             "%CLI_PATH%" compile --jobs 1 --fqbn %%B --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !BUILD_FLAGS!" "!EXAMPLE_DIR!" >"!COMPILE_LOG!" 2>&1
@@ -197,6 +220,8 @@ for %%B in (%BOARDS%) do (
                     )
                 )
                 if "!EXPECTED_MEMORY_LIMIT!"=="1" (
+                    set "GEHEUGEN_STATUS=VERWACHTE_GEHEUGENBEPERKING"
+                    call :REGISTREER_GEHEUGENGEBRUIK "!COMPILE_LOG!"
                     set /A EXPECTED_MEMORY+=1
                     echo VERWACHTE GEHEUGENBEPERKING UNO R3: %%F
                 ) else (
@@ -211,6 +236,8 @@ for %%B in (%BOARDS%) do (
                     echo.
                 )
             ) else (
+                set "GEHEUGEN_STATUS=OK"
+                call :REGISTREER_GEHEUGENGEBRUIK "!COMPILE_LOG!"
                 set /A OK+=1
             )
             del /Q "!COMPILE_LOG!" >nul 2>&1
@@ -250,3 +277,27 @@ if /I not "%~2"=="--no-pause" (
     echo.
 )
 exit /b !TOTAL_FAIL!
+
+:REGISTREER_GEHEUGENGEBRUIK
+set "PROGRAM_USED="
+set "PROGRAM_PERCENT="
+set "PROGRAM_MAX="
+set "RAM_USED="
+set "RAM_PERCENT="
+set "RAM_MAX="
+for /f "tokens=3,5,12" %%A in ('findstr /B /C:"Sketch uses " "%~1"') do (
+  set "PROGRAM_USED=%%A"
+  set "PROGRAM_PERCENT=%%B"
+  set "PROGRAM_MAX=%%C"
+)
+for /f "tokens=4,6,18" %%A in ('findstr /B /C:"Global variables use " "%~1"') do (
+  set "RAM_USED=%%A"
+  set "RAM_PERCENT=%%B"
+  set "RAM_MAX=%%C"
+)
+set "PROGRAMMA_WEERGAVE=NIET_GEVONDEN"
+set "RAM_WEERGAVE=NIET_GEVONDEN"
+if defined PROGRAM_USED if defined PROGRAM_MAX set "PROGRAMMA_WEERGAVE=!PROGRAM_USED!/!PROGRAM_MAX! !PROGRAM_PERCENT!"
+if defined RAM_USED if defined RAM_MAX set "RAM_WEERGAVE=!RAM_USED!/!RAM_MAX! !RAM_PERCENT!"
+echo [GEHEUGEN] Board=!GEHEUGEN_BOARD! ^| Bestand=!GEHEUGEN_BESTAND! ^| Test=!GEHEUGEN_TEST! ^| Programma=!PROGRAMMA_WEERGAVE! ^| RAM=!RAM_WEERGAVE! ^| Status=!GEHEUGEN_STATUS!
+goto :eof

@@ -67,9 +67,9 @@
 // ============================================================================
 // HX1838 TOETSENINDELINGEN: enkel relevant bij INPUT_TYPE_HX1838
 // ============================================================================
-#define HX1838_TOETSENINDELING_3x4                    1   // remote met 17 toetsen: enkel de 12 toetsen van de 3x4-matrix (1-9, *, 0, #)
-#define HX1838_TOETSENINDELING_REMOTE_17_TOETSEN      2   // remote met 17 toetsen: 3x4-matrix + navigatie (UP, DOWN, OK, LEFT, RIGHT)
-#define HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3  3   // remote met 21 toetsen: 0-9 + MP3-toetsen
+#define HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN  1   // remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]
+#define HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN  2   // remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]
+#define HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3          3   // remote met 21 toetsen: 0-9 + MP3-toetsen [CH-, CH, CH+, PREV, NEXT, PLAY, -, +, EQ, 0, 100+, 200+, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 // ============================================================================
 // HX1838 BRONCODES: waar de afstandsbedieningscodes vandaan komen

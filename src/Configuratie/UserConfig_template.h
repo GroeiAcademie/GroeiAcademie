@@ -31,6 +31,14 @@
 
 // #define TRACE // ENKEL wanneer TRACE nodig, staan hier geen commentaar '//' tekens voor :)
 
+// SerialScreen
+#ifndef SERIAL_BAUDRATE
+// #define SERIAL_BAUDRATE 115200UL
+#endif
+#ifndef SERIAL_CONNECT_TIMEOUT_MS
+// #define SERIAL_CONNECT_TIMEOUT_MS 2000UL
+#endif
+
 // SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.
 // Combineer meerdere uitvoertypes met de bitwise OR-operator |.
 //
@@ -235,12 +243,19 @@
 #endif
 
 #ifndef HX1838_ONTVANGER_PIN
-// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D2
+// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D6
+#endif
+
+// HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE: Standaard 1.
+// 1 = TinyIRReceiver.hpp (pin-change-interrupt, geen timerkanaal nodig, kleinere flash/RAM-voetafdruk), 
+// 0 = klassieke IRremote.hpp/IrReceiver (polling, timer-gebaseerd). 
+#ifndef HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+//  #define HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
 #endif
 
 #ifndef HX1838_TOETSENINDELING
-// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_3x4
-// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_17_TOETSEN
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
 #endif
 
@@ -250,36 +265,69 @@
 // #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
 #endif
 
-// Optionele vaste HX1838-mapping. Laat een code op 0 staan wanneer geen vaste code gekend is; dan gebruikt Input EEPROM of de kalibratieprocedure.
-// Wanneer alle HX1838_CODE_x waarden voor het gekozen remote-layout ingevuld zijn, heeft deze mapping in UserConfig.h voorrang op een eerder opgeslagen EEPROM-kalibratie.
-// Laat de waarden op 0 wanneer je geen vaste mapping wilt gebruiken; dan probeert Input eerst EEPROM en start daarna indien nodig de kalibratieprocedure.
-// #define HX1838_CODE_1  0x00000000UL
-// #define HX1838_CODE_2  0x00000000UL
-// #define HX1838_CODE_3  0x00000000UL
-// #define HX1838_CODE_4  0x00000000UL
-// #define HX1838_CODE_5  0x00000000UL
-// #define HX1838_CODE_6  0x00000000UL
-// #define HX1838_CODE_7  0x00000000UL
-// #define HX1838_CODE_8  0x00000000UL
-// #define HX1838_CODE_9  0x00000000UL
-// #define HX1838_CODE_10 0x00000000UL
-// #define HX1838_CODE_11 0x00000000UL
-// #define HX1838_CODE_12 0x00000000UL
-// #define HX1838_CODE_13 0x00000000UL
-// #define HX1838_CODE_14 0x00000000UL
-// #define HX1838_CODE_15 0x00000000UL
-// #define HX1838_CODE_16 0x00000000UL
-// #define HX1838_CODE_17 0x00000000UL
-// #define HX1838_CODE_18 0x00000000UL
-// #define HX1838_CODE_19 0x00000000UL
-// #define HX1838_CODE_20 0x00000000UL
-// #define HX1838_CODE_21 0x00000000UL
-
-// Bekende NEC-commandmapping voor de Remote 17-toets; voor de 3x4-layout worden de eerste 12 waarden gebruikt.
-// HX1838_CODE_1=0x16, 2=0x19, 3=0x0D, 4=0x0C, 5=0x18, 6=0x5E, 7=0x08, 8=0x1C, 9=0x5A, *=0x42, 0=0x52, #=0x4A, UP=0x46, DOWN=0x15, LEFT=0x44, RIGHT=0x43, OK=0x40.
-
-// Bekende NEC-commandmapping voor de Remote 21-toets MP3, in de volgorde van de bijbehorende HX1838-toetsenindeling:
-// CH-=0x45, CH=0x46, CH+=0x47, PREV=0x44, NEXT=0x40, PLAY=0x43, -=0x07, +=0x15, EQ=0x09, 0=0x16, 100+=0x19, 200+=0x0D, 1=0x0C, 2=0x18, 3=0x5E, 4=0x08, 5=0x1C, 6=0x5A, 7=0x42, 8=0x52, 9=0x4A.
+// Optionele vaste HX1838-mapping. Niet zelf gedefinieerde HX1838_CODE_x waarden worden door SystemConfig.h aangevuld met de standaardcodes.
+// Bij HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE wordt de vaste mapping gebruikt zodra minstens één HX1838_CODE_x in UserConfig.h is gedefinieerd.
+// Wil je in die modus EEPROM gebruiken, laat dan alle HX1838_CODE_x regels uitgeschakeld. Een expliciet gedefinieerde code met waarde 0 is ongeldig wanneer de vaste mapping wordt gebruikt.
+// Onderstaande waarden zijn de gekende NEC-codes van de standaard meegeleverde afstandsbediening; verwijder de "//" om ze te activeren, of vervang door je eigen gekalibreerde waarden.
+#if defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+// #define HX1838_CODE_1  0x46UL // = UP
+// #define HX1838_CODE_2  0x15UL // = DOWN
+// #define HX1838_CODE_3  0x40UL // = OK
+// #define HX1838_CODE_4  0x44UL // = LEFT
+// #define HX1838_CODE_5  0x43UL // = RIGHT
+// #define HX1838_CODE_6  0x16UL // = 1
+// #define HX1838_CODE_7  0x19UL // = 2
+// #define HX1838_CODE_8  0x0DUL // = 3
+// #define HX1838_CODE_9  0x0CUL // = 4
+// #define HX1838_CODE_10 0x18UL // = 5
+// #define HX1838_CODE_11 0x5EUL // = 6
+// #define HX1838_CODE_12 0x08UL // = 7
+// #define HX1838_CODE_13 0x1CUL // = 8
+// #define HX1838_CODE_14 0x5AUL // = 9
+// #define HX1838_CODE_15 0x42UL // = *
+// #define HX1838_CODE_16 0x52UL // = 0
+// #define HX1838_CODE_17 0x4AUL // = #
+#elif defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
+// #define HX1838_CODE_1  0x45UL // = 1
+// #define HX1838_CODE_2  0x46UL // = 2
+// #define HX1838_CODE_3  0x47UL // = 3
+// #define HX1838_CODE_4  0x44UL // = 4
+// #define HX1838_CODE_5  0x40UL // = 5
+// #define HX1838_CODE_6  0x43UL // = 6
+// #define HX1838_CODE_7  0x07UL // = 7
+// #define HX1838_CODE_8  0x15UL // = 8
+// #define HX1838_CODE_9  0x09UL // = 9
+// #define HX1838_CODE_10 0x16UL // = *
+// #define HX1838_CODE_11 0x19UL // = 0
+// #define HX1838_CODE_12 0x0DUL // = #
+// #define HX1838_CODE_13 0x18UL // = UP
+// #define HX1838_CODE_14 0x52UL // = DOWN
+// #define HX1838_CODE_15 0x1CUL // = OK
+// #define HX1838_CODE_16 0x08UL // = LEFT
+// #define HX1838_CODE_17 0x5AUL // = RIGHT
+#elif defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
+// #define HX1838_CODE_1  0x45UL // = CH-
+// #define HX1838_CODE_2  0x46UL // = CH
+// #define HX1838_CODE_3  0x47UL // = CH+
+// #define HX1838_CODE_4  0x44UL // = PREV
+// #define HX1838_CODE_5  0x40UL // = NEXT
+// #define HX1838_CODE_6  0x43UL // = PLAY
+// #define HX1838_CODE_7  0x07UL // = -
+// #define HX1838_CODE_8  0x15UL // = +
+// #define HX1838_CODE_9  0x09UL // = EQ
+// #define HX1838_CODE_10 0x16UL // = 0
+// #define HX1838_CODE_11 0x19UL // = 100+
+// #define HX1838_CODE_12 0x0DUL // = 200+
+// #define HX1838_CODE_13 0x0CUL // = 1
+// #define HX1838_CODE_14 0x18UL // = 2
+// #define HX1838_CODE_15 0x5EUL // = 3
+// #define HX1838_CODE_16 0x08UL // = 4
+// #define HX1838_CODE_17 0x1CUL // = 5
+// #define HX1838_CODE_18 0x5AUL // = 6
+// #define HX1838_CODE_19 0x42UL // = 7
+// #define HX1838_CODE_20 0x52UL // = 8
+// #define HX1838_CODE_21 0x4AUL // = 9
+#endif
 
 // Arduino Uno-shieldheaderpinnen. Alleen activeren wanneer de geselecteerde boardcore een afwijkende mapping nodig heeft.
 // Voor BOARD_ARDI32 kan de officiële shieldmapping leesbaar genoteerd worden als:

@@ -17,10 +17,6 @@
 #else
 
 void setup() {
-#if defined(DEBUG) && (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  Serial.begin(115200);
-#endif
-
   CharacterScreenConfigureren();
 }
 

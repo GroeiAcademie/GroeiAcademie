@@ -37,7 +37,7 @@ SCREEN_TYPE_CHARACTER
 SCREEN_TYPE_PIXELS
 ```
 
-Meerdere uitvoerdoelen worden gecombineerd met `|`. De standaard seriële `PrintToScreen()`-uitvoer via `SCREEN_TYPE_SERIAL` volgt de bestaande `DEBUG`-werking: wanneer `DEBUG` actief is, voegt `Screen.h` `SCREEN_TYPE_SERIAL` automatisch toe aan de effectieve `SCREEN_OUTPUT` en wordt de seriële debuguitvoer beschikbaar. De afzonderlijke foutfallback voor kritieke schermfouten kan Serial bewust rechtstreeks forceren; zie `SCREEN_FOUTCODES.md`.
+Meerdere uitvoerdoelen worden gecombineerd met `|`. De standaard seriële `PrintToScreen()`-uitvoer via `SCREEN_TYPE_SERIAL` volgt de bestaande `DEBUG`-werking: wanneer `DEBUG` actief is, voegt `Screen.h` `SCREEN_TYPE_SERIAL` automatisch toe aan de effectieve `SCREEN_OUTPUT` en wordt de seriële debuguitvoer beschikbaar. Bij de eerste normale SerialScreen-verbinding wacht de library maximaal `SERIAL_CONNECT_TIMEOUT_MS`; na timeout wordt Serial voor die sessie als niet beschikbaar beschouwd en wordt `CRITICAL: SS001` rechtstreeks via beschikbare andere schermen/callbacks gemeld. De afzonderlijke foutfallback voor kritieke schermfouten kan Serial bewust rechtstreeks forceren; zie `SCREEN_FOUTCODES.md`.
 
 ## Characterscherm zonder callback
 
@@ -49,7 +49,7 @@ Op een scherm met vier regels worden de vier teksten op regels 0 tot en met 3 ge
 
 ## PixelScreen zonder callback
 
-Fatale configuratiefouten van CharacterScreen en PixelScreen worden gemeld met een korte code zoals `CS000` of `PS001`. De volledige betekenis en oplossing staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Is geen van beide schermtypes beschikbaar, dan forceert de library voor deze melding Serial op 115200 baud.
+Fatale configuratiefouten van CharacterScreen en PixelScreen worden gemeld met een korte code zoals `CS000` of `PS001`. De volledige betekenis en oplossing staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Is geen van beide schermtypes beschikbaar, dan forceert de library voor deze melding Serial op `SERIAL_BAUDRATE`.
 
 De toepassing initialiseert de concrete displaydriver en registreert die daarna via de algemene `Adafruit_GFX*`-pointer:
 
@@ -108,7 +108,7 @@ Ruwe RGB565-hexwaarden, niet gebonden aan een specifieke driverbibliotheek (zoal
 
 ### TYPE_FATAL, TYPE_PANIC, TYPE_ABORT, TYPE_CRITICAL: gegarandeerde Serial-terugval
 
-Wanneer `PrintToScreen()` met een van deze vier types aangeroepen wordt terwijl geen enkel scherm en geen enkele callback beschikbaar is, forceert `PrintToScreenIntern()` `Serial.begin(115200)` en toont de melding daar, naar analogie van de bestaande `FATAL: CSxxx`/`PSxxx`-terugval (zie `SCREEN_FOUTCODES.md`). Dit is een bewuste uitzondering: enkel voor deze vier types, en enkel onder deze specifieke voorwaarde. Is er wél een scherm of callback actief, dan lopen ze gewoon via het normale pad hierboven.
+Wanneer `PrintToScreen()` met een van deze vier types aangeroepen wordt terwijl geen enkel scherm en geen enkele callback beschikbaar is, forceert `PrintToScreenIntern()` `Serial.begin(SERIAL_BAUDRATE)` en toont de melding daar, naar analogie van de bestaande `FATAL: CSxxx`/`PSxxx`-terugval (zie `SCREEN_FOUTCODES.md`). Dit is een bewuste uitzondering: enkel voor deze vier types, en enkel onder deze specifieke voorwaarde. Is er wél een scherm of callback actief, dan lopen ze gewoon via het normale pad hierboven.
 
 ## Callbacktypen
 

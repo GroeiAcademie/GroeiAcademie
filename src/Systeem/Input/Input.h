@@ -19,6 +19,12 @@
   #error KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen en past niet op INPUT_TYPE_DIGITAL of INPUT_TYPE_PCF8574.
 #endif
 
+#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838) && (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  #if (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_MOSI) || (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_MISO) || (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_SCK) || (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_CS) || (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_DC) || (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_RST)
+    #error HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt (SPI MOSI/MISO/SCK of PIXEL_SCREEN_CS/DC/RST). Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #endif
+#endif
+
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
   #if KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 && KEYPAD_TYPE != KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
     #error INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4, KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2, KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4, KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 en KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4.
@@ -45,17 +51,13 @@
   #endif
 
   #if HX1838_BRON_CODES == HX1838_BRON_CODES_DEFINE
-    #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_3x4
-      #if HX1838_CODE_1 == 0 || HX1838_CODE_2 == 0 || HX1838_CODE_3 == 0 || HX1838_CODE_4 == 0 || HX1838_CODE_5 == 0 || HX1838_CODE_6 == 0 || HX1838_CODE_7 == 0 || HX1838_CODE_8 == 0 || HX1838_CODE_9 == 0 || HX1838_CODE_10 == 0 || HX1838_CODE_11 == 0 || HX1838_CODE_12 == 0
-        #error HX1838_BRON_CODES_DEFINE vereist een volledige 12-toetsenmapping.
-      #endif
-    #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_17_TOETSEN
+    #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN || HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
       #if HX1838_CODE_1 == 0 || HX1838_CODE_2 == 0 || HX1838_CODE_3 == 0 || HX1838_CODE_4 == 0 || HX1838_CODE_5 == 0 || HX1838_CODE_6 == 0 || HX1838_CODE_7 == 0 || HX1838_CODE_8 == 0 || HX1838_CODE_9 == 0 || HX1838_CODE_10 == 0 || HX1838_CODE_11 == 0 || HX1838_CODE_12 == 0 || HX1838_CODE_13 == 0 || HX1838_CODE_14 == 0 || HX1838_CODE_15 == 0 || HX1838_CODE_16 == 0 || HX1838_CODE_17 == 0
-        #error HX1838_BRON_CODES_DEFINE vereist een volledige 17-toetsenmapping.
+        #error HX1838_CODE_1 t.e.m. HX1838_CODE_17 mogen bij HX1838_BRON_CODES_DEFINE niet 0 zijn.
       #endif
     #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
       #if HX1838_CODE_1 == 0 || HX1838_CODE_2 == 0 || HX1838_CODE_3 == 0 || HX1838_CODE_4 == 0 || HX1838_CODE_5 == 0 || HX1838_CODE_6 == 0 || HX1838_CODE_7 == 0 || HX1838_CODE_8 == 0 || HX1838_CODE_9 == 0 || HX1838_CODE_10 == 0 || HX1838_CODE_11 == 0 || HX1838_CODE_12 == 0 || HX1838_CODE_13 == 0 || HX1838_CODE_14 == 0 || HX1838_CODE_15 == 0 || HX1838_CODE_16 == 0 || HX1838_CODE_17 == 0 || HX1838_CODE_18 == 0 || HX1838_CODE_19 == 0 || HX1838_CODE_20 == 0 || HX1838_CODE_21 == 0
-        #error HX1838_BRON_CODES_DEFINE vereist een volledige 21-toetsenmapping.
+        #error HX1838_CODE_1 t.e.m. HX1838_CODE_21 mogen bij HX1838_BRON_CODES_DEFINE niet 0 zijn.
       #endif
     #endif
   #endif
@@ -95,9 +97,9 @@ struct MappingTussenOpschriftEnWeergavetekst {
 #endif
 
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
-  #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_3x4
-    #define AANTAL_IR_TOETSEN 12
-  #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_17_TOETSEN
+  #if HX1838_TOETSENINDELING   == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+    #define AANTAL_IR_TOETSEN 17
+  #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
     #define AANTAL_IR_TOETSEN 17
   #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
     #define AANTAL_IR_TOETSEN 21
@@ -238,7 +240,7 @@ void ControleerMappingVolledigheid(const MappingTussenToetsaanslagEnUitTeVoerenF
 
 // Initialiseert de geconfigureerde invoerkanalen (pinMode/Wire.begin/IrReceiver.begin),
 // en start bij HX1838 automatisch de kalibratieprocedure als er nog geen geldige kalibratie in EEPROM staat. 
-// Wanneer een volledige vaste HX1838-mapping in de configuratie staat, wordt die gebruikt vóór de kalibratieprocedure.
+// Wanneer de geconfigureerde bron de vaste HX1838-mapping gebruikt, worden ontbrekende codes vanuit SystemConfig.h aangevuld.
 void InputConfigureren();
 
 // Geeft één toetsaanslag terug via de gecompileerde invoerkanalen. 

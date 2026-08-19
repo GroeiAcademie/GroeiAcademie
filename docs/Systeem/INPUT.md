@@ -6,13 +6,13 @@ De gecompileerde dependencies hangen af van `INPUT_KANAAL_CONFIG`:
 
 - `INPUT_TYPE_DIGITAL`: geen extra externe library.
 - `INPUT_TYPE_PCF8574`: gebruikt `Wire` en de `PCF8574`-library van Rob Tillaart.
-- `INPUT_TYPE_HX1838`: gebruikt `IRremote` en `EEPROM`.
+- `INPUT_TYPE_HX1838`: gebruikt TinyIRReceiver of IRremote, afhankelijk van `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`, en `EEPROM` voor de HX1838-kalibratie-opslag. In v1.1.0 bevindt HX1838 zich nog in experimentele fase.
 - Niet geselecteerde invoerbackends worden via de preprocessor niet meegecompileerd.
 
 ## HX1838-kalibratie
 
 De huidige implementatie start bij ontbrekende of ongeldige EEPROM-kalibratie automatisch de kalibratieprocedure. Iedere te kalibreren toets en de aansluitende verificatiefase hebben een wachttijd begrensd door `HX1838_KALIBRATIE_TIMEOUT_MS` (standaard 30000 ms). Bij timeout wordt de kalibratie afgebroken en wordt geen onvolledige mapping opgeslagen. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
-`HX1838_BRON_CODES` bepaalt expliciet welke bron gebruikt wordt. `HX1838_BRON_CODES_DEFINE` vereist een volledige vaste mapping; `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM en kalibreert wanneer geen geldige EEPROM-mapping aanwezig is; `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` gebruikt een volledige vaste mapping wanneer die beschikbaar is en valt anders terug op EEPROM en zo nodig kalibratie. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
+`HX1838_BRON_CODES` bepaalt expliciet welke bron gebruikt wordt. `HX1838_BRON_CODES_DEFINE` gebruikt de vaste mapping en laat `SystemConfig.h` niet zelf gedefinieerde codes met de standaardcodes aanvullen. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM en kalibreert wanneer geen geldige EEPROM-mapping aanwezig is. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt en zo nodig gekalibreerd. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
 
 ## Platformafhankelijke opslag
 
@@ -135,11 +135,13 @@ Onder `examples/Systeem/Input/` staan `InputkanalenDIGITAL.ino`, `InputkanalenPC
 
 Beschikbare HX1838-toetsenindelingen:
 
-- `HX1838_TOETSENINDELING_3x4`: remote met 17 toetsen; enkel de 12 toetsen van de 3x4-matrix (1-9, *, 0, #) worden gebruikt; referentiebeeld: [HX1838_TOETSENINDELING_REMOTE_17_TOETSEN.png](Screenshots/HX1838_TOETSENINDELING_REMOTE_17_TOETSEN.png). Dezelfde remote wordt gebruikt; de 12 genoemde toetsen vormen functioneel de 3x4-indeling;
-- `HX1838_TOETSENINDELING_REMOTE_17_TOETSEN`: alle 17 toetsen, inclusief navigatie (UP, DOWN, OK, LEFT, RIGHT); referentiebeeld: [HX1838_TOETSENINDELING_REMOTE_17_TOETSEN.png](Screenshots/HX1838_TOETSENINDELING_REMOTE_17_TOETSEN.png);
+- `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN`: remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]: [HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_BOVENAAN.png](Screenshots/HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_BOVENAAN.png).
+- `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN`: remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]: [HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_ONDERAAN.png](Screenshots/HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_ONDERAAN.png);
 - `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`: remote met 21 toetsen, inclusief de MP3-toetsen; referentiebeeld: [HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3.jpeg](Screenshots/HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3.jpeg).
 
-Bij `HX1838_BRON_CODES_DEFINE` moet de vaste mapping volledig zijn voor de gekozen indeling: `HX1838_CODE_1` t.e.m. `HX1838_CODE_12` voor `HX1838_TOETSENINDELING_3x4`, `HX1838_CODE_1` t.e.m. `HX1838_CODE_17` voor `HX1838_TOETSENINDELING_REMOTE_17_TOETSEN` en `HX1838_CODE_1` t.e.m. `HX1838_CODE_21` voor `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`.
+`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE` kiest de HX1838-ontvangstbackend: `1` gebruikt TinyIRReceiver en `0` gebruikt IRremote.
+
+Voor de vaste mapping gebruikt `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN` `HX1838_CODE_1` t.e.m. `HX1838_CODE_17`, `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN` `HX1838_CODE_1` t.e.m. `HX1838_CODE_17` en `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3` `HX1838_CODE_1` t.e.m. `HX1838_CODE_21`. Niet zelf gedefinieerde codes worden door `SystemConfig.h` met de standaardcodes aangevuld. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
 
 ## Mapping-volledigheidscontrole (ControleerMappingVolledigheid)
 

@@ -34,3 +34,10 @@ src/Language/UserLibrary_*.h
 
 # Lokale, persoonlijke testpaden niet meenemen; het template wel
 extras/LokalePaden.cmd
+
+# Gegenereerde lokale tussenlogs
+extras/TestLibraryGereleased.txt
+extras/TestLibraryGereleasedOngeldig.txt
+extras/TestLibraryNieuw.txt
+extras/TestLibraryNieuwOngeldig.txt
+

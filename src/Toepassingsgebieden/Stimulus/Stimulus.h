@@ -156,7 +156,7 @@ void InitialiseerADS1115();
 SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int sensorA, int sensorB, StimulusProfiel gemetenStimulus[]);
 
 int  MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin = -1, int exitOffset = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS);
-int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart = 0, int MaskGewensteActieveSensorsBijExit = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS, bool testOpDRUKWAARDE = true, unsigned long maxOnsynchroniciteitMs = EXIT_TIKTIJD_MS);
+int  MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart = 0, int MaskGewensteActieveSensorsBijExit = 0, unsigned long timeoutMs = EXIT_TIKTIJD_MS, bool testOpDRUKWAARDE = true);
 
 int  RawAnalogRead(int sensorPin);
 

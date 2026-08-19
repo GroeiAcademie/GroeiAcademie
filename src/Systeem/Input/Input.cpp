@@ -120,21 +120,23 @@
 #endif
 
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
-  #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_3x4
+  #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
     const MappingTussenOpschriftEnWeergavetekst IR_KEY_LAYOUT[] = {
+      {_LABEL_OPSCHRIFT_UP, LABEL_TOETS_UP}, {_LABEL_OPSCHRIFT_DOWN, LABEL_TOETS_DOWN}, {_LABEL_OPSCHRIFT_OK, LABEL_TOETS_OK},
+      {_LABEL_OPSCHRIFT_LEFT, LABEL_TOETS_LEFT}, {_LABEL_OPSCHRIFT_RIGHT, LABEL_TOETS_RIGHT},
       {_LABEL_OPSCHRIFT_1, LABEL_TOETS_1}, {_LABEL_OPSCHRIFT_2, LABEL_TOETS_2}, {_LABEL_OPSCHRIFT_3, LABEL_TOETS_3},
       {_LABEL_OPSCHRIFT_4, LABEL_TOETS_4}, {_LABEL_OPSCHRIFT_5, LABEL_TOETS_5}, {_LABEL_OPSCHRIFT_6, LABEL_TOETS_6},
       {_LABEL_OPSCHRIFT_7, LABEL_TOETS_7}, {_LABEL_OPSCHRIFT_8, LABEL_TOETS_8}, {_LABEL_OPSCHRIFT_9, LABEL_TOETS_9},
       {_LABEL_OPSCHRIFT_STER, LABEL_TOETS_STER}, {_LABEL_OPSCHRIFT_0, LABEL_TOETS_0}, {_LABEL_OPSCHRIFT_HEKJE, LABEL_TOETS_HEKJE}
     };
-  #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_17_TOETSEN
+  #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
     const MappingTussenOpschriftEnWeergavetekst IR_KEY_LAYOUT[] = {
       {_LABEL_OPSCHRIFT_1, LABEL_TOETS_1}, {_LABEL_OPSCHRIFT_2, LABEL_TOETS_2}, {_LABEL_OPSCHRIFT_3, LABEL_TOETS_3},
       {_LABEL_OPSCHRIFT_4, LABEL_TOETS_4}, {_LABEL_OPSCHRIFT_5, LABEL_TOETS_5}, {_LABEL_OPSCHRIFT_6, LABEL_TOETS_6},
       {_LABEL_OPSCHRIFT_7, LABEL_TOETS_7}, {_LABEL_OPSCHRIFT_8, LABEL_TOETS_8}, {_LABEL_OPSCHRIFT_9, LABEL_TOETS_9},
       {_LABEL_OPSCHRIFT_STER, LABEL_TOETS_STER}, {_LABEL_OPSCHRIFT_0, LABEL_TOETS_0}, {_LABEL_OPSCHRIFT_HEKJE, LABEL_TOETS_HEKJE},
-      {_LABEL_OPSCHRIFT_UP, LABEL_TOETS_UP}, {_LABEL_OPSCHRIFT_DOWN, LABEL_TOETS_DOWN},
-      {_LABEL_OPSCHRIFT_LEFT, LABEL_TOETS_LEFT}, {_LABEL_OPSCHRIFT_RIGHT, LABEL_TOETS_RIGHT}, {_LABEL_OPSCHRIFT_OK, LABEL_TOETS_OK}
+      {_LABEL_OPSCHRIFT_UP, LABEL_TOETS_UP}, {_LABEL_OPSCHRIFT_DOWN, LABEL_TOETS_DOWN}, {_LABEL_OPSCHRIFT_OK, LABEL_TOETS_OK},
+      {_LABEL_OPSCHRIFT_LEFT, LABEL_TOETS_LEFT}, {_LABEL_OPSCHRIFT_RIGHT, LABEL_TOETS_RIGHT}
     };
   #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
     const MappingTussenOpschriftEnWeergavetekst IR_KEY_LAYOUT[] = {
@@ -149,6 +151,11 @@
   #else
     #error Ongeldige HX1838_TOETSENINDELING.
   #endif
+
+  static_assert(
+    (sizeof(IR_KEY_LAYOUT) / sizeof(IR_KEY_LAYOUT[0])) == AANTAL_IR_TOETSEN,
+    "IR_KEY_LAYOUT bevat niet het verwachte aantal HX1838-toetsen."
+  );
 #endif
 
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
@@ -157,7 +164,15 @@
 #endif
 
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
-  #include <IRremote.h>
+  #define NO_LED_RECEIVE_FEEDBACK_CODE
+
+  #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+    #define IR_RECEIVE_PIN HX1838_ONTVANGER_PIN
+    #include <TinyIRReceiver.hpp>
+  #else
+    #include <IRremote.hpp>
+  #endif
+
   #include <EEPROM.h>
 #endif
 
@@ -617,18 +632,48 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
   static uint8_t irCodes[AANTAL_IR_TOETSEN];
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  static void HX1838toonTabelMetCodes() {
+    for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
+#ifdef TRACE
+      DEBUG_PRINT("HX1838 toonTabel regel ");
+      DEBUG_PRINT(i + 1);
+      DEBUG_PRINT("/");
+      DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
+#endif
+      Serial.print(F("// #define HX1838_CODE_"));
+      Serial.print(i + 1);
+      Serial.print((i + 1) < 10 ? F("  0x") : F(" 0x"));
+      if (irCodes[i] < 0x10) Serial.print('0');
+      Serial.print(irCodes[i], HEX);
+      Serial.println(F("UL"));
+    }
+  }
+#endif
+
   static bool HX1838mappingUitUserConfigInladen() {
+#if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+    const uint8_t standaardCodes[] = {HX1838_CODE_1, HX1838_CODE_2, HX1838_CODE_3, HX1838_CODE_4, HX1838_CODE_5, HX1838_CODE_6, HX1838_CODE_7, HX1838_CODE_8, HX1838_CODE_9, HX1838_CODE_10, HX1838_CODE_11, HX1838_CODE_12, HX1838_CODE_13, HX1838_CODE_14, HX1838_CODE_15, HX1838_CODE_16, HX1838_CODE_17};
+#elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
+    const uint8_t standaardCodes[] = {HX1838_CODE_1, HX1838_CODE_2, HX1838_CODE_3, HX1838_CODE_4, HX1838_CODE_5, HX1838_CODE_6, HX1838_CODE_7, HX1838_CODE_8, HX1838_CODE_9, HX1838_CODE_10, HX1838_CODE_11, HX1838_CODE_12, HX1838_CODE_13, HX1838_CODE_14, HX1838_CODE_15, HX1838_CODE_16, HX1838_CODE_17};
+#elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
     const uint8_t standaardCodes[] = {HX1838_CODE_1, HX1838_CODE_2, HX1838_CODE_3, HX1838_CODE_4, HX1838_CODE_5, HX1838_CODE_6, HX1838_CODE_7, HX1838_CODE_8, HX1838_CODE_9, HX1838_CODE_10, HX1838_CODE_11, HX1838_CODE_12, HX1838_CODE_13, HX1838_CODE_14, HX1838_CODE_15, HX1838_CODE_16, HX1838_CODE_17, HX1838_CODE_18, HX1838_CODE_19, HX1838_CODE_20, HX1838_CODE_21};
+#endif
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) if (standaardCodes[i] == 0UL) return false;
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) irCodes[i] = standaardCodes[i];
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+    Serial.println(_INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL);
+    HX1838toonTabelMetCodes();
+#endif
     return true;
   }
 
   #define EEPROM_ADRES_MAGIC    0
   #define EEPROM_MAGIC_WAARDE   0xAC
   #define EEPROM_ADRES_VERSIE   1
-  #define EEPROM_INPUT_VERSIE   2
-  #define EEPROM_ADRES_CODES    2
+  #define EEPROM_INPUT_VERSIE   3
+  #define EEPROM_ADRES_TOETSENINDELING 2
+  #define EEPROM_ADRES_CODES    3
   #define EEPROM_BENODIGDE_GROOTTE (EEPROM_ADRES_CODES + (AANTAL_IR_TOETSEN * sizeof(uint8_t)))
 
   static bool EEPROMopslagBeginnen() {
@@ -661,7 +706,18 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
     PrintToScreen(_INPUT_HX1838_DRUK_NU_OP, IR_KEY_LAYOUT[index].weergavetekst, 0);
 
     unsigned long startWachten = millis();
+
     while ((millis() - startWachten) < HX1838_KALIBRATIE_TIMEOUT_MS) {
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+      if (TinyIRReceiverData.justWritten) {
+        TinyIRReceiverData.justWritten = false;
+        if (!(TinyIRReceiverData.Flags & IRDATA_FLAGS_IS_REPEAT)) {
+          irCodes[index] = TinyIRReceiverData.Command;
+          delay(HX1838_KALIBRATIE_TOETS_PAUZE_MS);
+          return true;
+        }
+      }
+#else
       if (IrReceiver.decode()) {
         if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
           irCodes[index] = IrReceiver.decodedIRData.command;
@@ -672,6 +728,7 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 
         IrReceiver.resume();
       }
+#endif
     }
 
     return false;
@@ -681,19 +738,50 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
     if (!EEPROMopslagBeginnen()) return;
     EEPROM.write(EEPROM_ADRES_MAGIC, EEPROM_MAGIC_WAARDE);
     EEPROM.write(EEPROM_ADRES_VERSIE, EEPROM_INPUT_VERSIE);
+    EEPROM.write(EEPROM_ADRES_TOETSENINDELING, HX1838_TOETSENINDELING);
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) EEPROM.put(EEPROM_ADRES_CODES + (i * sizeof(uint8_t)), irCodes[i]);
     EEPROMopslagBevestigen();
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
     Serial.println(_INPUT_HX1838_KALIBRATIE_OPGESLAGEN_SERIAL);
+    HX1838toonTabelMetCodes();
 #endif
     PrintToScreen(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_OPGESLAGEN, 2000);
   }
 
   static bool HX1838kalibratieLaden() {
-    if (!EEPROMopslagBeginnen()) return false;
-    if (EEPROM.read(EEPROM_ADRES_MAGIC) != EEPROM_MAGIC_WAARDE) return false;
-    if (EEPROM.read(EEPROM_ADRES_VERSIE) != EEPROM_INPUT_VERSIE) return false;
+    if (!EEPROMopslagBeginnen()) {
+#ifdef DEBUG
+      DEBUG_PRINT("HX1838kalibratieLaden(): EEPROMopslagBeginnen(): ");
+      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_FAALDE);
+#endif
+      return false;
+    }
+    if (EEPROM.read(EEPROM_ADRES_MAGIC) != EEPROM_MAGIC_WAARDE) {
+#ifdef DEBUG
+      DEBUG_PRINT("HX1838kalibratieLaden(): ");
+      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_MAGIC_MISMATCH);
+#endif
+      return false;
+    }
+    if (EEPROM.read(EEPROM_ADRES_VERSIE) != EEPROM_INPUT_VERSIE) {
+#ifdef DEBUG
+      DEBUG_PRINT("HX1838kalibratieLaden(): ");
+      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VERSIE_MISMATCH);
+#endif
+      return false;
+    }
+    if (EEPROM.read(EEPROM_ADRES_TOETSENINDELING) != HX1838_TOETSENINDELING) {
+#ifdef DEBUG
+      DEBUG_PRINT("HX1838kalibratieLaden(): ");
+      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_TOETSENINDELING_MISMATCH);
+#endif
+      return false;
+    }
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) EEPROM.get(EEPROM_ADRES_CODES + (i * sizeof(uint8_t)), irCodes[i]);
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+    Serial.println(_INPUT_HX1838_MAPPING_EEPROM_GELADEN_SERIAL);
+    HX1838toonTabelMetCodes();
+#endif
     return true;
   }
 
@@ -710,10 +798,16 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 
     while (aantalGeverifieerd < AANTAL_IR_TOETSEN) {
       if ((millis() - laatsteHerkenning) >= HX1838_KALIBRATIE_TIMEOUT_MS) return false;
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+      if (TinyIRReceiverData.justWritten) {
+        TinyIRReceiverData.justWritten = false;
+        if (!(TinyIRReceiverData.Flags & IRDATA_FLAGS_IS_REPEAT)) {
+          int index = HX1838indexUitZoekenVoorSignaal(TinyIRReceiverData.Command);
+#else
       if (IrReceiver.decode()) {
         if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
           int index = HX1838indexUitZoekenVoorSignaal(IrReceiver.decodedIRData.command);
-
+#endif
           if (index >= 0 && !geverifieerd[index]) {
             geverifieerd[index] = true;
             aantalGeverifieerd++;
@@ -725,8 +819,9 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
             PrintToScreen(IR_KEY_LAYOUT[index].weergavetekst, _INPUT_HX1838_TOETS_HERKEND, 500);
           }
         }
-
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE == 0
         IrReceiver.resume();
+#endif
       }
     }
 
@@ -740,6 +835,12 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
     Serial.println(_INPUT_HX1838_KALIBRATIE_GESTART_SERIAL);
 #endif
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
+#ifdef TRACE
+      DEBUG_PRINT("HX1838 kalibratieUitvoeren: toets ");
+      DEBUG_PRINT(i + 1);
+      DEBUG_PRINT("/");
+      DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
+#endif
       if (!HX1838toetsKalibreren(i)) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
         Serial.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
@@ -748,6 +849,10 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
         return;
       }
     }
+#ifdef DEBUG
+    DEBUG_PRINT("HX1838kalibratieUitvoeren(): ");
+    DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_ALLE_TOETSEN_GEKALIBREER_START_VERIFICATIE);
+#endif
     if (!HX1838kalibratieVerifieren()) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
       Serial.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
@@ -757,15 +862,57 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
   }
 
   static int HX1838uitLezenToetsAanslag() {
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+    if (!TinyIRReceiverData.justWritten) return 0;
+    TinyIRReceiverData.justWritten = false;
+#else
     if (!IrReceiver.decode()) return 0;
+#endif
+#ifdef TRACE
+    static unsigned long hx1838DecodeTeller = 0;
+    hx1838DecodeTeller++;
+#endif
     int positie = 0;
-
-    if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
-      int index = HX1838indexUitZoekenVoorSignaal(IrReceiver.decodedIRData.command);
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+    if (!(TinyIRReceiverData.Flags & IRDATA_FLAGS_IS_REPEAT)) {
+      int index = HX1838indexUitZoekenVoorSignaal(TinyIRReceiverData.Command);
+#ifdef TRACE
+      DEBUG_PRINT("HX1838 ontvangen=0x");
+      DEBUG_PRINT(String(TinyIRReceiverData.Command, HEX));
+      if (index >= 0) {
+        DEBUG_PRINT(" vergeleken met HX1838_CODE_");
+        DEBUG_PRINT(index + 1);
+        DEBUG_PRINT("=0x");
+        DEBUG_PRINT(String(irCodes[index], HEX));
+        DEBUG_PRINT(" (MATCH) teller=");
+      } else {
+        DEBUG_PRINT(" (GEEN MATCH in mapping) teller=");
+      }
+      DEBUG_PRINTLN(hx1838DecodeTeller);
+#endif
       if (index >= 0) positie = index + 1;
     }
-
+#else
+    if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
+      int index = HX1838indexUitZoekenVoorSignaal(IrReceiver.decodedIRData.command);
+#ifdef TRACE
+      DEBUG_PRINT("HX1838 ontvangen=0x");
+      DEBUG_PRINT(String(IrReceiver.decodedIRData.command, HEX));
+      if (index >= 0) {
+        DEBUG_PRINT(" vergeleken met HX1838_CODE_");
+        DEBUG_PRINT(index + 1);
+        DEBUG_PRINT("=0x");
+        DEBUG_PRINT(String(irCodes[index], HEX));
+        DEBUG_PRINT(" (MATCH) teller=");
+      } else {
+        DEBUG_PRINT(" (GEEN MATCH in mapping) teller=");
+      }
+      DEBUG_PRINTLN(hx1838DecodeTeller);
+#endif
+      if (index >= 0) positie = index + 1;
+    }
     IrReceiver.resume();
+#endif
     return positie;
   }
 #endif
@@ -807,36 +954,36 @@ void InputConfigureren() {
   #endif
 
   #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
-    IrReceiver.begin(HX1838_ONTVANGER_PIN, ENABLE_LED_FEEDBACK);
+#ifdef DEBUG
+    DEBUG_PRINT("InputConfigureren(): ");
+    DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
+#endif
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+    if (!initPCIInterruptForTinyReceiver()) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+      Serial.println(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL);
+#endif
+      PrintToScreen(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT, "", 2000);
+    }
+#else
+    IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
+#endif
+#ifdef DEBUG
+    DEBUG_PRINT("InputConfigureren(): ");
+    DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT);
+#endif
     #if HX1838_BRON_CODES == HX1838_BRON_CODES_DEFINE
-      HX1838mappingUitUserConfigInladen();
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-      Serial.println(_INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL);
-#endif
-      PrintToScreen(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
-    #elif HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD
-      if (HX1838kalibratieLaden()) {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-        Serial.println(_INPUT_HX1838_KALIBRATIE_GELADEN_SERIAL);
-#endif
-        PrintToScreen(_INPUT_HX1838_KALIBRATIE_GELADEN, "", 2000);
+      if (HX1838mappingUitUserConfigInladen()) {
+        PrintToScreen(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
       } else {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-        Serial.println(_INPUT_HX1838_GEEN_GELDIGE_KALIBRATIE_SERIAL);
+        Serial.println(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL);
 #endif
-        HX1838kalibratieUitvoeren();
+        PrintToScreen(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG, "", 2000);
       }
-    #else
-      if (HX1838mappingUitUserConfigInladen()) {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-        Serial.println(_INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL);
-#endif
-        PrintToScreen(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
-      } else if (HX1838kalibratieLaden()) {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-        Serial.println(_INPUT_HX1838_KALIBRATIE_GELADEN_SERIAL);
-#endif
-        PrintToScreen(_INPUT_HX1838_KALIBRATIE_GELADEN, "", 2000);
+    #elif HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD
+      if (HX1838kalibratieLaden()) {
+        PrintToScreen(_INPUT_HX1838_MAPPING_EEPROM_GELADEN, "", 2000);
       } else {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
         Serial.println(_INPUT_HX1838_GEEN_GELDIGE_KALIBRATIE_SERIAL);

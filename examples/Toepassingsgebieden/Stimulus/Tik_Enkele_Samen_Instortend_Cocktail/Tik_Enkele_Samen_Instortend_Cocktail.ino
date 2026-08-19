@@ -58,22 +58,19 @@ void setup() {
   analogReadResolution(ADC_BITS);
 #endif  
 
-#ifdef DEBUG
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  DEBUG_PRINTLN("=== DEBUG GESTART ===");
-#endif
-
-#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  CharacterScreenConfigureren(); // I2C-handdruk + lcd.init()/backlight()
-#endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
   pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
   PixelScreen = &pixelScreen;
-  PixelScreenConfigureren();
 #endif
+  ScreensConfigureren();
+
+#ifdef DEBUG
   PrintToScreen(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
+  Serial.begin(SERIAL_BAUDRATE);
+  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+  DEBUG_PRINTLN("=== DEBUG GESTART ===");
+#endif
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
   InitialiseerADS1115();

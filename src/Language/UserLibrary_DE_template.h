@@ -6,7 +6,7 @@
 
 // Kopieer dit bestand naar UserLibrary_DE.h in dezelfde map.
 // Alle aanpasbare teksten uit het overeenkomstige officiële taalbestand staan hieronder als voorbeeld.
-// Vaste systeemfoutcodes (_FATAL_CSxxx en _FATAL_PSxxx) zijn bewust niet aanpasbaar.
+// Vaste systeemfoutcodes (_FATAL_CSxxx, _FATAL_PSxxx en _CRITICAL_SSxxx) zijn bewust niet aanpasbaar.
 //=========================================================
 // FATAL
 //=========================================================
@@ -38,10 +38,13 @@
 
   #define _INPUT_HX1838_KALIBRATIE_UITVOEREN                       "KALIBRIERUNG"
   #define _INPUT_HX1838_KALIBRATIE_OPGESLAGEN                      "GESPEICHERT"
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT                         "ZEITLIMIT"
 
-  #define _INPUT_HX1838_KALIBRATIE_GELADEN                         "KALIBR. GELADEN"
+  #define _INPUT_HX1838_MAPPING_EEPROM_GELADEN                     "MAPPING GELADEN"
 
   #define _INPUT_HX1838_MAPPING_GELADEN                            "MAPPING GELADEN"
+
+  #define _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT                "IR PIN FEHLER"
 
 // Input Type: PCF8574
   #define _INPUT_PCF8574_FOUT                                      "PCF8574 FEHLER"
@@ -66,12 +69,27 @@
 // Input Type: HX1838
   #define _INPUT_HX1838_DRUK_NU_OP_SERIAL                          "Jetzt drücken: "
   #define _INPUT_HX1838_GEEN_GELDIGE_KALIBRATIE_SERIAL             "Keine gültige IR-Kalibrierung gefunden."
-  #define _INPUT_HX1838_KALIBRATIE_GELADEN_SERIAL                  "Vorhandene IR-Kalibrierung geladen."
+  #define _INPUT_HX1838_MAPPING_EEPROM_GELADEN_SERIAL              "IR-Mapping aus EEPROM geladen:"
   #define _INPUT_HX1838_KALIBRATIE_GESTART_SERIAL                  "=== IR-Kalibrierung gestartet ==="
+  #define _INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL                  "IR-Kalibrierung abgebrochen: Zeitlimit."
+
+  #define _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL         "IR-Empfänger: Interrupt konnte nicht an HX1838_ONTVANGER_PIN gekoppelt werden."
   #define _INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL           "Kalibrierung abgeschlossen. Alle Tasten zur Kontrolle erneut drücken."
   #define _INPUT_HX1838_KALIBRATIE_OPGESLAGEN_SERIAL               "Kalibrierung gespeichert."
-  #define _INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL              "Standard-IR-Mapping aus der Konfiguration geladen."
+  #define _INPUT_HX1838_MAPPING_CONFIG_GELADEN_SERIAL              "Standard-IR-Mapping aus der Konfiguration geladen:"
+
+  #define _INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG                  "MAPPING UNVOLLST."
+
+  #define _INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL           "Feste IR-Mapping in UserConfig.h ist unvollständig, nicht alle HX1838_CODE_x sind ausgefüllt."
   #define _INPUT_HX1838_TOETS_HERKEND_SERIAL                       "Erkannt: "
+
+  #define _INPUT_HX1838_DEBUG_FAALDE                                      "fehlgeschlagen"
+  #define _INPUT_HX1838_DEBUG_MAGIC_MISMATCH                              "Magic stimmt nicht überein"
+  #define _INPUT_HX1838_DEBUG_VERSIE_MISMATCH                             "Version stimmt nicht überein"
+  #define _INPUT_HX1838_DEBUG_TOETSENINDELING_MISMATCH                    "Tastenbelegung stimmt nicht überein"
+  #define _INPUT_HX1838_DEBUG_ALLE_TOETSEN_GEKALIBREER_START_VERIFICATIE  "alle Tasten kalibriert, Verifikation startet"
+  #define _INPUT_HX1838_DEBUG_VOOR_INIT                                   "vor Initialisierung"
+  #define _INPUT_HX1838_DEBUG_NA_INIT                                     "nach Initialisierung"
 
 // Input Type: PCF8574
   #define _INPUT_PCF8574_NIET_BEREIKBAAR_SERIAL                    "PCF8574 unter der eingestellten I2C-Adresse nicht erreichbar."

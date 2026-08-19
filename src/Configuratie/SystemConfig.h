@@ -796,10 +796,8 @@
 #endif
 
 // Legacy fallback voor oude Stimulus-voorbeelden die PIN_TOETS_1..4 rechtstreeks gebruiken.
-// Nodig zodat deze voorbeelden ook blijven compileren wanneer INPUT_TYPE_DIGITAL niet actief is,
-// bijvoorbeeld bij INPUT_TYPE_NONE.
-// Deze fallback stuurt de nieuwe Input-laag niet; nieuwe Input-configuraties gebruiken de
-// keypadtype-specifieke KEYPAD_PIN_...-mapping hierboven.
+// Nodig zodat deze voorbeelden ook blijven compileren wanneer INPUT_TYPE_DIGITAL niet actief is, bijvoorbeeld bij INPUT_TYPE_NONE.
+// Deze fallback stuurt de nieuwe Input-laag niet; nieuwe Input-configuraties gebruiken de keypadtype-specifieke KEYPAD_PIN_...-mapping hierboven.
 #ifndef PIN_TOETS_1
   #define PIN_TOETS_1 ARDUINO_UNO_SHIELD_PIN_D3
 #endif
@@ -817,6 +815,17 @@
   #define TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH
 #endif
 
+// HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE: Standaard 1.
+// 1 = TinyIRReceiver.hpp (pin-change-interrupt, geen timerkanaal nodig, kleinere flash/RAM-voetafdruk), 
+// 0 = klassieke IRremote.hpp/IrReceiver (polling, timer-gebaseerd). 
+#ifndef HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+  #define HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
+#endif
+
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE != 0 && HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE != 1
+  #error HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE moet 0 of 1 zijn.
+#endif
+
 #ifndef HX1838_BRON_CODES
   #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
 #endif
@@ -830,81 +839,194 @@
 #endif
 
 #ifndef HX1838_TOETSENINDELING
-  #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_3x4
+  #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
 #endif
 
-// GPIO2 is op ESP32-boards een strapping pin en vaak gekoppeld aan de ingebouwde LED, wat opstart-/flashproblemen kan geven als een extern onderdeel zoals de HX1838 daarop actief signaal geeft.
-// D6 heeft die rol niet en is daarom de veiligere keuze op BOARD_ESP32_UNO. Bij AVR/Renesas speelt dit niet.
-#ifndef HX1838_ONTVANGER_PIN
-  #if BOARD_VERSION == BOARD_ESP32_UNO
-    #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D6
+#if HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
+  #if defined(HX1838_CODE_1) || defined(HX1838_CODE_2) || defined(HX1838_CODE_3) || defined(HX1838_CODE_4) || defined(HX1838_CODE_5) || defined(HX1838_CODE_6) || defined(HX1838_CODE_7) || defined(HX1838_CODE_8) || defined(HX1838_CODE_9) || defined(HX1838_CODE_10) || defined(HX1838_CODE_11) || defined(HX1838_CODE_12) || defined(HX1838_CODE_13) || defined(HX1838_CODE_14) || defined(HX1838_CODE_15) || defined(HX1838_CODE_16) || defined(HX1838_CODE_17) || defined(HX1838_CODE_18) || defined(HX1838_CODE_19) || defined(HX1838_CODE_20) || defined(HX1838_CODE_21)
+    #undef HX1838_BRON_CODES
+    #define HX1838_BRON_CODES HX1838_BRON_CODES_DEFINE
   #else
-    #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D2
+    #undef HX1838_BRON_CODES
+    #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_ALTIJD
   #endif
 #endif
 
-#ifndef HX1838_CODE_1
-  #define HX1838_CODE_1 0UL
+// D6 is op geen enkel ondersteund board gereserveerd voor keypad (D2-D5), 
+// pixelscherm (D8-D13 via CS/DC/RST/SPI) of characterscherm (I2C), 
+// en vermijdt bovendien de GPIO2-strapping-pin-problematiek op BOARD_ESP32_UNO. 
+#ifndef HX1838_ONTVANGER_PIN
+  #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D6
 #endif
-#ifndef HX1838_CODE_2
-  #define HX1838_CODE_2 0UL
-#endif
-#ifndef HX1838_CODE_3
-  #define HX1838_CODE_3 0UL
-#endif
-#ifndef HX1838_CODE_4
-  #define HX1838_CODE_4 0UL
-#endif
-#ifndef HX1838_CODE_5
-  #define HX1838_CODE_5 0UL
-#endif
-#ifndef HX1838_CODE_6
-  #define HX1838_CODE_6 0UL
-#endif
-#ifndef HX1838_CODE_7
-  #define HX1838_CODE_7 0UL
-#endif
-#ifndef HX1838_CODE_8
-  #define HX1838_CODE_8 0UL
-#endif
-#ifndef HX1838_CODE_9
-  #define HX1838_CODE_9 0UL
-#endif
-#ifndef HX1838_CODE_10
-  #define HX1838_CODE_10 0UL
-#endif
-#ifndef HX1838_CODE_11
-  #define HX1838_CODE_11 0UL
-#endif
-#ifndef HX1838_CODE_12
-  #define HX1838_CODE_12 0UL
-#endif
-#ifndef HX1838_CODE_13
-  #define HX1838_CODE_13 0UL
-#endif
-#ifndef HX1838_CODE_14
-  #define HX1838_CODE_14 0UL
-#endif
-#ifndef HX1838_CODE_15
-  #define HX1838_CODE_15 0UL
-#endif
-#ifndef HX1838_CODE_16
-  #define HX1838_CODE_16 0UL
-#endif
-#ifndef HX1838_CODE_17
-  #define HX1838_CODE_17 0UL
-#endif
-#ifndef HX1838_CODE_18
-  #define HX1838_CODE_18 0UL
-#endif
-#ifndef HX1838_CODE_19
-  #define HX1838_CODE_19 0UL
-#endif
-#ifndef HX1838_CODE_20
-  #define HX1838_CODE_20 0UL
-#endif
-#ifndef HX1838_CODE_21
-  #define HX1838_CODE_21 0UL
+
+#if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+  #ifndef HX1838_CODE_1
+    #define HX1838_CODE_1 0x46UL // = UP
+  #endif
+  #ifndef HX1838_CODE_2
+    #define HX1838_CODE_2 0x15UL // = DOWN
+  #endif
+  #ifndef HX1838_CODE_3
+    #define HX1838_CODE_3 0x40UL // = OK
+  #endif
+  #ifndef HX1838_CODE_4
+    #define HX1838_CODE_4 0x44UL // = LEFT
+  #endif
+  #ifndef HX1838_CODE_5
+    #define HX1838_CODE_5 0x43UL // = RIGHT
+  #endif
+  #ifndef HX1838_CODE_6
+    #define HX1838_CODE_6 0x16UL // = 1
+  #endif
+  #ifndef HX1838_CODE_7
+    #define HX1838_CODE_7 0x19UL // = 2
+  #endif
+  #ifndef HX1838_CODE_8
+    #define HX1838_CODE_8 0x0DUL // = 3
+  #endif
+  #ifndef HX1838_CODE_9
+    #define HX1838_CODE_9 0x0CUL // = 4
+  #endif
+  #ifndef HX1838_CODE_10
+    #define HX1838_CODE_10 0x18UL // = 5
+  #endif
+  #ifndef HX1838_CODE_11
+    #define HX1838_CODE_11 0x5EUL // = 6
+  #endif
+  #ifndef HX1838_CODE_12
+    #define HX1838_CODE_12 0x08UL // = 7
+  #endif
+  #ifndef HX1838_CODE_13
+    #define HX1838_CODE_13 0x1CUL // = 8
+  #endif
+  #ifndef HX1838_CODE_14
+    #define HX1838_CODE_14 0x5AUL // = 9
+  #endif
+  #ifndef HX1838_CODE_15
+    #define HX1838_CODE_15 0x42UL // = *
+  #endif
+  #ifndef HX1838_CODE_16
+    #define HX1838_CODE_16 0x52UL // = 0
+  #endif
+  #ifndef HX1838_CODE_17
+    #define HX1838_CODE_17 0x4AUL // = #
+  #endif
+#elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
+  #ifndef HX1838_CODE_1
+    #define HX1838_CODE_1 0x45UL // = 1
+  #endif
+  #ifndef HX1838_CODE_2
+    #define HX1838_CODE_2 0x46UL // = 2
+  #endif
+  #ifndef HX1838_CODE_3
+    #define HX1838_CODE_3 0x47UL // = 3
+  #endif
+  #ifndef HX1838_CODE_4
+    #define HX1838_CODE_4 0x44UL // = 4
+  #endif
+  #ifndef HX1838_CODE_5
+    #define HX1838_CODE_5 0x40UL // = 5
+  #endif
+  #ifndef HX1838_CODE_6
+    #define HX1838_CODE_6 0x43UL // = 6
+  #endif
+  #ifndef HX1838_CODE_7
+    #define HX1838_CODE_7 0x07UL // = 7
+  #endif
+  #ifndef HX1838_CODE_8
+    #define HX1838_CODE_8 0x15UL // = 8
+  #endif
+  #ifndef HX1838_CODE_9
+    #define HX1838_CODE_9 0x09UL // = 9
+  #endif
+  #ifndef HX1838_CODE_10
+    #define HX1838_CODE_10 0x16UL // = *
+  #endif
+  #ifndef HX1838_CODE_11
+    #define HX1838_CODE_11 0x19UL // = 0
+  #endif
+  #ifndef HX1838_CODE_12
+    #define HX1838_CODE_12 0x0DUL // = #
+  #endif
+  #ifndef HX1838_CODE_13
+    #define HX1838_CODE_13 0x18UL // = UP
+  #endif
+  #ifndef HX1838_CODE_14
+    #define HX1838_CODE_14 0x52UL // = DOWN
+  #endif
+  #ifndef HX1838_CODE_15
+    #define HX1838_CODE_15 0x1CUL // = OK
+  #endif
+  #ifndef HX1838_CODE_16
+    #define HX1838_CODE_16 0x08UL // = LEFT
+  #endif
+  #ifndef HX1838_CODE_17
+    #define HX1838_CODE_17 0x5AUL // = RIGHT
+  #endif  
+#elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
+  #ifndef HX1838_CODE_1
+    #define HX1838_CODE_1 0x45UL // = CH-
+  #endif
+  #ifndef HX1838_CODE_2
+    #define HX1838_CODE_2 0x46UL // = CH
+  #endif
+  #ifndef HX1838_CODE_3
+    #define HX1838_CODE_3 0x47UL // = CH+
+  #endif
+  #ifndef HX1838_CODE_4
+    #define HX1838_CODE_4 0x44UL // = PREV
+  #endif
+  #ifndef HX1838_CODE_5
+    #define HX1838_CODE_5 0x40UL // = NEXT
+  #endif
+  #ifndef HX1838_CODE_6
+    #define HX1838_CODE_6 0x43UL // = PLAY
+  #endif
+  #ifndef HX1838_CODE_7
+    #define HX1838_CODE_7 0x07UL // = -
+  #endif
+  #ifndef HX1838_CODE_8
+    #define HX1838_CODE_8 0x15UL // = +
+  #endif
+  #ifndef HX1838_CODE_9
+    #define HX1838_CODE_9 0x09UL // = EQ
+  #endif
+  #ifndef HX1838_CODE_10
+    #define HX1838_CODE_10 0x16UL // = 0
+  #endif
+  #ifndef HX1838_CODE_11
+    #define HX1838_CODE_11 0x19UL // = 100+
+  #endif
+  #ifndef HX1838_CODE_12
+    #define HX1838_CODE_12 0x0DUL // = 200+
+  #endif
+  #ifndef HX1838_CODE_13
+    #define HX1838_CODE_13 0x0CUL // = 1
+  #endif
+  #ifndef HX1838_CODE_14
+    #define HX1838_CODE_14 0x18UL // = 2
+  #endif
+  #ifndef HX1838_CODE_15
+    #define HX1838_CODE_15 0x5EUL // = 3
+  #endif
+  #ifndef HX1838_CODE_16
+    #define HX1838_CODE_16 0x08UL // = 4
+  #endif
+  #ifndef HX1838_CODE_17
+    #define HX1838_CODE_17 0x1CUL // = 5
+  #endif
+  #ifndef HX1838_CODE_18
+    #define HX1838_CODE_18 0x5AUL // = 6
+  #endif
+  #ifndef HX1838_CODE_19
+    #define HX1838_CODE_19 0x42UL // = 7
+  #endif
+  #ifndef HX1838_CODE_20
+    #define HX1838_CODE_20 0x52UL // = 8
+  #endif
+  #ifndef HX1838_CODE_21
+    #define HX1838_CODE_21 0x4AUL // = 9
+  #endif
 #endif
 
 
@@ -928,6 +1050,14 @@
   #ifndef DEBUG
     #define DEBUG
   #endif
+#endif
+
+// SerialScreen
+#ifndef SERIAL_BAUDRATE
+  #define SERIAL_BAUDRATE 115200UL
+#endif
+#ifndef SERIAL_CONNECT_TIMEOUT_MS
+  #define SERIAL_CONNECT_TIMEOUT_MS 2000UL
 #endif
 
 // SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.

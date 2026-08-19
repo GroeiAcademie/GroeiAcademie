@@ -54,9 +54,15 @@ call :ControleerOpschriften "%PCF8574_INO%" "KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
 :: ============================================================
 set "HX1838_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
 
-call :ControleerOpschriften "%HX1838_INO%" "HX1838_TOETSENINDELING_3x4" "1 2 3 4 5 6 7 8 9 STER 0 HEKJE"
-call :ControleerOpschriften "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_17_TOETSEN" "1 2 3 4 5 6 7 8 9 STER 0 HEKJE UP DOWN LEFT RIGHT OK"
+call :ControleerOpschriften "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN" "UP DOWN OK LEFT RIGHT 1 2 3 4 5 6 7 8 9 STER 0 HEKJE"
+call :ControleerOpschriften "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN" "1 2 3 4 5 6 7 8 9 STER 0 HEKJE UP DOWN OK LEFT RIGHT"
 call :ControleerOpschriften "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3" "CH_MINUS CH CH_PLUS PREV NEXT PLAY MINUS PLUS EQ 0 100_PLUS 200_PLUS 1 2 3 4 5 6 7 8 9"
+
+:: Extra HX1838-controle: behoud de brede controle hierboven, maar controleer
+:: aanvullend de juiste #if/#elif-tak en de volgorde binnen mappingTestMenu[].
+call :ControleerOpschriftenInTak "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN" "UP DOWN OK LEFT RIGHT 1 2 3 4 5 6 7 8 9 STER 0 HEKJE"
+call :ControleerOpschriftenInTak "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN" "1 2 3 4 5 6 7 8 9 STER 0 HEKJE UP DOWN OK LEFT RIGHT"
+call :ControleerOpschriftenInTak "%HX1838_INO%" "HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3" "CH_MINUS CH CH_PLUS PREV NEXT PLAY MINUS PLUS EQ 0 100_PLUS 200_PLUS 1 2 3 4 5 6 7 8 9"
 
 echo ------------------------------------------------------------
 echo Gecontroleerd: !GECONTROLEERD! combinaties van bestand en type.
@@ -69,6 +75,59 @@ echo ============================================================
 popd
 pause
 exit /b !FOUT!
+
+
+:: ============================================================
+:: :ControleerOpschriftenInTak <ino-pad> <HX1838_TOETSENINDELING> <verwachte volgorde>
+:: ============================================================
+:ControleerOpschriftenInTak
+set "INO_PAD=%~1"
+set "TYPE_NAAM=%~2"
+set "VERWACHTE_OPSCHRIFTEN=%~3"
+set /A GECONTROLEERD+=1
+
+if not exist "%INO_PAD%" (
+    echo [FOUT] Bestand niet gevonden: %INO_PAD%
+    set /A FOUT+=1
+    goto :eof
+)
+
+set "TAK_START="
+for /f "tokens=1 delims=:" %%L in ('findstr /N /C:"HX1838_TOETSENINDELING == %TYPE_NAAM%" "%INO_PAD%"') do (
+    if not defined TAK_START set "TAK_START=%%L"
+)
+
+if not defined TAK_START (
+    echo [FOUT] %INO_PAD% ^| %TYPE_NAAM% ^| #if/#elif-tak niet gevonden
+    set /A FOUT+=1
+    goto :eof
+)
+
+set "TAK_EIND="
+for /f "tokens=1 delims=:" %%L in ('findstr /N /R /C:"^[ ]*#elif HX1838_TOETSENINDELING" /C:"^[ ]*#else" /C:"^[ ]*#endif" "%INO_PAD%"') do (
+    if %%L GTR !TAK_START! if not defined TAK_EIND set "TAK_EIND=%%L"
+)
+if not defined TAK_EIND set "TAK_EIND=2147483647"
+
+set /A VORIGE_REGEL=TAK_START
+for %%O in (%VERWACHTE_OPSCHRIFTEN%) do (
+    set "GEVONDEN_REGEL="
+    for /f "tokens=1 delims=:" %%L in ('findstr /N /C:"_LABEL_OPSCHRIFT_%%O," "%INO_PAD%"') do (
+        if %%L GTR !TAK_START! if %%L LSS !TAK_EIND! if not defined GEVONDEN_REGEL set "GEVONDEN_REGEL=%%L"
+    )
+
+    if not defined GEVONDEN_REGEL (
+        echo [FOUT] %INO_PAD% ^| %TYPE_NAAM% ^| opschrift %%O ontbreekt in de eigen #if/#elif-tak
+        set /A FOUT+=1
+    ) else (
+        if !GEVONDEN_REGEL! LEQ !VORIGE_REGEL! (
+            echo [FOUT] %INO_PAD% ^| %TYPE_NAAM% ^| opschrift %%O staat niet in de verwachte volgorde
+            set /A FOUT+=1
+        )
+        set /A VORIGE_REGEL=GEVONDEN_REGEL
+    )
+)
+goto :eof
 
 :: ============================================================
 :: :ControleerOpschriften <ino-pad> <keypadtype-naam> <lijst met opschriften gescheiden door spatie>

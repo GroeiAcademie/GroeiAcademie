@@ -44,9 +44,11 @@ De gebruiker stelt `SCREEN_OUTPUT_CONFIG` in. `SCREEN_OUTPUT` is de door de libr
 
 ```cpp
 // #define SCREEN_OUTPUT_CONFIG SCREEN_TYPE_NONE
+// #define SERIAL_BAUDRATE 115200UL
+// #define SERIAL_CONNECT_TIMEOUT_MS 2000UL
 ```
 
-`SCREEN_TYPE_NONE` is de veilige standaard. Kies in `UserConfig.h` bewust de uitvoertypes die jouw toepassing nodig heeft.
+`SCREEN_TYPE_NONE` is de veilige standaard. `SERIAL_CONNECT_TIMEOUT_MS` begrenst alleen de eerste normale SerialScreen-verbindingspoging; na timeout blijft de toepassing doorgaan en kan `CRITICAL: SS001` via een beschikbaar CharacterScreen of PixelScreen/callback worden gemeld. Kies in `UserConfig.h` bewust de uitvoertypes die jouw toepassing nodig heeft.
 
 ## PixelScreen-lay-out
 
@@ -72,15 +74,15 @@ Belangrijkste instellingen:
 // #define KEYPAD_TYPE KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
 // #define I2C_ADDRESS_PCF8574 0x20
 // #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D2
-// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_3x4
-// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_17_TOETSEN
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
 // #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
 ```
 
 Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`.
 
-Voor HX1838 kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. `HX1838_BRON_CODES` bepaalt of de vaste mapping, EEPROM of de fallbackvolgorde gebruikt wordt. Bij `HX1838_BRON_CODES_DEFINE` zijn respectievelijk 12, 17 of 21 ingevulde codes vereist, afhankelijk van de gekozen `HX1838_TOETSENINDELING`.
+Voor HX1838 kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. `HX1838_BRON_CODES_DEFINE` gebruikt de vaste mapping; codes die niet in `UserConfig.h` zijn gedefinieerd, worden door `SystemConfig.h` met de standaardcodes aangevuld. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
 
 De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken. Voor `INPUT_TYPE_DIGITAL` gebeurt dit per `KEYPAD_TYPE`: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden standaard D3,D2,D5,D4. De oude `PIN_TOETS_1` tot en met `PIN_TOETS_4` blijven voor backward compatibility ondersteund en hebben voorrang wanneer ze expliciet in `UserConfig.h` zijn ingesteld.
 
@@ -138,9 +140,9 @@ Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel 
 
 Beschikbare HX1838-toetsenindelingen:
 
-- `HX1838_TOETSENINDELING_3x4`: remote met 17 toetsen; enkel de 12 toetsen van de 3x4-matrix (1-9, *, 0, #) worden gebruikt;
-- `HX1838_TOETSENINDELING_REMOTE_17_TOETSEN`: alle 17 toetsen, inclusief navigatie (UP, DOWN, OK, LEFT, RIGHT);
-- `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`: remote met 21 toetsen, inclusief de MP3-toetsen.
+- `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN`: remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]
+- `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN`: remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]
+- `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`        : remote met 21 toetsen, inclusief de MP3-toetsen.
 
 ## Input-specifieke gebruikersinstellingen
 

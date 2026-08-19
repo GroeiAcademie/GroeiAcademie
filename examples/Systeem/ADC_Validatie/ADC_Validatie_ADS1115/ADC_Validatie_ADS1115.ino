@@ -35,6 +35,8 @@
 #define PIN_SENSOR_4 3
 #define STIMULUS_AANTAL_KANALEN 4
 
+#define SERIAL_BAUDRATE 115200 
+
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads;
@@ -118,7 +120,9 @@ unsigned long tStart = 0;
 unsigned long laatsteSample = 0;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(SERIAL_BAUDRATE);
+  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+
   Wire.begin();
   InitialiseerADS1115Validatie();
 

@@ -1,10 +1,6 @@
 #ifndef EXAMPLES_CONFIG_H
 #define EXAMPLES_CONFIG_H
 
-#ifndef SERIAL_BAUDRATE
-  #define SERIAL_BAUDRATE 115200UL
-#endif
-
 // Wachttijden gebruikt door de Screen-voorbeelden (Default_*Screen, Callback_*Screen).
 #ifndef LEESTIJD_VOORBEELD_MS
   #define LEESTIJD_VOORBEELD_MS 2000UL

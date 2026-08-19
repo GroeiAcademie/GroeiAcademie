@@ -76,6 +76,13 @@ De officiële veilige standaard is:
 
 Kies in `UserConfig.h` bewust de gewenste uitvoertypes. Wat niet in `SCREEN_OUTPUT_CONFIG` geselecteerd wordt, wordt niet gecompileerd. Wanneer `DEBUG` actief is, wordt Serial aanvullend in `SCREEN_OUTPUT` opgenomen.
 
+Voor SerialScreen gelden daarnaast:
+
+| Define | Betekenis |
+|---|---|
+| `SERIAL_BAUDRATE` | Baudrate voor de seriële uitvoer; standaard `115200UL`. |
+| `SERIAL_CONNECT_TIMEOUT_MS` | Maximale wachttijd bij de eerste normale SerialScreen-verbinding; standaard `2000UL`. Na timeout wordt Serial voor die sessie als niet beschikbaar beschouwd en wordt `CRITICAL: SS001` op beschikbare andere schermen/callbacks gemeld. |
+
 ## Characterscherm
 
 | Define | Betekenis |

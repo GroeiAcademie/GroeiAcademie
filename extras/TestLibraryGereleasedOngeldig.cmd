@@ -1,12 +1,12 @@
 @echo off
 cls
-if exist "TestLibraryStatusReport.txt" del /q "TestLibraryStatusReport.txt" >nul 2>&1
+if exist "%~dp0TestLibraryStatusReport.txt" del /q "%~dp0TestLibraryStatusReport.txt" >nul 2>&1
 :: Controleer of het script al via PowerShell met logging draait.
 if "%~1"=="--logged" goto :MAIN_SCRIPT
 
 :: Start het script opnieuw op, toon de uitvoer én bewaar het afzonderlijke logbestand.
 :: De exitcode van de interne run wordt expliciet teruggegeven aan de aanroeper.
-if exist "TestLibraryGereleasedOngeldig.txt" del /q "TestLibraryGereleasedOngeldig.txt" >nul 2>&1
+if exist "%~dp0TestLibraryGereleasedOngeldig.txt" del /q "%~dp0TestLibraryGereleasedOngeldig.txt" >nul 2>&1
 powershell -NoProfile -Command "& { & '%~f0' --logged %* 2>&1 | Tee-Object -FilePath '%~dp0TestLibraryGereleasedOngeldig.txt'; exit $LASTEXITCODE }"
 set "SCRIPT_RESULT=%errorlevel%"
 exit /b %SCRIPT_RESULT%

@@ -99,9 +99,9 @@ Ook hier geldt: een bewust ongeldige configuratie is alleen `[OK]` wanneer de co
 
 ### 6. Mapping-volledigheidscontrole — `TestLibraryMappingControle.cmd`
 
-`TestLibraryMappingControle.cmd` controleert tekstueel of `mappingTestMenu[]` in `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino` alle opschriften bevat die de betrokken `KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` kan opleveren. De referentielijsten bevatten de volledige opschriftenset van de gecontroleerde types.
+`TestLibraryMappingControle.cmd` behoudt voor DIGITAL, PCF8574 en HX1838 een brede tekstuele aanwezigheidstest op `mappingTestMenu[]` in `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino`. De referentielijsten bevatten de volledige opschriftenset van de gecontroleerde types.
 
-De controle is tekstueel en niet `#if`/`#elif`-bewust. Zij bevestigt dus dat een opschrift in het bestand aanwezig is, niet dat het noodzakelijk in de juiste voorwaardelijke tak staat. Bij nieuwe of gewijzigde keypadtypes moet de referentietabel in het script mee bijgewerkt worden.
+Voor HX1838 wordt aanvullend per `HX1838_TOETSENINDELING` de eigen `#if`/`#elif`-tak gecontroleerd. Binnen die tak controleert het script zowel de aanwezigheid als de verwachte volgorde van de opschriften. De referentietabellen worden handmatig onderhouden en moeten bij nieuwe of gewijzigde keypadtypes/toetsenindelingen mee bijgewerkt worden.
 
 ### 7. Statusrapport — `TestLibraryStatusReport.cmd`
 

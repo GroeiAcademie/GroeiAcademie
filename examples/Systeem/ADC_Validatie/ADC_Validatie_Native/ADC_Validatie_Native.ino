@@ -62,6 +62,8 @@
 #define PIN_SENSOR_4 A3
 #define STIMULUS_AANTAL_KANALEN 4
 
+#define SERIAL_BAUDRATE 115200 
+
 #include <Wire.h>
 
 const int sensorPin[STIMULUS_AANTAL_KANALEN] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
@@ -147,7 +149,9 @@ void setup() {
   analogReadResolution(ADC_BITS);
 #endif
 
-  Serial.begin(115200);
+  Serial.begin(SERIAL_BAUDRATE);
+  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+
   Wire.begin();
   InitialiseerADS1115Validatie();
 

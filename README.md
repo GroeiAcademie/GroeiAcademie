@@ -11,6 +11,7 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 - versie: `1.1.0`;
 - ontwikkelfase: alpha;
 - huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
+- de HX1838-ondersteuning binnen Input bevindt zich in v1.1.0 nog in experimentele fase;
 - de interne releasetests worden in vier afzonderlijke testcycli uitgevoerd; de definitieve releaseresultaten worden vastgelegd in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
@@ -105,6 +106,7 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 
 - `DEBUG`;
 - `SCREEN_OUTPUT_CONFIG`;
+- `SERIAL_BAUDRATE` en `SERIAL_CONNECT_TIMEOUT_MS` wanneer Serial-uitvoer gebruikt wordt;
 - `INPUT_KANAAL_CONFIG`;
 - `KEYPAD_TYPE` en, bij een UserDefined-keypad, alle vereiste `KEYPAD_GENERIEK_...`-instellingen;
 - `I2C_ADDRESS_PCF8574` wanneer `INPUT_TYPE_PCF8574` gebruikt wordt;

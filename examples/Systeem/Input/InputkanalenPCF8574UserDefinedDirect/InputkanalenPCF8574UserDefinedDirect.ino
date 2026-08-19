@@ -51,17 +51,13 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 };
 
 void setup() {
-  Serial.begin(115200);
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  CharacterScreenConfigureren();
-#endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
   pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
   PixelScreen = &pixelScreen;
-  PixelScreenConfigureren();
 #endif
+  ScreensConfigureren();
 
   InputConfigureren();
 

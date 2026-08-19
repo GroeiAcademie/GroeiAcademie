@@ -2,12 +2,12 @@
 cls
 setlocal EnableExtensions EnableDelayedExpansion
 
-set "REPORT=TestLibraryStatusReport.txt"
+set "REPORT=%~dp0TestLibraryStatusReport.txt"
 set "MARKER==== TEST VOLLEDIG AFGEROND ==="
-set "LOG1=TestLibraryGereleased.txt"
-set "LOG2=TestLibraryGereleasedOngeldig.txt"
-set "LOG3=TestLibraryNieuw.txt"
-set "LOG4=TestLibraryNieuwOngeldig.txt"
+set "LOG1=%~dp0TestLibraryGereleased.txt"
+set "LOG2=%~dp0TestLibraryGereleasedOngeldig.txt"
+set "LOG3=%~dp0TestLibraryNieuw.txt"
+set "LOG4=%~dp0TestLibraryNieuwOngeldig.txt"
 
 if exist "%REPORT%" del /q "%REPORT%" >nul 2>&1
 
@@ -115,6 +115,8 @@ if !GELDIG! NEQ 4 set /a RELEASE_FOUT+=1
 )
 
 call :SchrijfReleaseUpdate >> "%REPORT%"
+call :SchrijfGeheugentabellen >> "%REPORT%"
+if !RELEASE_FOUT! NEQ 0 call :SchrijfFoutdetails >> "%REPORT%"
 
 >> "%REPORT%" (
   echo.
@@ -149,6 +151,8 @@ if !GELDIG! EQU 4 if !RELEASE_FOUT! EQU 0 (
   echo TestLibraryGereleasedOngeldig.cmd  : !STATUS2!
   echo TestLibraryNieuw.cmd               : !STATUS3!
   echo TestLibraryNieuwOngeldig.cmd       : !STATUS4!
+  echo.
+  call :SchrijfFoutdetails
   echo.
   echo OPNIEUW UIT TE VOEREN:
   if not "!STATUS1!"=="VOLLEDIG AFGEROND" echo TestLibraryGereleased.cmd
@@ -276,6 +280,94 @@ if !RELEASE_FOUT! EQU 0 (
   echo De releasevalidatie is niet volledig geslaagd.
 )
 echo ============================================================
+exit /b
+
+
+:SchrijfGeheugentabellen
+echo.
+echo ============================================================
+echo GEHEUGENGEBRUIK - TestLibraryGereleased.cmd
+echo ============================================================
+call :SchrijfGeheugentabel "%LOG1%"
+echo.
+echo ============================================================
+echo GEHEUGENGEBRUIK - TestLibraryNieuw.cmd
+echo ============================================================
+call :SchrijfGeheugentabel "%LOG3%"
+exit /b
+
+:SchrijfGeheugentabel
+if not exist "%~1" (
+  echo GEEN LOGBESTAND AANWEZIG
+  exit /b
+)
+powershell -NoProfile -Command "$rows = Get-Content -LiteralPath '%~1' ^| ForEach-Object { if ($_ -match '^\[GEHEUGEN\]\s+Board=(.*?) \^| Bestand=(.*?) \^| Test=(.*?) \^| Programma=(.*?) \^| RAM=(.*?) \^| Status=(.*?)$') { [pscustomobject]@{ Board=$matches[1]; Bestand=$matches[2]; Test=$matches[3]; Programma=$matches[4]; RAM=$matches[5]; Status=$matches[6] } } }; if (-not $rows) { Write-Output 'Geen geheugenrecords gevonden.'; exit }; Write-Output 'Board ^| Bestand / example ^| Test / configuratie ^| Programma ^| RAM ^| Status'; Write-Output '----- ^| ----------------- ^| ------------------- ^| --------- ^| --- ^| ------'; foreach ($r in $rows) { Write-Output ('{0} ^| {1} ^| {2} ^| {3} ^| {4} ^| {5}' -f $r.Board,$r.Bestand,$r.Test,$r.Programma,$r.RAM,$r.Status) }"
+exit /b
+
+:SchrijfFoutdetails
+echo ============================================================
+echo MISLUKTE TESTEN - DETAILS
+echo ============================================================
+set "FOUTDETAILS_GEVONDEN=0"
+if not "!STATUS1!"=="VOLLEDIG AFGEROND" (
+  echo.
+  echo TestLibraryGereleased.cmd
+  echo   Testcyclus : !STATUS1!
+  if "!STATUS1!"=="ONTBREEKT" echo   Reden      : TestLibraryGereleased.txt ontbreekt.
+  if "!STATUS1!"=="ONVOLLEDIG / AFGEBROKEN" echo   Reden      : TestLibraryGereleased.txt bevat geen marker === TEST VOLLEDIG AFGEROND ===.
+  set "FOUTDETAILS_GEVONDEN=1"
+) else if "!RESULTAAT1!"=="MISLUKT" (
+  call :SchrijfFoutenUitLog "%LOG1%" "TestLibraryGereleased.cmd"
+  set "FOUTDETAILS_GEVONDEN=1"
+)
+if not "!STATUS2!"=="VOLLEDIG AFGEROND" (
+  echo.
+  echo TestLibraryGereleasedOngeldig.cmd
+  echo   Testcyclus : !STATUS2!
+  if "!STATUS2!"=="ONTBREEKT" echo   Reden      : TestLibraryGereleasedOngeldig.txt ontbreekt.
+  if "!STATUS2!"=="ONVOLLEDIG / AFGEBROKEN" echo   Reden      : TestLibraryGereleasedOngeldig.txt bevat geen marker === TEST VOLLEDIG AFGEROND ===.
+  set "FOUTDETAILS_GEVONDEN=1"
+) else if "!RESULTAAT2!"=="MISLUKT" (
+  call :SchrijfFoutenUitLog "%LOG2%" "TestLibraryGereleasedOngeldig.cmd"
+  set "FOUTDETAILS_GEVONDEN=1"
+)
+if not "!STATUS3!"=="VOLLEDIG AFGEROND" (
+  echo.
+  echo TestLibraryNieuw.cmd
+  echo   Testcyclus : !STATUS3!
+  if "!STATUS3!"=="ONTBREEKT" echo   Reden      : TestLibraryNieuw.txt ontbreekt.
+  if "!STATUS3!"=="ONVOLLEDIG / AFGEBROKEN" echo   Reden      : TestLibraryNieuw.txt bevat geen marker === TEST VOLLEDIG AFGEROND ===.
+  set "FOUTDETAILS_GEVONDEN=1"
+) else if "!RESULTAAT3_OFFICIEEL!"=="MISLUKT" (
+  call :SchrijfFoutenUitLog "%LOG3%" "TestLibraryNieuw.cmd - OFFICIEEL"
+  set "FOUTDETAILS_GEVONDEN=1"
+) else if "!RESULTAAT3_STATISCH!"=="MISLUKT" (
+  call :SchrijfFoutenUitLog "%LOG3%" "TestLibraryNieuw.cmd - STATISCH"
+  set "FOUTDETAILS_GEVONDEN=1"
+)
+if not "!STATUS4!"=="VOLLEDIG AFGEROND" (
+  echo.
+  echo TestLibraryNieuwOngeldig.cmd
+  echo   Testcyclus : !STATUS4!
+  if "!STATUS4!"=="ONTBREEKT" echo   Reden      : TestLibraryNieuwOngeldig.txt ontbreekt.
+  if "!STATUS4!"=="ONVOLLEDIG / AFGEBROKEN" echo   Reden      : TestLibraryNieuwOngeldig.txt bevat geen marker === TEST VOLLEDIG AFGEROND ===.
+  set "FOUTDETAILS_GEVONDEN=1"
+) else if "!RESULTAAT4!"=="MISLUKT" (
+  call :SchrijfFoutenUitLog "%LOG4%" "TestLibraryNieuwOngeldig.cmd"
+  set "FOUTDETAILS_GEVONDEN=1"
+)
+if "!FOUTDETAILS_GEVONDEN!"=="0" echo Geen releaseblokkerende foutdetails gevonden.
+exit /b
+
+:SchrijfFoutenUitLog
+echo.
+echo %~2
+echo ------------------------------------------------------------
+if not exist "%~1" (
+  echo Geen logbestand aanwezig.
+  exit /b
+)
+powershell -NoProfile -Command "$l=Get-Content -LiteralPath '%~1'; $hits=@(); for($i=0; $i -lt $l.Count; $i++){ if($l[$i] -match '^\[FOUT\]' -or $l[$i] -match '^FOUT:' -or $l[$i] -eq 'COMPILATIEFOUT' -or $l[$i] -match '^Arduino LINT.*(?:MISLUKT|FOUT)'){ $hits += $i } }; if($hits.Count -eq 0){ $sum=$l ^| Where-Object { $_ -match 'FOUT [1-9][0-9]*$' -or $_ -match 'Onverwacht mislukt\s*:\s*[1-9]' } ^| Select-Object -Last 5; if($sum){$sum}else{'Geen afzonderlijke foutregel gevonden; raadpleeg de volledige log hieronder in TestLibraryStatusReport.txt.'}; exit }; foreach($i in $hits){ Write-Output $l[$i]; $detail=@(); $max=[Math]::Min($l.Count-1,$i+30); for($j=$i+1;$j -le $max;$j++){ if($l[$j] -match '^\[OK\]' -or $l[$j] -match '^\[FOUT\]' -or $l[$j] -match '^-{20,}$'){ break }; if($l[$j] -match '(?i)(fatal error:|error:|#error|undefined reference|collect2:|compilation terminated|failed|mislukt|onverwacht)'){ $detail += $l[$j]; if($detail.Count -ge 4){break} } }; if($detail.Count -gt 0){ $detail ^| ForEach-Object { Write-Output ('  Reden: ' + $_) } } else { Write-Output '  Reden: zie bijbehorende compile-uitvoer in de volledige log.' }; Write-Output '' }"
 exit /b
 
 :VoegToe

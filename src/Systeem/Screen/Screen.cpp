@@ -30,11 +30,23 @@
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+static bool serialScreenGecontroleerd = false;
 static bool serialScreenGeconfigureerd = false;
-static void SerialScreenConfigureren() {
-  if (serialScreenGeconfigureerd) return;
-  Serial.begin(115200);
-  serialScreenGeconfigureerd = true;
+static bool serialScreenFoutmeldingWeergegeven = false;
+static void SerialScreenFoutmeldingWeergeven();
+
+static bool SerialScreenConfigureren(bool opnieuwProberen = false) {
+  if (serialScreenGecontroleerd && !opnieuwProberen) return serialScreenGeconfigureerd;
+
+  serialScreenGecontroleerd = true;
+  serialScreenFoutmeldingWeergegeven = false;
+  Serial.begin(SERIAL_BAUDRATE);
+
+  const unsigned long startTijd = millis();
+  while (!Serial && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+
+  serialScreenGeconfigureerd = (bool)Serial;
+  return serialScreenGeconfigureerd;
 }
 #endif
 
@@ -300,9 +312,38 @@ static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
   // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
-  Serial.begin(115200);
+  Serial.begin(SERIAL_BAUDRATE);
+  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+
   Serial.println(foutmelding);
   Serial.println(FATAL_ZOEK_OP);
+}
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+static void SerialScreenFoutmeldingWeergeven() {
+  if (serialScreenFoutmeldingWeergegeven) return;
+  serialScreenFoutmeldingWeergegeven = true;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if (CallbackScreenTypeCharacter) {
+    CallbackScreenTypeCharacter(_CRITICAL_SS001, FATAL_ZOEK_OP, 0, "", "", "", 0);
+  } else if (characterScreenStatus.gecontroleerd && characterScreenStatus.characterScreenActief) {
+    lcd.clear();
+    lcd.setCursor(0, 0); lcd.print(_CRITICAL_SS001);
+    lcd.setCursor(0, 1); lcd.print(FATAL_ZOEK_OP);
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (CallbackScreenTypePixel) {
+    CallbackScreenTypePixel(ScreenData::TYPE_CRITICAL, _CRITICAL_SS001, FATAL_ZOEK_OP, 0, "", "", "", 0);
+  } else if (pixelScreenStatus.gecontroleerd && pixelScreenStatus.pixelScreenActief) {
+    PixelScreenClear();
+    PixelScreenSetCursor(0, 0); PixelScreenPrint(_CRITICAL_SS001);
+    PixelScreenSetCursor(0, 1); PixelScreenPrint(FATAL_ZOEK_OP);
+  }
+#endif
 }
 #endif
 
@@ -330,7 +371,9 @@ static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
   // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
-  Serial.begin(115200);
+  Serial.begin(SERIAL_BAUDRATE);
+  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+
   Serial.println(foutmelding);
   Serial.println(FATAL_ZOEK_OP);
 }
@@ -381,6 +424,15 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   }
 #endif
 
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+#ifdef DEBUG
+  if (!SerialScreenConfigureren() && !serialScreenFoutmeldingWeergegeven) {
+    SerialScreenFoutmeldingWeergeven();
+    configuratiefoutWeergegeven = true;
+  }
+#endif
+#endif
+
   if (configuratiefoutWeergegeven) return;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
@@ -401,7 +453,9 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
     geenEnkelScreenBeschikbaar = geenEnkelScreenBeschikbaar && !CallbackScreenTypeCharacter && !characterScreenActief;
 #endif
     if (geenEnkelScreenBeschikbaar) {
-      Serial.begin(115200);
+      Serial.begin(SERIAL_BAUDRATE);
+      while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+
       if (eersteRegel != "") Serial.println(eersteRegel);
       if (tweedeRegel != "") Serial.println(tweedeRegel);
       if (delayTime) delay(delayTime);
@@ -416,9 +470,10 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   if (eersteRegel != "" || tweedeRegel != "") {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
-    SerialScreenConfigureren();
-    DEBUG_PRINTLN(eersteRegel);
-    DEBUG_PRINTLN(tweedeRegel);
+    if (serialScreenGeconfigureerd) {
+      DEBUG_PRINTLN(eersteRegel);
+      DEBUG_PRINTLN(tweedeRegel);
+    }
 #endif
 #endif
 
@@ -445,9 +500,10 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   if (derdeRegel != "" || vierdeRegel != "") {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
-    SerialScreenConfigureren();
-    DEBUG_PRINTLN(derdeRegel);
-    DEBUG_PRINTLN(vierdeRegel);
+    if (serialScreenGeconfigureerd) {
+      DEBUG_PRINTLN(derdeRegel);
+      DEBUG_PRINTLN(vierdeRegel);
+    }
 #endif
 #endif
 
@@ -489,7 +545,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   standaardScreenActief = standaardScreenActief || pixelScreenActief;
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL) && !(SCREEN_OUTPUT & (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
-  standaardScreenActief = true;
+  standaardScreenActief = serialScreenGeconfigureerd;
 #endif
 
   if (standaardScreenActief) {
@@ -508,8 +564,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
-  if (action != "") {
-    SerialScreenConfigureren();
+  if (action != "" && serialScreenGeconfigureerd) {
     Serial.println(action);
   }
 #endif
@@ -553,5 +608,10 @@ void ScreensConfigureren(bool opnieuwProberen) {
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   PixelScreenConfigureren(opnieuwProberen);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (!SerialScreenConfigureren(opnieuwProberen) && !serialScreenFoutmeldingWeergegeven) {
+    SerialScreenFoutmeldingWeergeven();
+  }
 #endif
 }

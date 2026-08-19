@@ -14,6 +14,13 @@ FATAL: PSxxx
 ZOEK DIT NU OP
 ```
 
+Voor een mislukte normale SerialScreen-verbinding gebruikt de library daarnaast:
+
+```text
+CRITICAL: SS001
+ZOEK DIT NU OP
+```
+
 De twee schermtypes vallen wederzijds op elkaar terug: een PixelScreen-fout verschijnt op het CharacterScreen wanneer dat correct geconfigureerd en actief is; een CharacterScreen-fout verschijnt op het PixelScreen wanneer dát correct geconfigureerd en actief is. Is geen van beide beschikbaar, dan forceert de library Serial op 115200 baud en verschijnt dezelfde melding in de Serial Monitor. `DEBUG` en `SCREEN_TYPE_SERIAL` zijn daarvoor niet vereist. Is het andere schermtype wel beschikbaar, dan wordt Serial voor deze foutmelding niet geforceerd. Geen van beide foutmeldingsfuncties roept zelf een configuratiefunctie aan — dat voorkomt een oneindige lus (zie `docs/DECISION_LOG.md`, D022).
 
 De volledige betekenis, controle en oplossing staan hieronder bij de gemelde foutcode.
@@ -30,6 +37,7 @@ De volledige betekenis, controle en oplossing staan hieronder bij de gemelde fou
 | [PS002: Omgewisselde breedte en hoogte komen niet overeen](#ps002) | Bij rotatie 1 of 3 komen de gemeten afmetingen niet overeen met de omgewisselde ingestelde afmetingen. |
 | [PS003: Niet-omgewisselde breedte en hoogte komen niet overeen](#ps003) | Bij rotatie 0 of 2 komen de gemeten afmetingen niet overeen met de ingestelde afmetingen. |
 | [PS004: Tekstgrid kleiner dan 16×2](#ps004) | De resolutie en tekstgrootte leveren minder dan 16 kolommen of minder dan 2 regels op. |
+| [SS001: SerialScreen niet beschikbaar na timeout](#ss001) | De eerste normale SerialScreen-verbindingspoging werd niet binnen `SERIAL_CONNECT_TIMEOUT_MS` beschikbaar. |
 
 <a id="cs000"></a>
 ## CS000 — CharacterScreenConfigureren() niet aangeroepen
@@ -378,3 +386,25 @@ De standaard PixelScreen-uitvoer kan de minimale tekstweergave van 16×2 niet ga
 ### Oplossing
 
 Gebruik een kleinere `PIXEL_SCREEN_TEXT_SIZE`, verklein `PIXEL_SCREEN_MARGIN`, `PIXEL_SCREEN_CHARACTER_SPACING` of `PIXEL_SCREEN_LINE_SPACING`, kies een PixelScreen met een grotere bruikbare resolutie of corrigeer de schermconfiguratie wanneer de gemeten breedte en hoogte niet kloppen.
+<a id="ss001"></a>
+## SS001 — SerialScreen niet beschikbaar na timeout
+
+### Melding
+
+```text
+CRITICAL: SS001
+ZOEK DIT NU OP
+```
+
+### Trigger
+
+De eerste normale `SerialScreenConfigureren()`-poging heeft `Serial.begin(SERIAL_BAUDRATE)` uitgevoerd, maar `Serial` werd niet beschikbaar binnen `SERIAL_CONNECT_TIMEOUT_MS`.
+
+### Gedrag
+
+De library onthoudt de mislukte poging zodat volgende `PrintToScreen()`-aanroepen niet telkens opnieuw de volledige timeout doorlopen. Een reeds werkend CharacterScreen en/of PixelScreen, of hun geregistreerde callback, krijgt de `CRITICAL: SS001`-melding rechtstreeks; het mislukte Serial-pad wordt daarvoor niet opnieuw gebruikt. De toepassing kan daarna verdergaan via de overige beschikbare uitvoerkanalen.
+
+### Controle
+
+Controleer de seriële verbinding en, indien nodig, `SERIAL_BAUDRATE` en `SERIAL_CONNECT_TIMEOUT_MS` in `UserConfig.h`.
+
