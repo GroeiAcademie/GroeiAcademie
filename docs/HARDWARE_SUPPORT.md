@@ -9,12 +9,15 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke statussen.
 | Arduino UNO R3 | `avr` | voorbeelden opgenomen in de compilatiematrix; vier gekende geheugenbeperkingen bij de grootste gecombineerde sketch | getest en goedgekeurd sinds v1.0.0 |
 | Arduino UNO R4 Minima | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0 |
 | Arduino UNO R4 WiFi | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0; netwerkfuncties maken geen deel uit van de library |
-| WEMOS D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | voorbeelden opgenomen in de compilatiematrix | relevante hardwaretests blijven per opstelling vast te leggen |
+| WEMOS D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | voorbeelden opgenomen in de compilatiematrix; compileert sinds v1.0.0 | hardwarematig nog niet bevestigd |
 | TTGO D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | hetzelfde boardprofiel als WEMOS D1 R32; geen afzonderlijk fysiek testresultaat vastgelegd | fysieke hardwarevalidatie nog afzonderlijk vastleggen |
+| Cytron Maker Uno RP2040 | `rp2040` | acceptatieboard in `TestLibraryNieuw.cmd` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
+| STMicroelectronics Nucleo-F401RE | `stm32` | acceptatieboard in `TestLibraryNieuw.cmd` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
+| SB Components Ardi32 | `esp32` | acceptatieboard in `TestLibraryNieuw.cmd`; expliciete headermapping in `SystemConfig.h` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
 
-Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi zijn sinds v1.0.0 getest en goedgekeurd. WEMOS D1 R32 en TTGO D1 R32 delen hetzelfde boardprofiel; dat bewijst niet automatisch dat elk van deze fysieke borden afzonderlijk is gevalideerd, en relevante hardwaretests blijven per opstelling vast te leggen.
+Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi zijn sinds v1.0.0 getest en goedgekeurd. WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd. TTGO D1 R32 deelt hetzelfde boardprofiel; dat bewijst geen fysieke validatie. Cytron Maker Uno RP2040, STMicroelectronics Nucleo-F401RE en SB Components Ardi32 zijn vanaf v1.1.0 experimenteel opgenomen als acceptatieboards en zijn nog niet fysiek hardwarematig gevalideerd.
 
-De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata van die externe library. Een Arduino Uno R3-vormfactorbord geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
+De gemelde waarschuwing van de externe library `LiquidCrystal I2C` betreft de architectuurmetadata van die library. Een Arduino Uno R3-vormfactorbord geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
 
 ## Vereiste Arduino IDE-boardselecties
 
@@ -27,7 +30,7 @@ De gemelde waarschuwing van `LiquidCrystal_I2C` betreft de architectuurmetadata 
 | TTGO D1 R32 | `esp32:esp32:d1_uno32` | `esp32:esp32` | `esp32 by Espressif Systems` | `WEMOS D1 R32` binnen het huidige ondersteunde profiel | dezelfde D1-R32-coremapping; fysieke hardwarevalidatie blijft afzonderlijk |
 | Cytron Maker Uno RP2040 | `rp2040:rp2040:cytron_maker_uno_rp2040` | `rp2040:rp2040` | `Raspberry Pi Pico/RP2040/RP2350 by Earle F. Philhower, III` | `Cytron Maker Uno RP2040` | standaardmapping van de specifieke Cytron-boardvariant |
 | STMicroelectronics Nucleo-F401RE | `STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE` | `STMicroelectronics:stm32` | `STM32 MCU based boards by STMicroelectronics` | `Nucleo-64` met part number `NUCLEO_F401RE` | standaardmapping van STM32duino |
-| SB Components Ardi32 | `esp32:esp32:esp32s3` | `esp32:esp32` | `esp32 by Espressif Systems` | `ESP32S3 Dev Module` | de generieke boardselectie kent de fysieke Arduino-Uno-header van de Ardi32 niet; `BOARD_VERSION BOARD_ARDI32` moet daarom via `UserConfig.h` expliciet gekozen worden en de eigen Ardi32-headerpinmapping moet afzonderlijk vastgelegd worden |
+| SB Components Ardi32 | `esp32:esp32:esp32s3` | `esp32:esp32` | `esp32 by Espressif Systems` | `ESP32S3 Dev Module` | de generieke boardselectie kent de fysieke Arduino-Uno-header van de Ardi32 niet; `BOARD_VERSION BOARD_ARDI32` moet daarom via `UserConfig.h` expliciet gekozen worden; `SystemConfig.h` bevat de expliciete Ardi32-headerpinmapping |
 
 ### Referentiebeelden boards
 
@@ -158,9 +161,9 @@ De huidige standaardpinnen zijn:
 
 De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepassingsgebieden/Stimulus/README.md).
 
-### GroeiAcademie Stimulus Hardware Shield v1.0.0
+### GroeiAcademie Stimulus Shield v1.1.0
 
-Voor het actuele shield zijn de schema-exporten, assemblagekeuzes en validatiestappen opgenomen onder `docs/Uitbreidingskaarten/Stimulus Shield v1.0.0/`. Gebruik de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) samen met de [handleiding voor de hardwarevalidatie v1.0.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+Voor het actuele shield zijn de schema-exporten, assemblagekeuzes en validatiestappen opgenomen onder `docs/Uitbreidingskaarten/Stimulus Shield v1.1.0/`. Gebruik de [beschrijving van het GroeiAcademie Stimulus Shield v1.1.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md) samen met de [handleiding voor de hardwarevalidatie v1.1.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
 
 De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbruggen: zes tussen H9 en H10 en één tussen H3 pin 1 en H4 pin 1. Plaats nooit beide tegelijk.
 
@@ -191,13 +194,11 @@ De officiële SB Components-documentatie bevestigt voor de onboard randapparatuu
 - onboard LED: GPIO8
 - onboard buzzer: GPIO40
 
-Deze waarden bevestigen niet automatisch de Arduino-Uno-header D0-D13/A0-A5-mapping. De volledige headermapping blijft daarom voorlopig als uitgeschakeld in `SystemConfig.h` totdat elke lijn rechtstreeks aan de officiële SB Components-hardwarebron is geverifieerd.
+De Arduino-Uno-header D0-D13/A0-A5/SDA/SCL-mapping is intussen rechtstreeks aan het officiële Ardi-32-schema geverifieerd en actief vastgelegd in `SystemConfig.h`. De bevestigde onboard GPIO's hierboven staan daar los van. De fysieke hardwarevalidatie van het board blijft een afzonderlijke status.
 
 ### Acceptance-validatie SB Components Ardi32
 
-De acceptance-compilaties voor `SB Components Ardi32` gebruiken `esp32:esp32:esp32s3` met `BOARD_VERSION=BOARD_ARDI32`.
+De acceptance-compilaties voor `SB Components Ardi32` gebruiken `esp32:esp32:esp32s3` met `BOARD_VERSION=BOARD_ARDI32` en daarmee de actieve Ardi32-headerpinmapping uit `SystemConfig.h`.
 
-Zolang de Arduino-Uno-headermapping voor `BOARD_ARDI32` in `SystemConfig.h` bewust uitgeschakeld blijft, kunnen acceptance-tests die gebruikmaken van D0-D13, A0-A5, SDA/SCL of andere Arduino-Uno-headerpinnen niet succesvol compileren.
-
-Deze acceptance-fouten zijn daarom een bekende tijdelijke beperking en hebben geen release-impact. Zij worden pas opnieuw als volledig valide beschouwd nadat de Ardi32-headermapping rechtstreeks aan de officiële SB Components-hardwarebron is bevestigd en geactiveerd.
+Deze acceptance-tests controleren de compileerbaarheid van de experimentele Ardi32-ondersteuning. Zij hebben geen release-impact zolang de fysieke hardwarevalidatie van dit board nog niet is afgerond.
 

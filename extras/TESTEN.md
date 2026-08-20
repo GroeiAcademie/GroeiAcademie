@@ -16,7 +16,7 @@ TestLibraryStatusReport.cmd
 LokalePaden_template.cmd
 ```
 
-`TestLibraryAllesEnMaakStatusReport.cmd` bestaat niet meer. De vier compilecycli worden afzonderlijk uitgevoerd. Daarna kan `TestLibraryStatusReport.cmd` hun vier logbestanden samenvoegen tot `TestLibraryStatusReport.txt`. `TestLibraryMappingControle.cmd` is een afzonderlijke tekstuele controle en wordt niet door het statusrapport uitgevoerd.
+`TestLibraryAllesEnMaakStatusReport.cmd` bestaat niet meer. De vier compilecycli worden afzonderlijk uitgevoerd. Daarna voegt `TestLibraryStatusReport.cmd` hun vier logbestanden samen tot `TestLibraryStatusReport.txt` en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit. De mappingcontrole is een verplichte releasevoorwaarde; een fout in die controle verhindert `RELEASEVALIDATIE GESLAAGD`.
 
 ## Padkeuze van de Windows-tests
 
@@ -114,7 +114,7 @@ TestLibraryNieuw.txt
 TestLibraryNieuwOngeldig.txt
 ```
 
-Nadat deze vier scripts afzonderlijk zijn uitgevoerd, voegt `TestLibraryStatusReport.cmd` ze samen tot `TestLibraryStatusReport.txt` en beoordeelt de releasegerichte samenvattingen. De mappingcontrole blijft een afzonderlijke stap.
+Nadat deze vier scripts afzonderlijk zijn uitgevoerd, voegt `TestLibraryStatusReport.cmd` ze samen tot `TestLibraryStatusReport.txt`, beoordeelt de releasegerichte samenvattingen en voert het de verplichte `TestLibraryMappingControle.cmd` automatisch uit. Alleen wanneer de vier compilecycli, de releasegerichte controles, de geheugengegevens én de mappingcontrole voldoen, kan het statusrapport `RELEASEVALIDATIE GESLAAGD` melden.
 
 ## Definitieve releaseresultaten
 

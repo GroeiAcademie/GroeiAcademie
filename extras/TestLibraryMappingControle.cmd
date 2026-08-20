@@ -1,5 +1,5 @@
 @echo off
-cls
+if /I not "%~1"=="--no-pause" cls
 setlocal enabledelayedexpansion
 pushd "%~dp0.."
 
@@ -72,9 +72,10 @@ if !FOUT! EQU 0 (
     echo !FOUT! ontbrekende opschriften gevonden. Zie [FOUT]-regels hierboven.
 )
 echo ============================================================
+set "MAPPING_RESULT=!FOUT!"
 popd
-pause
-exit /b !FOUT!
+if /I not "%~1"=="--no-pause" pause
+exit /b !MAPPING_RESULT!
 
 
 :: ============================================================

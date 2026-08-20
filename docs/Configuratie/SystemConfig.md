@@ -167,7 +167,7 @@ De gebruiker kiest:
 | `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_UNO_R4_WIFI` | 14 | 200 | Arduino UNO R4 WiFi met 14-bit ADC. |
 | `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_ESP32_UNO` | 12 | 0 | Wemos D1 R32 met de standaard 12-bit resolutie van de Arduino-ESP32-core. |
 
-Voor `BOARD_ESP32_UNO` betekent `DELAY_US 0` dat de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toevoegt. De conversietijd van de boardcore blijft bestaan. Voor WEMOS D1 R32 is deze instelling sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
+Voor `BOARD_ESP32_UNO` betekent `DELAY_US 0` dat de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toevoegt. De conversietijd van de boardcore blijft bestaan. Voor WEMOS D1 R32 compileert deze instelling sinds v1.0.0, maar hardwarematig is ze nog niet bevestigd. Controleer de werkelijke samplefrequentie, stabiliteit en sensorrespons afzonderlijk op WEMOS D1 R32, TTGO D1 R32 en andere compatibele borden.
 
 `ADC_MAX` en `ADC(x)` worden door `SystemConfig.h` uit `ADC_BITS` afgeleid. `ADC(x)` ondersteunt 10, 12, 14 en 15 bits. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan.
 
@@ -229,7 +229,7 @@ Bron voor de board- en pinmapping: de officiële `boards.txt` en `variants/d1_un
 
 ### BOARD_ESP32_UNO
 
-`BOARD_ESP32_UNO` is het configuratieprofiel voor Arduino Uno R3-vormfactor ESP32-borden. De compilatiematrix gebruikt boardprofiel `WEMOS D1 R32` met FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor. WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd; de fysieke hardwarevalidatie van andere varianten wordt afzonderlijk vastgelegd.
+`BOARD_ESP32_UNO` is het configuratieprofiel voor Arduino Uno R3-vormfactor ESP32-borden. De compilatiematrix gebruikt boardprofiel `WEMOS D1 R32` met FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor. WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd; de fysieke hardwarevalidatie van WEMOS D1 R32 en andere varianten wordt afzonderlijk vastgelegd.
 
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen

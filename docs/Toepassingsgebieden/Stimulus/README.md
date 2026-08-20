@@ -128,7 +128,7 @@ Voor ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`, waaronder WEMOS D1 R3
 #define BOARD_VERSION BOARD_ESP32_UNO
 ```
 
-De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. WEMOS D1 R32 is sinds v1.0.0 getest en goedgekeurd. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk op TTGO D1 R32 en andere compatibele borden.
+De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk op WEMOS D1 R32, TTGO D1 R32 en andere compatibele borden.
 
 Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
 
@@ -185,7 +185,7 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 
 ## Afzonderlijke schemabestanden
 
-De ADS1115-hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De centrale uitleg staat in [Hardware/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. De praktische validatiestappen staan in [Hardware/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+De ADS1115-hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De centrale uitleg staat in [Stimulus Shield v1.1.0](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. De praktische validatiestappen staan in [Handleiding Stimulus Shield v1.1.0](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
 
 
 ### BOARD_ESP32_UNO
@@ -193,7 +193,7 @@ De ADS1115-hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaar
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
 #### Reeds getest en ondersteund
-- WEMOS D1 R32: getest en goedgekeurd sinds v1.0.0;
+- WEMOS D1 R32: compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
 - TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
 
 #### Verwacht compatibel

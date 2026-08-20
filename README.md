@@ -26,7 +26,7 @@ De actuele status van de geïmplementeerde en geplande toepassingsgebieden staat
 2. Open Arduino IDE.
 3. Kies **Sketch > Include Library > Add .ZIP Library**.
 4. Selecteer de ZIP.
-5. Open daarna een voorbeeld via **File > Examples > GroeiAcademie**.
+5. Open daarna een voorbeeld via **File > Examples > GroeiAcademie FrameWork**.
 
 ### Handmatig
 
@@ -199,7 +199,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Uitbreidingskaarten/](docs/Uitbreidingskaarten/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de [beschrijving van het GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en de [handleiding voor de hardwarevalidatie v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md).
+De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Uitbreidingskaarten/](docs/Uitbreidingskaarten/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de [beschrijving van het Stimulus Shield v1.1.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md) en de [handleiding voor de hardwarevalidatie v1.1.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
 
 ## Geplande uitbreidingen
 

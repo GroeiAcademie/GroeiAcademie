@@ -109,7 +109,7 @@ De versienummers volgen de versie in `library.properties`.
 - documentatie onderling afgestemd op de actuele v1.0.1-status;
 - foutieve compilatiecijfers gecorrigeerd naar 188 uitgevoerde compilaties, 184 succesvolle compilaties, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
 - boardprofiel `esp32:esp32:d1_uno32` verduidelijkt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor;
-- WEMOS D1 R32 overal aangeduid als getest en goedgekeurd sinds v1.0.0;
+- status van WEMOS D1 R32 overal gelijkgetrokken: compileert sinds v1.0.0, hardwarematig nog niet bevestigd;
 - fysieke teststatus van TTGO D1 R32 en andere compatibele borden onderscheiden van het gedeelde boardprofiel;
 - Arduino Library Manager-status bijgewerkt nadat de aanmelding werd geaccepteerd;
 - achterhaalde v1.0.0-pre-releasepunten in de ROADMAP vervangen door de voltooide releasestatus;

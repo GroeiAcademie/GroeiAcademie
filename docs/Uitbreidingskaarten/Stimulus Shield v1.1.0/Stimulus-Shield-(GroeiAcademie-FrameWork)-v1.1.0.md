@@ -4,7 +4,7 @@
 > Status: werkdocument v1.1.0. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding.
 > Deze versie documenteert aanvullend de TFTSPI-uitbreiding en de gewijzigde connectorfuncties in het v1.1.0-shieldschema.
 
-> **Gezaghebbende hardwarebron**: `Schematic_Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0_2026-08-08` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in dit v1.1.0-schema de 1x7 TFTSPI-displayconnector. Figuur 1 hieronder (het generieke connectorschema uit een vroegere ontwerpfase) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
+> **Gezaghebbende hardwarebron**: `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0_2026-08-09` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in dit v1.1.0-schema de 1x7 TFTSPI-displayconnector. Figuur 1 hieronder (het generieke connectorschema uit een vroegere ontwerpfase) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
 
 **FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115, met TFTSPI-uitbreiding**
 
@@ -468,13 +468,16 @@ Voor TFTSPI zijn de grafische bibliotheken alleen nodig wanneer de TFTSPI-route 
   #define PIN_SENSOR_4 A3 // Analoge pin voor de 4de test-sensor
 #endif
 
-#define BOARD_UNO_R3        0
-#define BOARD_UNO_R4_MINIMA 1
-#define BOARD_UNO_R4_WIFI   2
-#define BOARD_ESP32_UNO     3
+#define BOARD_UNO_R3                     0
+#define BOARD_UNO_R4_MINIMA              1
+#define BOARD_UNO_R4_WIFI                2
+#define BOARD_ARDI32                     3
+#define BOARD_CYTRON_MAKER_UNO_RP2040    4
+#define BOARD_ESP32_UNO                  5
+#define BOARD_NUCLEO_F401RE              6
 
 #define BOARD_VERSION BOARD_UNO_R3 // wissel dit om van bord te wisselen
-#if BOARD_VERSION != BOARD_UNO_R3 && BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_ESP32_UNO
+#if BOARD_VERSION != BOARD_UNO_R3 && BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_ARDI32 && BOARD_VERSION != BOARD_CYTRON_MAKER_UNO_RP2040 && BOARD_VERSION != BOARD_ESP32_UNO && BOARD_VERSION != BOARD_NUCLEO_F401RE
   #error Selecteer een geldige BOARD_VERSION.
 #endif
 
@@ -663,12 +666,12 @@ Plaats voor het TFTSPI-pad ofwel de benodigde Quad Logic Level Shifters, ofwel z
 
 De tekeningset en documentatie voor deze hardwareversie zijn:
 
-- `SCH_Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0_2026-08-08.json`;
-- `Schematic_Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0_2026-08-08.pdf`;
-- `Schematic_Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0_2026-08-08.png`;
-- `Schematic_Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0_2026-08-08.svg`;
-- `Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0.md`;
-- `Handleiding-Stimulus-Shield-_GroeiAcademie-FrameWork_-v1_1_0.md`.
+- `SCH_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0_2026-08-09.json`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0_2026-08-09.pdf`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0_2026-08-09.png`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0_2026-08-09.svg`;
+- `Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0.md`;
+- `Handleiding-Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.0.md`.
 
 De twee afzonderlijke voorbeelden `ADC_Validatie_Native` en `ADC_Validatie_ADS1115` testen respectievelijk de directe ADC-route en de ADS1115-route. De volledige fysieke controle en validatievolgorde staan in de bijbehorende handleiding.
 
@@ -678,7 +681,7 @@ De twee afzonderlijke voorbeelden `ADC_Validatie_Native` en `ADC_Validatie_ADS11
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
 #### Reeds getest en ondersteund
-- WEMOS D1 R32: getest en goedgekeurd sinds v1.0.0;
+- WEMOS D1 R32: compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
 - TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
 
 #### Verwacht compatibel

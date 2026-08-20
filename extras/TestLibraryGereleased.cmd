@@ -3,9 +3,6 @@ cls
 if exist "%~dp0TestLibraryStatusReport.txt" del /q "%~dp0TestLibraryStatusReport.txt" >nul 2>&1
 setlocal enabledelayedexpansion
 
-:: Werk altijd vanuit de hoofdmap van de library, ook wanneer dit script vanuit extras wordt gestart.
-pushd "%~dp0.."
-
 :: Controleer of het script al via PowerShell met logging draait.
 if "%~1"=="--logged" goto :MAIN_SCRIPT
 
@@ -16,6 +13,9 @@ set "SCRIPT_RESULT=%errorlevel%"
 exit /b %SCRIPT_RESULT%
 
 :MAIN_SCRIPT
+
+:: Alleen de echte hoofd-run wijzigt de werkmap. De buitenste logging-wrapper laat de werkmap van de aanroeper ongemoeid.
+pushd "%~dp0.."
 
 :: Zoek arduino-cli en arduino-lint via PATH; anders via extras\LokalePaden.cmd (lokaal, niet
 :: gedeeld - zie extras\LokalePaden_template.cmd om aan te maken). Geen paden van specifieke
@@ -39,6 +39,7 @@ if not errorlevel 1 (
     echo Kopieer extras\LokalePaden_template.cmd naar extras\LokalePaden.cmd en vul
     echo daarin het pad naar arduino-cli in, of voeg arduino-cli toe aan PATH.
     if /I not "%~2"=="--no-pause" pause
+    popd
     exit /b 1
 )
 
@@ -112,6 +113,7 @@ for %%B in (%BOARDS%) do (
 
     if not defined BOARD_VERSION_TEST (
         echo FOUT: geen BOARD_VERSION gekoppeld aan %%B.
+        popd
         exit /b 1
     )
 

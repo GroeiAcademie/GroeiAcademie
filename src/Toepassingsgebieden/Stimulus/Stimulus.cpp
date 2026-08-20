@@ -337,16 +337,16 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
   unsigned long kortsteTikTijd = 0, langsteTikTijd = 0, totaleTikTijd = 0;
   int laagsteGemiddeldeTikKracht = 0, hoogsteGemiddeldeTikKracht = 0;
   int laagsteHoogsteTikKracht = 0, hoogsteHoogsteTikKracht = 0;
-  int aantalGestarteSensoren = 0;
+  int aantalSensorenGestart = 0;
 
   for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
     if (!sensor[sensorNummer].sensorGestart) continue;
 
-    startTijden[aantalGestarteSensoren] = sensor[sensorNummer].startTikTijd;
-    eindTijden[aantalGestarteSensoren] = sensor[sensorNummer].eindTikTijd;
+    startTijden[aantalSensorenGestart] = sensor[sensorNummer].startTikTijd;
+    eindTijden[aantalSensorenGestart] = sensor[sensorNummer].eindTikTijd;
     totaleTikTijd += gemetenStimulus[sensorNummer].TikTijd;
 
-    if (aantalGestarteSensoren == 0) {
+    if (aantalSensorenGestart == 0) {
       eersteStartTijd = laatsteStartTijd = sensor[sensorNummer].startTikTijd;
       eersteEindTijd = laatsteEindTijd = sensor[sensorNummer].eindTikTijd;
       kortsteTikTijd = langsteTikTijd = gemetenStimulus[sensorNummer].TikTijd;
@@ -365,10 +365,12 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
       if (gemetenStimulus[sensorNummer].hoogsteTikKracht > hoogsteHoogsteTikKracht) hoogsteHoogsteTikKracht = gemetenStimulus[sensorNummer].hoogsteTikKracht;
     }
 
-    aantalGestarteSensoren++;
+    aantalSensorenGestart++;
   }
 
-  if (aantalGestarteSensoren == 0) return synchronisatie;
+  synchronisatie.aantalSensorenGestart = aantalSensorenGestart;
+
+  if (aantalSensorenGestart == 0) return synchronisatie;
 
   synchronisatie.verschilStartTijd = laatsteStartTijd - eersteStartTijd;
   synchronisatie.verschilEindTijd = laatsteEindTijd - eersteEindTijd;
@@ -376,10 +378,10 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
   synchronisatie.verschilGemiddeldeTikKracht = hoogsteGemiddeldeTikKracht - laagsteGemiddeldeTikKracht;
   synchronisatie.verschilHoogsteTikKracht = hoogsteHoogsteTikKracht - laagsteHoogsteTikKracht;
 
-  unsigned long gemiddeldeTikTijd = totaleTikTijd / aantalGestarteSensoren;
+  unsigned long gemiddeldeTikTijd = totaleTikTijd / aantalSensorenGestart;
   unsigned long toegestaneMargeEindTijd = (gemiddeldeTikTijd * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
-  synchronisatie.aantalSensorenSynchroonStart = BepaalAantalSensorenSynchroon(startTijden, aantalGestarteSensoren, TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
-  synchronisatie.aantalSensorenSynchroonEinde = BepaalAantalSensorenSynchroon(eindTijden, aantalGestarteSensoren, toegestaneMargeEindTijd);
+  synchronisatie.aantalSensorenSynchroonStart = BepaalAantalSensorenSynchroon(startTijden, aantalSensorenGestart, TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
+  synchronisatie.aantalSensorenSynchroonEinde = BepaalAantalSensorenSynchroon(eindTijden, aantalSensorenGestart, toegestaneMargeEindTijd);
 
   return synchronisatie;
 }
@@ -788,6 +790,7 @@ static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
   synchronisatie.verschilTikTijd               = 0;
   synchronisatie.verschilGemiddeldeTikKracht   = 0;
   synchronisatie.verschilHoogsteTikKracht      = 0;
+  synchronisatie.aantalSensorenGestart         = 0;
   synchronisatie.aantalSensorenSynchroonStart  = 0;
   synchronisatie.aantalSensorenSynchroonEinde  = 0;
 }

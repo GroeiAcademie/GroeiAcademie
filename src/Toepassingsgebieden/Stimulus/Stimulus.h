@@ -133,9 +133,9 @@ struct StimulusProfiel {
 // ============================================================================
 
 struct SynchronisatieProfiel {
-  unsigned long verschilStartTijd, verschilEindTijd, verschilTikTijd;  // Verschil tussen eerst en laatst gestart, eerst en laatst losgelaten, en kortste en langste TikTijd
-  int verschilGemiddeldeTikKracht, verschilHoogsteTikKracht;           // Verschil tussen laagste en hoogste gemiddelde kracht, en tussen laagste en hoogste piekkracht
-  int aantalSensorenSynchroonStart, aantalSensorenSynchroonEinde;      // Grootste groep sensoren die binnen de toegestane marge synchroon start of eindigt: 0, 2, 3 of 4
+  unsigned long verschilStartTijd, verschilEindTijd, verschilTikTijd;                     // Verschil tussen eerst en laatst gestart, eerst en laatst losgelaten, en kortste en langste TikTijd
+  int verschilGemiddeldeTikKracht, verschilHoogsteTikKracht;                              // Verschil tussen laagste en hoogste gemiddelde kracht, en tussen laagste en hoogste piekkracht
+  int aantalSensorenGestart, aantalSensorenSynchroonStart, aantalSensorenSynchroonEinde;  // Grootste groep sensoren die binnen de toegestane marge synchroon start of eindigt: 0, 2, 3 of 4
 };
 
 // ============================================================================

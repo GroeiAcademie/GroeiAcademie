@@ -121,7 +121,7 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 ## 4. Hardware ROADMAP
 
 - Native ADC en ADS1115 op de bedoelde hardware valideren;
-- WEMOS D1 R32 is sinds v1.0.0 hardwarematig getest en goedgekeurd; fysieke validatie van TTGO D1 R32 en andere compatibele borden afzonderlijk vastleggen;
+- WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd; fysieke validatie van WEMOS D1 R32, TTGO D1 R32 en andere compatibele borden afzonderlijk vastleggen;
 - hardwareprofielen per ondersteund Arduino Uno R3-vormfactorbord vastleggen;
 - pinmapping, werkspanning en logische niveaus per hardwareprofiel valideren;
 - sensorcontact, beweging, storing en andere foutbronnen detecteren en rapporteren;
@@ -302,7 +302,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 - eerste publieke alpha-release vrijgegeven;
 - definitieve compilatiematrix en Arduino LINT uitgevoerd;
-- WEMOS D1 R32 getest en goedgekeurd;
+- WEMOS D1 R32 compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
 - versie, tag, changelog en `library.properties` gelijkgetrokken;
 - project-, community-, hardware- en release-documentatie gepubliceerd;
 - Arduino Library Manager-aanmelding ingediend en nadien geaccepteerd.

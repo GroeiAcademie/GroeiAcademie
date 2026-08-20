@@ -660,7 +660,7 @@ De twee afzonderlijke voorbeelden `ADC_Validatie_Native` en `ADC_Validatie_ADS11
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
 #### Reeds getest en ondersteund
-- WEMOS D1 R32: getest en goedgekeurd sinds v1.0.0;
+- WEMOS D1 R32: compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
 - TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
 
 #### Verwacht compatibel

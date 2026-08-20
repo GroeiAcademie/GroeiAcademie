@@ -80,7 +80,7 @@ Tijdens versie v1.1.0 worden volgende Arduino Uno R3-vormfactorborden ondersteun
 
 • Arduino UNO R4 WiFi;
 
-• WEMOS D1 R32 (ESP32), getest en goedgekeurd sinds v1.0.0.
+• WEMOS D1 R32 (ESP32), compileert sinds v1.0.0; hardwarematig nog niet bevestigd.
 • TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor gebruiken hetzelfde boardprofiel; hun fysieke hardwarevalidatie wordt afzonderlijk vastgelegd.
 
 Daarnaast zijn vanaf v1.1.0 volgende drie boards **experimenteel** toegevoegd, nog niet fysiek hardwarematig gevalideerd:
@@ -279,7 +279,7 @@ Tijdens versie v1.1.0 worden volgende Arduino Uno R3-vormfactorborden ondersteun
 • Arduino UNO R3
 • Arduino UNO R4 Minima
 • Arduino UNO R4 WiFi
-• WEMOS D1 R32 (ESP32), getest en goedgekeurd sinds v1.0.0
+• WEMOS D1 R32 (ESP32), compileert sinds v1.0.0; hardwarematig nog niet bevestigd
 
 Experimenteel (nog niet hardwarematig gevalideerd) vanaf v1.1.0:
 
