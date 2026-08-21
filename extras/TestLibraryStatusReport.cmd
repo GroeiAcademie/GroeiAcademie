@@ -187,7 +187,7 @@ if !GELDIG! EQU 4 if !RELEASE_FOUT! EQU 0 (
   echo ============================================================
   echo LEESBAAR STATUSRAPPORT - RELEASEVALIDATIE NIET GESLAAGD
   echo ============================================================
-  powershell -NoProfile -Command "$l=Get-Content -LiteralPath '%REPORT%'; $stop=($l ^| Select-String -SimpleMatch 'VOLLEDIGE TESTLOGS' ^| Select-Object -First 1).LineNumber; if($stop){$l[0..([Math]::Max(0,$stop-2))]}else{$l}"
+  powershell -NoProfile -Command "$l=Get-Content -LiteralPath '%REPORT%'; $stop=($l | Select-String -SimpleMatch 'VOLLEDIGE TESTLOGS' | Select-Object -First 1).LineNumber; if($stop){$l[0..([Math]::Max(0,$stop-2))]}else{$l}"
   echo.
   echo OPNIEUW UIT TE VOEREN:
   set "HERUITVOER1=0"
@@ -239,13 +239,13 @@ if errorlevel 1 (
 exit /b
 
 :BeoordeelGereleased
-for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -SimpleMatch -Pattern 'Totaal getest' ^| Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING1=%%L"
-for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -SimpleMatch -Pattern 'Arduino LINT' ^| Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING1_LINT=%%L"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Totaal getest\s*:\s*(\d+)' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_TOTAAL=%%V"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^OK bevonden\s*:\s*(\d+)' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_OK=%%V"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Verwachte UNO R3-geheugenbeperkingen\s*:\s*(\d+)' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_EXPECTED_MEMORY=%%V"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Onverwacht mislukt\s*:\s*(\d+)' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_UNEXPECTED_FAIL=%%V"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Arduino LINT\s*:\s*(.+)$' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value.Trim()}"`) do set "RELEASE_LINT=%%V"
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -SimpleMatch -Pattern 'Totaal getest' | Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING1=%%L"
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -SimpleMatch -Pattern 'Arduino LINT' | Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING1_LINT=%%L"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Totaal getest\s*:\s*(\d+)' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_TOTAAL=%%V"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^OK bevonden\s*:\s*(\d+)' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_OK=%%V"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Verwachte UNO R3-geheugenbeperkingen\s*:\s*(\d+)' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_EXPECTED_MEMORY=%%V"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Onverwacht mislukt\s*:\s*(\d+)' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "GERELEASED_UNEXPECTED_FAIL=%%V"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG1%' -Pattern '^Arduino LINT\s*:\s*(.+)$' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value.Trim()}"`) do set "RELEASE_LINT=%%V"
 set "GERELEASED_PARSE_OK=1"
 if "!GERELEASED_TOTAAL!"=="ONBEKEND" set "GERELEASED_PARSE_OK=0"
 if "!GERELEASED_OK!"=="ONBEKEND" set "GERELEASED_PARSE_OK=0"
@@ -269,8 +269,8 @@ exit /b
 set "BO_LOG=%~1"
 set "BO_RESULTAAT=%~2"
 set "BO_SAMENVATTING=%~3"
-for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal ' ^| Select-Object -Last 1; if($m){$m.Line}"`) do set "%BO_SAMENVATTING%=%%L"
-powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal\s+(\d+)\s+-\s+OK\s+(\d+)\s+-\s+FOUT\s+(\d+)$' ^| Select-Object -Last 1; if(-not $m){exit 1}; $t=[int]$m.Matches[0].Groups[1].Value; $o=[int]$m.Matches[0].Groups[2].Value; $f=[int]$m.Matches[0].Groups[3].Value; if($t -eq $o -and $f -eq 0){exit 0}else{exit 1}" >nul 2>&1
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal ' | Select-Object -Last 1; if($m){$m.Line}"`) do set "%BO_SAMENVATTING%=%%L"
+powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal\s+(\d+)\s+-\s+OK\s+(\d+)\s+-\s+FOUT\s+(\d+)$' | Select-Object -Last 1; if(-not $m){exit 1}; $t=[int]$m.Matches[0].Groups[1].Value; $o=[int]$m.Matches[0].Groups[2].Value; $f=[int]$m.Matches[0].Groups[3].Value; if($t -eq $o -and $f -eq 0){exit 0}else{exit 1}" >nul 2>&1
 if errorlevel 1 (
   set "%BO_RESULTAAT%=MISLUKT"
   set /a RELEASE_FOUT+=1
@@ -279,12 +279,12 @@ if errorlevel 1 (
 )
 exit /b
 :BeoordeelNieuw
-for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:' ^| Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING3_OFFICIEEL=%%L"
-for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^ACCEPTATIE:' ^| Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING3_ACCEPTATIE=%%L"
-for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^STATISCH:' ^| Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING3_STATISCH=%%L"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT$' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "NIEUW_OFFICIEEL_OK=%%V"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT$' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[2].Value}"`) do set "NIEUW_OFFICIEEL_TOTAAL=%%V"
-for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT$' ^| Select-Object -Last 1; if($m){$m.Matches[0].Groups[3].Value}"`) do set "NIEUW_OFFICIEEL_FAIL=%%V"
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:' | Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING3_OFFICIEEL=%%L"
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^ACCEPTATIE:' | Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING3_ACCEPTATIE=%%L"
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^STATISCH:' | Select-Object -Last 1; if($m){$m.Line}"`) do set "SAMENVATTING3_STATISCH=%%L"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT$' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[1].Value}"`) do set "NIEUW_OFFICIEEL_OK=%%V"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT$' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[2].Value}"`) do set "NIEUW_OFFICIEEL_TOTAAL=%%V"
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^OFFICIEEL:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT$' | Select-Object -Last 1; if($m){$m.Matches[0].Groups[3].Value}"`) do set "NIEUW_OFFICIEEL_FAIL=%%V"
 set "NIEUW_PARSE_OK=1"
 if "!NIEUW_OFFICIEEL_OK!"=="ONBEKEND" set "NIEUW_PARSE_OK=0"
 if "!NIEUW_OFFICIEEL_TOTAAL!"=="ONBEKEND" set "NIEUW_PARSE_OK=0"
@@ -299,14 +299,14 @@ if "!NIEUW_PARSE_OK!"=="0" (
 ) else (
   set "RESULTAAT3_OFFICIEEL=GESLAAGD"
 )
-powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^STATISCH:\s*(\d+)\s+FOUT$' ^| Select-Object -Last 1; if($m -and [int]$m.Matches[0].Groups[1].Value -eq 0){exit 0}else{exit 1}" >nul 2>&1
+powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^STATISCH:\s*(\d+)\s+FOUT$' | Select-Object -Last 1; if($m -and [int]$m.Matches[0].Groups[1].Value -eq 0){exit 0}else{exit 1}" >nul 2>&1
 if errorlevel 1 (
   set "RESULTAAT3_STATISCH=MISLUKT"
   set /a RELEASE_FOUT+=1
 ) else (
   set "RESULTAAT3_STATISCH=GESLAAGD"
 )
-powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^ACCEPTATIE:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT(?:\s+-\s+GEEN RELEASE-IMPACT)?$' ^| Select-Object -Last 1; if(-not $m){exit 1}; $o=[int]$m.Matches[0].Groups[1].Value; $t=[int]$m.Matches[0].Groups[2].Value; $f=[int]$m.Matches[0].Groups[3].Value; if($o -eq $t -and $f -eq 0){exit 0}else{exit 1}" >nul 2>&1
+powershell -NoProfile -Command "$m=Select-String -LiteralPath '%LOG3%' -Pattern '^ACCEPTATIE:\s*(\d+)/(\d+)\s+OK,\s*(\d+)\s+FOUT(?:\s+-\s+GEEN RELEASE-IMPACT)?$' | Select-Object -Last 1; if(-not $m){exit 1}; $o=[int]$m.Matches[0].Groups[1].Value; $t=[int]$m.Matches[0].Groups[2].Value; $f=[int]$m.Matches[0].Groups[3].Value; if($o -eq $t -and $f -eq 0){exit 0}else{exit 1}" >nul 2>&1
 if errorlevel 1 (
   set "RESULTAAT3_ACCEPTATIE=NIET VOLLEDIG GESLAAGD"
 ) else (
@@ -320,7 +320,7 @@ set "BG_AANTAL=%~3"
 set "BG_FOUTEN=%~4"
 set "BG_COUNT=0"
 set "BG_INVALID=0"
-for /f "tokens=1,2 delims=|" %%A in ('powershell -NoProfile -Command "$rows=Get-Content -LiteralPath '%BG_LOG%' ^| Where-Object {$_ -match '^\[GEHEUGEN\]'}; $bad=0; foreach($line in $rows){ if($line -notmatch '^\[GEHEUGEN\]\s+Board=(.*?) \| Bestand=(.*?) \| Test=(.*?) \| Programma=(.*?) \| RAM=(.*?) \| Status=(.*?)$'){ $bad++; continue }; $prog=$matches[4].Trim(); $ram=$matches[5].Trim(); $status=$matches[6].Trim(); if($status -eq 'OK'){ if($prog -eq 'NIET_GEVONDEN' -or $ram -eq 'NIET_GEVONDEN'){ $bad++ } } elseif($status -eq 'VERWACHTE_GEHEUGENBEPERKING'){ } else { $bad++ } }; Write-Output ($rows.Count.ToString()+'|'+$bad.ToString())"') do (
+for /f "tokens=1,2 delims=|" %%A in ('powershell -NoProfile -Command "$rows=Get-Content -LiteralPath '%BG_LOG%' | Where-Object {$_ -match '^\[GEHEUGEN\]'}; $bad=0; foreach($line in $rows){ if($line -notmatch '^\[GEHEUGEN\]\s+Board=(.*?) \| Bestand=(.*?) \| Test=(.*?) \| Programma=(.*?) \| RAM=(.*?) \| Status=(.*?)$'){ $bad++; continue }; $prog=$matches[4].Trim(); $ram=$matches[5].Trim(); $status=$matches[6].Trim(); if($status -eq 'OK'){ if($prog -eq 'NIET_GEVONDEN' -or $ram -eq 'NIET_GEVONDEN'){ $bad++ } } elseif($status -eq 'VERWACHTE_GEHEUGENBEPERKING'){ } else { $bad++ } }; Write-Output ($rows.Count.ToString()+'|'+$bad.ToString())"') do (
   set "BG_COUNT=%%A"
   set "BG_INVALID=%%B"
 )
@@ -386,7 +386,7 @@ if not exist "%~1" (
   echo GEEN LOGBESTAND AANWEZIG
   exit /b
 )
-powershell -NoProfile -Command "$rows = Get-Content -LiteralPath '%~1' ^| ForEach-Object { if ($_ -match '^\[GEHEUGEN\]\s+Board=(.*?) \^| Bestand=(.*?) \^| Test=(.*?) \^| Programma=(.*?) \^| RAM=(.*?) \^| Status=(.*?)$') { [pscustomobject]@{ Board=$matches[1]; Bestand=$matches[2]; Test=$matches[3]; Programma=$matches[4]; RAM=$matches[5]; Status=$matches[6] } } }; if (-not $rows) { Write-Output 'Geen geheugenrecords gevonden.'; exit }; Write-Output 'Board ^| Bestand / example ^| Test / configuratie ^| Programma ^| RAM ^| Status'; Write-Output '----- ^| ----------------- ^| ------------------- ^| --------- ^| --- ^| ------'; foreach ($r in $rows) { Write-Output ('{0} ^| {1} ^| {2} ^| {3} ^| {4} ^| {5}' -f $r.Board,$r.Bestand,$r.Test,$r.Programma,$r.RAM,$r.Status) }"
+powershell -NoProfile -Command "$rows = Get-Content -LiteralPath '%~1' | ForEach-Object { if ($_ -match '^\[GEHEUGEN\]\s+Board=(.*?) \| Bestand=(.*?) \| Test=(.*?) \| Programma=(.*?) \| RAM=(.*?) \| Status=(.*?)$') { [pscustomobject]@{ Board=$matches[1]; Bestand=$matches[2]; Test=$matches[3]; Programma=$matches[4]; RAM=$matches[5]; Status=$matches[6] } } }; if (-not $rows) { Write-Output 'Geen geheugenrecords gevonden.'; exit }; Write-Output 'Board | Bestand / example | Test / configuratie | Programma | RAM | Status'; Write-Output '----- | ----------------- | ------------------- | --------- | --- | ------'; foreach ($r in $rows) { Write-Output ('{0} | {1} | {2} | {3} | {4} | {5}' -f $r.Board,$r.Bestand,$r.Test,$r.Programma,$r.RAM,$r.Status) }"
 exit /b
 
 :SchrijfMappingResultaat
@@ -490,7 +490,7 @@ if not exist "%~1" (
   echo Geen logbestand aanwezig.
   exit /b
 )
-powershell -NoProfile -Command "$l=Get-Content -LiteralPath '%~1'; $cat='%~3'; $hits=@(); for($i=0; $i -lt $l.Count; $i++){ $line=$l[$i]; $hit=$false; if($cat -eq 'OFFICIEEL'){ if($line -match '^\[FOUT\]\[(OFFICIAL|OFFICIEEL)\]'){ $hit=$true } } elseif($cat -eq 'STATISCH'){ if($line -match '^\[FOUT\](?!\[)'){ $hit=$true } } else { if($line -match '^\[FOUT\]' -or $line -match '^FOUT:' -or $line -eq 'COMPILATIEFOUT' -or $line -match '^Arduino LINT.*(?:MISLUKT|FOUT)'){ $hit=$true } }; if($hit){ $hits += $i } }; if($hits.Count -eq 0){ $sum=$l ^| Where-Object { $_ -match 'FOUT [1-9][0-9]*$' -or $_ -match 'Onverwacht mislukt\s*:\s*[1-9]' } ^| Select-Object -Last 5; if($sum){$sum}else{'Geen afzonderlijke foutregel gevonden; raadpleeg de volledige log hieronder in TestLibraryStatusReport.txt.'}; exit }; foreach($i in $hits){ Write-Output $l[$i]; $detail=@(); $max=[Math]::Min($l.Count-1,$i+30); for($j=$i+1;$j -le $max;$j++){ if($l[$j] -match '^\[OK\]' -or $l[$j] -match '^\[FOUT\]' -or $l[$j] -match '^-{20,}$'){ break }; if($l[$j] -match '(?i)(fatal error:|error:|#error|undefined reference|collect2:|compilation terminated|failed|mislukt|onverwacht)'){ $detail += $l[$j]; if($detail.Count -ge 4){break} } }; if($detail.Count -gt 0){ $detail ^| ForEach-Object { Write-Output ('  Reden: ' + $_) } } else { Write-Output '  Reden: zie bijbehorende compile-uitvoer in de volledige log.' }; Write-Output '' }"
+powershell -NoProfile -Command "$l=Get-Content -LiteralPath '%~1'; $cat='%~3'; $hits=@(); for($i=0; $i -lt $l.Count; $i++){ $line=$l[$i]; $hit=$false; if($cat -eq 'OFFICIEEL'){ if($line -match '^\[FOUT\]\[(OFFICIAL|OFFICIEEL)\]'){ $hit=$true } } elseif($cat -eq 'STATISCH'){ if($line -match '^\[FOUT\](?!\[)'){ $hit=$true } } else { if($line -match '^\[FOUT\]' -or $line -match '^FOUT:' -or $line -eq 'COMPILATIEFOUT' -or $line -match '^Arduino LINT.*(?:MISLUKT|FOUT)'){ $hit=$true } }; if($hit){ $hits += $i } }; if($hits.Count -eq 0){ $sum=$l | Where-Object { $_ -match 'FOUT [1-9][0-9]*$' -or $_ -match 'Onverwacht mislukt\s*:\s*[1-9]' } | Select-Object -Last 5; if($sum){$sum}else{'Geen afzonderlijke foutregel gevonden; raadpleeg de volledige log hieronder in TestLibraryStatusReport.txt.'}; exit }; foreach($i in $hits){ Write-Output $l[$i]; $detail=@(); $max=[Math]::Min($l.Count-1,$i+30); for($j=$i+1;$j -le $max;$j++){ if($l[$j] -match '^\[OK\]' -or $l[$j] -match '^\[FOUT\]' -or $l[$j] -match '^-{20,}$'){ break }; if($l[$j] -match '(?i)(fatal error:|error:|#error|undefined reference|collect2:|compilation terminated|failed|mislukt|onverwacht)'){ $detail += $l[$j]; if($detail.Count -ge 4){break} } }; if($detail.Count -gt 0){ $detail | ForEach-Object { Write-Output ('  Reden: ' + $_) } } else { Write-Output '  Reden: zie bijbehorende compile-uitvoer in de volledige log.' }; Write-Output '' }"
 exit /b
 
 :VoegToe

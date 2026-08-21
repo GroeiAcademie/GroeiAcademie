@@ -6,6 +6,7 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 
 | Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte UNO R3-geheugenbeperkingen | Onverwachte fouten | Opmerking |
 |--------|-------|:------------:|------------:|---:|------------------------------------:|-------------------:|-----------|
+| v1.1.0 | 21-08-2026 | GESLAAGD | 460 | 456 | 4 | 0 | GESLAAGD |
 | v1.0.4 | 04-08-2026 | ✅ (Alle onverwachte controles zijn OK bevonden.) | 188 | 184 | 4 | 0 | GESLAAGD |
 | v1.0.3 | 03-08-2026 | ✅ (overgenomen) | 188 | 184 | 4 | 0 | overgenomen van v1.0.2 — enkel documentatiecorrecties |
 | v1.0.2 | 02-08-2026 | ✅ (overgenomen) | 188 | 184 | 4 | 0 | overgenomen; alleen zichtbaarheid gewijzigd |
@@ -13,7 +14,28 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 | v1.0.0 | 31-07-2026 | ✅ (1 bekende, onschadelijke waarschuwing) | 188 | 184 | 4 | 0 | eerste officiële validatie |
 
 
+# v1.1.0
+
+## Arduino LINT
+
+Status
+
+✅ Geslaagd — alle onverwachte controles zijn OK bevonden.
+
+## Compilatietesten
+
+- totaal: 460
+- OK: 456
+- verwachte UNO R3-geheugenbeperkingen: 4
+- onverwachte fouten: 0
+
+**Eindstatus: GESLAAGD**
+
 # v1.0.4
+
+## Arduino LINT
+
+Status
 
 **Datum**
 

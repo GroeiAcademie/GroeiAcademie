@@ -369,8 +369,8 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
   }
 
   synchronisatie.aantalSensorenGestart = aantalSensorenGestart;
-
   if (aantalSensorenGestart == 0) return synchronisatie;
+//  if (aantalSensorenGestart == 0 || aantalSensorenGestart != aantalSensorenSimultaanTeMeten) return synchronisatie; // TODO errorafhandeling
 
   synchronisatie.verschilStartTijd = laatsteStartTijd - eersteStartTijd;
   synchronisatie.verschilEindTijd = laatsteEindTijd - eersteEindTijd;
@@ -378,10 +378,10 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
   synchronisatie.verschilGemiddeldeTikKracht = hoogsteGemiddeldeTikKracht - laagsteGemiddeldeTikKracht;
   synchronisatie.verschilHoogsteTikKracht = hoogsteHoogsteTikKracht - laagsteHoogsteTikKracht;
 
-  unsigned long gemiddeldeTikTijd = totaleTikTijd / aantalSensorenGestart;
+  unsigned long gemiddeldeTikTijd = totaleTikTijd / aantalSensorenSimultaanTeMeten;
   unsigned long toegestaneMargeEindTijd = (gemiddeldeTikTijd * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
-  synchronisatie.aantalSensorenSynchroonStart = BepaalAantalSensorenSynchroon(startTijden, aantalSensorenGestart, TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
-  synchronisatie.aantalSensorenSynchroonEinde = BepaalAantalSensorenSynchroon(eindTijden, aantalSensorenGestart, toegestaneMargeEindTijd);
+  synchronisatie.aantalSensorenSynchroonStart = BepaalAantalSensorenSynchroon(startTijden, aantalSensorenSimultaanTeMeten, TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
+  synchronisatie.aantalSensorenSynchroonEinde = BepaalAantalSensorenSynchroon(eindTijden, aantalSensorenSimultaanTeMeten, toegestaneMargeEindTijd);
 
   return synchronisatie;
 }
