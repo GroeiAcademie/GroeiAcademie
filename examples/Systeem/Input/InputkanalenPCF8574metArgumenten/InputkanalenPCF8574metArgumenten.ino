@@ -41,7 +41,7 @@
 #include <Configuratie/ExamplesConfig.h>
 
 #ifndef INPUT_TEST_WEERGAVE_MS
-  #define INPUT_TEST_WEERGAVE_MS 5000UL
+  #define INPUT_TEST_WEERGAVE_MS 2000UL
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)

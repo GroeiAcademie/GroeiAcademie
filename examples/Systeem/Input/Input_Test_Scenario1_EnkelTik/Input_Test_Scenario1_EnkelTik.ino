@@ -44,7 +44,6 @@ bool ToetsPositieIngedrukt(const char* opschrift, int positie) {
   return strcmp(opschrift, cijferNotatie) == 0 || strcmp(opschrift, sNotatie) == 0;
 }
 
-
 // INSTORTEND SCORINGSVORM (enkel gebruikt bij Scenario 3, stap 3)
 int instortendOfGradueel = INSTORTEND_SCORING_BINAIR; // Kan verhoogd worden met instortendOfGradueel++ na succesvolle sessies (net als stimulusVersie)
 
