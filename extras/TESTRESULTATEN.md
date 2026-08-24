@@ -14,6 +14,21 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 | v1.0.0 | 31-07-2026 | ✅ (1 bekende, onschadelijke waarschuwing) | 188 | 184 | 4 | 0 | eerste officiële validatie |
 
 
+# v1.1.1
+
+## Handmatige HX1838-hardwarevalidatie
+
+Voor v1.1.1 is de released HX1838-route met `HX1838_BRON_CODES_DEFINE` op de geteste hardwareopstelling werkend bevestigd:
+
+- `HX1838_BRON_CODES = HX1838_BRON_CODES_DEFINE`;
+- `HX1838_ONTVANGER_PIN = ARDUINO_UNO_SHIELD_PIN_D12`;
+- `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1` — TinyIRReceiver: **WERKT**;
+- `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0` — IRremote: **WERKT**.
+
+De EEPROM-gebaseerde HX1838-routes blijven in v1.1.1 experimenteel.
+
+De volledige v1.1.1-releasevalidatie met de vier compilecycli is op dit moment nog niet als definitief releaseresultaat in de overzichtstabel opgenomen. De totaalaantallen worden pas na uitvoering van de bijgewerkte testmatrix vastgelegd.
+
 # v1.1.0
 
 ## Arduino LINT

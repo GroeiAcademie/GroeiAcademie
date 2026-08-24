@@ -14,7 +14,7 @@
 // deze .ino niet meegecompileerd.
 
 /*
-#if defined(INPUT_KANAAL_CONFIG) && (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+#if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
   // Experimenteel: eigen directe PCF8574-configuratie. Zie docs/Systeem/INPUT.md.
   // Let op: dit zijn PCF8574-pinnen P0 t.e.m. P7, geen Arduino-pinnummers.

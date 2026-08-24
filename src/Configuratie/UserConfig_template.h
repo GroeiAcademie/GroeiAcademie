@@ -96,7 +96,7 @@
 // Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
 // De standaardvolgorde is D2,D3,D4,D5; uitsluitend de twee membraan-directtypes gebruiken standaard de gedraaide D3,D2,D5,D4-volgorde.
 // Bestaande PIN_TOETS_1..4-definities blijven ondersteund en hebben voorrang voor backward compatibility.
-#if defined(INPUT_KANAAL_CONFIG) && (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+#if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
 // #define KEYPAD_PIN_K1 ARDUINO_UNO_SHIELD_PIN_D2
 // #define KEYPAD_PIN_K2 ARDUINO_UNO_SHIELD_PIN_D3
@@ -128,7 +128,7 @@
 // INPUT_TYPE_PCF8574: logische aansluitingen op PCF8574 P0-P7.
 // Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
 // PCF8574_PIN_P0 t.e.m. PCF8574_PIN_P7 zijn vaste hardware-identiteiten en worden niet aangepast.
-#if defined(INPUT_KANAAL_CONFIG) && (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+#if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
   // Experimenteel: eigen directe PCF8574-configuratie. Zie docs/Systeem/INPUT.md.
   // Verwijder de // voor de benodigde #define-regels en pas de waarden aan je eigen keypad aan.
@@ -243,7 +243,7 @@
 #endif
 
 #ifndef HX1838_ONTVANGER_PIN
-// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D6
+// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D12
 #endif
 
 // HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE: Standaard 1.
@@ -257,6 +257,7 @@
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
 #endif
 
 #ifndef HX1838_BRON_CODES
@@ -265,11 +266,19 @@
 // #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
 #endif
 
-// Optionele vaste HX1838-mapping. Niet zelf gedefinieerde HX1838_CODE_x waarden worden door SystemConfig.h aangevuld met de standaardcodes.
+#if defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
+// HX1838_TOETSENINDELING_REMOTE_USER_DEFINED is in v1.1.1 uitsluitend beschikbaar met HX1838_BRON_CODES_DEFINE.
+// Geef het aantal toetsen, de commandcodes en de opschrift/weergavetekstkoppeling volledig in UserConfig.h op.
+// De huidige HX1838-laag vergelijkt 8-bit commandwaarden (uint8_t).
+// #define HX1838_GENERIEK_AANTAL_TOETSEN 4
+// #define HX1838_GENERIEK_CODES {0x45UL, 0x46UL, 0x47UL, 0x44UL}
+// #define HX1838_GENERIEK_KEY_LAYOUT { {"1", "1"}, {"2", "2"}, {"3", "3"}, {"4", "4"} }
+
+// Optionele vaste HX1838-mapping voor de drie ingebouwde toetsenindelingen. Niet zelf gedefinieerde HX1838_CODE_x waarden worden door SystemConfig.h aangevuld met de standaardcodes.
 // Bij HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE wordt de vaste mapping gebruikt zodra minstens één HX1838_CODE_x in UserConfig.h is gedefinieerd.
 // Wil je in die modus EEPROM gebruiken, laat dan alle HX1838_CODE_x regels uitgeschakeld. Een expliciet gedefinieerde code met waarde 0 is ongeldig wanneer de vaste mapping wordt gebruikt.
 // Onderstaande waarden zijn de gekende NEC-codes van de standaard meegeleverde afstandsbediening; verwijder de "//" om ze te activeren, of vervang door je eigen gekalibreerde waarden.
-#if defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
+#elif defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
 // #define HX1838_CODE_1  0x46UL // = UP
 // #define HX1838_CODE_2  0x15UL // = DOWN
 // #define HX1838_CODE_3  0x40UL // = OK
@@ -570,6 +579,6 @@
 // ============================================================================
 // DEBUG INSTELLINGEN 
 // ============================================================================
-// DEBUG_PRINT, DEBUG_PRINTLN en DEBUG_PRINTLN2 worden door SystemConfig.h afgeleid uit DEBUG.
+// GA_DEBUG_PRINT, GA_DEBUG_PRINTLN en GA_DEBUG_PRINTLN2 worden door SystemConfig.h afgeleid uit DEBUG.
 
 #endif

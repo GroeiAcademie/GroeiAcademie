@@ -52,7 +52,7 @@ void setup() {
 #ifdef DEBUG
   Serial.begin(SERIAL_BAUDRATE);
   while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  DEBUG_PRINTLN("=== DEBUG GESTART ===");
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
@@ -99,8 +99,8 @@ void UitvoerenAlgoritmeEnkelTik() {
 
   while (TIK_TEST_ACTIEVE_VINGER == -1) {
 #ifdef DEBUG
-  DEBUG_PRINT("Actieve vinger = ");
-  DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
+  GA_DEBUG_PRINT("Actieve vinger = ");
+  GA_DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
@@ -118,9 +118,9 @@ void UitvoerenAlgoritmeEnkelTik() {
   }
 
 #ifdef DEBUG
-  DEBUG_PRINT("Actieve vinger = ");
-  DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
-  DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINT("Actieve vinger = ");
+  GA_DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
+  GA_DEBUG_PRINTLN("---------------------");
 #endif
 
   while (AnalogReadMetGekorigeerdeOffsets(TIK_TEST_ACTIEVE_VINGER, offsetSensorActief) > TIK_MINIMALE_DRUKWAARDE);

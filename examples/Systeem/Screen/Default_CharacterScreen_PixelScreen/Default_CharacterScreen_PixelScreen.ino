@@ -14,7 +14,7 @@
 // daarom in UserConfig.h (kopieer van UserConfig_template.h) of rechtstreeks
 // in SystemConfig.h. Onderstaande controle geeft een duidelijke foutmelding
 // als dat nog niet gebeurd is, in plaats van de sketch stil te laten falen.
-#if ((SCREEN_OUTPUT_CONFIG & (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS)) != (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
+#if (((SCREEN_OUTPUT_CONFIG) & (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS)) != (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
   #error Stel SCREEN_OUTPUT_CONFIG in UserConfig.h in met SCREEN_TYPE_CHARACTER en SCREEN_TYPE_PIXELS.
 #else
 

@@ -69,7 +69,7 @@ void setup() {
   PrintToScreen(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
   Serial.begin(SERIAL_BAUDRATE);
   while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  DEBUG_PRINTLN("=== DEBUG GESTART ===");
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
@@ -200,8 +200,8 @@ void UitvoerenAlgoritmeEnkelTik() {
 
   while (TIK_TEST_ACTIEVE_VINGER == -1) {
 #ifdef DEBUG
-  DEBUG_PRINT("Actieve vinger = ");
-  DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
+  GA_DEBUG_PRINT("Actieve vinger = ");
+  GA_DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
@@ -219,9 +219,9 @@ void UitvoerenAlgoritmeEnkelTik() {
   }
 
 #ifdef DEBUG
-  DEBUG_PRINT("Actieve vinger = ");
-  DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
-  DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINT("Actieve vinger = ");
+  GA_DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
+  GA_DEBUG_PRINTLN("---------------------");
 #endif
 
   while (AnalogReadMetGekorigeerdeOffsets(TIK_TEST_ACTIEVE_VINGER, offsetSensorActief) > TIK_MINIMALE_DRUKWAARDE);
@@ -394,9 +394,9 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
   // --- START VAN DE TRAININGSLUS ---
   for (int herhaling = 1; herhaling <= TEST_AANTAL_KEER_HERHALEN; herhaling++) {
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Scenario 3: herhaling = ");
-    DEBUG_PRINTLN(herhaling);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Scenario 3: herhaling = ");
+    GA_DEBUG_PRINTLN(herhaling);
 #endif
 
     int aantalStappenSynchroon = 0;
@@ -416,11 +416,11 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     nulmetingStimulus[0] = gemetenStimulus[0];
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 1 nulmeting tijd/kracht = ");
-    DEBUG_PRINT(nulmetingStimulus[0].TikTijd);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(nulmetingStimulus[0].gemiddeldeTikKracht);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 1 nulmeting tijd/kracht = ");
+    GA_DEBUG_PRINT(nulmetingStimulus[0].TikTijd);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(nulmetingStimulus[0].gemiddeldeTikKracht);
 #endif
 
     // STAP 2: SENSOR 1 EN SENSOR 2 SIMULTAAN
@@ -428,9 +428,9 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     exitStatus = MeetStimulusSimultaan(gemetenStimulus, AANTAL_SENSOREN_ALGORITME3, gemetenSynchronisatie, 0b1100, 0b0100);
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 2 exitStatus = ");
-    DEBUG_PRINTLN(exitStatus);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 2 exitStatus = ");
+    GA_DEBUG_PRINTLN(exitStatus);
 #endif  
 
     // MaskReedsActieveSensorsBijStart = 0b1100: sensor 1 en sensor 2 zijn reeds actief bij aanvang van stap 2.
@@ -456,13 +456,13 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     }
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 2 sensor1/sensor2/simultaan = ");
-    DEBUG_PRINT(Sensor1Correct);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINT(Sensor2Correct);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(SimultaanCorrect);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 2 sensor1/sensor2/simultaan = ");
+    GA_DEBUG_PRINT(Sensor1Correct);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINT(Sensor2Correct);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(SimultaanCorrect);
 #endif
 
     // STAP 3 TOT n: SENSOR 2, EEN DOORLOPENDE METING
@@ -485,20 +485,20 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     }
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 3 tot n tijd/kracht = ");
-    DEBUG_PRINT(TijdCorrect);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(KrachtCorrect);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 3 tot n tijd/kracht = ");
+    GA_DEBUG_PRINT(TijdCorrect);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(KrachtCorrect);
 #endif
 
     // Maximum per ronde = stap2(1) + stap3(INSTORTEND_AANTAL_STAPPEN)
     if (aantalStappenSynchroon == (1 + INSTORTEND_AANTAL_STAPPEN)) TELLER_INSTORTEND_CORRECT++;
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Aantal stappen synchroon = ");
-    DEBUG_PRINTLN(aantalStappenSynchroon);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Aantal stappen synchroon = ");
+    GA_DEBUG_PRINTLN(aantalStappenSynchroon);
 #endif
 
     String herhalingStr = (herhaling < 10) ? ('0' + String(herhaling)) : String(herhaling);
@@ -640,43 +640,43 @@ void UitvoerenAlgoritmeCocktailTik() {
     }
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Scenario 4 herhaling = ");
-    DEBUG_PRINTLN(herhaling);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Scenario 4 herhaling = ");
+    GA_DEBUG_PRINTLN(herhaling);
 
-    DEBUG_PRINT("Aantal sensoren = ");
-    DEBUG_PRINTLN(aantalSensorenSimultaanTeMeten);
+    GA_DEBUG_PRINT("Aantal sensoren = ");
+    GA_DEBUG_PRINTLN(aantalSensorenSimultaanTeMeten);
 
-    DEBUG_PRINT("Gemiddelde TikTijd = ");
-    DEBUG_PRINTLN(gematigdTijd);
+    GA_DEBUG_PRINT("Gemiddelde TikTijd = ");
+    GA_DEBUG_PRINTLN(gematigdTijd);
 
-    DEBUG_PRINT("Gemiddelde TikKracht = ");
-    DEBUG_PRINTLN(gematigdKracht);
+    GA_DEBUG_PRINT("Gemiddelde TikKracht = ");
+    GA_DEBUG_PRINTLN(gematigdKracht);
 
-    DEBUG_PRINT("Eerste tot laatste start = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilStartTijd);
+    GA_DEBUG_PRINT("Eerste tot laatste start = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilStartTijd);
 
-    DEBUG_PRINT("Toegestane marge start = ");
-    DEBUG_PRINTLN(TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
+    GA_DEBUG_PRINT("Toegestane marge start = ");
+    GA_DEBUG_PRINTLN(TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
 
-    DEBUG_PRINT("Eerste tot laatste einde = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilEindTijd);
+    GA_DEBUG_PRINT("Eerste tot laatste einde = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilEindTijd);
 
-    DEBUG_PRINT("Toegestane marge einde = ");
-    DEBUG_PRINTLN(toegestaneMargeEindTijd);
+    GA_DEBUG_PRINT("Toegestane marge einde = ");
+    GA_DEBUG_PRINTLN(toegestaneMargeEindTijd);
 
-    DEBUG_PRINT("Start/einde/synchroon = ");
-    DEBUG_PRINT(startTijdSimultaan);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINT(eindTijdSimultaan);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(startTijdSimultaan && eindTijdSimultaan);
+    GA_DEBUG_PRINT("Start/einde/synchroon = ");
+    GA_DEBUG_PRINT(startTijdSimultaan);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINT(eindTijdSimultaan);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(startTijdSimultaan && eindTijdSimultaan);
 
-    DEBUG_PRINT("Aantal sensoren synchroon start = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonStart);
+    GA_DEBUG_PRINT("Aantal sensoren synchroon start = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonStart);
 
-    DEBUG_PRINT("Aantal sensoren synchroon einde = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonEinde);
+    GA_DEBUG_PRINT("Aantal sensoren synchroon einde = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonEinde);
 #endif
 
     if (herhalingStr == "0M") {

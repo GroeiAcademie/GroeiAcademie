@@ -8,10 +8,13 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 
 ## Huidige status
 
-- versie: `1.1.0`;
+- versie: `1.1.1`;
 - ontwikkelfase: alpha;
 - huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
-- de HX1838-ondersteuning binnen Input bevindt zich in v1.1.0 nog in experimentele fase;
+- HX1838 met `HX1838_BRON_CODES_DEFINE` is released;
+- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` laat binnen deze DEFINE-route een eigen afstandsbediening toe via een configureerbaar aantal toetsen en opschriftkoppeling in `UserConfig.h`; de 8-bit commandcodes kunnen via `HX1838_GENERIEK_CODES` worden opgegeven of automatisch worden gekalibreerd wanneer die define ontbreekt;
+- deze HX1838-route is hardwarematig bevestigd met ontvanger op D12 en met beide ontvangstbackends: TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) en IRremote (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0`);
+- de EEPROM-gebaseerde HX1838-routes blijven experimenteel;
 - de interne releasetests worden in vier afzonderlijke testcycli uitgevoerd; de definitieve releaseresultaten worden vastgelegd in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
@@ -55,14 +58,15 @@ Elke officiële release van deze library wordt vóór publicatie met de meegelev
 De validatie omvat:
 
 - Arduino LINT (Library Manager)
-- compilatie van alle voorbeelden;
-- afzonderlijke Input-validatie met geldige en bewust ongeldige configuraties;
+- volledige gereleasete regressie op Arduino UNO R4 Minima en een minimale gerichte regressie op de overige boards;
+- optioneel `extras/TestLibraryGereleasedVolledigeRegresietesten.cmd` voor de volledige historische gereleasete regressiedekking, selecteerbaar per `Screen`, `Input`, `Stimulus` of combinatie;
+- afzonderlijke HX1838-validatie voor de v1.1.1-wijzigingen, met geldige en bewust ongeldige configuraties;
 - menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
 - Arduino Uno R3;
 - Arduino Uno R4 Minima;
 - Arduino Uno R4 WiFi;
 - ESP32-borden via boardprofiel WEMOS D1 R32 (`esp32:esp32:d1_uno32`);
-- experimentele acceptatiecompilaties voor de nieuwe v1.1.0-boardprofielen, zonder invloed op PASS/FAIL van de officieel ondersteunde boards.
+- minimale acceptatiecompilaties voor de experimentele boardprofielen, zonder invloed op PASS/FAIL van de officieel ondersteunde boards.
 
 Meer informatie:
 
@@ -148,6 +152,7 @@ examples/
 │       ├── InputkanalenDIGITAL/
 │       ├── InputkanalenPCF8574/
 │       ├── InputkanalenHX1838/
+│       ├── InputkanalenHX1838UserDefined/
 │       ├── InputkanalenPCF8574UserDefinedDirect/
 │       └── InputkanalenPCF8574UserDefinedMatrix/
 └── Toepassingsgebieden/
@@ -189,7 +194,7 @@ Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregist
 
 ## Elektronische schema's
 
-De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release staat onder [Stimulus Shield v1.1.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
+De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release is [Stimulus Shield v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md): v1.1.0 + HX1838 IR Receiver.
 
 Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.md](docs/Toepassingsgebieden/Stimulus/README.md):
 
@@ -199,7 +204,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De ADS1115- en TFTSPI-hardwarelijn staat onder [docs/Uitbreidingskaarten/](docs/Uitbreidingskaarten/), met de actuele JSON-, PDF-, PNG- en SVG-schema-exporten, de [beschrijving van het Stimulus Shield v1.1.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md) en de [handleiding voor de hardwarevalidatie v1.1.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
+De ADS1115- en TFTSPI-hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten blijven onder Stimulus Shield v1.1.0 staan. Voor deze release beschrijft [Stimulus Shield v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) de toevoeging van de HX1838 IR Receiver; de aanvullende [hardwarevalidatie v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) hoort daarbij.
 
 ## Geplande uitbreidingen
 

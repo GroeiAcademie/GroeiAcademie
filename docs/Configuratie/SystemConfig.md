@@ -174,9 +174,9 @@ Voor `BOARD_ESP32_UNO` betekent `DELAY_US 0` dat de GroeiAcademie FrameWork-libr
 ## DEBUG-macro's
 
 ```cpp
-DEBUG_PRINT(x)
-DEBUG_PRINTLN(x)
-DEBUG_PRINTLN2(x, f)
+GA_DEBUG_PRINT(x)
+GA_DEBUG_PRINTLN(x)
+GA_DEBUG_PRINTLN2(x, f)
 ```
 
 Deze macro's verwijzen naar `Serial` wanneer `DEBUG` actief is. De Screen-laag voegt in dat geval automatisch `SCREEN_TYPE_SERIAL` aan de effectieve `SCREEN_OUTPUT` toe.

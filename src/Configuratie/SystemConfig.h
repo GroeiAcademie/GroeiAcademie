@@ -394,7 +394,7 @@
   #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
 #endif
 
-#if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
   #ifndef KEYPAD_TYPE
     #define KEYPAD_TYPE KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
   #endif
@@ -416,7 +416,7 @@
   #define I2C_ADDRESS_PCF8574 0x20
 #endif
 
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   // DIGITAL: mapping van keypadlabels naar Arduino Uno-shieldheaderpinnen.
   // De Arduino Uno-shieldpinnen blijven ARDUINO_UNO_SHIELD_PIN_D2..D5.
   // De KEYPAD_PIN_*-namen volgen het gekozen keypadtype:
@@ -539,7 +539,7 @@
     #endif
   #endif
 
-#elif (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+#elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
 #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
   #ifndef KEYPAD_PIN_K1
     #define KEYPAD_PIN_K1 PCF8574_PIN_P0
@@ -827,7 +827,7 @@
 #endif
 
 #ifndef HX1838_BRON_CODES
-  #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
+  #define HX1838_BRON_CODES HX1838_BRON_CODES_DEFINE
 #endif
 
 #ifndef HX1838_KALIBRATIE_TOETS_PAUZE_MS
@@ -842,6 +842,12 @@
   #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
 #endif
 
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
+  #if HX1838_BRON_CODES != HX1838_BRON_CODES_DEFINE
+    #error HX1838_TOETSENINDELING_REMOTE_USER_DEFINED wordt in v1.1.1 alleen ondersteund met HX1838_BRON_CODES_DEFINE.
+  #endif
+#endif
+
 #if HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
   #if defined(HX1838_CODE_1) || defined(HX1838_CODE_2) || defined(HX1838_CODE_3) || defined(HX1838_CODE_4) || defined(HX1838_CODE_5) || defined(HX1838_CODE_6) || defined(HX1838_CODE_7) || defined(HX1838_CODE_8) || defined(HX1838_CODE_9) || defined(HX1838_CODE_10) || defined(HX1838_CODE_11) || defined(HX1838_CODE_12) || defined(HX1838_CODE_13) || defined(HX1838_CODE_14) || defined(HX1838_CODE_15) || defined(HX1838_CODE_16) || defined(HX1838_CODE_17) || defined(HX1838_CODE_18) || defined(HX1838_CODE_19) || defined(HX1838_CODE_20) || defined(HX1838_CODE_21)
     #undef HX1838_BRON_CODES
@@ -852,11 +858,25 @@
   #endif
 #endif
 
-// D6 is op geen enkel ondersteund board gereserveerd voor keypad (D2-D5), 
-// pixelscherm (D8-D13 via CS/DC/RST/SPI) of characterscherm (I2C), 
-// en vermijdt bovendien de GPIO2-strapping-pin-problematiek op BOARD_ESP32_UNO. 
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
+  #ifndef HX1838_GENERIEK_AANTAL_TOETSEN
+    #error HX1838_GENERIEK_AANTAL_TOETSEN moet ingesteld worden in UserConfig.h bij HX1838_TOETSENINDELING_REMOTE_USER_DEFINED.
+  #else
+    #if HX1838_GENERIEK_AANTAL_TOETSEN < 1 || HX1838_GENERIEK_AANTAL_TOETSEN > 255
+      #error HX1838_GENERIEK_AANTAL_TOETSEN moet tussen 1 en 255 liggen.
+    #endif
+  #endif
+  #ifndef HX1838_GENERIEK_CODES
+    #define HX1838_GENERIEK_CODES_KALIBREREN
+  #endif
+  #ifndef HX1838_GENERIEK_KEY_LAYOUT
+    #error HX1838_GENERIEK_KEY_LAYOUT moet ingesteld worden in UserConfig.h bij HX1838_TOETSENINDELING_REMOTE_USER_DEFINED.
+  #endif
+#endif
+
+// D12 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was. 
 #ifndef HX1838_ONTVANGER_PIN
-  #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D6
+  #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D12
 #endif
 
 #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
@@ -1301,13 +1321,13 @@
 // DEBUG INSTELLINGEN 
 // ============================================================================
 #if defined(DEBUG)
-  #define DEBUG_PRINT(x)          Serial.print(x)
-  #define DEBUG_PRINTLN(x)        Serial.println(x)
-  #define DEBUG_PRINTLN2(x, f)    Serial.println(x, f)
+  #define GA_DEBUG_PRINT(x)          Serial.print(x)
+  #define GA_DEBUG_PRINTLN(x)        Serial.println(x)
+  #define GA_DEBUG_PRINTLN2(x, f)    Serial.println(x, f)
 #else
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTLN2(x, f)
+  #define GA_DEBUG_PRINT(x)
+  #define GA_DEBUG_PRINTLN(x)
+  #define GA_DEBUG_PRINTLN2(x, f)
 #endif
 
 #endif

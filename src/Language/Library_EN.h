@@ -42,7 +42,7 @@
 
 // Input Type: HX1838
 #ifndef _INPUT_HX1838_CONTROLE
-  #define _INPUT_HX1838_CONTROLE                                   "IR CHECK:"
+  #define _INPUT_HX1838_CONTROLE                                   "IR CHECK"
 #endif
 #ifndef _INPUT_HX1838_DRUK_OP_ELKE_TOETS_VOOR_CONTROLE
   #define _INPUT_HX1838_DRUK_OP_ELKE_TOETS_VOOR_CONTROLE           "PRESS EACH KEY"
@@ -85,12 +85,36 @@
   #define _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT                "IR PIN ERROR"
 #endif
 
+#ifndef _INPUT_MAPPINGCONTROLE_TITEL
+  #define _INPUT_MAPPINGCONTROLE_TITEL                             "Mapping check"
+#endif
+#ifndef _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK
+  #define _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK                    "LABELS OK"
+#endif
+
+#ifndef _INPUT_MAPPINGCONTROLE_WAARSCHUWING
+  #define _INPUT_MAPPINGCONTROLE_WAARSCHUWING                      "WARNING"
+#endif
+#ifndef _INPUT_MAPPINGCONTROLE_ONTBREEKT
+  #define _INPUT_MAPPINGCONTROLE_ONTBREEKT                         "Missing"
+#endif
+
+#ifndef _INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD
+  #define _INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD                "CALIBRATED"
+#endif
+#ifndef _INPUT_HX1838_GENERIEK_CODES_ZIE_SERIEEL
+  #define _INPUT_HX1838_GENERIEK_CODES_ZIE_SERIEEL                 "SEE SERIAL"
+#endif
+
 // Input Type: PCF8574
 #ifndef _INPUT_PCF8574_FOUT
   #define _INPUT_PCF8574_FOUT                                      "PCF8574 ERROR"
 #endif
 #ifndef _INPUT_PCF8574_CONTROLEER_I2C
   #define _INPUT_PCF8574_CONTROLEER_I2C                            "CHECK I2C"
+#endif
+#ifndef _INPUT_PCF8574_ADRES_LABEL
+  #define _INPUT_PCF8574_ADRES_LABEL                                "I2C address"
 #endif
 
 // Stimulus
@@ -196,9 +220,102 @@
   #define _INPUT_HX1838_DEBUG_NA_INIT                                     "after init"
 #endif
 
+#ifndef _INPUT_HX1838_DEBUG_GEEN_MATCH
+  #define _INPUT_HX1838_DEBUG_GEEN_MATCH                                  "NO MATCH"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_IR_ONTVANGEN
+  #define _INPUT_HX1838_DEBUG_IR_ONTVANGEN                                "IR received"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_MATCH
+  #define _INPUT_HX1838_DEBUG_MATCH                                       "MATCH"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_REGEL
+  #define _INPUT_HX1838_DEBUG_REGEL                                       "line"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_TOETS
+  #define _INPUT_HX1838_DEBUG_TOETS                                       "key"
+#endif
+#ifndef _INPUT_HX1838_DEBUG_VERGELEKEN_MET
+  #define _INPUT_HX1838_DEBUG_VERGELEKEN_MET                              "compared to"
+#endif
+
+#ifndef _INPUT_HX1838_GENERIEK_CODES_NIET_GEDEFINIEERD_KALIBRATIE_GESTART
+  #define _INPUT_HX1838_GENERIEK_CODES_NIET_GEDEFINIEERD_KALIBRATIE_GESTART   "not defined, calibration started."
+#endif
+#ifndef _INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD_KOPIEER_REGEL
+  #define _INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD_KOPIEER_REGEL             "Codes calibrated, copy the line above into"
+#endif
+
 // Input Type: PCF8574
 #ifndef _INPUT_PCF8574_NIET_BEREIKBAAR_SERIAL
   #define _INPUT_PCF8574_NIET_BEREIKBAAR_SERIAL                    "PCF8574 not reachable at configured I2C address."
+#endif
+
+//=========================================================
+// Static Assert
+//=========================================================
+// Input Type: HX1838
+#ifndef _INPUT_HX1838_STATIC_ASSERT_AANTAL_TOETSEN
+  #define _INPUT_HX1838_STATIC_ASSERT_AANTAL_TOETSEN               "does not contain the expected number of HX1838 keys."
+#endif
+#ifndef _INPUT_HX1838_STATIC_ASSERT_CODES_BEVATTEN
+  #define _INPUT_HX1838_STATIC_ASSERT_CODES_BEVATTEN               "codes."
+#endif
+#ifndef _INPUT_HX1838_STATIC_ASSERT_GEEN_CODE_WAARDE_NUL
+  #define _INPUT_HX1838_STATIC_ASSERT_GEEN_CODE_WAARDE_NUL         "contain a code with value 0."
+#endif
+#ifndef _INPUT_HX1838_STATIC_ASSERT_MAG_BIJ
+  #define _INPUT_HX1838_STATIC_ASSERT_MAG_BIJ                      "may not, when using"
+#endif
+#ifndef _INPUT_HX1838_STATIC_ASSERT_MOET_EXACT
+  #define _INPUT_HX1838_STATIC_ASSERT_MOET_EXACT                   "must contain exactly"
+#endif
+
+// Input Type: PCF8574
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MAX_ACHT_PINNEN
+  #define _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MAX_ACHT_PINNEN      "The direct generic keypad uses more than 8 PCF8574 pins."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MIN_EEN_PIN
+  #define _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MIN_EEN_PIN          "The direct generic keypad must use at least one PCF8574 pin."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_DIRECT_PINNEN_MAX_ACHT
+  #define _INPUT_PCF8574_STATIC_ASSERT_DIRECT_PINNEN_MAX_ACHT      "The direct keypad uses more than 8 PCF8574 pins."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_DIRECT_AANTAL
+  #define _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_DIRECT_AANTAL    "must contain exactly one entry per direct keypad pin."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_MATRIX_AANTAL
+  #define _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_MATRIX_AANTAL    "must contain exactly one entry per matrix position."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_MATRIX_DUBBELE_PINNEN
+  #define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_DUBBELE_PINNEN       "The generic matrix contains duplicate row or column pins."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MAX_ACHT_PINNEN
+  #define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MAX_ACHT_PINNEN      "The generic matrix keypad uses more than 8 PCF8574 pins."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_KOLOM
+  #define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_KOLOM        "The generic matrix keypad must have at least one column."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_RIJ
+  #define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_RIJ          "The generic matrix keypad must have at least one row."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_MATRIX_PINNEN_MAX_ACHT
+  #define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_PINNEN_MAX_ACHT      "The matrix uses more than 8 PCF8574 pins."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_PINNEN_BEREIK
+  #define _INPUT_PCF8574_STATIC_ASSERT_PINNEN_BEREIK               "may only use PCF8574 bit positions 0 through 7."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_PINNEN_UNIEK
+  #define _INPUT_PCF8574_STATIC_ASSERT_PINNEN_UNIEK                "contains duplicate PCF8574 pins."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_BEREIK
+  #define _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_BEREIK            "may only use PCF8574 bit positions 0 through 7."
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_EN
+  #define _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_EN                "and"
+#endif
+#ifndef _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_OVERLAP
+  #define _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_OVERLAP           "The same PCF8574 pin may not be both a row and a column pin."
 #endif
 
 //=========================================================

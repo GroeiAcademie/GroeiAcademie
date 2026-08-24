@@ -52,7 +52,7 @@ void setup() {
 #ifdef DEBUG
   Serial.begin(SERIAL_BAUDRATE);
   while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  DEBUG_PRINTLN("=== DEBUG GESTART ===");
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
@@ -214,43 +214,43 @@ void UitvoerenAlgoritmeCocktailTik() {
     }
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Scenario 4 herhaling = ");
-    DEBUG_PRINTLN(herhaling);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Scenario 4 herhaling = ");
+    GA_DEBUG_PRINTLN(herhaling);
 
-    DEBUG_PRINT("Aantal sensoren = ");
-    DEBUG_PRINTLN(aantalSensorenSimultaanTeMeten);
+    GA_DEBUG_PRINT("Aantal sensoren = ");
+    GA_DEBUG_PRINTLN(aantalSensorenSimultaanTeMeten);
 
-    DEBUG_PRINT("Gemiddelde TikTijd = ");
-    DEBUG_PRINTLN(gematigdTijd);
+    GA_DEBUG_PRINT("Gemiddelde TikTijd = ");
+    GA_DEBUG_PRINTLN(gematigdTijd);
 
-    DEBUG_PRINT("Gemiddelde TikKracht = ");
-    DEBUG_PRINTLN(gematigdKracht);
+    GA_DEBUG_PRINT("Gemiddelde TikKracht = ");
+    GA_DEBUG_PRINTLN(gematigdKracht);
 
-    DEBUG_PRINT("Eerste tot laatste start = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilStartTijd);
+    GA_DEBUG_PRINT("Eerste tot laatste start = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilStartTijd);
 
-    DEBUG_PRINT("Toegestane marge start = ");
-    DEBUG_PRINTLN(TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
+    GA_DEBUG_PRINT("Toegestane marge start = ");
+    GA_DEBUG_PRINTLN(TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
 
-    DEBUG_PRINT("Eerste tot laatste einde = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilEindTijd);
+    GA_DEBUG_PRINT("Eerste tot laatste einde = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilEindTijd);
 
-    DEBUG_PRINT("Toegestane marge einde = ");
-    DEBUG_PRINTLN(toegestaneMargeEindTijd);
+    GA_DEBUG_PRINT("Toegestane marge einde = ");
+    GA_DEBUG_PRINTLN(toegestaneMargeEindTijd);
 
-    DEBUG_PRINT("Start/einde/synchroon = ");
-    DEBUG_PRINT(startTijdSimultaan);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINT(eindTijdSimultaan);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(startTijdSimultaan && eindTijdSimultaan);
+    GA_DEBUG_PRINT("Start/einde/synchroon = ");
+    GA_DEBUG_PRINT(startTijdSimultaan);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINT(eindTijdSimultaan);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(startTijdSimultaan && eindTijdSimultaan);
 
-    DEBUG_PRINT("Aantal sensoren synchroon start = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonStart);
+    GA_DEBUG_PRINT("Aantal sensoren synchroon start = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonStart);
 
-    DEBUG_PRINT("Aantal sensoren synchroon einde = ");
-    DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonEinde);
+    GA_DEBUG_PRINT("Aantal sensoren synchroon einde = ");
+    GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].aantalSensorenSynchroonEinde);
 #endif
 
     if (herhalingStr == "0M") {

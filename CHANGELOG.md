@@ -4,6 +4,25 @@ Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestan
 
 De versienummers volgen de versie in `library.properties`.
 
+## [Unreleased]
+
+## 1.1.1
+
+### Stimulus Shield v1.1.1
+
+- Stimulus Shield v1.1.1 = Stimulus Shield v1.1.0 + HX1838 IR Receiver; de bestaande v1.1.0-hardwarebasis blijft behouden en de HX1838-signaalaansluiting gebruikt Arduino Uno-shieldpin `D12`.
+
+### HX1838
+
+- HX1838 gaat voor `HX1838_BRON_CODES = HX1838_BRON_CODES_DEFINE` van experimenteel in v1.1.0 naar released in v1.1.1; de EEPROM-gebaseerde routes `HX1838_BRON_CODES_EEPROM_ALTIJD` en `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` blijven experimenteel;
+- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` toegevoegd binnen de released DEFINE-route: `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` worden in `UserConfig.h` ingesteld; de 8-bit commandcodes kunnen via `HX1838_GENERIEK_CODES` worden opgegeven of, wanneer deze define ontbreekt, automatisch worden gekalibreerd; deze UserDefined-toetsenindeling ondersteunt in v1.1.1 bewust alleen `HX1838_BRON_CODES_DEFINE`, niet de experimentele EEPROM-routes;
+- standaard `HX1838_ONTVANGER_PIN` gewijzigd naar Arduino Uno-shieldpin `D12`;
+- `HX1838_BRON_CODES = HX1838_BRON_CODES_DEFINE` is hardwarematig getest en werkend met `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1` (TinyIRReceiver) én `= 0` (IRremote), telkens met de HX1838-ontvanger op D12;
+- de HX1838-debuguitvoer gebruikt eigen `GA_DEBUG_PRINT`, `GA_DEBUG_PRINTLN` en `GA_DEBUG_PRINTLN2`-macro's, zodat TinyIRReceiver/IRremote de GroeiAcademie-debugmacro's niet meer kunnen verwijderen via hun interne `#undef DEBUG_PRINT`/`#undef DEBUG_PRINTLN`;
+- de testindeling is opgesplitst volgens regressierisico: `TestLibraryGereleased.cmd` voert op Arduino UNO R4 Minima de volledige gereleasete regressiematrix uit en op de overige boards een minimale gerichte regressietest; `TestLibraryNieuw.cmd` test de volledige nieuwe HX1838-matrix op alle vier officiële en alle drie acceptatieboards, terwijl `TestLibraryNieuwOngeldig.cmd` de ongeldige HX1838-configuraties controleert;
+- DIGITAL-, PCF8574-, UserDefined- en bestaande Input/Stimulus-tests zijn van de nieuwe Input-matrix naar de gereleasete regressietests verplaatst; HX1838 blijft voor v1.1.1 in de nieuwe testcyclus;
+- `extras/TestLibraryGereleasedVolledigeRegresietesten.cmd` toegevoegd als afzonderlijke volledige regressietest: `ALLES` dekt de gereleasete testbasis van `TestLibraryGereleased.cmd` uit v1.1.0 plus de stabiele niet-HX1838-dekking van `TestLibraryNieuw.cmd` uit v1.1.0; de HX1838-v1.1.1-tests blijven in `TestLibraryNieuw.cmd`. De volledige regressie kan ook per `Screen`, `Input`, `Stimulus` of combinatie worden uitgevoerd en maakt geen deel uit van de vier releasecompilecycli van `TestLibraryStatusReport.cmd`.
+
 ## 1.1.0
 
 ### Gedeelde bus-eigendom (voor release toegevoegd, geen API-wijziging)

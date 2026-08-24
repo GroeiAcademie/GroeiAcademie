@@ -73,16 +73,22 @@ Belangrijkste instellingen:
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
 // #define KEYPAD_TYPE KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
 // #define I2C_ADDRESS_PCF8574 0x20
-// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D2
+// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D12
+// #define HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
+// #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
 // #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
 ```
 
 Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`.
 
-Voor HX1838 kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. `HX1838_BRON_CODES_DEFINE` gebruikt de vaste mapping; codes die niet in `UserConfig.h` zijn gedefinieerd, worden door `SystemConfig.h` met de standaardcodes aangevuld. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
+De standaard HX1838-ontvangerpin is vanaf v1.1.1 D12. `HX1838_BRON_CODES_DEFINE` gaat in v1.1.1 van experimenteel naar released en is op de geteste hardwareopstelling met D12 bevestigd voor zowel TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) als IRremote (`= 0`); beide routes werken. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
+
+Voor de drie ingebouwde HX1838-toetsenindelingen kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. Bij `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` zijn `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` verplicht. `HX1838_GENERIEK_CODES` mag als vaste DEFINE-mapping worden ingevuld; wanneer deze ontbreekt, start automatisch de UserDefined-kalibratie om de codes te bepalen. In v1.1.1 worden voor deze UserDefined-route geen EEPROM-codebronnen ondersteund. De huidige UserDefined-codes zijn 8-bit commandwaarden (`uint8_t`).
+
+Voor de ingebouwde indelingen geldt verder: `HX1838_BRON_CODES_DEFINE` gebruikt de vaste mapping; codes die niet in `UserConfig.h` zijn gedefinieerd, worden door `SystemConfig.h` met de standaardcodes aangevuld. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
 
 De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken. Voor `INPUT_TYPE_DIGITAL` gebeurt dit per `KEYPAD_TYPE`: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden standaard D3,D2,D5,D4. De oude `PIN_TOETS_1` tot en met `PIN_TOETS_4` blijven voor backward compatibility ondersteund en hebben voorrang wanneer ze expliciet in `UserConfig.h` zijn ingesteld.
 
@@ -143,6 +149,7 @@ Beschikbare HX1838-toetsenindelingen:
 - `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN`: remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]
 - `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN`: remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]
 - `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`        : remote met 21 toetsen, inclusief de MP3-toetsen.
+- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED`          : eigen toetsenindeling; in v1.1.1 uitsluitend met `HX1838_BRON_CODES_DEFINE`. Stel `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` in `UserConfig.h` in. `HX1838_GENERIEK_CODES` is optioneel: ontbreekt deze define, dan start automatisch de UserDefined-kalibratie.
 
 ## Input-specifieke gebruikersinstellingen
 

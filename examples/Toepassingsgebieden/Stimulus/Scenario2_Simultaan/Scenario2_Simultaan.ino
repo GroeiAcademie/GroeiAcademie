@@ -52,7 +52,7 @@ void setup() {
 #ifdef DEBUG
   Serial.begin(SERIAL_BAUDRATE);
   while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  DEBUG_PRINTLN("=== DEBUG GESTART ===");
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)

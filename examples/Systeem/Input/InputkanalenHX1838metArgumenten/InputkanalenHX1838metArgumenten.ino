@@ -10,10 +10,11 @@
 //   wordt door meerdere functies gelezen en geschreven, via &status als argument.
 // Alle overige toetsen van elke indeling gebruiken de eenvoudige, rechtstreekse (void*)-cast.
 //
-// Ondersteunde HX1838_TOETSENINDELING-waarden, elk met hun volledige opschrift:
+// Dit voorbeeld behandelt de drie vaste HX1838_TOETSENINDELING-waarden, elk met hun volledige opschrift:
 // - HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN     remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]
 // - HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN     remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]
 // - HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3             remote met 21 toetsen: 0-9 + MP3-toetsen [CH-, CH, CH+, PREV, NEXT, PLAY, -, +, EQ, 0, 100+, 200+, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+// Voor HX1838_TOETSENINDELING_REMOTE_USER_DEFINED, zie InputkanalenHX1838UserDefined.ino.
 //
 // mappingTestMenu[] hieronder bevat, per HX1838_TOETSENINDELING, de volledige set opschriften die die indeling kan opleveren, 
 // elk gekoppeld aan een functie met het argumenten-veld. 

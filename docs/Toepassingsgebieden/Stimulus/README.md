@@ -185,7 +185,7 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 
 ## Afzonderlijke schemabestanden
 
-De ADS1115-hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De centrale uitleg staat in [Stimulus Shield v1.1.0](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md). Daarin worden H5, H6, H7 en H8 beschreven, samen met de keuze tussen directe Arduino-ADC en ADS1115 en de TFT-SPI-route. De praktische validatiestappen staan in [Handleiding Stimulus Shield v1.1.0](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
+De hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De actuele versie is [Stimulus Shield v1.1.1](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md): de volledige v1.1.0-basis met H5, H6, H7 en H8, directe Arduino-ADC/ADS1115 en TFT-SPI, plus de HX1838 IR Receiver. De aanvullende validatiestappen staan in [Handleiding Stimulus Shield v1.1.1](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md).
 
 
 ### BOARD_ESP32_UNO

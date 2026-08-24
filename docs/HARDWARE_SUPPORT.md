@@ -11,11 +11,15 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke statussen.
 | Arduino UNO R4 WiFi | `renesas_uno` | voorbeelden opgenomen in de compilatiematrix | getest en goedgekeurd sinds v1.0.0; netwerkfuncties maken geen deel uit van de library |
 | WEMOS D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | voorbeelden opgenomen in de compilatiematrix; compileert sinds v1.0.0 | hardwarematig nog niet bevestigd |
 | TTGO D1 R32 via `esp32:esp32:d1_uno32` | `esp32` | hetzelfde boardprofiel als WEMOS D1 R32; geen afzonderlijk fysiek testresultaat vastgelegd | fysieke hardwarevalidatie nog afzonderlijk vastleggen |
-| Cytron Maker Uno RP2040 | `rp2040` | acceptatieboard in `TestLibraryNieuw.cmd` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
-| STMicroelectronics Nucleo-F401RE | `stm32` | acceptatieboard in `TestLibraryNieuw.cmd` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
-| SB Components Ardi32 | `esp32` | acceptatieboard in `TestLibraryNieuw.cmd`; expliciete headermapping in `SystemConfig.h` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
+| Cytron Maker Uno RP2040 | `rp2040` | minimale acceptatieregressie in `TestLibraryGereleased.cmd` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
+| STMicroelectronics Nucleo-F401RE | `stm32` | minimale acceptatieregressie in `TestLibraryGereleased.cmd` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
+| SB Components Ardi32 | `esp32` | minimale acceptatieregressie in `TestLibraryGereleased.cmd`; expliciete headermapping in `SystemConfig.h` | experimenteel toegevoegd in v1.1.0; nog niet fysiek hardwarematig gevalideerd |
 
 Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi zijn sinds v1.0.0 getest en goedgekeurd. WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd. TTGO D1 R32 deelt hetzelfde boardprofiel; dat bewijst geen fysieke validatie. Cytron Maker Uno RP2040, STMicroelectronics Nucleo-F401RE en SB Components Ardi32 zijn vanaf v1.1.0 experimenteel opgenomen als acceptatieboards en zijn nog niet fysiek hardwarematig gevalideerd.
+
+### HX1838-validatie v1.1.1
+
+In v1.1.1 gaat HX1838 met `HX1838_BRON_CODES_DEFINE` van experimenteel naar released. Deze route is op de geteste hardwareopstelling met ontvanger op Arduino Uno-shieldpin D12 hardwarematig bevestigd: zowel TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) als IRremote (`= 0`) werken met deze configuratie. D12 is daarom de standaard `HX1838_ONTVANGER_PIN` in v1.1.1. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 
 De gemelde waarschuwing van de externe library `LiquidCrystal I2C` betreft de architectuurmetadata van die library. Een Arduino Uno R3-vormfactorbord geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
 
@@ -144,6 +148,8 @@ Controleer het werkelijke I2C-adres van de module. Veelvoorkomende adressen zijn
 
 PixelScreen wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` in `SCREEN_OUTPUT` staat. De algemene Screen-laag gebruikt `Adafruit_GFX`; de concrete displaydriver wordt door de toepassing geïnitialiseerd. Voor een ST7789 op Arduino UNO zijn `D11` (MOSI) en `D13` (SCK) de hardware-SPI-pinnen. `CS`, `DC` en `RST` zijn configureerbaar.
 
+Voor de experimentele STMicroelectronics Nucleo-F401RE-acceptatiebuild is een externe dependencybeperking gekend: `Adafruit ST7735 and ST7789 Library` kan bij de gebruikte STM32-core stoppen op `wiring_private.h: No such file or directory`. De maintainer-test classificeert uitsluitend die specifieke fout als verwachte dependencybeperking; dit is geen bevestigde PixelScreen-ondersteuning op Nucleo-F401RE en andere compilefouten blijven acceptatiefouten.
+
 Controleer de voeding en logicaniveaus van de concrete displaymodule. Bij de universele shieldopbouw wordt ofwel de levelshifter geplaatst, ofwel worden de overeenkomstige draadbruggen geplaatst. Plaats nooit beide tegelijk.
 
 ### Stimulus-sensoren
@@ -161,9 +167,9 @@ De huidige standaardpinnen zijn:
 
 De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepassingsgebieden/Stimulus/README.md).
 
-### GroeiAcademie Stimulus Shield v1.1.0
+### GroeiAcademie Stimulus Shield v1.1.1
 
-Voor het actuele shield zijn de schema-exporten, assemblagekeuzes en validatiestappen opgenomen onder `docs/Uitbreidingskaarten/Stimulus Shield v1.1.0/`. Gebruik de [beschrijving van het GroeiAcademie Stimulus Shield v1.1.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md) samen met de [handleiding voor de hardwarevalidatie v1.1.0](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.0.md).
+Stimulus Shield v1.1.1 = Stimulus Shield v1.1.0 + HX1838 IR Receiver. De volledige v1.1.0-hardwarebasis blijft behouden; v1.1.1 voegt de HX1838 IR Receiver toe met signaal op Arduino Uno-shieldpin `D12`. De v1.1.0-tekeningset blijft de basis voor de ongewijzigde shieldhardware. Gebruik de [beschrijving van Stimulus Shield v1.1.1](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) samen met de [hardwarevalidatie v1.1.1](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md).
 
 De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbruggen: zes tussen H9 en H10 en één tussen H3 pin 1 en H4 pin 1. Plaats nooit beide tegelijk.
 

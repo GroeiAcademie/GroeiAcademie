@@ -52,7 +52,7 @@ void setup() {
 #ifdef DEBUG
   Serial.begin(SERIAL_BAUDRATE);
   while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  DEBUG_PRINTLN("=== DEBUG GESTART ===");
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
@@ -110,9 +110,9 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
   // --- START VAN DE TRAININGSLUS ---
   for (int herhaling = 1; herhaling <= TEST_AANTAL_KEER_HERHALEN; herhaling++) {
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Scenario 3: herhaling = ");
-    DEBUG_PRINTLN(herhaling);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Scenario 3: herhaling = ");
+    GA_DEBUG_PRINTLN(herhaling);
 #endif
 
     int aantalStappenSynchroon = 0;
@@ -132,11 +132,11 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     nulmetingStimulus[0] = gemetenStimulus[0];
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 1 nulmeting tijd/kracht = ");
-    DEBUG_PRINT(nulmetingStimulus[0].TikTijd);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(nulmetingStimulus[0].gemiddeldeTikKracht);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 1 nulmeting tijd/kracht = ");
+    GA_DEBUG_PRINT(nulmetingStimulus[0].TikTijd);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(nulmetingStimulus[0].gemiddeldeTikKracht);
 #endif
 
     // STAP 2: SENSOR 1 EN SENSOR 2 SIMULTAAN
@@ -144,9 +144,9 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     exitStatus = MeetStimulusSimultaan(gemetenStimulus, AANTAL_SENSOREN_ALGORITME3, gemetenSynchronisatie, 0b1100, 0b0100);
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 2 exitStatus = ");
-    DEBUG_PRINTLN(exitStatus);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 2 exitStatus = ");
+    GA_DEBUG_PRINTLN(exitStatus);
 #endif  
 
     // MaskReedsActieveSensorsBijStart = 0b1100: sensor 1 en sensor 2 zijn reeds actief bij aanvang van stap 2.
@@ -172,13 +172,13 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     }
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 2 sensor1/sensor2/simultaan = ");
-    DEBUG_PRINT(Sensor1Correct);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINT(Sensor2Correct);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(SimultaanCorrect);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 2 sensor1/sensor2/simultaan = ");
+    GA_DEBUG_PRINT(Sensor1Correct);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINT(Sensor2Correct);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(SimultaanCorrect);
 #endif
 
     // STAP 3 TOT n: SENSOR 2, EEN DOORLOPENDE METING
@@ -201,20 +201,20 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     }
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Stap 3 tot n tijd/kracht = ");
-    DEBUG_PRINT(TijdCorrect);
-    DEBUG_PRINT(" / ");
-    DEBUG_PRINTLN(KrachtCorrect);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Stap 3 tot n tijd/kracht = ");
+    GA_DEBUG_PRINT(TijdCorrect);
+    GA_DEBUG_PRINT(" / ");
+    GA_DEBUG_PRINTLN(KrachtCorrect);
 #endif
 
     // Maximum per ronde = stap2(1) + stap3(INSTORTEND_AANTAL_STAPPEN)
     if (aantalStappenSynchroon == (1 + INSTORTEND_AANTAL_STAPPEN)) TELLER_INSTORTEND_CORRECT++;
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
-    DEBUG_PRINT("Aantal stappen synchroon = ");
-    DEBUG_PRINTLN(aantalStappenSynchroon);
+    GA_DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINT("Aantal stappen synchroon = ");
+    GA_DEBUG_PRINTLN(aantalStappenSynchroon);
 #endif
 
     String herhalingStr = (herhaling < 10) ? ('0' + String(herhaling)) : String(herhaling);

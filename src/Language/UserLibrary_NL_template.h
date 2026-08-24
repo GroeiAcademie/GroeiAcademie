@@ -18,7 +18,7 @@
 #define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
 
 // Input Type: HX1838
-#define _INPUT_HX1838_CONTROLE                                   "CONTROLE IR:"
+#define _INPUT_HX1838_CONTROLE                                   "CONTROLE IR"
 #define _INPUT_HX1838_DRUK_OP_ELKE_TOETS_VOOR_CONTROLE           "DRUK ELKE TOETS"
 
 #define _INPUT_HX1838_CONTROLE_GESLAAGD                          "CONTROLE IR: OK"
@@ -39,9 +39,19 @@
 
 #define _INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT                "IR PIN FOUT"
 
+#define _INPUT_MAPPINGCONTROLE_TITEL                             "Mapping-controle"
+#define _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK                    "OPSCHRIFTEN OK"
+
+#define _INPUT_MAPPINGCONTROLE_WAARSCHUWING                      "WAARSCHUWING"
+#define _INPUT_MAPPINGCONTROLE_ONTBREEKT                         "Ontbreekt"
+
+#define _INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD                "GEKALIBREERD"
+#define _INPUT_HX1838_GENERIEK_CODES_ZIE_SERIEEL                 "ZIE SERIEEL"
+
 // Input Type: PCF8574
 #define _INPUT_PCF8574_FOUT                                      "PCF8574 FOUT"
 #define _INPUT_PCF8574_CONTROLEER_I2C                            "CONTROLEER I2C"
+#define _INPUT_PCF8574_ADRES_LABEL                                "I2C-adres"
 
 // Stimulus
 #define _LCD_KRACHT_TE_HARD              "TE HARD"
@@ -84,8 +94,45 @@
   #define _INPUT_HX1838_DEBUG_VOOR_INIT                                   "voor init"
   #define _INPUT_HX1838_DEBUG_NA_INIT                                     "na init"
 
+  #define _INPUT_HX1838_DEBUG_GEEN_MATCH                                  "GEEN MATCH"
+  #define _INPUT_HX1838_DEBUG_IR_ONTVANGEN                                "IR-ontvangen"
+  #define _INPUT_HX1838_DEBUG_MATCH                                       "MATCH"
+  #define _INPUT_HX1838_DEBUG_REGEL                                       "regel"
+  #define _INPUT_HX1838_DEBUG_TOETS                                       "toets"
+  #define _INPUT_HX1838_DEBUG_VERGELEKEN_MET                              "vergeleken met"
+
+  #define _INPUT_HX1838_GENERIEK_CODES_NIET_GEDEFINIEERD_KALIBRATIE_GESTART   "niet gedefinieerd, kalibratie gestart."
+  #define _INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD_KOPIEER_REGEL             "Codes gekalibreerd, kopieer de regel hierboven naar"
+
 // Input Type: PCF8574
 #define _INPUT_PCF8574_NIET_BEREIKBAAR_SERIAL                   "PCF8574 niet bereikbaar op ingesteld I2C-adres."
+
+//=========================================================
+// Static Assert
+//=========================================================
+// Input Type: HX1838
+#define _INPUT_HX1838_STATIC_ASSERT_AANTAL_TOETSEN               "bevat niet het verwachte aantal HX1838-toetsen."
+#define _INPUT_HX1838_STATIC_ASSERT_CODES_BEVATTEN               "codes bevatten."
+#define _INPUT_HX1838_STATIC_ASSERT_GEEN_CODE_WAARDE_NUL         "geen code met waarde 0 bevatten."
+#define _INPUT_HX1838_STATIC_ASSERT_MAG_BIJ                      "mag bij"
+#define _INPUT_HX1838_STATIC_ASSERT_MOET_EXACT                   "moet exact"
+
+// Input Type: PCF8574
+#define _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MAX_ACHT_PINNEN      "Het directe generieke keypad gebruikt meer dan 8 PCF8574-pinnen."
+#define _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MIN_EEN_PIN          "Het directe generieke keypad moet minstens één PCF8574-pin gebruiken."
+#define _INPUT_PCF8574_STATIC_ASSERT_DIRECT_PINNEN_MAX_ACHT      "Het directe keypad gebruikt meer dan 8 PCF8574-pinnen."
+#define _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_DIRECT_AANTAL    "moet exact één entry per directe keypadpin bevatten."
+#define _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_MATRIX_AANTAL    "moet exact één entry per matrixpositie bevatten."
+#define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_DUBBELE_PINNEN       "De generieke matrix bevat dubbele rij- of kolompinnen."
+#define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MAX_ACHT_PINNEN      "Het generieke matrixkeypad gebruikt meer dan 8 PCF8574-pinnen."
+#define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_KOLOM        "Het generieke matrixkeypad moet minstens één kolom hebben."
+#define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_RIJ          "Het generieke matrixkeypad moet minstens één rij hebben."
+#define _INPUT_PCF8574_STATIC_ASSERT_MATRIX_PINNEN_MAX_ACHT      "De matrix gebruikt meer dan 8 PCF8574-pinnen."
+#define _INPUT_PCF8574_STATIC_ASSERT_PINNEN_BEREIK               "mag alleen PCF8574-bitposities 0 t.e.m. 7 bevatten."
+#define _INPUT_PCF8574_STATIC_ASSERT_PINNEN_UNIEK                "bevat dubbele PCF8574-pinnen."
+#define _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_BEREIK            "mogen alleen PCF8574-bitposities 0 t.e.m. 7 bevatten."
+#define _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_EN                "en"
+#define _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_OVERLAP           "Dezelfde PCF8574-pin mag niet tegelijk rij- en kolompin zijn."
 
 //=========================================================
 // INPUT - TOETSLABELS

@@ -110,7 +110,7 @@ bool CharacterScreenConfigureren(bool opnieuwProberen) {
       if (characterScreenI2CKandidaten[j] == characterScreenI2CKandidaten[i]) { reedsGeprobeerd = true; break; }
     }
     if (reedsGeprobeerd) continue;
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     if (characterScreenI2CKandidaten[i] == I2C_ADDRESS_PCF8574) continue;
 #endif
 
@@ -471,8 +471,8 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
     if (serialScreenGeconfigureerd) {
-      DEBUG_PRINTLN(eersteRegel);
-      DEBUG_PRINTLN(tweedeRegel);
+      GA_DEBUG_PRINTLN(eersteRegel);
+      GA_DEBUG_PRINTLN(tweedeRegel);
     }
 #endif
 #endif
@@ -501,8 +501,8 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
     if (serialScreenGeconfigureerd) {
-      DEBUG_PRINTLN(derdeRegel);
-      DEBUG_PRINTLN(vierdeRegel);
+      GA_DEBUG_PRINTLN(derdeRegel);
+      GA_DEBUG_PRINTLN(vierdeRegel);
     }
 #endif
 #endif

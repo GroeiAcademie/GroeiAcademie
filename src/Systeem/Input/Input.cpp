@@ -33,7 +33,7 @@
 
 #include <string.h>
 
-#if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
 
   #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
     const MappingTussenOpschriftEnWeergavetekst KEY_LAYOUT[] = {
@@ -60,7 +60,7 @@
       {_LABEL_OPSCHRIFT_1, LABEL_TOETS_1}, {_LABEL_OPSCHRIFT_2, LABEL_TOETS_2}, {_LABEL_OPSCHRIFT_3, LABEL_TOETS_3}, {_LABEL_OPSCHRIFT_4, LABEL_TOETS_4}
     };
 
-  #elif (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+  #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4
       const MappingTussenOpschriftEnWeergavetekst KEY_LAYOUT[] = {
         {_LABEL_OPSCHRIFT_S1, LABEL_TOETS_S1}, {_LABEL_OPSCHRIFT_S2, LABEL_TOETS_S2}, {_LABEL_OPSCHRIFT_S3, LABEL_TOETS_S3}, {_LABEL_OPSCHRIFT_S4, LABEL_TOETS_S4},
@@ -119,7 +119,7 @@
   #endif
 #endif
 
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
     const MappingTussenOpschriftEnWeergavetekst IR_KEY_LAYOUT[] = {
       {_LABEL_OPSCHRIFT_UP, LABEL_TOETS_UP}, {_LABEL_OPSCHRIFT_DOWN, LABEL_TOETS_DOWN}, {_LABEL_OPSCHRIFT_OK, LABEL_TOETS_OK},
@@ -148,22 +148,24 @@
       {_LABEL_OPSCHRIFT_4, LABEL_TOETS_4}, {_LABEL_OPSCHRIFT_5, LABEL_TOETS_5}, {_LABEL_OPSCHRIFT_6, LABEL_TOETS_6},
       {_LABEL_OPSCHRIFT_7, LABEL_TOETS_7}, {_LABEL_OPSCHRIFT_8, LABEL_TOETS_8}, {_LABEL_OPSCHRIFT_9, LABEL_TOETS_9}
     };
+  #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
+    const MappingTussenOpschriftEnWeergavetekst IR_KEY_LAYOUT[] = HX1838_GENERIEK_KEY_LAYOUT;
   #else
     #error Ongeldige HX1838_TOETSENINDELING.
   #endif
 
   static_assert(
     (sizeof(IR_KEY_LAYOUT) / sizeof(IR_KEY_LAYOUT[0])) == AANTAL_IR_TOETSEN,
-    "IR_KEY_LAYOUT bevat niet het verwachte aantal HX1838-toetsen."
+    "IR_KEY_LAYOUT " _INPUT_HX1838_STATIC_ASSERT_AANTAL_TOETSEN
   );
 #endif
 
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   #include <Wire.h>
   #include <PCF8574.h>
 #endif
 
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   #define NO_LED_RECEIVE_FEEDBACK_CODE
 
   #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
@@ -246,7 +248,7 @@ void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag
   (void)opschriftToetsAanslag;
   (void)aantalEntries;
   byte aantalOntbrekend = 0;
-#if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
   for (byte i = 0; i < (sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])); i++) {
     bool gevonden = false;
     for (byte j = 0; j < aantalEntries; j++) {
@@ -254,15 +256,15 @@ void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag
     }
     if (!gevonden) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      PrintToScreen(ScreenData::TYPE_WARNING, F("WAARSCHUWING"), String(F("Ontbreekt: ")) + KEY_LAYOUT[i].opschrift);
+      PrintToScreen(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
 #else
-      PrintToScreen(F("WAARSCHUWING"), String(F("Ontbreekt: ")) + KEY_LAYOUT[i].opschrift);
+      PrintToScreen(_INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
 #endif
       aantalOntbrekend++;
     }
   }
 #endif
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   for (byte i = 0; i < (sizeof(IR_KEY_LAYOUT) / sizeof(IR_KEY_LAYOUT[0])); i++) {
     bool gevonden = false;
     for (byte j = 0; j < aantalEntries; j++) {
@@ -270,9 +272,9 @@ void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag
     }
     if (!gevonden) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      PrintToScreen(ScreenData::TYPE_WARNING, F("WAARSCHUWING"), String(F("Ontbreekt: ")) + IR_KEY_LAYOUT[i].opschrift);
+      PrintToScreen(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
 #else
-      PrintToScreen(F("WAARSCHUWING"), String(F("Ontbreekt: ")) + IR_KEY_LAYOUT[i].opschrift);
+      PrintToScreen(_INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
 #endif
       aantalOntbrekend++;
     }
@@ -280,9 +282,9 @@ void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag
 #endif
   if (aantalOntbrekend == 0) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    PrintToScreen(ScreenData::TYPE_INFO, F("Mapping-controle"), F("alle opschriften OK"));
+    PrintToScreen(ScreenData::TYPE_INFO, _INPUT_MAPPINGCONTROLE_TITEL, _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK);
 #else
-    PrintToScreen(F("Mapping-controle"), F("alle opschriften OK"));
+    PrintToScreen(_INPUT_MAPPINGCONTROLE_TITEL, _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK);
 #endif
   }
 }
@@ -311,7 +313,7 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 // ============================================================================
 // PCF8574 PINMAPPING EN LAAGSTE-NIVEAUFUNCTIES
 // ============================================================================
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   template <size_t N>
   constexpr bool PCF8574PinnenBinnenBereik(const byte (&pinnen)[N], size_t index = 0) { return index >= N ? true : (pinnen[index] <= 7 && PCF8574PinnenBinnenBereik(pinnen, index + 1)); }
 
@@ -380,15 +382,15 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     static const byte TOETS_PINNEN[AANTAL_DIRECT_PINNEN] = {KEYPAD_PIN_OUT1, KEYPAD_PIN_OUT2, KEYPAD_PIN_OUT3, KEYPAD_PIN_OUT4, KEYPAD_PIN_OUT5, KEYPAD_PIN_OUT6, KEYPAD_PIN_OUT7, KEYPAD_PIN_OUT8};
   #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
     #define KEYPAD_IS_DIRECT
-    static_assert(KEYPAD_GENERIEK_AANTAL_PINNEN > 0, "Het directe generieke keypad moet minstens één PCF8574-pin gebruiken.");
-    static_assert(KEYPAD_GENERIEK_AANTAL_PINNEN <= 8, "Het directe generieke keypad gebruikt meer dan 8 PCF8574-pinnen.");
+    static_assert(KEYPAD_GENERIEK_AANTAL_PINNEN > 0, _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MIN_EEN_PIN);
+    static_assert(KEYPAD_GENERIEK_AANTAL_PINNEN <= 8, _INPUT_PCF8574_STATIC_ASSERT_DIRECT_MAX_ACHT_PINNEN);
     static constexpr byte AANTAL_DIRECT_PINNEN = KEYPAD_GENERIEK_AANTAL_PINNEN;
     static constexpr byte TOETS_PINNEN[AANTAL_DIRECT_PINNEN] = KEYPAD_GENERIEK_PINNEN;
   #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
     #define KEYPAD_IS_MATRIX
-    static_assert(KEYPAD_GENERIEK_AANTAL_RIJEN > 0, "Het generieke matrixkeypad moet minstens één rij hebben.");
-    static_assert(KEYPAD_GENERIEK_AANTAL_KOLOMMEN > 0, "Het generieke matrixkeypad moet minstens één kolom hebben.");
-    static_assert((KEYPAD_GENERIEK_AANTAL_RIJEN + KEYPAD_GENERIEK_AANTAL_KOLOMMEN) <= 8, "Het generieke matrixkeypad gebruikt meer dan 8 PCF8574-pinnen.");
+    static_assert(KEYPAD_GENERIEK_AANTAL_RIJEN > 0, _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_RIJ);
+    static_assert(KEYPAD_GENERIEK_AANTAL_KOLOMMEN > 0, _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MIN_EEN_KOLOM);
+    static_assert((KEYPAD_GENERIEK_AANTAL_RIJEN + KEYPAD_GENERIEK_AANTAL_KOLOMMEN) <= 8, _INPUT_PCF8574_STATIC_ASSERT_MATRIX_MAX_ACHT_PINNEN);
     static constexpr byte AANTAL_RIJEN = KEYPAD_GENERIEK_AANTAL_RIJEN;
     static constexpr byte AANTAL_KOLOMMEN = KEYPAD_GENERIEK_AANTAL_KOLOMMEN;
     static constexpr byte RIJ_PINNEN[AANTAL_RIJEN] = KEYPAD_GENERIEK_RIJ_PINNEN;
@@ -396,21 +398,21 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #endif
 
   #if defined(KEYPAD_IS_DIRECT)
-    static_assert(AANTAL_DIRECT_PINNEN <= 8, "Het directe keypad gebruikt meer dan 8 PCF8574-pinnen.");
+    static_assert(AANTAL_DIRECT_PINNEN <= 8, _INPUT_PCF8574_STATIC_ASSERT_DIRECT_PINNEN_MAX_ACHT);
   #endif
   #if defined(KEYPAD_IS_MATRIX)
-    static_assert((AANTAL_RIJEN + AANTAL_KOLOMMEN) <= 8, "De matrix gebruikt meer dan 8 PCF8574-pinnen.");
+    static_assert((AANTAL_RIJEN + AANTAL_KOLOMMEN) <= 8, _INPUT_PCF8574_STATIC_ASSERT_MATRIX_PINNEN_MAX_ACHT);
   #endif
 
   #if KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
-    static_assert((sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])) == AANTAL_DIRECT_PINNEN, "KEYPAD_GENERIEK_KEY_LAYOUT moet exact één entry per directe keypadpin bevatten.");
-    static_assert(PCF8574PinnenBinnenBereik(TOETS_PINNEN), "KEYPAD_GENERIEK_PINNEN mag alleen PCF8574-bitposities 0 t.e.m. 7 bevatten.");
-    static_assert(PCF8574PinnenUniek(TOETS_PINNEN), "KEYPAD_GENERIEK_PINNEN bevat dubbele PCF8574-pinnen.");
+    static_assert((sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])) == AANTAL_DIRECT_PINNEN, "KEYPAD_GENERIEK_KEY_LAYOUT " _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_DIRECT_AANTAL);
+    static_assert(PCF8574PinnenBinnenBereik(TOETS_PINNEN), "KEYPAD_GENERIEK_PINNEN " _INPUT_PCF8574_STATIC_ASSERT_PINNEN_BEREIK);
+    static_assert(PCF8574PinnenUniek(TOETS_PINNEN), "KEYPAD_GENERIEK_PINNEN " _INPUT_PCF8574_STATIC_ASSERT_PINNEN_UNIEK);
   #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
-    static_assert((sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])) == (AANTAL_RIJEN * AANTAL_KOLOMMEN), "KEYPAD_GENERIEK_KEY_LAYOUT moet exact één entry per matrixpositie bevatten.");
-    static_assert(PCF8574PinnenBinnenBereik(RIJ_PINNEN) && PCF8574PinnenBinnenBereik(KOLOM_PINNEN), "KEYPAD_GENERIEK_RIJ_PINNEN en KEYPAD_GENERIEK_KOLOM_PINNEN mogen alleen PCF8574-bitposities 0 t.e.m. 7 bevatten.");
-    static_assert(PCF8574PinnenUniek(RIJ_PINNEN) && PCF8574PinnenUniek(KOLOM_PINNEN), "De generieke matrix bevat dubbele rij- of kolompinnen.");
-    static_assert(PCF8574PinnenNietOverlappend(RIJ_PINNEN, KOLOM_PINNEN), "Dezelfde PCF8574-pin mag niet tegelijk rij- en kolompin zijn.");
+    static_assert((sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])) == (AANTAL_RIJEN * AANTAL_KOLOMMEN), "KEYPAD_GENERIEK_KEY_LAYOUT " _INPUT_PCF8574_STATIC_ASSERT_KEY_LAYOUT_MATRIX_AANTAL);
+    static_assert(PCF8574PinnenBinnenBereik(RIJ_PINNEN) && PCF8574PinnenBinnenBereik(KOLOM_PINNEN), "KEYPAD_GENERIEK_RIJ_PINNEN " _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_EN " KEYPAD_GENERIEK_KOLOM_PINNEN " _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_BEREIK);
+    static_assert(PCF8574PinnenUniek(RIJ_PINNEN) && PCF8574PinnenUniek(KOLOM_PINNEN), _INPUT_PCF8574_STATIC_ASSERT_MATRIX_DUBBELE_PINNEN);
+    static_assert(PCF8574PinnenNietOverlappend(RIJ_PINNEN, KOLOM_PINNEN), _INPUT_PCF8574_STATIC_ASSERT_RIJ_KOLOM_OVERLAP);
   #endif
 
   static PCF8574 pcf8574(I2C_ADDRESS_PCF8574);
@@ -424,8 +426,8 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   static void PCF8574OnbereikbaarMelden() {
     pcf8574Bereikbaar = false;
     if (pcf8574FoutmeldingWeergegeven) return;
-    static char pcf8574AdresBuffer[17];
-    snprintf(pcf8574AdresBuffer, sizeof(pcf8574AdresBuffer), "I2C-adres: 0x%02X", I2C_ADDRESS_PCF8574);
+    char pcf8574AdresBuffer[17];
+    snprintf(pcf8574AdresBuffer, sizeof(pcf8574AdresBuffer), _INPUT_PCF8574_ADRES_LABEL ": 0x%02X", I2C_ADDRESS_PCF8574);
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
     PrintToScreen(ScreenData::TYPE_FATAL, _FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
 #else
@@ -510,7 +512,7 @@ void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 // ============================================================================
 // DIGITALE DIRECTE UITLEZING (INPUT_TYPE_DIGITAL)
 // ============================================================================
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   static int DigitaalUitLezenRuweData() {
     #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
       const byte rijPinnen[2] = {PIN_TOETS_1, PIN_TOETS_2};
@@ -552,7 +554,7 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 // ============================================================================
 // DEBOUNCE + NIEUWE-TOETSAANSLAGDETECTIE VOOR FYSIEKE KEYPADS
 // ============================================================================
-#if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
   static int vorigeRauweKeypadPositie = 0;
   static int stabieleKeypadPositie = 0;
   static unsigned long keypadWijzigingSinds = 0;
@@ -564,9 +566,9 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
   #endif
 
   static int KeypadUitLezenRuweData() {
-    #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
       return DigitaalUitLezenRuweData();
-    #elif (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+    #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       #if defined(KEYPAD_IS_MATRIX)
         return PCF8574uitLezenPoortenP0totP7MatrixAansluiting();
       #else
@@ -629,17 +631,33 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 // ============================================================================
 // HX1838 KALIBRATIE EN UITLEZING
 // ============================================================================
-#if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   static uint8_t irCodes[AANTAL_IR_TOETSEN];
+
+  template <size_t N>
+  constexpr bool HX1838CodesNietNul(const uint8_t (&codes)[N], size_t index = 0) { return index >= N ? true : (codes[index] != 0 && HX1838CodesNietNul(codes, index + 1)); }
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
   static void HX1838toonTabelMetCodes() {
+#if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
+    Serial.print(F("// #define HX1838_GENERIEK_CODES {"));
+    for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
+      if (i > 0) Serial.print(F(", "));
+      Serial.print(F("0x"));
+      if (irCodes[i] < 0x10) Serial.print('0');
+      Serial.print(irCodes[i], HEX);
+      Serial.print(F("UL"));
+    }
+    Serial.println(F("}"));
+#else
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
 #ifdef TRACE
-      DEBUG_PRINT("HX1838 toonTabel regel ");
-      DEBUG_PRINT(i + 1);
-      DEBUG_PRINT("/");
-      DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
+      GA_DEBUG_PRINT("HX1838toonTabelMetCodes(): ");
+      GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_REGEL);
+      GA_DEBUG_PRINT(" ");
+      GA_DEBUG_PRINT(i + 1);
+      GA_DEBUG_PRINT("/");
+      GA_DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
 #endif
       Serial.print(F("// #define HX1838_CODE_"));
       Serial.print(i + 1);
@@ -648,9 +666,44 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
       Serial.print(irCodes[i], HEX);
       Serial.println(F("UL"));
     }
+#endif
   }
 #endif
 
+#if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED && defined(HX1838_GENERIEK_CODES_KALIBREREN)
+  static bool HX1838toetsKalibreren(byte index);
+
+  static void HX1838GeneriekCodesKalibreren() {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+    Serial.println("HX1838_GENERIEK_CODES " _INPUT_HX1838_GENERIEK_CODES_NIET_GEDEFINIEERD_KALIBRATIE_GESTART);
+#endif
+    for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
+#ifdef TRACE
+      GA_DEBUG_PRINT("HX1838GeneriekCodesKalibreren(): ");
+      GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_TOETS);
+      GA_DEBUG_PRINT(" ");
+      GA_DEBUG_PRINT(i + 1);
+      GA_DEBUG_PRINT("/");
+      GA_DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
+#endif
+      if (!HX1838toetsKalibreren(i)) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+        Serial.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
+#endif
+        PrintToScreen(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
+        return;
+      }
+    }
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+    Serial.println(_INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD_KOPIEER_REGEL " UserConfig.h:");
+    HX1838toonTabelMetCodes();
+#endif
+    PrintToScreen(_INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD, _INPUT_HX1838_GENERIEK_CODES_ZIE_SERIEEL, 0);
+    while (true) { }
+  }
+#endif
+
+#if !(HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED && defined(HX1838_GENERIEK_CODES_KALIBREREN))
   static bool HX1838mappingUitUserConfigInladen() {
 #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
     const uint8_t standaardCodes[] = {HX1838_CODE_1, HX1838_CODE_2, HX1838_CODE_3, HX1838_CODE_4, HX1838_CODE_5, HX1838_CODE_6, HX1838_CODE_7, HX1838_CODE_8, HX1838_CODE_9, HX1838_CODE_10, HX1838_CODE_11, HX1838_CODE_12, HX1838_CODE_13, HX1838_CODE_14, HX1838_CODE_15, HX1838_CODE_16, HX1838_CODE_17};
@@ -658,6 +711,10 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
     const uint8_t standaardCodes[] = {HX1838_CODE_1, HX1838_CODE_2, HX1838_CODE_3, HX1838_CODE_4, HX1838_CODE_5, HX1838_CODE_6, HX1838_CODE_7, HX1838_CODE_8, HX1838_CODE_9, HX1838_CODE_10, HX1838_CODE_11, HX1838_CODE_12, HX1838_CODE_13, HX1838_CODE_14, HX1838_CODE_15, HX1838_CODE_16, HX1838_CODE_17};
 #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
     const uint8_t standaardCodes[] = {HX1838_CODE_1, HX1838_CODE_2, HX1838_CODE_3, HX1838_CODE_4, HX1838_CODE_5, HX1838_CODE_6, HX1838_CODE_7, HX1838_CODE_8, HX1838_CODE_9, HX1838_CODE_10, HX1838_CODE_11, HX1838_CODE_12, HX1838_CODE_13, HX1838_CODE_14, HX1838_CODE_15, HX1838_CODE_16, HX1838_CODE_17, HX1838_CODE_18, HX1838_CODE_19, HX1838_CODE_20, HX1838_CODE_21};
+#elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
+    static constexpr uint8_t standaardCodes[] = HX1838_GENERIEK_CODES;
+    static_assert((sizeof(standaardCodes) / sizeof(standaardCodes[0])) == AANTAL_IR_TOETSEN, "HX1838_GENERIEK_CODES " _INPUT_HX1838_STATIC_ASSERT_MOET_EXACT " HX1838_GENERIEK_AANTAL_TOETSEN " _INPUT_HX1838_STATIC_ASSERT_CODES_BEVATTEN);
+    static_assert(HX1838CodesNietNul(standaardCodes), "HX1838_GENERIEK_CODES " _INPUT_HX1838_STATIC_ASSERT_MAG_BIJ " HX1838_BRON_CODES_DEFINE " _INPUT_HX1838_STATIC_ASSERT_GEEN_CODE_WAARDE_NUL);
 #endif
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) if (standaardCodes[i] == 0UL) return false;
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) irCodes[i] = standaardCodes[i];
@@ -667,6 +724,7 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 #endif
     return true;
   }
+#endif
 
   #define EEPROM_ADRES_MAGIC    0
   #define EEPROM_MAGIC_WAARDE   0xAC
@@ -751,29 +809,29 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
   static bool HX1838kalibratieLaden() {
     if (!EEPROMopslagBeginnen()) {
 #ifdef DEBUG
-      DEBUG_PRINT("HX1838kalibratieLaden(): EEPROMopslagBeginnen(): ");
-      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_FAALDE);
+      GA_DEBUG_PRINT("HX1838kalibratieLaden(): EEPROMopslagBeginnen(): ");
+      GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_FAALDE);
 #endif
       return false;
     }
     if (EEPROM.read(EEPROM_ADRES_MAGIC) != EEPROM_MAGIC_WAARDE) {
 #ifdef DEBUG
-      DEBUG_PRINT("HX1838kalibratieLaden(): ");
-      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_MAGIC_MISMATCH);
+      GA_DEBUG_PRINT("HX1838kalibratieLaden(): ");
+      GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_MAGIC_MISMATCH);
 #endif
       return false;
     }
     if (EEPROM.read(EEPROM_ADRES_VERSIE) != EEPROM_INPUT_VERSIE) {
 #ifdef DEBUG
-      DEBUG_PRINT("HX1838kalibratieLaden(): ");
-      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VERSIE_MISMATCH);
+      GA_DEBUG_PRINT("HX1838kalibratieLaden(): ");
+      GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VERSIE_MISMATCH);
 #endif
       return false;
     }
     if (EEPROM.read(EEPROM_ADRES_TOETSENINDELING) != HX1838_TOETSENINDELING) {
 #ifdef DEBUG
-      DEBUG_PRINT("HX1838kalibratieLaden(): ");
-      DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_TOETSENINDELING_MISMATCH);
+      GA_DEBUG_PRINT("HX1838kalibratieLaden(): ");
+      GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_TOETSENINDELING_MISMATCH);
 #endif
       return false;
     }
@@ -836,10 +894,12 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 #endif
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
 #ifdef TRACE
-      DEBUG_PRINT("HX1838 kalibratieUitvoeren: toets ");
-      DEBUG_PRINT(i + 1);
-      DEBUG_PRINT("/");
-      DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
+      GA_DEBUG_PRINT("HX1838kalibratieUitvoeren(): ");
+      GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_TOETS);
+      GA_DEBUG_PRINT(" ");
+      GA_DEBUG_PRINT(i + 1);
+      GA_DEBUG_PRINT("/");
+      GA_DEBUG_PRINTLN(AANTAL_IR_TOETSEN);
 #endif
       if (!HX1838toetsKalibreren(i)) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
@@ -850,8 +910,8 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
       }
     }
 #ifdef DEBUG
-    DEBUG_PRINT("HX1838kalibratieUitvoeren(): ");
-    DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_ALLE_TOETSEN_GEKALIBREER_START_VERIFICATIE);
+    GA_DEBUG_PRINT("HX1838kalibratieUitvoeren(): ");
+    GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_ALLE_TOETSEN_GEKALIBREER_START_VERIFICATIE);
 #endif
     if (!HX1838kalibratieVerifieren()) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
@@ -877,18 +937,25 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
     if (!(TinyIRReceiverData.Flags & IRDATA_FLAGS_IS_REPEAT)) {
       int index = HX1838indexUitZoekenVoorSignaal(TinyIRReceiverData.Command);
 #ifdef TRACE
-      DEBUG_PRINT("HX1838 ontvangen=0x");
-      DEBUG_PRINT(String(TinyIRReceiverData.Command, HEX));
+      GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_IR_ONTVANGEN);
+      GA_DEBUG_PRINT("=0x");
+      GA_DEBUG_PRINT(String(TinyIRReceiverData.Command, HEX));
       if (index >= 0) {
-        DEBUG_PRINT(" vergeleken met HX1838_CODE_");
-        DEBUG_PRINT(index + 1);
-        DEBUG_PRINT("=0x");
-        DEBUG_PRINT(String(irCodes[index], HEX));
-        DEBUG_PRINT(" (MATCH) teller=");
+        GA_DEBUG_PRINT(" ");
+        GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_VERGELEKEN_MET);
+        GA_DEBUG_PRINT(" HX1838_CODE_");
+        GA_DEBUG_PRINT(index + 1);
+        GA_DEBUG_PRINT("=0x");
+        GA_DEBUG_PRINT(String(irCodes[index], HEX));
+        GA_DEBUG_PRINT(" (");
+        GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_MATCH);
+        GA_DEBUG_PRINT(") #");
       } else {
-        DEBUG_PRINT(" (GEEN MATCH in mapping) teller=");
+        GA_DEBUG_PRINT(" (");
+        GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_GEEN_MATCH);
+        GA_DEBUG_PRINT(") #");
       }
-      DEBUG_PRINTLN(hx1838DecodeTeller);
+      GA_DEBUG_PRINTLN(hx1838DecodeTeller);
 #endif
       if (index >= 0) positie = index + 1;
     }
@@ -896,18 +963,25 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
     if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
       int index = HX1838indexUitZoekenVoorSignaal(IrReceiver.decodedIRData.command);
 #ifdef TRACE
-      DEBUG_PRINT("HX1838 ontvangen=0x");
-      DEBUG_PRINT(String(IrReceiver.decodedIRData.command, HEX));
+      GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_IR_ONTVANGEN);
+      GA_DEBUG_PRINT("=0x");
+      GA_DEBUG_PRINT(String(IrReceiver.decodedIRData.command, HEX));
       if (index >= 0) {
-        DEBUG_PRINT(" vergeleken met HX1838_CODE_");
-        DEBUG_PRINT(index + 1);
-        DEBUG_PRINT("=0x");
-        DEBUG_PRINT(String(irCodes[index], HEX));
-        DEBUG_PRINT(" (MATCH) teller=");
+        GA_DEBUG_PRINT(" ");
+        GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_VERGELEKEN_MET);
+        GA_DEBUG_PRINT(" HX1838_CODE_");
+        GA_DEBUG_PRINT(index + 1);
+        GA_DEBUG_PRINT("=0x");
+        GA_DEBUG_PRINT(String(irCodes[index], HEX));
+        GA_DEBUG_PRINT(" (");
+        GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_MATCH);
+        GA_DEBUG_PRINT(") #");
       } else {
-        DEBUG_PRINT(" (GEEN MATCH in mapping) teller=");
+        GA_DEBUG_PRINT(" (");
+        GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_GEEN_MATCH);
+        GA_DEBUG_PRINT(") #");
       }
-      DEBUG_PRINTLN(hx1838DecodeTeller);
+      GA_DEBUG_PRINTLN(hx1838DecodeTeller);
 #endif
       if (index >= 0) positie = index + 1;
     }
@@ -921,7 +995,7 @@ static unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 // PUBLIEKE API
 // ============================================================================
 void InputConfigureren() {
-  #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
     #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
       pinMode(PIN_TOETS_1, OUTPUT);
       pinMode(PIN_TOETS_2, OUTPUT);
@@ -942,7 +1016,7 @@ void InputConfigureren() {
     #endif
   #endif
 
-  #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   // businitialisatie loopt nu via GedeeldeBus (Systeem/GedeeldeBus/), gedragsbehoudend t.o.v. de vorige, hier lokaal herhaalde ARDI32-logica.
   GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
     if (!pcf8574.begin(0xFF)) {
@@ -953,10 +1027,10 @@ void InputConfigureren() {
     }
   #endif
 
-  #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
+  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
 #ifdef DEBUG
-    DEBUG_PRINT("InputConfigureren(): ");
-    DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
+    GA_DEBUG_PRINT("InputConfigureren(): ");
+    GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
 #endif
 #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
     if (!initPCIInterruptForTinyReceiver()) {
@@ -969,18 +1043,22 @@ void InputConfigureren() {
     IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
 #endif
 #ifdef DEBUG
-    DEBUG_PRINT("InputConfigureren(): ");
-    DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT);
+    GA_DEBUG_PRINT("InputConfigureren(): ");
+    GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT);
 #endif
     #if HX1838_BRON_CODES == HX1838_BRON_CODES_DEFINE
-      if (HX1838mappingUitUserConfigInladen()) {
-        PrintToScreen(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
-      } else {
+      #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED && defined(HX1838_GENERIEK_CODES_KALIBREREN)
+        HX1838GeneriekCodesKalibreren();
+      #else
+        if (HX1838mappingUitUserConfigInladen()) {
+          PrintToScreen(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
+        } else {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-        Serial.println(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL);
+          Serial.println(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL);
 #endif
-        PrintToScreen(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG, "", 2000);
-      }
+          PrintToScreen(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG, "", 2000);
+        }
+      #endif
     #elif HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD
       if (HX1838kalibratieLaden()) {
         PrintToScreen(_INPUT_HX1838_MAPPING_EEPROM_GELADEN, "", 2000);
@@ -995,7 +1073,7 @@ void InputConfigureren() {
 
   #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
     laatsteInvoerTijdstipVoorTimeout = millis();
-    #if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+    #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
       vorigeRauweKeypadPositie = 0;
       stabieleKeypadPositie = 0;
       keypadWijzigingSinds = millis();
@@ -1009,11 +1087,11 @@ void InputConfigureren() {
 static InputResultaat OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker) {
   InputResultaat resultaat = {InputKanaal::NONE, 0, nullptr};
 
-  #if INPUT_KANAAL_CONFIG == INPUT_TYPE_NONE
+  #if (INPUT_KANAAL_CONFIG) == INPUT_TYPE_NONE
     return resultaat;
   #endif
 
-  #if (INPUT_KANAAL_CONFIG & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+  #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
     if (wachten) {
       while (KeypadUitLezenRuweData() != 0) delay(1);
       vorigeRauweKeypadPositie = 0;
@@ -1023,7 +1101,7 @@ static InputResultaat OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
   #endif
 
   while (true) {
-    #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_DIGITAL)
+    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();
       #else
@@ -1065,7 +1143,7 @@ static InputResultaat OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         }
       }
       #endif
-    #elif (INPUT_KANAAL_CONFIG & INPUT_TYPE_PCF8574)
+    #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();
       #else
@@ -1109,7 +1187,7 @@ static InputResultaat OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
       #endif
     #endif
 
-    #if (INPUT_KANAAL_CONFIG & INPUT_TYPE_HX1838)
+    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
       int positieIR = HX1838uitLezenToetsAanslag();
       if (positieIR > 0 && positieIR <= AANTAL_IR_TOETSEN) {
         #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID

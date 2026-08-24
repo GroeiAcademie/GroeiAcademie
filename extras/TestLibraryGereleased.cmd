@@ -52,14 +52,23 @@ set "UITGESLOTEN_OMDAT_ZE_DEEL_UITMAKEN_VAN_NIEUW=\examples\Systeem\Input\"
 :: 0 = zonder DEBUG testen, 1 = met DEBUG testen
 set "DEBUG_TEST=0"
 
-:: Lijst met de vier boards die getest moeten worden
-set "BOARDS=arduino:avr:uno arduino:renesas_uno:minima arduino:renesas_uno:unor4wifi esp32:esp32:d1_uno32"
+:: v1.1.1 teststrategie:
+:: - Arduino UNO R4 Minima is het referentieboard voor de volledige gereleasete regressiematrix.
+:: - De andere officieel ondersteunde boards krijgen een minimale gerichte regressietest.
+:: - De experimentele acceptatieboards krijgen dezelfde minimale test zonder release-impact.
+set "BOARDS=arduino:renesas_uno:minima"
+set "MINIMALE_OFFICIELE_BOARDS=arduino:avr:uno arduino:renesas_uno:unor4wifi esp32:esp32:d1_uno32"
+set ACCEPTATIE_BOARDS="rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:esp32s3"
 
 set /A TESTS=0
 set /A OK=0
 set /A EXPECTED_MEMORY=0
 set /A FAIL=0
 set /A LINT_FAIL=0
+set /A ACCEPTATIE_TESTS=0
+set /A ACCEPTATIE_OK=0
+set /A ACCEPTATIE_FAIL=0
+set /A ACCEPTATIE_EXPECTED_DEPENDENCY=0
 
 echo ------------------------------------------------------------
 "%LINT_PATH%" --library-manager update
@@ -102,6 +111,26 @@ if "!ADC_ADS1115_GEVONDEN!"=="0" (
     set /A FAIL+=1
 )
 del "!STATIC_CHECK_LOG!" >nul 2>&1
+
+findstr /C:"PCF8574" library.properties >nul || (
+    echo FOUT: PCF8574 dependency ontbreekt in library.properties.
+    set /A FAIL+=1
+)
+powershell -NoProfile -Command "Select-String -Path 'src\Systeem\Input\Input.cpp' -Pattern 'PrintToScreen\(\x22','Serial\.print\(\x22','Serial\.println\(\x22' | Where-Object { $_.Line -notmatch 'Serial\.(?:print|println)\(\x22\s*\x22\)' } | ForEach-Object { '{0}:{1}' -f $_.LineNumber,$_.Line }" >"%TEMP%\GA_InputHardcoded.txt"
+set "HARDCODED_SIZE=0"
+for %%A in ("%TEMP%\GA_InputHardcoded.txt") do set "HARDCODED_SIZE=%%~zA"
+if !HARDCODED_SIZE! GTR 0 (
+    echo FOUT: Hardcoded gebruikerstekst gevonden in Input.cpp.
+    type "%TEMP%\GA_InputHardcoded.txt"
+    set /A FAIL+=1
+)
+del "%TEMP%\GA_InputHardcoded.txt" >nul 2>&1
+for %%K in (InputConfigureren OpvragenHuidigeToetsAanslag OpvragenHuidigeToetsAanslagen OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag InputResultaat InputResultaten InputKanaal StatusOpvragenToetsAanslagen MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN INPUT_TYPE_DIGITAL INPUT_TYPE_PCF8574) do (
+    findstr /B /C:"%%K	" keywords.txt >nul || (
+        echo FOUT: keywords.txt mist %%K
+        set /A FAIL+=1
+    )
+)
 echo ------------------------------------------------------------
 
 for %%B in (%BOARDS%) do (
@@ -121,6 +150,8 @@ for %%B in (%BOARDS%) do (
     echo [AUTOMATISCHE BOARDDETECTIE ZONDER -DBOARD_VERSION]
     set /A TESTS+=1
     set "AUTO_BOARD_LOG=%TEMP%\GroeiAcademieAutoBoard_!RANDOM!_!RANDOM!.txt"
+    echo Compileren van: examples\Systeem\Input\InputkanalenDIGITAL\InputkanalenDIGITAL.ino
+    echo INPUT_TYPE_DIGITAL ^| KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 ^| SCREEN_OUTPUT_CONFIG=SCREEN_TYPE_NONE ^| AUTOMATISCHE BOARDDETECTIE ZONDER -DBOARD_VERSION
     "%CLI_PATH%" compile --jobs 1 --fqbn %%B --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG -DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 -DSCREEN_OUTPUT_CONFIG=SCREEN_TYPE_NONE" "examples\Systeem\Input\InputkanalenDIGITAL" >"!AUTO_BOARD_LOG!" 2>&1
     set "AUTO_BOARD_RESULT=!errorlevel!"
     type "!AUTO_BOARD_LOG!"
@@ -250,12 +281,34 @@ for %%B in (%BOARDS%) do (
 
 echo.
 echo ============================================================
+echo GERELEASETE INPUT-MATRIX OP REFERENTIEBOARD: UNO R4 MINIMA
+echo ============================================================
+call :TEST_STABIELE_INPUT_VOLLEDIG
+
+echo.
+echo ============================================================
+echo MINIMALE REGRESSIE OP OVERIGE OFFICIELE BOARDS
+echo ============================================================
+for %%B in (%MINIMALE_OFFICIELE_BOARDS%) do call :TEST_MINIMAAL_BOARD "%%~B" OFFICIEEL
+
+echo.
+echo ============================================================
+echo MINIMALE REGRESSIE OP ACCEPTATIEBOARDS
+echo ============================================================
+for %%B in (%ACCEPTATIE_BOARDS%) do call :TEST_MINIMAAL_BOARD "%%~B" ACCEPTATIE
+
+echo.
+echo ============================================================
 echo TESTRESULTAAT
 echo ============================================================
 echo Totaal getest                         : !TESTS!
 echo OK bevonden                           : !OK!
 echo Verwachte UNO R3-geheugenbeperkingen : !EXPECTED_MEMORY!
 echo Onverwacht mislukt                    : !FAIL!
+echo Acceptatietests                         : !ACCEPTATIE_TESTS!
+echo Acceptatietests OK                      : !ACCEPTATIE_OK!
+echo Acceptatietests verwachte dependencybeperking: !ACCEPTATIE_EXPECTED_DEPENDENCY!
+echo Acceptatietests FOUT                    : !ACCEPTATIE_FAIL! ^(geen release-impact^)
 if !LINT_FAIL!==0 (
     echo Arduino LINT                         : GESLAAGD
 ) else (
@@ -279,6 +332,312 @@ if /I not "%~2"=="--no-pause" (
     echo.
 )
 exit /b !TOTAL_FAIL!
+
+
+:TEST_STABIELE_INPUT_VOLLEDIG
+set "BOARD=arduino:renesas_uno:minima"
+set "MODE=OFFICIEEL"
+set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_MINIMA"
+set "TEST_NAAM=INPUT_TYPE_NONE"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_NONE"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4 | TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4 -DTTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED=TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4 | TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4 -DTTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED=TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_USER_DEFINED_DIRECT"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_USER_DEFINED_DIRECT -DKEYPAD_GENERIEK_AANTAL_PINNEN=4 -DKEYPAD_GENERIEK_PINNEN={PCF8574_PIN_P0,PCF8574_PIN_P1,PCF8574_PIN_P2,PCF8574_PIN_P3} -DKEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED=KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW -DKEYPAD_GENERIEK_KEY_LAYOUT={{_LABEL_OPSCHRIFT_1,LABEL_TOETS_1},{_LABEL_OPSCHRIFT_2,LABEL_TOETS_2},{_LABEL_OPSCHRIFT_3,LABEL_TOETS_3},{_LABEL_OPSCHRIFT_4,LABEL_TOETS_4}}"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | KEYPAD_TYPE_USER_DEFINED_MATRIX"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_USER_DEFINED_MATRIX -DKEYPAD_GENERIEK_AANTAL_RIJEN=3 -DKEYPAD_GENERIEK_AANTAL_KOLOMMEN=3 -DKEYPAD_GENERIEK_RIJ_PINNEN={PCF8574_PIN_P0,PCF8574_PIN_P1,PCF8574_PIN_P2} -DKEYPAD_GENERIEK_KOLOM_PINNEN={PCF8574_PIN_P3,PCF8574_PIN_P4,PCF8574_PIN_P5} -DKEYPAD_GENERIEK_KEY_LAYOUT={{_LABEL_OPSCHRIFT_1,LABEL_TOETS_1},{_LABEL_OPSCHRIFT_2,LABEL_TOETS_2},{_LABEL_OPSCHRIFT_3,LABEL_TOETS_3},{_LABEL_OPSCHRIFT_4,LABEL_TOETS_4},{_LABEL_OPSCHRIFT_5,LABEL_TOETS_5},{_LABEL_OPSCHRIFT_6,LABEL_TOETS_6},{_LABEL_OPSCHRIFT_7,LABEL_TOETS_7},{_LABEL_OPSCHRIFT_8,LABEL_TOETS_8},{_LABEL_OPSCHRIFT_9,LABEL_TOETS_9}}"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_DIGITAL | UITGEBREIDE NON-BLOCKING EVENTS"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 -DINPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID -DINPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS=1000UL"
+call :COMPILE_STABIELE_INPUT
+set "TEST_NAAM=INPUT_TYPE_PCF8574 | UITGEBREIDE NON-BLOCKING EVENTS"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 -DINPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID -DINPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS=1000UL"
+call :COMPILE_STABIELE_INPUT
+call :COMPILE_STABIELE_INPUT_STIMULUS
+goto :eof
+
+:COMPILE_STABIELE_INPUT
+set "EXAMPLE_METARGUMENTEN="
+if not "!TEST_FLAGS:INPUT_TYPE_NONE=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik"
+) else if not "!TEST_FLAGS:KEYPAD_TYPE_USER_DEFINED_DIRECT=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574UserDefinedDirect"
+) else if not "!TEST_FLAGS:KEYPAD_TYPE_USER_DEFINED_MATRIX=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574UserDefinedMatrix"
+) else if not "!TEST_FLAGS:INPUT_TYPE_PCF8574=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574"
+    set "EXAMPLE_METARGUMENTEN=examples\Systeem\Input\InputkanalenPCF8574metArgumenten"
+) else if not "!TEST_FLAGS:INPUT_TYPE_DIGITAL=!"=="!TEST_FLAGS!" (
+    set "EXAMPLE=examples\Systeem\Input\InputkanalenDIGITAL"
+    set "EXAMPLE_METARGUMENTEN=examples\Systeem\Input\InputkanalenDIGITALmetArgumenten"
+)
+
+for %%X in ("!EXAMPLE!") do set "EXAMPLE_BESTAND=%%~nxX.ino"
+echo ------------------------------------------------------------
+echo Compileren van: !EXAMPLE!\!EXAMPLE_BESTAND!
+echo !TEST_NAAM!
+set /A TESTS+=1
+"%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS! !BOARD_FLAGS!" "!EXAMPLE!" >"%TEMP%\GA_ReleasedInputCompile.txt" 2>&1
+set "COMPILE_RESULT=!errorlevel!"
+type "%TEMP%\GA_ReleasedInputCompile.txt"
+if "!COMPILE_RESULT!"=="0" (
+    set "GEHEUGEN_BOARD=%BOARD%"
+    set "GEHEUGEN_BESTAND=!EXAMPLE_BESTAND!"
+    set "GEHEUGEN_TEST=!TEST_NAAM!"
+    set "GEHEUGEN_STATUS=OK"
+    call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_ReleasedInputCompile.txt"
+    set /A OK+=1
+) else (
+    echo [FOUT][OFFICIEEL] %BOARD% ^| !TEST_NAAM!
+    set /A FAIL+=1
+)
+del "%TEMP%\GA_ReleasedInputCompile.txt" >nul 2>&1
+
+if defined EXAMPLE_METARGUMENTEN (
+    for %%X in ("!EXAMPLE_METARGUMENTEN!") do set "EXAMPLE_METARGUMENTEN_BESTAND=%%~nxX.ino"
+    echo ------------------------------------------------------------
+    echo Compileren van: !EXAMPLE_METARGUMENTEN!\!EXAMPLE_METARGUMENTEN_BESTAND!
+    echo !TEST_NAAM! ^| metArgumenten
+    set /A TESTS+=1
+    "%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS! !BOARD_FLAGS!" "!EXAMPLE_METARGUMENTEN!" >"%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt" 2>&1
+    set "COMPILE_RESULT=!errorlevel!"
+    type "%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt"
+    if "!COMPILE_RESULT!"=="0" (
+        set "GEHEUGEN_BOARD=%BOARD%"
+        set "GEHEUGEN_BESTAND=!EXAMPLE_METARGUMENTEN_BESTAND!"
+        set "GEHEUGEN_TEST=!TEST_NAAM! | metArgumenten"
+        set "GEHEUGEN_STATUS=OK"
+        call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt"
+        set /A OK+=1
+    ) else (
+        echo [FOUT][OFFICIEEL] %BOARD% ^| !TEST_NAAM! ^| metArgumenten
+        set /A FAIL+=1
+    )
+    del "%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt" >nul 2>&1
+)
+goto :eof
+
+:COMPILE_STABIELE_INPUT_STIMULUS
+for %%E in (examples\Systeem\Input\Input_Test_Scenario1_EnkelTik examples\Systeem\Input\Input_Test_Scenario2_Simultaan examples\Systeem\Input\Input_Test_Scenario3_Ineenstortend examples\Systeem\Input\Input_Test_Scenario4_Cocktail examples\Systeem\Input\Input_Test_Tik_Enkele_Samen_Instortend_Cocktail) do (
+    echo ------------------------------------------------------------
+    echo Compileren van: %%E\%%~nxE.ino
+    echo INPUT + STIMULUS ^| %%~nxE
+    set /A TESTS+=1
+    "%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !BOARD_FLAGS!" "%%E" >"%TEMP%\GA_ReleasedInputStimulus.txt" 2>&1
+    set "COMPILE_RESULT=!errorlevel!"
+    type "%TEMP%\GA_ReleasedInputStimulus.txt"
+    if "!COMPILE_RESULT!"=="0" (
+        set "GEHEUGEN_BOARD=%BOARD%"
+        set "GEHEUGEN_BESTAND=%%~nxE.ino"
+        set "GEHEUGEN_TEST=INPUT + STIMULUS | %%~nxE"
+        set "GEHEUGEN_STATUS=OK"
+        call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_ReleasedInputStimulus.txt"
+        set /A OK+=1
+    ) else (
+        echo [FOUT][OFFICIEEL] %BOARD% ^| %%~nxE
+        set /A FAIL+=1
+    )
+    del "%TEMP%\GA_ReleasedInputStimulus.txt" >nul 2>&1
+)
+goto :eof
+
+:TEST_MINIMAAL_BOARD
+set "MIN_BOARD=%~1"
+set "MIN_MODE=%~2"
+set "MIN_BOARD_FLAGS="
+if "%MIN_BOARD%"=="arduino:avr:uno" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R3"
+if "%MIN_BOARD%"=="arduino:renesas_uno:unor4wifi" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_WIFI"
+if "%MIN_BOARD%"=="esp32:esp32:d1_uno32" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_UNO"
+if "%MIN_BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_CYTRON_MAKER_UNO_RP2040"
+if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_NUCLEO_F401RE"
+if "%MIN_BOARD%"=="esp32:esp32:esp32s3" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ARDI32"
+if not defined MIN_BOARD_FLAGS (
+    echo [FOUT] Geen BOARD_VERSION gekoppeld aan %MIN_BOARD%.
+    if "%MIN_MODE%"=="OFFICIEEL" (set /A FAIL+=1) else set /A ACCEPTATIE_FAIL+=1
+    goto :eof
+)
+
+set "MIN_VERWACHT_GEHEUGEN=0"
+set "MIN_VERWACHT_DEPENDENCY=0"
+if "%MIN_BOARD%"=="esp32:esp32:esp32s3" (
+    echo [N.V.T.][%MIN_MODE%] %MIN_BOARD% ^| AUTOMATISCHE BOARDDETECTIE ^| generieke ESP32S3 Dev Module identificeert een fysieke Ardi32 niet automatisch
+) else (
+    set "MIN_TEST_NAAM=AUTOMATISCHE BOARDDETECTIE | DIGITAL"
+    set "MIN_TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 -DSCREEN_OUTPUT_CONFIG=SCREEN_TYPE_NONE"
+    set "MIN_EXAMPLE=examples\Systeem\Input\InputkanalenDIGITAL"
+    set "MIN_GEBRUIK_BOARD_FLAGS=0"
+    call :COMPILE_MINIMAAL
+)
+
+set "MIN_TEST_NAAM=CharacterScreen"
+set "MIN_TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=2"
+set "MIN_EXAMPLE=examples\Systeem\Screen\Default_CharacterScreen"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=PixelScreen"
+set "MIN_TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=4"
+set "MIN_EXAMPLE=examples\Systeem\Screen\Default_PixelScreen"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+set "MIN_VERWACHT_DEPENDENCY=0"
+if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_VERWACHT_DEPENDENCY=1"
+call :COMPILE_MINIMAAL
+set "MIN_VERWACHT_DEPENDENCY=0"
+
+set "MIN_TEST_NAAM=Stimulus basis | SCREEN_TYPE_NONE"
+set "MIN_TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=0"
+set "MIN_EXAMPLE=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=Input DIGITAL | KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "MIN_TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "MIN_EXAMPLE=examples\Systeem\Input\InputkanalenDIGITAL"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=Input DIGITAL | KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 | metArgumenten"
+set "MIN_TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "MIN_EXAMPLE=examples\Systeem\Input\InputkanalenDIGITALmetArgumenten"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=Input PCF8574 | KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "MIN_TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "MIN_EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=Input PCF8574 | KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 | metArgumenten"
+set "MIN_TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "MIN_EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574metArgumenten"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=Input PCF8574 | KEYPAD_TYPE_USER_DEFINED_DIRECT"
+set "MIN_TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_USER_DEFINED_DIRECT -DKEYPAD_GENERIEK_AANTAL_PINNEN=4 -DKEYPAD_GENERIEK_PINNEN={PCF8574_PIN_P0,PCF8574_PIN_P1,PCF8574_PIN_P2,PCF8574_PIN_P3} -DKEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED=KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW -DKEYPAD_GENERIEK_KEY_LAYOUT={{_LABEL_OPSCHRIFT_1,LABEL_TOETS_1},{_LABEL_OPSCHRIFT_2,LABEL_TOETS_2},{_LABEL_OPSCHRIFT_3,LABEL_TOETS_3},{_LABEL_OPSCHRIFT_4,LABEL_TOETS_4}}"
+set "MIN_EXAMPLE=examples\Systeem\Input\InputkanalenPCF8574UserDefinedDirect"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+set "MIN_TEST_NAAM=Input + Stimulus representatief"
+set "MIN_TEST_FLAGS="
+set "MIN_EXAMPLE=examples\Systeem\Input\Input_Test_Scenario1_EnkelTik"
+set "MIN_GEBRUIK_BOARD_FLAGS=1"
+call :COMPILE_MINIMAAL
+
+if "%MIN_BOARD%"=="arduino:avr:uno" (
+    set "MIN_VERWACHT_GEHEUGEN=1"
+    set "MIN_TEST_NAAM=UNO R3 geheugengrens | gecombineerde Stimulus | SCREEN_OUTPUT_CONFIG=7"
+    set "MIN_TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=7"
+    set "MIN_EXAMPLE=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail"
+    set "MIN_GEBRUIK_BOARD_FLAGS=1"
+    call :COMPILE_MINIMAAL
+    set "MIN_VERWACHT_GEHEUGEN=0"
+)
+goto :eof
+
+:COMPILE_MINIMAAL
+set "MIN_EXTRA=!MIN_TEST_FLAGS!"
+if "!MIN_GEBRUIK_BOARD_FLAGS!"=="1" set "MIN_EXTRA=!MIN_EXTRA! !MIN_BOARD_FLAGS!"
+for %%X in ("!MIN_EXAMPLE!") do set "MIN_EXAMPLE_BESTAND=%%~nxX.ino"
+echo ------------------------------------------------------------
+echo Compileren van: !MIN_EXAMPLE!\!MIN_EXAMPLE_BESTAND!
+echo !MIN_TEST_NAAM!
+if "%MIN_MODE%"=="OFFICIEEL" (set /A TESTS+=1) else set /A ACCEPTATIE_TESTS+=1
+"%CLI_PATH%" compile --jobs 1 --fqbn "%MIN_BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !MIN_EXTRA!" "%MIN_EXAMPLE%" >"%TEMP%\GA_ReleasedMinimal.txt" 2>&1
+set "MIN_RESULT=!errorlevel!"
+type "%TEMP%\GA_ReleasedMinimal.txt"
+if "!MIN_RESULT!"=="0" (
+    set "GEHEUGEN_BOARD=%MIN_BOARD%"
+    set "GEHEUGEN_BESTAND=!MIN_EXAMPLE_BESTAND!"
+    set "GEHEUGEN_TEST=!MIN_TEST_NAAM!"
+    set "GEHEUGEN_STATUS=OK"
+    call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_ReleasedMinimal.txt"
+    if "%MIN_MODE%"=="OFFICIEEL" (set /A OK+=1) else set /A ACCEPTATIE_OK+=1
+) else (
+    set "MIN_MEMORY_MATCH=0"
+    if "!MIN_VERWACHT_GEHEUGEN!"=="1" (
+        findstr /C:"text section exceeds available space in board" "%TEMP%\GA_ReleasedMinimal.txt" >nul
+        if not errorlevel 1 set "MIN_MEMORY_MATCH=1"
+    )
+    set "MIN_DEPENDENCY_MATCH=0"
+    if "!MIN_VERWACHT_DEPENDENCY!"=="1" (
+        findstr /C:"wiring_private.h: No such file or directory" "%TEMP%\GA_ReleasedMinimal.txt" >nul
+        if not errorlevel 1 set "MIN_DEPENDENCY_MATCH=1"
+    )
+    if "!MIN_MEMORY_MATCH!"=="1" (
+        set "GEHEUGEN_BOARD=%MIN_BOARD%"
+        set "GEHEUGEN_BESTAND=!MIN_EXAMPLE_BESTAND!"
+        set "GEHEUGEN_TEST=!MIN_TEST_NAAM!"
+        set "GEHEUGEN_STATUS=VERWACHTE_GEHEUGENBEPERKING"
+        call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_ReleasedMinimal.txt"
+        echo [VERWACHTE GEHEUGENBEPERKING][%MIN_MODE%] %MIN_BOARD% ^| !MIN_TEST_NAAM!
+        set /A EXPECTED_MEMORY+=1
+    ) else if "!MIN_DEPENDENCY_MATCH!"=="1" (
+        echo [VERWACHTE DEPENDENCYBEPERKING][%MIN_MODE%] %MIN_BOARD% ^| !MIN_TEST_NAAM! ^| Adafruit ST77xx verwacht wiring_private.h
+        if "%MIN_MODE%"=="ACCEPTATIE" set /A ACCEPTATIE_EXPECTED_DEPENDENCY+=1
+    ) else (
+        echo [FOUT][%MIN_MODE%] %MIN_BOARD% ^| !MIN_TEST_NAAM!
+        if "%MIN_MODE%"=="OFFICIEEL" (set /A FAIL+=1) else set /A ACCEPTATIE_FAIL+=1
+    )
+)
+del "%TEMP%\GA_ReleasedMinimal.txt" >nul 2>&1
+goto :eof
 
 :REGISTREER_GEHEUGENGEBRUIK
 set "PROGRAM_USED="

@@ -116,14 +116,14 @@ int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
   int waarde = raw - offsetSensor;
 
   if (waarde < 0) {
-    DEBUG_PRINT("Pin=");
-    DEBUG_PRINT(sensorPin);
-    DEBUG_PRINT(" raw=");
-    DEBUG_PRINT(raw);
-    DEBUG_PRINT(" offset=");
-    DEBUG_PRINT(offsetSensor);
-    DEBUG_PRINT(" waarde=");
-    DEBUG_PRINTLN(waarde);
+    GA_DEBUG_PRINT("Pin=");
+    GA_DEBUG_PRINT(sensorPin);
+    GA_DEBUG_PRINT(" raw=");
+    GA_DEBUG_PRINT(raw);
+    GA_DEBUG_PRINT(" offset=");
+    GA_DEBUG_PRINT(offsetSensor);
+    GA_DEBUG_PRINT(" waarde=");
+    GA_DEBUG_PRINTLN(waarde);
   }  
 #else
   int waarde = RawAnalogRead(sensorPin) - offsetSensor;
@@ -164,7 +164,7 @@ void BepaalSensorOffsets() {
   unsigned long startTijd = millis();
 
 #ifdef TRACE
-   DEBUG_PRINTLN("---------------------");
+   GA_DEBUG_PRINTLN("---------------------");
 #endif
 
   while (millis() - startTijd < OFFSET_METING_TIJD_MS) {
@@ -173,10 +173,10 @@ void BepaalSensorOffsets() {
       if (aantalMetingen > 1 && meting > hoogsteMeting[sensorNummer]) { hoogsteMeting[sensorNummer] = meting; }
 
 #ifdef TRACE
-      DEBUG_PRINT("Meting sensor ");
-      DEBUG_PRINT(sensorNummer + 1);
-      DEBUG_PRINT(" = ");
-      DEBUG_PRINTLN(meting);
+      GA_DEBUG_PRINT("Meting sensor ");
+      GA_DEBUG_PRINT(sensorNummer + 1);
+      GA_DEBUG_PRINT(" = ");
+      GA_DEBUG_PRINTLN(meting);
 #endif
     }
 
@@ -193,20 +193,20 @@ void BepaalSensorOffsets() {
   }
 
 #ifdef DEBUG
-  DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINTLN("---------------------");
 
-  DEBUG_PRINT("Offset sensor 1 = ");
-  DEBUG_PRINTLN(offsetSensor1);
+  GA_DEBUG_PRINT("Offset sensor 1 = ");
+  GA_DEBUG_PRINTLN(offsetSensor1);
 
-  DEBUG_PRINT("Offset sensor 2 = ");
-  DEBUG_PRINTLN(offsetSensor2);
+  GA_DEBUG_PRINT("Offset sensor 2 = ");
+  GA_DEBUG_PRINTLN(offsetSensor2);
 
   if (AANTAL_SENSOREN_AANWEZIG == 4) {
-    DEBUG_PRINT("Offset sensor 3 = ");
-    DEBUG_PRINTLN(offsetSensor3);
+    GA_DEBUG_PRINT("Offset sensor 3 = ");
+    GA_DEBUG_PRINTLN(offsetSensor3);
 
-    DEBUG_PRINT("Offset sensor 4 = ");
-    DEBUG_PRINTLN(offsetSensor4);
+    GA_DEBUG_PRINT("Offset sensor 4 = ");
+    GA_DEBUG_PRINTLN(offsetSensor4);
   }
 #endif
 }
@@ -424,8 +424,8 @@ int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimul
     // Normale stopvoorwaarde: sensor losgelaten
     if (sensor.actueleTikKracht <= TIK_MINIMALE_DRUKWAARDE) {
 #ifdef DEBUG
-      DEBUG_PRINT("actueleTikKracht bij loslaten = ");
-      DEBUG_PRINTLN(sensor.actueleTikKracht);
+      GA_DEBUG_PRINT("actueleTikKracht bij loslaten = ");
+      GA_DEBUG_PRINTLN(sensor.actueleTikKracht);
 #endif
       VerwerkSensor(nu, sensorPin, OffsetSensor, sensor);
       exitStatus = EXIT_STATUS_SENSOR_LOSGELATEN;
@@ -460,40 +460,40 @@ int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimul
   BerekenEindStimulus(sensor, gemetenStimulus);
 
 #ifdef DEBUG
-  DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINTLN("---------------------");
 
-  DEBUG_PRINT("aantalTikKrachtMetingen = ");
-  DEBUG_PRINTLN(sensor.aantalTikKrachtMetingen);
+  GA_DEBUG_PRINT("aantalTikKrachtMetingen = ");
+  GA_DEBUG_PRINTLN(sensor.aantalTikKrachtMetingen);
 
-  DEBUG_PRINT("somVanTikKrachtMetingen = ");
-  DEBUG_PRINTLN(sensor.somVanTikKrachtMetingen);
+  GA_DEBUG_PRINT("somVanTikKrachtMetingen = ");
+  GA_DEBUG_PRINTLN(sensor.somVanTikKrachtMetingen);
 
-  DEBUG_PRINT("startTikTijd = ");
-  DEBUG_PRINTLN(sensor.startTikTijd);
+  GA_DEBUG_PRINT("startTikTijd = ");
+  GA_DEBUG_PRINTLN(sensor.startTikTijd);
 
-  DEBUG_PRINT("eindTikTijd = ");
-  DEBUG_PRINTLN(sensor.eindTikTijd);
+  GA_DEBUG_PRINT("eindTikTijd = ");
+  GA_DEBUG_PRINTLN(sensor.eindTikTijd);
 
-  DEBUG_PRINT("TikTijd = ");
-  DEBUG_PRINTLN(gemetenStimulus.TikTijd);
+  GA_DEBUG_PRINT("TikTijd = ");
+  GA_DEBUG_PRINTLN(gemetenStimulus.TikTijd);
 
-  DEBUG_PRINT("gemiddeldeTikKracht = ");
-  DEBUG_PRINTLN(gemetenStimulus.gemiddeldeTikKracht);
+  GA_DEBUG_PRINT("gemiddeldeTikKracht = ");
+  GA_DEBUG_PRINTLN(gemetenStimulus.gemiddeldeTikKracht);
 
-  DEBUG_PRINT("piekTikKracht = ");
-  DEBUG_PRINTLN(gemetenStimulus.hoogsteTikKracht);
+  GA_DEBUG_PRINT("piekTikKracht = ");
+  GA_DEBUG_PRINTLN(gemetenStimulus.hoogsteTikKracht);
 
-  DEBUG_PRINT("tijdTotPiekTikKracht = ");
-  DEBUG_PRINTLN(gemetenStimulus.tijdTotPiekTikKracht);
+  GA_DEBUG_PRINT("tijdTotPiekTikKracht = ");
+  GA_DEBUG_PRINTLN(gemetenStimulus.tijdTotPiekTikKracht);
 
-  DEBUG_PRINT("opbouwSnelheid = ");
-  DEBUG_PRINTLN(gemetenStimulus.opbouwSnelheid);
+  GA_DEBUG_PRINT("opbouwSnelheid = ");
+  GA_DEBUG_PRINTLN(gemetenStimulus.opbouwSnelheid);
 
-  DEBUG_PRINT("afbouwSnelheid = ");
-  DEBUG_PRINTLN(gemetenStimulus.afbouwSnelheid);
+  GA_DEBUG_PRINT("afbouwSnelheid = ");
+  GA_DEBUG_PRINTLN(gemetenStimulus.afbouwSnelheid);
 
-  DEBUG_PRINT("exitStatus = ");
-  DEBUG_PRINTLN(exitStatus);
+  GA_DEBUG_PRINT("exitStatus = ");
+  GA_DEBUG_PRINTLN(exitStatus);
 #endif
 
   return exitStatus;
@@ -610,22 +610,22 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
       if (sensorMask != vorigSensorMask) {
         vorigSensorMask = sensorMask;
 
-        DEBUG_PRINTLN("---------------------");
+        GA_DEBUG_PRINTLN("---------------------");
 
-        DEBUG_PRINT("MaskReedsActieveSensorsBijStart = ");
-        DEBUG_PRINTLN2(MaskReedsActieveSensorsBijStart, BIN);
+        GA_DEBUG_PRINT("MaskReedsActieveSensorsBijStart = ");
+        GA_DEBUG_PRINTLN2(MaskReedsActieveSensorsBijStart, BIN);
 
-        DEBUG_PRINT("sensorMask = ");
-        DEBUG_PRINTLN2(sensorMask, BIN);
+        GA_DEBUG_PRINT("sensorMask = ");
+        GA_DEBUG_PRINTLN2(sensorMask, BIN);
 
-        DEBUG_PRINT("MaskGewensteActieveSensorsBijExit = ");
-        DEBUG_PRINTLN2(MaskGewensteActieveSensorsBijExit, BIN);
+        GA_DEBUG_PRINT("MaskGewensteActieveSensorsBijExit = ");
+        GA_DEBUG_PRINTLN2(MaskGewensteActieveSensorsBijExit, BIN);
 
         for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-          DEBUG_PRINT("Sensor ");
-          DEBUG_PRINT(sensorNummer + 1);
-          DEBUG_PRINT(" actueleTikKracht = ");
-          DEBUG_PRINTLN(sensor[sensorNummer].actueleTikKracht);
+          GA_DEBUG_PRINT("Sensor ");
+          GA_DEBUG_PRINT(sensorNummer + 1);
+          GA_DEBUG_PRINT(" actueleTikKracht = ");
+          GA_DEBUG_PRINTLN(sensor[sensorNummer].actueleTikKracht);
         }
       }
 #endif
@@ -717,39 +717,39 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
   synchronisatie[0] = MaakSynchronisatieProfielAlleSensoren(sensor, aantalSensorenSimultaanTeMeten, gemetenStimulus);
 
 #ifdef DEBUG
-  DEBUG_PRINTLN("=== SIMULTANE METING ===");
+  GA_DEBUG_PRINTLN("=== SIMULTANE METING ===");
 
   for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-    DEBUG_PRINT("Sensor ");
-    DEBUG_PRINT(sensorNummer + 1);
-    DEBUG_PRINT(" gestart = ");
-    DEBUG_PRINTLN(sensor[sensorNummer].sensorGestart);
+    GA_DEBUG_PRINT("Sensor ");
+    GA_DEBUG_PRINT(sensorNummer + 1);
+    GA_DEBUG_PRINT(" gestart = ");
+    GA_DEBUG_PRINTLN(sensor[sensorNummer].sensorGestart);
 
-    DEBUG_PRINT(sensorNummer + 1);
-    DEBUG_PRINT(" TikTijd = ");
-    DEBUG_PRINTLN(gemetenStimulus[sensorNummer].TikTijd);
+    GA_DEBUG_PRINT(sensorNummer + 1);
+    GA_DEBUG_PRINT(" TikTijd = ");
+    GA_DEBUG_PRINTLN(gemetenStimulus[sensorNummer].TikTijd);
 
-    DEBUG_PRINT(sensorNummer + 1);
-    DEBUG_PRINT(" gemiddeldeTikKracht = ");
-    DEBUG_PRINTLN(gemetenStimulus[sensorNummer].gemiddeldeTikKracht);
+    GA_DEBUG_PRINT(sensorNummer + 1);
+    GA_DEBUG_PRINT(" gemiddeldeTikKracht = ");
+    GA_DEBUG_PRINTLN(gemetenStimulus[sensorNummer].gemiddeldeTikKracht);
   }
 
-  DEBUG_PRINT("Synchronisatie 01 verschilStartTijd = ");
-  DEBUG_PRINTLN(synchronisatie[0].verschilStartTijd);
+  GA_DEBUG_PRINT("Synchronisatie 01 verschilStartTijd = ");
+  GA_DEBUG_PRINTLN(synchronisatie[0].verschilStartTijd);
 
-  DEBUG_PRINT("Synchronisatie 01 verschilEindTijd = ");
-  DEBUG_PRINTLN(synchronisatie[0].verschilEindTijd);
+  GA_DEBUG_PRINT("Synchronisatie 01 verschilEindTijd = ");
+  GA_DEBUG_PRINTLN(synchronisatie[0].verschilEindTijd);
 
   if (aantalSensorenSimultaanTeMeten == 4) {
-    DEBUG_PRINT("Synchronisatie 02 verschilStartTijd = ");
-    DEBUG_PRINTLN(synchronisatie[1].verschilStartTijd);
+    GA_DEBUG_PRINT("Synchronisatie 02 verschilStartTijd = ");
+    GA_DEBUG_PRINTLN(synchronisatie[1].verschilStartTijd);
 
-    DEBUG_PRINT("Synchronisatie 03 verschilStartTijd = ");
-    DEBUG_PRINTLN(synchronisatie[2].verschilStartTijd);
+    GA_DEBUG_PRINT("Synchronisatie 03 verschilStartTijd = ");
+    GA_DEBUG_PRINTLN(synchronisatie[2].verschilStartTijd);
   }
 
-  DEBUG_PRINT("exitStatus = ");
-  DEBUG_PRINTLN(exitStatus);
+  GA_DEBUG_PRINT("exitStatus = ");
+  GA_DEBUG_PRINTLN(exitStatus);
 #endif
 
   return exitStatus;
@@ -848,44 +848,44 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
   int margeTikKracht = (nulmeting.gemiddeldeTikKracht * TOEGESTANE_MARGE_TIKKRACHT) / MargeDeler();
 
 #ifdef DEBUG
-  DEBUG_PRINTLN("---------------------");
-  DEBUG_PRINT("TOEGESTANE_MARGE_TIKKRACHT = ");
-  DEBUG_PRINTLN(TOEGESTANE_MARGE_TIKKRACHT);
+  GA_DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINT("TOEGESTANE_MARGE_TIKKRACHT = ");
+  GA_DEBUG_PRINTLN(TOEGESTANE_MARGE_TIKKRACHT);
 
-  DEBUG_PRINT("gemeten = ");
-  DEBUG_PRINTLN(gemeten.TikTijd);
+  GA_DEBUG_PRINT("gemeten = ");
+  GA_DEBUG_PRINTLN(gemeten.TikTijd);
 
   if (doelTikTijd < INSTORTEND_TOV_NULMETING) {
-    DEBUG_PRINT("minimum = ");
-    DEBUG_PRINTLN(minimaleTikTijd);
+    GA_DEBUG_PRINT("minimum = ");
+    GA_DEBUG_PRINTLN(minimaleTikTijd);
 
-    DEBUG_PRINT("maximum = ");
-    DEBUG_PRINTLN(maximaleTikTijd);
+    GA_DEBUG_PRINT("maximum = ");
+    GA_DEBUG_PRINTLN(maximaleTikTijd);
   } else {
-    DEBUG_PRINT("TOEGESTANE_MARGE_TIKTIJD = ");
-    DEBUG_PRINTLN(TOEGESTANE_MARGE_TIKTIJD);
+    GA_DEBUG_PRINT("TOEGESTANE_MARGE_TIKTIJD = ");
+    GA_DEBUG_PRINTLN(TOEGESTANE_MARGE_TIKTIJD);
 
-    DEBUG_PRINT("MARGE_FACTOR = ");
-    DEBUG_PRINTLN(MARGE_FACTOR);
+    GA_DEBUG_PRINT("MARGE_FACTOR = ");
+    GA_DEBUG_PRINTLN(MARGE_FACTOR);
 
-    DEBUG_PRINT("referentieTikTijd = ");
-    DEBUG_PRINTLN(referentieTikTijd);
+    GA_DEBUG_PRINT("referentieTikTijd = ");
+    GA_DEBUG_PRINTLN(referentieTikTijd);
 
-    DEBUG_PRINT("margeTikTijd = ");
-    DEBUG_PRINTLN(margeTikTijd);
+    GA_DEBUG_PRINT("margeTikTijd = ");
+    GA_DEBUG_PRINTLN(margeTikTijd);
   }
 
-  DEBUG_PRINT("nulmeting gemiddeldeTikKracht = ");
-  DEBUG_PRINTLN(nulmeting.gemiddeldeTikKracht);
+  GA_DEBUG_PRINT("nulmeting gemiddeldeTikKracht = ");
+  GA_DEBUG_PRINTLN(nulmeting.gemiddeldeTikKracht);
 
-  DEBUG_PRINT("margeTikKracht = ");
-  DEBUG_PRINTLN(margeTikKracht);
+  GA_DEBUG_PRINT("margeTikKracht = ");
+  GA_DEBUG_PRINTLN(margeTikKracht);
 
-  DEBUG_PRINT("gemeten TikTijd = ");
-  DEBUG_PRINTLN(gemeten.TikTijd);
+  GA_DEBUG_PRINT("gemeten TikTijd = ");
+  GA_DEBUG_PRINTLN(gemeten.TikTijd);
 
-  DEBUG_PRINT("gemeten gemiddeldeTikKracht = ");
-  DEBUG_PRINTLN(gemeten.gemiddeldeTikKracht);
+  GA_DEBUG_PRINT("gemeten gemiddeldeTikKracht = ");
+  GA_DEBUG_PRINTLN(gemeten.gemiddeldeTikKracht);
 #endif
 
   // TIKKRACHT
@@ -938,19 +938,19 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
     KrachtCorrect = KrachtCorrect && piekTikKrachtCorrect && opbouwSnelheidCorrect && afbouwSnelheidCorrect;
 
 #ifdef DEBUG
-    DEBUG_PRINTLN("---------------------");
+    GA_DEBUG_PRINTLN("---------------------");
 
-    DEBUG_PRINT("piekTikKrachtCorrect = ");
-    DEBUG_PRINTLN(piekTikKrachtCorrect);
+    GA_DEBUG_PRINT("piekTikKrachtCorrect = ");
+    GA_DEBUG_PRINTLN(piekTikKrachtCorrect);
 
-    DEBUG_PRINT("tijdTotPiekTikKrachtCorrect = ");
-    DEBUG_PRINTLN(tijdTotPiekTikKrachtCorrect);
+    GA_DEBUG_PRINT("tijdTotPiekTikKrachtCorrect = ");
+    GA_DEBUG_PRINTLN(tijdTotPiekTikKrachtCorrect);
 
-    DEBUG_PRINT("opbouwSnelheidCorrect = ");
-    DEBUG_PRINTLN(opbouwSnelheidCorrect);
+    GA_DEBUG_PRINT("opbouwSnelheidCorrect = ");
+    GA_DEBUG_PRINTLN(opbouwSnelheidCorrect);
 
-    DEBUG_PRINT("afbouwSnelheidCorrect = ");
-    DEBUG_PRINTLN(afbouwSnelheidCorrect);
+    GA_DEBUG_PRINT("afbouwSnelheidCorrect = ");
+    GA_DEBUG_PRINTLN(afbouwSnelheidCorrect);
 #endif
   }
 
@@ -976,34 +976,34 @@ void VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatiePro
   if (krachtInBalans) { TELLER_TIKKRACHT_IN_BALANS++; }
 
 #ifdef DEBUG
-  DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINTLN("---------------------");
 
-  DEBUG_PRINT("verschilStartTijd nul/gemeten = ");
-  DEBUG_PRINT(nulmeting.verschilStartTijd);
-  DEBUG_PRINT(" / ");
-  DEBUG_PRINTLN(gemeten.verschilStartTijd);
+  GA_DEBUG_PRINT("verschilStartTijd nul/gemeten = ");
+  GA_DEBUG_PRINT(nulmeting.verschilStartTijd);
+  GA_DEBUG_PRINT(" / ");
+  GA_DEBUG_PRINTLN(gemeten.verschilStartTijd);
 
-  DEBUG_PRINT("verschilTikTijd nul/gemeten = ");
-  DEBUG_PRINT(nulmeting.verschilTikTijd);
-  DEBUG_PRINT(" / ");
-  DEBUG_PRINTLN(gemeten.verschilTikTijd);
+  GA_DEBUG_PRINT("verschilTikTijd nul/gemeten = ");
+  GA_DEBUG_PRINT(nulmeting.verschilTikTijd);
+  GA_DEBUG_PRINT(" / ");
+  GA_DEBUG_PRINTLN(gemeten.verschilTikTijd);
 
-  DEBUG_PRINT("synchronisatieCorrect = ");
-  DEBUG_PRINTLN(synchronisatieCorrect);
+  GA_DEBUG_PRINT("synchronisatieCorrect = ");
+  GA_DEBUG_PRINTLN(synchronisatieCorrect);
 
-  DEBUG_PRINT("verschilGemiddeldeTikKracht nul/gemeten = ");
-  DEBUG_PRINT(nulmeting.verschilGemiddeldeTikKracht);
-  DEBUG_PRINT(" / ");
-  DEBUG_PRINTLN(gemeten.verschilGemiddeldeTikKracht);
+  GA_DEBUG_PRINT("verschilGemiddeldeTikKracht nul/gemeten = ");
+  GA_DEBUG_PRINT(nulmeting.verschilGemiddeldeTikKracht);
+  GA_DEBUG_PRINT(" / ");
+  GA_DEBUG_PRINTLN(gemeten.verschilGemiddeldeTikKracht);
 
-  DEBUG_PRINT("verschilHoogsteTikKracht nul/gemeten = ");
-  DEBUG_PRINT(nulmeting.verschilHoogsteTikKracht);
-  DEBUG_PRINT(" / ");
-  DEBUG_PRINTLN(gemeten.verschilHoogsteTikKracht);
+  GA_DEBUG_PRINT("verschilHoogsteTikKracht nul/gemeten = ");
+  GA_DEBUG_PRINT(nulmeting.verschilHoogsteTikKracht);
+  GA_DEBUG_PRINT(" / ");
+  GA_DEBUG_PRINTLN(gemeten.verschilHoogsteTikKracht);
 
-  DEBUG_PRINT("krachtInBalans = ");
-  DEBUG_PRINTLN(krachtInBalans);
-  DEBUG_PRINTLN("---------------------");
+  GA_DEBUG_PRINT("krachtInBalans = ");
+  GA_DEBUG_PRINTLN(krachtInBalans);
+  GA_DEBUG_PRINTLN("---------------------");
 #endif
 }
 

@@ -180,7 +180,7 @@ Vanaf v1.1.0 bestaat een gedeelde `System/Input`-laag. `INPUT_KANAAL_CONFIG` sel
 | 4x3 Membraan Schakelaar Toetsenbord (flat 7) | ter-discussie |
 | 4x5 Membraan Schakelaar Toetsenbord (flat 9) | ter-discussie |
 | HW-139 (touch sensors) | ter-discussie |
-| IR HX1838 Infrarood Afstandsbediening, IR ontvanger voor 38kHz IR signalen | softwarematig opgenomen in Input v1.1.0; fysieke validatie per remote/ontvanger |
+| IR HX1838 Infrarood Afstandsbediening, IR ontvanger voor 38kHz IR signalen | softwarematig opgenomen in Input v1.1.0; in v1.1.1 gaat `HX1838_BRON_CODES_DEFINE` van experimenteel naar released, hardwarematig werkend bevestigd op D12 met zowel TinyIRReceiver (`= 1`) als IRremote (`= 0`); `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` laat binnen DEFINE een eigen toetsenindeling/codetabel toe; de EEPROM-gebaseerde HX1838-routes blijven experimenteel |
 
 ### Bouwstenen
 
