@@ -98,7 +98,7 @@ In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo
 | H10 | 1x6 Dupont-connector aan de Arduino-zijde van de TFTSPI footprint voor de Quad Logic Level Shifter U8 |
 | H11 | 1x4 Dupont-connector voor de I2C-aansluiting van de PCF8574-uitbreiding |
 | U9 | PCF8574-board voor optionele I2C-naar-digitale-I/O-uitbreiding |
-| U10 | 1x9 vrouwelijke Dupont-connector voor P0-P7 en INT van het PCF8574-board |
+| H12 | 1x9 vrouwelijke Dupont-connector voor P0-P7 en INT van het PCF8574-board |
 | SW1 | 4-kanaals DIP-switch voor ADS1115 ADDR-keuze |
 | U1 | Arduino UNO R3/R4 |
 | U2 | 1x4 keymatrix |
@@ -161,7 +161,7 @@ De referentie-/testmodule voor de software is de OTRONIC OT8980. De software bli
 | Onderdeel | Functie |
 |---|---|
 | U9 | PCF8574-board |
-| U10 | P0-P7 en INT van de expander |
+| H12 | P0-P7 en INT van de expander |
 | H11 | I2C-aansluiting SCL, SDA, GND en VCC naar de gedeelde I2C-bus |
 | H1 | bestaande directe 1x4-keymatrix op D2-D5 + GND |
 

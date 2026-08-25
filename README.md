@@ -204,7 +204,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De ADS1115- en TFTSPI-hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten blijven onder Stimulus Shield v1.1.0 staan. Voor deze release beschrijft [Stimulus Shield v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) de toevoeging van de HX1838 IR Receiver; de aanvullende [hardwarevalidatie v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) hoort daarbij.
+De volledige hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten staan onder Stimulus Shield v1.1.1. [Stimulus Shield v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) bevat de volledige opvolger van v1.1.0, inclusief de HX1838 IR Receiver; de [hardwarevalidatie v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) hoort daarbij.
 
 ## Geplande uitbreidingen
 

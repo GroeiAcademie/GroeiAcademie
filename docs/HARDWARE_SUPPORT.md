@@ -169,7 +169,7 @@ De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepa
 
 ### GroeiAcademie Stimulus Shield v1.1.1
 
-Stimulus Shield v1.1.1 = Stimulus Shield v1.1.0 + HX1838 IR Receiver. De volledige v1.1.0-hardwarebasis blijft behouden; v1.1.1 voegt de HX1838 IR Receiver toe met signaal op Arduino Uno-shieldpin `D12`. De v1.1.0-tekeningset blijft de basis voor de ongewijzigde shieldhardware. Gebruik de [beschrijving van Stimulus Shield v1.1.1](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) samen met de [hardwarevalidatie v1.1.1](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md).
+Stimulus Shield v1.1.1 is de volledige opvolger van Stimulus Shield v1.1.0 en bevat de volledige v1.1.0-hardwarebasis plus de HX1838 IR Receiver met signaal op Arduino Uno-shieldpin `D12`. De volledige v1.1.1-tekeningset staat in de map Stimulus Shield v1.1.1. Gebruik de [beschrijving van Stimulus Shield v1.1.1](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) samen met de [hardwarevalidatie v1.1.1](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md).
 
 De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbruggen: zes tussen H9 en H10 en één tussen H3 pin 1 en H4 pin 1. Plaats nooit beide tegelijk.
 

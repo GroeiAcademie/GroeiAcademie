@@ -6,6 +6,7 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 
 | Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte UNO R3-geheugenbeperkingen | Onverwachte fouten | Opmerking |
 |--------|-------|:------------:|------------:|---:|------------------------------------:|-------------------:|-----------|
+| v1.1.1 | 25-08-2026 | GESLAAGD | 359 | 358 | 1 | 0 | GESLAAGD |
 | v1.1.0 | 21-08-2026 | GESLAAGD | 460 | 456 | 4 | 0 | GESLAAGD |
 | v1.0.4 | 04-08-2026 | ✅ (Alle onverwachte controles zijn OK bevonden.) | 188 | 184 | 4 | 0 | GESLAAGD |
 | v1.0.3 | 03-08-2026 | ✅ (overgenomen) | 188 | 184 | 4 | 0 | overgenomen van v1.0.2 — enkel documentatiecorrecties |
@@ -28,6 +29,22 @@ Voor v1.1.1 is de released HX1838-route met `HX1838_BRON_CODES_DEFINE` op de get
 De EEPROM-gebaseerde HX1838-routes blijven in v1.1.1 experimenteel.
 
 De volledige v1.1.1-releasevalidatie met de vier compilecycli is op dit moment nog niet als definitief releaseresultaat in de overzichtstabel opgenomen. De totaalaantallen worden pas na uitvoering van de bijgewerkte testmatrix vastgelegd.
+
+## Arduino LINT
+
+Status
+
+✅ Geslaagd — alle onverwachte controles zijn OK bevonden.
+
+
+## Compilatietesten
+
+- totaal: 359
+- OK: 358
+- verwachte UNO R3-geheugenbeperkingen: 1
+- onverwachte fouten: 0
+
+**Eindstatus: GESLAAGD**
 
 # v1.1.0
 

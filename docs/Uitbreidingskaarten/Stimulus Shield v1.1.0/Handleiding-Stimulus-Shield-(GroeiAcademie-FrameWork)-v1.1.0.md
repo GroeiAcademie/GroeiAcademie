@@ -350,10 +350,10 @@ Alle verdere gebruikersvragen worden uitgevoerd via de seriële monitor.
 
 Aanvullende Input-route in v1.1.0
 
-Naast de rechtstreekse keymatrix op H1 ondersteunt het v1.1.0-schema een optionele PCF8574-uitbreiding via U9/U10/H11.
+Naast de rechtstreekse keymatrix op H1 ondersteunt het v1.1.0-schema een optionele PCF8574-uitbreiding via U9/H12/H11.
 
 • U9 is het PCF8574-board;
-• U10 voert P0-P7 en INT uit;
+• H12 voert P0-P7 en INT uit;
 • H11 verbindt de module met SCL, SDA, GND en VCC van de gedeelde I2C-bus;
 • de software gebruikt hiervoor `INPUT_TYPE_PCF8574` en `I2C_ADDRESS_PCF8574`;
 • de OTRONIC OT8980 is de referentie-/testmodule.

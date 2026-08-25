@@ -268,7 +268,8 @@
 
 #if defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
 // HX1838_TOETSENINDELING_REMOTE_USER_DEFINED is in v1.1.1 uitsluitend beschikbaar met HX1838_BRON_CODES_DEFINE.
-// Geef het aantal toetsen, de commandcodes en de opschrift/weergavetekstkoppeling volledig in UserConfig.h op.
+// Geef het aantal toetsen en de opschrift/weergavetekstkoppeling volledig in UserConfig.h op.
+// HX1838_GENERIEK_CODES is optioneel: aanwezig = opgegeven codes gebruiken; afwezig = HX1838GeneriekCodesKalibreren() starten om de codes te bepalen.
 // De huidige HX1838-laag vergelijkt 8-bit commandwaarden (uint8_t).
 // #define HX1838_GENERIEK_AANTAL_TOETSEN 4
 // #define HX1838_GENERIEK_CODES {0x45UL, 0x46UL, 0x47UL, 0x44UL}
