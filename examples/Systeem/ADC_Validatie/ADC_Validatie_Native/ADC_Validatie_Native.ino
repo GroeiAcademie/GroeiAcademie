@@ -31,10 +31,10 @@
 #define BOARD_UNO_R3                     0
 #define BOARD_UNO_R4_MINIMA              1
 #define BOARD_UNO_R4_WIFI                2
-#define BOARD_ARDI32                     3
-#define BOARD_CYTRON_MAKER_UNO_RP2040    4
-#define BOARD_ESP32_UNO                  5
-#define BOARD_NUCLEO_F401RE              6
+#define BOARD_ESP32_D1_UNO_R32           5
+#define BOARD_ESP32S3_ARDI32             3
+#define BOARD_RP2040_CYTRON_MAKER_UNO    4
+#define BOARD_STM32F4_NUCLEO64_F401RE    6
 
 #ifndef BOARD_VERSION
   #define BOARD_VERSION BOARD_UNO_R3
@@ -44,13 +44,13 @@
   #define ADC_BITS 10
 #elif (BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI)
   #define ADC_BITS 14
-#elif BOARD_VERSION == BOARD_ARDI32
+#elif BOARD_VERSION == BOARD_ESP32S3_ARDI32
   #define ADC_BITS 12      // ESP32-S3 Arduino core: analogRead() standaard 12-bit
-#elif BOARD_VERSION == BOARD_ESP32_UNO
+#elif BOARD_VERSION == BOARD_ESP32_D1_UNO_R32
   #define ADC_BITS 12      // zie kanttekening in docs/Configuratie/SystemConfig.md
-#elif BOARD_VERSION == BOARD_CYTRON_MAKER_UNO_RP2040
+#elif BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
   #define ADC_BITS 10      // Earle Philhower RP2040 core: analogReadResolution() standaard 10-bit
-#elif BOARD_VERSION == BOARD_NUCLEO_F401RE
+#elif BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE
   #define ADC_BITS 10      // STM32duino: analogRead() standaard 10-bit voor Arduino-compatibiliteit
 #else
   #error Selecteer een geldige BOARD_VERSION.
@@ -64,6 +64,12 @@
 
 #define SERIAL_BAUDRATE 115200 
 
+#if defined(ARDUINO_ESP32S3_DEV)
+  #define GA_SERIAL Serial0
+#else
+  #define GA_SERIAL Serial
+#endif
+
 #include <Wire.h>
 
 const int sensorPin[STIMULUS_AANTAL_KANALEN] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
@@ -73,7 +79,7 @@ bool metingAfgerond = false;
 #ifndef PRINTTOSCREEN_BESTAAT_AL
 void PrintToScreen(const char* regel1, const char* regel2) {
 #ifdef DEBUG
-  Serial.print(F("[LCD] ")); Serial.print(regel1); Serial.print(F(" / ")); Serial.println(regel2);
+  GA_SERIAL.print(F("[LCD] ")); GA_SERIAL.print(regel1); GA_SERIAL.print(F(" / ")); GA_SERIAL.println(regel2);
 #endif
 }
 #endif
@@ -82,7 +88,7 @@ void InitialiseerADS1115Validatie() {
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
   if (!ads.begin(ADS1115_I2C_ADDRESS)) {
 #ifdef DEBUG
-    Serial.println(F("ADS1115 niet gevonden"));
+    GA_SERIAL.println(F("ADS1115 niet gevonden"));
 #endif
     PrintToScreen("ADS1115", "niet gevonden");
     ads1115Aanwezig = false;
@@ -130,12 +136,12 @@ void printStats() {
     double gemiddelde = s.som / s.n;
     double variantie = (s.somKwadraat / s.n) - (gemiddelde * gemiddelde);
     double stdev = sqrt(variantie > 0 ? variantie : 0.0);
-    Serial.print(F("Kanaal ")); Serial.print(k);
-    Serial.print(F(": n=")); Serial.print(s.n);
-    Serial.print(F(" gemiddelde=")); Serial.print(gemiddelde, 2);
-    Serial.print(F(" stdev=")); Serial.print(stdev, 3);
-    Serial.print(F(" min=")); Serial.print(s.minWaarde);
-    Serial.print(F(" max=")); Serial.println(s.maxWaarde);
+    GA_SERIAL.print(F("Kanaal ")); GA_SERIAL.print(k);
+    GA_SERIAL.print(F(": n=")); GA_SERIAL.print(s.n);
+    GA_SERIAL.print(F(" gemiddelde=")); GA_SERIAL.print(gemiddelde, 2);
+    GA_SERIAL.print(F(" stdev=")); GA_SERIAL.print(stdev, 3);
+    GA_SERIAL.print(F(" min=")); GA_SERIAL.print(s.minWaarde);
+    GA_SERIAL.print(F(" max=")); GA_SERIAL.println(s.maxWaarde);
   }
 }
 
@@ -149,19 +155,19 @@ void setup() {
   analogReadResolution(ADC_BITS);
 #endif
 
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 
   Wire.begin();
   InitialiseerADS1115Validatie();
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
-  Serial.println(F("=== Validatie: backend = ADS1115 ==="));
+  GA_SERIAL.println(F("=== Validatie: backend = ADS1115 ==="));
 #else
-  Serial.println(F("=== Validatie: backend = Arduino-ADC ==="));
+  GA_SERIAL.println(F("=== Validatie: backend = Arduino-ADC ==="));
 #endif
 
-  Serial.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
+  GA_SERIAL.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
   tStart = millis();
 }
 
@@ -179,9 +185,9 @@ void loop() {
   }
 
   if (nu - tStart >= VALIDATIE_DUUR_MS) {
-    Serial.println(F("--- Resultaat ---"));
+    GA_SERIAL.println(F("--- Resultaat ---"));
     printStats();
-    Serial.println(F("Meting voltooid."));
+    GA_SERIAL.println(F("Meting voltooid."));
     metingAfgerond = true;
   }
 }

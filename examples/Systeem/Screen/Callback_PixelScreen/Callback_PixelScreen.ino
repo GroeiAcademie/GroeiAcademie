@@ -25,7 +25,7 @@ void MijnPixelScreen(ScreenData screenData, const String& eersteRegel, const Str
   uint16_t kleur;
   switch (screenData) {
     case ScreenData::TYPE_FATAL:    kleur = PIXEL_SCREEN_KLEUR_FATAL;    break;
-    case ScreenData::TYPE_ERROR:    kleur = PIXEL_SCREEN_KLEUR_ERROR;    break;
+    case ScreenData::TYPE_FAULT:    kleur = PIXEL_SCREEN_KLEUR_FAULT;    break; 
     case ScreenData::TYPE_WARNING:  kleur = PIXEL_SCREEN_KLEUR_WARNING;  break;
     case ScreenData::TYPE_INFO:     kleur = PIXEL_SCREEN_KLEUR_INFO;     break;
     case ScreenData::TYPE_CRITICAL: kleur = PIXEL_SCREEN_KLEUR_CRITICAL; break;

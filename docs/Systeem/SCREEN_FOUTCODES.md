@@ -21,7 +21,7 @@ CRITICAL: SS001
 ZOEK DIT NU OP
 ```
 
-De twee schermtypes vallen wederzijds op elkaar terug: een PixelScreen-fout verschijnt op het CharacterScreen wanneer dat correct geconfigureerd en actief is; een CharacterScreen-fout verschijnt op het PixelScreen wanneer dát correct geconfigureerd en actief is. Is geen van beide beschikbaar, dan forceert de library Serial op 115200 baud en verschijnt dezelfde melding in de Serial Monitor. `DEBUG` en `SCREEN_TYPE_SERIAL` zijn daarvoor niet vereist. Is het andere schermtype wel beschikbaar, dan wordt Serial voor deze foutmelding niet geforceerd. Geen van beide foutmeldingsfuncties roept zelf een configuratiefunctie aan — dat voorkomt een oneindige lus (zie `docs/DECISION_LOG.md`, D022).
+De twee schermtypes vallen wederzijds op elkaar terug: een PixelScreen-fout verschijnt op het CharacterScreen wanneer dat correct geconfigureerd en actief is; een CharacterScreen-fout verschijnt op het PixelScreen wanneer dát correct geconfigureerd en actief is. Is geen van beide beschikbaar, dan forceert de library Serial op 115200 baud en verschijnt dezelfde melding in de Serial Monitor. `DEBUG` en `SCREEN_TYPE_SERIAL` zijn daarvoor niet vereist. Is het andere schermtype wel beschikbaar, dan wordt Serial voor deze foutmelding niet geforceerd. Geen van beide foutmeldingsfuncties roept zelf een configuratiefunctie aan: dat voorkomt een oneindige lus (zie `docs/DECISION_LOG.md`, D022).
 
 De volledige betekenis, controle en oplossing staan hieronder bij de gemelde foutcode.
 
@@ -40,7 +40,7 @@ De volledige betekenis, controle en oplossing staan hieronder bij de gemelde fou
 | [SS001: SerialScreen niet beschikbaar na timeout](#ss001) | De eerste normale SerialScreen-verbindingspoging werd niet binnen `SERIAL_CONNECT_TIMEOUT_MS` beschikbaar. |
 
 <a id="cs000"></a>
-## CS000 — CharacterScreenConfigureren() niet aangeroepen
+## CS000: CharacterScreenConfigureren() niet aangeroepen
 
 ### Melding
 
@@ -82,7 +82,7 @@ De library kan niet garanderen dat het characterscherm werkt, en toont daarom ge
 Roep `CharacterScreenConfigureren()` (of `ScreensConfigureren()`) aan in `setup()`, vóór de eerste `PrintToScreen()`-aanroep.
 
 <a id="cs001"></a>
-## CS001 — Geen I2C-antwoord
+## CS001: Geen I2C-antwoord
 
 ### Melding
 
@@ -120,7 +120,7 @@ De library kan het characterscherm niet aanspreken en schakelt de CharacterScree
 Herstel de I2C-verbinding of pas `I2C_ADRES` aan. Overweeg `CHARACTERSCREEN_I2C_ADRES_MODUS = 1` of `2` wanneer het adres regelmatig wisselt (zie `docs/DECISION_LOG.md`, D023).
 
 <a id="cs002"></a>
-## CS002 — Scherm gevonden op ander I2C-adres
+## CS002: Scherm gevonden op ander I2C-adres
 
 ### Melding
 
@@ -145,14 +145,14 @@ Vergelijk het gemelde `0xNN` met de huidige `I2C_ADRES`-instelling.
 
 ### Gevolg
 
-Geen zelfherstel in modus 1 — de configuratie wordt als mislukt beschouwd totdat `I2C_ADRES` overeenstemt met het werkelijke adres.
+Geen zelfherstel in modus 1: de configuratie wordt als mislukt beschouwd totdat `I2C_ADRES` overeenstemt met het werkelijke adres.
 
 ### Oplossing
 
 Pas `I2C_ADRES` aan naar het gemelde adres en hercompileer. Overweeg modus `2` wanneer je liever geen hercompilatie wil bij een wisselend adres (zie de afweging in `docs/DECISION_LOG.md`, D023).
 
 <a id="ps000"></a>
-## PS000 — PixelScreenConfigureren() niet aangeroepen
+## PS000: PixelScreenConfigureren() niet aangeroepen
 
 ### Melding
 
@@ -194,7 +194,7 @@ De library kan niet garanderen dat het pixelscherm werkt, en toont daarom geen n
 Roep `PixelScreenConfigureren()` (of `ScreensConfigureren()`) aan in `setup()`, ná het koppelen van `PixelScreen` en vóór de eerste `PrintToScreen()`-aanroep.
 
 <a id="ps001"></a>
-## PS001 — PixelScreen niet gekoppeld
+## PS001: PixelScreen niet gekoppeld
 
 ### Melding
 
@@ -239,7 +239,7 @@ De library kan het geselecteerde PixelScreen niet aanspreken en schakelt de Pixe
 Initialiseer de concrete displaydriver, stel de gewenste rotatie in, koppel het schermobject aan `PixelScreen` en roep daarna `PixelScreenConfigureren()` aan.
 
 <a id="ps002"></a>
-## PS002 — Omgewisselde breedte en hoogte komen niet overeen
+## PS002: Omgewisselde breedte en hoogte komen niet overeen
 
 ### Melding
 
@@ -284,7 +284,7 @@ De library kan de beschikbare schermbreedte, schermhoogte en tekstindeling niet 
 Corrigeer het geselecteerde schermtype, de initialisatieafmetingen of de rotatie zodat de door de driver gerapporteerde afmetingen overeenkomen met de verwachte omgewisselde afmetingen.
 
 <a id="ps003"></a>
-## PS003 — Niet-omgewisselde breedte en hoogte komen niet overeen
+## PS003: Niet-omgewisselde breedte en hoogte komen niet overeen
 
 ### Melding
 
@@ -329,7 +329,7 @@ De library kan de beschikbare schermbreedte, schermhoogte en tekstindeling niet 
 Corrigeer het geselecteerde schermtype, de initialisatieafmetingen of de rotatie zodat de door de driver gerapporteerde afmetingen overeenkomen met de verwachte niet-omgewisselde afmetingen.
 
 <a id="ps004"></a>
-## PS004 — Tekstgrid kleiner dan 16×2
+## PS004: Tekstgrid kleiner dan 16×2
 
 ### Melding
 
@@ -387,7 +387,7 @@ De standaard PixelScreen-uitvoer kan de minimale tekstweergave van 16×2 niet ga
 
 Gebruik een kleinere `PIXEL_SCREEN_TEXT_SIZE`, verklein `PIXEL_SCREEN_MARGIN`, `PIXEL_SCREEN_CHARACTER_SPACING` of `PIXEL_SCREEN_LINE_SPACING`, kies een PixelScreen met een grotere bruikbare resolutie of corrigeer de schermconfiguratie wanneer de gemeten breedte en hoogte niet kloppen.
 <a id="ss001"></a>
-## SS001 — SerialScreen niet beschikbaar na timeout
+## SS001: SerialScreen niet beschikbaar na timeout
 
 ### Melding
 
@@ -398,7 +398,7 @@ ZOEK DIT NU OP
 
 ### Trigger
 
-De eerste normale `SerialScreenConfigureren()`-poging heeft `Serial.begin(SERIAL_BAUDRATE)` uitgevoerd, maar `Serial` werd niet beschikbaar binnen `SERIAL_CONNECT_TIMEOUT_MS`.
+De eerste normale `SerialScreenConfigureren()`-poging heeft `GA_SERIAL.begin(SERIAL_BAUDRATE)` uitgevoerd, maar de seriële interface werd niet beschikbaar binnen `SERIAL_CONNECT_TIMEOUT_MS`.
 
 ### Gedrag
 

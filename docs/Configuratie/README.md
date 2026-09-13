@@ -30,4 +30,4 @@ De wrapper waarmee de voorbeeldprogramma's de gekozen `Examples_XX.h` laden, hee
 src/Configuratie/Examples.h
 ```
 
-- [ExamplesConfig.h](ExamplesConfig.md) — gedeelde, per script overschrijfbare instellingen voor de examples.
+- [ExamplesConfig.h](ExamplesConfig.md): gedeelde, per script overschrijfbare instellingen voor de examples.

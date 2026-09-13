@@ -44,21 +44,21 @@ if not errorlevel 1 (
 )
 
 
-:: Paden die door TestLibraryNieuw.cmd getest worden dienen we hier op te geven.
+:: Paden die door TestLibraryGereleased.cmd niet getest mogen worden dienen we hier op te geven.
 :: Bij meerdere uit te sluiten directories geven we deze na elkaar op gescheiden door een spatie
 :: bv: set "UITGESLOTEN_OMDAT_ZE_DEEL_UITMAKEN_VAN_NIEUW=\examples\Systeem\Input\ \examples\Systeem\andereSubdirectorie\"
-set "UITGESLOTEN_OMDAT_ZE_DEEL_UITMAKEN_VAN_NIEUW=\examples\Systeem\Input\"
+set "UITGESLOTEN_OMDAT_ZE_DEEL_UITMAKEN_VAN_NIEUW=\examples\Systeem\Input\ \examples\Systeem\GedeeldeBus\"
 
 :: 0 = zonder DEBUG testen, 1 = met DEBUG testen
 set "DEBUG_TEST=0"
 
-:: v1.1.1 teststrategie:
+:: v1.1.2 teststrategie:
 :: - Arduino UNO R4 Minima is het referentieboard voor de volledige gereleasete regressiematrix.
 :: - De andere officieel ondersteunde boards krijgen een minimale gerichte regressietest.
 :: - De experimentele acceptatieboards krijgen dezelfde minimale test zonder release-impact.
 set "BOARDS=arduino:renesas_uno:minima"
 set "MINIMALE_OFFICIELE_BOARDS=arduino:avr:uno arduino:renesas_uno:unor4wifi esp32:esp32:d1_uno32"
-set ACCEPTATIE_BOARDS="rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:esp32s3"
+set ACCEPTATIE_BOARDS="arduino:zephyr:unoq" "rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:esp32s3"
 
 set /A TESTS=0
 set /A OK=0
@@ -122,6 +122,7 @@ for %%A in ("%TEMP%\GA_InputHardcoded.txt") do set "HARDCODED_SIZE=%%~zA"
 if !HARDCODED_SIZE! GTR 0 (
     echo FOUT: Hardcoded gebruikerstekst gevonden in Input.cpp.
     type "%TEMP%\GA_InputHardcoded.txt"
+    set /A TESTS+=1
     set /A FAIL+=1
 )
 del "%TEMP%\GA_InputHardcoded.txt" >nul 2>&1
@@ -138,7 +139,7 @@ for %%B in (%BOARDS%) do (
     if "%%B"=="arduino:avr:uno"               set "BOARD_VERSION_TEST=BOARD_UNO_R3"
     if "%%B"=="arduino:renesas_uno:minima"    set "BOARD_VERSION_TEST=BOARD_UNO_R4_MINIMA"
     if "%%B"=="arduino:renesas_uno:unor4wifi" set "BOARD_VERSION_TEST=BOARD_UNO_R4_WIFI"
-    if "%%B"=="esp32:esp32:d1_uno32"          set "BOARD_VERSION_TEST=BOARD_ESP32_UNO"
+    if "%%B"=="esp32:esp32:d1_uno32"          set "BOARD_VERSION_TEST=BOARD_ESP32_D1_UNO_R32"
 
     if not defined BOARD_VERSION_TEST (
         echo FOUT: geen BOARD_VERSION gekoppeld aan %%B.
@@ -296,19 +297,21 @@ echo ============================================================
 echo MINIMALE REGRESSIE OP ACCEPTATIEBOARDS
 echo ============================================================
 for %%B in (%ACCEPTATIE_BOARDS%) do call :TEST_MINIMAAL_BOARD "%%~B" ACCEPTATIE
+call :TEST_MINIMAAL_BOARD "esp32:esp32:esp32s3" ACCEPTATIE BOARD_ESP32S3_DEV
 
 echo.
 echo ============================================================
 echo TESTRESULTAAT
 echo ============================================================
-echo Totaal getest                         : !TESTS!
-echo OK bevonden                           : !OK!
-echo Verwachte UNO R3-geheugenbeperkingen : !EXPECTED_MEMORY!
-echo Onverwacht mislukt                    : !FAIL!
-echo Acceptatietests                         : !ACCEPTATIE_TESTS!
-echo Acceptatietests OK                      : !ACCEPTATIE_OK!
+echo Totaal getest                                : !TESTS!
+echo OK bevonden                                  : !OK!
+echo Verwachte UNO R3-geheugenbeperkingen         : !EXPECTED_MEMORY!
+echo Onverwacht mislukt                           : !FAIL!
+echo Acceptatietests                              : !ACCEPTATIE_TESTS!
+echo Acceptatietests OK                           : !ACCEPTATIE_OK!
 echo Acceptatietests verwachte dependencybeperking: !ACCEPTATIE_EXPECTED_DEPENDENCY!
-echo Acceptatietests FOUT                    : !ACCEPTATIE_FAIL! ^(geen release-impact^)
+echo Acceptatietests FOUT                         : !ACCEPTATIE_FAIL! 
+
 if !LINT_FAIL!==0 (
     echo Arduino LINT                         : GESLAAGD
 ) else (
@@ -316,7 +319,8 @@ if !LINT_FAIL!==0 (
 )
 echo ============================================================
 
-set /A TOTAL_FAIL=FAIL+LINT_FAIL
+set /A TOTAL_FAIL=FAIL+LINT_FAIL+ACCEPTATIE_FAIL
+
 if !TOTAL_FAIL!==0 (
     echo Alle onverwachte controles zijn OK bevonden.
     if !EXPECTED_MEMORY! GTR 0 echo !EXPECTED_MEMORY! gekende UNO R3-geheugenbeperkingen zijn afzonderlijk geregistreerd.
@@ -407,11 +411,11 @@ call :COMPILE_STABIELE_INPUT
 set "TEST_NAAM=INPUT_TYPE_PCF8574 | UITGEBREIDE NON-BLOCKING EVENTS"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 -DINPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID -DINPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS=1000UL"
 call :COMPILE_STABIELE_INPUT
-call :COMPILE_STABIELE_INPUT_STIMULUS
 goto :eof
 
 :COMPILE_STABIELE_INPUT
 set "EXAMPLE_METARGUMENTEN="
+
 if not "!TEST_FLAGS:INPUT_TYPE_NONE=!"=="!TEST_FLAGS!" (
     set "EXAMPLE=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik"
 ) else if not "!TEST_FLAGS:KEYPAD_TYPE_USER_DEFINED_DIRECT=!"=="!TEST_FLAGS!" (
@@ -434,6 +438,7 @@ set /A TESTS+=1
 "%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS! !BOARD_FLAGS!" "!EXAMPLE!" >"%TEMP%\GA_ReleasedInputCompile.txt" 2>&1
 set "COMPILE_RESULT=!errorlevel!"
 type "%TEMP%\GA_ReleasedInputCompile.txt"
+
 if "!COMPILE_RESULT!"=="0" (
     set "GEHEUGEN_BOARD=%BOARD%"
     set "GEHEUGEN_BESTAND=!EXAMPLE_BESTAND!"
@@ -445,6 +450,7 @@ if "!COMPILE_RESULT!"=="0" (
     echo [FOUT][OFFICIEEL] %BOARD% ^| !TEST_NAAM!
     set /A FAIL+=1
 )
+
 del "%TEMP%\GA_ReleasedInputCompile.txt" >nul 2>&1
 
 if defined EXAMPLE_METARGUMENTEN (
@@ -456,6 +462,7 @@ if defined EXAMPLE_METARGUMENTEN (
     "%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS! !BOARD_FLAGS!" "!EXAMPLE_METARGUMENTEN!" >"%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt" 2>&1
     set "COMPILE_RESULT=!errorlevel!"
     type "%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt"
+
     if "!COMPILE_RESULT!"=="0" (
         set "GEHEUGEN_BOARD=%BOARD%"
         set "GEHEUGEN_BESTAND=!EXAMPLE_METARGUMENTEN_BESTAND!"
@@ -467,44 +474,28 @@ if defined EXAMPLE_METARGUMENTEN (
         echo [FOUT][OFFICIEEL] %BOARD% ^| !TEST_NAAM! ^| metArgumenten
         set /A FAIL+=1
     )
-    del "%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt" >nul 2>&1
-)
-goto :eof
 
-:COMPILE_STABIELE_INPUT_STIMULUS
-for %%E in (examples\Systeem\Input\Input_Test_Scenario1_EnkelTik examples\Systeem\Input\Input_Test_Scenario2_Simultaan examples\Systeem\Input\Input_Test_Scenario3_Ineenstortend examples\Systeem\Input\Input_Test_Scenario4_Cocktail examples\Systeem\Input\Input_Test_Tik_Enkele_Samen_Instortend_Cocktail) do (
-    echo ------------------------------------------------------------
-    echo Compileren van: %%E\%%~nxE.ino
-    echo INPUT + STIMULUS ^| %%~nxE
-    set /A TESTS+=1
-    "%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !BOARD_FLAGS!" "%%E" >"%TEMP%\GA_ReleasedInputStimulus.txt" 2>&1
-    set "COMPILE_RESULT=!errorlevel!"
-    type "%TEMP%\GA_ReleasedInputStimulus.txt"
-    if "!COMPILE_RESULT!"=="0" (
-        set "GEHEUGEN_BOARD=%BOARD%"
-        set "GEHEUGEN_BESTAND=%%~nxE.ino"
-        set "GEHEUGEN_TEST=INPUT + STIMULUS | %%~nxE"
-        set "GEHEUGEN_STATUS=OK"
-        call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_ReleasedInputStimulus.txt"
-        set /A OK+=1
-    ) else (
-        echo [FOUT][OFFICIEEL] %BOARD% ^| %%~nxE
-        set /A FAIL+=1
-    )
-    del "%TEMP%\GA_ReleasedInputStimulus.txt" >nul 2>&1
+    del "%TEMP%\GA_ReleasedInputCompileMetArgumenten.txt" >nul 2>&1
 )
 goto :eof
 
 :TEST_MINIMAAL_BOARD
 set "MIN_BOARD=%~1"
 set "MIN_MODE=%~2"
+set "MIN_BOARD_PROFIEL=%~3"
 set "MIN_BOARD_FLAGS="
 if "%MIN_BOARD%"=="arduino:avr:uno" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R3"
 if "%MIN_BOARD%"=="arduino:renesas_uno:unor4wifi" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_WIFI"
-if "%MIN_BOARD%"=="esp32:esp32:d1_uno32" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_UNO"
-if "%MIN_BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_CYTRON_MAKER_UNO_RP2040"
-if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_NUCLEO_F401RE"
-if "%MIN_BOARD%"=="esp32:esp32:esp32s3" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ARDI32"
+if "%MIN_BOARD%"=="arduino:zephyr:unoq" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_Q"
+if "%MIN_BOARD%"=="esp32:esp32:d1_uno32" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_D1_UNO_R32"
+if "%MIN_BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_RP2040_CYTRON_MAKER_UNO"
+if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_STM32F4_NUCLEO64_F401RE"
+
+if "%MIN_BOARD%"=="esp32:esp32:esp32s3" (
+    if not defined MIN_BOARD_PROFIEL set "MIN_BOARD_PROFIEL=BOARD_ESP32S3_ARDI32"
+    set "MIN_BOARD_FLAGS=-DBOARD_VERSION=!MIN_BOARD_PROFIEL!"
+)
+
 if not defined MIN_BOARD_FLAGS (
     echo [FOUT] Geen BOARD_VERSION gekoppeld aan %MIN_BOARD%.
     if "%MIN_MODE%"=="OFFICIEEL" (set /A FAIL+=1) else set /A ACCEPTATIE_FAIL+=1
@@ -513,7 +504,10 @@ if not defined MIN_BOARD_FLAGS (
 
 set "MIN_VERWACHT_GEHEUGEN=0"
 set "MIN_VERWACHT_DEPENDENCY=0"
-if "%MIN_BOARD%"=="esp32:esp32:esp32s3" (
+set "MIN_TEST_AUTODETECT=1"
+if "%MIN_BOARD%"=="esp32:esp32:esp32s3" if "%MIN_BOARD_PROFIEL%"=="BOARD_ESP32S3_ARDI32" set "MIN_TEST_AUTODETECT=0"
+
+if "%MIN_TEST_AUTODETECT%"=="0" (
     echo [N.V.T.][%MIN_MODE%] %MIN_BOARD% ^| AUTOMATISCHE BOARDDETECTIE ^| generieke ESP32S3 Dev Module identificeert een fysieke Ardi32 niet automatisch
 ) else (
     set "MIN_TEST_NAAM=AUTOMATISCHE BOARDDETECTIE | DIGITAL"
@@ -536,8 +530,8 @@ set "MIN_GEBRUIK_BOARD_FLAGS=1"
 set "MIN_VERWACHT_DEPENDENCY=0"
 if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_VERWACHT_DEPENDENCY=1"
 call :COMPILE_MINIMAAL
-set "MIN_VERWACHT_DEPENDENCY=0"
 
+set "MIN_VERWACHT_DEPENDENCY=0"
 set "MIN_TEST_NAAM=Stimulus basis | SCREEN_TYPE_NONE"
 set "MIN_TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=0"
 set "MIN_EXAMPLE=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik"
@@ -576,7 +570,7 @@ call :COMPILE_MINIMAAL
 
 set "MIN_TEST_NAAM=Input + Stimulus representatief"
 set "MIN_TEST_FLAGS="
-set "MIN_EXAMPLE=examples\Systeem\Input\Input_Test_Scenario1_EnkelTik"
+set "MIN_EXAMPLE=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik"
 set "MIN_GEBRUIK_BOARD_FLAGS=1"
 call :COMPILE_MINIMAAL
 

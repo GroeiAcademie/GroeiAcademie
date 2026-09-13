@@ -73,7 +73,7 @@ Belangrijkste instellingen:
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
 // #define KEYPAD_TYPE KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
 // #define I2C_ADDRESS_PCF8574 0x20
-// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D12
+// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D8
 // #define HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
 // #define HX1838_TOETSENINDELING HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
@@ -84,9 +84,9 @@ Belangrijkste instellingen:
 
 Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`.
 
-De standaard HX1838-ontvangerpin is vanaf v1.1.1 D12. `HX1838_BRON_CODES_DEFINE` gaat in v1.1.1 van experimenteel naar released en is op de geteste hardwareopstelling met D12 bevestigd voor zowel TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) als IRremote (`= 0`); beide routes werken. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
+`HX1838_BRON_CODES_DEFINE` is released en is hardwarematig bevestigd voor zowel TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) als IRremote (`= 0`); beide routes werken. De standaard `HX1838_ONTVANGER_PIN` is D8. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 
-Voor de drie ingebouwde HX1838-toetsenindelingen kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. Bij `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` zijn `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` verplicht. `HX1838_GENERIEK_CODES` mag als vaste DEFINE-mapping worden ingevuld; wanneer deze ontbreekt, start automatisch de UserDefined-kalibratie om de codes te bepalen. In v1.1.1 worden voor deze UserDefined-route geen EEPROM-codebronnen ondersteund. De huidige UserDefined-codes zijn 8-bit commandwaarden (`uint8_t`).
+Voor de drie ingebouwde HX1838-toetsenindelingen kunnen `HX1838_CODE_1` tot en met `HX1838_CODE_21` als vaste mapping worden ingevuld. Bij `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` zijn `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` verplicht. `HX1838_GENERIEK_CODES` mag als vaste DEFINE-mapping worden ingevuld; wanneer deze ontbreekt, start automatisch de UserDefined-kalibratie om de codes te bepalen. Voor deze UserDefined-route worden geen EEPROM-codebronnen ondersteund. De huidige UserDefined-codes zijn 8-bit commandwaarden (`uint8_t`).
 
 Voor de ingebouwde indelingen geldt verder: `HX1838_BRON_CODES_DEFINE` gebruikt de vaste mapping; codes die niet in `UserConfig.h` zijn gedefinieerd, worden door `SystemConfig.h` met de standaardcodes aangevuld. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
 
@@ -108,13 +108,15 @@ Het template bevat de huidige instelbare waarden voor:
 `BOARD_VERSION` blijft een algemene boardkeuze en staat buiten de keuze tussen de Native ADC en ADS1115. De beschikbare waarden zijn:
 
 ```cpp
-#define BOARD_UNO_R3                     0
-#define BOARD_UNO_R4_MINIMA              1
-#define BOARD_UNO_R4_WIFI                2
-#define BOARD_ARDI32                     3
-#define BOARD_CYTRON_MAKER_UNO_RP2040    4
-#define BOARD_ESP32_UNO                  5
-#define BOARD_NUCLEO_F401RE              6
+#define BOARD_UNO_R3                       0
+#define BOARD_UNO_R4_MINIMA                1
+#define BOARD_UNO_R4_WIFI                  2
+#define BOARD_UNO_Q                        7
+#define BOARD_ESP32_D1_UNO_R32             5
+#define BOARD_ESP32S3_ARDI32               3
+#define BOARD_ESP32S3_DEV                  8
+#define BOARD_RP2040_CYTRON_MAKER_UNO      4
+#define BOARD_STM32F4_NUCLEO64_F401RE      6
 ```
 
 Selecteer het bord met één regel:
@@ -123,7 +125,7 @@ Selecteer het bord met één regel:
 #define BOARD_VERSION BOARD_UNO_R3
 ```
 
-`SystemConfig.h` leidt `ADC_BITS` automatisch af uit `ADC_BACKEND` en `BOARD_VERSION`. `DELAY_US` blijft via `UserConfig.h` aanpasbaar en krijgt anders de van het Arduino Uno R3-vormfactorbord en de backend afhankelijke fallback uit `SystemConfig.h`. Voor `BOARD_ESP32_UNO` blijft `DELAY_US 0` een te valideren keuze voor de concrete meetopstelling; zie `SystemConfig.md`.
+`SystemConfig.h` leidt `ADC_BITS` automatisch af uit `ADC_BACKEND` en `BOARD_VERSION`. `DELAY_US` blijft via `UserConfig.h` aanpasbaar en krijgt anders de van het Arduino Uno R3-vormfactorbord en de backend afhankelijke fallback uit `SystemConfig.h`. Voor `BOARD_ESP32_D1_UNO_R32` blijft `DELAY_US 0` een te valideren keuze voor de concrete meetopstelling; zie `SystemConfig.md`.
 
 ## Actief gebruikersbestand
 
@@ -134,14 +136,14 @@ src/Configuratie/UserConfig.h
 Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel van iedere release. `.gitignore` beschermt het actieve bestand bij Git-gebruik; verwijder of vervang je de volledige librarymap handmatig, maak dan eerst een reservekopie van het actieve gebruikersbestand.
 
 
-### BOARD_ESP32_UNO
+### BOARD_ESP32_D1_UNO_R32
 
-`BOARD_ESP32_UNO` is het configuratieprofiel voor Arduino Uno R3-vormfactor ESP32-borden. De compilatiematrix gebruikt boardprofiel `WEMOS D1 R32` met FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor. WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd; de fysieke hardwarevalidatie van WEMOS D1 R32 en andere varianten wordt afzonderlijk vastgelegd.
+`BOARD_ESP32_D1_UNO_R32` is het configuratieprofiel voor Arduino Uno R3-vormfactor ESP32-borden. De compilatiematrix gebruikt boardprofiel `WeMos D1 R32` met FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U). In de dependencycontrole worden beide gezamenlijk aangeduid als `ESP32-WROOM-32U` en gebruiken ze FQBN `esp32:esp32:d1_uno32`. WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest; andere compatibele varianten blijven afzonderlijk te valideren.
 
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
-`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_UNO` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. De keypad-specifieke `KEYPAD_PIN_...`-mapping voor `INPUT_TYPE_DIGITAL` gebruikt deze shieldnamen en wordt daarna gekoppeld aan de bestaande `PIN_TOETS_1` tot en met `PIN_TOETS_4`; `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
+`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. De keypad-specifieke `KEYPAD_PIN_...`-mapping voor `INPUT_TYPE_DIGITAL` gebruikt deze shieldnamen en wordt daarna gekoppeld aan de bestaande `PIN_TOETS_1` tot en met `PIN_TOETS_4`; `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven. Dit geldt ook voor de actieve `BOARD_STM32F4_NUCLEO64_F401RE`-mapping: D0-D13, A0-A5, SDA/SCL en SS/MOSI/MISO/SCK zijn elk afzonderlijk met `#ifndef` beschermd.
 
 
 Beschikbare HX1838-toetsenindelingen:
@@ -149,7 +151,7 @@ Beschikbare HX1838-toetsenindelingen:
 - `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN`: remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]
 - `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN`: remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]
 - `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`        : remote met 21 toetsen, inclusief de MP3-toetsen.
-- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED`          : eigen toetsenindeling; in v1.1.1 uitsluitend met `HX1838_BRON_CODES_DEFINE`. Stel `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` in `UserConfig.h` in. `HX1838_GENERIEK_CODES` is optioneel: ontbreekt deze define, dan start automatisch de UserDefined-kalibratie.
+- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED`          : eigen toetsenindeling; uitsluitend met `HX1838_BRON_CODES_DEFINE`. Stel `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` in `UserConfig.h` in. `HX1838_GENERIEK_CODES` is optioneel: ontbreekt deze define, dan start automatisch de UserDefined-kalibratie.
 
 ## Input-specifieke gebruikersinstellingen
 

@@ -6,11 +6,32 @@ De versienummers volgen de versie in `library.properties`.
 
 ## [Unreleased]
 
+## 1.1.2
+
+### Boardnamen en Arduino Uno-shieldpinmapping
+
+- de vier aanvullende boardconstanten gebruiken vanaf v1.1.2 consequent de canonieke architectuur- en boardfamilienamen `BOARD_ESP32_D1_UNO_R32`, `BOARD_ESP32S3_ARDI32`, `BOARD_RP2040_CYTRON_MAKER_UNO` en `BOARD_STM32F4_NUCLEO64_F401RE`, met behoud van hun bestaande numerieke waarden;
+- alle code, testscripts, voorbeelden en Markdowndocumentatie in het pakket zijn naar deze vier namen bijgewerkt;
+- `BOARD_STM32F4_NUCLEO64_F401RE` heeft nu een actieve Arduino Uno-shieldheader-mapping voor D0-D13, A0-A5, SDA/SCL en SS/MOSI/MISO/SCK; iedere `ARDUINO_UNO_SHIELD_PIN_...`-fallback is afzonderlijk met `#ifndef` beschermd zodat `UserConfig.h` per pin kan overschrijven;
+- de Cytron Maker UNO RP2040- en Ardi32-header-mapping blijven expliciet per board vastgelegd; de WeMos/TTGO D1 R32 (ESP32-WROOM-32U)-route gebruikt de `D0`-t.e.m.-`D13`-namen van de geselecteerde Espressif-boardvariant;
+- generieke `GPIO0` t.e.m. `GPIO49`-labels zijn centraal in `SystemConfig.h` beschikbaar gemaakt voor leesbare board-specifieke mappings;
+- referentiebestanden voor de STM32 Nucleo-F401RE, Cytron Maker UNO RP2040 en Arduino UNO R4 Minima zijn toegevoegd onder `docs/ArduinoUnoVormfactorBoards/`.
+- hardwarevalidatiestatus bijgewerkt: WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn hardwarematig getest en succesvol; Cytron Maker UNO RP2040 is hardwarematig getest en succesvol, behalve PixelScreen.
+
+### Configuratie en Input
+
+- `SystemConfig.h` is structureel herschikt zodat de officiële fallbackinstellingen dezelfde logische secties volgen als `UserConfig_template.h`; de gebruikersconfiguratie blijft vóór de fallbacks geladen en afzonderlijke instellingen blijven met `#ifndef` overschrijfbaar;
+- `UserConfig_template.h` is overeenkomstig uitgebreid en geordend zodat de actuele instelbare waarden en board-/pinmapping zichtbaar naast de officiële `SystemConfig.h`-structuur staan;
+- de compile-time controle op een HX1838-ontvangerpin die samenvalt met een PixelScreen-pin meldt nu per concreet conflict een gerichte `#warning` (MOSI, MISO, SCK, CS, DC of RST) in plaats van één gecombineerde `#error`;
+
+### Stimulus Shield v1.1.2
+
+- de foutieve voorgangers zijn uit de actuele release verwijderd;
+- uitsluitend de tekeningset en documentatie onder `docs/Uitbreidingskaarten/Stimulus Shield v1.1.2/` gelden als hardwarebron;
+- HX1838 DATA gebruikt Arduino Uno-shieldpin `D8`;
+- PixelScreen RST gebruikt Arduino Uno-shieldpin `D7`.
+
 ## 1.1.1
-
-### Stimulus Shield v1.1.1
-
-- Stimulus Shield v1.1.1 = Stimulus Shield v1.1.0 + HX1838 IR Receiver; de bestaande v1.1.0-hardwarebasis blijft behouden en de HX1838-signaalaansluiting gebruikt Arduino Uno-shieldpin `D12`.
 
 ### HX1838
 
@@ -63,7 +84,7 @@ De versienummers volgen de versie in `library.properties`.
 
 ### Boards en hardware
 
-- boardindeling uitgebreid met `BOARD_ARDI32`, `BOARD_CYTRON_MAKER_UNO_RP2040` en `BOARD_NUCLEO_F401RE` als experimentele v1.1.0-ondersteuning;
+- boardindeling uitgebreid met `BOARD_ESP32S3_ARDI32`, `BOARD_RP2040_CYTRON_MAKER_UNO` en `BOARD_STM32F4_NUCLEO64_F401RE` als experimentele v1.1.0-ondersteuning;
 - het Stimulus Shield v1.1.0-schema en de bijhorende documentatie bevatten de PCF8574-uitbreiding naast het bestaande directe keymatrixpad;
 - de nieuwe boards blijven in acceptatiefase tot hun fysieke hardwarevalidatie is afgerond.
 
@@ -84,28 +105,28 @@ De versienummers volgen de versie in `library.properties`.
 
 ## 1.0.4
 
-### Screen-laag — CharacterScreen-configuratie, symmetrisch met PixelScreen
+### Screen-laag: CharacterScreen-configuratie, symmetrisch met PixelScreen
 
-- **Nieuw:** `CharacterScreenConfigureren()` — doet een echte I2C-handdruk vóór `lcd.init()`/`lcd.backlight()`, symmetrisch met de bestaande `PixelScreenConfigureren()`. Vervangt de rechtstreekse `lcd.init(); lcd.backlight();`-aanroepen in alle betrokken voorbeelden;
-- **Nieuw:** `ScreensConfigureren()` — optionele gemakslaag die, aan de hand van `SCREEN_OUTPUT`, automatisch enkel de nodige configuratiefunctie(s) aanroept. Geen deprecatie van `CharacterScreenConfigureren()`/`PixelScreenConfigureren()`, die blijven de granulaire, expliciete route (zie `docs/DECISION_LOG.md`, D022);
-- **Nieuw:** `CHARACTERSCREEN_I2C_ADRES_MODUS` (0/1/2, standaard `1`) — laat `CharacterScreenConfigureren()` een kort lijstje bekende I2C-adressen aftasten wanneer het geconfigureerde `I2C_ADRES` niet reageert, met per modus een ander gevolg (geen scan / scan + rapporteren / scan + automatisch herbouwen). Zie `docs/DECISION_LOG.md`, D023, en de impact-tabel in `UserConfig_template.h`;
+- **Nieuw:** `CharacterScreenConfigureren()`: doet een echte I2C-handdruk vóór `lcd.init()`/`lcd.backlight()`, symmetrisch met de bestaande `PixelScreenConfigureren()`. Vervangt de rechtstreekse `lcd.init(); lcd.backlight();`-aanroepen in alle betrokken voorbeelden;
+- **Nieuw:** `ScreensConfigureren()`: optionele gemakslaag die, aan de hand van `SCREEN_OUTPUT`, automatisch enkel de nodige configuratiefunctie(s) aanroept. Geen deprecatie van `CharacterScreenConfigureren()`/`PixelScreenConfigureren()`, die blijven de granulaire, expliciete route (zie `docs/DECISION_LOG.md`, D022);
+- **Nieuw:** `CHARACTERSCREEN_I2C_ADRES_MODUS` (0/1/2, standaard `1`): laat `CharacterScreenConfigureren()` een kort lijstje bekende I2C-adressen aftasten wanneer het geconfigureerde `I2C_ADRES` niet reageert, met per modus een ander gevolg (geen scan / scan + rapporteren / scan + automatisch herbouwen). Zie `docs/DECISION_LOG.md`, D023, en de impact-tabel in `UserConfig_template.h`;
 - **Breaking change, bewust aanvaard:** de impliciete auto-configuratie van het pixelscherm (`if (pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief) PixelScreenConfigureren();`) is volledig verwijderd, zonder fallback. Een sketch die vandaag werkt zonder expliciete `PixelScreenConfigureren()`-aanroep, werkt na deze update niet meer. Aanvaard omdat er nog geen gekende externe gebruikers zijn (zelfde redenering als D020);
 - `PrintToScreenIntern()` toont voortaan, maximaal één keer, een duidelijke foutmelding (`CS000`/`PS000` bij een vergeten configuratie-aanroep, de opgeslagen foutcode bij een mislukte configuratie) in plaats van de aanroep stil te laten mislukken;
 - nieuwe foutcodes `_FATAL_CS000`, `_FATAL_CS001`, `_FATAL_CS002` en `_FATAL_PS000` toegevoegd aan de vier taalbestanden; bestaande `_FATAL_PS001`–`_FATAL_PS004` ongewijzigd;
 - `PixelScreenFoutmeldingWeergeven()` gebruikt voortaan enkel een reeds geconfigureerd en werkend characterscherm als terugvalpad (voorheen onvoorwaardelijk); nieuwe, symmetrische `CharacterScreenFoutmeldingWeergeven()` doet hetzelfde in de andere richting;
-- **Vereist een volledige nieuwe testronde** (niet overgenomen van v1.0.0): dit wijzigt echt gedrag, in tegenstelling tot v1.0.2/v1.0.3. Resultaten volgen in `extras/TESTRESULTATEN.md` zodra de compilatiematrix op echte hardware is uitgevoerd — inclusief empirische bevestiging van de placement-new (modus 2) op AVR (UNO R3);
+- **Vereist een volledige nieuwe testronde** (niet overgenomen van v1.0.0): dit wijzigt echt gedrag, in tegenstelling tot v1.0.2/v1.0.3. Resultaten volgen in `extras/TESTRESULTATEN.md` zodra de compilatiematrix op echte hardware is uitgevoerd: inclusief empirische bevestiging van de placement-new (modus 2) op AVR (UNO R3);
 - **Bugfix tijdens eigen validatie ontdekt (vóór publicatie):** `PixelScreenConfigureren()` zette `pixelScreenActief` niet op `true` bij een geslaagde configuratie, waardoor `PrintToScreenIntern()` een geslaagde pixelscherm-configuratie als mislukt beschouwde. Bij CHARACTER+PIXELS samen leidde dit tot een lege foutmelding op het characterscherm en geen enkele uitvoer op het pixelscherm. Gecorrigeerd vóór release;
-- `docs/Systeem/PIXELSCREEN_FOUTCODES.md` hernoemd naar `docs/Systeem/SCREEN_FOUTCODES.md` en aangevuld met `CS000`, `CS001`, `CS002` en `PS000` — voorheen enkel PS001–PS004 gedocumenteerd, waardoor de nieuwe CharacterScreen-foutcodes nergens terug te vinden waren voor wie de "ZOEK DIT NU OP"-instructie opvolgde;
-- **Naar aanleiding van code review, vóór publicatie:** het configuratiecontroleblok in `PrintToScreenIntern()` geldt voortaan enkel voor de ingebouwde hardware — is er een callback geregistreerd, dan wordt die niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is (zie `docs/DECISION_LOG.md`, D024);
-- **Naar aanleiding van code review, vóór publicatie:** `PixelScreenPrint()` tekent niet langer buiten het berekende grid — tekst die niet meer past binnen de resterende kolommen/regels wordt afgekapt in plaats van zichtbaar buiten het grid getekend; `cursorRegel` wordt begrensd zodat opeenvolgende te lange teksten nooit onder het grid kunnen belanden;
-- **Nieuw:** `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()` krijgen een optionele `opnieuwProberen`-parameter (standaard `false`, dus geen enkel bestaand voorbeeld hoeft aangepast). Enkel bij expliciet `true` wordt een eerder gecontroleerde configuratie opnieuw geprobeerd — nuttig na een fysieke aansluiting tijdens het draaien, zonder reset van de microcontroller. Niet bedoeld om automatisch (bv. in `loop()`) aan te roepen: elke poging doet een echte I2C-transactie.
+- `docs/Systeem/PIXELSCREEN_FOUTCODES.md` hernoemd naar `docs/Systeem/SCREEN_FOUTCODES.md` en aangevuld met `CS000`, `CS001`, `CS002` en `PS000`: voorheen enkel PS001–PS004 gedocumenteerd, waardoor de nieuwe CharacterScreen-foutcodes nergens terug te vinden waren voor wie de "ZOEK DIT NU OP"-instructie opvolgde;
+- **Naar aanleiding van code review, vóór publicatie:** het configuratiecontroleblok in `PrintToScreenIntern()` geldt voortaan enkel voor de ingebouwde hardware: is er een callback geregistreerd, dan wordt die niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is (zie `docs/DECISION_LOG.md`, D024);
+- **Naar aanleiding van code review, vóór publicatie:** `PixelScreenPrint()` tekent niet langer buiten het berekende grid: tekst die niet meer past binnen de resterende kolommen/regels wordt afgekapt in plaats van zichtbaar buiten het grid getekend; `cursorRegel` wordt begrensd zodat opeenvolgende te lange teksten nooit onder het grid kunnen belanden;
+- **Nieuw:** `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()` krijgen een optionele `opnieuwProberen`-parameter (standaard `false`, dus geen enkel bestaand voorbeeld hoeft aangepast). Enkel bij expliciet `true` wordt een eerder gecontroleerde configuratie opnieuw geprobeerd: nuttig na een fysieke aansluiting tijdens het draaien, zonder reset van de microcontroller. Niet bedoeld om automatisch (bv. in `loop()`) aan te roepen: elke poging doet een echte I2C-transactie.
 
 ## 1.0.3
 
 ### Documentatie
 
 - terminologie consequent gemaakt: "board"/"moederbord" vervangen door de volledige, exacte term "Arduino Uno R3-vormfactorbord(en)" doorheen de documentatie, met uitzondering van Arduino's eigen productterminologie (`Arduino Boards Manager`, `boardprofiel`) en de al bestaande vaste samenstelling "ESP32-borden in Arduino Uno R3-vormfactor";
-- `SPONSORS.md`: nieuwe kandidaat-Arduino Uno R3-vormfactorborden toegevoegd (Cytron Maker Uno RP2040, SB Components Ardi32, STM32 Nucleo-F401RE);
+- `SPONSORS.md`: nieuwe kandidaat-Arduino Uno R3-vormfactorborden toegevoegd (Cytron Maker UNO RP2040, SB Components Ardi32, STM32 Nucleo-F401RE);
 - `docs/ROADMAP.md`: statustabellen toegevoegd voor Arduino Uno R3-vormfactorborden en sensoren, met verwijzing naar `SPONSORS.md`;
 - `docs/Toepassingsgebieden/SENSOR_INVENTARIS.md`: piëzo-ademhalingsband toegevoegd; referentie-/validatie-apparaten (NeuroSky MindWave Mobile 2, Mindfield eSense, MindFlex) apart van kandidaat-sensoren vermeld;
 - `docs/HARDWARE_SUPPORT.md`: tabel met interne ADC-resolutie per Arduino Uno R3-vormfactorbord toegevoegd;
@@ -113,7 +134,7 @@ De versienummers volgen de versie in `library.properties`.
 
 ## 1.0.2
 
-### Screen- en Stimulus-laag — API-oppervlak verkleind
+### Screen- en Stimulus-laag: API-oppervlak verkleind
 
 - twaalf functies die uitsluitend intern als bouwsteen dienden, zijn niet langer publiek gedeclareerd (interne/`static` zichtbaarheid): `BepaalAantalSensorenSynchroon()`, `BerekenEindStimulus()`, `InitialiseerSensorStart()`, `MaakSensorMask()`, `MaakSynchronisatieProfielAlleSensoren()`, `ResetStimulusProfiel()`, `ResetSynchronisatieProfiel()`, `VerwerkSensor()`, `PixelScreenClear()`, `PixelScreenSetCursor()`, `PixelScreenPrint()` en `PixelScreenFoutmeldingWeergeven()`;
 - geen van deze wijzigingen raakt een bestaand voorbeeld: alle twaalf functies werden al uitsluitend intern gebruikt, nooit door een `.ino`;
@@ -127,9 +148,9 @@ De versienummers volgen de versie in `library.properties`.
 
 - documentatie onderling afgestemd op de actuele v1.0.1-status;
 - foutieve compilatiecijfers gecorrigeerd naar 188 uitgevoerde compilaties, 184 succesvolle compilaties, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
-- boardprofiel `esp32:esp32:d1_uno32` verduidelijkt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor;
-- status van WEMOS D1 R32 overal gelijkgetrokken: compileert sinds v1.0.0, hardwarematig nog niet bevestigd;
-- fysieke teststatus van TTGO D1 R32 en andere compatibele borden onderscheiden van het gedeelde boardprofiel;
+- boardprofiel `esp32:esp32:d1_uno32` verduidelijkt voor WeMos D1 R32 (ESP32-WROOM-32U), TTGO D1 R32 (ESP32-WROOM-32U) en compatibele ESP32-borden in Arduino Uno R3-vormfactor;
+- status van WeMos D1 R32 (ESP32-WROOM-32U) overal gelijkgetrokken: compileert sinds v1.0.0, hardwarematig nog niet bevestigd;
+- fysieke teststatus van TTGO D1 R32 (ESP32-WROOM-32U) en andere compatibele borden onderscheiden van het gedeelde boardprofiel;
 - Arduino Library Manager-status bijgewerkt nadat de aanmelding werd geaccepteerd;
 - achterhaalde v1.0.0-pre-releasepunten in de ROADMAP vervangen door de voltooide releasestatus;
 - gebroken links in het rootbestand `GOVERNANCE.md` gecorrigeerd;
@@ -138,7 +159,7 @@ De versienummers volgen de versie in `library.properties`.
 - projectnaam consequent geschreven als `GroeiAcademie FrameWork`;
 - losse `#define`-regels in Markdown correct als code weergegeven.
 
-## 1.0.0 — eerste publieke alpha-release
+## 1.0.0: eerste publieke alpha-release
 
 ### Screen-laag
 
@@ -167,8 +188,8 @@ De versienummers volgen de versie in `library.properties`.
 ### Configuratie, boards en taal
 
 - `UserConfig_template.h` bevat alle in deze release rechtstreeks instelbare gebruikersparameters en wordt als `UserConfig.h` vóór de fallbackwaarden uit `SystemConfig.h` geladen;
-- `UNO_VERSION` vervangen door `BOARD_VERSION`, met afzonderlijke keuzewaarden voor UNO R3, UNO R4 Minima, UNO R4 WiFi en Wemos D1 R32;
-- 12-bit ADC-schaling toegevoegd voor Wemos D1 R32; de Stimulusvoorbeelden passen `analogReadResolution(ADC_BITS)` nu toe bij 12 en 14 bits;
+- `UNO_VERSION` vervangen door `BOARD_VERSION`, met afzonderlijke keuzewaarden voor UNO R3, UNO R4 Minima, UNO R4 WiFi en WeMos D1 R32 (ESP32-WROOM-32U);
+- 12-bit ADC-schaling toegevoegd voor WeMos D1 R32 (ESP32-WROOM-32U); de Stimulusvoorbeelden passen `analogReadResolution(ADC_BITS)` nu toe bij 12 en 14 bits;
 - `src/Configuratie/Examples.h` behoudt zijn naam en laadt per gekozen taal eerst een eventueel `UserExample_XX.h` en daarna `Examples_XX.h`;
 - `UserExample_XX_template.h` en `UserLibrary_XX_template.h` zijn voor NL, DE, EN en FR toegevoegd onder `src/Language/`; actieve gebruikersbestanden blijven in dezelfde map;
 - `UserLibrary_XX.h` wordt vóór `Library_XX.h` geladen; de officiële configuratiewaarden en taaldefines zijn afzonderlijk als fallback beschermd;
@@ -177,7 +198,7 @@ De versienummers volgen de versie in `library.properties`.
 - gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in; persoonlijke instellingen worden vanuit `UserConfig.h` geladen en ontbrekende waarden vallen terug op `SystemConfig.h`; globale compilerdefinities kunnen voor gecontroleerde builds vóór deze configuratie worden vastgelegd;
 - `FATAL_ZOEK_OP` is verplaatst van `Screen.h` naar de vier `Library_XX.h`-bestanden en de vier `UserLibrary_XX_template.h`-bestanden;
 - status van UNO R3, UNO R4 Minima en UNO R4 WiFi verduidelijkt;
-- Wemos D1 R32-pintoewijzing toegevoegd aan `ADC_Validatie_Native`;
+- WeMos D1 R32 (ESP32-WROOM-32U)-pintoewijzing toegevoegd aan `ADC_Validatie_Native`;
 
 ### Stimulus en ADC
 
@@ -208,7 +229,7 @@ De versienummers volgen de versie in `library.properties`.
 - compilatie gecontroleerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
 - Arduino LINT uitgevoerd zonder fouten, met één bekende onschadelijke waarschuwing.
 - alle `.cmd`-testscripts werken vanuit de hoofdmap van de library, ook wanneer ze vanuit `extras` worden gestart;
-- testscripts uitgebreid met Wemos D1 R32, schone sequentiële compilatie, Arduino LINT-status en afzonderlijke registratie van de vier gekende UNO R3-geheugenbeperkingen;
+- testscripts uitgebreid met WeMos D1 R32 (ESP32-WROOM-32U), schone sequentiële compilatie, Arduino LINT-status en afzonderlijke registratie van de vier gekende UNO R3-geheugenbeperkingen;
 
 ### Documentatie, structuur en licentie
 

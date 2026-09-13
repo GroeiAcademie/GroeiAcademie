@@ -1,3 +1,4 @@
+// Input-testkopie van Tik_Enkele_Samen_Instortend_Cocktail. Origineel Stimulus-voorbeeld blijft ongewijzigd.
 // ============================================================================
 // Tik — Enkel, samen, instortend en cocktail
 // ============================================================================
@@ -12,9 +13,22 @@
 
 #include <Wire.h>
 
-// OPMERKING: De keuze tussen <GroeiAcademie.h> en <Stimulus.h> bepaalt enkel welke namen je sketch mag aanroepen (zichtbaarheid), niet wat er gecompileerd wordt.
-// #include <GroeiAcademie.h> // alles van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
-#include <Stimulus.h>         // enkel module: Stimulus van GROEI ACADEMIE mag worden aangeroepen binnen deze sketch/arduino code
+// INPUT TESTEN:
+// Standaard wordt KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 gebruikt.
+//
+// Kies in UserConfig.h het te testen invoerkanaal via INPUT_KANAAL_CONFIG:
+// #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
+// #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
+// #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
+// #define INPUT_KANAAL_CONFIG (INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838)
+//
+// Alleen de toetsen met opschrift 1 t.e.m. 4, of S1 t.e.m. S4, worden in deze test gebruikt.
+// Dit geldt ook wanneer het gekozen keypad of de HX1838-remote meer toetsen heeft.
+#ifndef INPUT_TEST_GEBRUIK_FUNCTIEMAPPING
+  #define INPUT_TEST_GEBRUIK_FUNCTIEMAPPING 0
+#endif
+
+#include <GroeiAcademie.h>
 #include <Configuratie/Examples.h>
 #include <Configuratie/ExamplesConfig.h>
 
@@ -22,6 +36,17 @@
 #include <Adafruit_ST7789.h>
 Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
 #endif
+
+// Vergelijkt het opschrift van de ingedrukte toets met een positie (1-4), ongeacht of het
+// actieve keypad de cijfernotatie ("1") of de S-notatie ("S1") gebruikt voor die positie.
+bool ToetsPositieIngedrukt(const char* opschrift, int positie) {
+  if (opschrift == nullptr) return false;
+  char cijferNotatie[3];
+  char sNotatie[4];
+  snprintf(cijferNotatie, sizeof(cijferNotatie), "%d", positie);
+  snprintf(sNotatie, sizeof(sNotatie), "S%d", positie);
+  return strcmp(opschrift, cijferNotatie) == 0 || strcmp(opschrift, sNotatie) == 0;
+}
 
 // INSTORTEND SCORINGSVORM (enkel gebruikt bij Scenario 3, stap 3)
 int instortendOfGradueel = INSTORTEND_SCORING_BINAIR; // Kan verhoogd worden met instortendOfGradueel++ na succesvolle sessies (net als stimulusVersie)
@@ -53,10 +78,23 @@ int TEST_AANTAL_KEER_HERHALEN  = 5;
 // ============================================================================
 // SETUP: DE OPSTARTFASE
 // ============================================================================
+const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingKeuzeMenu[] = {
+  {_LABEL_OPSCHRIFT_1, UitvoerenAlgoritmeEnkelTik},
+  {_LABEL_OPSCHRIFT_2, UitvoerenAlgoritmeSimultaneTik},
+  {_LABEL_OPSCHRIFT_3, UitvoerenAlgoritmeIneenstortendeTik},
+  {_LABEL_OPSCHRIFT_4, UitvoerenAlgoritmeCocktailTik}
+};
+
 void setup() {
 #if ADC_BITS == 12 || ADC_BITS == 14
   analogReadResolution(ADC_BITS);
 #endif  
+
+#ifdef DEBUG
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
+#endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
@@ -64,13 +102,7 @@ void setup() {
   PixelScreen = &pixelScreen;
 #endif
   ScreensConfigureren();
-
-#ifdef DEBUG
   PrintToScreen(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
-  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
-#endif
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
   InitialiseerADS1115();
@@ -80,10 +112,11 @@ void setup() {
   // RegistreerCallbackScreenTypePixel(MijnPixelScreen);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
-  pinMode(PIN_TOETS_1, INPUT_PULLUP);
-  pinMode(PIN_TOETS_2, INPUT_PULLUP);
-  pinMode(PIN_TOETS_3, INPUT_PULLUP);
-  pinMode(PIN_TOETS_4, INPUT_PULLUP);
+  //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
+  //-- pinMode(PIN_TOETS_2, INPUT_PULLUP);
+  //-- pinMode(PIN_TOETS_3, INPUT_PULLUP);
+  //-- pinMode(PIN_TOETS_4, INPUT_PULLUP);
+  InputConfigureren();
 
   PrintToScreen(LCD_START_L1, LCD_START_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
   ResetAlleTellers();
@@ -99,26 +132,33 @@ void loop() {
   PrintToScreen(LCD_MENU_L1, LCD_MENU_L2);
 
   // Wacht tot alle toetsen losgelaten zijn.
-  while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW);
+  /*-- while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW); */
 
   while (true) {
-    if (digitalRead(PIN_TOETS_1) == LOW) {
-      while (digitalRead(PIN_TOETS_1) == LOW);
+    #if INPUT_TEST_GEBRUIK_FUNCTIEMAPPING
+      UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingKeuzeMenu);
+      break;
+    #else
+      InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
+      const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
+    if (ToetsPositieIngedrukt(opschriftToetsAanslag, 1)) {
+      //-- while (digitalRead(PIN_TOETS_1) == LOW);
       UitvoerenAlgoritmeEnkelTik();
       break;
-    } else if (digitalRead(PIN_TOETS_2) == LOW) {
-      while (digitalRead(PIN_TOETS_2) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {
+      //-- while (digitalRead(PIN_TOETS_2) == LOW);
       UitvoerenAlgoritmeSimultaneTik();
       break;
-    } else if (digitalRead(PIN_TOETS_3) == LOW) {
-      while (digitalRead(PIN_TOETS_3) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {
+      //-- while (digitalRead(PIN_TOETS_3) == LOW);
       UitvoerenAlgoritmeIneenstortendeTik();
       break;
-    } else if (digitalRead(PIN_TOETS_4) == LOW) {
-      while (digitalRead(PIN_TOETS_4) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {
+      //-- while (digitalRead(PIN_TOETS_4) == LOW);
       UitvoerenAlgoritmeCocktailTik();
       break;
     }
+    #endif
   }
 }
 
@@ -275,7 +315,7 @@ void UitvoerenAlgoritmeEnkelTik() {
 // ALGORITME 2: SIMULTANE TIK (Scenario 2)
 // ============================================================================
 
-void UitvoerenAlgoritmeSimultaneTik () {
+void UitvoerenAlgoritmeSimultaneTik() {
   const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
 
   ResetAlleTellers();
@@ -530,19 +570,21 @@ void UitvoerenAlgoritmeCocktailTik() {
   PrintToScreen(LCD_S4_SENSORS_TEXT, LCD_S4_SENSORS_KEUZE);
 
   // Wacht tot alle toetsen losgelaten zijn.
-  while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW);
+  /*-- while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW); */
 
   while (true) {
-    if (digitalRead(PIN_TOETS_2) == LOW) {
-      while (digitalRead(PIN_TOETS_2) == LOW);
+    InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
+    const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
+    if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {
+      //-- while (digitalRead(PIN_TOETS_2) == LOW);
       aantalSensorenSimultaanTeMeten = 2;
       break;
-    } else if (digitalRead(PIN_TOETS_3) == LOW) {
-      while (digitalRead(PIN_TOETS_3) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {
+      //-- while (digitalRead(PIN_TOETS_3) == LOW);
       aantalSensorenSimultaanTeMeten = 3;
       break;
-    } else if (digitalRead(PIN_TOETS_4) == LOW) {
-      while (digitalRead(PIN_TOETS_4) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {
+      //-- while (digitalRead(PIN_TOETS_4) == LOW);
       aantalSensorenSimultaanTeMeten = 4;
       break;
     }
@@ -765,11 +807,13 @@ void ToonMenuKiesEnStelLevelIn() {
   int gekozenLevel = 0;
 
   // Wacht tot alle toetsen losgelaten zijn.
-  while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW);
+  /*-- while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW); */
 
   while (true) {
-    if (digitalRead(PIN_TOETS_1) == LOW) {  // Start
-      while (digitalRead(PIN_TOETS_1) == LOW);
+    InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
+    const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
+    if (ToetsPositieIngedrukt(opschriftToetsAanslag, 1)) {  // Start
+      //-- while (digitalRead(PIN_TOETS_1) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 150UL;
       TOEGESTANE_MARGE_TIKTIJD   = 30;
       TOEGESTANE_MARGE_TIKKRACHT = 25;
@@ -778,8 +822,8 @@ void ToonMenuKiesEnStelLevelIn() {
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 1;
       break;
-    } else if (digitalRead(PIN_TOETS_2) == LOW) {  // Basic
-      while (digitalRead(PIN_TOETS_2) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {  // Basic
+      //-- while (digitalRead(PIN_TOETS_2) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 100UL;
       TOEGESTANE_MARGE_TIKTIJD   = 20;
       TOEGESTANE_MARGE_TIKKRACHT = 15;
@@ -788,8 +832,8 @@ void ToonMenuKiesEnStelLevelIn() {
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 2;
       break;
-    } else if (digitalRead(PIN_TOETS_3) == LOW) {  // Expert
-      while (digitalRead(PIN_TOETS_3) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {  // Expert
+      //-- while (digitalRead(PIN_TOETS_3) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 75UL;
       TOEGESTANE_MARGE_TIKTIJD   = 15;
       TOEGESTANE_MARGE_TIKKRACHT = 10;
@@ -798,8 +842,8 @@ void ToonMenuKiesEnStelLevelIn() {
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 3;
       break;
-    } else if (digitalRead(PIN_TOETS_4) == LOW) {  // Elite
-      while (digitalRead(PIN_TOETS_4) == LOW);
+    } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {  // Elite
+      //-- while (digitalRead(PIN_TOETS_4) == LOW);
       TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 50UL;
       TOEGESTANE_MARGE_TIKTIJD   = 10;
       TOEGESTANE_MARGE_TIKKRACHT = 5;

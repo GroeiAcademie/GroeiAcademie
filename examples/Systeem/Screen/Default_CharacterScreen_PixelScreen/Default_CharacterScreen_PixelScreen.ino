@@ -22,8 +22,8 @@ Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
 
 void setup() {
 #if defined(DEBUG) && (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 #endif
 
   pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
@@ -40,8 +40,10 @@ void setup() {
 
 void loop() {
   while (true) {
+
     PrintToScreen("GROEI ACADEMIE", "TYPE_NONE", LEESTIJD_VOORBEELD_MS);
     PrintToScreen(ScreenData::TYPE_NONE, "EERSTE REGEL", "TWEEDE REGEL", LEESTIJD_VOORBEELD_MS, " NU", "DERDE REGEL", "VIERDE REGEL", WACHTTIJD_TUSSEN_PAGINAS_MS);
   }
 }
+
 #endif

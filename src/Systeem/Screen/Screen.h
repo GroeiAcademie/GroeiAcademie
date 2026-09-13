@@ -86,7 +86,7 @@ enum class ScreenData : uint8_t {
     // Waarschuwingen en fouten
     TYPE_WARNING,
     TYPE_ALERT,
-    TYPE_ERROR,
+    TYPE_FAULT,
     TYPE_CRITICAL,
     TYPE_FATAL,
     TYPE_ABORT,

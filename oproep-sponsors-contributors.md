@@ -1,4 +1,4 @@
-# Oproepteksten — GroeiAcademie FrameWork v1.0.0
+# Oproepteksten: GroeiAcademie FrameWork v1.0.0
 
 Drie varianten, afgestemd op het publicatiekanaal. Vervang `[GitHub-repository-URL]` door de definitieve URL van de publieke repository.
 
@@ -15,7 +15,7 @@ De library is ontstaan vanuit toepassingen voor Neuro-Linguïstisch Programmeren
 We zoeken:
 
 - **Contributors** voor code, voorbeelden, documentatie, vertalingen, meetprotocollen, hardware- en elektronicatests, bugmeldingen, reviews, onderzoek en communityondersteuning. Ook een kleine bijdrage; een typfix, één extra voorbeeld, een vertaling; is welkom en vraagt geen uitgebreide procedure. Zie `CONTRIBUTING.md` en `CONTRIBUTORS.md`.
-- **Donaties**, snel en eenmalig — een kopje koffie voor het project, zonder overleg of proces. Zie `SPONSORS.md`.
+- **Donaties**, snel en eenmalig: een kopje koffie voor het project, zonder overleg of proces. Zie `SPONSORS.md`.
 - **Sponsors** voor financiële of materiële steun, zoals Arduino Uno R3-vormfactorborden, sensoren, meetapparatuur, PCB-productie, testmateriaal of softwarelicenties. Zie `SPONSORS.md`.
 
 Grote wijzigingen worden eerst besproken. De maintainers bewaken de architectuur, kwaliteit en onafhankelijkheid van het project en beslissen over opname.

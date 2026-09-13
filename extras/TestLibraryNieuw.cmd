@@ -30,10 +30,10 @@ if not errorlevel 1 (
     exit /b 1
 )
 
-:: v1.1.1: TestLibraryNieuw test uitsluitend de nieuwe HX1838-functionaliteit.
+:: v1.1.2: TestLibraryNieuw test de nieuwe en gewijzigde v1.1.2-functionaliteit.
 :: Bestaand testconcept: nieuwe functionaliteit wordt volledig getest op alle officiële én acceptatieboards.
-set "OFFICIAL_BOARDS=arduino:avr:uno arduino:renesas_uno:minima arduino:renesas_uno:unor4wifi esp32:esp32:d1_uno32"
-set ACCEPTANCE_BOARDS="rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:esp32s3"
+set "OFFICIAL_BOARDS=arduino:avr:uno arduino:renesas_uno:minima arduino:renesas_uno:unor4wifi arduino:zephyr:unoq rp2040:rp2040:cytron_maker_uno_rp2040 STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE esp32:esp32:d1_uno32 esp32:esp32:esp32s3"
+set "ACCEPTANCE_BOARDS="
 
 set /A OFFICIAL_TESTS=0
 set /A OFFICIAL_OK=0
@@ -46,7 +46,7 @@ set /A STATIC_FAIL=0
 findstr /C:"IRremote" library.properties >nul || (echo [FOUT] IRremote dependency ontbreekt.& set /A STATIC_FAIL+=1)
 findstr /B /C:"INPUT_TYPE_HX1838	" keywords.txt >nul || (echo [FOUT] keywords.txt mist INPUT_TYPE_HX1838& set /A STATIC_FAIL+=1)
 
-for %%B in (%ACCEPTANCE_BOARDS%) do call :TEST_BOARD "%%~B" ACCEPTANCE
+if defined ACCEPTANCE_BOARDS for %%B in (%ACCEPTANCE_BOARDS%) do call :TEST_BOARD "%%~B" ACCEPTANCE
 for %%B in (%OFFICIAL_BOARDS%) do call :TEST_BOARD "%%~B" OFFICIAL
 
 echo.
@@ -66,14 +66,19 @@ if !RELEASE_FAIL!==0 (exit /b 0) else exit /b 1
 :TEST_BOARD
 set "BOARD=%~1"
 set "MODE=%~2"
+set "BOARD_PROFIEL=%~3"
 set "BOARD_FLAGS="
 if "%BOARD%"=="arduino:avr:uno" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R3"
 if "%BOARD%"=="arduino:renesas_uno:minima" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_MINIMA"
 if "%BOARD%"=="arduino:renesas_uno:unor4wifi" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_WIFI"
-if "%BOARD%"=="esp32:esp32:d1_uno32" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_UNO"
-if "%BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_CYTRON_MAKER_UNO_RP2040"
-if "%BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_NUCLEO_F401RE"
-if "%BOARD%"=="esp32:esp32:esp32s3" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_ARDI32"
+if "%BOARD%"=="arduino:zephyr:unoq" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_Q"
+if "%BOARD%"=="esp32:esp32:d1_uno32" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_D1_UNO_R32"
+if "%BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_RP2040_CYTRON_MAKER_UNO"
+if "%BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_STM32F4_NUCLEO64_F401RE"
+if "%BOARD%"=="esp32:esp32:esp32s3" (
+    if not defined BOARD_PROFIEL set "BOARD_PROFIEL=BOARD_ESP32S3_ARDI32"
+    set "BOARD_FLAGS=-DBOARD_VERSION=!BOARD_PROFIEL!"
+)
 
 if not defined BOARD_FLAGS (
     echo [FOUT] Geen BOARD_VERSION gekoppeld aan %BOARD%.
@@ -82,10 +87,72 @@ if not defined BOARD_FLAGS (
 )
 
 echo ============================================================
-echo NIEUWE HX1838-TESTS OP BOARD: %BOARD%
+echo INPUT-TESTS OP BOARD: %BOARD%
 echo MODE=%MODE%
 echo ============================================================
+call :TEST_INPUT_BASIS
 call :TEST_HX1838_VOLLEDIG
+goto :eof
+
+:TEST_INPUT_BASIS
+set "TEST_NAAM=DIGITAL | standaard"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "INPUT_EXAMPLE_DIR=examples\Systeem\Input\InputkanalenDIGITAL"
+set "INPUT_EXAMPLE_BESTAND=InputkanalenDIGITAL.ino"
+call :COMPILE_INPUT_EXAMPLE
+
+set "TEST_NAAM=DIGITAL | metArgumenten"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4"
+set "INPUT_EXAMPLE_DIR=examples\Systeem\Input\InputkanalenDIGITALmetArgumenten"
+set "INPUT_EXAMPLE_BESTAND=InputkanalenDIGITALmetArgumenten.ino"
+call :COMPILE_INPUT_EXAMPLE
+
+set "TEST_NAAM=PCF8574 | standaard"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "INPUT_EXAMPLE_DIR=examples\Systeem\Input\InputkanalenPCF8574"
+set "INPUT_EXAMPLE_BESTAND=InputkanalenPCF8574.ino"
+call :COMPILE_INPUT_EXAMPLE
+
+set "TEST_NAAM=PCF8574 | metArgumenten"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
+set "INPUT_EXAMPLE_DIR=examples\Systeem\Input\InputkanalenPCF8574metArgumenten"
+set "INPUT_EXAMPLE_BESTAND=InputkanalenPCF8574metArgumenten.ino"
+call :COMPILE_INPUT_EXAMPLE
+
+set "TEST_NAAM=PCF8574 | UserDefinedDirect"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_USER_DEFINED_DIRECT -DKEYPAD_GENERIEK_AANTAL_PINNEN=4 -DKEYPAD_GENERIEK_PINNEN={PCF8574_PIN_P0,PCF8574_PIN_P1,PCF8574_PIN_P2,PCF8574_PIN_P3} -DKEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED=KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW -DKEYPAD_GENERIEK_KEY_LAYOUT={{_LABEL_OPSCHRIFT_1,LABEL_TOETS_1},{_LABEL_OPSCHRIFT_2,LABEL_TOETS_2},{_LABEL_OPSCHRIFT_3,LABEL_TOETS_3},{_LABEL_OPSCHRIFT_4,LABEL_TOETS_4}}"
+set "INPUT_EXAMPLE_DIR=examples\Systeem\Input\InputkanalenPCF8574UserDefinedDirect"
+set "INPUT_EXAMPLE_BESTAND=InputkanalenPCF8574UserDefinedDirect.ino"
+call :COMPILE_INPUT_EXAMPLE
+
+set "TEST_NAAM=PCF8574 | UserDefinedMatrix"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_USER_DEFINED_MATRIX -DKEYPAD_GENERIEK_AANTAL_RIJEN=3 -DKEYPAD_GENERIEK_AANTAL_KOLOMMEN=3 -DKEYPAD_GENERIEK_RIJ_PINNEN={PCF8574_PIN_P0,PCF8574_PIN_P1,PCF8574_PIN_P2} -DKEYPAD_GENERIEK_KOLOM_PINNEN={PCF8574_PIN_P3,PCF8574_PIN_P4,PCF8574_PIN_P5} -DKEYPAD_GENERIEK_KEY_LAYOUT={{_LABEL_OPSCHRIFT_1,LABEL_TOETS_1},{_LABEL_OPSCHRIFT_2,LABEL_TOETS_2},{_LABEL_OPSCHRIFT_3,LABEL_TOETS_3},{_LABEL_OPSCHRIFT_4,LABEL_TOETS_4},{_LABEL_OPSCHRIFT_5,LABEL_TOETS_5},{_LABEL_OPSCHRIFT_6,LABEL_TOETS_6},{_LABEL_OPSCHRIFT_7,LABEL_TOETS_7},{_LABEL_OPSCHRIFT_8,LABEL_TOETS_8},{_LABEL_OPSCHRIFT_9,LABEL_TOETS_9}}"
+set "INPUT_EXAMPLE_DIR=examples\Systeem\Input\InputkanalenPCF8574UserDefinedMatrix"
+set "INPUT_EXAMPLE_BESTAND=InputkanalenPCF8574UserDefinedMatrix.ino"
+call :COMPILE_INPUT_EXAMPLE
+goto :eof
+
+:COMPILE_INPUT_EXAMPLE
+if "%MODE%"=="OFFICIAL" (set /A OFFICIAL_TESTS+=1) else set /A ACCEPTANCE_TESTS+=1
+echo ------------------------------------------------------------
+echo Compileren van: !INPUT_EXAMPLE_DIR!\!INPUT_EXAMPLE_BESTAND!
+echo !TEST_NAAM!
+"%CLI_PATH%" compile --jobs 1 --fqbn "%BOARD%" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS! !BOARD_FLAGS!" "!INPUT_EXAMPLE_DIR!" >"%TEMP%\GA_InputCompile.txt" 2>&1
+set "COMPILE_RESULT=!errorlevel!"
+type "%TEMP%\GA_InputCompile.txt"
+if "!COMPILE_RESULT!"=="0" (
+    set "GEHEUGEN_BOARD=%BOARD%"
+    set "GEHEUGEN_BESTAND=!INPUT_EXAMPLE_BESTAND!"
+    set "GEHEUGEN_TEST=!TEST_NAAM!"
+    set "GEHEUGEN_STATUS=OK"
+    call :REGISTREER_GEHEUGENGEBRUIK "%TEMP%\GA_InputCompile.txt"
+    if "%MODE%"=="OFFICIAL" (set /A OFFICIAL_OK+=1) else set /A ACCEPTANCE_OK+=1
+) else (
+    echo [FOUT][%MODE%] %BOARD% ^| !TEST_NAAM!
+    echo ------------------------------------------------------------
+    if "%MODE%"=="OFFICIAL" (set /A OFFICIAL_FAIL+=1) else set /A ACCEPTANCE_FAIL+=1
+)
+del "%TEMP%\GA_InputCompile.txt" >nul 2>&1
 goto :eof
 
 :TEST_HX1838_VOLLEDIG
@@ -93,7 +160,9 @@ set "TEST_MET_ARGUMENTEN=1"
 set "TEST_NAAM=HX1838 | TinyIRReceiver | DEFINE | D12 | OK BOVENAAN 17"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_BRON_CODES=HX1838_BRON_CODES_DEFINE -DHX1838_ONTVANGER_PIN=ARDUINO_UNO_SHIELD_PIN_D12 -DHX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE=1 -DHX1838_TOETSENINDELING=HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN"
 call :COMPILE_HX1838
+if "%BOARD%"=="arduino:zephyr:unoq" if not "!TEST_FLAGS:HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE=0=!"=="!TEST_FLAGS!" goto :eof
 call :COMPILE_HX1838_STIMULUS_TESTS
+if "%BOARD%"=="arduino:zephyr:unoq" if not "!TEST_FLAGS:HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE=0=!"=="!TEST_FLAGS!" goto :eof
 
 set "TEST_MET_ARGUMENTEN=1"
 set "TEST_NAAM=HX1838 | TinyIRReceiver | DEFINE | D12 | OK ONDERAAN 17"
@@ -212,7 +281,7 @@ if "!TEST_MET_ARGUMENTEN!"=="1" (
 goto :eof
 
 :COMPILE_HX1838_STIMULUS_TESTS
-for %%E in (examples\Systeem\Input\Input_Test_Scenario1_EnkelTik examples\Systeem\Input\Input_Test_Scenario2_Simultaan examples\Systeem\Input\Input_Test_Scenario3_Ineenstortend examples\Systeem\Input\Input_Test_Scenario4_Cocktail examples\Systeem\Input\Input_Test_Tik_Enkele_Samen_Instortend_Cocktail) do (
+for %%E in (examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik examples\Toepassingsgebieden\Stimulus\Scenario2_Simultaan examples\Toepassingsgebieden\Stimulus\Scenario3_Ineenstortend examples\Toepassingsgebieden\Stimulus\Scenario4_Cocktail examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail) do (
     if "%MODE%"=="OFFICIAL" (set /A OFFICIAL_TESTS+=1) else set /A ACCEPTANCE_TESTS+=1
     set "STIM_TEST_NAAM=!TEST_NAAM! | INPUT + STIMULUS | %%~nxE"
     echo ------------------------------------------------------------

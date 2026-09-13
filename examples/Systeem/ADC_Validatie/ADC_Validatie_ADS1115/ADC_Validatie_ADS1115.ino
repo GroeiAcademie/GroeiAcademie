@@ -37,6 +37,12 @@
 
 #define SERIAL_BAUDRATE 115200 
 
+#if defined(ARDUINO_ESP32S3_DEV)
+  #define GA_SERIAL Serial0
+#else
+  #define GA_SERIAL Serial
+#endif
+
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads;
@@ -48,7 +54,7 @@ bool metingAfgerond  = false;
 #ifndef PRINTTOSCREEN_BESTAAT_AL
 void PrintToScreen(const char* regel1, const char* regel2) {
 #ifdef DEBUG
-  Serial.print(F("[LCD] ")); Serial.print(regel1); Serial.print(F(" / ")); Serial.println(regel2);
+  GA_SERIAL.print(F("[LCD] ")); GA_SERIAL.print(regel1); GA_SERIAL.print(F(" / ")); GA_SERIAL.println(regel2);
 #endif
 }
 #endif
@@ -57,7 +63,7 @@ void InitialiseerADS1115Validatie() {
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
   if (!ads.begin(ADS1115_I2C_ADDRESS)) {
 #ifdef DEBUG
-    Serial.println(F("ADS1115 niet gevonden"));
+    GA_SERIAL.println(F("ADS1115 niet gevonden"));
 #endif
     PrintToScreen("ADS1115", "niet gevonden");
     ads1115Aanwezig = false;
@@ -105,12 +111,12 @@ void printStats() {
     double gemiddelde = s.som / s.n;
     double variantie = (s.somKwadraat / s.n) - (gemiddelde * gemiddelde);
     double stdev = sqrt(variantie > 0 ? variantie : 0.0);
-    Serial.print(F("Kanaal ")); Serial.print(k);
-    Serial.print(F(": n=")); Serial.print(s.n);
-    Serial.print(F(" gemiddelde=")); Serial.print(gemiddelde, 2);
-    Serial.print(F(" stdev=")); Serial.print(stdev, 3);
-    Serial.print(F(" min=")); Serial.print(s.minWaarde);
-    Serial.print(F(" max=")); Serial.println(s.maxWaarde);
+    GA_SERIAL.print(F("Kanaal ")); GA_SERIAL.print(k);
+    GA_SERIAL.print(F(": n=")); GA_SERIAL.print(s.n);
+    GA_SERIAL.print(F(" gemiddelde=")); GA_SERIAL.print(gemiddelde, 2);
+    GA_SERIAL.print(F(" stdev=")); GA_SERIAL.print(stdev, 3);
+    GA_SERIAL.print(F(" min=")); GA_SERIAL.print(s.minWaarde);
+    GA_SERIAL.print(F(" max=")); GA_SERIAL.println(s.maxWaarde);
   }
 }
 
@@ -120,19 +126,19 @@ unsigned long tStart = 0;
 unsigned long laatsteSample = 0;
 
 void setup() {
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 
   Wire.begin();
   InitialiseerADS1115Validatie();
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
-  Serial.println(F("=== Validatie: backend = ADS1115 ==="));
+  GA_SERIAL.println(F("=== Validatie: backend = ADS1115 ==="));
 #else
-  Serial.println(F("=== Validatie: backend = Arduino-ADC ==="));
+  GA_SERIAL.println(F("=== Validatie: backend = Arduino-ADC ==="));
 #endif
 
-  Serial.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
+  GA_SERIAL.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
   tStart = millis();
 }
 
@@ -150,9 +156,9 @@ void loop() {
   }
 
   if (nu - tStart >= VALIDATIE_DUUR_MS) {
-    Serial.println(F("--- Resultaat ---"));
+    GA_SERIAL.println(F("--- Resultaat ---"));
     printStats();
-    Serial.println(F("Meting voltooid."));
+    GA_SERIAL.println(F("Meting voltooid."));
     metingAfgerond = true;
   }
 }

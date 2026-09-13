@@ -122,13 +122,13 @@ Voor UNO R4 WiFi:
 
 Beide UNO R4-keuzes gebruiken 14-bit ADC-schaal en `DELAY_US 200`.
 
-Voor ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`, waaronder WEMOS D1 R32 en TTGO D1 R32:
+Voor ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`, waaronder WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U):
 
 ```cpp
-#define BOARD_VERSION BOARD_ESP32_UNO
+#define BOARD_VERSION BOARD_ESP32_D1_UNO_R32
 ```
 
-De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd. Controleer de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk op WEMOS D1 R32, TTGO D1 R32 en andere compatibele borden.
+De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest. Controleer bij andere compatibele borden de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk.
 
 Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
 
@@ -185,16 +185,18 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 
 ## Afzonderlijke schemabestanden
 
-De hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De actuele versie is [Stimulus Shield v1.1.1](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md): de volledige v1.1.0-basis met H5, H6, H7 en H8, directe Arduino-ADC/ADS1115 en TFT-SPI, plus de HX1838 IR Receiver. De aanvullende validatiestappen staan in [Handleiding Stimulus Shield v1.1.1](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md).
+De hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De actuele versie is [Stimulus Shield v1.1.2](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md): de actuele v1.1.2-hardware met H5, H6, H7 en H8, directe Arduino-ADC/ADS1115, TFT-SPI en HX1838. De aanvullende validatiestappen staan in [Handleiding Stimulus Shield v1.1.2](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md).
 
 
-### BOARD_ESP32_UNO
+### BOARD_ESP32_D1_UNO_R32
 
 Arduino Uno R3-vormfactor ESP32-boardprofiel.
 
 #### Reeds getest en ondersteund
-- WEMOS D1 R32: compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
-- TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
+- TTGO D1 R32 (ESP32-WROOM-32U): geïmplementeerd en getest;
+- WeMos D1 R32 (ESP32-WROOM-32U): geïmplementeerd en getest.
+
+Beide gebruiken `BOARD_ESP32_D1_UNO_R32` en worden in de dependencycontrole gezamenlijk aangeduid als `ESP32-WROOM-32U`.
 
 #### Verwacht compatibel
 - Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino ESP32-core.

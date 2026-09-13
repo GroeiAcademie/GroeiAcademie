@@ -39,6 +39,8 @@ SCREEN_TYPE_PIXELS
 
 Meerdere uitvoerdoelen worden gecombineerd met `|`. De standaard seriële `PrintToScreen()`-uitvoer via `SCREEN_TYPE_SERIAL` volgt de bestaande `DEBUG`-werking: wanneer `DEBUG` actief is, voegt `Screen.h` `SCREEN_TYPE_SERIAL` automatisch toe aan de effectieve `SCREEN_OUTPUT` en wordt de seriële debuguitvoer beschikbaar. Bij de eerste normale SerialScreen-verbinding wacht de library maximaal `SERIAL_CONNECT_TIMEOUT_MS`; na timeout wordt Serial voor die sessie als niet beschikbaar beschouwd en wordt `CRITICAL: SS001` rechtstreeks via beschikbare andere schermen/callbacks gemeld. De afzonderlijke foutfallback voor kritieke schermfouten kan Serial bewust rechtstreeks forceren; zie `SCREEN_FOUTCODES.md`.
 
+De concrete seriële interface loopt via `GA_SERIAL`: bij `BOARD_ESP32S3_ARDI32` en `BOARD_ESP32S3_DEV` is dat `Serial0`, op de andere boards `Serial`.
+
 ## Characterscherm zonder callback
 
 Zonder geregistreerde charactercallback gebruikt de library `LiquidCrystal_I2C`. Ondersteunde schermen zijn `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` en `SCREEN_LCD4002`.
@@ -96,7 +98,7 @@ TYPE_VIDEO
 
 ```cpp
 PIXEL_SCREEN_KLEUR_FATAL    // 0xF800, rood
-PIXEL_SCREEN_KLEUR_ERROR    // 0xFC00, oranje
+PIXEL_SCREEN_KLEUR_FAULT    // 0xFC00, oranje
 PIXEL_SCREEN_KLEUR_WARNING  // 0xFFE0, geel
 PIXEL_SCREEN_KLEUR_INFO     // 0x07FF, cyaan
 PIXEL_SCREEN_KLEUR_CRITICAL // 0xF81F, magenta
@@ -108,7 +110,7 @@ Ruwe RGB565-hexwaarden, niet gebonden aan een specifieke driverbibliotheek (zoal
 
 ### TYPE_FATAL, TYPE_PANIC, TYPE_ABORT, TYPE_CRITICAL: gegarandeerde Serial-terugval
 
-Wanneer `PrintToScreen()` met een van deze vier types aangeroepen wordt terwijl geen enkel scherm en geen enkele callback beschikbaar is, forceert `PrintToScreenIntern()` `Serial.begin(SERIAL_BAUDRATE)` en toont de melding daar, naar analogie van de bestaande `FATAL: CSxxx`/`PSxxx`-terugval (zie `SCREEN_FOUTCODES.md`). Dit is een bewuste uitzondering: enkel voor deze vier types, en enkel onder deze specifieke voorwaarde. Is er wél een scherm of callback actief, dan lopen ze gewoon via het normale pad hierboven.
+Wanneer `PrintToScreen()` met een van deze vier types aangeroepen wordt terwijl geen enkel scherm en geen enkele callback beschikbaar is, forceert `PrintToScreenIntern()` `GA_SERIAL.begin(SERIAL_BAUDRATE)` en toont de melding daar, naar analogie van de bestaande `FATAL: CSxxx`/`PSxxx`-terugval (zie `SCREEN_FOUTCODES.md`). Dit is een bewuste uitzondering: enkel voor deze vier types, en enkel onder deze specifieke voorwaarde. Is er wél een scherm of callback actief, dan lopen ze gewoon via het normale pad hierboven.
 
 ## Callbacktypen
 
@@ -144,7 +146,7 @@ Een callback beheert zelf wissen, regelplaatsing, paginering, wachttijden, `acti
 
 Een I2C-characterscherm gebruikt `VCC`, `GND`, `SDA` en `SCL`. Controleer `I2C_ADRES` en de spanning van de gebruikte backpack.
 
-Een SPI-PixelScreen op Arduino UNO gebruikt voor hardware-SPI standaard `D11` als MOSI en `D13` als SCK. `CS`, `DC` en `RST` worden ingesteld met `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`. Controleer altijd de voedingsspanning en logicaniveaus van de concrete displaymodule.
+Een SPI-PixelScreen op Arduino UNO gebruikt voor hardware-SPI standaard `D11` als MOSI en `D13` als SCK. `CS`, `DC` en `RST` worden ingesteld met `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`. De standaard `PIXEL_SCREEN_RST` is Arduino Uno-shieldpin `D7`. Controleer altijd de voedingsspanning en logicaniveaus van de concrete displaymodule.
 
 ## Beperkingen
 

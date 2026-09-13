@@ -20,8 +20,23 @@
 #endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  #if (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_MOSI) || (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_MISO) || (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_SCK) || (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_CS) || (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_DC) || (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_RST)
-    #error HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt (SPI MOSI/MISO/SCK of PIXEL_SCREEN_CS/DC/RST). Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #if (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_MOSI)
+    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt SPI MOSI. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #endif
+  #if (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_MISO)
+    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt SPI MISO. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #endif
+  #if (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_SCK)
+    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt SPI SCK. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #endif
+  #if (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_CS)
+    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt PIXEL_SCREEN_CS. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #endif
+  #if (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_DC)
+    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt PIXEL_SCREEN_DC. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
+  #endif
+  #if (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_RST)
+    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt PIXEL_SCREEN_RST. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
   #endif
 #endif
 

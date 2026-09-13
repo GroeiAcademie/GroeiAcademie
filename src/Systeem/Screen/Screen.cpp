@@ -40,12 +40,12 @@ static bool SerialScreenConfigureren(bool opnieuwProberen = false) {
 
   serialScreenGecontroleerd = true;
   serialScreenFoutmeldingWeergegeven = false;
-  Serial.begin(SERIAL_BAUDRATE);
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
 
   const unsigned long startTijd = millis();
-  while (!Serial && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 
-  serialScreenGeconfigureerd = (bool)Serial;
+  serialScreenGeconfigureerd = (bool)GA_SERIAL;
   return serialScreenGeconfigureerd;
 }
 #endif
@@ -312,11 +312,11 @@ static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
   // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 
-  Serial.println(foutmelding);
-  Serial.println(FATAL_ZOEK_OP);
+  GA_SERIAL.println(foutmelding);
+  GA_SERIAL.println(FATAL_ZOEK_OP);
 }
 #endif
 
@@ -371,11 +371,11 @@ static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
   // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
-  Serial.begin(SERIAL_BAUDRATE);
-  while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 
-  Serial.println(foutmelding);
-  Serial.println(FATAL_ZOEK_OP);
+  GA_SERIAL.println(foutmelding);
+  GA_SERIAL.println(FATAL_ZOEK_OP);
 }
 #endif
 
@@ -453,11 +453,11 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
     geenEnkelScreenBeschikbaar = geenEnkelScreenBeschikbaar && !CallbackScreenTypeCharacter && !characterScreenActief;
 #endif
     if (geenEnkelScreenBeschikbaar) {
-      Serial.begin(SERIAL_BAUDRATE);
-      while (!Serial) { ; } // Wacht hier totdat er een seriële verbinding is
+      GA_SERIAL.begin(SERIAL_BAUDRATE);
+      while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 
-      if (eersteRegel != "") Serial.println(eersteRegel);
-      if (tweedeRegel != "") Serial.println(tweedeRegel);
+      if (eersteRegel != "") GA_SERIAL.println(eersteRegel);
+      if (tweedeRegel != "") GA_SERIAL.println(tweedeRegel);
       if (delayTime) delay(delayTime);
       return;
     }
@@ -565,7 +565,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
 #ifdef DEBUG
   if (action != "" && serialScreenGeconfigureerd) {
-    Serial.println(action);
+    GA_SERIAL.println(action);
   }
 #endif
 #endif

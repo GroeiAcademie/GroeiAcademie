@@ -98,7 +98,7 @@ set "DEBUG_TEST=0"
 :: - de relevante minimale Screen- en Stimuluscontroles voor acceptatieboards uit TestLibraryGereleased.cmd blijven behouden.
 set "BOARDS=arduino:renesas_uno:minima"
 set "MINIMALE_OFFICIELE_BOARDS=arduino:avr:uno arduino:renesas_uno:unor4wifi esp32:esp32:d1_uno32"
-set ACCEPTATIE_BOARDS="rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:esp32s3"
+set ACCEPTATIE_BOARDS="arduino:zephyr:unoq" "rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:esp32s3"
 set "VOLLEDIGE_OFFICIELE_BOARDS=%BOARDS% %MINIMALE_OFFICIELE_BOARDS%"
 
 set /A TESTS=0
@@ -207,6 +207,14 @@ for %%B in (%VOLLEDIGE_OFFICIELE_BOARDS%) do (
     if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_STABIELE_INPUT_VOLLEDIG
     if "%TEST_INPUT%"=="1" if "%TEST_STIMULUS%"=="1" call :REGRESSIE_COMPILE_INPUT_STIMULUS_VOLLEDIG
 )
+:: WeMos D1 R32 (ESP32-WROOM-32U) gebruikt hetzelfde FQBN en BOARD_VERSION-profiel als TTGO D1 R32.
+:: Daarom wordt dit board afzonderlijk opnieuw meegenomen zodat beide fysieke boards in de testcijfers voorkomen.
+call :REGRESSIE_STEL_BOARD_IN "esp32:esp32:d1_uno32" OFFICIEEL
+if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_AUTOMATISCHE_BOARDDETECTIE
+if "%TEST_SCREEN%"=="1" call :REGRESSIE_TEST_SCREEN_VOLLEDIG
+if "%TEST_STIMULUS%"=="1" call :REGRESSIE_TEST_STIMULUS_VOLLEDIG
+if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_STABIELE_INPUT_VOLLEDIG
+if "%TEST_INPUT%"=="1" if "%TEST_STIMULUS%"=="1" call :REGRESSIE_COMPILE_INPUT_STIMULUS_VOLLEDIG
 for %%B in (%ACCEPTATIE_BOARDS%) do (
     call :REGRESSIE_STEL_BOARD_IN "%%~B" ACCEPTATIE
     if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_AUTOMATISCHE_BOARDDETECTIE
@@ -215,6 +223,12 @@ for %%B in (%ACCEPTATIE_BOARDS%) do (
     if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_STABIELE_INPUT_VOLLEDIG
     if "%TEST_INPUT%"=="1" if "%TEST_STIMULUS%"=="1" call :REGRESSIE_COMPILE_INPUT_STIMULUS_VOLLEDIG
 )
+call :REGRESSIE_STEL_BOARD_IN "esp32:esp32:esp32s3" ACCEPTATIE BOARD_ESP32S3_DEV
+if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_AUTOMATISCHE_BOARDDETECTIE
+if "%TEST_SCREEN%"=="1" call :REGRESSIE_TEST_SCREEN_ACCEPTATIE
+if "%TEST_STIMULUS%"=="1" call :REGRESSIE_TEST_STIMULUS_ACCEPTATIE
+if "%TEST_INPUT%"=="1" call :REGRESSIE_TEST_STABIELE_INPUT_VOLLEDIG
+if "%TEST_INPUT%"=="1" if "%TEST_STIMULUS%"=="1" call :REGRESSIE_COMPILE_INPUT_STIMULUS_VOLLEDIG
 
 echo.
 echo ============================================================
@@ -440,13 +454,18 @@ goto :eof
 :TEST_MINIMAAL_BOARD
 set "MIN_BOARD=%~1"
 set "MIN_MODE=%~2"
+set "MIN_BOARD_PROFIEL=%~3"
 set "MIN_BOARD_FLAGS="
 if "%MIN_BOARD%"=="arduino:avr:uno" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R3"
 if "%MIN_BOARD%"=="arduino:renesas_uno:unor4wifi" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_WIFI"
-if "%MIN_BOARD%"=="esp32:esp32:d1_uno32" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_UNO"
-if "%MIN_BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_CYTRON_MAKER_UNO_RP2040"
-if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_NUCLEO_F401RE"
-if "%MIN_BOARD%"=="esp32:esp32:esp32s3" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ARDI32"
+if "%MIN_BOARD%"=="arduino:zephyr:unoq" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_Q"
+if "%MIN_BOARD%"=="esp32:esp32:d1_uno32" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_D1_UNO_R32"
+if "%MIN_BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_RP2040_CYTRON_MAKER_UNO"
+if "%MIN_BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "MIN_BOARD_FLAGS=-DBOARD_VERSION=BOARD_STM32F4_NUCLEO64_F401RE"
+if "%MIN_BOARD%"=="esp32:esp32:esp32s3" (
+    if not defined MIN_BOARD_PROFIEL set "MIN_BOARD_PROFIEL=BOARD_ESP32S3_ARDI32"
+    set "MIN_BOARD_FLAGS=-DBOARD_VERSION=!MIN_BOARD_PROFIEL!"
+)
 if not defined MIN_BOARD_FLAGS (
     echo [FOUT] Geen BOARD_VERSION gekoppeld aan %MIN_BOARD%.
     if "%MIN_MODE%"=="OFFICIEEL" (set /A FAIL+=1) else set /A ACCEPTATIE_FAIL+=1
@@ -455,7 +474,9 @@ if not defined MIN_BOARD_FLAGS (
 
 set "MIN_VERWACHT_GEHEUGEN=0"
 set "MIN_VERWACHT_DEPENDENCY=0"
-if "%MIN_BOARD%"=="esp32:esp32:esp32s3" (
+set "MIN_TEST_AUTODETECT=1"
+if "%MIN_BOARD%"=="esp32:esp32:esp32s3" if "%MIN_BOARD_PROFIEL%"=="BOARD_ESP32S3_ARDI32" set "MIN_TEST_AUTODETECT=0"
+if "%MIN_TEST_AUTODETECT%"=="0" (
     echo [N.V.T.][%MIN_MODE%] %MIN_BOARD% ^| AUTOMATISCHE BOARDDETECTIE ^| generieke ESP32S3 Dev Module identificeert een fysieke Ardi32 niet automatisch
 ) else (
     set "MIN_TEST_NAAM=AUTOMATISCHE BOARDDETECTIE | DIGITAL"
@@ -584,14 +605,19 @@ goto :eof
 :REGRESSIE_STEL_BOARD_IN
 set "BOARD=%~1"
 set "MODE=%~2"
+set "BOARD_PROFIEL=%~3"
 set "BOARD_FLAGS="
 if "%BOARD%"=="arduino:avr:uno" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R3"
 if "%BOARD%"=="arduino:renesas_uno:minima" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_MINIMA"
 if "%BOARD%"=="arduino:renesas_uno:unor4wifi" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_R4_WIFI"
-if "%BOARD%"=="esp32:esp32:d1_uno32" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_UNO"
-if "%BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_CYTRON_MAKER_UNO_RP2040"
-if "%BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_NUCLEO_F401RE"
-if "%BOARD%"=="esp32:esp32:esp32s3" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_ARDI32"
+if "%BOARD%"=="arduino:zephyr:unoq" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_UNO_Q"
+if "%BOARD%"=="esp32:esp32:d1_uno32" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_ESP32_D1_UNO_R32"
+if "%BOARD%"=="rp2040:rp2040:cytron_maker_uno_rp2040" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_RP2040_CYTRON_MAKER_UNO"
+if "%BOARD%"=="STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" set "BOARD_FLAGS=-DBOARD_VERSION=BOARD_STM32F4_NUCLEO64_F401RE"
+if "%BOARD%"=="esp32:esp32:esp32s3" (
+    if not defined BOARD_PROFIEL set "BOARD_PROFIEL=BOARD_ESP32S3_ARDI32"
+    set "BOARD_FLAGS=-DBOARD_VERSION=!BOARD_PROFIEL!"
+)
 if not defined BOARD_FLAGS (
     echo [FOUT] Geen BOARD_VERSION gekoppeld aan %BOARD%.
     if "%MODE%"=="OFFICIEEL" (set /A FAIL+=1) else set /A ACCEPTATIE_FAIL+=1
@@ -611,7 +637,7 @@ if "%MODE%"=="OFFICIEEL" (set /A FAIL+=1) else set /A ACCEPTATIE_FAIL+=1
 goto :eof
 
 :REGRESSIE_TEST_AUTOMATISCHE_BOARDDETECTIE
-if "%BOARD%"=="esp32:esp32:esp32s3" (
+if "%BOARD%"=="esp32:esp32:esp32s3" if "%BOARD_PROFIEL%"=="BOARD_ESP32S3_ARDI32" (
     echo [N.V.T.][%MODE%] %BOARD% ^| AUTOMATISCHE BOARDDETECTIE ^| generieke ESP32S3 Dev Module identificeert een fysieke Ardi32 niet automatisch
     goto :eof
 )

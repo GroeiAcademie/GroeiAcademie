@@ -2,11 +2,11 @@
 
 Dank je voor je interesse om bij te dragen aan het **GroeiAcademie FrameWork**.
 
-Bijdragen kunnen bestaan uit code, `examples`, documentatie, vertalingen, hardware- en elektronicatests, meetresultaten, onderzoek, meetprotocollen, reviews, bugmeldingen en communityondersteuning. Elke bijdrage is welkom, van een typfix tot een nieuwe hardwaremodule — de verwachtingen hieronder schalen mee met de omvang van je bijdrage.
+Bijdragen kunnen bestaan uit code, `examples`, documentatie, vertalingen, hardware- en elektronicatests, meetresultaten, onderzoek, meetprotocollen, reviews, bugmeldingen en communityondersteuning. Elke bijdrage is welkom, van een typfix tot een nieuwe hardwaremodule: de verwachtingen hieronder schalen mee met de omvang van je bijdrage.
 
 ## Snel starten: kleine bijdragen
 
-Gaat het om een  typfix, een verbeterde zin in de documentatie, een kleine verduidelijking in een bestaand `example`, of een vertaling? Dien gewoon een Pull Request in. Een korte, werkende wijziging met een duidelijke titel volstaat — de uitgebreide checklist verderop in dit document is daar niet op van toepassing. 
+Gaat het om een  typfix, een verbeterde zin in de documentatie, een kleine verduidelijking in een bestaand `example`, of een vertaling? Dien gewoon een Pull Request in. Een korte, werkende wijziging met een duidelijke titel volstaat: de uitgebreide checklist verderop in dit document is daar niet op van toepassing. 
 
 Twijfel je of iets "klein" is? Dien de Pull Request gewoon in. De maintainers laten je weten of er meer nodig is.
 
@@ -38,7 +38,7 @@ Bijdragen aan schema's, bedrading, voedingen, spanningsniveaus, signaalcondition
 
 ### Testers
 
-Testen van code, `examples`, hardware en combinaties daarvan op ondersteunde Arduino Uno R3-vormfactorborden en configuraties. Ook een enkel testresultaat op één Arduino Uno R3-vormfactorbord is een waardevolle bijdrage — dat hoeft geen volledige validatie te zijn.
+Testen van code, `examples`, hardware en combinaties daarvan op ondersteunde Arduino Uno R3-vormfactorborden en configuraties. Ook een enkel testresultaat op één Arduino Uno R3-vormfactorbord is een waardevolle bijdrage: dat hoeft geen volledige validatie te zijn.
 
 ### Vertalingen
 
@@ -76,7 +76,7 @@ Elke contributor bevestigt dat zijn bijdrage mag worden opgenomen en verspreid o
 
 Elke bijdrage die meer omvat dan een kleine tekstuele wijziging, bevat duidelijke testinstructies, zodat de maintainers de werking zelf kunnen herhalen en de testresultaten onafhankelijk kunnen controleren.
 
-Bij een codewijziging vermeldt de contributor welke bestanden, functies en `examples` door de wijziging worden geraakt, en welke bestaande werking mogelijk wordt beïnvloed — ook wanneer dat effect niet de bedoeling is.
+Bij een codewijziging vermeldt de contributor welke bestanden, functies en `examples` door de wijziging worden geraakt, en welke bestaande werking mogelijk wordt beïnvloed: ook wanneer dat effect niet de bedoeling is.
 
 Een bijdrage die nieuwe dependencies toevoegt, wordt eerst voorgesteld via een GitHub Discussion. Een nieuwe dependency wordt alleen aanvaard wanneer die aantoonbaar noodzakelijk is en er binnen het bestaande GroeiAcademie FrameWork geen bruikbaar alternatief bestaat.
 

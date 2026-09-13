@@ -1,18 +1,16 @@
 
-# Stimulus uitbreiding met ADS1115 en TFTSPI
+# Stimulus uitbreiding met ADS1115, TFTSPI en HX1838
 
-> Status: werkdocument v1.0.0. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding.
-> Deze versie documenteert aanvullend de TFTSPI-uitbreiding en de gewijzigde connectorfuncties in het v1.0.0-shieldschema.
+> Status: actuele hardwaredocumentatie v1.1.2. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding.
+> Deze versie beschrijft uitsluitend de actuele Stimulus Shield v1.1.2-hardware.
 
-> **Gezaghebbende hardwarebron**: `Schematic_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in dit v1.0.0-schema de 1x7 TFTSPI-displayconnector. Figuur 1 hieronder (het generieke connectorschema uit v1.0.0) is een **historische/conceptuele referentie — niet gebouwd, niet onderhouden**. Het toont de redenering achter de ADS1115-uitbreiding, maar wijkt af van de effectief te bouwen print en mag niet als bouwinstructie gebruikt worden.
+> **Gezaghebbende hardwarebron**: `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05` (shield-PCB). Dit document beschrijft H6 conform die shield-uitvoering: 4x2 jumpers voor directe Arduino-ADC. De ADDR-keuze gebeurt via SW1. De voedingskeuze voor het FSR/ADS1115-pad gebeurt via H7, de 3-pin jumper 5V/3V3. H8 is in het v1.1.2-schema de 1x7 TFTSPI-displayconnector.
 
 **FSR402/RFP602 analoge uitlezing transparant maken voor Arduino ADC of ADS1115, met TFTSPI-uitbreiding**
 
-Figuur 1 (historisch/conceptueel, niet onderhouden). Vroeger Stimulus-schema met vier FSR402/RFP602-lijnen richting Arduino analoge ingangen, LCD 1602 I2C, keypad en Arduino UNO R4 Minima. H6 stond hier nog als 1x4-pins vrouwelijke Dupont-connector — zie de gezaghebbende shield-PCB voor de actuele 4x2-jumpers-uitvoering.
+Gebruik voor bouw en validatie uitsluitend de actuele v1.1.2-tekeningset in deze map.
 
-Figuur 1 — historisch/conceptueel schema: niet opgenomen in deze release; gebruik voor bouw en validatie uitsluitend de actuele v1.0.0-tekeningset.
-
-## Deel 1 — Beslissing en uitgangspunt
+## Deel 1: Beslissing en uitgangspunt
 
 ## 1. Korte conclusie
 
@@ -39,7 +37,7 @@ Je kiest dus niet per kanaal een adres, wel per ADS1115-chip of module.
 
 Per ADS1115 kan je het adres kiezen met de ADDR-pin. De vier adressen zijn 0x48, 0x49, 0x4A en 0x4B. Daardoor kan je tot vier ADS1115-modules op dezelfde I2C-bus zetten. Voor de Stimulus-uitbreiding is één ADS1115 voldoende voor de vier FSR402/RFP602-lijnen.
 
-De ADDR-adreskeuze gebeurt in het v1.0.0-shieldschema via SW1. Er mag altijd maar één SW1-schakelaar tegelijk ON staan. Voor Stimulus is de standaard ADDR naar GND, dus adres 0x48.
+De ADDR-adreskeuze gebeurt in het v1.1.2-shieldschema via SW1. Er mag altijd maar één SW1-schakelaar tegelijk ON staan. Voor Stimulus is de standaard ADDR naar GND, dus adres 0x48.
 
 Zonder I2C-multiplexer kan je maximaal vier ADS1115-modules op dezelfde I2C-bus zetten. Dat geeft maximaal 4 modules x 4 single-ended kanalen = 16 analoge ingangen.
 
@@ -80,9 +78,9 @@ De ADS1115 kan op dezelfde I2C-bus als het LCD. Wanneer de ADS1115 en de LCD bei
 
 De footprints voor de Quad Logic Level Shifters mogen twee functies krijgen: ofwel wordt de quad Quad Logic Level Shifter geplaatst wanneer niveauconversie nodig is, ofwel worden de overeenkomstige kanaalparen rechtstreeks met draadbruggen verbonden wanneer beide zijden dezelfde logicaspanning gebruiken. GND blijft gemeenschappelijk. U3 wordt gedeeld gebruikt voor LCD-I2C en TFT-RST. U8 wordt gebruikt voor TFTSPI SCL, SDA, DC en CS.
 
-## Deel 2 — Eén schema, meerdere onafhankelijke bestukkingskeuzes
+## Deel 2: Eén schema, meerdere onafhankelijke bestukkingskeuzes
 
-In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo blijft de Markdown rechtstreeks bruikbaar naast het schema. In v1.0.0 zijn er drie onafhankelijke keuzes: het ADC-pad, de I2C-niveauconversie en de TFTSPI-niveauconversie.
+In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo blijft de Markdown rechtstreeks bruikbaar naast het schema. Er zijn vier onafhankelijke keuzes: het ADC-pad, de I2C-niveauconversie, de TFTSPI-niveauconversie en het input-pad. Voor Input zijn de rechtstreekse 1x4-keymatrix via H1/D2-D5, de PCF8574-uitbreiding via de gedeelde I2C-bus en de HX1838 IR Receiver met DATA op D8 beschikbaar.
 
 | Referentie | Functie in het schema |
 |---|---|
@@ -96,6 +94,11 @@ In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo
 | H8 | 1x7 Dupont-connector voor GMT020-02 / 2.0 inch TFTSPI-display |
 | H9 | 1x6 Dupont-connector aan de TFT-zijde van de TFTSPI footprint voor de Quad Logic Level Shifter U8 |
 | H10 | 1x6 Dupont-connector aan de Arduino-zijde van de TFTSPI footprint voor de Quad Logic Level Shifter U8 |
+| H11 | 1x4 Dupont-connector voor de I2C-aansluiting van de PCF8574-uitbreiding |
+| U9 | PCF8574-board voor optionele I2C-naar-digitale-I/O-uitbreiding |
+| H12 | 1x9 vrouwelijke Dupont-connector voor P0-P7 en INT van het PCF8574-board |
+| H13 | 1x3 Dupont-connector tussen het shield en de HX1838 IR Receiver |
+| U10 | HX1838 IR Receiver; DATA is verbonden met Arduino D8 |
 | SW1 | 4-kanaals DIP-switch voor ADS1115 ADDR-keuze |
 | U1 | Arduino UNO R3/R4 |
 | U2 | 1x4 keymatrix |
@@ -106,7 +109,7 @@ In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo
 
 ### 6.1 Directe Arduino-ADC of ADS1115
 
-H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en de vier analoge sensorlijnen. H6 is een afzonderlijk 4x2-jumperveld. Met vier geplaatste jumpers verbindt H6 H5 pin 7 tot en met pin 10 met Arduino A0 tot en met A3. H7, de 3-pin jumper 5V/3V3, is in v1.0.0 uitsluitend de voedingskeuze voor het FSR/ADS1115-pad. SW1 is uitsluitend de ADDR-keuze voor de ADS1115-adreskeuze. H8 is de TFTSPI-displayconnector.
+H5 is de centrale 10-polige Dupont-connector voor het ADS1115-pad en de vier analoge sensorlijnen. H6 is een afzonderlijk 4x2-jumperveld. Met vier geplaatste jumpers verbindt H6 H5 pin 7 tot en met pin 10 met Arduino A0 tot en met A3. H7, de 3-pin jumper 5V/3V3, is in v1.1.2 uitsluitend de voedingskeuze voor het FSR/ADS1115-pad. SW1 is uitsluitend de ADDR-keuze voor de ADS1115-adreskeuze. H8 is de TFTSPI-displayconnector.
 
 | Pinvolgorde H5, 10-polige ADS1115-connector | Functie |
 |---|---|
@@ -149,6 +152,23 @@ De footprints voor de Quad Logic Level Shifters bestaan uit twee 1x6 Dupont-head
 
 De footprints zijn fysiek aanwezig. Als niveauconversie nodig is, wordt de quad Quad Logic Level Shifter geplaatst. Als beide zijden dezelfde logicaspanning gebruiken, worden draadbruggen geplaatst. Plaats nooit tegelijk een Quad Logic Level Shifter én draadbruggen op hetzelfde kanaalpaar.
 
+### 6.3 Input-pad: direct, via PCF8574 of via HX1838
+
+Het v1.1.2-schema bevat de directe 1x4-keymatrix op H1/D2-D5, de PCF8574-uitbreiding en de HX1838 IR Receiver.
+
+De referentie-/testmodule voor de software is de OTRONIC OT8980. De software blijft chipgeoriënteerd en gebruikt `INPUT_TYPE_PCF8574`, `I2C_ADDRESS_PCF8574` en de Rob Tillaart `PCF8574`-library.
+
+| Onderdeel | Functie |
+|---|---|
+| U9 | PCF8574-board |
+| H12 | P0-P7 en INT van de expander |
+| U10 | HX1838 IR Receiver |
+| H13 | 1x3 aansluiting voor GND, VCC en DATA van de HX1838 |
+| H11 | I2C-aansluiting SCL, SDA, GND en VCC naar de gedeelde I2C-bus |
+| H1 | bestaande directe 1x4-keymatrix op D2-D5 + GND |
+
+De directe keymatrix en de PCF8574-route blijven beschikbaar voor fysieke keypads. De HX1838 vormt daarnaast een IR-invoerroute. De softwarekeuze gebeurt via `INPUT_KANAAL_CONFIG`; `KEYPAD_TYPE` beschrijft het aangesloten keypad. De HX1838 DATA-lijn is op het shield verbonden met Arduino D8. Ieder I2C-apparaat op dezelfde bus moet een uniek adres hebben.
+
 ## 7. Bestukkingstabellen
 
 ### 7.1 Keuze tussen directe Arduino-ADC en ADS1115
@@ -173,6 +193,20 @@ U3 wordt gedeeld gebruikt. Daarom worden H3 en H4 niet als één vaste “LCD-zi
 |---|---|---|---|
 | Met niveauconversie | Quad Quad Logic Level Shifter U8, plus U3-kanaal HV1/LV1 voor RST | U8 verwerkt TFTSPI SCL, SDA, DC en CS. U3 verwerkt TFT RST. | Alle vijf TFTSPI-stuurlijnen krijgen niveauconversie |
 | Zonder niveauconversie | Zeven draadbruggen | Zes draadbruggen van H9 naar H10 voor GND, VCC, SCL, SDA, DC en CS, plus één draadbrug van H3 pin 1 naar H4 pin 1 voor RST. | Alleen gebruiken wanneer Arduino en TFT dezelfde logicaspanning gebruiken |
+
+### 7.4 Bestukking van de HX1838 IR Receiver
+
+De HX1838 is in v1.1.2 als Input-hardware opgenomen.
+
+| Onderdeel | Functie |
+|---|---|
+| U10 | HX1838 IR Receiver |
+| H13 | 1x3 Dupont-connector voor GND, VCC en DATA |
+| DATA | Verbonden met Arduino D8 |
+| VCC | Verbonden met de VCC-lijn van het shield |
+| GND | Verbonden met de gemeenschappelijke GND |
+
+De HX1838 kan als Input-route gebruikt worden zonder de bestaande directe keymatrix- of PCF8574-hardware uit het schema te verwijderen.
 
 ## 8. ADDR-keuze via SW1 en voedingskeuze via H7
 
@@ -234,9 +268,10 @@ Waarschuwingen:
 - H7 voedingskeuze 5V/3V3: plaats één jumper voor de voedingskeuze van het FSR/ADS1115-pad: 5V of 3V3.
 - Quad Logic Level Shifter-footprint U3/H3/H4: IC = niveauconversie nodig. Draadbrug = zelfde logicaspanning. Nooit Quad Logic Level Shifter en draadbruggen tegelijk in dezelfde kanaalparen.
 - TFTSPI U8/U3: gebruik ofwel de Quad Logic Level Shifters, ofwel zeven draadbruggen wanneer geen niveauconversie nodig is: zes van H9 naar H10 en één van H3 pin 1 naar H4 pin 1. Nooit een Quad Logic Level Shifter en draadbruggen tegelijk op dezelfde verbindingen.
+- HX1838: controleer dat U10 via H13 op GND, VCC en DATA aangesloten is en dat DATA naar Arduino D8 loopt.
 - Standaardkeuze bij eerste testen: directe Arduino-ADC met vier jumpers op jumperveld H6, waardoor H5 pin 7-10 met Arduino A0-A3 verbonden worden, en draadbruggen voor de I2C-bus wanneer geen niveauconversie nodig is.
 
-## Deel 3 — Pinaansluitingen
+## Deel 3: Pinaansluitingen
 
 ## 10. FSR402/RFP602
 
@@ -309,7 +344,7 @@ Gebruik deze bestukking wanneer Arduino, LCD-backpack en ADS1115 op dezelfde I2C
 
 ### 11.4 Met Quad Logic Level Shifter U3
 
-Gebruik deze bestukking wanneer de componentzijde en Arduino-zijde een verschillende logicaspanning hebben. U3 wordt gedeeld gebruikt voor LCD-I2C en TFT-RST. Daarom worden H3 en H4 niet beschreven als één vaste “LCD-zijde” en één vaste “Arduino-zijde”; de functie ligt per kanaal vast. De onderstaande toewijzing is geen voorstel meer, maar de vast bedrade kanaaltoewijzing in het v1.0.0-schema.
+Gebruik deze bestukking wanneer de componentzijde en Arduino-zijde een verschillende logicaspanning hebben. U3 wordt gedeeld gebruikt voor LCD-I2C en TFT-RST. Daarom worden H3 en H4 niet beschreven als één vaste “LCD-zijde” en één vaste “Arduino-zijde”; de functie ligt per kanaal vast. De onderstaande toewijzing is geen voorstel meer, maar de vast bedrade kanaaltoewijzing in het v1.1.2-schema.
 
 | U3-kanaal | Functie in dit schema |
 |---|---|
@@ -351,13 +386,13 @@ Bij dit display zijn SDA en SCL geen I2C-signalen. Ze worden gebruikt als SPI-si
 | SDA | MOSI / data out | D11 / MOSI |
 | CS | Chip Select | D10 |
 | DC | Data/Command | D9 |
-| RST | Reset | D8 |
+| RST | Reset | D7 |
 
 ### 12.1 Pinconflictcontrole TFTSPI en keymatrix
 
 De keymatrix via H1 gebruikt Arduino D2, D3, D4 en D5, met GND als gemeenschappelijke lijn naar U2.
 
-Het TFTSPI-display via H8 gebruikt Arduino D8, D9, D10, D11 en D13.
+Het TFTSPI-display via H8 gebruikt Arduino D7, D9, D10, D11 en D13.
 
 Er is daardoor geen pinconflict tussen de keymatrix en TFTSPI.
 
@@ -383,7 +418,7 @@ Het GMT020-02 TFTSPI-display gebruikt vijf stuurlijnen.
 | SDA | D11 / MOSI | via U8 |
 | CS | D10 | via U8 |
 | DC | D9 | via U8 |
-| RST | D8 | via U3 |
+| RST | D7 | via U3 |
 
 U8 is de belangrijkste Quad Logic Level Shifter voor de vier TFTSPI-lijnen SCL, SDA, CS en DC. H9 is de TFT-zijde van U8. H10 is de Arduino-zijde van U8. De vijfde TFTSPI-lijn, RST, loopt via kanaal HV1/LV1 van U3.
 
@@ -406,7 +441,7 @@ Wanneer geen niveauconversie nodig is, worden geen Quad Logic Level Shifters gep
 
 Plaats nooit tegelijk een Quad Logic Level Shifter én draadbruggen op dezelfde kanaalparen.
 
-## Deel 4 — Huidige software-implementatie
+## Deel 4: Huidige software-implementatie
 
 ## 13. Backend-define
 
@@ -450,13 +485,18 @@ Voor TFTSPI zijn de grafische bibliotheken alleen nodig wanneer de TFTSPI-route 
   #define PIN_SENSOR_4 A3 // Analoge pin voor de 4de test-sensor
 #endif
 
-#define BOARD_UNO_R3        0
-#define BOARD_UNO_R4_MINIMA 1
-#define BOARD_UNO_R4_WIFI   2
-#define BOARD_ESP32_UNO     3
+#define BOARD_UNO_R3                       0
+#define BOARD_UNO_R4_MINIMA                1
+#define BOARD_UNO_R4_WIFI                  2
+#define BOARD_UNO_Q                        7
+#define BOARD_ESP32_D1_UNO_R32             5
+#define BOARD_ESP32S3_ARDI32               3
+#define BOARD_ESP32S3_DEV                  8
+#define BOARD_RP2040_CYTRON_MAKER_UNO      4
+#define BOARD_STM32F4_NUCLEO64_F401RE      6
 
 #define BOARD_VERSION BOARD_UNO_R3 // wissel dit om van bord te wisselen
-#if BOARD_VERSION != BOARD_UNO_R3 && BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_ESP32_UNO
+#if BOARD_VERSION != BOARD_UNO_R3 && BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_UNO_Q && BOARD_VERSION != BOARD_ESP32_D1_UNO_R32 && BOARD_VERSION != BOARD_ESP32S3_ARDI32 && BOARD_VERSION != BOARD_ESP32S3_DEV && BOARD_VERSION != BOARD_RP2040_CYTRON_MAKER_UNO && BOARD_VERSION != BOARD_STM32F4_NUCLEO64_F401RE
   #error Selecteer een geldige BOARD_VERSION.
 #endif
 
@@ -469,7 +509,7 @@ Voor TFTSPI zijn de grafische bibliotheken alleen nodig wanneer de TFTSPI-route 
 #elif (BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI)
   #define ADC_BITS 14 // R4 = 10 of 14
   #define DELAY_US 200 // Vertraging tussen samples in de meetlussen
-#elif BOARD_VERSION == BOARD_ESP32_UNO
+#elif BOARD_VERSION == BOARD_ESP32_D1_UNO_R32
   #define ADC_BITS 12 // zie kanttekening in docs/Configuratie/SystemConfig.md
   #define DELAY_US 0 // zie kanttekening in docs/Configuratie/SystemConfig.md
 #else
@@ -578,7 +618,7 @@ Ik stel voor om nu vier dingen vast te leggen:
 
 Daarmee blijft de huidige code bruikbaar, kan je later eenvoudig naar ADS1115 omschakelen, en voorkom je pinproblemen wanneer er extra componenten voor emoties bijkomen.
 
-## Deel 5 — Validatie
+## Deel 5: Validatie
 
 ## 18. Validatiestap: wanneer is ADS1115 betrouwbaar?
 
@@ -640,31 +680,18 @@ Gebruik `ADC_Validatie_ADS1115.ino` om de ADS1115-route te testen.
 
 Plaats voor het TFTSPI-pad ofwel de benodigde Quad Logic Level Shifters, ofwel zeven draadbruggen: zes van H9 naar H10 en één van H3 pin 1 naar H4 pin 1. Plaats nooit een Quad Logic Level Shifter en draadbruggen tegelijk op dezelfde verbindingen. De HV-zijde hoort aan de 5 V-Arduinozijde en de LV-zijde aan de 3,3 V-displayzijde.
 
-
-## 20. Actuele bestandenset v1.0.0
+## 20. Actuele bestandenset v1.1.2
 
 De tekeningset en documentatie voor deze hardwareversie zijn:
 
-- `SCH_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29.json`;
-- `Schematic_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29.pdf`;
-- `Schematic_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29.png`;
-- `Schematic_GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0_2026-07-29.svg`;
-- `GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md`;
-- `Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md`.
+- `SCH_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05.json`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05.pdf`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05.png`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05.svg`;
+- `Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2.md`;
+- `Handleiding-Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2.md`.
 
-De twee afzonderlijke voorbeelden `ADC_Validatie_Native` en `ADC_Validatie_ADS1115` testen respectievelijk de directe ADC-route en de ADS1115-route. De volledige fysieke controle en validatievolgorde staan in de bijbehorende handleiding.
+Voor bouw, aansluiting en validatie geldt uitsluitend deze v1.1.2-bestandenset. De foutieve voorgangers maken geen deel meer uit van de actuele documentatie.
 
 
-### BOARD_ESP32_UNO
-
-Arduino Uno R3-vormfactor ESP32-boardprofiel.
-
-#### Reeds getest en ondersteund
-- WEMOS D1 R32: compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
-- TTGO D1 R32: gebruikt hetzelfde boardprofiel `esp32:esp32:d1_uno32`; fysieke hardwarevalidatie afzonderlijk vast te leggen.
-
-#### Verwacht compatibel
-- Andere Arduino Uno R3-vormfactor ESP32-borden met dezelfde Arduino-pinout en een ondersteunde Arduino ESP32-core.
-
-#### Nog niet getest
-- Aan te vullen na validatie.
+**Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) met PixelScreen:** jumper U11 op pin 9 is de enige oplossing die we hiervoor aanhouden tijdens het uploaden. Open U11 tijdens het uploaden en sluit U11 opnieuw na het uploaden.

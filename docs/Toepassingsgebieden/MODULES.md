@@ -23,7 +23,7 @@ Zie [Governance](../../GOVERNANCE.md) voor hoe een nieuw voorstel deze statussen
 
 | Toepassingsgebied | Softwarestatus | Elektronische documentatie |
 |---|---|---|
-| Stimulus en conditionering | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [Stimulus Shield v1.1.1](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) |
+| Stimulus en conditionering | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [Stimulus Shield v1.1.2](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) |
 | Screen | gedeelde systeemlaag | [../Systeem/SCREEN.md](../Systeem/SCREEN.md) |
 | Ademhaling | kandidaat-idee | nog geen gevalideerd schema |
 | Hartslag, HRV en hartcoherentie | kandidaat-idee | nog geen gevalideerd schema |
@@ -80,7 +80,7 @@ De repository bevat afzonderlijke voorbeelden voor:
 4. cocktail;
 5. een samengesteld demonstratievoorbeeld.
 
-Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [Stimulus Shield v1.1.1](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) voor de actuele hardwareversie: v1.1.0 met H5, H6, H7 en H8 plus de HX1838 IR Receiver in v1.1.1. Het validatieprotocol staat in [Handleiding hardwarevalidatie v1.1.1](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md).
+Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [Stimulus Shield v1.1.2](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) voor de actuele hardwareversie v1.1.2. Het validatieprotocol staat in [Handleiding hardwarevalidatie v1.1.2](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md).
 
 ## 2. Ademhaling
 

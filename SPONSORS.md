@@ -2,14 +2,14 @@
 
 Dank aan iedereen die het **GroeiAcademie FrameWork** steunt.
 
-Er zijn twee manieren om te steunen — welke voor jou past, hangt af van wat je zoekt, niet van het bedrag.
+Er zijn twee manieren om te steunen: welke voor jou past, hangt af van wat je zoekt, niet van het bedrag.
 
 - **Doneren**: snel, eenmalig, geen overleg nodig. Zie "☕ Doneren" hieronder.
 - **Sponsoring**: je wil iets specifieks steunen, iets anders dan geld aanbieden, of weten waar je bijdrage naartoe gaat. Zie "Sponsoring" verderop.
 
 Je kiest zelf via welk kanaal je doneert of sponsort.
 
-Een donatie of sponsoring is, eenmaal ontvangen, niet terugvorderbaar — ook niet wanneer een gesponsorde feature achteraf niet haalbaar blijkt (zie verderop) of een samenwerking vroegtijdig eindigt.
+Een donatie of sponsoring is, eenmaal ontvangen, niet terugvorderbaar: ook niet wanneer een gesponsorde feature achteraf niet haalbaar blijkt (zie verderop) of een samenwerking vroegtijdig eindigt.
 
 ## ☕ Doneren
 
@@ -17,17 +17,17 @@ Voor wie gewoon een bedrag wil geven, ongeacht de hoogte, zonder overleg of proc
 
 | Bedrag | Naam |
 |---|---|
-| € 5 | **Warme Supporter** — een lekkere filterkoffie om te laten zien dat je achter ons staat. |
-| € 15 | **Sfeermaker** — een luxe cappuccino met extra schuim voor net dat beetje extra motivatie. |
-| € 35 | **Koffie met Gebak** — een complete traktatie om een mooie mijlpaal van ons project te vieren. |
-| € 75 | **Thuisbarista** — jij investeert in kwalitatieve bonen zodat we wekenlang vooruit kunnen. |
-| € 150 | **Strippenkaart** — jouw structurele sympathie zorgt voor een dagelijkse boost op de werkvloer. |
-| € 500 | **Koffiemachine** — dankzij jou staat de belangrijkste infrastructuur van ons project als een huis. |
-| € 1000 | **Eretafel** — jij financiert de plek waar alles samenkomt en verdient een ereplaats aan de stamtafel. Bij deze bijdrage bezorgen we je, net als onze workshopdeelnemers, een certificaat. |
+| € 5 | **Warme Supporter**: een lekkere filterkoffie om te laten zien dat je achter ons staat. |
+| € 15 | **Sfeermaker**: een luxe cappuccino met extra schuim voor net dat beetje extra motivatie. |
+| € 35 | **Koffie met Gebak**: een complete traktatie om een mooie mijlpaal van ons project te vieren. |
+| € 75 | **Thuisbarista**: jij investeert in kwalitatieve bonen zodat we wekenlang vooruit kunnen. |
+| € 150 | **Strippenkaart**: jouw structurele sympathie zorgt voor een dagelijkse boost op de werkvloer. |
+| € 500 | **Koffiemachine**: dankzij jou staat de belangrijkste infrastructuur van ons project als een huis. |
+| € 1000 | **Eretafel**: jij financiert de plek waar alles samenkomt en verdient een ereplaats aan de stamtafel. Bij deze bijdrage bezorgen we je, net als onze workshopdeelnemers, een certificaat. |
 
 Wil je liever een ander bedrag doneren dan de bovenstaande bedragen? Dat kan ook via hetzelfde webshopproduct.
 
-Elke donatie blijft standaard volledig anoniem, ongeacht het bedrag — ook bij "Eretafel." Donaties verschijnen nooit op de sponsorlijst hieronder, want daar is geen toestemmings- of vermeldingsstap voor voorzien. Wil je toch publiek erkend worden voor een grotere donatie? Neem dan contact op via het sponsoringpad hieronder — vanaf dat moment loopt het via sponsoring, niet via de webshop.
+Elke donatie blijft standaard volledig anoniem, ongeacht het bedrag: ook bij "Eretafel." Donaties verschijnen nooit op de sponsorlijst hieronder, want daar is geen toestemmings- of vermeldingsstap voor voorzien. Wil je toch publiek erkend worden voor een grotere donatie? Neem dan contact op via het sponsoringpad hieronder: vanaf dat moment loopt het via sponsoring, niet via de webshop.
 
 ## Sponsoring
 
@@ -42,17 +42,17 @@ Vermeld bij voorkeur welke vorm van steun je aanbiedt, of het eenmalig of terugk
 
 Sponsoring hoeft niet enkel financieel te zijn. We verwelkomen ook:
 
-- **Financiële steun** — geldelijke bijdragen, eenmalig of terugkerend;
-- **Apparatuur** — 3D-printers, oscilloscopen, logic analyzers, soldeerstations, heteluchtstations, labvoedingen, krimptangen, boormachines en montagegereedschap voor prototyping, productie, assemblage, metingen en testen;
-- **Accessoires** — aanvullende onderdelen of toebehoren om onze apparatuur uit te breiden;
-- **Gereedschap** — handgereedschap voor het bouwen, monteren, onderhouden en afwerken van prototypes en apparatuur;
-- **Hardware** — ontwikkelborden, sensoren, meetmodules, displays en andere elektronische of mechanische componenten voor prototypes, testopstellingen en het uiteindelijke systeem;
-- **PCB-productie** — PCB-fabricage, prototypeseries, assemblage en bestukking;
-- **Softwarelicenties** — PCB-ontwerpsoftware, CAD-software, meetsoftware, ontwikkeltools en documentatietools die ontwikkeling, ontwerp, testen of documentatie ondersteunen;
-- **Testmateriaal** — breadboards, testkabels, krokodillenklemmen, jumper wires, adapters, connectoren en tijdelijke testbehuizingen voor het opbouwen, aansluiten en controleren van testopstellingen;
-- **Tijd en expertise** — advies, gespecialiseerde productie, metingen, kalibratie, validatie, elektronicaontwerp, mechanisch ontwerp en productieondersteuning;
-- **Verbruiksmaterialen** — soldeersel, flux, krimpkous, filamenten, lijm, tape, draad, reinigingsmiddelen en andere materialen die tijdens het bouwen, testen en produceren worden verbruikt;
-- **Praktische ondersteuning** — transport, opslag, toegang tot een werkruimte, tijdelijke hulp bij een concrete taak en andere vormen van ondersteuning, in overleg;
+- **Financiële steun**: geldelijke bijdragen, eenmalig of terugkerend;
+- **Apparatuur**: 3D-printers, oscilloscopen, logic analyzers, soldeerstations, heteluchtstations, labvoedingen, krimptangen, boormachines en montagegereedschap voor prototyping, productie, assemblage, metingen en testen;
+- **Accessoires**: aanvullende onderdelen of toebehoren om onze apparatuur uit te breiden;
+- **Gereedschap**: handgereedschap voor het bouwen, monteren, onderhouden en afwerken van prototypes en apparatuur;
+- **Hardware**: ontwikkelborden, sensoren, meetmodules, displays en andere elektronische of mechanische componenten voor prototypes, testopstellingen en het uiteindelijke systeem;
+- **PCB-productie**: PCB-fabricage, prototypeseries, assemblage en bestukking;
+- **Softwarelicenties**: PCB-ontwerpsoftware, CAD-software, meetsoftware, ontwikkeltools en documentatietools die ontwikkeling, ontwerp, testen of documentatie ondersteunen;
+- **Testmateriaal**: breadboards, testkabels, krokodillenklemmen, jumper wires, adapters, connectoren en tijdelijke testbehuizingen voor het opbouwen, aansluiten en controleren van testopstellingen;
+- **Tijd en expertise**: advies, gespecialiseerde productie, metingen, kalibratie, validatie, elektronicaontwerp, mechanisch ontwerp en productieondersteuning;
+- **Verbruiksmaterialen**: soldeersel, flux, krimpkous, filamenten, lijm, tape, draad, reinigingsmiddelen en andere materialen die tijdens het bouwen, testen en produceren worden verbruikt;
+- **Praktische ondersteuning**: transport, opslag, toegang tot een werkruimte, tijdelijke hulp bij een concrete taak en andere vormen van ondersteuning, in overleg;
 
 ### Waarvoor we momenteel sponsoring zoeken
 
@@ -79,12 +79,12 @@ Binnen de bovenstaande vormen van sponsoring zoeken we momenteel concreet steun 
   - Hazet 823 driehoekige schraper.
 
  - **Hardware**
-  - Cytron Maker Uno RP2040 (~$15): Arduino Uno R3-vormfactorbord, kandidaat voor unieke PIO-precisietiming;
+  - Cytron Maker UNO RP2040 (~$15): extra hardware voor verdere validatie;
   - MAX30205: levert continu temperatuurdata tijdens de meting;
   - MyoWare 2.0: geeft continu een EMG-signaal door tijdens de meting;
   - Piëzo-ademhalingsband, levert continu ademhalingsdata tijdens de meting;
-  - SB Components Ardi32 (~€26-35): Arduino Uno R3-vormfactorbord, kandidaat voor sterkste rekenkracht/geheugen (ESP32-S3, 16 MB Flash, 8 MB PSRAM).
-  - STM32 Nucleo-F401RE (~€13-19): Arduino Uno R3-vormfactorbord, kandidaat voor beste interne ADC-referentiekwaliteit;
+  - SB Components Ardi-32 (ESP32-S3-WROOM-1) (~€26-35): extra hardware voor verdere validatie.
+  - STM32F4 Nucleo-F401RE (~€13-19): extra hardware voor verdere validatie;
 
 - **Verbruiksmaterialen**
   - Glue Sticks voor Bambu Lab 3D-printer;
@@ -98,7 +98,7 @@ Binnen de bovenstaande vormen van sponsoring zoeken we momenteel concreet steun 
  
 ### Sponsoring van een specifieke feature
 
-Sponsoring van een specifieke feature kan worden gebruikt om de technische, functionele en praktische haalbaarheid ervan te onderzoeken — bijvoorbeeld onderzoek, hardware, prototypes, ontwikkeling, testen of documentatie.
+Sponsoring van een specifieke feature kan worden gebruikt om de technische, functionele en praktische haalbaarheid ervan te onderzoeken: bijvoorbeeld onderzoek, hardware, prototypes, ontwikkeling, testen of documentatie.
 
 Het resultaat van dat onderzoek kan ook zijn dat de feature niet haalbaar of niet verantwoord blijkt. Ook dan wordt de sponsoring niet terugbetaald (zie de clausule bovenaan). Praktische afspraken over opvolging, communicatie en eventuele tussentijdse updates worden rechtstreeks tussen de sponsor en de maintainers gemaakt.
 
@@ -112,9 +112,9 @@ Gebruik van de naam en het merk GroeiAcademie door een sponsor blijft onderworpe
 
 ### Erkenning
 
-Sponsors worden alleen met hun toestemming vermeld. De vermelding kan de naam, het type steun en het startmoment bevatten, en een website of link — vooraf goedgekeurd door de maintainers.
+Sponsors worden alleen met hun toestemming vermeld. De vermelding kan de naam, het type steun en het startmoment bevatten, en een website of link: vooraf goedgekeurd door de maintainers.
 
-Naast een vermelding hieronder kan een sponsor, na akkoord van de maintainers, ook worden vermeld in een releasebericht, de `README.md` of relevante documentatie. Dit is telkens een extra mogelijkheid, geen automatisme — de sponsor kiest zelf of, waar en hoe die vermeld wordt.
+Naast een vermelding hieronder kan een sponsor, na akkoord van de maintainers, ook worden vermeld in een releasebericht, de `README.md` of relevante documentatie. Dit is telkens een extra mogelijkheid, geen automatisme: de sponsor kiest zelf of, waar en hoe die vermeld wordt.
 
 | Naam | Type steun | Sinds |
 |---|---|---|

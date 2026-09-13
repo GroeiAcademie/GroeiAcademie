@@ -6,14 +6,16 @@ De gecompileerde dependencies hangen af van `INPUT_KANAAL_CONFIG`:
 
 - `INPUT_TYPE_DIGITAL`: geen extra externe library.
 - `INPUT_TYPE_PCF8574`: gebruikt `Wire` en de `PCF8574`-library van Rob Tillaart.
-- `INPUT_TYPE_HX1838`: gebruikt TinyIRReceiver of IRremote, afhankelijk van `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`. In v1.1.1 is HX1838 met `HX1838_BRON_CODES_DEFINE` released; dit is op de geteste hardwareopstelling met ontvanger op D12 werkend bevestigd voor beide ontvangstbackends. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
+- `INPUT_TYPE_HX1838`: gebruikt TinyIRReceiver of IRremote, afhankelijk van `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`. HX1838 met `HX1838_BRON_CODES_DEFINE` is released en hardwarematig bevestigd voor beide ontvangstbackends. De standaard ontvangerpin is D8. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 - Niet geselecteerde invoerbackends worden via de preprocessor niet meegecompileerd.
 
 ## HX1838-kalibratie
 
+
+De compile-time controle geeft een gerichte `#warning` wanneer `HX1838_ONTVANGER_PIN` samenvalt met een pin die het actieve PixelScreen gebruikt: MOSI, MISO, SCK, `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` of `PIXEL_SCREEN_RST`. De melding benoemt het concrete conflict zodat de pin in `UserConfig.h` gericht kan worden aangepast.
 Voor `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` binnen de released `HX1838_BRON_CODES_DEFINE`-route start automatisch een kalibratie wanneer `HX1838_GENERIEK_CODES` ontbreekt. Iedere te kalibreren toets heeft een wachttijd begrensd door `HX1838_KALIBRATIE_TIMEOUT_MS` (standaard 30000 ms). Bij timeout wordt de kalibratie afgebroken. Na een geslaagde kalibratie wordt de gegenereerde `HX1838_GENERIEK_CODES`-regel aangeboden om in `UserConfig.h` over te nemen.
 
-Voor de experimentele EEPROM-routes start bij ontbrekende of ongeldige EEPROM-kalibratie eveneens automatisch de kalibratieprocedure. De aansluitende verificatiefase gebruikt dezelfde timeout. Bij timeout wordt geen onvolledige mapping opgeslagen. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt en zo nodig gekalibreerd. Deze EEPROM-gebaseerde routes blijven in v1.1.1 experimenteel. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
+Voor de experimentele EEPROM-routes start bij ontbrekende of ongeldige EEPROM-kalibratie eveneens automatisch de kalibratieprocedure. De aansluitende verificatiefase gebruikt dezelfde timeout. Bij timeout wordt geen onvolledige mapping opgeslagen. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt en zo nodig gekalibreerd. Deze EEPROM-gebaseerde routes blijven experimenteel. Een afzonderlijke gebruikersroute om later bewust opnieuw te kalibreren blijft een toekomstig instellingenwerkpunt.
 
 ## Platformafhankelijke opslag
 
@@ -72,7 +74,7 @@ De referentie-/testmodule voor de I2C-naar-IO-uitbreiding is de OTRONIC OT8980. 
 
 De enkelvoudige API `OpvragenHuidigeToetsAanslag()` geeft maximaal één aanslag per aanroep terug.
 
-De publieke meervoudige API is al vastgelegd als `OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1)`. In v1.1.0 is `MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN` nog `1`. Daardoor is alleen `aantalSimultaan = 1` werkelijk geïmplementeerd en gebruikt die functie intern dezelfde werking als `OpvragenHuidigeToetsAanslag()`. Elke andere waarde retourneert `StatusOpvragenToetsAanslagen::NIET_GEIMPLEMENTEERD`.
+De publieke meervoudige API is al vastgelegd als `OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1)`. `MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN` is momenteel `1`. Daardoor is alleen `aantalSimultaan = 1` werkelijk geïmplementeerd en gebruikt die functie intern dezelfde werking als `OpvragenHuidigeToetsAanslag()`. Elke andere waarde retourneert `StatusOpvragenToetsAanslagen::NIET_GEIMPLEMENTEERD`.
 
 Wanneer simultane aanslagen later worden uitgewerkt, blijft hetzelfde publieke prototype behouden. `aantalSimultaan = 2` zal dan exact twee gelijktijdige aanslagen betekenen: minder dan twee is `TE_WEINIG`, exact twee is `GELDIG` en meer dan twee is `TE_VEEL`.
 
@@ -90,14 +92,14 @@ Standaard uitgeschakeld, om geen extra geheugen te verbruiken op geheugenarme bo
 - **Lang indrukken**: per toets optioneel in te stellen via `functieBijLangIndrukken` en `langIndrukkenDrempelMs` in `MappingTussenToetsaanslagEnUitTeVoerenFunctie`. Wanneer `OpvragenHuidigeToetsAanslag(false)` een `LANG_INDRUKKEN`-gebeurtenis teruggeeft, voert `UitVoerenFunctieVolgensMappingMetToetsAanslag()` de gekoppelde `functieBijLangIndrukken` uit. De gewone `functie` blijft gekoppeld aan `TOETSAANSLAG`. Bij een expliciet meegegeven mapping wordt `langIndrukkenDrempelMs` uit die werkelijk gebruikte mapping opgezocht.
 - **Timeout bij geen invoer**: `INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS`, standaard `0` (geen timeout, huidig gedrag). Bij een waarde groter dan 0 start de timer in `InputConfigureren()` en geeft `OpvragenHuidigeToetsAanslag(false)` na die periode een `InputResultaat` met `gebeurtenis = TIMEOUT_GEEN_INVOER` terug. Ook de huidige enkelvoudig geïmplementeerde `OpvragenHuidigeToetsAanslagen(..., 1)` geeft dit timeoutresultaat door.
 
-`INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` is de v1.1.0-configuratieschakelaar voor de optionele uitgebreide gebeurtenissen.
+`INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` is de configuratieschakelaar voor de optionele uitgebreide gebeurtenissen.
 
 ## Nieuwe boards in acceptatiefase
 
 Nieuwe boards mogen al meegecompileerd en getest worden vóór ze officieel ondersteund zijn. Hun resultaten worden afzonderlijk gerapporteerd en hebben tijdens de acceptatiefase geen invloed op PASS/FAIL van het officieel ondersteunde pakket.
 
 
-## Ondersteunde keypadtypen in v1.1.0
+## Ondersteunde keypadtypen
 
 De fysieke keypadkeuze gebeurt met `KEYPAD_TYPE`.
 
@@ -131,7 +133,7 @@ PCF8574 ondersteunt de gedefinieerde keypadtypen die maximaal acht expanderlijne
 
 ## Input-testvoorbeelden
 
-Onder `examples/Systeem/Input/` staan `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino`, `InputkanalenHX1838.ino`, hun `metArgumenten`-tegenhangers (`InputkanalenDIGITALmetArgumenten.ino`, `InputkanalenPCF8574metArgumenten.ino`, `InputkanalenHX1838metArgumenten.ino`) en de Input-testkopieën van de Stimulus-scenario's. De originele Stimulus-voorbeelden blijven onaangeroerd. De testkopieën zijn bedoeld om te bewijzen dat dezelfde keuzevolgorde via `InputConfigureren()` en `OpvragenHuidigeToetsAanslag(true)` kan verlopen.
+Onder `examples/Systeem/Input/` staan `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino`, `InputkanalenHX1838.ino`, hun `metArgumenten`-tegenhangers (`InputkanalenDIGITALmetArgumenten.ino`, `InputkanalenPCF8574metArgumenten.ino`, `InputkanalenHX1838metArgumenten.ino`), `InputkanalenHX1838UserDefined.ino`, `InputkanalenPCF8574UserDefinedDirect.ino` en `InputkanalenPCF8574UserDefinedMatrix.ino`. De vijf actuele Stimulus-scenario's staan uitsluitend onder `examples/Toepassingsgebieden/Stimulus/` en gebruiken de Input-laag.
 
 
 Beschikbare HX1838-toetsenindelingen:
@@ -139,11 +141,11 @@ Beschikbare HX1838-toetsenindelingen:
 - `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN`: remote met 17 toetsen: (UP, DOWN, OK, LEFT, RIGHT, 1-9, *, 0, #) [UP, DOWN, OK, LEFT, RIGHT, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #]: [HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_BOVENAAN.png](Screenshots/HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_BOVENAAN.png).
 - `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN`: remote met 17 toetsen: (1-9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT) [1, 2, 3, 4, 5, 6, 7, 8, 9, *, 0, #, UP, DOWN, OK, LEFT, RIGHT]: [HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_ONDERAAN.png](Screenshots/HX1838_TOETSENINDELING_REMOTE_17_TOETSEN_OK_ONDERAAN.png);
 - `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3`        : remote met 21 toetsen, inclusief de MP3-toetsen; referentiebeeld: [HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3.jpeg](Screenshots/HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3.jpeg).
-- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED`          : gebruiker bepaalt zelf het aantal toetsen, de 8-bit commandcodes en de opschrift/weergavetekstkoppeling. In v1.1.1 is deze indeling uitsluitend beschikbaar met `HX1838_BRON_CODES_DEFINE`.
+- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED`          : gebruiker bepaalt zelf het aantal toetsen, de 8-bit commandcodes en de opschrift/weergavetekstkoppeling. Deze indeling is uitsluitend beschikbaar met `HX1838_BRON_CODES_DEFINE`.
 
-Voor `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` moeten in `UserConfig.h` `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` ingesteld worden. `HX1838_GENERIEK_CODES` is optioneel: wanneer deze define ontbreekt, start automatisch de UserDefined-kalibratie; wanneer ze wel is ingesteld, moet het aantal codes exact overeenkomen met `HX1838_GENERIEK_AANTAL_TOETSEN` en worden nulcodes geweigerd. Het aantal layoutentries moet altijd exact overeenkomen met `HX1838_GENERIEK_AANTAL_TOETSEN`. De huidige implementatie vergelijkt de door TinyIRReceiver/IRremote gedecodeerde 8-bit `command`-waarde (`uint8_t`), zodat UserDefined in v1.1.1 niet claimt ieder mogelijk IR-protocol of iedere volledige protocol/address/command-combinatie te ondersteunen. Zie ook `InputkanalenHX1838UserDefined.ino`.
+Voor `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` moeten in `UserConfig.h` `HX1838_GENERIEK_AANTAL_TOETSEN` en `HX1838_GENERIEK_KEY_LAYOUT` ingesteld worden. `HX1838_GENERIEK_CODES` is optioneel: wanneer deze define ontbreekt, start automatisch de UserDefined-kalibratie; wanneer ze wel is ingesteld, moet het aantal codes exact overeenkomen met `HX1838_GENERIEK_AANTAL_TOETSEN` en worden nulcodes geweigerd. Het aantal layoutentries moet altijd exact overeenkomen met `HX1838_GENERIEK_AANTAL_TOETSEN`. De huidige implementatie vergelijkt de door TinyIRReceiver/IRremote gedecodeerde 8-bit `command`-waarde (`uint8_t`), zodat UserDefined niet claimt ieder mogelijk IR-protocol of iedere volledige protocol/address/command-combinatie te ondersteunen. Zie ook `InputkanalenHX1838UserDefined.ino`.
 
-`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE` kiest de HX1838-ontvangstbackend: `1` gebruikt TinyIRReceiver en `0` gebruikt IRremote. De standaard `HX1838_ONTVANGER_PIN` is in v1.1.1 D12. Met `HX1838_BRON_CODES = HX1838_BRON_CODES_DEFINE` zijn op de geteste hardwareopstelling zowel waarde `1` als waarde `0` met D12 getest en werkend bevonden; deze DEFINE-route is vanaf v1.1.1 released. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
+`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE` kiest de HX1838-ontvangstbackend: `1` gebruikt TinyIRReceiver en `0` gebruikt IRremote. De standaard `HX1838_ONTVANGER_PIN` is D8. Met `HX1838_BRON_CODES = HX1838_BRON_CODES_DEFINE` zijn beide ontvangstbackends hardwarematig getest en werkend bevonden; deze DEFINE-route is released. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 
 Voor de vaste mapping gebruikt `HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN` `HX1838_CODE_1` t.e.m. `HX1838_CODE_17`, `HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN` `HX1838_CODE_1` t.e.m. `HX1838_CODE_17` en `HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3` `HX1838_CODE_1` t.e.m. `HX1838_CODE_21`. Niet zelf gedefinieerde codes worden door `SystemConfig.h` met de standaardcodes aangevuld. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
 

@@ -1,4 +1,4 @@
-# GroeiAcademie v1.2.0 — Sensoren-kernel (experimentele pilot)
+# GroeiAcademie v1.2.0: Sensoren-kernel (experimentele pilot)
 
 **Status: PRERELEASE / experimenteel.** Dit is geen v1.2.0-releasekandidaat, geen vervanging van v1.1.0, en niets hierin is tot nu toe gecompileerd of op hardware getest. Dit document beschrijft een werkende architectuurpilot, bedoeld om mee te testen en feedback op te geven, niet om in productie te gebruiken.
 
@@ -43,7 +43,7 @@ Meld bevindingen via de gebruikelijke kanalen van het project (zie `CONTRIBUTING
 Deze pilot bevat een aantal architecturale vragen die bewust nog open staan. Wie hierover wil meedenken, is welkom via een GitHub Discussion (zie `CONTRIBUTING.md`). Concreet, in volgorde van hoe dringend we ze zelf inschatten (volledige onderbouwing: zie DEEL 22 van het brainstormdocument):
 
 - `SENSOR_COMPONENT_*`: hoe koppel je een sensor-instantie ondubbelzinnig aan zijn fysieke pin/adres? (gedeeltelijk al opgelost, DEEL 24)
-- Gedeelde bus-eigendom tussen meerdere subsystemen (I²C/SPI) — zie `Systeem/GedeeldeBus/`
+- Gedeelde bus-eigendom tussen meerdere subsystemen (I²C/SPI): zie `Systeem/GedeeldeBus/`
 - DS18B20 met meerdere sensoren op dezelfde 1-Wire-bus
 - Meerdere borden die naar één centrale plek communiceren: welk NodeId-concept, welke tijdsbasis over borden heen? (DEEL 20)
 

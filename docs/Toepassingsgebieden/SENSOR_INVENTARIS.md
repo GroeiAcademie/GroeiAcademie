@@ -58,7 +58,7 @@ Toepasbaar voor borst- en buikbeweging, lichaamshouding, beweging, tremor, react
 * AD8232, ECG-meetmodule, hartslagmeter-sensorkit met klinische nauwkeurigheid
 * NeuroSky TGAM, brainwave sensor module, EEG
 
-Referentie-/validatie-apparaten (geen kandidaat-sensoren voor integratie — dienen om te controleren of eigen hardware zoals BioAmp/NeuroSky TGAM dezelfde brainwave-patronen kan tonen als een gevestigd consumentenapparaat):
+Referentie-/validatie-apparaten (geen kandidaat-sensoren voor integratie: dienen om te controleren of eigen hardware zoals BioAmp/NeuroSky TGAM dezelfde brainwave-patronen kan tonen als een gevestigd consumentenapparaat):
 
 * NeuroSky MindWave Mobile 2, EEG
 * Mindfield eSense, zie Hartslag, HRV en hartcoherentie

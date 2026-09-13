@@ -84,7 +84,7 @@ De actuele compileprofielen omvatten:
 - Arduino UNO R3;
 - Arduino UNO R4 Minima;
 - Arduino UNO R4 WiFi;
-- `BOARD_ESP32_UNO`.
+- `BOARD_ESP32_D1_UNO_R32`.
 
 Andere ESP32- en niet-Arduino-UNO-platformen worden pas officieel ondersteund nadat pinmapping, ADC-gedrag, timing, geheugen, dependencies en echte hardwarewerking per profiel zijn gevalideerd.
 
@@ -121,7 +121,8 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 ## 4. Hardware ROADMAP
 
 - Native ADC en ADS1115 op de bedoelde hardware valideren;
-- WEMOS D1 R32 compileert sinds v1.0.0, maar is hardwarematig nog niet bevestigd; fysieke validatie van WEMOS D1 R32, TTGO D1 R32 en andere compatibele borden afzonderlijk vastleggen;
+- WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest; andere compatibele D1-R32-borden blijven afzonderlijk te valideren;
+- Cytron Maker UNO RP2040 is geïmplementeerd en getest;
 - hardwareprofielen per ondersteund Arduino Uno R3-vormfactorbord vastleggen;
 - pinmapping, werkspanning en logische niveaus per hardwareprofiel valideren;
 - sensorcontact, beweging, storing en andere foutbronnen detecteren en rapporteren;
@@ -131,21 +132,20 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 
 ### Arduino Uno R3-vormfactorborden
 
-Status volgens de [statuslegende in MODULES.md](Toepassingsgebieden/MODULES.md#statuslegende).
-
 | Arduino Uno R3-vormfactorbord | Status |
 |---|---|
-| Arduino UNO R3 | geïmplementeerd |
-| Arduino UNO R4 Minima | geïmplementeerd |
-| Arduino UNO R4 WiFi | geïmplementeerd |
-| Arduino ESP32-S3 38pin V4 Expension Board (ESP32-WROOM-32U) | kandidaat-idee |
-| Cytron Maker Uno RP2040 | kandidaat-idee |
-| SB Components Ardi32 | kandidaat-idee |
-| STM32 Nucleo-F401RE | kandidaat-idee |
-| TTGO D1 R32 | geïmplementeerd |
-| WEMOS D1 R32 | geïmplementeerd |
+| Arduino UNO R3 | geïmplementeerd en getest |
+| Arduino UNO R4 Minima | geïmplementeerd en getest |
+| Arduino UNO R4 WiFi | geïmplementeerd en getest |
+| Arduino UNO Q | geïmplementeerd en getest |
+| Cytron Maker UNO RP2040 | geïmplementeerd en getest |
+| Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) | geïmplementeerd en getest |
+| SB Components Ardi-32 (ESP32-S3-WROOM-1) | geïmplementeerd en getest |
+| STM32F4 Nucleo-F401RE | geïmplementeerd en getest |
+| TTGO D1 R32 (ESP32-WROOM-32U) | geïmplementeerd en getest |
+| WeMos D1 R32 (ESP32-WROOM-32U) | geïmplementeerd en getest |
 
-Zie ook [SPONSORS.md](../SPONSORS.md) voor de Arduino Uno R3-vormfactorborden die momenteel als kandidaat open staan voor sponsoring.
+`ESP32-WROOM-32U` is de gezamenlijke technische aanduiding die in de dependencycontrole wordt gebruikt voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U). `ESP32-S3-WROOM-1` is daar de gezamenlijke dependency-aanduiding voor Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) en SB Components Ardi-32 (ESP32-S3-WROOM-1).
 
 ### Schermen
 
@@ -302,7 +302,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 - eerste publieke alpha-release vrijgegeven;
 - definitieve compilatiematrix en Arduino LINT uitgevoerd;
-- WEMOS D1 R32 compileert sinds v1.0.0; hardwarematig nog niet bevestigd;
+- WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest;
 - versie, tag, changelog en `library.properties` gelijkgetrokken;
 - project-, community-, hardware- en release-documentatie gepubliceerd;
 - Arduino Library Manager-aanmelding ingediend en nadien geaccepteerd.

@@ -72,18 +72,24 @@ De software bepaalt automatisch welke hardware aanwezig is, welke hardware onder
 1.6) Ondersteunde Arduino Uno R3-vormfactorborden
 ==============================================================================
 
-Tijdens versie v1.0.0 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
+In versie v1.1.2 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
 
 • Arduino UNO R3;
-
 • Arduino UNO R4 Minima;
-
 • Arduino UNO R4 WiFi;
+• Arduino UNO Q;
+• Cytron Maker UNO RP2040;
+• Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1);
+• SB Components Ardi-32 (ESP32-S3-WROOM-1);
+• STM32F4 Nucleo-F401RE;
+• TTGO D1 R32 (ESP32-WROOM-32U);
+• WeMos D1 R32 (ESP32-WROOM-32U).
 
-• WEMOS D1 R32 (ESP32), compileert sinds v1.0.0; hardwarematig nog niet bevestigd.
-• TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor gebruiken hetzelfde boardprofiel; hun fysieke hardwarevalidatie wordt afzonderlijk vastgelegd.
+`ESP32-WROOM-32U` is de gezamenlijke technische aanduiding in de dependencycontrole voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U).
 
 Ondersteuning voor bijkomende Arduino Uno R3-vormfactorborden kan in latere versies toegevoegd worden.
+
+**Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) met PixelScreen:** jumper U11 op pin 9 is de enige oplossing die we hiervoor aanhouden tijdens het uploaden. Open U11 tijdens het uploaden en sluit U11 opnieuw na het uploaden.
 
 ==============================================================================
 1.6.1) Arduino IDE voorbereiden voor ESP32-borden in Arduino Uno R3-vormfactor
@@ -91,9 +97,9 @@ Ondersteuning voor bijkomende Arduino Uno R3-vormfactorborden kan in latere vers
 
 Installeer via Arduino Boards Manager het boardpakket `esp32 by Espressif Systems`.
 
-Selecteer daarna in Arduino IDE het boardprofiel `WEMOS D1 R32`.
+Selecteer daarna in Arduino IDE het boardprofiel `WeMos D1 R32`.
 
-De compilatietests gebruiken hiervoor FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen.
+De compilatietests gebruiken hiervoor FQBN `esp32:esp32:d1_uno32`. Dit profiel geldt voor WeMos D1 R32 (ESP32-WROOM-32U), TTGO D1 R32 (ESP32-WROOM-32U) en compatibele ESP32-borden in Arduino Uno R3-vormfactor en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen.
 
 Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als Arduino Uno R3-vormfactorbord geselecteerd.
 
@@ -112,6 +118,10 @@ De hardwarevalidatie ondersteunt onder andere:
 • PixelScreens GMT020.02.7P v1.3 of later via SPI;
 
 • 1x4 Keymatrix;
+
+• optionele PCF8574 I2C-naar-I/O-uitbreiding voor Input (referentie-/testmodule OTRONIC OT8980);
+
+• HX1838 IR Receiver als extra Input-route, DATA verbonden met Arduino D8;
 
 • Quad Logic Level Shifters;
 
@@ -195,7 +205,7 @@ Het doel van de hardware-inventarisatie is om vóór het GroeiAcademie Stimulus 
 Arduino geplaatst wordt, automatisch vast te stellen welke hardware aanwezig
 is, hoe deze hardware opgebouwd is en welke configuratie gebruikt wordt.
 
-Het GroeiAcademie Stimulus Hardware Shield v1.0.0 werd bewust modulair ontworpen. Niet iedere
+Het GroeiAcademie Stimulus Hardware Shield v1.1.2 werd bewust modulair ontworpen. Niet iedere
 gebruiker zal alle uitbreidingen monteren. Sommige toepassingen vereisen
 slechts twee FSR402/RFP602-sensoren, andere vier. Sommigen gebruiken een
 ADS1115-module, anderen sluiten de sensoren rechtstreeks aan op de analoge
@@ -264,12 +274,20 @@ Doel
 
 Het GroeiAcademie Stimulus Hardware Shield ondersteunt meerdere Arduino-compatibele Arduino Uno R3-vormfactorborden. Het gekozen Arduino Uno R3-vormfactorbord bepaalt onder andere de beschikbare ADC, de werkspanning van het FSR402/RFP602-circuit, de softwareconfiguratie en welke hardwaretesten automatisch uitgevoerd kunnen worden.
 
-Tijdens versie v1.0.0 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
+In versie v1.1.2 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
 
 • Arduino UNO R3
 • Arduino UNO R4 Minima
 • Arduino UNO R4 WiFi
-• WEMOS D1 R32 (ESP32), compileert sinds v1.0.0; hardwarematig nog niet bevestigd
+• Arduino UNO Q
+• Cytron Maker UNO RP2040
+• Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1)
+• SB Components Ardi-32 (ESP32-S3-WROOM-1)
+• STM32F4 Nucleo-F401RE
+• TTGO D1 R32 (ESP32-WROOM-32U)
+• WeMos D1 R32 (ESP32-WROOM-32U)
+
+`ESP32-WROOM-32U` is de gezamenlijke technische aanduiding in de dependencycontrole voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U).
 
 ------------------------------------------------------------------------------
 
@@ -280,12 +298,18 @@ Welk Arduino Uno R3-vormfactorbord wordt gebruikt?
 □ Arduino UNO R3
 □ Arduino UNO R4 Minima
 □ Arduino UNO R4 WiFi
-□ WEMOS D1 R32 (ESP32)
+□ Arduino UNO Q
+□ Cytron Maker UNO RP2040
+□ Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1)
+□ SB Components Ardi-32 (ESP32-S3-WROOM-1)
+□ STM32F4 Nucleo-F401RE
+□ TTGO D1 R32 (ESP32-WROOM-32U)
+□ WeMos D1 R32 (ESP32-WROOM-32U)
 
 ------------------------------------------------------------------------------
 
 ==============================================================================
-3.2) Inventariseren van het GroeiAcademie Stimulus Hardware Shield v1.0.0
+3.2) Inventariseren van het GroeiAcademie Stimulus Hardware Shield v1.1.2
 ==============================================================================
 
 ------------------------------------------------------------------------------
@@ -331,6 +355,27 @@ Indien antwoord = Nee
 Het GroeiAcademie Stimulus Hardware Shield beschikt tijdens de hardwarevalidatie niet over een lokale gebruikersbediening.
 
 Alle verdere gebruikersvragen worden uitgevoerd via de seriële monitor.
+
+Input-routes in v1.1.2
+
+Het v1.1.2-schema bevat naast de rechtstreekse keymatrix op H1 ook de optionele PCF8574-uitbreiding en de HX1838 IR Receiver.
+
+PCF8574:
+
+• U9 is het PCF8574-board;
+• H12 voert P0-P7 en INT uit;
+• H11 verbindt de module met SCL, SDA, GND en VCC van de gedeelde I2C-bus;
+• de software gebruikt hiervoor `INPUT_TYPE_PCF8574` en `I2C_ADDRESS_PCF8574`;
+• de OTRONIC OT8980 is de referentie-/testmodule.
+
+HX1838:
+
+• U10 is de HX1838 IR Receiver;
+• H13 is de 1x3 aansluiting voor GND, VCC en DATA;
+• DATA is verbonden met Arduino D8;
+• de software gebruikt hiervoor `INPUT_TYPE_HX1838`.
+
+De inventarisatie moet vastleggen welke Input-route of combinatie gebruikt wordt. Wanneer PCF8574 gebruikt wordt, moet het ingestelde I2C-adres uniek zijn op de bus. Wanneer HX1838 gebruikt wordt, moet U10 via H13 correct op GND, VCC en DATA aangesloten zijn.
 
 Resultaat
 
@@ -487,7 +532,7 @@ Indien antwoord = 3V3
 
 Controleer of het geselecteerde Arduino Uno R3-vormfactorbord met een logicaniveau van 3V3 werkt.
 
-Voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden met boardprofiel `esp32:esp32:d1_uno32` is de werkspanning 3V3.
+Voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) met boardprofiel `esp32:esp32:d1_uno32` is de werkspanning 3V3.
 
 Controleer eveneens of alle aangesloten uitbreidingsmodules geschikt zijn voor gebruik met 3V3.
 
@@ -1186,6 +1231,8 @@ Afhankelijk van de hardwareconfiguratie controleert de software automatisch:
 
 Hardware die software niet betrouwbaar kan detecteren wordt niet automatisch goedgekeurd.
 
+De aanwezigheid van de HX1838 wordt niet uitsluitend op basis van passieve hardwaredetectie goedgekeurd. De functionele controle gebeurt tijdens de interactieve Input-validatie door een IR-toets te ontvangen.
+
 ==============================================================================
 4.3) Automatische detectie van de I²C-bus
 ==============================================================================
@@ -1505,9 +1552,11 @@ Om afhankelijkheden tussen de verschillende hardwareonderdelen te vermijden, wor
 
 4. Keymatrix
 
-5. FSR402/RFP602-sensoren
+5. HX1838 IR Receiver, wanneer aanwezig
 
-6. Samenvatting
+6. FSR402/RFP602-sensoren
+
+7. Samenvatting
 
 Wanneer een test niet uitgevoerd kan worden omdat een vorige test mislukt is, worden de resterende testen automatisch overgeslagen.
 
@@ -1655,6 +1704,32 @@ De software controleert automatisch:
 • toets 4.
 
 Iedere toets moet afzonderlijk gedetecteerd worden.
+
+==============================================================================
+6.6.1) Controleren van de HX1838 IR Receiver
+==============================================================================
+
+Doel
+
+Controleer de correcte werking van de HX1838 IR Receiver wanneer deze in de hardware-inventarisatie aanwezig is.
+
+Visuele controles
+
+Controleer dat:
+
+• U10 de HX1838 IR Receiver is;
+
+• U10 via H13 aangesloten is op GND, VCC en DATA;
+
+• de DATA-lijn verbonden is met Arduino D8.
+
+Functionele controle
+
+De software activeert de HX1838-invoer en vraagt de gebruiker een toets op de IR-afstandsbediening in te drukken.
+
+De test is geslaagd wanneer een geldige IR-toetsaanslag door de HX1838-route ontvangen wordt.
+
+Wanneer geen geldige toetsaanslag ontvangen wordt, controleer eerst de aansluiting van GND, VCC en DATA, de verbinding met D8 en de gebruikte afstandsbediening.
 
 ==============================================================================
 6.7) Controleren van de FSR402/RFP602-sensoren

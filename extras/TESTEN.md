@@ -37,13 +37,13 @@ Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en c
 
 `TestLibraryDependency.cmd` vergelijkt de vereiste libraries met de geïnstalleerde libraries en kan ontbrekende dependencies desgewenst via `arduino-cli lib install` installeren. De lijst wordt handmatig uit `library.properties` onderhouden.
 
-`TestBoardplatformsDependency.cmd` vergelijkt de vereiste boardplatforms met `arduino-cli core list`. Voor Cytron Maker Uno RP2040 en STMicroelectronics Nucleo-F401RE kan het script bij automatische installatie eerst de benodigde Additional Boards Manager URL toevoegen, daarna de package-index bijwerken en het platform installeren.
+`TestBoardplatformsDependency.cmd` vergelijkt de vereiste boardplatforms met `arduino-cli core list`. Voor Cytron Maker UNO RP2040 en STM32F4 Nucleo-F401RE kan het script bij automatische installatie eerst de benodigde Additional Boards Manager URL toevoegen, daarna de package-index bijwerken en het platform installeren.
 
 Deze twee dependency-scripts zijn voorbereidende controles; zij maken geen deel uit van de vier compilelogs die `TestLibraryStatusReport.cmd` samenvoegt.
 
-### 2. Gereleasede basis — `TestLibraryGereleased.cmd`
+### 2. Gereleasede basis: `TestLibraryGereleased.cmd`
 
-Vanaf v1.1.1 gebruikt de gereleasete regressietest één referentieboard voor diepe dekking en minimale gerichte regressietests op de overige boards.
+Vanaf v1.1.2 gebruikt de gereleasete regressietest één referentieboard voor diepe dekking en minimale gerichte regressietests op de overige boards.
 
 **Arduino UNO R4 Minima is het referentieboard voor de volledige gereleasete regressiematrix.** Op dit board:
 
@@ -51,32 +51,36 @@ Vanaf v1.1.1 gebruikt de gereleasete regressietest één referentieboard voor di
 - worden de statische configuratiecontroles uitgevoerd;
 - worden de bestaande niet-HX1838-voorbeelden recursief getest;
 - worden Stimulusvoorbeelden met `SCREEN_OUTPUT_CONFIG` 0 tot en met 7 gecompileerd;
-- wordt de volledige gereleasete Input-matrix voor `INPUT_TYPE_NONE`, DIGITAL, PCF8574, UserDefined-keypads, uitgebreide non-blocking Input en de vijf `Input_Test_...`-Stimulusvoorbeelden uitgevoerd;
+- wordt de volledige gereleasete Input-matrix voor `INPUT_TYPE_NONE`, DIGITAL, PCF8574, UserDefined-keypads, uitgebreide non-blocking Input en de vijf Stimulus-scenario’s onder `examples/Toepassingsgebieden/Stimulus` uitgevoerd;
 - blijven de `metArgumenten`-varianten van DIGITAL en PCF8574 onderdeel van de diepe regressie.
 
 De overige officiële boards krijgen een minimale gerichte regressietest:
 
 - Arduino UNO R3;
 - Arduino UNO R4 WiFi;
-- WEMOS D1 R32 (`esp32:esp32:d1_uno32`).
+- WeMos D1 R32 (ESP32-WROOM-32U) (`esp32:esp32:d1_uno32`).
 
 Per board worden minimaal automatische boarddetectie, CharacterScreen, PixelScreen, een Stimulus-basisbuild, een representatieve DIGITAL-build, een representatieve PCF8574-build en een representatieve Input+Stimulus-build gecompileerd. Op Arduino UNO R3 wordt aanvullend één geheugengevoelige gecombineerde Stimulus-build met `SCREEN_OUTPUT_CONFIG = 7` uitgevoerd; alleen de gekende melding `text section exceeds available space in board` wordt daar als verwachte geheugenbeperking geclassificeerd.
 
-De experimentele acceptatieboards krijgen dezelfde minimale regressietest, met twee expliciete uitzonderingen: bij SB Components Ardi32 is automatische boarddetectie niet van toepassing omdat `esp32:esp32:esp32s3` de generieke `ESP32S3 Dev Module` selecteert en de fysieke Ardi32 niet kan identificeren; de overige Ardi32-tests gebruiken daarom expliciet `BOARD_VERSION=BOARD_ARDI32`. Bij STMicroelectronics Nucleo-F401RE wordt de PixelScreen-build wel uitgevoerd, maar de gekende externe Adafruit ST77xx-fout `wiring_private.h: No such file or directory` wordt als verwachte dependencybeperking geclassificeerd en niet als fout van GroeiAcademie. Een andere PixelScreen-compilefout blijft wel een acceptatiefout.
+De acceptatieboards krijgen dezelfde minimale regressietest, met twee expliciete uitzonderingen: bij SB Components Ardi-32 (ESP32-S3-WROOM-1) is automatische boarddetectie niet van toepassing omdat `esp32:esp32:esp32s3` de generieke `ESP32S3 Dev Module` selecteert; de tests gebruiken daarom expliciet `BOARD_VERSION=BOARD_ESP32S3_ARDI32`. Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) wordt met dezelfde FQBN afzonderlijk als `BOARD_ESP32S3_DEV` getest. Bij STM32F4 Nucleo-F401RE wordt de PixelScreen-build wel uitgevoerd, maar de gekende externe Adafruit ST77xx-fout `wiring_private.h: No such file or directory` wordt als verwachte dependencybeperking geclassificeerd en niet als fout van GroeiAcademie. Een andere PixelScreen-compilefout blijft wel een acceptatiefout.
 
-De experimentele acceptatieboards zijn:
+De acceptatieboards zijn:
 
-- Cytron Maker Uno RP2040;
-- STMicroelectronics Nucleo-F401RE;
-- SB Components Ardi32.
+- Arduino UNO Q;
+- Cytron Maker UNO RP2040;
+- Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1);
+- SB Components Ardi-32 (ESP32-S3-WROOM-1);
+- STM32F4 Nucleo-F401RE.
 
 Acceptatieresultaten worden afzonderlijk gerapporteerd en hebben geen invloed op het officiële release-PASS/FAIL.
+
+De actuele fysieke hardwarestatus staat in `docs/HARDWARE_SUPPORT.md` en `extras/TESTRESULTATEN.md`: alle tien ondersteunde boards zijn geïmplementeerd en getest.
 
 `examples/Systeem/Input/` blijft uitgesloten van de gewone recursieve example-loop, omdat Input bewust via de aparte gereleasete Input-matrix en de nieuwe HX1838-matrix wordt getest.
 
 Alle compile-aanroepen gebruiken `--jobs 1`.
 
-### 2a. Volledige gereleasete regressie — `TestLibraryGereleasedVolledigeRegresietesten.cmd`
+### 2a. Volledige gereleasete regressie: `TestLibraryGereleasedVolledigeRegresietesten.cmd`
 
 Dit script staat bewust **naast** de vier releasecompilecycli. Het wordt niet door `TestLibraryStatusReport.cmd` verwerkt en wijzigt niets aan `extras/TESTRESULTATEN.md`. Het is het afzonderlijke vangnet om de volledige gereleasete regressiedekking opnieuw uit te voeren wanneer dat nodig is.
 
@@ -84,7 +88,7 @@ Bij keuze `ALLES` combineert het:
 
 - de volledige gereleasete Screen- en Stimulusdekking van `TestLibraryGereleased.cmd` uit v1.1.0 op de vier officiële boards;
 - de stabiele DIGITAL-, PCF8574-, UserDefined- en non-blocking Input-dekking van `TestLibraryNieuw.cmd` uit v1.1.0 op de officiële en acceptatieboards;
-- de vijf bestaande `Input_Test_...`-Stimulus-integratietests wanneer zowel Input als Stimulus geselecteerd zijn;
+- de vijf Stimulus-scenario’s onder `examples/Toepassingsgebieden/Stimulus` als Input+Stimulus-integratietests wanneer zowel Input als Stimulus geselecteerd zijn;
 - Arduino LINT en de bijbehorende statische controles.
 
 De HX1838-tests die in v1.1.1 door `TestLibraryNieuw.cmd` worden uitgevoerd, zijn hier bewust niet dubbel opgenomen. Om de volledige v1.1.1-testdekking te draaien, gebruik je dus deze volledige regressietest samen met de normale v1.1.1-`TestLibraryNieuw.cmd`-cyclus.
@@ -103,7 +107,7 @@ INPUT + STIMULUS
 
 Voor niet-interactief gebruik zijn dezelfde selecties beschikbaar als argumenten `ALLES`, `SCREEN`, `INPUT`, `STIMULUS`, `SCREEN_INPUT`, `SCREEN_STIMULUS` en `INPUT_STIMULUS`. Met alleen `--no-pause` wordt `ALLES` gebruikt.
 
-### 3. Negatieve gereleasete configuraties — `TestLibraryGereleasedOngeldig.cmd`
+### 3. Negatieve gereleasete configuraties: `TestLibraryGereleasedOngeldig.cmd`
 
 Deze test compileert bewust ongeldige configuraties. Een negatieve test is alleen geslaagd wanneer:
 
@@ -114,7 +118,7 @@ Vanaf v1.1.1 bevat dit script naast de bestaande Screen- en SystemConfig-control
 
 Een fout pad, ontbrekende dependency of andere toevallige compilerfout kan daardoor niet als vals-positieve `[OK]` doorgaan.
 
-### 4. HX1838-validatie v1.1.1 — `TestLibraryNieuw.cmd`
+### 4. HX1838-validatie v1.1.1: `TestLibraryNieuw.cmd`
 
 `TestLibraryNieuw.cmd` test in v1.1.1 **uitsluitend HX1838**. De released-route is `HX1838_BRON_CODES_DEFINE`; de EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 
@@ -128,11 +132,11 @@ Dezelfde volledige nieuwe HX1838-matrix wordt uitgevoerd op alle vier officiële
 - de drie ingebouwde toetsenindelingen via de bestaande `metArgumenten`-route met beide ontvangstbackends;
 - beide ontvangstbackends met `DEBUG`;
 - `PCF8574 + HX1838` met beide ontvangstbackends;
-- de vijf bestaande `Input_Test_...`-Stimulusvoorbeelden binnen de HX1838-configuraties.
+- de vijf Stimulus-scenario’s onder `examples/Toepassingsgebieden/Stimulus` binnen de HX1838-configuraties.
 
 De hardwarevalidatie zelf staat afzonderlijk in `extras/TESTRESULTATEN.md`: met `HX1838_BRON_CODES_DEFINE` en ontvanger op D12 werken op de geteste hardwareopstelling zowel TinyIRReceiver (`= 1`) als IRremote (`= 0`), inclusief `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` en de automatische UserDefined-kalibratie wanneer `HX1838_GENERIEK_CODES` ontbreekt.
 
-### 5. Negatieve HX1838-configuraties — `TestLibraryNieuwOngeldig.cmd`
+### 5. Negatieve HX1838-configuraties: `TestLibraryNieuwOngeldig.cmd`
 
 Dit script bevat vanaf v1.1.1 uitsluitend negatieve configuraties waarin HX1838 betrokken is, waaronder:
 
@@ -145,13 +149,13 @@ Dit script bevat vanaf v1.1.1 uitsluitend negatieve configuraties waarin HX1838 
 
 Ook hier is een test alleen `[OK]` wanneer de compilatie faalt én de specifiek verwachte fouttekst voorkomt.
 
-### 6. Mapping-volledigheidscontrole — `TestLibraryMappingControle.cmd`
+### 6. Mapping-volledigheidscontrole: `TestLibraryMappingControle.cmd`
 
 `TestLibraryMappingControle.cmd` behoudt voor DIGITAL, PCF8574 en HX1838 een brede tekstuele aanwezigheidstest op `mappingTestMenu[]` in `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino`. De referentielijsten bevatten de volledige opschriftenset van de gecontroleerde types.
 
 Voor de drie ingebouwde HX1838-toetsenindelingen wordt aanvullend per `HX1838_TOETSENINDELING` de eigen `#if`/`#elif`-tak in `InputkanalenHX1838.ino` gecontroleerd. Binnen die tak controleert het script zowel de aanwezigheid als de verwachte volgorde van de opschriften. `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` is hiervan bewust uitgezonderd omdat de opschriften door de gebruiker worden bepaald; daarvoor wordt `InputkanalenHX1838UserDefined.ino` gecompileerd met een expliciete generieke testconfiguratie. De referentietabellen worden handmatig onderhouden en moeten bij nieuwe of gewijzigde ingebouwde keypadtypes/toetsenindelingen mee bijgewerkt worden.
 
-### 7. Statusrapport — `TestLibraryStatusReport.cmd`
+### 7. Statusrapport: `TestLibraryStatusReport.cmd`
 
 De vier compilecycli schrijven elk hun eigen logbestand:
 

@@ -12,7 +12,7 @@ Toekomstige toepassingsgebieden binnen het GroeiAcademie FrameWork gaan gebruik 
 
 ## 2. De relevante norm
 
-De internationale norm voor elektrische medische apparatuur is **IEC 60601-1**, "Medical Electrical Equipment — Part 1: General Requirements for Safety and Essential Performance". Voor ECG specifiek bestaat een aanvullende deelnorm, **IEC 60601-2-25**.
+De internationale norm voor elektrische medische apparatuur is **IEC 60601-1**, "Medical Electrical Equipment: Part 1: General Requirements for Safety and Essential Performance". Voor ECG specifiek bestaat een aanvullende deelnorm, **IEC 60601-2-25**.
 
 De norm classificeert het deel van het toestel dat met de patiënt in contact komt (het "applied part") in drie types:
 

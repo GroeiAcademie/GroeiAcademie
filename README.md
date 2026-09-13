@@ -8,12 +8,17 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 
 ## Huidige status
 
-- versie: `1.1.1`;
+- versie: `1.1.2`;
+- de actuele boardconstanten en hun volgorde staan in `src/Configuratie/SystemConfig.h`, inclusief `BOARD_UNO_Q` en `BOARD_ESP32S3_DEV`;
+- voor `BOARD_STM32F4_NUCLEO64_F401RE` is de Arduino Uno-shieldheader-mapping D0-D13, A0-A5, SDA/SCL en SPI nu actief in `SystemConfig.h` en per pin overschrijfbaar via `UserConfig.h`;
+- `BOARD_STM32F4_NUCLEO64_F401RE` is hardwarematig getest met CharacterDisplay, ADS1115, PCF8574, PixelScreen en HX1838; selecteer in Arduino IDE **Nucleo-64** met part number **Nucleo F401RE** (`STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE`); details en de vereiste PixelScreen/Adafruit-patch staan in `docs/HARDWARE_SUPPORT.md`;
+- de standaard HX1838-pin is `D8` en de standaard PixelScreen-resetpin is `D7`;
+- hardwarestatus: alle tien ondersteunde boards zijn **geïmplementeerd en getest**; de volledige bevestigde hardwarestatus staat in `docs/HARDWARE_SUPPORT.md` en `extras/TESTRESULTATEN.md`;
 - ontwikkelfase: alpha;
 - huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
 - HX1838 met `HX1838_BRON_CODES_DEFINE` is released;
 - `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` laat binnen deze DEFINE-route een eigen afstandsbediening toe via een configureerbaar aantal toetsen en opschriftkoppeling in `UserConfig.h`; de 8-bit commandcodes kunnen via `HX1838_GENERIEK_CODES` worden opgegeven of automatisch worden gekalibreerd wanneer die define ontbreekt;
-- deze HX1838-route is hardwarematig bevestigd met ontvanger op D12 en met beide ontvangstbackends: TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) en IRremote (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0`);
+- deze HX1838-route is hardwarematig bevestigd met beide ontvangstbackends: TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) en IRremote (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0`);
 - de EEPROM-gebaseerde HX1838-routes blijven experimenteel;
 - de interne releasetests worden in vier afzonderlijke testcycli uitgevoerd; de definitieve releaseresultaten worden vastgelegd in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
@@ -49,7 +54,7 @@ Herstart Arduino IDE na de installatie.
 
 ### ESP32-borden in Arduino Uno R3-vormfactor
 
-Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer daarna het boardprofiel `WEMOS D1 R32`. De compilatietests gebruiken FQBN `esp32:esp32:d1_uno32`. Dit boardprofiel wordt gebruikt voor WEMOS D1 R32, TTGO D1 R32 en compatibele ESP32-borden in Arduino Uno R3-vormfactor en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen. Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als Arduino Uno R3-vormfactorbord geselecteerd.
+Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer daarna het boardprofiel `WeMos D1 R32`. De compilatietests gebruiken FQBN `esp32:esp32:d1_uno32`. Dit boardprofiel wordt gebruikt voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U), gezamenlijk aangeduid als `ESP32-WROOM-32U` in de dependencycontrole en verzorgt de juiste omzetting van Arduino-pinnamen zoals `A0` naar de overeenkomstige ESP32-GPIO-pinnen. Een toolpakket zoals `esp32:esp-rv32@2601` wordt automatisch met het ESP32-boardpakket geïnstalleerd en wordt niet als Arduino Uno R3-vormfactorbord geselecteerd.
 
 ## Kwaliteitscontrole
 
@@ -60,12 +65,15 @@ De validatie omvat:
 - Arduino LINT (Library Manager)
 - volledige gereleasete regressie op Arduino UNO R4 Minima en een minimale gerichte regressie op de overige boards;
 - optioneel `extras/TestLibraryGereleasedVolledigeRegresietesten.cmd` voor de volledige historische gereleasete regressiedekking, selecteerbaar per `Screen`, `Input`, `Stimulus` of combinatie;
-- afzonderlijke HX1838-validatie voor de v1.1.1-wijzigingen, met geldige en bewust ongeldige configuraties;
+- afzonderlijke HX1838-validatie met geldige en bewust ongeldige configuraties;
 - menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
-- Arduino Uno R3;
+- Arduino UNO R3;
 - Arduino Uno R4 Minima;
 - Arduino Uno R4 WiFi;
-- ESP32-borden via boardprofiel WEMOS D1 R32 (`esp32:esp32:d1_uno32`);
+- WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) via `esp32:esp32:d1_uno32`;
+- Arduino UNO Q via `arduino:zephyr:unoq`;
+- Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) en SB Components Ardi-32 (ESP32-S3-WROOM-1) via `esp32:esp32:esp32s3`;
+- Cytron Maker UNO RP2040 en STM32F4 Nucleo-F401RE via hun eigen acceptatieprofielen;
 - minimale acceptatiecompilaties voor de experimentele boardprofielen, zonder invloed op PASS/FAIL van de officieel ondersteunde boards.
 
 Meer informatie:
@@ -122,7 +130,7 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 - `AANTAL_SENSOREN_AANWEZIG`;
 - `PIN_SENSOR_1` tot en met `PIN_SENSOR_4`;
 - `BOARD_VERSION`;
-- `ADC_BACKEND` (`ADC_BACKEND_NATIVE` of `ADC_BACKEND_ADS1115`) — zie hierboven bij Afhankelijkheid.
+- `ADC_BACKEND` (`ADC_BACKEND_NATIVE` of `ADC_BACKEND_ADS1115`): zie hierboven bij Afhankelijkheid.
 
 Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
 
@@ -140,21 +148,31 @@ Beschikbare voorbeelden:
 examples/
 ├── Systeem/
 │   ├── ADC_Validatie/
-│   │   ├── ADC_Validatie_Native/
-│   │   └── ADC_Validatie_ADS1115/
-│   ├── Screen/
-│   │   ├── Callback_CharacterScreen/
-│   │   ├── Callback_PixelScreen/
+│   │   ├── ADC_Validatie_ADS1115/
+│   │   └── ADC_Validatie_Native/
+│   ├── GedeeldeBus/
 │   │   ├── Default_CharacterScreen/
+│   │   ├── Default_CharacterScreen_PixelScreen/
 │   │   ├── Default_PixelScreen/
-│   │   └── Default_CharacterScreen_PixelScreen/
-│   └── Input/
-│       ├── InputkanalenDIGITAL/
-│       ├── InputkanalenPCF8574/
-│       ├── InputkanalenHX1838/
-│       ├── InputkanalenHX1838UserDefined/
-│       ├── InputkanalenPCF8574UserDefinedDirect/
-│       └── InputkanalenPCF8574UserDefinedMatrix/
+│   │   ├── InputkanalenDIGITAL/
+│   │   ├── InputkanalenHX1838/
+│   │   └── InputkanalenPCF8574/
+│   ├── Input/
+│   │   ├── InputkanalenDIGITAL/
+│   │   ├── InputkanalenDIGITALmetArgumenten/
+│   │   ├── InputkanalenHX1838/
+│   │   ├── InputkanalenHX1838UserDefined/
+│   │   ├── InputkanalenHX1838metArgumenten/
+│   │   ├── InputkanalenPCF8574/
+│   │   ├── InputkanalenPCF8574UserDefinedDirect/
+│   │   ├── InputkanalenPCF8574UserDefinedMatrix/
+│   │   └── InputkanalenPCF8574metArgumenten/
+│   └── Screen/
+│       ├── Callback_CharacterScreen/
+│       ├── Callback_PixelScreen/
+│       ├── Default_CharacterScreen/
+│       ├── Default_CharacterScreen_PixelScreen/
+│       └── Default_PixelScreen/
 └── Toepassingsgebieden/
     └── Stimulus/
         ├── Scenario1_EnkelTik/
@@ -164,7 +182,7 @@ examples/
         └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
-`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [GroeiAcademie Stimulus Hardware Shield v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/GroeiAcademie-Stimulus-Hardware-Shield-v1.0.0.md) en [Handleiding GroeiAcademie Stimulus Hardware Validatie v1.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.0.0/Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
+`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) en [Handleiding Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
 
 ## Librarystructuur
 
@@ -194,7 +212,7 @@ Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregist
 
 ## Elektronische schema's
 
-De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release is [Stimulus Shield v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md): v1.1.0 + HX1838 IR Receiver.
+De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release is [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md): actuele v1.1.2-hardware met HX1838 DATA op D8 en PixelScreen RST op D7.
 
 Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.md](docs/Toepassingsgebieden/Stimulus/README.md):
 
@@ -204,7 +222,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De volledige hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten staan onder Stimulus Shield v1.1.1. [Stimulus Shield v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) bevat de volledige opvolger van v1.1.0, inclusief de HX1838 IR Receiver; de [hardwarevalidatie v1.1.1](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.1/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.1.md) hoort daarbij.
+De volledige hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten staan onder Stimulus Shield v1.1.2. [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) bevat de actuele v1.1.2-hardware inclusief de HX1838 IR Receiver; de [hardwarevalidatie v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) hoort daarbij.
 
 ## Geplande uitbreidingen
 
