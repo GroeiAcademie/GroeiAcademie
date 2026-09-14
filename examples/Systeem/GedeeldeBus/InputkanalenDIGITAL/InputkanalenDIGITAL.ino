@@ -32,30 +32,28 @@
 #include <Systeem/GedeeldeBus/GedeeldeBus.h>
 
 // FASE 1: enkel aanmelden, geen conflictcontrole op dit moment.
-bool ScreenResourcesAanmeldenOpGedeeldeBus() {
+bool ScreenAanmeldenHardwareResourcesOpGedeeldeBus() {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if (!UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent::SERIAL, SetupOfLoop::SETUP)) return false;
+  if (!UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent::SERIAL, true)) return false;
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if (!I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL, SetupOfLoop::SETUP)) return false;
+  if (!I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL, true)) return false;
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  if (!SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, HardwareResourcePin::SCK, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::SS, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::D9, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::D7, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
+  if (!SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, HardwareResourcePin::SCK, true)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, {PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST}, HardwareResourceToegang::EXCLUSIEF, true)) return false;
 #endif
 
   return true;
 }
 
-bool InputResourcesAanmeldenOpGedeeldeBus() {
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D2, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D3, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D4, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D5, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
+bool InputAanmeldenHardwareResourcesOpGedeeldeBus() {
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D2, HardwareResourceToegang::EXCLUSIEF, true)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D3, HardwareResourceToegang::EXCLUSIEF, true)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D4, HardwareResourceToegang::EXCLUSIEF, true)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceType::GPIO, HardwareResourcePin::D5, HardwareResourceToegang::EXCLUSIEF, true)) return false;
   return true;
 }
 
@@ -97,15 +95,15 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 
 void setup() {
   // FASE 1: aanmelden.
-  RegistratiesResettenOpGedeeldeBus();
-  ScreenResourcesAanmeldenOpGedeeldeBus();
-  InputResourcesAanmeldenOpGedeeldeBus();
+  AantalAanmeldingenOpNulZettenOpGedeeldeBus();
+  ScreenAanmeldenHardwareResourcesOpGedeeldeBus();
+  InputAanmeldenHardwareResourcesOpGedeeldeBus();
 
   // FASE 2 en 3: pas nu, na alle aanmeldingen, controleren en de poort openen of sluiten.
   uint8_t conflictA = 0, conflictB = 0;
-  bool magInpluggen = AlleAangemeldeResourcesInpluggenOpGedeeldeBus();
+  bool magInpluggen = AanmeldingenInpluggenOpGedeeldeBus();
   if (!magInpluggen) {
-    AlleAangemeldeResourcesControlerenOpGedeeldeBus(&conflictA, &conflictB);
+    AanmeldingenOpConflictenControlerenOpGedeeldeBus(&conflictA, &conflictB);
   }
 
   if (!magInpluggen) {

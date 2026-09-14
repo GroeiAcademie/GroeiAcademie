@@ -70,7 +70,7 @@ GroeiAcademie/
 │   └── TERMINOLOGY.md
 ├── examples/
 │   ├── Systeem/
-│   │   ├── ADC_Validatie/
+│   │   ├── ADC_Backend/
 │   │   │   └── ...
 │   │   └── Screen/
 │   │       └── ...

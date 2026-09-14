@@ -197,7 +197,7 @@ Het pakket bevat daarnaast de gebruikte Nucleo-F401RE-referentie onder `docs/Ard
 | TTGO D1 R32 (ESP32-WROOM-32U) | 12-bit |
 | WeMos D1 R32 (ESP32-WROOM-32U) | 12-bit |
 
-Voor precisiemetingen kan de externe **ADS1115** worden gebruikt. `SystemConfig.h` gebruikt daarvoor `ADC_BITS 15` voor het single-ended bereik. Zie `examples/Systeem/ADC_Validatie/ADC_Validatie_ADS1115/`.
+Voor precisiemetingen kan de externe **ADS1115** worden gebruikt. `SystemConfig.h` gebruikt daarvoor `ADC_BITS 15` voor het single-ended bereik. Zie `examples/Systeem/ADC_Backend/ADC_Backend_ADS1115/`.
 
 ## Configuratie
 

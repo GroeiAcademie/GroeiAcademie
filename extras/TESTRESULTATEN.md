@@ -175,7 +175,7 @@ Alle onverwachte controles zijn OK bevonden.
 ============================================================
 ```
 
-Het totaal van 188 volgt rechtstreeks uit de opschoning van de `.ino`-configuratiearchitectuur: enkel de 5 Stimulus-scenario's worden over alle 8 mogelijke `SCREEN_OUTPUT_CONFIG`-waarden getest (`5 × 8 = 40` per Arduino Uno R3-vormfactorbord), de 5 Screen-examples en de 2 `ADC_Validatie`-scripts elk met exact hun eigen, relevante configuratie (`7 × 1 = 7` per Arduino Uno R3-vormfactorbord): samen `47` per Arduino Uno R3-vormfactorbord, `× 4` Arduino Uno R3-vormfactorborden `= 188`. Minder, gerichtere combinaties in plaats van overbodige herhaling ten opzichte van eerdere testruns.
+Het totaal van 188 volgt rechtstreeks uit de opschoning van de `.ino`-configuratiearchitectuur: enkel de 5 Stimulus-scenario's worden over alle 8 mogelijke `SCREEN_OUTPUT_CONFIG`-waarden getest (`5 × 8 = 40` per Arduino Uno R3-vormfactorbord), de 5 Screen-examples en de 2 `ADC_Backend`-scripts elk met exact hun eigen, relevante configuratie (`7 × 1 = 7` per Arduino Uno R3-vormfactorbord): samen `47` per Arduino Uno R3-vormfactorbord, `× 4` Arduino Uno R3-vormfactorborden `= 188`. Minder, gerichtere combinaties in plaats van overbodige herhaling ten opzichte van eerdere testruns.
 
 ### Vier verwachte UNO R3-geheugenbeperkingen
 

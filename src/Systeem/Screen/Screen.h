@@ -121,6 +121,7 @@ extern CharacterScreenCallback CallbackScreenTypeCharacter;
 // ook na een eerdere mislukking — standaard false, dus bestaande aanroepen
 // (zonder argument) blijven exact hetzelfde werken. Niet automatisch herhalen
 // (bv. in loop()): elke poging doet een echte I2C-transactie.
+// Roept intern InitialiserenGedeeldeBus() aan (experimenteel, GEDEELDE_BUS_PROTOTYPE in SystemConfig.h).
 bool CharacterScreenConfigureren(bool opnieuwProberen = false);
 #endif // SCREEN_TYPE_CHARACTER
 

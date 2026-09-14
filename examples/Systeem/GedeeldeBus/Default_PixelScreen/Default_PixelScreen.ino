@@ -2,19 +2,24 @@
 // Default PixelScreen
 // ============================================================================
 // ============================================================================
+#define GEDEELDE_BUS_PROTOTYPE
+
+// Schakel GEDEELDE_BUS_PROTOTYPE om de nieuwe GedeeldeBus-functionaliteit te kunnen testen.
+// Zonder deze regel wordt alleen de bestaande, stabiele GedeeldeBus-code gebruikt en krijgt deze .ino compileerfouten.
+// Verwijder in 'SystemConfig.h' dus // voor '// #define GEDEELDE_BUS_PROTOTYPE' om deze prototypefuncties beschikbaar te maken.
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
 #include <Screen.h>
 #include <Systeem/GedeeldeBus/GedeeldeBus.h>
 #include <Configuratie/ExamplesConfig.h>
 
-// Schakel GEDEELDE_BUS_PROTOTYPE om de nieuwe GedeeldeBus-functionaliteit te kunnen testen.
-// Zonder deze regel wordt alleen de bestaande, stabiele GedeeldeBus-code gebruikt en krijgt deze .ino compileerfouten.
-// Verwijder in 'SystemConfig.h' dus // voor '// #define GEDEELDE_BUS_PROTOTYPE' om deze prototypefuncties beschikbaar te maken.
-
-// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino structureel niet: Screen.cpp wordt als apart bestand gecompileerd en ziet een #define hier nooit. 
-// Zet SCREEN_TYPE_CHARACTER én SCREEN_TYPE_PIXELS daarom in UserConfig.h (kopieer van UserConfig_template.h) of rechtstreeks in SystemConfig.h. 
-// Onderstaande controle geeft een duidelijke foutmelding als dat nog niet gebeurd is, in plaats van de sketch stil te laten falen.
+// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino
+// structureel niet: Screen.cpp wordt als apart bestand gecompileerd en ziet
+// een #define hier nooit. Zet SCREEN_TYPE_PIXELS daarom in UserConfig.h
+// (kopieer van UserConfig_template.h) of rechtstreeks in SystemConfig.h.
+// Onderstaande controle geeft een duidelijke foutmelding als dat nog niet
+// gebeurd is, in plaats van de sketch stil te laten falen.
 #if !((SCREEN_OUTPUT_CONFIG) & SCREEN_TYPE_PIXELS)
   #error Stel SCREEN_OUTPUT_CONFIG in UserConfig.h of SystemConfig.h in op (minstens) SCREEN_TYPE_PIXELS.
 #else
@@ -23,15 +28,12 @@ Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
 
 void setup() {
   // FASE 1: aanmelden.
-  RegistratiesResettenOpGedeeldeBus();
-  SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, HardwareResourcePin::SCK, SetupOfLoop::SETUP);
-  ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::SS, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP);
-  ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::D9, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP);
-  ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::D7, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP);
-// TODO: ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, {HardwareResourcePin::SS, HardwareResourcePin::D9, HardwareResourcePin::D7}, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP);
+  AantalAanmeldingenOpNulZettenOpGedeeldeBus();
+  SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, HardwareResourcePin::SCK, true);
+  AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, {PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST}, HardwareResourceToegang::EXCLUSIEF, true);
 
   // FASE 2 en 3.
-  bool magInpluggen = AlleAangemeldeResourcesInpluggenOpGedeeldeBus();
+  bool magInpluggen = AanmeldingenInpluggenOpGedeeldeBus();
   if (!magInpluggen) {
     PrintToScreen("GedeeldeBus", "RESOURCECONFLICT", LEESTIJD_VOORBEELD_MS);
     return;

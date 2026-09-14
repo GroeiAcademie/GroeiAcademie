@@ -32,7 +32,7 @@ if not errorlevel 1 (
 
 :: v1.1.2: TestLibraryNieuw test de nieuwe en gewijzigde v1.1.2-functionaliteit.
 :: Bestaand testconcept: nieuwe functionaliteit wordt volledig getest op alle officiële én acceptatieboards.
-set "OFFICIAL_BOARDS=arduino:avr:uno arduino:renesas_uno:minima arduino:renesas_uno:unor4wifi arduino:zephyr:unoq rp2040:rp2040:cytron_maker_uno_rp2040 STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE esp32:esp32:d1_uno32 esp32:esp32:esp32s3"
+set OFFICIAL_BOARDS="arduino:avr:uno" "arduino:renesas_uno:minima" "arduino:renesas_uno:unor4wifi" "arduino:zephyr:unoq" "rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE" "esp32:esp32:d1_uno32" "esp32:esp32:esp32s3"
 set "ACCEPTANCE_BOARDS="
 
 set /A OFFICIAL_TESTS=0

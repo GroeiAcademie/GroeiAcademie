@@ -158,16 +158,16 @@ if "%TEST_STIMULUS%"=="1" (
             if not "!HUIDIG_PAD:%%U=!"=="!HUIDIG_PAD!" set "AANWEZIG_IN_UITSLUITING=1"
         )
         if "!AANWEZIG_IN_UITSLUITING!"=="0" (
-            if /I "%%~nxF"=="ADC_Validatie_Native.ino" set "ADC_NATIVE_GEVONDEN=1"
-            if /I "%%~nxF"=="ADC_Validatie_ADS1115.ino" set "ADC_ADS1115_GEVONDEN=1"
+            if /I "%%~nxF"=="ADC_Backend_Native.ino" set "ADC_NATIVE_GEVONDEN=1"
+            if /I "%%~nxF"=="ADC_Backend_ADS1115.ino" set "ADC_ADS1115_GEVONDEN=1"
         )
     )
     if "!ADC_NATIVE_GEVONDEN!"=="0" (
-        echo FOUT: ADC_Validatie_Native.ino nergens gevonden onder examples.
+        echo FOUT: ADC_Backend_Native.ino nergens gevonden onder examples.
         set /A FAIL+=1
     )
     if "!ADC_ADS1115_GEVONDEN!"=="0" (
-        echo FOUT: ADC_Validatie_ADS1115.ino nergens gevonden onder examples.
+        echo FOUT: ADC_Backend_ADS1115.ino nergens gevonden onder examples.
         set /A FAIL+=1
     )
 )
@@ -675,7 +675,7 @@ for /R "examples\Systeem\Screen" %%F in (*.ino) do (
 goto :eof
 
 :REGRESSIE_TEST_STIMULUS_VOLLEDIG
-for /R "examples\Systeem\ADC_Validatie" %%F in (*.ino) do (
+for /R "examples\Systeem\ADC_Backend" %%F in (*.ino) do (
     set "REG_EXAMPLE=%%~dpF"
     set "REG_EXAMPLE=!REG_EXAMPLE:~0,-1!"
     set "REG_BESTAND=%%~nxF"

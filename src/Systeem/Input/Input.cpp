@@ -1022,7 +1022,7 @@ void InputConfigureren() {
 
   #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   // businitialisatie loopt nu via GedeeldeBus (Systeem/GedeeldeBus/), gedragsbehoudend t.o.v. de vorige, hier lokaal herhaalde ARDI32-logica.
-  GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
+  InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
     if (!pcf8574.begin(0xFF)) {
       PCF8574OnbereikbaarMelden();
     } else {

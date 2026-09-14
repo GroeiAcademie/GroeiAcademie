@@ -26,32 +26,30 @@
 
 #include <Systeem/GedeeldeBus/GedeeldeBus.h>
 
-bool ScreenResourcesAanmeldenOpGedeeldeBus() {
+bool ScreenAanmeldenHardwareResourcesOpGedeeldeBus() {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if (!UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent::SERIAL, SetupOfLoop::SETUP)) return false;
+  if (!UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent::SERIAL, true)) return false;
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if (!I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL, SetupOfLoop::SETUP)) return false;
+  if (!I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL, true)) return false;
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  if (!SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, HardwareResourcePin::SCK, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::SS, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::D9, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, HardwareResourcePin::D7, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
+  if (!SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, HardwareResourcePin::SCK, true)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, {PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST}, HardwareResourceToegang::EXCLUSIEF, true)) return false;
 #endif
 
   return true;
 }
 
-bool InputResourcesAanmeldenOpGedeeldeBus() {
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_HX1838, HardwareResourceType::IR, HardwareResourcePin::D8, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
+bool InputAanmeldenHardwareResourcesOpGedeeldeBus() {
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::INPUT_HX1838, HardwareResourceType::IR, HardwareResourcePin::CUSTOM, HardwareResourceToegang::EXCLUSIEF, true, GedeeldeBusRol::AUTONOOM, GEDEELDE_BUS_GEEN_ADRES, HX1838_ONTVANGER_PIN)) return false;
 #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE == 1
-  if (!ResourcesAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_HX1838, HardwareResourceType::INTERRUPT, HardwareResourcePin::D8, HardwareResourceToegang::EXCLUSIEF, SetupOfLoop::SETUP)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::INPUT_HX1838, HardwareResourceType::INTERRUPT, HardwareResourcePin::CUSTOM, HardwareResourceToegang::EXCLUSIEF, true, GedeeldeBusRol::AUTONOOM, GEDEELDE_BUS_GEEN_ADRES, HX1838_ONTVANGER_PIN)) return false;
 #endif
 #if HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD || HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
-  if (!EEPROMAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_HX1838, SetupOfLoop::SETUP)) return false;
+  if (!EEPROMAanmeldenOpGedeeldeBus(GedeeldeBusComponent::INPUT_HX1838, true)) return false;
 #endif
   return true;
 }
@@ -192,12 +190,12 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 
 void setup() {
   // FASE 1: aanmelden.
-  RegistratiesResettenOpGedeeldeBus();
-  ScreenResourcesAanmeldenOpGedeeldeBus();
-  InputResourcesAanmeldenOpGedeeldeBus();
+  AantalAanmeldingenOpNulZettenOpGedeeldeBus();
+  ScreenAanmeldenHardwareResourcesOpGedeeldeBus();
+  InputAanmeldenHardwareResourcesOpGedeeldeBus();
 
   // FASE 2 en 3.
-  bool magInpluggen = AlleAangemeldeResourcesInpluggenOpGedeeldeBus();
+  bool magInpluggen = AanmeldingenInpluggenOpGedeeldeBus();
   if (!magInpluggen) {
     PrintToScreen("GedeeldeBus", "RESOURCECONFLICT", INPUT_TEST_WEERGAVE_MS);
     return;

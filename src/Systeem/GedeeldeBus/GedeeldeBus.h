@@ -29,15 +29,16 @@ enum class GedeeldeBusType : uint8_t {
 
 // Initialiseert de opgegeven bus, enkel bij de eerste aanroep voor dat type.
 // Veilig om meermaals aan te roepen vanuit verschillende subsystemen.
-void GedeeldeBusInitialiseren(GedeeldeBusType busType);
+void InitialiserenGedeeldeBus(GedeeldeBusType busType);
 
 // Enkel voor testdoeleinden/diagnose: geeft terug of een bus al geïnitialiseerd is.
-bool GedeeldeBusIsGeinitialiseerd(GedeeldeBusType busType);
+bool IsGedeeldeBusGeinitialiseerd(GedeeldeBusType busType);
 
 // Reset de interne "al geïnitialiseerd"-vlaggen. Beïnvloedt de fysieke bus zelf niet; enkel bedoeld voor testscenario's.
-void GedeeldeBusResetten();
+void ResettenGedeeldeBus();
 
 #ifdef GEDEELDE_BUS_PROTOTYPE
+  #include <initializer_list> // ARDUINO UNO R3 ondersteunt dit niet — tijdelijk, want UNO R3 wordt overwogen te schrappen in v1.1.4
 
 // ============================================================================
 // PROTOTYPE: centrale registratie van hardware-resources.
@@ -91,7 +92,7 @@ enum class HardwareResourceType : uint8_t {
 
 // Alleen fysieke resources van de UNO-vormfactor.
 // Sensor- of module-interne resources horen bij die sensor/module en worden niet in deze enum verzameld.
-// HardwareResource: geeft aan welke fysieke resource van de UNO-vormfactor gebruikt wordt.
+// HardwareResourcePin: geeft aan welke fysieke resource van de UNO-vormfactor gebruikt wordt.
 enum class HardwareResourcePin : uint8_t {
   // Digitale pinnen 
   D0                 = 0x00,
@@ -127,7 +128,8 @@ enum class HardwareResourcePin : uint8_t {
   SCK                = 0x32,
   SS                 = 0x33,
 
-  GEEN               = 0xFF
+  CUSTOM             = 0xFE, // geen vast shieldlabel; de effectieve pin wordt apart meegegeven (bv. instelbare pinnen zoals PIXEL_SCREEN_DC)
+  NONE               = 0xFF  // geen pin van toepassing (bv. bij UART, EEPROM, of het I2C-adres zelf)
 };
 
 // HardwareResourceToegang: bepaalt of een hardware-resource door meerdere componenten gedeeld mag worden of exclusief gebruikt wordt.
@@ -143,8 +145,8 @@ enum class GedeeldeBusRol : uint8_t {
   SLAVE              = 0x02
 };
 
-// GedeeldeBusResourceRegistratie: bevat één volledige registratie van een component en de hardware-resource die het gebruikt.
-struct GedeeldeBusResourceRegistratie {
+// GedeeldeBusHardwareResourceAanmelding: bevat één volledige registratie van een component en de hardware-resource die het gebruikt.
+struct GedeeldeBusHardwareResourceAanmelding {
   GedeeldeBusComponent component;
   HardwareResourceType type;
   HardwareResourcePin resource;
@@ -154,36 +156,48 @@ struct GedeeldeBusResourceRegistratie {
   uint8_t adres;
 };
 
-#ifndef MAX_GEDEELDE_BUS_RESOURCE_REGISTRATIES
-  #define MAX_GEDEELDE_BUS_RESOURCE_REGISTRATIES 24
+#ifndef GEDEELDE_BUS_MAX_AANMELDINGEN_HARDWARE_RESOURCES
+  #define GEDEELDE_BUS_MAX_AANMELDINGEN_HARDWARE_RESOURCES 24
 #endif
 
 #define GEDEELDE_BUS_GEEN_PIN   0xFF
 #define GEDEELDE_BUS_GEEN_ADRES 0xFF
 
-// SetupOfLoop: bepaalt of aanmelden/afmelden enkel opslaat (SETUP), of meteen ook controleert
-// en inplugt (LOOP). Bij LOOP en een conflict wordt de zonet aangemelde resource automatisch
-// weer afgemeld.
-enum class SetupOfLoop : uint8_t { SETUP = 0x00, LOOP = 0x01 };
-
-bool ResourcesAanmeldenOpGedeeldeBus(
+// gedeeldeBusAanmeldenOfAfmeldenInSetup: true betekent enkel opslaan (in setup()), geen controle.
+// false betekent meteen ook controleren en inpluggen (in loop()). Bij false en een conflict wordt
+// de zonet aangemelde resource automatisch weer afgemeld.
+bool AanmeldenHardwareResourcesOpGedeeldeBus(
   GedeeldeBusComponent component,
   HardwareResourceType type,
   HardwareResourcePin resource,
   HardwareResourceToegang toegang,
-  SetupOfLoop setupOfLoop,
+  bool gedeeldeBusAanmeldenOfAfmeldenInSetup,
   GedeeldeBusRol rol = GedeeldeBusRol::AUTONOOM,
-  uint8_t adres = GEDEELDE_BUS_GEEN_ADRES
+  uint8_t adres = GEDEELDE_BUS_GEEN_ADRES,
+  uint8_t pinOverride = GEDEELDE_BUS_GEEN_PIN
 );
 
-bool ResourcesAfmeldenOpGedeeldeBus(
+bool AfmeldenHardwareResourcesOpGedeeldeBus(
   GedeeldeBusComponent component,
   HardwareResourceType type,
   HardwareResourcePin resource,
   HardwareResourceToegang toegang,
-  SetupOfLoop setupOfLoop,
+  bool gedeeldeBusAanmeldenOfAfmeldenInSetup,
   GedeeldeBusRol rol = GedeeldeBusRol::AUTONOOM,
-  uint8_t adres = GEDEELDE_BUS_GEEN_ADRES
+  uint8_t adres = GEDEELDE_BUS_GEEN_ADRES,
+  uint8_t pinOverride = GEDEELDE_BUS_GEEN_PIN
+);
+
+// Meervoudsversie: meldt meerdere CUSTOM-pinnen van hetzelfde component in één aanroep aan,
+// bv. AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent::PIXEL_SCREEN, HardwareResourceType::GPIO, {PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST}, HardwareResourceToegang::EXCLUSIEF, true);
+// Roept intern, per pin, de enkelvoudsversie aan met HardwareResourcePin::CUSTOM.
+bool AanmeldenHardwareResourcesOpGedeeldeBus(
+  GedeeldeBusComponent component,
+  HardwareResourceType type,
+  std::initializer_list<uint8_t> pinnen,
+  HardwareResourceToegang toegang,
+  bool gedeeldeBusAanmeldenOfAfmeldenInSetup,
+  GedeeldeBusRol rol = GedeeldeBusRol::AUTONOOM
 );
 
 bool I2CAanmeldenOpGedeeldeBus(
@@ -191,7 +205,7 @@ bool I2CAanmeldenOpGedeeldeBus(
   uint8_t adres,
   HardwareResourcePin sdaResource,
   HardwareResourcePin sclResource,
-  SetupOfLoop setupOfLoop
+  bool gedeeldeBusAanmeldenOfAfmeldenInSetup
 );
 
 bool SPIAanmeldenOpGedeeldeBus(
@@ -199,22 +213,22 @@ bool SPIAanmeldenOpGedeeldeBus(
   HardwareResourcePin misoResource,
   HardwareResourcePin mosiResource,
   HardwareResourcePin sckResource,
-  SetupOfLoop setupOfLoop
+  bool gedeeldeBusAanmeldenOfAfmeldenInSetup
 );
 
-bool EEPROMAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, SetupOfLoop setupOfLoop);
-bool UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, SetupOfLoop setupOfLoop);
+bool EEPROMAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, bool gedeeldeBusAanmeldenOfAfmeldenInSetup);
+bool UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, bool gedeeldeBusAanmeldenOfAfmeldenInSetup);
 
 // Fase 2: vergelijkt, na alle aanmeldingen, elk paar registraties onderling, symmetrisch.
 // Bij een conflict wijzen de twee out-parameters (indien opgegeven) beide betrokken registraties aan.
-bool AlleAangemeldeResourcesControlerenOpGedeeldeBus(uint8_t* conflictIndexA = nullptr, uint8_t* conflictIndexB = nullptr);
+bool AanmeldingenOpConflictenControlerenOpGedeeldeBus(uint8_t* conflictIndexA = nullptr, uint8_t* conflictIndexB = nullptr);
 
 // Fase 3: veilige poort. Roept fase 2 aan; enkel bij true mag de hardware-init in Input.cpp/Screen.cpp doorgaan.
-bool AlleAangemeldeResourcesInpluggenOpGedeeldeBus();
+bool AanmeldingenInpluggenOpGedeeldeBus();
 
-void RegistratiesResettenOpGedeeldeBus();
-uint8_t AantalRegistratiesOpGedeeldeBus();
-const GedeeldeBusResourceRegistratie* RegistratieOpIndexOpGedeeldeBus(uint8_t index);
+void AantalAanmeldingenOpNulZettenOpGedeeldeBus();
+uint8_t OpvragenAantalAanmeldingenOpGedeeldeBus();
+const GedeeldeBusHardwareResourceAanmelding* OpvragenPointerAanmeldingOpGedeeldeBus(uint8_t index);
 
 #endif // GEDEELDE_BUS_PROTOTYPE
 

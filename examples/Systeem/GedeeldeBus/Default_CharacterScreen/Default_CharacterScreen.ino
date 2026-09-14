@@ -20,11 +20,11 @@
 
 void setup() {
   // FASE 1: aanmelden.
-  RegistratiesResettenOpGedeeldeBus();
-  I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL, SetupOfLoop::SETUP);
+  AantalAanmeldingenOpNulZettenOpGedeeldeBus();
+  I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL, true);
 
   // FASE 2 en 3.
-  bool magInpluggen = AlleAangemeldeResourcesInpluggenOpGedeeldeBus();
+  bool magInpluggen = AanmeldingenInpluggenOpGedeeldeBus();
 
   if (!magInpluggen) {
     PrintToScreen("GedeeldeBus", "RESOURCECONFLICT", LEESTIJD_VOORBEELD_MS);

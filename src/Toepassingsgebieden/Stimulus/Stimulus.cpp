@@ -30,7 +30,7 @@ static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, Sen
     // Wire expliciet via GedeeldeBus initialiseren VOOR ads.begin() aangeroepen wordt. 
     // Zonder dit zou de ADS1115-library zelf, intern, Wire.begin() zonder board-specifieke SDA/SCL-pinnen kunnen aanroepen,
     // wat op ARDI32 tot een verkeerde pinconfiguratie zou leiden als dit nog vóór Screen/Input gebeurt.
-    GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
+    InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
 
     if (!ads.begin(I2C_ADDRESS_ADS1115)) {
       ads1115Aanwezig = false;

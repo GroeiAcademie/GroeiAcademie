@@ -637,8 +637,8 @@ Voorstel voor een objectieve vergelijking, uitvoerbaar met schema 3 zonder herbe
 De validatiescripts zijn bewust zelfstandig gehouden. Ze gebruiken niet de volledige Stimulus-librarylogica, zodat de Arduino-ADC-route en ADS1115-route zuiver hardwarematig vergeleken kunnen worden.
 
 Gebruik:
-- `ADC_Validatie_Native` voor de directe Arduino-ADC-route.
-- `ADC_Validatie_ADS1115` voor de ADS1115-route.
+- `ADC_Backend_Native` voor de directe Arduino-ADC-route.
+- `ADC_Backend_ADS1115` voor de ADS1115-route.
 
 Deze scripts zijn bedoeld voor hardwarevalidatie, niet als gewone gebruikersvoorbeelden van de Stimulus-library.
 
@@ -646,8 +646,8 @@ Er zijn twee aparte validatiescripts, zodat de Arduino-ADC-route en de ADS1115-r
 
 | Script | Backend | Fysieke keuze |
 |---|---|---|
-| `examples/Systeem/ADC_Validatie/ADC_Validatie_Native/ADC_Validatie_Native.ino` | `ADC_BACKEND_NATIVE` | Geen ADS1115-module op H5. Vier jumpers op jumperveld H6. H6 verbindt H5 pin 7-10 met Arduino A0-A3. |
-| `examples/Systeem/ADC_Validatie/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino` | `ADC_BACKEND_ADS1115` | ADS1115-bordje op H5. Gewenst adres kiezen via SW1. Standaard: ADDR naar GND, adres `0x48`. |
+| `examples/Systeem/ADC_Backend/ADC_Backend_Native/ADC_Backend_Native.ino` | `ADC_BACKEND_NATIVE` | Geen ADS1115-module op H5. Vier jumpers op jumperveld H6. H6 verbindt H5 pin 7-10 met Arduino A0-A3. |
+| `examples/Systeem/ADC_Backend/ADC_Backend_ADS1115/ADC_Backend_ADS1115.ino` | `ADC_BACKEND_ADS1115` | ADS1115-bordje op H5. Gewenst adres kiezen via SW1. Standaard: ADDR naar GND, adres `0x48`. |
 
 In beide validatiescripts wordt dezelfde functiehandtekening gebruikt als in de Stimulus-code:
 
@@ -659,19 +659,19 @@ Bij `ADC_BACKEND_NATIVE` is `sensorPin` een Arduino-pin. Bij `ADC_BACKEND_ADS111
 
 ### 19.1 Arduino-ADC-validatie
 
-Gebruik `ADC_Validatie_Native.ino` om de directe Arduino-ADC-route te testen.
+Gebruik `ADC_Backend_Native.ino` om de directe Arduino-ADC-route te testen.
 
 ```cpp
-// Zie examples/Systeem/ADC_Validatie/ADC_Validatie_Native/ADC_Validatie_Native.ino
+// Zie examples/Systeem/ADC_Backend/ADC_Backend_Native/ADC_Backend_Native.ino
 #define ADC_BACKEND ADC_BACKEND_NATIVE
 ```
 
 ### 19.2 ADS1115-validatie
 
-Gebruik `ADC_Validatie_ADS1115.ino` om de ADS1115-route te testen.
+Gebruik `ADC_Backend_ADS1115.ino` om de ADS1115-route te testen.
 
 ```cpp
-// Zie examples/Systeem/ADC_Validatie/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino
+// Zie examples/Systeem/ADC_Backend/ADC_Backend_ADS1115/ADC_Backend_ADS1115.ino
 #define ADC_BACKEND ADC_BACKEND_ADS1115
 ```
 

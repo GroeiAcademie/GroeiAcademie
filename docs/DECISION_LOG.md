@@ -116,3 +116,46 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 **Besluit:** het configuratiecontroleblok in `PrintToScreenIntern()` (dat `CS000`/`PS000` toont bij een vergeten configuratie-aanroep) geldt enkel wanneer er geen callback geregistreerd is voor dat schermtype. Is er een `CallbackScreenTypeCharacter`/`CallbackScreenTypePixel` geregistreerd, dan wordt die callback niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is: de callback-gebruiker blijft zelf verantwoordelijk voor het al dan niet configureren van de ingebouwde hardware, indien die callback ze nog gebruikt.
 
 **Context:** `SCREEN_TYPE_CHARACTER`/`SCREEN_TYPE_PIXELS` vertegenwoordigen zo consequent "er is uitvoer van dit type gewenst", niet specifiek "de ingebouwde hardware moet werken": in lijn met hoe de rest van `PrintToScreenIntern()` een callback al als volledig apart pad behandelde. Naar aanleiding van code review, vóór publicatie van v1.0.4.
+
+## D025 GedeeldeBus: centralisatie van businitialisatie
+
+**Besluit:** `Screen.cpp`, `Input.cpp` (PCF8574-tak) en `Stimulus.cpp` (`InitialiseerADS1115()`) riepen voorheen elk apart `Wire.begin()`/`SPI.begin()` aan, met identieke maar afzonderlijk onderhouden board-specifieke logica. Dit is gecentraliseerd in een nieuw `Systeem/GedeeldeBus`-bestand, gedragsbehoudend.
+
+**Context:** concreet risico verholpen: bij gelijktijdig gebruik van bijvoorbeeld Input met PCF8574 én een I2C-scherm was er voorheen geen garantie op conflictvrije businitialisatie. Toegevoegd in v1.1.0.
+
+## D026 Aparte types voor Input met/zonder argumenten
+
+**Besluit:** `InputFunctieMetArgumenten`/`MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten` worden volledig apart gehouden van het bestaande `InputFunctie`/`MappingTussenToetsaanslagEnUitTeVoerenFunctie`, met een eigen `void* argumenten`-veld. Het eerste type wordt op geen enkele manier geraakt.
+
+**Context:** toegevoegd in v1.1.0, als tweede, onafhankelijk type naast het bestaande.
+
+## D027 Experimentele, gebruikersgedefinieerde keypadtypes
+
+**Besluit:** `KEYPAD_TYPE_USER_DEFINED_DIRECT`/`KEYPAD_TYPE_USER_DEFINED_MATRIX` toegevoegd, experimenteel, enkel bij `INPUT_TYPE_PCF8574`: laat toe een nieuw, fysiek keypad te testen zonder de bibliotheek zelf aan te passen, door pinnen, `KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED` en de opschriftkoppeling volledig in `UserConfig.h` in te stellen.
+
+**Context:** toegevoegd in v1.1.0. Ontbrekende, vereiste instellingen geven een leesbare `#error`-tekst tijdens het compileren.
+
+## D028 HX1838 DEFINE-route: van experimenteel naar released
+
+**Besluit:** HX1838 gaat voor `HX1838_BRON_CODES = HX1838_BRON_CODES_DEFINE` van experimenteel (v1.1.0) naar released (v1.1.1). De EEPROM-gebaseerde routes (`HX1838_BRON_CODES_EEPROM_ALTIJD`, `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE`) blijven experimenteel.
+
+**Context:** `HX1838_BRON_CODES_DEFINE` is hardwarematig getest en werkend met zowel TinyIRReceiver als IRremote, telkens met de ontvanger op Arduino Uno-shieldpin `D12`.
+
+## D029 Test-indeling naar regressierisico
+
+**Besluit:** de testindeling wordt opgesplitst volgens regressierisico: `TestLibraryGereleased.cmd` voert de volledige gereleasete regressiematrix uit; `TestLibraryNieuw.cmd` test de volledige nieuwe matrix voor functionaliteit die nog niet released is; `TestLibraryNieuwOngeldig.cmd` controleert de ongeldige configuraties.
+
+**Context:** toegevoegd in v1.1.1. `extras/TestLibraryGereleasedVolledigeRegresietesten.cmd` bestaat daarnaast als aparte, volledige regressietest, geen deel van de vier releasecompilecycli.
+
+## D030 Canonieke boardnamen
+
+**Besluit:** de vier aanvullende boardconstanten gebruiken vanaf v1.1.2 consequent de canonieke architectuur- en boardfamilienamen (`BOARD_ESP32_D1_UNO_R32`, `BOARD_ESP32S3_ARDI32`, `BOARD_RP2040_CYTRON_MAKER_UNO`, `BOARD_STM32F4_NUCLEO64_F401RE`), met behoud van hun bestaande numerieke waarden.
+
+**Context:** alle code, testscripts, voorbeelden en Markdowndocumentatie zijn naar deze vier namen bijgewerkt.
+
+## D031 Stimulus Shield v1.1.2 als enige geldige hardwarebron
+
+**Besluit:** de foutieve voorgangers van de Stimulus Shield zijn uit de actuele release verwijderd. Uitsluitend de tekeningset en documentatie onder `docs/Uitbreidingskaarten/Stimulus Shield v1.1.2/` gelden als hardwarebron.
+
+**Context:** toegevoegd in v1.1.2. HX1838 DATA gebruikt Arduino Uno-shieldpin `D8`; PixelScreen RST gebruikt Arduino Uno-shieldpin `D7`.
+

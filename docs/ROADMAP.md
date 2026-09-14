@@ -84,9 +84,15 @@ De actuele compileprofielen omvatten:
 - Arduino UNO R3;
 - Arduino UNO R4 Minima;
 - Arduino UNO R4 WiFi;
-- `BOARD_ESP32_D1_UNO_R32`.
+- Arduino UNO Q;
+- Cytron Maker UNO RP2040;
+- Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1);
+- SB Components Ardi-32 (ESP32-S3-WROOM-1);
+- STM32F4 Nucleo-F401RE;
+- TTGO D1 R32 (ESP32-WROOM-32U);
+- WeMos D1 R32 (ESP32-WROOM-32U).
 
-Andere ESP32- en niet-Arduino-UNO-platformen worden pas officieel ondersteund nadat pinmapping, ADC-gedrag, timing, geheugen, dependencies en echte hardwarewerking per profiel zijn gevalideerd.
+Platformen buiten deze lijst worden pas officieel ondersteund nadat pinmapping, ADC-gedrag, timing, geheugen, dependencies en echte hardwarewerking per profiel zijn gevalideerd, zoals hierboven voor deze tien al gebeurd is (zie `docs/HARDWARE_SUPPORT.md`).
 
 ### PixelScreen-uitbreidingen
 

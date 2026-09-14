@@ -98,16 +98,16 @@ for /R "examples" %%F in (*.ino) do (
         if not "!HUIDIG_PAD:%%U=!"=="!HUIDIG_PAD!" set "AANWEZIG_IN_UITSLUITING=1"
     )
     if "!AANWEZIG_IN_UITSLUITING!"=="0" (
-        if /I "%%~nxF"=="ADC_Validatie_Native.ino" set "ADC_NATIVE_GEVONDEN=1"
-        if /I "%%~nxF"=="ADC_Validatie_ADS1115.ino" set "ADC_ADS1115_GEVONDEN=1"
+        if /I "%%~nxF"=="ADC_Backend_Native.ino" set "ADC_NATIVE_GEVONDEN=1"
+        if /I "%%~nxF"=="ADC_Backend_ADS1115.ino" set "ADC_ADS1115_GEVONDEN=1"
     )
 )
 if "!ADC_NATIVE_GEVONDEN!"=="0" (
-    echo FOUT: ADC_Validatie_Native.ino nergens gevonden onder examples.
+    echo FOUT: ADC_Backend_Native.ino nergens gevonden onder examples.
     set /A FAIL+=1
 )
 if "!ADC_ADS1115_GEVONDEN!"=="0" (
-    echo FOUT: ADC_Validatie_ADS1115.ino nergens gevonden onder examples.
+    echo FOUT: ADC_Backend_ADS1115.ino nergens gevonden onder examples.
     set /A FAIL+=1
 )
 del "!STATIC_CHECK_LOG!" >nul 2>&1

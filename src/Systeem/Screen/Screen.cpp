@@ -87,7 +87,7 @@ bool CharacterScreenConfigureren(bool opnieuwProberen) {
   characterScreenStatus.foutmeldingWeergegeven = false;
 
   // businitialisatie loopt nu via GedeeldeBus (Systeem/GedeeldeBus/),gedragsbehoudend t.o.v. de vorige, hier lokaal herhaalde ARDI32-logica.
-  GedeeldeBusInitialiseren(GedeeldeBusType::I2C);
+  InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
 
 #if (CHARACTERSCREEN_I2C_ADRES_MODUS == 0)
   // Geen scan: enkel de handdruk-check op het geconfigureerde I2C_ADRES.

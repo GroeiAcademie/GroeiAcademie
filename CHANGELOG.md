@@ -6,6 +6,15 @@ De versienummers volgen de versie in `library.properties`.
 
 ## [Unreleased]
 
+### Overwogen: afbouw Arduino UNO R3-ondersteuning
+
+- het project overweegt om ondersteuning voor Arduino UNO R3 te schrappen vanaf v1.1.3, wegens te weinig beschikbaar geheugen voor recentere functionaliteit (zoals `GedeeldeBus`, die `std::initializer_list` gebruikt);
+- nog geen definitieve beslissing; deze aankondiging dient als vooraankondiging, in lijn met het deprecatiebeleid uit `ROADMAP.md`.
+
+### GedeeldeBus: naamgeving
+
+- `GedeeldeBusInitialiseren()` hernoemd naar `InitialiserenGedeeldeBus()`, gedragsbehoudend. Dit betreft enkel de altijd-actieve basisfunctie; de overige, experimentele `GEDEELDE_BUS_PROTOTYPE`-functienamen (gebruikt in de voorbeelden onder `examples/Systeem/GedeeldeBus/`) vallen hier niet onder.
+
 ## 1.1.2
 
 ### Boardnamen en Arduino Uno-shieldpinmapping

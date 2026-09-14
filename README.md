@@ -6,6 +6,37 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 
 > **Meten is Weten, in plaats van Denken te Weten.**
 
+
+## Prototype Stimulus
+
+![GROEI ACADEMIE FrameWork - Prototype Stimulus](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Protottype.jpg)
+
+Op deze foto zie je het prototype op **breadboard van het Stimulus v1.1.2 shield**.
+
+## Stimulus Shield v1.1.2
+
+![Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05.png)
+
+Op deze afbeelding zie je het schema van het Stimulus Shield v1.1.2, het **elektronische schema** van het eerder getoonde breadboardprototype, dat de aansluitingen voor de Stimulus-toepassing samenbrengt op één uitbreidingskaart.
+
+## Ondersteunde boards
+
+![GROEI ACADEMIE FrameWork - Boards](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Board.JPG)
+
+Op deze foto zie je alle succesvol geteste en reeds ondersteunde **ARDUINO UNO-vormfactor boards**.
+
+## Inputkanalen
+
+![GROEI ACADEMIE FrameWork - Input](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Input.JPG)
+
+Op deze foto zie je de reeds geteste drukknoppen, membranen en afstandsbedieningen. Via het **User Defined Matrix-mechanisme** kunnen we wellicht alle gangbare varianten ondersteunen.
+
+## Schermen
+
+![GROEI ACADEMIE FrameWork - Screen](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Screen.JPG)
+
+Op deze foto zie je de geteste schermen, die slechts enkele voorbeelden zijn van de vele mogelijke **Character- en PixelScreens**.
+
 ## Huidige status
 
 - versie: `1.1.2`;
@@ -147,10 +178,10 @@ Beschikbare voorbeelden:
 ```text
 examples/
 ├── Systeem/
-│   ├── ADC_Validatie/
-│   │   ├── ADC_Validatie_ADS1115/
-│   │   └── ADC_Validatie_Native/
-│   ├── GedeeldeBus/
+│   ├── ADC_Backend/
+│   │   ├── ADC_Backend_ADS1115/
+│   │   └── ADC_Backend_Native/
+│   ├── GedeeldeBus/   # experimenteel, in te schakelen via GEDEELDE_BUS_PROTOTYPE in SystemConfig.h
 │   │   ├── Default_CharacterScreen/
 │   │   ├── Default_CharacterScreen_PixelScreen/
 │   │   ├── Default_PixelScreen/
@@ -182,7 +213,7 @@ examples/
         └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
-`ADC_Validatie_Native` en `ADC_Validatie_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) en [Handleiding Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
+`ADC_Backend_Native` en `ADC_Backend_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) en [Handleiding Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
 
 ## Librarystructuur
 
@@ -195,7 +226,7 @@ GroeiAcademie/
 │   ├── Configuratie/
 │   ├── Systeem/Screen/        # Screen.h, Screen.cpp en ScreenTypes.h
 │   ├── Systeem/Input/         # Input.h, Input.cpp en InputTypes.h
-│   ├── Systeem/GedeeldeBus/   # gedeelde I2C/SPI-businitialisatie
+│   ├── Systeem/GedeeldeBus/   # gedeelde I2C/SPI-businitialisatie (experimenteel, GEDEELDE_BUS_PROTOTYPE)
 │   └── Toepassingsgebieden/Stimulus/
 ├── examples/
 ├── docs/

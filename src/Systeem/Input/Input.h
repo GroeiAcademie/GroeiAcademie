@@ -258,6 +258,7 @@ void ControleerMappingVolledigheid(const MappingTussenToetsaanslagEnUitTeVoerenF
 // Initialiseert de geconfigureerde invoerkanalen (pinMode/Wire.begin/IrReceiver.begin),
 // en start bij HX1838 automatisch de kalibratieprocedure als er nog geen geldige kalibratie in EEPROM staat. 
 // Wanneer de geconfigureerde bron de vaste HX1838-mapping gebruikt, worden ontbrekende codes vanuit SystemConfig.h aangevuld.
+// Roept bij INPUT_TYPE_PCF8574 intern InitialiserenGedeeldeBus() aan (experimenteel, GEDEELDE_BUS_PROTOTYPE in SystemConfig.h).
 void InputConfigureren();
 
 // Geeft één toetsaanslag terug via de gecompileerde invoerkanalen. 

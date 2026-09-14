@@ -132,7 +132,7 @@ De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit
 
 Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
 
-`ADC_Validatie_Native.ino` is een zelfstandig hardwarevalidatiescript en gebruikt daarom een eigen `BOARD_VERSION`-keuze in het script zelf. De gewone Stimulusvoorbeelden gebruiken de centrale configuratie uit `UserConfig.h` en `SystemConfig.h`.
+`ADC_Backend_Native.ino` is een zelfstandig hardwarevalidatiescript en gebruikt daarom een eigen `BOARD_VERSION`-keuze in het script zelf. De gewone Stimulusvoorbeelden gebruiken de centrale configuratie uit `UserConfig.h` en `SystemConfig.h`.
 
 ## Configuratiegrenzen
 
@@ -164,8 +164,8 @@ Voor reproduceerbare resultaten:
 
 ## Scenario's en voorbeelden
 
-- `examples/Systeem/ADC_Validatie/ADC_Validatie_Native/ADC_Validatie_Native.ino`
-- `examples/Systeem/ADC_Validatie/ADC_Validatie_ADS1115/ADC_Validatie_ADS1115.ino`
+- `examples/Systeem/ADC_Backend/ADC_Backend_Native/ADC_Backend_Native.ino`
+- `examples/Systeem/ADC_Backend/ADC_Backend_ADS1115/ADC_Backend_ADS1115.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario1_EnkelTik/Scenario1_EnkelTik.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario2_Simultaan/Scenario2_Simultaan.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario3_Ineenstortend/Scenario3_Ineenstortend.ino`
