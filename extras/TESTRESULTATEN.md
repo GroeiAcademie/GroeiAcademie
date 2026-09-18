@@ -6,7 +6,7 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 
 | Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte UNO R3-geheugenbeperkingen | Onverwachte fouten | Opmerking |
 |--------|-------|:------------:|------------:|---:|------------------------------------:|-------------------:|-----------|
-| v1.1.2 | nog uit te voeren | NOG UIT TE VOEREN | - | - | - | - | validatie van de v1.1.2-wijzigingen nog niet uitgevoerd |
+| v1.1.2 | 18-09-2026 | GESLAAGD | 626 | 626 | 0 | 0 | GESLAAGD |
 | v1.1.1 | 25-08-2026 | GESLAAGD | 359 | 358 | 1 | 0 | GESLAAGD |
 | v1.1.0 | 21-08-2026 | GESLAAGD | 460 | 456 | 4 | 0 | GESLAAGD |
 | v1.0.4 | 04-08-2026 | ✅ (Alle onverwachte controles zijn OK bevonden.) | 188 | 184 | 4 | 0 | GESLAAGD |

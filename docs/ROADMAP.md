@@ -6,7 +6,7 @@ Deze ROADMAP beschrijft de ontwikkelrichting van het GroeiAcademie FrameWork. Ee
 
 Het GroeiAcademie FrameWork vormt één uitbreidbaar framework waarin software, elektronica, hardware, sensormetingen, biofeedback, onderzoek, onderwijs en toepassingen binnen Neuro-Linguïstisch Programmeren samenkomen.
 
-Het project heeft als doel om fysiologische en gedragsmatige reacties zo betrouwbaar mogelijk te meten, te kalibreren, te combineren en begrijpelijk terug te koppelen. Daarbij staat de individuele gebruiker centraal. Het systeem vertrekt niet uitsluitend van gemiddelden, maar leert hoe één persoon reageert, herstelt en evolueert.
+Dit project heeft als doel om fysiologische en gedragsmatige reacties zo betrouwbaar mogelijk te meten, te kalibreren, te combineren en begrijpelijk terug te koppelen. Daarbij staat de individuele gebruiker centraal. Het systeem vertrekt niet uitsluitend van gemiddelden, maar leert hoe één persoon reageert, herstelt en evolueert.
 
 De library blijft modulair en uitbreidbaar. Nieuwe toepassingsgebieden worden pas officieel ondersteund wanneer hun meetdoel, code, voorbeelden, elektronische documentatie, kalibratie, foutbronnen, interpretatiegrenzen en hardwarevalidatie voldoende zijn uitgewerkt.
 
@@ -14,53 +14,80 @@ Het project wordt vanaf v1.0.0 publiek ontwikkeld als open-sourceproject. Bijdra
 
 ## 2. Functionele ROADMAP
 
-1. **Verschillende emoties leren kalibreren.**
+1. **Aanraking, capacitieve bediening en gebruikersinput**
+   Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande `PIN_TOETS`-systeem.
 
-2. **Meten of het brein die herinnering of beleving oproept overeenkomstig de gevraagde emotie.**
+2. **Aanwezigheid, afstand en locatie**
+   Toepasbaar voor aanwezigheid, afstand, beweging, lichaamshouding en locatie in een ruimte.
 
-3. **Hartcoherentie.**
+3. **Ademhaling**
+   Meten of de ademhaling in lijn is met de opgelegde ademhaling.
+   Hiermee kunnen onder meer ademfrequentie, ritme, fase, diepte, luchtstroom en borst- of buikbeweging worden onderzocht.
 
-4. **Meten of de ademhaling in lijn is met de opgelegde ademhaling.**
-
-5. **Baseline bepalen**
-
+4. **Baseline bepalen**
    Iedere meting begint met het bepalen van iemands persoonlijke fysiologische nulmeting.
 
-6. **Stressrespons meten**
+5. **Betrouwbaarheid van metingen bepalen**
+   Automatisch aangeven hoeveel vertrouwen het systeem heeft in een meting, rekening houdend met beweging, slechte sensorcontacten, storingen enzovoort.
 
-   Meten hoe sterk en hoe snel iemand reageert op een stressor of negatieve stimulus.
+6. **Beweging, houding en lichaamsbeweging**
+   Toepasbaar voor borst- en buikbeweging, lichaamshouding, beweging, tremor, reactietijd en bewegingsartefacten.
 
-7. **Herstelvermogen meten**
+7. **Bio-elektrische en biopotentiële signalen**
+   Referentie-/validatie-apparaten (geen kandidaat-sensoren voor integratie: dienen om te controleren of eigen hardware zoals BioAmp/NeuroSky TGAM dezelfde brainwave-patronen kan tonen als een gevestigd consumentenapparaat):
+   Belangrijk onderscheid: EEG, EMG, ECG & EOG
 
-   Meten hoe snel iemand na stress of een emotionele activatie terugkeert naar zijn persoonlijke baseline.
+8. **Druk, kracht en aanraking**
+   Toepasbaar voor druk, kracht, grijpkracht, voetdruk, aanraking, houding en verandering in spierspanning via uitgeoefende kracht.
 
-8. **Effect van interventies objectiveren**
-
+9. **Effect van interventies objectiveren**
    Meten welk effect bijvoorbeeld NLP-technieken, ademhaling, hartcoherentie, meditatie, ontspanning of andere interventies werkelijk hebben.
 
-9. **Individuele fysiologische profielen opbouwen**
+10. **Emoties kalibreren**
+    Verschillende emoties leren kalibreren.
 
-   Leren hoe iemand persoonlijk reageert in plaats van algemene gemiddelden te gebruiken. Dit sluit nauw aan bij het uitgangspunt om niet op "de gemiddelde gebruiker" te vertrouwen.
-
-10. **Sensorfusie**
-
-    Verschillende sensoren combineren zodat conclusies betrouwbaarder worden dan met één enkele sensor.
-
-11. **Betrouwbaarheid van metingen bepalen**
-
-    Automatisch aangeven hoeveel vertrouwen het systeem heeft in een meting, rekening houdend met beweging, slechte sensorcontacten, storingen enzovoort.
-
-12. **Gepersonaliseerde biofeedback**
-
-    Niet alleen meten, maar de feedback automatisch aanpassen aan wat voor die persoon het meest helpt.
-
-13. **Evolutie over langere termijn volgen**
-
+11. **Evolutie over langere termijn volgen**
     Objectief opvolgen of iemand over dagen, weken of maanden vooruitgaat.
 
-14. **Rapportering en vergelijking**
+12. **Gepersonaliseerde biofeedback**
+    Niet alleen meten, maar de feedback automatisch aanpassen aan wat voor die persoon het meest helpt.
 
+13. **Hartslag, HRV en hartcoherentie**
+    Hartcoherentie.
+    Hiermee kunnen hartslag, hartslagvariabiliteit, coherentie en herstelreacties worden onderzocht.
+
+14. **Herinnering, beleving en emotionele respons**
+    Meten of het brein die herinnering of beleving oproept overeenkomstig de gevraagde emotie.
+
+15. **Herstelvermogen meten**
+    Meten hoe snel iemand na stress of een emotionele activatie terugkeert naar zijn persoonlijke baseline.
+
+16. **Huidgeleiding en autonome activatie**
+    Toepasbaar voor elektrodermale activiteit, zweetklieractiviteit en veranderingen in sympathische activatie.
+
+17. **Huidtemperatuur en omgevingsmetingen**
+    Voor huidtemperatuur moet nog per sensor worden bepaald welke werkelijk geschikt is voor direct huidcontact en welke vooral de omgevingstemperatuur meten.
+
+18. **Individuele fysiologische profielen opbouwen**
+    Leren hoe iemand persoonlijk reageert in plaats van algemene gemiddelden te gebruiken. Dit sluit nauw aan bij het uitgangspunt om niet op "de gemiddelde gebruiker" te vertrouwen.
+
+19. **Omgevingsfactoren**
+    Meet de omstandigheden van de ruimte, niet van de student zelf. Nodig om te weten of een meetverschil tussen twee sessies door de student komt, of door bijvoorbeeld een warmere kamer die dag.
+
+20. **Rapportering en vergelijking**
     Sessies vergelijken, evolutie tonen en resultaten begrijpelijk visualiseren.
+
+21. **Sensorfusie**
+    Verschillende sensoren combineren zodat conclusies betrouwbaarder worden dan met één enkele sensor.
+
+22. **Stem en ademgeluid**
+    Mogelijke stemparameters: toonhoogte, intensiteit, spreektempo, pauzes, ritme, stemtrilling, ademgeluid, veranderingen in stemkwaliteit.
+
+23. **Stressrespons meten**
+    Meten hoe sterk en hoe snel iemand reageert op een stressor of negatieve stimulus.
+
+24. **Visuele observatie en pupilgedrag**
+    Mogelijke toepassingen: oogbewegingen, pupilverwijding, knippergedrag, gelaatsbeweging, lichaamshouding.
 
 ## 3. Technische ROADMAP
 

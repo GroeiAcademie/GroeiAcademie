@@ -6,6 +6,43 @@ Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oef
 
 > **Meten is Weten, in plaats van Denken te Weten.**
 
+## Waar het FrameWork naartoe groei
+
+Het GroeiAcademie FrameWork vormt één uitbreidbaar framework waarin software, elektronica, hardware, sensormetingen, biofeedback, onderzoek, onderwijs en toepassingen binnen Neuro-Linguïstisch Programmeren samenkomen.
+
+Dit project heeft als doel om fysiologische en gedragsmatige reacties zo betrouwbaar mogelijk te meten, te kalibreren, te combineren en begrijpelijk terug te koppelen. Daarbij staat de individuele gebruiker centraal. Het systeem vertrekt niet uitsluitend van gemiddelden, maar leert hoe één persoon reageert, herstelt en evolueert.
+
+Het project wordt vanaf v1.0.0 publiek ontwikkeld als open-sourceproject. Bijdragen uit code, documentatie, vertaling, elektronica, hardware, testen, onderzoek, meetprotocollen en communitywerk zijn welkom. De maintainers bewaken de architectuur, kwaliteit, licentie, onafhankelijkheid en samenhang van het project.
+
+## Functionele ROADMAP
+
+1. **Aanraking, capacitieve bediening en gebruikersinput**
+2. **Aanwezigheid, afstand en locatie**
+3. **Ademhaling**
+4. **Baseline bepalen**
+5. **Betrouwbaarheid van metingen bepalen**
+6. **Beweging, houding en lichaamsbeweging**
+7. **Bio-elektrische en biopotentiÃ«le signalen**
+8. **Druk, kracht en aanraking**
+9. **Effect van interventies objectiveren**
+10. **Emoties kalibreren**
+11. **Evolutie over langere termijn volgen**
+12. **Gepersonaliseerde biofeedback**
+13. **Hartslag, HRV en hartcoherentie**
+14. **Herinnering, beleving en emotionele respons**
+15. **Herstelvermogen meten**
+16. **Huidgeleiding en autonome activatie**
+17. **Huidtemperatuur en omgevingsmetingen**
+18. **Individuele fysiologische profielen opbouwen**
+19. **Omgevingsfactoren**
+20. **Rapportering en vergelijking**
+21. **Sensorfusie**
+22. **Stem en ademgeluid**
+23. **Stressrespons meten**
+24. **Visuele observatie en pupilgedrag**
+
+De volledige functionele ROADMAP staat in [de roadmap](docs/ROADMAP.md).
+
 
 ## Prototype Stimulus
 
