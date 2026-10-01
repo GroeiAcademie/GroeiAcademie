@@ -1,118 +1,24 @@
 #include "Stimulus.h"
+#include "../../Systeem/GedeeldeBus/GedeeldeBus.h"
+
+struct Stimulus Stimulus;
 
 // ============================================================================
-// Interne hulpfuncties (D020): dienen uitsluitend als bouwsteen binnen dit
-// bestand, worden door geen enkel voorbeeld of ander bronbestand aangeroepen,
-// en zijn daarom niet langer publiek gedeclareerd in Stimulus.h.
-// ============================================================================
-static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]);
-
-static int  BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge);
-static void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus);
-static void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor);
-static int  MaakSensorMask(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, bool testOpDRUKWAARDE = true);
-static void ResetStimulusProfiel(StimulusProfiel &gemetenStimulus);
-static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie);
-static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor);
-
-// ============================================================================
-// RawAnalogRead: backend-afhankelijke ruwe sensorlezing.
-// Losstaand van AnalogReadMetGekorigeerdeOffsets() omdat BepaalSensorOffsets()
-// en de wegwerp-meting in MeetStimulus() ook een ruwe lezing nodig hebben, zonder offsetcorrectie.
-// ============================================================================
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  #include <Adafruit_ADS1X15.h>
-  #include "../../Systeem/GedeeldeBus/GedeeldeBus.h"
-  static Adafruit_ADS1115 ads;
-  static bool ads1115Aanwezig = false;
-
-  void InitialiseerADS1115() {
-    // Wire expliciet via GedeeldeBus initialiseren VOOR ads.begin() aangeroepen wordt. 
-    // Zonder dit zou de ADS1115-library zelf, intern, Wire.begin() zonder board-specifieke SDA/SCL-pinnen kunnen aanroepen,
-    // wat op ARDI32 tot een verkeerde pinconfiguratie zou leiden als dit nog vóór Screen/Input gebeurt.
-    InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-
-    if (!ads.begin(I2C_ADDRESS_ADS1115)) {
-      ads1115Aanwezig = false;
-      PrintToScreen(_LCD_ADS1115_FOUT, _LCD_ADS1115_NIET_GEVONDEN, _LCD_LEESTIJD_FEEDBACK_MS);
-      return;
-    }
-
-    ads.setGain(GAIN_TWOTHIRDS);
-    ads1115Aanwezig = true;
-  }
-
-  int RawAnalogRead(int sensorPin) {
-    if (!ads1115Aanwezig) return 0;
-    return ads.readADC_SingleEnded(sensorPin);
-  }
-#else
-  void InitialiseerADS1115() {
-  }
-
-  int RawAnalogRead(int sensorPin) {
-    return analogRead(sensorPin);
-  }
-#endif
-
-const int sensorPin[4] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
-
-// ============================================================================
-// STATUSTELLERS EN VARIABELEN
+// SENSOR
 // ============================================================================
 
-int stimulusVersie = STIMULUS_BASIC;
-
-unsigned long nulmetingTikTijd  = 0;
-int nulmetingTikKracht          = 0;
-
-int offsetSensor1               = 0;
-int offsetSensor2               = 0;
-int offsetSensor3               = 0;
-int offsetSensor4               = 0;
-int offsetSensorActief          = 0; 
-
-// Deze globale uitvoerwaarden zijn alleen geldig direct na de laatste aanroep van VergelijkStimulus().
-bool TijdCorrect                = false;
-bool KrachtCorrect              = false;
-
-// MARGE_FACTOR t.o.v. de nulmeting
-int MARGE_FACTOR                = DEFAULT_MARGE_FACTOR;
-
-static unsigned long MargeDeler() {
+unsigned long Stimulus::MargeDeler() {
   int margeFactor = (MARGE_FACTOR > 0) ? MARGE_FACTOR : DEFAULT_MARGE_FACTOR;
   return (unsigned long)margeFactor * 100UL;
 }
-
-int TIK_TEST_ACTIEVE_VINGER     = -1;
-
-int TELLER_TIKTIJD_CORRECT      = 0;
-int TELLER_TIKTIJD_TE_SNEL      = 0;
-int TELLER_TIKTIJD_TE_TRAAG     = 0;
-int TELLER_TIKTIJD_SYNCHROON    = 0;
-
-int TELLER_TIKKRACHT_CORRECT    = 0;
-int TELLER_TIKKRACHT_TE_ZACHT   = 0;
-int TELLER_TIKKRACHT_TE_HARD    = 0;
-int TELLER_TIKKRACHT_IN_BALANS  = 0;
-
-int TELLER_INSTORTEND_CORRECT   = 0;
-
-int TELLER_SIMULTANE_START_OK   = 0;
-int TELLER_SIMULTANE_EIND_OK    = 0;
-
-int TOEGESTANE_MARGE_TIKTIJD    = DEFAULT_TOEGESTANE_MARGE_TIKTIJD;
-int TOEGESTANE_MARGE_TIKKRACHT  = DEFAULT_TOEGESTANE_MARGE_TIKKRACHT;
-
-unsigned long TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = DEFAULT_TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS;
 
 // ============================================================================
 // STIMULUS
 // ============================================================================
 
-int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
+int Stimulus::AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
 #ifdef TRACE
-  int raw = RawAnalogRead(sensorPin);
+  int raw = sensorRFP602.RawAnalogRead(sensorPin);
   int waarde = raw - offsetSensor;
 
   if (waarde < 0) {
@@ -126,14 +32,14 @@ int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
     GA_DEBUG_PRINTLN(waarde);
   }  
 #else
-  int waarde = RawAnalogRead(sensorPin) - offsetSensor;
+  int waarde = sensorRFP602.RawAnalogRead(sensorPin) - offsetSensor;
 #endif
 
   if (waarde < 0) waarde = 0;
   return waarde;
 }
 
-static int BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge) {
+int Stimulus::BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSensoren, unsigned long toegestaneMarge) {
   int grootsteAantalSensorenSynchroon = 0;
 
   for (int eersteSensor = 0; eersteSensor < aantalSensoren; eersteSensor++) {
@@ -158,7 +64,7 @@ static int BepaalAantalSensorenSynchroon(unsigned long tijden[], int aantalSenso
   return grootsteAantalSensorenSynchroon;
 }
 
-void BepaalSensorOffsets() {
+void Stimulus::BepaalSensorOffsets() {
   int aantalMetingen = 0;
   int hoogsteMeting[4] = { 0, 0, 0, 0 };
   unsigned long startTijd = millis();
@@ -169,7 +75,7 @@ void BepaalSensorOffsets() {
 
   while (millis() - startTijd < OFFSET_METING_TIJD_MS) {
     for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
-      int meting = RawAnalogRead(sensorPin[sensorNummer]);
+      int meting = sensorRFP602.RawAnalogRead(sensorRFP602.sensorPin[sensorNummer]);
       if (aantalMetingen > 1 && meting > hoogsteMeting[sensorNummer]) { hoogsteMeting[sensorNummer] = meting; }
 
 #ifdef TRACE
@@ -211,7 +117,7 @@ void BepaalSensorOffsets() {
 #endif
 }
 
-static void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus) {
+void Stimulus::BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemetenStimulus) {
   // TIKTIJD
   if (sensor.sensorGestart && sensor.eindTikTijd > sensor.startTikTijd) gemetenStimulus.TikTijd = sensor.eindTikTijd - sensor.startTikTijd;
 
@@ -243,24 +149,24 @@ static void BerekenEindStimulus(SensorMeetStatus &sensor, StimulusProfiel &gemet
   }
 }
 
-int EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKracht,
+int Stimulus::EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKracht,
                       bool &nulmetingGoedgekeurd, unsigned long &nulmetingTikTijd, int &nulmetingTikKracht,
                       int &herhaling, int &aantalNulmetingPogingen) {
   if (!nulmetingGoedgekeurd) {  // Als de nulmeting nog NIET is goedgekeurd (false)
     int aantalChecksGeslaagd  = 0;
 
     if (gemetenGemiddeldeTikKracht < TIKKRACHT_MINIMALE_COMFORT_GRENS) {
-      PrintToScreen(_LCD_SCORE_TIKKRACHT, _LCD_KRACHT_TE_ZACHT, _LCD_LEESTIJD_FEEDBACK_MS);
+      Screen->Print(_LCD_SCORE_TIKKRACHT, _LCD_KRACHT_TE_ZACHT, _LCD_LEESTIJD_FEEDBACK_MS);
     } else if (gemetenGemiddeldeTikKracht > TIKKRACHT_MAXIMALE_COMFORT_GRENS) {
-      PrintToScreen(_LCD_SCORE_TIKKRACHT, _LCD_KRACHT_TE_HARD, _LCD_LEESTIJD_FEEDBACK_MS);
+      Screen->Print(_LCD_SCORE_TIKKRACHT, _LCD_KRACHT_TE_HARD, _LCD_LEESTIJD_FEEDBACK_MS);
     } else {
       ++aantalChecksGeslaagd ;
     }
 
     if (gemetenTikTijd > MAXIMALE_TIKTIJD_MS) {
-      PrintToScreen(_LCD_SCORE_TIKTIJD, _LCD_TIJD_TE_LANG, _LCD_LEESTIJD_FEEDBACK_MS);
+      Screen->Print(_LCD_SCORE_TIKTIJD, _LCD_TIJD_TE_LANG, _LCD_LEESTIJD_FEEDBACK_MS);
     } else if (gemetenTikTijd < MINIMALE_TIKTIJD_MS) {
-      PrintToScreen(_LCD_SCORE_TIKTIJD, _LCD_TIJD_TE_KORT, _LCD_LEESTIJD_FEEDBACK_MS);
+      Screen->Print(_LCD_SCORE_TIKTIJD, _LCD_TIJD_TE_KORT, _LCD_LEESTIJD_FEEDBACK_MS);
     } else {
       ++aantalChecksGeslaagd;
     }
@@ -275,7 +181,7 @@ int EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKrac
       aantalNulmetingPogingen++;  // Hoogt de teller op met 1 stap
 
       if (aantalNulmetingPogingen >= MAX_AANTAL_POGINGEN_NULMETING) {  // GRENS BEREIKT: Stop de oneindige loop direct
-        PrintToScreen(_LCD_TIJD_METEN_STOPT, _LCD_TIJD_TEVEEL_FOUT, _LCD_LEESTIJD_FEEDBACK_MS);
+        Screen->Print(_LCD_TIJD_METEN_STOPT, _LCD_TIJD_TEVEEL_FOUT, _LCD_LEESTIJD_FEEDBACK_MS);
         return -1;  // Aangepast: -1 betekent stoppen
       } else {      // NOG POGINGEN OVER: Reset deze ronde zodat hij opnieuw mag proberen
         herhaling--;
@@ -287,7 +193,7 @@ int EvalueerNulmeting(unsigned long gemetenTikTijd, int gemetenGemiddeldeTikKrac
   return 0;  // Fallback
 }
 
-static void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor) {
+void Stimulus::InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor) {
   sensor.sensorGestart             = true;
 
   sensor.startTikTijd              = nu;
@@ -300,7 +206,7 @@ static void InitialiseerSensorStart(unsigned long nu, SensorMeetStatus &sensor) 
   sensor.aantalTikKrachtMetingen   = 1;
 }
 
-static int MaakSensorMask(SensorMeetStatus sensor[], int aantalSensoren, bool testOpDRUKWAARDE) {
+int Stimulus::MaakSensorMask(SensorMeetStatus sensor[], int aantalSensoren, bool testOpDRUKWAARDE) {
   int sensorMask = 0b0000;
 
   for (int sensorNummer = 0; sensorNummer < aantalSensoren; sensorNummer++) {
@@ -314,7 +220,7 @@ static int MaakSensorMask(SensorMeetStatus sensor[], int aantalSensoren, bool te
   return sensorMask;
 }
 
-SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int sensorA, int sensorB, StimulusProfiel gemetenStimulus[]) {
+SynchronisatieProfiel Stimulus::MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int sensorA, int sensorB, StimulusProfiel gemetenStimulus[]) {
   SynchronisatieProfiel synchronisatie;
   ResetSynchronisatieProfiel(synchronisatie);
 
@@ -327,7 +233,7 @@ SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int s
   return synchronisatie;
 }
 
-static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]) {
+SynchronisatieProfiel Stimulus::MaakSynchronisatieProfielAlleSensoren(SensorMeetStatus sensor[], int aantalSensorenSimultaanTeMeten, StimulusProfiel gemetenStimulus[]) {
   SynchronisatieProfiel synchronisatie;
   ResetSynchronisatieProfiel(synchronisatie);
 
@@ -386,13 +292,13 @@ static SynchronisatieProfiel MaakSynchronisatieProfielAlleSensoren(SensorMeetSta
   return synchronisatie;
 }
 
-int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin, int exitOffset, unsigned long timeoutMs) {
+int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin, int exitOffset, unsigned long timeoutMs) {
   int exitStatus = EXIT_STATUS_GEEN;
   SensorMeetStatus sensor = {};
   ResetStimulusProfiel(gemetenStimulus);
 
   // Eerste meting weggooien: kanaalwissel-artefact ligt structureel boven drempel
-  RawAnalogRead(sensorPin);
+  sensorRFP602.RawAnalogRead(sensorPin);
 
   unsigned long timeoutNoActionMs = (timeoutMs > EXIT_NO_ACTION_MS) ? timeoutMs : EXIT_NO_ACTION_MS;
 
@@ -499,7 +405,7 @@ int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimul
   return exitStatus;
 }
 
-int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart, int MaskGewensteActieveSensorsBijExit, unsigned long timeoutMs, bool testOpDRUKWAARDE) {
+int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart, int MaskGewensteActieveSensorsBijExit, unsigned long timeoutMs, bool testOpDRUKWAARDE) {
   const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
   SensorMeetStatus sensor[4] = {};
 
@@ -533,7 +439,7 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
   // MaskReedsActieveSensorsBijStart geeft exact aan welke sensoren al actief zijn bij aanvang van de meting. vb: 0b1100 = sensor 1 en sensor 2 zijn al actief bij aanvang.
   if (MaskReedsActieveSensorsBijStart != 0) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]);
+      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]);
     }
 
     // controle vóór initialisatie
@@ -568,7 +474,7 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
       if (millis() - startWachtenOpActie >= timeoutNoActionMs) return EXIT_STATUS_NO_ACTION_TIMEOUT;
 
       for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-        sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]);
+        sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]);
       }
 
       unsigned long nu = millis();
@@ -597,10 +503,10 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
 
     // Eerst alle actuele sensorwaarden opnieuw lezen.
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]);
+      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]);
     }
 
-    // for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
+    // for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
 
     if (MaskGewensteActieveSensorsBijExit != 0) { 
       // Maak het mask rechtstreeks op basis van de zojuist gelezen actuele drukwaarden.
@@ -656,7 +562,7 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
     }
 
     // Verwerk dezelfde sensorwaarden die hierboven voor het mask gebruikt werden.
-    for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
+    for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
 
     // Stop wanneer de ingestelde timeout bereikt is.
     if (nu - startMeting >= timeoutMs) {
@@ -755,7 +661,7 @@ int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenS
   return exitStatus;
 }
 
-void ResetAlleTellers() {
+void Stimulus::ResetAlleTellers() {
   TIK_TEST_ACTIEVE_VINGER = -1;
   offsetSensorActief = 0;
 
@@ -775,7 +681,7 @@ void ResetAlleTellers() {
   TELLER_SIMULTANE_EIND_OK   = 0;
 }
 
-static void ResetStimulusProfiel(StimulusProfiel &stimulus) {
+void Stimulus::ResetStimulusProfiel(StimulusProfiel &stimulus) {
   stimulus.TikTijd              = 0;
   stimulus.gemiddeldeTikKracht  = 0;
   stimulus.hoogsteTikKracht     = 0;
@@ -784,7 +690,7 @@ static void ResetStimulusProfiel(StimulusProfiel &stimulus) {
   stimulus.afbouwSnelheid       = 0;
 }
 
-static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
+void Stimulus::ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
   synchronisatie.verschilStartTijd             = 0;
   synchronisatie.verschilEindTijd              = 0;
   synchronisatie.verschilTikTijd               = 0;
@@ -796,7 +702,7 @@ static void ResetSynchronisatieProfiel(SynchronisatieProfiel &synchronisatie) {
 }
 
 // doelTikTijd: > 0 = expliciete milliseconden, 0 = nulmeting, -1/-2/-3 = instortende moeilijkheidsgraad.
-void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, bool &TijdCorrect, bool &KrachtCorrect, long doelTikTijd, char *instortendExtraTeken) {
+void Stimulus::VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, bool &TijdCorrect, bool &KrachtCorrect, long doelTikTijd, char *instortendExtraTeken) {
   unsigned long referentieTikTijd = (doelTikTijd > INSTORTEND_TOV_NULMETING) ? doelTikTijd : nulmeting.TikTijd;
   unsigned long margeTikTijd = (referentieTikTijd * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
   unsigned long minimaleTikTijd = 0, maximaleTikTijd = 0; // Ondergrens wordt later veilig op nul begrensd om unsigned-underflow te vermijden.
@@ -958,7 +864,7 @@ void VergelijkStimulus(StimulusProfiel &nulmeting, StimulusProfiel &gemeten, boo
   if (KrachtCorrect) TELLER_TIKKRACHT_CORRECT++;
 }
 
-void VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatieProfiel &gemeten) {
+void Stimulus::VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatieProfiel &gemeten) {
   unsigned long margeStartTijd = (nulmeting.verschilStartTijd  * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
   unsigned long margeTikTijd   = (nulmeting.verschilTikTijd  * TOEGESTANE_MARGE_TIKTIJD) / MargeDeler();
 
@@ -1007,7 +913,7 @@ void VergelijkSynchronisatie(SynchronisatieProfiel &nulmeting, SynchronisatiePro
 #endif
 }
 
-static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor) {
+void Stimulus::VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, SensorMeetStatus &sensor) {
   if (!sensor.sensorGestart && !sensor.sensorKlaar && sensor.actueleTikKracht > TIK_MINIMALE_DRUKWAARDE) InitialiseerSensorStart(nu, sensor);
 
   if (sensor.sensorGestart && !sensor.sensorKlaar) {
@@ -1027,7 +933,7 @@ static void VerwerkSensor(unsigned long nu, int sensorPin, int offsetSensor, Sen
   }
 }
 
-void WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensorenSimultaanTeMeten) {
+void Stimulus::WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensorenSimultaanTeMeten) {
   if (aantalSensorenSimultaanTeMeten < 1 || aantalSensorenSimultaanTeMeten > 4) return;
   const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
   bool alleSensorsLosgelaten = false;
@@ -1036,7 +942,7 @@ void WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensorenSimultaanTeMeten) {
     alleSensorsLosgelaten = true;
 
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      if (AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) alleSensorsLosgelaten = false;
+      if (AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) alleSensorsLosgelaten = false;
     }
 
     if (WACHT_LOSLATEN_DELAY_MS > 0) delay(WACHT_LOSLATEN_DELAY_MS);  // Voorkomt onafgebroken I2C-bevraging bij ADC_BACKEND_ADS1115.

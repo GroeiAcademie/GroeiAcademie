@@ -34,15 +34,10 @@
   #define INPUT_TEST_WEERGAVE_MS 5000UL
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  #include <Adafruit_ST7789.h>
-  Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
-#endif
-
 #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
 void TestFunctie(void* argumenten) {
   const char* opschrift = (const char*)argumenten;
-  PrintToScreen("Toets ingedrukt:", opschrift, INPUT_TEST_WEERGAVE_MS);
+  Screen->Print("Toets ingedrukt:", opschrift, INPUT_TEST_WEERGAVE_MS);
 }
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten mappingTestMenu[] = {
@@ -61,7 +56,7 @@ struct ToetsData {
 
 void TestFunctie(void* argumenten) {
   ToetsData* data = (ToetsData*)argumenten;
-  PrintToScreen("Toets ingedrukt:", data->opschrift, INPUT_TEST_WEERGAVE_MS);
+  Screen->Print("Toets ingedrukt:", data->opschrift, INPUT_TEST_WEERGAVE_MS);
 }
 
 ToetsData data1 = {"1"};
@@ -79,17 +74,15 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten mappingTestMenu
 
 void setup() {
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
-  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
-  PixelScreen = &pixelScreen;
-#endif
-  ScreensConfigureren();
+  Screen = GedeeldeBusNewComponent<struct Screen>();
+  if (Screen == nullptr) exit(0);
 
-  InputConfigureren();
+  Input = GedeeldeBusNewComponent<struct Input>();
+  if (Input == nullptr) exit(0);
+  Input->InputConfigureren();
 }
 
 void loop() {
-  PrintToScreen("Input-test DIGITAL (met argumenten)", "druk een toets");
-  UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
+  Screen->Print("Input-test DIGITAL (met argumenten)", "druk een toets");
+  Input->UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
 }

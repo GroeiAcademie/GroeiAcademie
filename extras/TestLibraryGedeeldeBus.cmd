@@ -6,7 +6,7 @@ set "BESTANDSNAAM=TestLibraryGedeeldeBus"
 set "CONTROLE_MODUS=INCLUDE"
 set "CONTROLE_PADEN=examples\Systeem\GedeeldeBus\;"
 
-set "EXTRA_FLAGS=-DGEDEELDE_BUS_PROTOTYPE"
+set "EXTRA_FLAGS="
 
 call "%~dp0TestLibraryCommon.cmd" %*
 exit /b %errorlevel%

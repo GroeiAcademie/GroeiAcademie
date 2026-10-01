@@ -1,89 +1,29 @@
 // ============================================================================
-// Stimulus — transparante ADC-laag + validatiesketch (ADS1115)
+// ADC Backend — ADS1115
 // ============================================================================
-// LET OP:
-// Dit is een zelfstandig hardware-validatiescript.
-// Het gebruikt bewust niet de volledige Stimulus-librarylogica, en hangt
-// daarom ook NIET af van UserConfig.h/SystemConfig.h — alles wat dit script
-// nodig heeft, staat hieronder zelf gedefinieerd. Zo blijft dit script altijd
-// werken, ongeacht hoe je UserConfig.h voor je eigen project is ingesteld.
-//
-// Voor gewone gebruikers:
-// Gebruik dit script alleen om de hardware te valideren.
-// Gebruik de normale Stimulus-voorbeelden om met de library zelf te werken.
-//
-// Doel: de ADS1115-route elektrisch en meetkundig testen zonder extra lagen,
-// door dezelfde 4 FSR402/RFP602-lijnen uit te lezen via één vaste backend,
-// zodat Arduino-ADC en ADS1115 afzonderlijk getest en vergeleken kunnen worden.
-//
-// Fysieke validatie:
-// 1. Plaats het ADS1115-bordje op H5.
-// 2. Kies het gewenste ADS1115-adres via SW1.
-// 3. Standaard voor Stimulus: ADDR naar GND, adres 0x48.
-//
-// Vereist: Adafruit ADS1X15-library.
+// Valideert de ADS1115-route via de v2.0.0 GedeeldeBus-structuur.
+// ADC_ADS1115 gebruikt dezelfde technische codebasis als ExtenderADS1115.
+// De sensorlaag wordt in deze test nog niet gebruikt.
 // ============================================================================
 
-#define ADC_BACKEND_NATIVE  0
-#define ADC_BACKEND_ADS1115 1
-#define ADC_BACKEND ADC_BACKEND_ADS1115
+#include <Systeem/GedeeldeBus/GedeeldeBus.h>
+#include <Configuratie/SystemConfig.h>
 
-#define ADS1115_I2C_ADDRESS 0x48
-#define PIN_SENSOR_1 0
-#define PIN_SENSOR_2 1
-#define PIN_SENSOR_3 2
-#define PIN_SENSOR_4 3
+#if ADC_BACKEND != ADC_BACKEND_ADS1115
+  #error Deze validatie vereist ADC_BACKEND_ADS1115.
+#endif
+
 #define STIMULUS_AANTAL_KANALEN 4
 
-#define SERIAL_BAUDRATE 115200 
+const int sensorPin[STIMULUS_AANTAL_KANALEN] = {
+  ADC_PIN_SENSOR_1,
+  ADC_PIN_SENSOR_2,
+  ADC_PIN_SENSOR_3,
+  ADC_PIN_SENSOR_4
+};
 
-#if defined(ARDUINO_ESP32S3_DEV)
-  #define GA_SERIAL Serial0
-#else
-  #define GA_SERIAL Serial
-#endif
-
-#include <Wire.h>
-#include <Adafruit_ADS1X15.h>
-Adafruit_ADS1115 ads;
-
-const int sensorPin[STIMULUS_AANTAL_KANALEN] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
 bool ads1115Aanwezig = false;
-bool metingAfgerond  = false;
-
-#ifndef PRINTTOSCREEN_BESTAAT_AL
-void PrintToScreen(const char* regel1, const char* regel2) {
-#ifdef DEBUG
-  GA_SERIAL.print(F("[LCD] ")); GA_SERIAL.print(regel1); GA_SERIAL.print(F(" / ")); GA_SERIAL.println(regel2);
-#endif
-}
-#endif
-
-void InitialiseerADS1115Validatie() {
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  if (!ads.begin(ADS1115_I2C_ADDRESS)) {
-#ifdef DEBUG
-    GA_SERIAL.println(F("ADS1115 niet gevonden"));
-#endif
-    PrintToScreen("ADS1115", "niet gevonden");
-    ads1115Aanwezig = false;
-    return;
-  }
-  ads.setGain(GAIN_TWOTHIRDS);
-  ads1115Aanwezig = true;
-#else
-  ads1115Aanwezig = true;
-#endif
-}
-
-int RawAnalogReadValidatie(int sensorPin) {
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  if (!ads1115Aanwezig) return 0;
-  return ads.readADC_SingleEnded(sensorPin);
-#else
-  return analogRead(sensorPin);
-#endif
-}
+bool metingAfgerond = false;
 
 struct KanaalStats {
   long n = 0;
@@ -127,31 +67,28 @@ unsigned long laatsteSample = 0;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
+  while (!GA_SERIAL) { ; }
 
-  Wire.begin();
-  InitialiseerADS1115Validatie();
+  if (!ADC_ADS1115.aanmelden() || !ADC_ADS1115.controleren() || !ADC_ADS1115.inpluggen() || !ADC_ADS1115.activeren()) {
+    GA_SERIAL.println(F("ADC_ADS1115 kon niet worden ingeplugd."));
+    while (true) { ; }
+  }
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  GA_SERIAL.println(F("=== Validatie: backend = ADS1115 ==="));
-#else
-  GA_SERIAL.println(F("=== Validatie: backend = Arduino-ADC ==="));
-#endif
-
-  GA_SERIAL.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
+  ads1115Aanwezig = ADC_ADS1115.ingeplugd;
+  ADC_ADS1115.setGain(GAIN_TWOTHIRDS);
+  GA_SERIAL.println(F("=== Validatie: ADC_ADS1115 ingeplugd ==="));
   tStart = millis();
 }
 
 void loop() {
-  if (metingAfgerond) return;
+  if (metingAfgerond || !ads1115Aanwezig) return;
 
   unsigned long nu = millis();
 
   if (nu - laatsteSample >= SAMPLE_INTERVAL_MS) {
     laatsteSample = nu;
     for (uint8_t k = 0; k < STIMULUS_AANTAL_KANALEN; k++) {
-      int waarde = RawAnalogReadValidatie(sensorPin[k]);
-      voegMetingToe(k, waarde);
+      voegMetingToe(k, ADC_ADS1115.readADC_SingleEnded(sensorPin[k]));
     }
   }
 

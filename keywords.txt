@@ -31,12 +31,21 @@ OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag	KEYWORD2
 UitVoerenFunctieVolgensMappingMetToetsAanslag	KEYWORD2
 
 # Screen
-PrintToScreen	KEYWORD2
-ScreensConfigureren	KEYWORD2
-CharacterScreenConfigureren	KEYWORD2
-PixelScreenConfigureren	KEYWORD2
-RegistreerCallbackScreenTypeCharacter	KEYWORD2
-RegistreerCallbackScreenTypePixel	KEYWORD2
+Aanmelden	KEYWORD2
+Afmelden	KEYWORD2
+Clear	KEYWORD2
+Configureren	KEYWORD2
+Controleren	KEYWORD2
+FoutmeldingWeergeven	KEYWORD2
+GridClamp	KEYWORD2
+Inpluggen	KEYWORD2
+KarakterBreedte	KEYWORD2
+KarakterStap	KEYWORD2
+Print	KEYWORD2
+RegelHoogte	KEYWORD2
+RegelStap	KEYWORD2
+RegistreerCallback	KEYWORD2
+SetCursor	KEYWORD2
 
 # Stimulus
 AnalogReadMetGekorigeerdeOffsets	KEYWORD2

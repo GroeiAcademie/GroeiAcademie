@@ -4,7 +4,6 @@
 #include "../Systeem/Input/InputTypes.h"
 #include "../Systeem/Screen/ScreenTypes.h"
 
-
 // BOARD_VERSIONs: ondersteunde ARDUINO UNO-vormfactor boards die vóór UserConfig.h beschikbaar moeten zijn.
 #define BOARD_UNO_R3                       0
 #define BOARD_UNO_R4_MINIMA                1
@@ -147,14 +146,6 @@
 #endif
 
 // ============================================================================
-// GEDEELDE_BUS_PROTOTYPE: interne schakel voor de PROTOTYPE/beta-fase.
-// Tijdens de PROTOTYPE/beta-fase deze define handmatig activeren om de GedeeldeBus-prototypecode mee te compileren zonder de bestaande stabiele werking te breken.
-// De gebruiker kan deze define niet via UserConfig.h aan- of uitzetten.
-// Zodra GedeeldeBus definitief is, verdwijnt deze define.
-// ============================================================================
-// #define GEDEELDE_BUS_PROTOTYPE
-
-// ============================================================================
 // BOARD_ID: generieke, per-fysiek-bord-identiteit, bewust hier in SystemConfig.h en niet in een subsysteem-specifiek configuratiebestand, want "welk fysiek bord is dit" is geen eigenschap van één subsysteem. 
 // (FURURE) Heeft nog geen functioneel effect; dient als voorbereiding op scenario's waarbij meerdere borden met elkaar communiceren en elkaar moeten kunnen onderscheiden. 
 // Wijzig per fysiek bord via UserConfig.h.
@@ -185,15 +176,7 @@
 #endif
 
 #ifndef I2C_ADDRESS_ADS1115
-  #ifdef ADS1115_I2C_ADDRESS
-    #define I2C_ADDRESS_ADS1115 ADS1115_I2C_ADDRESS
-  #else
-    #define I2C_ADDRESS_ADS1115 0x48
-  #endif
-#endif
-
-#ifndef ADS1115_I2C_ADDRESS
-  #define ADS1115_I2C_ADDRESS I2C_ADDRESS_ADS1115
+  #define I2C_ADDRESS_ADS1115 0x48
 #endif
 
 // Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
@@ -323,19 +306,7 @@
 
 // Characterscherm ----------------------------------------------------------------
 #ifndef I2C_ADDRESS_CHARACTER_SCREEN
-  #ifdef I2C_ADRES
-    #define I2C_ADDRESS_CHARACTER_SCREEN I2C_ADRES
-  #else
-    #define I2C_ADDRESS_CHARACTER_SCREEN 0x27
-  #endif
-#endif
-
-// CHARACTERSCREEN_I2C_ADRES_MODUS: 
-// 0 = geen scan (kleinste footprint), 
-// 1 = scan + rapporteren (standaard),
-// 2 = scan + automatisch herbouwen op het gevonden adres.
-#ifndef CHARACTERSCREEN_I2C_ADRES_MODUS
-  #define CHARACTERSCREEN_I2C_ADRES_MODUS 1
+  #define I2C_ADDRESS_CHARACTER_SCREEN 0x27
 #endif
 
 #ifndef ACTIEF_CHARACTER_SCREEN
@@ -344,13 +315,13 @@
 
 // Pixelscherm --------------------------------------------------------------------
 #ifndef PIXEL_SCREEN_CS
-  #define PIXEL_SCREEN_CS                ARDUINO_UNO_SHIELD_PIN_SS
+  #define PIXEL_SCREEN_CS              HardwareResourcePin::SS
 #endif
 #ifndef PIXEL_SCREEN_DC
-  #define PIXEL_SCREEN_DC                ARDUINO_UNO_SHIELD_PIN_D9
+  #define PIXEL_SCREEN_DC              HardwareResourcePin::D9
 #endif
 #ifndef PIXEL_SCREEN_RST
-  #define PIXEL_SCREEN_RST               ARDUINO_UNO_SHIELD_PIN_D7
+  #define PIXEL_SCREEN_RST             HardwareResourcePin::D7
 #endif
 
 #ifndef ACTIEF_PIXEL_SCREEN
@@ -424,11 +395,6 @@
 // BOARD
 #if BOARD_VERSION != BOARD_UNO_R3 && BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_UNO_Q && BOARD_VERSION != BOARD_ESP32S3_ARDI32 && BOARD_VERSION != BOARD_ESP32S3_DEV && BOARD_VERSION != BOARD_ESP32_D1_UNO_R32 && BOARD_VERSION != BOARD_RP2040_CYTRON_MAKER_UNO && BOARD_VERSION != BOARD_STM32F4_NUCLEO64_F401RE
   #error Selecteer een geldige BOARD_VERSION.
-#endif
-
-// Characterscherm
-#ifndef I2C_ADRES
-  #define I2C_ADRES I2C_ADDRESS_CHARACTER_SCREEN
 #endif
 
 // TAAL
@@ -1016,35 +982,569 @@
 #endif
 
 // ============================================================================
+// EXTENDERS
+// ============================================================================
+// Elke EXTENDER_<NAAM>_AANTAL bepaalt hoeveel instanties er zijn; elke adres-/CS-macro staat achter zijn eigen if op dat aantal, 
+// zodat er nooit een macro bestaat voor een instantie die niet actief is.
+// DEFAULT: EXTENDER_<NAAM>_AANTAL = 0 of 1.
+// EXPERIMENTEEL: EXTENDER_<NAAM>_AANTAL >= 2.
+// ============================================================================
+
+// --- I2C-Extenders ---
+// SDA en SCL zijn GEDEELDE native resources en komen uit de boardconfiguratie.
+// Elk I2C-adres hieronder is EXCLUSIEF op dezelfde I2C-bus.
+// Extra native aansluitingen (INT, IRQ, RESET, ALERT_RDY, ...) zijn EXCLUSIEF
+// wanneer ze hieronder per extender-instance als HardwareResourcePin worden ingesteld.
+#ifndef EXTENDER_ADS1115_AANTAL
+  #define EXTENDER_ADS1115_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — ADS1115 #1
+// ============================================================================
+#if EXTENDER_ADS1115_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
+    #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1115_1_ALERT_RDY
+    #define EXTENDER_ADS1115_1_ALERT_RDY HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS1115 #2
+// ============================================================================
+#if EXTENDER_ADS1115_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_ADS1115_2
+    #define I2C_ADDRESS_EXTENDER_ADS1115_2 0x49
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1115_2_ALERT_RDY
+    #define EXTENDER_ADS1115_2_ALERT_RDY HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_MCP23017_AANTAL
+  #define EXTENDER_MCP23017_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — MCP23017 #1
+// ============================================================================
+#if EXTENDER_MCP23017_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
+    #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_1_INTA
+    #define EXTENDER_MCP23017_1_INTA HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_1_INTB
+    #define EXTENDER_MCP23017_1_INTB HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_1_RESET
+    #define EXTENDER_MCP23017_1_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — MCP23017 #2
+// ============================================================================
+#if EXTENDER_MCP23017_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
+    #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_2_INTA
+    #define EXTENDER_MCP23017_2_INTA HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_2_INTB
+    #define EXTENDER_MCP23017_2_INTB HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_2_RESET
+    #define EXTENDER_MCP23017_2_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_PCF8574_AANTAL
+  #define EXTENDER_PCF8574_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — PCF8574 #1
+// ============================================================================
+#if EXTENDER_PCF8574_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
+    #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8574_1_INT
+    #define EXTENDER_PCF8574_1_INT HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — PCF8574 #2
+// ============================================================================
+#if EXTENDER_PCF8574_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
+    #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8574_2_INT
+    #define EXTENDER_PCF8574_2_INT HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_PCF8575_AANTAL
+  #define EXTENDER_PCF8575_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — PCF8575 #1
+// ============================================================================
+#if EXTENDER_PCF8575_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
+    #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8575_1_INT
+    #define EXTENDER_PCF8575_1_INT HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — PCF8575 #2
+// ============================================================================
+#if EXTENDER_PCF8575_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
+    #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8575_2_INT
+    #define EXTENDER_PCF8575_2_INT HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_TCA9548A_AANTAL
+  #define EXTENDER_TCA9548A_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — TCA9548A #1
+// ============================================================================
+#if EXTENDER_TCA9548A_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
+    #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_TCA9548A_1_RESET
+    #define EXTENDER_TCA9548A_1_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — TCA9548A #2
+// ============================================================================
+#if EXTENDER_TCA9548A_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
+    #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_TCA9548A_2_RESET
+    #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_ADS7828_AANTAL
+  #define EXTENDER_ADS7828_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — ADS7828 #1
+// ============================================================================
+#if EXTENDER_ADS7828_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
+    #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS7828 #2
+// ============================================================================
+#if EXTENDER_ADS7828_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
+    #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49
+  #endif
+#endif
+
+#ifndef EXTENDER_DS2482_800_AANTAL
+  #define EXTENDER_DS2482_800_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — DS2482-800 #1
+// ============================================================================
+#if EXTENDER_DS2482_800_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
+    #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — DS2482-800 #2
+// ============================================================================
+#if EXTENDER_DS2482_800_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
+    #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19
+  #endif
+#endif
+
+// --- SPI-Extenders (CS-pin i.p.v. adres) ---
+// SCK, MISO en MOSI zijn GEDEELDE native resources en komen uit de boardconfiguratie.
+// CS is per extender-instance EXCLUSIEF en moet expliciet op een vrije HardwareResourcePin worden ingesteld.
+// Extra native aansluitingen (IRQ, RESET, START, PWDN, GPIO..., ...) zijn EXCLUSIEF
+// wanneer ze hieronder per extender-instance als HardwareResourcePin worden ingesteld.
+#ifndef EXTENDER_ADS1158_AANTAL
+  #define EXTENDER_ADS1158_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — ADS1158 #1
+// ============================================================================
+#if EXTENDER_ADS1158_AANTAL >= 1
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_ADS1158_1
+    #define CS_PIN_EXTENDER_ADS1158_1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1158_1_PWDN
+    #define EXTENDER_ADS1158_1_PWDN HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1158_1_RESET
+    #define EXTENDER_ADS1158_1_RESET HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1158_1_START
+    #define EXTENDER_ADS1158_1_START HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS1158 #2
+// ============================================================================
+#if EXTENDER_ADS1158_AANTAL >= 2
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_ADS1158_2
+    #define CS_PIN_EXTENDER_ADS1158_2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1158_2_PWDN
+    #define EXTENDER_ADS1158_2_PWDN HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1158_2_RESET
+    #define EXTENDER_ADS1158_2_RESET HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS1158_2_START
+    #define EXTENDER_ADS1158_2_START HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_ADS7953_AANTAL
+  #define EXTENDER_ADS7953_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — ADS7953 #1
+// ============================================================================
+#if EXTENDER_ADS7953_AANTAL >= 1
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_ADS7953_1
+    #define CS_PIN_EXTENDER_ADS7953_1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
+    #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::D5
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
+    #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::D6
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
+    #define EXTENDER_ADS7953_GPIO2_TO_UNO_1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_1
+    #define EXTENDER_ADS7953_GPIO3_TO_UNO_1 HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS7953 #2
+// ============================================================================
+#if EXTENDER_ADS7953_AANTAL >= 2
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_ADS7953_2
+    #define CS_PIN_EXTENDER_ADS7953_2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
+    #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::D7
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
+    #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::D8
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
+    #define EXTENDER_ADS7953_GPIO2_TO_UNO_2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_2
+    #define EXTENDER_ADS7953_GPIO3_TO_UNO_2 HardwareResourcePin::NONE
+  #endif
+#endif
+
+// --- Geen protocol (native select-pinnen, geen adres/CS) ---
+// EN, S0, S1, S2, S3 en Z zijn per extender-instance EXCLUSIEVE native resources.
+#ifndef EXTENDER_CD74HC4067_AANTAL
+  #define EXTENDER_CD74HC4067_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — CD74HC4067 #1
+// ============================================================================
+#if EXTENDER_CD74HC4067_AANTAL >= 1
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_1_EN
+    #define EXTENDER_CD74HC4067_1_EN HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_1_S0
+    #define EXTENDER_CD74HC4067_1_S0 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_1_S1
+    #define EXTENDER_CD74HC4067_1_S1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_1_S2
+    #define EXTENDER_CD74HC4067_1_S2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_1_S3
+    #define EXTENDER_CD74HC4067_1_S3 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_1_Z
+    #define EXTENDER_CD74HC4067_1_Z HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — CD74HC4067 #2
+// ============================================================================
+#if EXTENDER_CD74HC4067_AANTAL >= 2
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_2_EN
+    #define EXTENDER_CD74HC4067_2_EN HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_2_S0
+    #define EXTENDER_CD74HC4067_2_S0 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_2_S1
+    #define EXTENDER_CD74HC4067_2_S1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_2_S2
+    #define EXTENDER_CD74HC4067_2_S2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_2_S3
+    #define EXTENDER_CD74HC4067_2_S3 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_CD74HC4067_2_Z
+    #define EXTENDER_CD74HC4067_2_Z HardwareResourcePin::NONE
+  #endif
+#endif
+
+// --- I2C-of-SPI-keuze door de aanmelder (twee tellingen mogelijk) ---
+// I2C: SDA/SCL zijn GEDEELD; het I2C-adres en de extra native aansluitingen zijn EXCLUSIEF.
+// SPI: SCK/MISO/MOSI zijn GEDEELD; CS en de extra native aansluitingen zijn EXCLUSIEF.
+#ifndef EXTENDER_MAX14830_I2C_AANTAL
+  #define EXTENDER_MAX14830_I2C_AANTAL 0
+#endif
+#ifndef EXTENDER_MAX14830_SPI_AANTAL
+  #define EXTENDER_MAX14830_SPI_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — MAX14830 SPI #1
+// ============================================================================
+#if EXTENDER_MAX14830_SPI_AANTAL >= 1
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
+    #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MAX14830_SPI_1_IRQ
+    #define EXTENDER_MAX14830_SPI_1_IRQ HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — MAX14830 SPI #2
+// ============================================================================
+#if EXTENDER_MAX14830_SPI_AANTAL >= 2
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
+    #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MAX14830_SPI_2_IRQ
+    #define EXTENDER_MAX14830_SPI_2_IRQ HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// DEFAULT — MAX14830 I2C #1
+// ============================================================================
+#if EXTENDER_MAX14830_I2C_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_1
+    #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 0x60
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MAX14830_I2C_1_IRQ
+    #define EXTENDER_MAX14830_I2C_1_IRQ HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — MAX14830 I2C #2
+// ============================================================================
+#if EXTENDER_MAX14830_I2C_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_2
+    #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 0x61
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MAX14830_I2C_2_IRQ
+    #define EXTENDER_MAX14830_I2C_2_IRQ HardwareResourcePin::NONE
+  #endif
+#endif
+
+#ifndef EXTENDER_SC16IS752_I2C_AANTAL
+  #define EXTENDER_SC16IS752_I2C_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — SC16IS752 I2C #1
+// ============================================================================
+#if EXTENDER_SC16IS752_I2C_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1
+    #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 0x48
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_I2C_1_IRQ
+    #define EXTENDER_SC16IS752_I2C_1_IRQ HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_I2C_1_RESET
+    #define EXTENDER_SC16IS752_I2C_1_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — SC16IS752 I2C #2
+// ============================================================================
+#if EXTENDER_SC16IS752_I2C_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2
+    #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 0x49
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_I2C_2_IRQ
+    #define EXTENDER_SC16IS752_I2C_2_IRQ HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_I2C_2_RESET
+    #define EXTENDER_SC16IS752_I2C_2_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+#ifndef EXTENDER_SC16IS752_SPI_AANTAL
+  #define EXTENDER_SC16IS752_SPI_AANTAL 0
+#endif
+// ============================================================================
+// DEFAULT — SC16IS752 SPI #1
+// ============================================================================
+#if EXTENDER_SC16IS752_SPI_AANTAL >= 1
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_SC16IS752_SPI_1
+    #define CS_PIN_EXTENDER_SC16IS752_SPI_1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_SPI_1_IRQ
+    #define EXTENDER_SC16IS752_SPI_1_IRQ HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_SPI_1_RESET
+    #define EXTENDER_SC16IS752_SPI_1_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+// ============================================================================
+// EXPERIMENTEEL — SC16IS752 SPI #2
+// ============================================================================
+#if EXTENDER_SC16IS752_SPI_AANTAL >= 2
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_SC16IS752_SPI_2
+    #define CS_PIN_EXTENDER_SC16IS752_SPI_2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_SPI_2_IRQ
+    #define EXTENDER_SC16IS752_SPI_2_IRQ HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_SC16IS752_SPI_2_RESET
+    #define EXTENDER_SC16IS752_SPI_2_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
+
+// ============================================================================
 // ADC BACKEND
 // ============================================================================
 
 // Definieer de pinnen voor de sensoren op jouw sensorboard
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
-  #ifndef PIN_SENSOR_1
-    #define PIN_SENSOR_1 0   // ADS1115-kanaal 0
+  #ifndef ADC_PIN_SENSOR_1
+    #define ADC_PIN_SENSOR_1 0   // ADS1115-kanaal 0
   #endif
-  #ifndef PIN_SENSOR_2
-    #define PIN_SENSOR_2 1   // ADS1115-kanaal 1
+  #ifndef ADC_PIN_SENSOR_2
+    #define ADC_PIN_SENSOR_2 1   // ADS1115-kanaal 1
   #endif
-  #ifndef PIN_SENSOR_3
-    #define PIN_SENSOR_3 2   // ADS1115-kanaal 2
+  #ifndef ADC_PIN_SENSOR_3
+    #define ADC_PIN_SENSOR_3 2   // ADS1115-kanaal 2
   #endif
-  #ifndef PIN_SENSOR_4
-    #define PIN_SENSOR_4 3   // ADS1115-kanaal 3
+  #ifndef ADC_PIN_SENSOR_4
+    #define ADC_PIN_SENSOR_4 3   // ADS1115-kanaal 3
   #endif
 #else
-  #ifndef PIN_SENSOR_1
-    #define PIN_SENSOR_1 ARDUINO_UNO_SHIELD_PIN_A0  // standaard waarde: ARDUINO_UNO_SHIELD_PIN_A0, Analoge pin voor de 1ste test-sensor
+  #ifndef ADC_PIN_SENSOR_1
+    #define ADC_PIN_SENSOR_1 HardwareResourcePin::A0  // standaard waarde: HardwareResourcePin::A0, Analoge pin voor de 1ste test-sensor
   #endif
-  #ifndef PIN_SENSOR_2
-    #define PIN_SENSOR_2 ARDUINO_UNO_SHIELD_PIN_A1  // standaard waarde: ARDUINO_UNO_SHIELD_PIN_A1, Analoge pin voor de 2de test-sensor
+  #ifndef ADC_PIN_SENSOR_2
+    #define ADC_PIN_SENSOR_2 HardwareResourcePin::A1  // standaard waarde: HardwareResourcePin::A1, Analoge pin voor de 2de test-sensor
   #endif
-  #ifndef PIN_SENSOR_3
-    #define PIN_SENSOR_3 ARDUINO_UNO_SHIELD_PIN_A2  // standaard waarde: ARDUINO_UNO_SHIELD_PIN_A2, Analoge pin voor de 3de test-sensor
+  #ifndef ADC_PIN_SENSOR_3
+    #define ADC_PIN_SENSOR_3 HardwareResourcePin::A2  // standaard waarde: HardwareResourcePin::A2, Analoge pin voor de 3de test-sensor
   #endif
-  #ifndef PIN_SENSOR_4
-    #define PIN_SENSOR_4 ARDUINO_UNO_SHIELD_PIN_A3  // standaard waarde: ARDUINO_UNO_SHIELD_PIN_A3, Analoge pin voor de 4de test-sensor
+  #ifndef ADC_PIN_SENSOR_4
+    #define ADC_PIN_SENSOR_4 HardwareResourcePin::A3  // standaard waarde: HardwareResourcePin::A3, Analoge pin voor de 4de test-sensor
   #endif
 #endif
 
@@ -1110,124 +1610,73 @@
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   // DIGITAL: mapping van keypadlabels naar Arduino Uno-shieldheaderpinnen.
   // De Arduino Uno-shieldpinnen blijven ARDUINO_UNO_SHIELD_PIN_D2..D5.
-  // De KEYPAD_PIN_*-namen volgen het gekozen keypadtype:
+  // De INPUT_KEYPAD_PIN_*-namen volgen het gekozen keypadtype:
   // - drukknoppen direct: K1..K4
   // - drukknoppen matrix: L/R- of R/C-lijnen
   // - membraan direct: 1..4
   // - touch direct: OUT1..OUT4
-  // PIN_TOETS_1..4 blijft de legacy/backward-compatibility laag voor bestaande code.
-  // Wanneer de gebruiker één PIN_TOETS_x definieert, moeten alle vier PIN_TOETS_1..4 gedefinieerd zijn.
-  // Zo vermijden we dat legacy-PIN_TOETS_x en nieuwe KEYPAD_PIN_* door elkaar gemengd worden.
-  #if defined(PIN_TOETS_1) || defined(PIN_TOETS_2) || defined(PIN_TOETS_3) || defined(PIN_TOETS_4)
-    #if !defined(PIN_TOETS_1) || !defined(PIN_TOETS_2) || !defined(PIN_TOETS_3) || !defined(PIN_TOETS_4)
-      #error "PIN_TOETS_1 t/m PIN_TOETS_4 moeten samen gedefinieerd worden."
-    #endif
-    
-  #else
-    // Nieuwe keypadlaag: per KEYPAD_TYPE wordt vastgelegd welk keypadlabel op welke Arduino Uno-shieldpin aangesloten is.
-    // Daarna worden PIN_TOETS_1..4 afgeleid zodat bestaande code backward compatible blijft.
-    #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-      #ifndef KEYPAD_PIN_K1
-        #define KEYPAD_PIN_K1 ARDUINO_UNO_SHIELD_PIN_D2
+  // Wanneer de gebruiker één INPUT_KEYPAD_PIN_* definieert, moeten alle vier pinnen van dat keypadtype gedefinieerd zijn.
+  #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
+    #if defined(INPUT_KEYPAD_PIN_K1) || defined(INPUT_KEYPAD_PIN_K2) || defined(INPUT_KEYPAD_PIN_K3) || defined(INPUT_KEYPAD_PIN_K4)
+      #if !defined(INPUT_KEYPAD_PIN_K1) || !defined(INPUT_KEYPAD_PIN_K2) || !defined(INPUT_KEYPAD_PIN_K3) || !defined(INPUT_KEYPAD_PIN_K4)
+        #error "INPUT_KEYPAD_PIN_K1 t/m INPUT_KEYPAD_PIN_K4 moeten samen gedefinieerd worden."
       #endif
-      #ifndef KEYPAD_PIN_K2
-        #define KEYPAD_PIN_K2 ARDUINO_UNO_SHIELD_PIN_D3
-      #endif
-      #ifndef KEYPAD_PIN_K3
-        #define KEYPAD_PIN_K3 ARDUINO_UNO_SHIELD_PIN_D4
-      #endif
-      #ifndef KEYPAD_PIN_K4
-        #define KEYPAD_PIN_K4 ARDUINO_UNO_SHIELD_PIN_D5
-      #endif
-
-      #define PIN_TOETS_1 KEYPAD_PIN_K1
-      #define PIN_TOETS_2 KEYPAD_PIN_K2
-      #define PIN_TOETS_3 KEYPAD_PIN_K3
-      #define PIN_TOETS_4 KEYPAD_PIN_K4
-
-    #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-      #ifndef KEYPAD_PIN_L1
-        #define KEYPAD_PIN_L1 ARDUINO_UNO_SHIELD_PIN_D2
-      #endif
-      #ifndef KEYPAD_PIN_L2
-        #define KEYPAD_PIN_L2 ARDUINO_UNO_SHIELD_PIN_D3
-      #endif
-      #ifndef KEYPAD_PIN_R1
-        #define KEYPAD_PIN_R1 ARDUINO_UNO_SHIELD_PIN_D4
-      #endif
-      #ifndef KEYPAD_PIN_R2
-        #define KEYPAD_PIN_R2 ARDUINO_UNO_SHIELD_PIN_D5
-      #endif
-
-      #define PIN_TOETS_1 KEYPAD_PIN_L1
-      #define PIN_TOETS_2 KEYPAD_PIN_L2
-      #define PIN_TOETS_3 KEYPAD_PIN_R1
-      #define PIN_TOETS_4 KEYPAD_PIN_R2
-
-    #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
-      // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
-      // Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld moeten worden.
-      #ifndef KEYPAD_PIN_1
-        #define KEYPAD_PIN_1 ARDUINO_UNO_SHIELD_PIN_D3
-      #endif
-      #ifndef KEYPAD_PIN_2
-        #define KEYPAD_PIN_2 ARDUINO_UNO_SHIELD_PIN_D2
-      #endif
-      #ifndef KEYPAD_PIN_3
-        #define KEYPAD_PIN_3 ARDUINO_UNO_SHIELD_PIN_D5
-      #endif
-      #ifndef KEYPAD_PIN_4
-        #define KEYPAD_PIN_4 ARDUINO_UNO_SHIELD_PIN_D4
-      #endif
-
-      #define PIN_TOETS_1 KEYPAD_PIN_1
-      #define PIN_TOETS_2 KEYPAD_PIN_2
-      #define PIN_TOETS_3 KEYPAD_PIN_3
-      #define PIN_TOETS_4 KEYPAD_PIN_4
-
-    #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-      // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
-      // Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld moeten worden.
-      #ifndef KEYPAD_PIN_1
-        #define KEYPAD_PIN_1 ARDUINO_UNO_SHIELD_PIN_D3
-      #endif
-      #ifndef KEYPAD_PIN_2
-        #define KEYPAD_PIN_2 ARDUINO_UNO_SHIELD_PIN_D2
-      #endif
-      #ifndef KEYPAD_PIN_3
-        #define KEYPAD_PIN_3 ARDUINO_UNO_SHIELD_PIN_D5
-      #endif
-      #ifndef KEYPAD_PIN_4
-        #define KEYPAD_PIN_4 ARDUINO_UNO_SHIELD_PIN_D4
-      #endif
-
-      #define PIN_TOETS_1 KEYPAD_PIN_1
-      #define PIN_TOETS_2 KEYPAD_PIN_2
-      #define PIN_TOETS_3 KEYPAD_PIN_3
-      #define PIN_TOETS_4 KEYPAD_PIN_4
-
-    #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-      #ifndef KEYPAD_PIN_OUT1
-        #define KEYPAD_PIN_OUT1 ARDUINO_UNO_SHIELD_PIN_D2
-      #endif
-      #ifndef KEYPAD_PIN_OUT2
-        #define KEYPAD_PIN_OUT2 ARDUINO_UNO_SHIELD_PIN_D3
-      #endif
-      #ifndef KEYPAD_PIN_OUT3
-        #define KEYPAD_PIN_OUT3 ARDUINO_UNO_SHIELD_PIN_D4
-      #endif
-      #ifndef KEYPAD_PIN_OUT4
-        #define KEYPAD_PIN_OUT4 ARDUINO_UNO_SHIELD_PIN_D5
-      #endif
-
-      #define PIN_TOETS_1 KEYPAD_PIN_OUT1
-      #define PIN_TOETS_2 KEYPAD_PIN_OUT2
-      #define PIN_TOETS_3 KEYPAD_PIN_OUT3
-      #define PIN_TOETS_4 KEYPAD_PIN_OUT4
-
     #else
-      #error "Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
+      #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::D2
+      #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::D3
+      #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::D4
+      #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::D5
     #endif
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
+    #if defined(INPUT_KEYPAD_PIN_L1) || defined(INPUT_KEYPAD_PIN_L2) || defined(INPUT_KEYPAD_PIN_R1) || defined(INPUT_KEYPAD_PIN_R2)
+      #if !defined(INPUT_KEYPAD_PIN_L1) || !defined(INPUT_KEYPAD_PIN_L2) || !defined(INPUT_KEYPAD_PIN_R1) || !defined(INPUT_KEYPAD_PIN_R2)
+        #error "INPUT_KEYPAD_PIN_L1, INPUT_KEYPAD_PIN_L2, INPUT_KEYPAD_PIN_R1 en INPUT_KEYPAD_PIN_R2 moeten samen gedefinieerd worden."
+      #endif
+    #else
+      #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::D2
+      #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::D3
+      #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::D4
+      #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::D5
+    #endif
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
+    // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
+    // Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld moeten worden.
+    #if defined(INPUT_KEYPAD_PIN_1) || defined(INPUT_KEYPAD_PIN_2) || defined(INPUT_KEYPAD_PIN_3) || defined(INPUT_KEYPAD_PIN_4)
+      #if !defined(INPUT_KEYPAD_PIN_1) || !defined(INPUT_KEYPAD_PIN_2) || !defined(INPUT_KEYPAD_PIN_3) || !defined(INPUT_KEYPAD_PIN_4)
+        #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
+      #endif
+    #else
+      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::D3
+      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::D2
+      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::D5
+      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::D4
+    #endif
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
+    // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
+    // Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld moeten worden.
+    #if defined(INPUT_KEYPAD_PIN_1) || defined(INPUT_KEYPAD_PIN_2) || defined(INPUT_KEYPAD_PIN_3) || defined(INPUT_KEYPAD_PIN_4)
+      #if !defined(INPUT_KEYPAD_PIN_1) || !defined(INPUT_KEYPAD_PIN_2) || !defined(INPUT_KEYPAD_PIN_3) || !defined(INPUT_KEYPAD_PIN_4)
+        #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
+      #endif
+    #else    
+      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::D3
+      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::D2
+      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::D5
+      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::D4
+    #endif
+  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
+    #if defined(INPUT_KEYPAD_PIN_OUT1) || defined(INPUT_KEYPAD_PIN_OUT2) || defined(INPUT_KEYPAD_PIN_OUT3) || defined(INPUT_KEYPAD_PIN_OUT4)
+      #if !defined(INPUT_KEYPAD_PIN_OUT1) || !defined(INPUT_KEYPAD_PIN_OUT2) || !defined(INPUT_KEYPAD_PIN_OUT3) || !defined(INPUT_KEYPAD_PIN_OUT4)
+        #error "INPUT_KEYPAD_PIN_OUT1 t/m INPUT_KEYPAD_PIN_OUT4 moeten samen gedefinieerd worden."
+      #endif
+    #else
+      #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::D2
+      #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::D3
+      #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::D4
+      #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::D5
+    #endif
+  #else
+    #error "Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
   #endif
 
 // INPUT_TYPE_PCF8574 ---------------------------------------------------------
@@ -1264,256 +1713,240 @@
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-  #ifndef KEYPAD_PIN_K1
-    #define KEYPAD_PIN_K1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_K1
+    #define INPUT_KEYPAD_PIN_K1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_K2
-    #define KEYPAD_PIN_K2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_K2
+    #define INPUT_KEYPAD_PIN_K2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_K3
-    #define KEYPAD_PIN_K3 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_K3
+    #define INPUT_KEYPAD_PIN_K3 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_K4
-    #define KEYPAD_PIN_K4 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_K4
+    #define INPUT_KEYPAD_PIN_K4 PCF8574_PIN_P3
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4
-  #ifndef KEYPAD_PIN_K1
-    #define KEYPAD_PIN_K1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_K1
+    #define INPUT_KEYPAD_PIN_K1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_K2
-    #define KEYPAD_PIN_K2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_K2
+    #define INPUT_KEYPAD_PIN_K2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_K3
-    #define KEYPAD_PIN_K3 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_K3
+    #define INPUT_KEYPAD_PIN_K3 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_K4
-    #define KEYPAD_PIN_K4 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_K4
+    #define INPUT_KEYPAD_PIN_K4 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_K5
-    #define KEYPAD_PIN_K5 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_K5
+    #define INPUT_KEYPAD_PIN_K5 PCF8574_PIN_P4
   #endif
-  #ifndef KEYPAD_PIN_K6
-    #define KEYPAD_PIN_K6 PCF8574_PIN_P5
+  #ifndef INPUT_KEYPAD_PIN_K6
+    #define INPUT_KEYPAD_PIN_K6 PCF8574_PIN_P5
   #endif
-  #ifndef KEYPAD_PIN_K7
-    #define KEYPAD_PIN_K7 PCF8574_PIN_P6
+  #ifndef INPUT_KEYPAD_PIN_K7
+    #define INPUT_KEYPAD_PIN_K7 PCF8574_PIN_P6
   #endif
-  #ifndef KEYPAD_PIN_K8
-    #define KEYPAD_PIN_K8 PCF8574_PIN_P7
+  #ifndef INPUT_KEYPAD_PIN_K8
+    #define INPUT_KEYPAD_PIN_K8 PCF8574_PIN_P7
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-  #ifndef KEYPAD_PIN_L1
-    #define KEYPAD_PIN_L1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_L1
+    #define INPUT_KEYPAD_PIN_L1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_L2
-    #define KEYPAD_PIN_L2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_L2
+    #define INPUT_KEYPAD_PIN_L2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_R1
-    #define KEYPAD_PIN_R1 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_R1
+    #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_R2
-    #define KEYPAD_PIN_R2 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_R2
+    #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P3
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4
-  #ifndef KEYPAD_PIN_C4
-    #define KEYPAD_PIN_C4 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_C4
+    #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_C3
-    #define KEYPAD_PIN_C3 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_C3
+    #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_C2
-    #define KEYPAD_PIN_C2 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_C2
+    #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_C1
-    #define KEYPAD_PIN_C1 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_C1
+    #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_R1
-    #define KEYPAD_PIN_R1 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_R1
+    #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P4
   #endif
-  #ifndef KEYPAD_PIN_R2
-    #define KEYPAD_PIN_R2 PCF8574_PIN_P5
+  #ifndef INPUT_KEYPAD_PIN_R2
+    #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P5
   #endif
-  #ifndef KEYPAD_PIN_R3
-    #define KEYPAD_PIN_R3 PCF8574_PIN_P6
+  #ifndef INPUT_KEYPAD_PIN_R3
+    #define INPUT_KEYPAD_PIN_R3 PCF8574_PIN_P6
   #endif
-  #ifndef KEYPAD_PIN_R4
-    #define KEYPAD_PIN_R4 PCF8574_PIN_P7
+  #ifndef INPUT_KEYPAD_PIN_R4
+    #define INPUT_KEYPAD_PIN_R4 PCF8574_PIN_P7
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
-  #ifndef KEYPAD_PIN_1
-    #define KEYPAD_PIN_1 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_1
+    #define INPUT_KEYPAD_PIN_1 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_2
-    #define KEYPAD_PIN_2 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_2
+    #define INPUT_KEYPAD_PIN_2 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_3
-    #define KEYPAD_PIN_3 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_3
+    #define INPUT_KEYPAD_PIN_3 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_4
-    #define KEYPAD_PIN_4 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_4
+    #define INPUT_KEYPAD_PIN_4 PCF8574_PIN_P2
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-  #ifndef KEYPAD_PIN_1
-    #define KEYPAD_PIN_1 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_1
+    #define INPUT_KEYPAD_PIN_1 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_2
-    #define KEYPAD_PIN_2 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_2
+    #define INPUT_KEYPAD_PIN_2 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_3
-    #define KEYPAD_PIN_3 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_3
+    #define INPUT_KEYPAD_PIN_3 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_4
-    #define KEYPAD_PIN_4 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_4
+    #define INPUT_KEYPAD_PIN_4 PCF8574_PIN_P2
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4
-  #ifndef KEYPAD_PIN_R1
-    #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_R1
+    #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_C1
-    #define KEYPAD_PIN_C1 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_C1
+    #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_C2
-    #define KEYPAD_PIN_C2 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_C2
+    #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_C3
-    #define KEYPAD_PIN_C3 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_C3
+    #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_C4
-    #define KEYPAD_PIN_C4 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_C4
+    #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P4
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4
-  #ifndef KEYPAD_PIN_R1
-    #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_R1
+    #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_R2
-    #define KEYPAD_PIN_R2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_R2
+    #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_C1
-    #define KEYPAD_PIN_C1 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_C1
+    #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_C2
-    #define KEYPAD_PIN_C2 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_C2
+    #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_C3
-    #define KEYPAD_PIN_C3 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_C3
+    #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P4
   #endif
-  #ifndef KEYPAD_PIN_C4
-    #define KEYPAD_PIN_C4 PCF8574_PIN_P5
+  #ifndef INPUT_KEYPAD_PIN_C4
+    #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P5
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3
-  #ifndef KEYPAD_PIN_R1
-    #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_R1
+    #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_R2
-    #define KEYPAD_PIN_R2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_R2
+    #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_R3
-    #define KEYPAD_PIN_R3 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_R3
+    #define INPUT_KEYPAD_PIN_R3 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_R4
-    #define KEYPAD_PIN_R4 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_R4
+    #define INPUT_KEYPAD_PIN_R4 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_C1
-    #define KEYPAD_PIN_C1 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_C1
+    #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P4
   #endif
-  #ifndef KEYPAD_PIN_C2
-    #define KEYPAD_PIN_C2 PCF8574_PIN_P5
+  #ifndef INPUT_KEYPAD_PIN_C2
+    #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P5
   #endif
-  #ifndef KEYPAD_PIN_C3
-    #define KEYPAD_PIN_C3 PCF8574_PIN_P6
+  #ifndef INPUT_KEYPAD_PIN_C3
+    #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P6
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4
-  #ifndef KEYPAD_PIN_R1
-    #define KEYPAD_PIN_R1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_R1
+    #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_R2
-    #define KEYPAD_PIN_R2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_R2
+    #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_R3
-    #define KEYPAD_PIN_R3 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_R3
+    #define INPUT_KEYPAD_PIN_R3 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_R4
-    #define KEYPAD_PIN_R4 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_R4
+    #define INPUT_KEYPAD_PIN_R4 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_C1
-    #define KEYPAD_PIN_C1 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_C1
+    #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P4
   #endif
-  #ifndef KEYPAD_PIN_C2
-    #define KEYPAD_PIN_C2 PCF8574_PIN_P5
+  #ifndef INPUT_KEYPAD_PIN_C2
+    #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P5
   #endif
-  #ifndef KEYPAD_PIN_C3
-    #define KEYPAD_PIN_C3 PCF8574_PIN_P6
+  #ifndef INPUT_KEYPAD_PIN_C3
+    #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P6
   #endif
-  #ifndef KEYPAD_PIN_C4
-    #define KEYPAD_PIN_C4 PCF8574_PIN_P7
+  #ifndef INPUT_KEYPAD_PIN_C4
+    #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P7
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-  #ifndef KEYPAD_PIN_OUT1
-    #define KEYPAD_PIN_OUT1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_OUT1
+    #define INPUT_KEYPAD_PIN_OUT1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_OUT2
-    #define KEYPAD_PIN_OUT2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_OUT2
+    #define INPUT_KEYPAD_PIN_OUT2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_OUT3
-    #define KEYPAD_PIN_OUT3 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_OUT3
+    #define INPUT_KEYPAD_PIN_OUT3 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_OUT4
-    #define KEYPAD_PIN_OUT4 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_OUT4
+    #define INPUT_KEYPAD_PIN_OUT4 PCF8574_PIN_P3
   #endif
 
 #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4
-  #ifndef KEYPAD_PIN_OUT1
-    #define KEYPAD_PIN_OUT1 PCF8574_PIN_P0
+  #ifndef INPUT_KEYPAD_PIN_OUT1
+    #define INPUT_KEYPAD_PIN_OUT1 PCF8574_PIN_P0
   #endif
-  #ifndef KEYPAD_PIN_OUT2
-    #define KEYPAD_PIN_OUT2 PCF8574_PIN_P1
+  #ifndef INPUT_KEYPAD_PIN_OUT2
+    #define INPUT_KEYPAD_PIN_OUT2 PCF8574_PIN_P1
   #endif
-  #ifndef KEYPAD_PIN_OUT3
-    #define KEYPAD_PIN_OUT3 PCF8574_PIN_P2
+  #ifndef INPUT_KEYPAD_PIN_OUT3
+    #define INPUT_KEYPAD_PIN_OUT3 PCF8574_PIN_P2
   #endif
-  #ifndef KEYPAD_PIN_OUT4
-    #define KEYPAD_PIN_OUT4 PCF8574_PIN_P3
+  #ifndef INPUT_KEYPAD_PIN_OUT4
+    #define INPUT_KEYPAD_PIN_OUT4 PCF8574_PIN_P3
   #endif
-  #ifndef KEYPAD_PIN_OUT5
-    #define KEYPAD_PIN_OUT5 PCF8574_PIN_P4
+  #ifndef INPUT_KEYPAD_PIN_OUT5
+    #define INPUT_KEYPAD_PIN_OUT5 PCF8574_PIN_P4
   #endif
-  #ifndef KEYPAD_PIN_OUT6
-    #define KEYPAD_PIN_OUT6 PCF8574_PIN_P5
+  #ifndef INPUT_KEYPAD_PIN_OUT6
+    #define INPUT_KEYPAD_PIN_OUT6 PCF8574_PIN_P5
   #endif
-  #ifndef KEYPAD_PIN_OUT7
-    #define KEYPAD_PIN_OUT7 PCF8574_PIN_P6
+  #ifndef INPUT_KEYPAD_PIN_OUT7
+    #define INPUT_KEYPAD_PIN_OUT7 PCF8574_PIN_P6
   #endif
-  #ifndef KEYPAD_PIN_OUT8
-    #define KEYPAD_PIN_OUT8 PCF8574_PIN_P7
+  #ifndef INPUT_KEYPAD_PIN_OUT8
+    #define INPUT_KEYPAD_PIN_OUT8 PCF8574_PIN_P7
   #endif
 #endif
 
-#endif
-
-// Legacy fallback voor oude Stimulus-voorbeelden die PIN_TOETS_1..4 rechtstreeks gebruiken.
-// Nodig zodat deze voorbeelden ook blijven compileren wanneer INPUT_TYPE_DIGITAL niet actief is, bijvoorbeeld bij INPUT_TYPE_NONE.
-// Deze fallback stuurt de nieuwe Input-laag niet; nieuwe Input-configuraties gebruiken de keypadtype-specifieke KEYPAD_PIN_...-mapping hierboven.
-#ifndef PIN_TOETS_1
-  #define PIN_TOETS_1 ARDUINO_UNO_SHIELD_PIN_D3
-#endif
-#ifndef PIN_TOETS_2
-  #define PIN_TOETS_2 ARDUINO_UNO_SHIELD_PIN_D2
-#endif
-#ifndef PIN_TOETS_3
-  #define PIN_TOETS_3 ARDUINO_UNO_SHIELD_PIN_D5
-#endif
-#ifndef PIN_TOETS_4
-  #define PIN_TOETS_4 ARDUINO_UNO_SHIELD_PIN_D4
 #endif
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------

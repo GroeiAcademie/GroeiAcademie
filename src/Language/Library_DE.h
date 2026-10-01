@@ -5,6 +5,21 @@
 // Bis zur Überprüfung durch eine Person, die diese Sprache beherrscht.
 
 //=========================================================
+// ABORT
+//=========================================================
+// CharacterScreen
+#define _ABORT_CS001 "ABORT: CS001" // CharacterScreen aanmelden() mislukt
+
+// PixelScreen
+#define _ABORT_PS001 "ABORT: PS001" // PixelScreen aanmelden() mislukt
+
+// SerialScreen
+#define _ABORT_SS001 "ABORT: SS001" // SerialScreen aanmelden() mislukt
+
+// GedeeldeBus
+#define _ABORT_GB001 "ABORT: GB001" // GedeeldeBus aanmelden() mislukt: GEDEELD-claim zonder geldige identiteit
+
+//=========================================================
 // FATAL
 //=========================================================
 #ifndef FATAL_ZOEK_OP
@@ -12,19 +27,48 @@
 #endif
 
 // CharacterScreen
-#define _FATAL_CS000 "FATAL: CS000" // CharacterScreenConfigureren() niet aangeroepen
-#define _FATAL_CS001 "FATAL: CS001" // Geen I2C-antwoord op geen enkel geprobeerd adres
-#define _FATAL_CS002 "FATAL: CS002" // Scherm gevonden op ander I2C-adres dan I2C_ADRES (modus 1)
+#define _FATAL_CS101 "FATAL: CS101" // CharacterScreen controleren() mislukt
+#define _FATAL_CS401 "FATAL: CS401" // CharacterScreen tijdens runtime niet actief/beschikbaar
 
 // PixelScreen
-#define _FATAL_PS000 "FATAL: PS000" // PixelScreenConfigureren() niet aangeroepen
-#define _FATAL_PS001 "FATAL: PS001" // PixelScreen niet gekoppeld
-#define _FATAL_PS002 "FATAL: PS002" // Omgewisselde breedte en hoogte komen niet overeen
-#define _FATAL_PS003 "FATAL: PS003" // Niet-omgewisselde breedte en hoogte komen niet overeen
-#define _FATAL_PS004 "FATAL: PS004" // Tekstgrid kleiner dan 16x2
+#define _FATAL_PS101 "FATAL: PS101" // PixelScreen controleren() mislukt
+#define _FATAL_PS401 "FATAL: PS401" // PixelScreen tijdens runtime niet actief/beschikbaar
 
 // SerialScreen
-#define _CRITICAL_SS001 "CRITICAL: SS001" // SerialScreen niet beschikbaar na SERIAL_CONNECT_TIMEOUT_MS
+#define _FATAL_SS101 "FATAL: SS101" // SerialScreen controleren() mislukt
+
+// GedeeldeBus
+#define _FATAL_GB101 "FATAL: GB101" // GedeeldeBus controleren() mislukt: minstens een claim EXCLUSIEF, zelfde resource
+#define _FATAL_GB102 "FATAL: GB102" // GedeeldeBus controleren() mislukt: zelfde I2C-adres, zelfde bus
+#define _FATAL_GB103 "FATAL: GB103" // GedeeldeBus controleren() mislukt: twee GEDEELD-claims, andere identiteit
+#define _FATAL_GB104 "FATAL: GB104" // GedeeldeBus controleren() mislukt: parent is exclusief al bezet door een andere child
+#define _FATAL_GB105 "FATAL: GB105" // GedeeldeBus controleren() mislukt: binnen een component twee EXCLUSIEF-claims op dezelfde resource
+#define _FATAL_GB106 "FATAL: GB106" // GedeeldeBus controleren() mislukt: binnen een component EXCLUSIEF- en GEDEELD-claim op dezelfde resource
+#define _FATAL_GB107 "FATAL: GB107" // GedeeldeBus controleren() mislukt: binnen een component twee GEDEELD-claims, andere identiteit
+#define _FATAL_GB108 "FATAL: GB108" // GedeeldeBus controleren() mislukt: verplichte resource ontbreekt
+#define _FATAL_GB109 "FATAL: GB109" // GedeeldeBus controleren() mislukt: I2C-adres niet toegestaan voor dit hardwaretype
+#define _FATAL_GB110 "FATAL: GB110" // GedeeldeBus controleren() mislukt: ongeldig I2C-adres
+#define _FATAL_GB111 "FATAL: GB111" // GedeeldeBus controleren() mislukt: parent/extender biedt gevraagde resource niet aan
+
+//=========================================================
+// CRITICAL
+//=========================================================
+// CharacterScreen
+#define _CRITICAL_CS201 "CRITICAL: CS201" // CharacterScreen inpluggen() mislukt
+#define _CRITICAL_CS301 "CRITICAL: CS301" // CharacterScreen activeren() mislukt
+
+// PixelScreen
+#define _CRITICAL_PS201 "CRITICAL: PS201" // PixelScreen inpluggen() mislukt
+#define _CRITICAL_PS301 "CRITICAL: PS301" // PixelScreen activeren() mislukt
+#define _CRITICAL_PS302 "CRITICAL: PS302" // PixelScreen niet gekoppeld
+#define _CRITICAL_PS303 "CRITICAL: PS303" // Omgewisselde breedte en hoogte komen niet overeen
+#define _CRITICAL_PS304 "CRITICAL: PS304" // Niet-omgewisselde breedte en hoogte komen niet overeen
+#define _CRITICAL_PS305 "CRITICAL: PS305" // Tekstgrid kleiner dan 16x2
+
+// SerialScreen
+#define _CRITICAL_SS201 "CRITICAL: SS201" // SerialScreen inpluggen() mislukt
+#define _CRITICAL_SS301 "CRITICAL: SS301" // SerialScreen activeren() mislukt
+#define _CRITICAL_SS302 "CRITICAL: SS302" // SerialScreen niet beschikbaar na SERIAL_CONNECT_TIMEOUT_MS
 
 // InputKanalen
 #define _FATAL_IN000 "FATAL: IN000" // PCF8574 niet bereikbaar op ingesteld I2C-adres

@@ -1,4 +1,4 @@
-// Input-testkopie van Tik_Enkele_Samen_Instortend_Cocktail. Origineel Stimulus-voorbeeld blijft ongewijzigd.
+// v2.0.0 Stimulus-voorbeeld.
 // ============================================================================
 // Tik — Enkel, samen, instortend en cocktail
 // ============================================================================
@@ -32,10 +32,6 @@
 #include <Configuratie/Examples.h>
 #include <Configuratie/ExamplesConfig.h>
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-#include <Adafruit_ST7789.h>
-Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
-#endif
 
 // Vergelijkt het opschrift van de ingedrukte toets met een positie (1-4), ongeacht of het
 // actieve keypad de cijfernotatie ("1") of de S-notatie ("S1") gebruikt voor die positie.
@@ -96,40 +92,39 @@ void setup() {
   GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
-  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
-  PixelScreen = &pixelScreen;
-#endif
-  ScreensConfigureren();
-  PrintToScreen(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
+  Screen = GedeeldeBusNewComponent<struct Screen>();
+  if (Screen == nullptr) exit(0);
+  Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  InitialiseerADS1115();
-#endif
+  sensorRFC602.aanmelden();
+  sensorRFC602.controleren();
+  sensorRFC602.inpluggen();
+  sensorRFC602.activeren();
 
-  // RegistreerCallbackScreenTypeCharacter(MijnCharacterScreen);
-  // RegistreerCallbackScreenTypePixel(MijnPixelScreen);
+  // Screen.Character.RegistreerCallback(MijnCharacterScreen);
+  // Screen.Pixel.RegistreerCallback(MijnPixelScreen);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
   //-- pinMode(PIN_TOETS_2, INPUT_PULLUP);
   //-- pinMode(PIN_TOETS_3, INPUT_PULLUP);
   //-- pinMode(PIN_TOETS_4, INPUT_PULLUP);
-  InputConfigureren();
+  Input = GedeeldeBusNewComponent<struct Input>();
+  if (Input == nullptr) exit(0);
+  Input->InputConfigureren();
 
-  PrintToScreen(LCD_START_L1, LCD_START_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
-  ResetAlleTellers();
+  Screen->Print(LCD_START_L1, LCD_START_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
+  Stimulus.ResetAlleTellers();
 
-  PrintToScreen(LCD_NULMETING_L1, LCD_NULMETING_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
-  BepaalSensorOffsets();  
+  Screen->Print(LCD_NULMETING_L1, LCD_NULMETING_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
+  Stimulus.BepaalSensorOffsets();  
 }
 
 // ============================================================================
 // LOOP: HET HOOFDPROGRAMMA EN MENU
 // ============================================================================
 void loop() {
-  PrintToScreen(LCD_MENU_L1, LCD_MENU_L2);
+  Screen->Print(LCD_MENU_L1, LCD_MENU_L2);
 
   // Wacht tot alle toetsen losgelaten zijn.
   /*-- while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW); */
@@ -139,7 +134,7 @@ void loop() {
       UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingKeuzeMenu);
       break;
     #else
-      InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
+      InputResultaat invoer = Input->OpvragenHuidigeToetsAanslag(true);
       const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
     if (ToetsPositieIngedrukt(opschriftToetsAanslag, 1)) {
       //-- while (digitalRead(PIN_TOETS_1) == LOW);
@@ -172,9 +167,9 @@ void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, u
     String eersteRegelLC = eersteRegel; eersteRegelLC.toLowerCase();
     String tweedeRegelLC = tweedeRegel; tweedeRegelLC.toLowerCase();
 
-    lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(eersteRegelLC);
-    lcd.setCursor(0, 1); lcd.print(tweedeRegelLC);
+    Screen->Character.display.clear();
+    Screen->Character.display.setCursor(0, 0); Screen->Character.display.print(eersteRegelLC);
+    Screen->Character.display.setCursor(0, 1); Screen->Character.display.print(tweedeRegelLC);
   }
 
   if (derdeRegel != "" || vierdeRegel != "") {
@@ -183,18 +178,18 @@ void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, u
 
     if (!ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS) {
       if (delayTussenPaginas) delay(delayTussenPaginas);
-      lcd.clear();
+      Screen->Character.display.clear();
     }
 
-    lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); lcd.print(derdeRegelLC);
-    lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); lcd.print(vierdeRegelLC);
+    Screen->Character.display.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); Screen->Character.display.print(derdeRegelLC);
+    Screen->Character.display.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); Screen->Character.display.print(vierdeRegelLC);
   }
 
   if (delayTime) delay(delayTime);
 
   if (action != "") {
     String actionLC = action; actionLC.toLowerCase();
-    lcd.print(actionLC);
+    Screen->Character.display.print(actionLC);
   }
 }
 #endif
@@ -217,42 +212,42 @@ void MijnPixelScreen(const String& eersteRegel, const String& tweedeRegel, unsig
 // ============================================================================
 
 void VoorbeeldGebruik() {
-  PrintToScreen(LCD_S3_STAP_2, LCD_S3_SENSOR_1en2);
+  Screen->Print(LCD_S3_STAP_2, LCD_S3_SENSOR_1en2);
 
-  PrintToScreen(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
+  Screen->Print(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
 
-  PrintToScreen(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS, LCD_S0_NU);
+  Screen->Print(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS, LCD_S0_NU);
 
-  PrintToScreen(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
-  WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-  PrintToScreen("", "", 0, LCD_S0_NU);
+  Screen->Print(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Screen->Print("", "", 0, LCD_S0_NU);
 }
 
 // ============================================================================
 // ALGORITME 1: ENKEL TIK (Scenario 1)
 // ============================================================================
 void UitvoerenAlgoritmeEnkelTik() {
-  ResetAlleTellers();
+  Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
-  PrintToScreen(LCD_S1_TITEL, LCD_S0_GEEF_STARTTIK, MINIMALE_WACHTTIJD_MS);   
-  WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-  PrintToScreen("", "", 0, LCD_S0_NU);
+  Screen->Print(LCD_S1_TITEL, LCD_S0_GEEF_STARTTIK, MINIMALE_WACHTTIJD_MS);   
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Screen->Print("", "", 0, LCD_S0_NU);
 
-  while (TIK_TEST_ACTIEVE_VINGER == -1) {
+  while (Stimulus.TIK_TEST_ACTIEVE_VINGER == -1) {
 #ifdef DEBUG
   GA_DEBUG_PRINT("Actieve vinger = ");
-  GA_DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
+  GA_DEBUG_PRINTLN(Stimulus.TIK_TEST_ACTIEVE_VINGER);
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
-    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { RawAnalogRead(sensorPin[sensorNummer]); }
-     const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
+    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[sensorNummer]); }
+     const int offsetSensor[4] = { Stimulus.offsetSensor1, Stimulus.offsetSensor2, Stimulus.offsetSensor3, Stimulus.offsetSensor4 };
 
     // bepaal welke sensor als eerste actief is
     for (int sensorNummer = AANTAL_SENSOREN_AANWEZIG - 1; sensorNummer >= 0; sensorNummer--) {
-      if (AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
-        TIK_TEST_ACTIEVE_VINGER = sensorPin[sensorNummer];
-        offsetSensorActief = offsetSensor[sensorNummer];
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorRFC602.sensorPin[sensorNummer];
+        Stimulus.offsetSensorActief = offsetSensor[sensorNummer];
         break;
       }
     }
@@ -260,11 +255,11 @@ void UitvoerenAlgoritmeEnkelTik() {
 
 #ifdef DEBUG
   GA_DEBUG_PRINT("Actieve vinger = ");
-  GA_DEBUG_PRINTLN(TIK_TEST_ACTIEVE_VINGER);
+  GA_DEBUG_PRINTLN(Stimulus.TIK_TEST_ACTIEVE_VINGER);
   GA_DEBUG_PRINTLN("---------------------");
 #endif
 
-  while (AnalogReadMetGekorigeerdeOffsets(TIK_TEST_ACTIEVE_VINGER, offsetSensorActief) > TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(Stimulus.TIK_TEST_ACTIEVE_VINGER, Stimulus.offsetSensorActief) > TIK_MINIMALE_DRUKWAARDE);
   
   // --- EENMALIGE NULMETING ---
   int aantalNulmetingPogingen = 0;
@@ -276,27 +271,27 @@ void UitvoerenAlgoritmeEnkelTik() {
     int WACHTTIJD_MS = random(MINIMALE_WACHTTIJD_MS, MAXIMALE_WACHTTIJD_MS);
 
     if (nulmetingGoedgekeurd) {  // Wanneer de nulmeting WEL is goedgekeurd (true)
-      PrintToScreen(LCD_S0_LABEL_TIJDENS + String(nulmetingTikTijd) + LCD_S0_LABEL_MS, LCD_S0_TIK_AANHOUDEN, WACHTTIJD_MS);
+      Screen->Print(LCD_S0_LABEL_TIJDENS + String(Stimulus.nulmetingTikTijd) + LCD_S0_LABEL_MS, LCD_S0_TIK_AANHOUDEN, WACHTTIJD_MS);
     } else {
-      PrintToScreen(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
+      Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-    PrintToScreen("", "", 0, LCD_S0_NU);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+    Screen->Print("", "", 0, LCD_S0_NU);
 
     // Dit vangt te vroeg drukken of te laat loslaten fysiologisch perfect op.
-    while (AnalogReadMetGekorigeerdeOffsets(TIK_TEST_ACTIEVE_VINGER, offsetSensorActief) > TIK_MINIMALE_DRUKWAARDE);
+    while (Stimulus.AnalogReadMetGekorigeerdeOffsets(Stimulus.TIK_TEST_ACTIEVE_VINGER, Stimulus.offsetSensorActief) > TIK_MINIMALE_DRUKWAARDE);
 
     // PAS ALS HET BORD VRIJ IS, meten we de échte, nieuwe reactie-tik als volledig StimulusProfiel:
-    int exitStatus = MeetStimulus(TIK_TEST_ACTIEVE_VINGER, offsetSensorActief, gemetenStimulus[0]);
+    int exitStatus = Stimulus.MeetStimulus(Stimulus.TIK_TEST_ACTIEVE_VINGER, Stimulus.offsetSensorActief, gemetenStimulus[0]);
     if (exitStatus == EXIT_VOORWAARDE_NO_ACTION_TIMEOUT || exitStatus == EXIT_VOORWAARDE_TIMEOUT) { return; }
 
     if (nulmetingGoedgekeurd) {
       if (gemetenStimulus[0].TikTijd > EXIT_TIKTIJD_MS) { return; } // Noodstop check
-      VergelijkStimulus(nulmetingStimulus[0], gemetenStimulus[0], TijdCorrect, KrachtCorrect);
+      Stimulus.VergelijkStimulus(nulmetingStimulus[0], gemetenStimulus[0], Stimulus.TijdCorrect, Stimulus.KrachtCorrect);
       herhalingStr = (herhaling < 10) ? ('0' + String(herhaling)) : String(herhaling);
     } else {
-      int resultaatNulmeting = EvalueerNulmeting(gemetenStimulus[0].TikTijd, gemetenStimulus[0].gemiddeldeTikKracht, nulmetingGoedgekeurd, nulmetingTikTijd, nulmetingTikKracht, herhaling, aantalNulmetingPogingen);
+      int resultaatNulmeting = Stimulus.EvalueerNulmeting(gemetenStimulus[0].TikTijd, gemetenStimulus[0].gemiddeldeTikKracht, nulmetingGoedgekeurd, Stimulus.nulmetingTikTijd, Stimulus.nulmetingTikKracht, herhaling, aantalNulmetingPogingen);
 
       if (resultaatNulmeting == -1) {
         return; // Verlaat direct de trainingslus omdat het maximum aantal pogingen is bereikt
@@ -305,7 +300,7 @@ void UitvoerenAlgoritmeEnkelTik() {
       }
     }
 
-    PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIKTIJD + String(gemetenStimulus[0].TikTijd), String(' ') + LCD_SCORE_TIKKRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+    Screen->Print(herhalingStr + ' ' + LCD_SCORE_TIKTIJD + String(gemetenStimulus[0].TikTijd), String(' ') + LCD_SCORE_TIKKRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
   }
 
   ToonEindScoreScenario1();
@@ -316,23 +311,23 @@ void UitvoerenAlgoritmeEnkelTik() {
 // ============================================================================
 
 void UitvoerenAlgoritmeSimultaneTik() {
-  const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
+  const int offsetSensor[4] = { Stimulus.offsetSensor1, Stimulus.offsetSensor2, Stimulus.offsetSensor3, Stimulus.offsetSensor4 };
 
-  ResetAlleTellers();
+  Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
-  PrintToScreen(LCD_S2_TITEL, LCD_S2_KIES_SENSOREN, MINIMALE_WACHTTIJD_MS);
-  WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-  PrintToScreen("", "", 0, LCD_S0_NU);
+  Screen->Print(LCD_S2_TITEL, LCD_S2_KIES_SENSOREN, MINIMALE_WACHTTIJD_MS);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) RawAnalogRead(sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot twee sensoren ingedrukt zijn geweest.
   int eersteGekozenSensorNummer = -1, tweedeGekozenSensorNummer = -1;
 
   while (eersteGekozenSensorNummer == -1 || tweedeGekozenSensorNummer == -1) {
     for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) {
-      if (AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
         if (eersteGekozenSensorNummer == -1) {
           eersteGekozenSensorNummer = sensorNummer;
         } else if (tweedeGekozenSensorNummer == -1 && eersteGekozenSensorNummer != sensorNummer) {
@@ -343,8 +338,8 @@ void UitvoerenAlgoritmeSimultaneTik() {
   }
 
   // STAP 2: Blijf wachten zolang minstens één van de twee gekozen sensoren nog ingedrukt blijft.
-  while (AnalogReadMetGekorigeerdeOffsets(sensorPin[eersteGekozenSensorNummer], offsetSensor[eersteGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE ||
-         AnalogReadMetGekorigeerdeOffsets(sensorPin[tweedeGekozenSensorNummer], offsetSensor[tweedeGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[eersteGekozenSensorNummer], offsetSensor[eersteGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE ||
+         Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[tweedeGekozenSensorNummer], offsetSensor[tweedeGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE);
 
   // --- EENMALIGE NULMETING ---
   int aantalNulmetingPogingen = 0;
@@ -356,25 +351,25 @@ void UitvoerenAlgoritmeSimultaneTik() {
     int WACHTTIJD_MS = random(MINIMALE_WACHTTIJD_MS, MAXIMALE_WACHTTIJD_MS);
 
     if (nulmetingGoedgekeurd) {
-      PrintToScreen(LCD_S0_LABEL_TIJDENS + String(nulmetingTikTijd) + LCD_S0_LABEL_MS, LCD_S0_TIK_AANHOUDEN, WACHTTIJD_MS);
+      Screen->Print(LCD_S0_LABEL_TIJDENS + String(Stimulus.nulmetingTikTijd) + LCD_S0_LABEL_MS, LCD_S0_TIK_AANHOUDEN, WACHTTIJD_MS);
     } else {
-      PrintToScreen(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
+      Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-    PrintToScreen("", "", 0, LCD_S0_NU);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+    Screen->Print("", "", 0, LCD_S0_NU);
 
     // Meet de twee gekozen sensoren en hun onderlinge synchronisatie.
-    int exitStatus = MeetStimulusSimultaan(gemetenStimulus, AANTAL_SENSOREN_ALGORITME2, gemetenSynchronisatie);
+    int exitStatus = Stimulus.MeetStimulusSimultaan(gemetenStimulus, AANTAL_SENSOREN_ALGORITME2, gemetenSynchronisatie);
     if (exitStatus == EXIT_VOORWAARDE_NO_ACTION_TIMEOUT || exitStatus == EXIT_VOORWAARDE_TIMEOUT) { return; }
 
     // --- EVALUATIEFITTING ---
     if (nulmetingGoedgekeurd) {
       if (gemetenStimulus[eersteGekozenSensorNummer].TikTijd > EXIT_TIKTIJD_MS || gemetenStimulus[tweedeGekozenSensorNummer].TikTijd > EXIT_TIKTIJD_MS) { return; } // Noodstop check
 
-      VergelijkStimulus(nulmetingStimulus[eersteGekozenSensorNummer], gemetenStimulus[eersteGekozenSensorNummer], TijdCorrect, KrachtCorrect);
-      VergelijkStimulus(nulmetingStimulus[tweedeGekozenSensorNummer], gemetenStimulus[tweedeGekozenSensorNummer], TijdCorrect, KrachtCorrect);
-      VergelijkSynchronisatie(nulmetingSynchronisatie, gemetenSynchronisatie[0]);
+      Stimulus.VergelijkStimulus(nulmetingStimulus[eersteGekozenSensorNummer], gemetenStimulus[eersteGekozenSensorNummer], Stimulus.TijdCorrect, Stimulus.KrachtCorrect);
+      Stimulus.VergelijkStimulus(nulmetingStimulus[tweedeGekozenSensorNummer], gemetenStimulus[tweedeGekozenSensorNummer], Stimulus.TijdCorrect, Stimulus.KrachtCorrect);
+      Stimulus.VergelijkSynchronisatie(nulmetingSynchronisatie, gemetenSynchronisatie[0]);
 
       // Formatteer herhalingsteller (Twee digits) via String-klasse om pointers te vermijden
       herhalingStr = (herhaling < 10) ? ('0' + String(herhaling)) : String(herhaling);
@@ -382,21 +377,21 @@ void UitvoerenAlgoritmeSimultaneTik() {
       unsigned long gematigdTijd = (gemetenStimulus[eersteGekozenSensorNummer].TikTijd + gemetenStimulus[tweedeGekozenSensorNummer].TikTijd) / 2;
       int gematigdKracht = (gemetenStimulus[eersteGekozenSensorNummer].gemiddeldeTikKracht + gemetenStimulus[tweedeGekozenSensorNummer].gemiddeldeTikKracht) / 2;
 
-      bool startTijdSimultaan = gemetenSynchronisatie[0].verschilStartTijd <= TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS;
-      unsigned long toegestaneVerschilTikTijd = gematigdTijd * TOEGESTANE_MARGE_TIKTIJD / 100;
+      bool startTijdSimultaan = gemetenSynchronisatie[0].verschilStartTijd <= Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS;
+      unsigned long toegestaneVerschilTikTijd = gematigdTijd * Stimulus.TOEGESTANE_MARGE_TIKTIJD / 100;
       bool tikTijdSimultaan = gemetenSynchronisatie[0].verschilTikTijd <= toegestaneVerschilTikTijd;
 
-      int resultaatNulmeting = EvalueerNulmeting(gematigdTijd, gematigdKracht, nulmetingGoedgekeurd, nulmetingTikTijd, nulmetingTikKracht, herhaling, aantalNulmetingPogingen);
+      int resultaatNulmeting = Stimulus.EvalueerNulmeting(gematigdTijd, gematigdKracht, nulmetingGoedgekeurd, Stimulus.nulmetingTikTijd, Stimulus.nulmetingTikKracht, herhaling, aantalNulmetingPogingen);
 
       if (resultaatNulmeting == -1) {
         return;
       } else if (resultaatNulmeting == 1) {
         if (!startTijdSimultaan) {
           nulmetingGoedgekeurd = false;
-          PrintToScreen(LCD_S0_NULMETING, LCD_S2_START_VERSCHIL, LCD_LEESTIJD_FEEDBACK_LANG_MS);
+          Screen->Print(LCD_S0_NULMETING, LCD_S2_START_VERSCHIL, LCD_LEESTIJD_FEEDBACK_LANG_MS);
         } else if (!tikTijdSimultaan) {
           nulmetingGoedgekeurd = false;
-          PrintToScreen(LCD_S0_NULMETING, LCD_S2_TIJD_VERSCHILT, LCD_LEESTIJD_FEEDBACK_LANG_MS);
+          Screen->Print(LCD_S0_NULMETING, LCD_S2_TIJD_VERSCHILT, LCD_LEESTIJD_FEEDBACK_LANG_MS);
         } else {
           nulmetingStimulus[eersteGekozenSensorNummer] = gemetenStimulus[eersteGekozenSensorNummer];
           nulmetingStimulus[tweedeGekozenSensorNummer] = gemetenStimulus[tweedeGekozenSensorNummer];
@@ -406,7 +401,7 @@ void UitvoerenAlgoritmeSimultaneTik() {
     }
 
     // Directe feedback van beide metingen gescheiden door een slash '/' conform jouw opzet
-    PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[eersteGekozenSensorNummer].TikTijd) + '/' + String(gemetenStimulus[tweedeGekozenSensorNummer].TikTijd), LCD_SCORE_KRACHT + String(gemetenStimulus[eersteGekozenSensorNummer].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[tweedeGekozenSensorNummer].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+    Screen->Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[eersteGekozenSensorNummer].TikTijd) + '/' + String(gemetenStimulus[tweedeGekozenSensorNummer].TikTijd), LCD_SCORE_KRACHT + String(gemetenStimulus[eersteGekozenSensorNummer].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[tweedeGekozenSensorNummer].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
   }
 
   ToonEindScoreScenario2(); 
@@ -416,20 +411,20 @@ void UitvoerenAlgoritmeSimultaneTik() {
 // ALGORITME 3: INEENSTORTENDE TIK (Scenario 3)
 // ============================================================================
 void UitvoerenAlgoritmeIneenstortendeTik() {
-  ResetAlleTellers();
+  Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
-  PrintToScreen(LCD_S3_TITEL, LCD_S0_GEEF_STARTTIK, MINIMALE_WACHTTIJD_MS);
-  WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-  PrintToScreen("", "", 0, LCD_S0_NU);
+  Screen->Print(LCD_S3_TITEL, LCD_S0_GEEF_STARTTIK, MINIMALE_WACHTTIJD_MS);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Screen->Print("", "", 0, LCD_S0_NU);
 
   // eerste meting smijten we weg, geeft een valse waarde
-  RawAnalogRead(PIN_SENSOR_1); RawAnalogRead(PIN_SENSOR_2);
+  sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[0]); sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[1]);
 
   // STAP A: Blijf wachten tot een vinger sensor 1 AANRAAKT
-  while (AnalogReadMetGekorigeerdeOffsets(PIN_SENSOR_1, offsetSensor1) <= TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[0], Stimulus.offsetSensor1) <= TIK_MINIMALE_DRUKWAARDE);
 
   // STAP B: Blijf wachten tot een vinger sensor 1 LOSLAAT
-  while (AnalogReadMetGekorigeerdeOffsets(PIN_SENSOR_1, offsetSensor1) > TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[0], Stimulus.offsetSensor1) > TIK_MINIMALE_DRUKWAARDE);
 
   // --- START VAN DE TRAININGSLUS ---
   for (int herhaling = 1; herhaling <= TEST_AANTAL_KEER_HERHALEN; herhaling++) {
@@ -443,10 +438,10 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     int exitStatus = EXIT_STATUS_GEEN;
 
     // STAP 1: SENSOR 1
-    PrintToScreen(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
-    WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-    PrintToScreen("", "", 0, LCD_S0_NU);
-    exitStatus = MeetStimulus(PIN_SENSOR_1, offsetSensor1, gemetenStimulus[0], PIN_SENSOR_2, offsetSensor2);
+    Screen->Print(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+    Screen->Print("", "", 0, LCD_S0_NU);
+    exitStatus = Stimulus.MeetStimulus(sensorRFC602.sensorPin[0], Stimulus.offsetSensor1, gemetenStimulus[0], sensorRFC602.sensorPin[1], Stimulus.offsetSensor2);
 
     // Alleen wanneer sensor 2 de exitsensor activeert, mag stap 2 starten.
     if (exitStatus != EXIT_VOORWAARDE_EXITSENSOR_INGEDRUKT) { return; }
@@ -464,8 +459,8 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
 #endif
 
     // STAP 2: SENSOR 1 EN SENSOR 2 SIMULTAAN
-    PrintToScreen(LCD_S3_STAP_2, LCD_S3_SENSOR_1en2); // Geen wachttijd tussen stap 1 en stap 2.
-    exitStatus = MeetStimulusSimultaan(gemetenStimulus, AANTAL_SENSOREN_ALGORITME3, gemetenSynchronisatie, 0b1100, 0b0100);
+    Screen->Print(LCD_S3_STAP_2, LCD_S3_SENSOR_1en2); // Geen wachttijd tussen stap 1 en stap 2.
+    exitStatus = Stimulus.MeetStimulusSimultaan(gemetenStimulus, AANTAL_SENSOREN_ALGORITME3, gemetenSynchronisatie, 0b1100, 0b0100);
 
 #ifdef DEBUG
     GA_DEBUG_PRINTLN("---------------------");
@@ -476,15 +471,15 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     // MaskReedsActieveSensorsBijStart = 0b1100: sensor 1 en sensor 2 zijn reeds actief bij aanvang van stap 2.
     // MaskGewensteActieveSensorsBijExit = 0b0100: exit wanneer enkel sensor 2 nog actief is (sensor 1 losgelaten).
     if (exitStatus != EXIT_VOORWAARDE_SENSOR_LOSGELATEN) { return; }
-    VergelijkStimulus(nulmetingStimulus[0], gemetenStimulus[0], TijdCorrect, KrachtCorrect);
+    Stimulus.VergelijkStimulus(nulmetingStimulus[0], gemetenStimulus[0], Stimulus.TijdCorrect, Stimulus.KrachtCorrect);
 
-    bool Sensor1Correct = TijdCorrect && KrachtCorrect;
-    VergelijkStimulus(nulmetingStimulus[0], gemetenStimulus[1], TijdCorrect, KrachtCorrect);
+    bool Sensor1Correct = Stimulus.TijdCorrect && Stimulus.KrachtCorrect;
+    Stimulus.VergelijkStimulus(nulmetingStimulus[0], gemetenStimulus[1], Stimulus.TijdCorrect, Stimulus.KrachtCorrect);
 
     // Voor sensor 2 telt in stap 2 alleen de TikTijd. De gemeten kracht wordt hieronder zijn eigen referentie voor stap 3.
-    bool Sensor2Correct = TijdCorrect;
+    bool Sensor2Correct = Stimulus.TijdCorrect;
     nulmetingStimulus[1] = gemetenStimulus[1];
-    unsigned long margeSimultaanTijd = (nulmetingStimulus[0].TikTijd * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
+    unsigned long margeSimultaanTijd = (nulmetingStimulus[0].TikTijd * Stimulus.TOEGESTANE_MARGE_TIKTIJD) / (Stimulus.MARGE_FACTOR * 100UL);
 
     bool SimultaanCorrect = true;
     if (gemetenSynchronisatie[0].verschilStartTijd > margeSimultaanTijd) SimultaanCorrect = false;
@@ -492,7 +487,7 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
 
     if (Sensor1Correct && Sensor2Correct && SimultaanCorrect) {
       aantalStappenSynchroon++;
-      TELLER_TIKTIJD_SYNCHROON++; // SYNCHROON in Scenario 3 betekent dat de simultane tweede stap correct werd uitgevoerd.
+      Stimulus.TELLER_TIKTIJD_SYNCHROON++; // SYNCHROON in Scenario 3 betekent dat de simultane tweede stap correct werd uitgevoerd.
     }
 
 #ifdef DEBUG
@@ -506,34 +501,34 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
 #endif
 
     // STAP 3 TOT n: SENSOR 2, EEN DOORLOPENDE METING
-    PrintToScreen(LCD_S3_STAP_3_n, LCD_S3_SENSOR_2); // Geen wachttijd tussen stap 2 en stap 3.
-    exitStatus = MeetStimulus(PIN_SENSOR_2, offsetSensor2, gemetenStimulus[1], -1, 0, INSTORTEND_MAXIMALE_FACTOR * MAXIMALE_TIKTIJD_MS + 1000UL);
+    Screen->Print(LCD_S3_STAP_3_n, LCD_S3_SENSOR_2); // Geen wachttijd tussen stap 2 en stap 3.
+    exitStatus = Stimulus.MeetStimulus(sensorRFC602.sensorPin[1], Stimulus.offsetSensor2, gemetenStimulus[1], -1, 0, INSTORTEND_MAXIMALE_FACTOR * MAXIMALE_TIKTIJD_MS + 1000UL);
     if (exitStatus == EXIT_VOORWAARDE_NO_ACTION_TIMEOUT || exitStatus == EXIT_VOORWAARDE_TIMEOUT) { return; }
 
     char instortendExtraTeken = '?';
-    VergelijkStimulus(nulmetingStimulus[1], gemetenStimulus[1], TijdCorrect, KrachtCorrect, INSTORTEND_MOEILIJKHEIDSGRAAD_1, &instortendExtraTeken); // De minimale en maximale totale tiktijd van stap 3 worden rechtstreeks bepaald op basis van de tiktijd van sensor 2 in stap 2.
+    Stimulus.VergelijkStimulus(nulmetingStimulus[1], gemetenStimulus[1], Stimulus.TijdCorrect, Stimulus.KrachtCorrect, INSTORTEND_MOEILIJKHEIDSGRAAD_1, &instortendExtraTeken); // De minimale en maximale totale tiktijd van stap 3 worden rechtstreeks bepaald op basis van de tiktijd van sensor 2 in stap 2.
 
     // Scoringsvorm bepaald door level (instortendOfGradueel):
     // BINAIR   (level 1-3): tijd EN kracht beiden correct → volle punten, anders 0
     // GRADUEEL (level 4)  : tijd en kracht apart gescoord → elk de helft van de punten
     if (instortendOfGradueel == INSTORTEND_SCORING_GRADUEEL) {
       // Bij een oneven aantal stappen krijgt tijd het extra punt: bij 5 is tijd 3 en kracht 2.
-      if (TijdCorrect)   aantalStappenSynchroon += (INSTORTEND_AANTAL_STAPPEN + 1) / 2;
-      if (KrachtCorrect) aantalStappenSynchroon += INSTORTEND_AANTAL_STAPPEN / 2;
+      if (Stimulus.TijdCorrect)   aantalStappenSynchroon += (INSTORTEND_AANTAL_STAPPEN + 1) / 2;
+      if (Stimulus.KrachtCorrect) aantalStappenSynchroon += INSTORTEND_AANTAL_STAPPEN / 2;
     } else {
-      if (TijdCorrect && KrachtCorrect) aantalStappenSynchroon += INSTORTEND_AANTAL_STAPPEN;
+      if (Stimulus.TijdCorrect && Stimulus.KrachtCorrect) aantalStappenSynchroon += INSTORTEND_AANTAL_STAPPEN;
     }
 
 #ifdef DEBUG
     GA_DEBUG_PRINTLN("---------------------");
     GA_DEBUG_PRINT("Stap 3 tot n tijd/kracht = ");
-    GA_DEBUG_PRINT(TijdCorrect);
+    GA_DEBUG_PRINT(Stimulus.TijdCorrect);
     GA_DEBUG_PRINT(" / ");
-    GA_DEBUG_PRINTLN(KrachtCorrect);
+    GA_DEBUG_PRINTLN(Stimulus.KrachtCorrect);
 #endif
 
     // Maximum per ronde = stap2(1) + stap3(INSTORTEND_AANTAL_STAPPEN)
-    if (aantalStappenSynchroon == (1 + INSTORTEND_AANTAL_STAPPEN)) TELLER_INSTORTEND_CORRECT++;
+    if (aantalStappenSynchroon == (1 + INSTORTEND_AANTAL_STAPPEN)) Stimulus.TELLER_INSTORTEND_CORRECT++;
 
 #ifdef DEBUG
     GA_DEBUG_PRINTLN("---------------------");
@@ -546,7 +541,7 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     // 0 > -> instortend niet geslaagd, tijd te lang
     // 0 = -> tijd van stap 3 is correct, maar de volledige ronde is niet geslaagd
     // 1 = -> tijd van stap 3 is correct én de volledige ronde is geslaagd
-    PrintToScreen(herhalingStr + ' ' + LCD_SCORE_SYNCHROON + String(aantalStappenSynchroon), LCD_SCORE_INSTORTEND + String(aantalStappenSynchroon == (1 + INSTORTEND_AANTAL_STAPPEN)) + ' ' + instortendExtraTeken, LCD_LEESTIJD_FEEDBACK_KORT_MS);
+    Screen->Print(herhalingStr + ' ' + LCD_SCORE_SYNCHROON + String(aantalStappenSynchroon), LCD_SCORE_INSTORTEND + String(aantalStappenSynchroon == (1 + INSTORTEND_AANTAL_STAPPEN)) + ' ' + instortendExtraTeken, LCD_LEESTIJD_FEEDBACK_KORT_MS);
   }
 
   ToonEindScoreScenario3();
@@ -557,23 +552,23 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
 // ============================================================================
 
 void UitvoerenAlgoritmeCocktailTik() {
-  ResetAlleTellers();
+  Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
-  PrintToScreen(LCD_S4_TITEL, "", MINIMALE_WACHTTIJD_MS);
-  WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-  PrintToScreen("", "", 0, LCD_S0_NU);
+  Screen->Print(LCD_S4_TITEL, "", MINIMALE_WACHTTIJD_MS);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Screen->Print("", "", 0, LCD_S0_NU);
   int aantalSensorenSimultaanTeMeten;
 
 #if AANTAL_SENSOREN_AANWEZIG == 2
   aantalSensorenSimultaanTeMeten = 2;
 #else
-  PrintToScreen(LCD_S4_SENSORS_TEXT, LCD_S4_SENSORS_KEUZE);
+  Screen->Print(LCD_S4_SENSORS_TEXT, LCD_S4_SENSORS_KEUZE);
 
   // Wacht tot alle toetsen losgelaten zijn.
   /*-- while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW); */
 
   while (true) {
-    InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
+    InputResultaat invoer = Input->OpvragenHuidigeToetsAanslag(true);
     const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
     if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {
       //-- while (digitalRead(PIN_TOETS_2) == LOW);
@@ -591,12 +586,12 @@ void UitvoerenAlgoritmeCocktailTik() {
   }
 #endif
 
-  PrintToScreen(LCD_S4_TITEL, String(aantalSensorenSimultaanTeMeten) + LCD_S4_SENSOREN, MINIMALE_WACHTTIJD_MS);
-  WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-  PrintToScreen("", "", 0, LCD_S0_NU);
+  Screen->Print(LCD_S4_TITEL, String(aantalSensorenSimultaanTeMeten) + LCD_S4_SENSOREN, MINIMALE_WACHTTIJD_MS);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) RawAnalogRead(sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot alle te meten sensoren ingedrukt zijn geweest.
   int aantalGestarteSensoren = 0;
@@ -604,7 +599,7 @@ void UitvoerenAlgoritmeCocktailTik() {
 
   while (aantalGestarteSensoren < aantalSensorenSimultaanTeMeten) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      if (!sensorGekozen[sensorNummer] && AnalogReadMetGekorigeerdeOffsets(sensorPin[sensorNummer], sensorNummer == 0 ? offsetSensor1 : sensorNummer == 1 ? offsetSensor2 : sensorNummer == 2 ? offsetSensor3 : offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
+      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
         sensorGekozen[sensorNummer] = true;
         aantalGestarteSensoren++;
       }
@@ -612,7 +607,7 @@ void UitvoerenAlgoritmeCocktailTik() {
   }
 
   // STAP 2: Blijf wachten zolang minstens één van de gebruikte sensoren nog ingedrukt blijft.
-  WachtTotAlleSensorsLosgelatenVoorTest(aantalSensorenSimultaanTeMeten);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(aantalSensorenSimultaanTeMeten);
 
   // --- EENMALIGE NULMETING ---
   int aantalNulmetingPogingen = 0;
@@ -624,16 +619,16 @@ void UitvoerenAlgoritmeCocktailTik() {
     int WACHTTIJD_MS = random(MINIMALE_WACHTTIJD_MS, MAXIMALE_WACHTTIJD_MS);
 
     if (nulmetingGoedgekeurd) {
-      PrintToScreen(LCD_S0_LABEL_TIJDENS + String(nulmetingTikTijd) + LCD_S0_LABEL_MS, LCD_S0_TIK_AANHOUDEN, WACHTTIJD_MS);
+      Screen->Print(LCD_S0_LABEL_TIJDENS + String(Stimulus.nulmetingTikTijd) + LCD_S0_LABEL_MS, LCD_S0_TIK_AANHOUDEN, WACHTTIJD_MS);
     } else {
-      PrintToScreen(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
+      Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
-    PrintToScreen("", "", 0, LCD_S0_NU);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+    Screen->Print("", "", 0, LCD_S0_NU);
 
     // Meet alle gebruikte sensoren en hun gezamenlijke synchronisatie.
-    int exitStatus = MeetStimulusSimultaan(gemetenStimulus, aantalSensorenSimultaanTeMeten, gemetenSynchronisatie);
+    int exitStatus = Stimulus.MeetStimulusSimultaan(gemetenStimulus, aantalSensorenSimultaanTeMeten, gemetenSynchronisatie);
     if (exitStatus == EXIT_VOORWAARDE_NO_ACTION_TIMEOUT || exitStatus == EXIT_VOORWAARDE_TIMEOUT) { return; }
 
     unsigned long totaleTikTijd = 0, totaleTikKracht = 0;
@@ -646,34 +641,34 @@ void UitvoerenAlgoritmeCocktailTik() {
     unsigned long gematigdTijd = totaleTikTijd / aantalSensorenSimultaanTeMeten;
     int gematigdKracht = totaleTikKracht / aantalSensorenSimultaanTeMeten;
 
-    unsigned long toegestaneMargeEindTijd = (gematigdTijd * TOEGESTANE_MARGE_TIKTIJD) / (MARGE_FACTOR * 100UL);
-    bool startTijdSimultaan = gemetenSynchronisatie[0].verschilStartTijd <= TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS;
+    unsigned long toegestaneMargeEindTijd = (gematigdTijd * Stimulus.TOEGESTANE_MARGE_TIKTIJD) / (Stimulus.MARGE_FACTOR * 100UL);
+    bool startTijdSimultaan = gemetenSynchronisatie[0].verschilStartTijd <= Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS;
     bool eindTijdSimultaan = gemetenSynchronisatie[0].verschilEindTijd <= toegestaneMargeEindTijd;
 
     if (nulmetingGoedgekeurd) {
       for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
         if (gemetenStimulus[sensorNummer].TikTijd > EXIT_TIKTIJD_MS) { return; }
-        VergelijkStimulus(nulmetingStimulus[sensorNummer], gemetenStimulus[sensorNummer], TijdCorrect, KrachtCorrect);
+        Stimulus.VergelijkStimulus(nulmetingStimulus[sensorNummer], gemetenStimulus[sensorNummer], Stimulus.TijdCorrect, Stimulus.KrachtCorrect);
       }
 
-      if (startTijdSimultaan) TELLER_SIMULTANE_START_OK++;
-      if (eindTijdSimultaan) TELLER_SIMULTANE_EIND_OK++;
-      if (startTijdSimultaan && eindTijdSimultaan) TELLER_TIKTIJD_SYNCHROON++;
+      if (startTijdSimultaan) Stimulus.TELLER_SIMULTANE_START_OK++;
+      if (eindTijdSimultaan) Stimulus.TELLER_SIMULTANE_EIND_OK++;
+      if (startTijdSimultaan && eindTijdSimultaan) Stimulus.TELLER_TIKTIJD_SYNCHROON++;
 
       // Formatteer herhalingsteller (Twee digits) via String-klasse om pointers te vermijden
       herhalingStr = (herhaling < 10) ? ('0' + String(herhaling)) : String(herhaling);
     } else {
-      int resultaatNulmeting = EvalueerNulmeting(gematigdTijd, gematigdKracht, nulmetingGoedgekeurd, nulmetingTikTijd, nulmetingTikKracht, herhaling, aantalNulmetingPogingen);
+      int resultaatNulmeting = Stimulus.EvalueerNulmeting(gematigdTijd, gematigdKracht, nulmetingGoedgekeurd, Stimulus.nulmetingTikTijd, Stimulus.nulmetingTikKracht, herhaling, aantalNulmetingPogingen);
 
       if (resultaatNulmeting == -1) {
         return;
       } else if (resultaatNulmeting == 1) {
         if (!startTijdSimultaan) {
           nulmetingGoedgekeurd = false;
-          PrintToScreen(LCD_S0_NULMETING, LCD_S4_START_VERSCHIL, LCD_LEESTIJD_FEEDBACK_LANG_MS);
+          Screen->Print(LCD_S0_NULMETING, LCD_S4_START_VERSCHIL, LCD_LEESTIJD_FEEDBACK_LANG_MS);
         } else if (!eindTijdSimultaan) {
           nulmetingGoedgekeurd = false;
-          PrintToScreen(LCD_S0_NULMETING, LCD_S4_TIJD_VERSCHILT, LCD_LEESTIJD_FEEDBACK_LANG_MS);
+          Screen->Print(LCD_S0_NULMETING, LCD_S4_TIJD_VERSCHILT, LCD_LEESTIJD_FEEDBACK_LANG_MS);
         } else {
           for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) nulmetingStimulus[sensorNummer] = gemetenStimulus[sensorNummer];
           nulmetingSynchronisatie = gemetenSynchronisatie[0];
@@ -699,7 +694,7 @@ void UitvoerenAlgoritmeCocktailTik() {
     GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilStartTijd);
 
     GA_DEBUG_PRINT("Toegestane marge start = ");
-    GA_DEBUG_PRINTLN(TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
+    GA_DEBUG_PRINTLN(Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS);
 
     GA_DEBUG_PRINT("Eerste tot laatste einde = ");
     GA_DEBUG_PRINTLN(gemetenSynchronisatie[0].verschilEindTijd);
@@ -722,27 +717,27 @@ void UitvoerenAlgoritmeCocktailTik() {
 #endif
 
     if (herhalingStr == "0M") {
-      PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gematigdTijd), LCD_SCORE_KRACHT + String(gematigdKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+      Screen->Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gematigdTijd), LCD_SCORE_KRACHT + String(gematigdKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
     } else {
       if (aantalSensorenSimultaanTeMeten == 2) { // 2 Sensoren, Scherm 1 (identiek aan scenario 2)
-        PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+        Screen->Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
       } else if (aantalSensorenSimultaanTeMeten == 3) { // Drie gebruikte sensoren bij vier hardwarematig aanwezige sensoren.
         /*
-        PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS);
-        PrintToScreen(LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_SCORE_KRACHT + String(gemetenStimulus[2].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+        Screen.Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+        Screen.Print(LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_SCORE_KRACHT + String(gemetenStimulus[2].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
         */
-        PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS, "", 
+        Screen->Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS, "", 
                       LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_SCORE_KRACHT + String(gemetenStimulus[2].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
       } else { // 4 Sensoren, Scherm 1: tijden & Scherm 2: krachten
         /*
-        PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd) + '/' + String(gemetenStimulus[3].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS);
-        PrintToScreen(LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_SCORE_KRACHT + String(gemetenStimulus[2].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[3].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+        Screen.Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd) + '/' + String(gemetenStimulus[3].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+        Screen.Print(LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_SCORE_KRACHT + String(gemetenStimulus[2].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[3].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
         */
-        PrintToScreen(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd) + '/' + String(gemetenStimulus[3].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS, "", 
+        Screen->Print(herhalingStr + ' ' + LCD_SCORE_TIJD + String(gemetenStimulus[0].TikTijd) + '/' + String(gemetenStimulus[1].TikTijd), LCD_SCORE_TIJD + String(gemetenStimulus[2].TikTijd) + '/' + String(gemetenStimulus[3].TikTijd), LCD_LEESTIJD_FEEDBACK_KORT_MS, "", 
                       LCD_SCORE_KRACHT + String(gemetenStimulus[0].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[1].gemiddeldeTikKracht), LCD_SCORE_KRACHT + String(gemetenStimulus[2].gemiddeldeTikKracht) + '/' + String(gemetenStimulus[3].gemiddeldeTikKracht), LCD_LEESTIJD_FEEDBACK_KORT_MS);
       }
 
-      PrintToScreen(LCD_S4_SYNCROON_START + String(gemetenSynchronisatie[0].aantalSensorenSynchroonStart) + '/' + String(aantalSensorenSimultaanTeMeten), LCD_S4_SYNCROON_EINDE + String(gemetenSynchronisatie[0].aantalSensorenSynchroonEinde) + '/' + String(aantalSensorenSimultaanTeMeten), LCD_LEESTIJD_FEEDBACK_KORT_MS);
+      Screen->Print(LCD_S4_SYNCROON_START + String(gemetenSynchronisatie[0].aantalSensorenSynchroonStart) + '/' + String(aantalSensorenSimultaanTeMeten), LCD_S4_SYNCROON_EINDE + String(gemetenSynchronisatie[0].aantalSensorenSynchroonEinde) + '/' + String(aantalSensorenSimultaanTeMeten), LCD_LEESTIJD_FEEDBACK_KORT_MS);
     }
   }
 
@@ -751,110 +746,110 @@ void UitvoerenAlgoritmeCocktailTik() {
 
 void ToonEindScoreScenario1() {
   // Berekening van de procentuele scores met integer-veiligheid (schaal 0-100%)
-  int percentageTikTijdOk = (TELLER_TIKTIJD_CORRECT * 100) / TEST_AANTAL_KEER_HERHALEN;
-  int percentageTikKrachtOk = (TELLER_TIKKRACHT_CORRECT * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageTikTijdOk = (Stimulus.TELLER_TIKTIJD_CORRECT * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageTikKrachtOk = (Stimulus.TELLER_TIKKRACHT_CORRECT * 100) / TEST_AANTAL_KEER_HERHALEN;
 
   // --- TOON SCORE TIKTIJD & TIKKRACHT ---
-  PrintToScreen(LCD_SCORE_TIKTIJD + String(percentageTikTijdOk) + LCD_SCORE_PERCENTAGE, LCD_SCORE_TIKKRACHT + String(percentageTikKrachtOk) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
+  Screen->Print(LCD_SCORE_TIKTIJD + String(percentageTikTijdOk) + LCD_SCORE_PERCENTAGE, LCD_SCORE_TIKKRACHT + String(percentageTikKrachtOk) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
 }
 
 void ToonEindScoreScenario2() {
   // 1. Berekening van de procentuele scores (schaal 0-100%)
   int totaalAantalStimuli   = TEST_AANTAL_KEER_HERHALEN * 2;
-  int percentageTikTijdOk   = (TELLER_TIKTIJD_CORRECT * 100) / totaalAantalStimuli;
-  int percentageTikKrachtOk = (TELLER_TIKKRACHT_CORRECT * 100) / totaalAantalStimuli;
+  int percentageTikTijdOk   = (Stimulus.TELLER_TIKTIJD_CORRECT * 100) / totaalAantalStimuli;
+  int percentageTikKrachtOk = (Stimulus.TELLER_TIKKRACHT_CORRECT * 100) / totaalAantalStimuli;
 
   // 2. Berekening van de specifieke coördinatiescores (Synchroon en In Balans)
-  int percentageSynchroon = (TELLER_TIKTIJD_SYNCHROON * 100) / TEST_AANTAL_KEER_HERHALEN;
-  int percentageInBalans  = (TELLER_TIKKRACHT_IN_BALANS * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageSynchroon = (Stimulus.TELLER_TIKTIJD_SYNCHROON * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageInBalans  = (Stimulus.TELLER_TIKKRACHT_IN_BALANS * 100) / TEST_AANTAL_KEER_HERHALEN;
 
   // --- SCHERM 1: TOON HOOFDSCORE TIKTIJD & TIKKRACHT ---
-  PrintToScreen(LCD_SCORE_TIJD + String(percentageTikTijdOk) + LCD_SCORE_PERCENTAGE, LCD_SCORE_KRACHT + String(percentageTikKrachtOk) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
+  Screen->Print(LCD_SCORE_TIJD + String(percentageTikTijdOk) + LCD_SCORE_PERCENTAGE, LCD_SCORE_KRACHT + String(percentageTikKrachtOk) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
 
   // --- SCHERM 2: TOON COÖRDINATIE FEEDBACK (Synchroon en InBalans) ---
   // Dit scherm laat de gebruiker zien in welke mate beide handen synchroon en in balans samenwerkten
-  PrintToScreen(LCD_SCORE_SYNCHROON + String(percentageSynchroon) + LCD_SCORE_PERCENTAGE, LCD_SCORE_IN_BALANS + String(percentageInBalans) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
+  Screen->Print(LCD_SCORE_SYNCHROON + String(percentageSynchroon) + LCD_SCORE_PERCENTAGE, LCD_SCORE_IN_BALANS + String(percentageInBalans) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
 
-  // 3. Reset het geheugen (Zorg dat ResetAlleTellers ook de 2 nieuwe variabelen reset!)
-  ResetAlleTellers();
+  // 3. Reset het geheugen (Zorg dat Stimulus.ResetAlleTellers ook de 2 nieuwe variabelen reset!)
+  Stimulus.ResetAlleTellers();
 }
 
 void ToonEindScoreScenario3() {
   // Stap 1 = 1 punt, stap 2 = 1 punt, stap 3 = INSTORTEND_AANTAL_STAPPEN punten
-  int totaalAantalKeren     = TEST_AANTAL_KEER_HERHALEN * 3; // VergelijkStimulus() wordt per ronde 3 keer aangeroepen.
-  int percentageTikTijdOk   = (TELLER_TIKTIJD_CORRECT * 100) / totaalAantalKeren;
-  int percentageTikKrachtOk = (TELLER_TIKKRACHT_CORRECT * 100) / totaalAantalKeren;
-  int percentageSynchroon   = (TELLER_TIKTIJD_SYNCHROON * 100) / TEST_AANTAL_KEER_HERHALEN;
-  int percentageInstortend  = (TELLER_INSTORTEND_CORRECT * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int totaalAantalKeren     = TEST_AANTAL_KEER_HERHALEN * 3; // Stimulus.VergelijkStimulus() wordt per ronde 3 keer aangeroepen.
+  int percentageTikTijdOk   = (Stimulus.TELLER_TIKTIJD_CORRECT * 100) / totaalAantalKeren;
+  int percentageTikKrachtOk = (Stimulus.TELLER_TIKKRACHT_CORRECT * 100) / totaalAantalKeren;
+  int percentageSynchroon   = (Stimulus.TELLER_TIKTIJD_SYNCHROON * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageInstortend  = (Stimulus.TELLER_INSTORTEND_CORRECT * 100) / TEST_AANTAL_KEER_HERHALEN;
 
-  PrintToScreen(LCD_SCORE_TIJD + String(percentageTikTijdOk) + LCD_SCORE_PERCENTAGE, LCD_SCORE_KRACHT + String(percentageTikKrachtOk) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
-  PrintToScreen(LCD_SCORE_SYNCHROON + String(percentageSynchroon) + LCD_SCORE_PERCENTAGE, LCD_SCORE_INSTORTEND + String(percentageInstortend) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
-  if (TELLER_INSTORTEND_CORRECT == TEST_AANTAL_KEER_HERHALEN) PrintToScreen(LCD_FINALE_TITEL, LCD_FINALE_SUCCES, LCD_LEESTIJD_ENDSCORE_MS); // Alle rondes perfect gescoord
+  Screen->Print(LCD_SCORE_TIJD + String(percentageTikTijdOk) + LCD_SCORE_PERCENTAGE, LCD_SCORE_KRACHT + String(percentageTikKrachtOk) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
+  Screen->Print(LCD_SCORE_SYNCHROON + String(percentageSynchroon) + LCD_SCORE_PERCENTAGE, LCD_SCORE_INSTORTEND + String(percentageInstortend) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
+  if (Stimulus.TELLER_INSTORTEND_CORRECT == TEST_AANTAL_KEER_HERHALEN) Screen->Print(LCD_FINALE_TITEL, LCD_FINALE_SUCCES, LCD_LEESTIJD_ENDSCORE_MS); // Alle rondes perfect gescoord
 }
 
 void ToonEindScoreScenario4() {
-  int percentageStartOK   = (TELLER_SIMULTANE_START_OK * 100) / TEST_AANTAL_KEER_HERHALEN;
-  int percentageEindOK    = (TELLER_SIMULTANE_EIND_OK * 100) / TEST_AANTAL_KEER_HERHALEN;
-  int percentageSynchroon = (TELLER_TIKTIJD_SYNCHROON * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageStartOK   = (Stimulus.TELLER_SIMULTANE_START_OK * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageEindOK    = (Stimulus.TELLER_SIMULTANE_EIND_OK * 100) / TEST_AANTAL_KEER_HERHALEN;
+  int percentageSynchroon = (Stimulus.TELLER_TIKTIJD_SYNCHROON * 100) / TEST_AANTAL_KEER_HERHALEN;
 
-  PrintToScreen(LCD_S4_SYNCROON_START + String(percentageStartOK) + LCD_SCORE_PERCENTAGE, LCD_S4_SYNCROON_EINDE + String(percentageEindOK) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
-  PrintToScreen(LCD_SCORE_SYNCHROON + String(percentageSynchroon) + LCD_SCORE_PERCENTAGE, "", LCD_LEESTIJD_ENDSCORE_MS);
-  if (TELLER_TIKTIJD_SYNCHROON == TEST_AANTAL_KEER_HERHALEN) PrintToScreen(LCD_FINALE_TITEL, LCD_FINALE_SUCCES, LCD_LEESTIJD_ENDSCORE_MS);
+  Screen->Print(LCD_S4_SYNCROON_START + String(percentageStartOK) + LCD_SCORE_PERCENTAGE, LCD_S4_SYNCROON_EINDE + String(percentageEindOK) + LCD_SCORE_PERCENTAGE, LCD_LEESTIJD_ENDSCORE_MS);
+  Screen->Print(LCD_SCORE_SYNCHROON + String(percentageSynchroon) + LCD_SCORE_PERCENTAGE, "", LCD_LEESTIJD_ENDSCORE_MS);
+  if (Stimulus.TELLER_TIKTIJD_SYNCHROON == TEST_AANTAL_KEER_HERHALEN) Screen->Print(LCD_FINALE_TITEL, LCD_FINALE_SUCCES, LCD_LEESTIJD_ENDSCORE_MS);
 }
 
 void ToonMenuKiesEnStelLevelIn() {
-  PrintToScreen(LCD_KEUZE_LEVELS_L1, LCD_KEUZE_LEVELS_L2);
+  Screen->Print(LCD_KEUZE_LEVELS_L1, LCD_KEUZE_LEVELS_L2);
   int gekozenLevel = 0;
 
   // Wacht tot alle toetsen losgelaten zijn.
   /*-- while (digitalRead(PIN_TOETS_1) == LOW || digitalRead(PIN_TOETS_2) == LOW || digitalRead(PIN_TOETS_3) == LOW || digitalRead(PIN_TOETS_4) == LOW); */
 
   while (true) {
-    InputResultaat invoer = OpvragenHuidigeToetsAanslag(true);
+    InputResultaat invoer = Input->OpvragenHuidigeToetsAanslag(true);
     const char* opschriftToetsAanslag = invoer.opschriftToetsAanslag;
     if (ToetsPositieIngedrukt(opschriftToetsAanslag, 1)) {  // Start
       //-- while (digitalRead(PIN_TOETS_1) == LOW);
-      TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 150UL;
-      TOEGESTANE_MARGE_TIKTIJD   = 30;
-      TOEGESTANE_MARGE_TIKKRACHT = 25;
+      Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 150UL;
+      Stimulus.TOEGESTANE_MARGE_TIKTIJD   = 30;
+      Stimulus.TOEGESTANE_MARGE_TIKKRACHT = 25;
       TEST_AANTAL_KEER_HERHALEN  = 5;
-      stimulusVersie             = STIMULUS_BASIC;
+      Stimulus.stimulusVersie             = STIMULUS_BASIC;
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 1;
       break;
     } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 2)) {  // Basic
       //-- while (digitalRead(PIN_TOETS_2) == LOW);
-      TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 100UL;
-      TOEGESTANE_MARGE_TIKTIJD   = 20;
-      TOEGESTANE_MARGE_TIKKRACHT = 15;
+      Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 100UL;
+      Stimulus.TOEGESTANE_MARGE_TIKTIJD   = 20;
+      Stimulus.TOEGESTANE_MARGE_TIKKRACHT = 15;
       TEST_AANTAL_KEER_HERHALEN  = 10;
-      stimulusVersie             = STIMULUS_BASIC;
+      Stimulus.stimulusVersie             = STIMULUS_BASIC;
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 2;
       break;
     } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 3)) {  // Expert
       //-- while (digitalRead(PIN_TOETS_3) == LOW);
-      TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 75UL;
-      TOEGESTANE_MARGE_TIKTIJD   = 15;
-      TOEGESTANE_MARGE_TIKKRACHT = 10;
+      Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 75UL;
+      Stimulus.TOEGESTANE_MARGE_TIKTIJD   = 15;
+      Stimulus.TOEGESTANE_MARGE_TIKKRACHT = 10;
       TEST_AANTAL_KEER_HERHALEN  = 15;
-      stimulusVersie             = STIMULUS_BASIC;
+      Stimulus.stimulusVersie             = STIMULUS_BASIC;
       instortendOfGradueel       = INSTORTEND_SCORING_BINAIR;   // Stap 3: tijd EN kracht beiden correct
       gekozenLevel               = 3;
       break;
     } else if (ToetsPositieIngedrukt(opschriftToetsAanslag, 4)) {  // Elite
       //-- while (digitalRead(PIN_TOETS_4) == LOW);
-      TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 50UL;
-      TOEGESTANE_MARGE_TIKTIJD   = 10;
-      TOEGESTANE_MARGE_TIKKRACHT = 5;
+      Stimulus.TOEGESTANE_MARGE_SIMULTANE_STARTTIJD_MS = 50UL;
+      Stimulus.TOEGESTANE_MARGE_TIKTIJD   = 10;
+      Stimulus.TOEGESTANE_MARGE_TIKKRACHT = 5;
       TEST_AANTAL_KEER_HERHALEN  = 20;
-      stimulusVersie             = STIMULUS_EXTENDED;
+      Stimulus.stimulusVersie             = STIMULUS_EXTENDED;
       instortendOfGradueel       = INSTORTEND_SCORING_GRADUEEL; // Stap 3: tijd en kracht apart gescoord
       gekozenLevel               = 4;
       break;
     }
   }
 
-  String tweedeRegel = '#' + String(TEST_AANTAL_KEER_HERHALEN) + " T" + String(TOEGESTANE_MARGE_TIKTIJD) + "% K" + String(TOEGESTANE_MARGE_TIKKRACHT) + "% SV" + stimulusVersie;
-  PrintToScreen(LCD_KEUZE_LEVELS_L3 + String(gekozenLevel), tweedeRegel, LCD_LEESTIJD_FEEDBACK_LANG_MS);
+  String tweedeRegel = '#' + String(TEST_AANTAL_KEER_HERHALEN) + " T" + String(Stimulus.TOEGESTANE_MARGE_TIKTIJD) + "% K" + String(Stimulus.TOEGESTANE_MARGE_TIKKRACHT) + "% SV" + Stimulus.stimulusVersie;
+  Screen->Print(LCD_KEUZE_LEVELS_L3 + String(gekozenLevel), tweedeRegel, LCD_LEESTIJD_FEEDBACK_LANG_MS);
 }

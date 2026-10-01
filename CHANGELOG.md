@@ -15,6 +15,51 @@ De versienummers volgen de versie in `library.properties`.
 
 - `GedeeldeBusInitialiseren()` hernoemd naar `InitialiserenGedeeldeBus()`, gedragsbehoudend. Dit betreft enkel de altijd-actieve basisfunctie; de overige, experimentele `GEDEELDE_BUS_PROTOTYPE`-functienamen (gebruikt in de voorbeelden onder `examples/Systeem/GedeeldeBus/`) vallen hier niet onder.
 
+## 2.0.0
+
+### Screen
+
+- `Screen` is de enige v2.0.0-Screen-architectuur en werkt via `GEDEELDE_BUS_PROTOTYPE`; de oude niet-GedeeldeBus-Screen-route is verwijderd;
+- alle blijvende Screen-hardware en Screen-status zitten in het `Screen`-object, waaronder `Screen.Character.display`, `Screen.Pixel.display`, `Screen.Pixel.PixelScreen`, callbacks, status en de GedeeldeBus-kinderen;
+- `Screen.Character.display` is het concrete `LiquidCrystal_I2C`-object; `Screen.Pixel.display` is het concrete `Adafruit_ST7789`-object; `Screen.Pixel.PixelScreen` blijft voorlopig de `Adafruit_GFX*`-pointer naar dat object tot de definitieve pointernaam is gekozen;
+- `Screen.Pixel.Configureren()` plugt de PixelScreen-resources via GedeeldeBus in en initialiseert daarna het fysieke pixelscherm; `Screen.Character.Configureren()` doet hetzelfde per CharacterScreen-kanaal; `Screen.Configureren()` configureert de geselecteerde Screen-kanalen gezamenlijk;
+- de afzonderlijke `Adafruit_ST7789 pixelScreen(...)`-constructie, `pixelScreen.init(...)`, `pixelScreen.setRotation(...)` en `PixelScreen = &pixelScreen` verdwijnen uit de Screen-voorbeelden;
+- de vijf dubbele Screen-voorbeelden onder `examples/Systeem/GedeeldeBus/` zijn verwijderd; de vijf voorbeelden onder `examples/Systeem/Screen/` gebruiken de v2.0.0-object-API;
+- `extras/TestLibraryScreen-v2.0.0.cmd` toegevoegd als tijdelijke, gerichte Screen-test op Arduino UNO R4 Minima.
+
+### Input
+
+- `Input` is de enige v2.0.0-Input-architectuur en werkt via `GEDEELDE_BUS_PROTOTYPE`; de oude backward/non-PROTOTYPE-Input-routes zijn verwijderd.
+- DIGITAL, PCF8574 en HX1838 worden als GedeeldeBus-kinderen van `Input` ingeplugd; de blijvende Input-status en kanaalstatus zitten in het `Input`-object.
+- de publieke Input-aanroepen lopen via het object, waaronder `Input.InputConfigureren()`, `Input.OpvragenHuidigeToetsAanslag(...)`, `Input.OpvragenHuidigeToetsAanslagen(...)`, `Input.UitVoerenFunctieVolgensMappingMetToetsAanslag(...)` en `Input.ControleerMappingVolledigheid(...)`.
+- `INPUT_PCF8574` en `EXTENDER_PCF8574` gebruiken dezelfde interne `ExtenderPCF8574`-codebasis; de afzonderlijke externe PCF8574-library is uit de Input-implementatie en uit `library.properties` verwijderd.
+- `GedeeldeBusComponent::INPUT_PCF8574` blijft de exclusieve Input-rol en de shield-pinindeling aanduiden; fysiek telt deze PCF8574 als de eerste gebruikte PCF8574 in de I2C-adresreeks.
+- wanneer `INPUT_PCF8574` het standaardadres `0x20` gebruikt, krijgt `EXTENDER_PCF8574_1` standaard `0x21` en `EXTENDER_PCF8574_2` standaard `0x22`.
+- de negen dubbele Input-voorbeelden onder `examples/Systeem/GedeeldeBus/` zijn verwijderd; de negen voorbeelden onder `examples/Systeem/Input/` gebruiken de v2.0.0-object-API.
+- `extras/TestLibraryInput-v2.0.0.cmd` toegevoegd als tijdelijke, gerichte Input-test op Arduino UNO R4 Minima; deze bevat het relevante Input-deel van `TestLibraryGereleased.cmd` en drie HX1838-tests.
+
+### Stimulus
+
+- `Stimulus` is de enige v2.0.0-Stimulus-objectstructuur; de bestaande meet- en vergelijkingsalgoritmes blijven inhoudelijk behouden.
+- de publieke Stimulus-aanroepen en blijvende Stimulus-status lopen via `Stimulus`, waaronder `Stimulus.MeetStimulus(...)`, `Stimulus.MeetStimulusSimultaan(...)`, offsets, marges en tellers.
+- `ADC_NATIVE` en `ADC_ADS1115` zijn configureerbare GedeeldeBus-objecten; `sensorRFP602` wordt op de geselecteerde ADC-route ingeplugd en Stimulus leest via `sensorRFP602`.
+- bij `ADC_ADS1115` gebruikt `sensorRFP602` hetzelfde `ADC_ADS1115`-object dat van `ExtenderADS1115` erft; een afzonderlijk `Adafruit_ADS1115`-object binnen Stimulus is verwijderd.
+- de vijf Stimulus-voorbeelden gebruiken de v2.0.0-object-API van `Screen`, `Input` en `Stimulus`; het dubbele gecombineerde Stimulus-voorbeeld onder `examples/Systeem/GedeeldeBus/` is verwijderd.
+- `extras/TestLibraryStimulus-v2.0.0.cmd` toegevoegd als tijdelijke Stimulus-test op Arduino UNO R4 Minima, met beide ADC-backends en alle acht Screen-configuraties.
+- de eerste RFP602-sensorlaag is toegevoegd als directe, één-op-één omzetting van de bestaande Stimulus-uitlezing;
+- `sensorRFP602` wordt als Sensor-kind op de gekozen ADC-extender ingeplugd;
+- `sensorRFP602.RawAnalogRead(...)` neemt de directe sample-uitlezing over van `Stimulus.RawAnalogRead(...)`;
+- `sensorRFP602.sensorPin[4]` neemt de vier bestaande Stimulus-kanalen over;
+- SensorKernel, buffering en andere collectiemodi zijn in deze stap bewust nog niet toegevoegd.
+
+### ADC-laag
+
+- `ADC_NATIVE` en `ADC_ADS1115` zijn de twee exclusieve ADC-routes binnen de v2.0.0-GedeeldeBus-architectuur.
+- `ADC_ADS1115` gebruikt rechtstreeks dezelfde `ExtenderADS1115`-codebasis als een gewone ADS1115-extender.
+- `ADC_ADS1115` gebruikt standaard `I2C_ADDRESS_ADS1115`; wanneer deze route actief is, schuift `EXTENDER_ADS1115_1` standaard naar het volgende ADS1115-adres en `EXTENDER_ADS1115_2` naar het daaropvolgende adres.
+- de twee bestaande voorbeelden onder `examples/Systeem/ADC_Backend/` valideren voortaan het aanmelden, controleren en inpluggen via GedeeldeBus; de sensorlaag wordt in deze stap nog niet gebruikt.
+- `extras/TestLibraryADC-v2.0.0.cmd` toegevoegd als tijdelijke, gerichte ADC-test op Arduino UNO R4 Minima.
+
 ## 1.1.2
 
 ### Boardnamen en Arduino Uno-shieldpinmapping

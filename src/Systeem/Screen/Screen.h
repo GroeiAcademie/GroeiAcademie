@@ -4,8 +4,8 @@
 #include <Arduino.h>
 
 #include "ScreenTypes.h"
-
 #include "../../Configuratie/SystemConfig.h"
+#include "../GedeeldeBus/GedeeldeBus.h"
 
 #ifndef SCREEN_OUTPUT_CONFIG
   #error SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd.
@@ -25,18 +25,18 @@
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 #include <LiquidCrystal_I2C.h>
-extern LiquidCrystal_I2C lcd;
 
 #if (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD1604 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004)
   #define ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS true
 #else
   #define ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS false
 #endif
+
 #endif // SCREEN_TYPE_CHARACTER
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
 #include <Adafruit_GFX.h>
-extern Adafruit_GFX* PixelScreen;
+#include <Adafruit_ST7789.h>
 
 #if (ACTIEF_PIXEL_SCREEN == SCREEN_128X32)
   #define ACTIEF_PIXEL_SCREEN_BREEDTE 128
@@ -67,23 +67,14 @@ extern Adafruit_GFX* PixelScreen;
   #error PIXEL_SCREEN_ROTATION moet 0, 1, 2 of 3 zijn.
 #endif
 
-extern bool ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS;
-
 enum class ScreenData : uint8_t {
-    // Geen expliciet informatietype opgegeven
     TYPE_NONE,
-
-    // Informatief
     TYPE_INFO,
     TYPE_MESSAGE,
     TYPE_NOTIFY,
     TYPE_SUCCESS,
-
-    // Interactie
     TYPE_PROMPT,
     TYPE_CONFIRM,
-
-    // Waarschuwingen en fouten
     TYPE_WARNING,
     TYPE_ALERT,
     TYPE_FAULT,
@@ -91,12 +82,8 @@ enum class ScreenData : uint8_t {
     TYPE_FATAL,
     TYPE_ABORT,
     TYPE_PANIC,
-
-    // Diagnose
     TYPE_DEBUG,
     TYPE_TRACE,
-
-    // Inhoud
     TYPE_TEXT,
     TYPE_GRAPHICS,
     TYPE_VIDEO
@@ -105,49 +92,118 @@ enum class ScreenData : uint8_t {
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 typedef void (*CharacterScreenCallback)(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
-void RegistreerCallbackScreenTypeCharacter(CharacterScreenCallback callback);
-extern CharacterScreenCallback CallbackScreenTypeCharacter;
-
-// D022/D023: CHARACTERSCREEN_I2C_ADRES_MODUS bepaalt hoe CharacterScreenConfigureren()
-// omgaat met het I2C-adres van het characterscherm (default in SystemConfig.h).
-//   0 = geen scan, enkel de handdruk-check op het geconfigureerde I2C_ADRES (kleinste footprint).
-//   1 = scan + rapporteren via de foutmelding, geen zelfherstel (standaard).
-//   2 = scan + automatisch herbouwen op het gevonden adres (placement-new), nooit hercompileren.
-#if (CHARACTERSCREEN_I2C_ADRES_MODUS < 0) || (CHARACTERSCREEN_I2C_ADRES_MODUS > 2)
-  #error CHARACTERSCREEN_I2C_ADRES_MODUS moet 0, 1 of 2 zijn.
 #endif
-
-// O2/D024-vervolg: opnieuwProberen=true dwingt een nieuwe configuratiepoging af,
-// ook na een eerdere mislukking — standaard false, dus bestaande aanroepen
-// (zonder argument) blijven exact hetzelfde werken. Niet automatisch herhalen
-// (bv. in loop()): elke poging doet een echte I2C-transactie.
-// Roept intern InitialiserenGedeeldeBus() aan (experimenteel, GEDEELDE_BUS_PROTOTYPE in SystemConfig.h).
-bool CharacterScreenConfigureren(bool opnieuwProberen = false);
-#endif // SCREEN_TYPE_CHARACTER
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
 typedef void (*PixelScreenCallback)(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
-void RegistreerCallbackScreenTypePixel(PixelScreenCallback callback);
-extern PixelScreenCallback CallbackScreenTypePixel;
+#endif
 
-bool PixelScreenConfigureren(bool opnieuwProberen = false);
+struct Screen : GedeeldeBusNode {
+  Screen();
+  Screen(uint8_t SCREEN_TYPES_ACTIEF);
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  Screen(CharacterScreenCallback callback);
+  Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback callback);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  Screen(PixelScreenCallback callback);
+  Screen(uint8_t SCREEN_TYPES_ACTIEF, PixelScreenCallback callback);
+#endif
+#if ((SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER) && (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS))
+  Screen(CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback);
+  Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback);
+#endif
 
-// ============================================================================
-// D020: PixelScreenClear(), PixelScreenSetCursor(), PixelScreenPrint() en
-// PixelScreenFoutmeldingWeergeven() dienden uitsluitend als interne bouwsteen
-// en zijn niet langer publiek. Hun prototypes staan nu als static forward
-// declarations bovenaan Screen.cpp.
-// ============================================================================
-#endif // SCREEN_TYPE_PIXELS
+  void ActivatiefoutWeergeven();
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-void PrintToScreen(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
-#endif // SCREEN_TYPE_PIXELS
+  void Print(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+#endif
+  void Print(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
 
-void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  struct Character {
+    bool actief = false;
 
-// D022: optionele gemakslaag, geen deprecatie van CharacterScreenConfigureren()/
-// PixelScreenConfigureren() — die blijven de granulaire, expliciete route.
-void ScreensConfigureren(bool opnieuwProberen = false);
+    CharacterScreenCallback callback = nullptr;
+    ::CharacterScreen* gedeeldeBus   = nullptr;
+
+    LiquidCrystal_I2C display{I2C_ADDRESS_CHARACTER_SCREEN, (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2002 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 20 : (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD4002 ? 40 : 16), (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD1604 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 4 : 2};
+
+    const char* foutmelding     = nullptr;
+    char foutmeldingBuffer[24]  = {};
+    bool foutmeldingWeergegeven = false;
+
+    void FoutmeldingWeergeven(const String& foutmelding);
+    void RegistreerCallback(CharacterScreenCallback callback);
+  } Character;
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  struct Pixel {
+    bool actief = false;
+
+    PixelScreenCallback callback = nullptr;
+    ::PixelScreen* gedeeldeBus   = nullptr;
+
+    uint8_t aantalKolommen = 0;
+    uint8_t aantalRegels   = 0;
+    uint8_t cursorKolom    = 0;
+    uint8_t cursorRegel    = 0;
+    int16_t offsetX        = 0;
+    int16_t offsetY        = 0;
+
+    Adafruit_ST7789 display{ static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_CS)), static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_DC)), static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_RST))};
+    Adafruit_GFX* gfx = nullptr;
+
+    bool emulateLCDxxx4         = false;
+    const char* foutmelding     = nullptr;
+    bool foutmeldingWeergegeven = false;
+
+    void FoutmeldingWeergeven(const String& foutmelding);
+    void RegistreerCallback(PixelScreenCallback callback);
+
+    void    Clear();
+    uint8_t GridClamp(int32_t waarde, uint8_t minimumWaarde, uint8_t maximumWaarde);
+    int16_t KarakterBreedte();
+    int16_t KarakterStap();
+    void    Print(const String& tekst);
+    int16_t RegelHoogte();
+    int16_t RegelStap();
+    void    SetCursor(uint8_t kolom, uint8_t regel);
+  } Pixel;
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  struct Serial {
+    bool actief = false;
+
+    SerialOutput* gedeeldeBus = nullptr;
+
+    const char* foutmelding     = nullptr;
+    bool foutmeldingWeergegeven = false;
+
+    void FoutmeldingWeergeven();
+  } Serial;
+#endif
+
+private:
+  uint8_t SCREEN_TYPES_ACTIEF = SCREEN_OUTPUT;
+
+  // Screen stuurt elke stap intern door naar zijn uitvoeren (CharacterScreen, PixelScreen, SerialOutput).
+  bool aanmelden() override;
+  bool controleren() override;
+  bool inpluggen() override;
+  bool Activeren() override;
+  bool afmelden() override;
+
+  void PrintPrivate(
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+    ScreenData screenData,
+#endif
+    const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);
+};
+
+extern struct Screen* Screen;
 
 #endif // SCREEN_H

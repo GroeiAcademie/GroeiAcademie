@@ -29,18 +29,18 @@ De volledige betekenis, controle en oplossing staan hieronder bij de gemelde fou
 
 | Foutcode | Betekenis |
 |---|---|
-| [CS000: CharacterScreenConfigureren() niet aangeroepen](#cs000) | De ingebouwde characterschermhardware is niet expliciet geconfigureerd vóór de eerste `PrintToScreen()`-aanroep. |
+| [CS000: Screen.Inpluggen() niet aangeroepen](#cs000) | De ingebouwde characterschermhardware is niet expliciet geconfigureerd vóór de eerste `Screen.Print()`-aanroep. |
 | [CS001: geen I2C-antwoord](#cs001) | Geen enkel geprobeerd I2C-adres reageerde op de handdruk-check. |
-| [CS002: scherm gevonden op ander I2C-adres](#cs002) | Enkel bij `CHARACTERSCREEN_I2C_ADRES_MODUS = 1`: het scherm reageerde op een ander adres dan het geconfigureerde `I2C_ADRES`. |
-| [PS000: PixelScreenConfigureren() niet aangeroepen](#ps000) | De ingebouwde pixelschermhardware is niet expliciet geconfigureerd vóór de eerste `PrintToScreen()`-aanroep. |
-| [PS001: PixelScreen niet gekoppeld](#ps001) | De algemene `PixelScreen`-pointer verwijst niet naar het geïnitialiseerde schermobject. |
+| [CS002: scherm gevonden op ander I2C-adres](#cs002) | Wordt door de huidige Screen-code niet meer uitgegeven; automatische I2C-adresmodi zijn verwijderd. |
+| [PS000: Screen.Inpluggen() niet aangeroepen](#ps000) | De ingebouwde pixelschermhardware is niet expliciet geconfigureerd vóór de eerste `Screen.Print()`-aanroep. |
+| [PS001: PixelScreen niet gekoppeld](#ps001) | `Screen.Pixel.gfx` verwijst niet naar het geïnitialiseerde `Screen.Pixel.display`-object. |
 | [PS002: Omgewisselde breedte en hoogte komen niet overeen](#ps002) | Bij rotatie 1 of 3 komen de gemeten afmetingen niet overeen met de omgewisselde ingestelde afmetingen. |
 | [PS003: Niet-omgewisselde breedte en hoogte komen niet overeen](#ps003) | Bij rotatie 0 of 2 komen de gemeten afmetingen niet overeen met de ingestelde afmetingen. |
 | [PS004: Tekstgrid kleiner dan 16×2](#ps004) | De resolutie en tekstgrootte leveren minder dan 16 kolommen of minder dan 2 regels op. |
 | [SS001: SerialScreen niet beschikbaar na timeout](#ss001) | De eerste normale SerialScreen-verbindingspoging werd niet binnen `SERIAL_CONNECT_TIMEOUT_MS` beschikbaar. |
 
 <a id="cs000"></a>
-## CS000: CharacterScreenConfigureren() niet aangeroepen
+## CS000: Screen.Inpluggen() niet aangeroepen
 
 ### Melding
 
@@ -52,25 +52,29 @@ ZOEK DIT NU OP
 ### Trigger
 
 ```cpp
-if (!characterScreenStatus.gecontroleerd)
+if (Screen.Character.gedeeldeBus == nullptr)
 ```
 
 ### Betekenis
 
-`PrintToScreen()` werd aangeroepen terwijl `CharacterScreenConfigureren()` (rechtstreeks, of via `ScreensConfigureren()`) nog nooit werd aangeroepen voor CharacterScreen-uitvoer.
+`Screen.Print()` werd aangeroepen terwijl `Screen.Inpluggen()` nog niet succesvol werd uitgevoerd voor CharacterScreen-uitvoer.
 
 ### Controle
 
 Controleer of `setup()` één van deze aanroepen bevat:
 
 ```cpp
-CharacterScreenConfigureren();
+Screen.Aanmelden();
+Screen.Controleren();
+Screen.Inpluggen();
 ```
 
 of
 
 ```cpp
-ScreensConfigureren();
+Screen.Aanmelden();
+Screen.Controleren();
+Screen.Inpluggen();
 ```
 
 ### Gevolg
@@ -79,7 +83,7 @@ De library kan niet garanderen dat het characterscherm werkt, en toont daarom ge
 
 ### Oplossing
 
-Roep `CharacterScreenConfigureren()` (of `ScreensConfigureren()`) aan in `setup()`, vóór de eerste `PrintToScreen()`-aanroep.
+Doorloop in `setup()` eerst `Screen.Aanmelden()`, `Screen.Controleren()` en `Screen.Inpluggen()`, vóór de eerste `Screen.Print()`-aanroep.
 
 <a id="cs001"></a>
 ## CS001: Geen I2C-antwoord
@@ -100,7 +104,7 @@ if (Wire.endTransmission() != 0)
 
 ### Betekenis
 
-Geen enkel geprobeerd I2C-adres gaf een ACK terug. Bij `CHARACTERSCREEN_I2C_ADRES_MODUS = 0` is dat enkel het geconfigureerde `I2C_ADRES`; bij modus 1 of 2 is dat `I2C_ADRES` gevolgd door de kandidatenlijst (`0x27`, `0x3F`).
+Het geconfigureerde `I2C_ADRES` gaf geen ACK terug. `CharacterScreen::Activeren()` controleert uitsluitend dit aangemelde adres.
 
 ### Controle
 
@@ -117,7 +121,7 @@ De library kan het characterscherm niet aanspreken en schakelt de CharacterScree
 
 ### Oplossing
 
-Herstel de I2C-verbinding of pas `I2C_ADRES` aan. Overweeg `CHARACTERSCREEN_I2C_ADRES_MODUS = 1` of `2` wanneer het adres regelmatig wisselt (zie `docs/DECISION_LOG.md`, D023).
+Herstel de I2C-verbinding of pas `I2C_ADRES` aan naar het werkelijke adres van het CharacterScreen.
 
 <a id="cs002"></a>
 ## CS002: Scherm gevonden op ander I2C-adres
@@ -133,7 +137,7 @@ ZOEK DIT NU OP
 
 ### Trigger
 
-Enkel bij `CHARACTERSCREEN_I2C_ADRES_MODUS = 1`, wanneer een kandidaat-adres wél reageert maar dat niet het geconfigureerde `I2C_ADRES` is.
+De huidige code gebruikt geen automatische I2C-adresmodus meer en geeft `CS002` niet meer uit.
 
 ### Betekenis
 
@@ -152,7 +156,7 @@ Geen zelfherstel in modus 1: de configuratie wordt als mislukt beschouwd totdat 
 Pas `I2C_ADRES` aan naar het gemelde adres en hercompileer. Overweeg modus `2` wanneer je liever geen hercompilatie wil bij een wisselend adres (zie de afweging in `docs/DECISION_LOG.md`, D023).
 
 <a id="ps000"></a>
-## PS000: PixelScreenConfigureren() niet aangeroepen
+## PS000: Screen.Inpluggen() niet aangeroepen
 
 ### Melding
 
@@ -164,25 +168,29 @@ ZOEK DIT NU OP
 ### Trigger
 
 ```cpp
-if (!pixelScreenStatus.gecontroleerd)
+if (Screen.Pixel.gedeeldeBus == nullptr)
 ```
 
 ### Betekenis
 
-`PrintToScreen()` werd aangeroepen terwijl `PixelScreenConfigureren()` (rechtstreeks, of via `ScreensConfigureren()`) nog nooit werd aangeroepen voor PixelScreen-uitvoer.
+`Screen.Print()` werd aangeroepen terwijl `Screen.Inpluggen()` nog niet succesvol werd uitgevoerd voor PixelScreen-uitvoer.
 
 ### Controle
 
-Controleer of `setup()`, ná het koppelen van `PixelScreen`, één van deze aanroepen bevat:
+Controleer of `setup()` de PixelScreen-configuratie rechtstreeks of via de volledige Screen-setup aanroept:
 
 ```cpp
-PixelScreenConfigureren();
+Screen.Aanmelden();
+Screen.Controleren();
+Screen.Inpluggen();
 ```
 
 of
 
 ```cpp
-ScreensConfigureren();
+Screen.Aanmelden();
+Screen.Controleren();
+Screen.Inpluggen();
 ```
 
 ### Gevolg
@@ -191,7 +199,7 @@ De library kan niet garanderen dat het pixelscherm werkt, en toont daarom geen n
 
 ### Oplossing
 
-Roep `PixelScreenConfigureren()` (of `ScreensConfigureren()`) aan in `setup()`, ná het koppelen van `PixelScreen` en vóór de eerste `PrintToScreen()`-aanroep.
+Doorloop in `setup()` eerst `Screen.Aanmelden()`, `Screen.Controleren()` en `Screen.Inpluggen()`, vóór de eerste `Screen.Print()`-aanroep. De koppeling van `Screen.Pixel.gfx` aan `Screen.Pixel.display` gebeurt intern tijdens `Screen.Inpluggen()`.
 
 <a id="ps001"></a>
 ## PS001: PixelScreen niet gekoppeld
@@ -211,24 +219,27 @@ if (!PixelScreen)
 
 ### Betekenis
 
-PixelScreen werd geselecteerd, maar er is geen geïnitialiseerd schermobject aan de algemene `PixelScreen`-pointer gekoppeld.
+PixelScreen werd geselecteerd, maar `Screen.Pixel.gfx` verwijst niet naar het interne `Screen.Pixel.display`-object.
 
 ### Controle
 
-Controleer of deze stappen na de initialisatie van de concrete displaydriver worden uitgevoerd:
+Controleer of de normale v2.0.0-PixelScreen-configuratie wordt gebruikt:
 
 ```cpp
-pixelScreen.init(...);
-pixelScreen.setRotation(...);
-PixelScreen = &pixelScreen;
-PixelScreenConfigureren();
+Screen.Aanmelden();
+Screen.Controleren();
+Screen.Inpluggen();
 ```
 
-De ontbrekende koppeling is doorgaans:
+of:
 
 ```cpp
-PixelScreen = &pixelScreen;
+Screen.Aanmelden();
+Screen.Controleren();
+Screen.Inpluggen();
 ```
+
+Na een geslaagde GedeeldeBus-inplug voert `Screen` intern de initialisatie, rotatie en koppeling uit.
 
 ### Gevolg
 
@@ -236,7 +247,7 @@ De library kan het geselecteerde PixelScreen niet aanspreken en schakelt de Pixe
 
 ### Oplossing
 
-Initialiseer de concrete displaydriver, stel de gewenste rotatie in, koppel het schermobject aan `PixelScreen` en roep daarna `PixelScreenConfigureren()` aan.
+Doorloop `Screen.Aanmelden()`, `Screen.Controleren()` en `Screen.Inpluggen()`. `Screen::Inpluggen()` initialiseert `Screen.Pixel.display`, stelt `PIXEL_SCREEN_ROTATION` in en koppelt `Screen.Pixel.gfx` aan dat object.
 
 <a id="ps002"></a>
 ## PS002: Omgewisselde breedte en hoogte komen niet overeen
@@ -257,7 +268,7 @@ if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || PixelScreen->height() 
 
 ### Betekenis
 
-Bij rotatie 1 of 3 verwacht de huidige configuratie dat de ingestelde breedte en hoogte omgewisseld worden. De door `PixelScreen->width()` en `PixelScreen->height()` gerapporteerde afmetingen voldoen niet aan die verwachting.
+Bij rotatie 1 of 3 verwacht de huidige configuratie dat de ingestelde breedte en hoogte omgewisseld worden. De door `Screen.Pixel.gfx->width()` en `Screen.Pixel.gfx->height()` gerapporteerde afmetingen voldoen niet aan die verwachting.
 
 ### Controle
 
@@ -266,7 +277,7 @@ Controleer:
 - of `ACTIEF_PIXEL_SCREEN` overeenkomt met de werkelijk aangesloten displaymodule;
 - of de concrete displaydriver met de juiste fysieke resolutie werd geïnitialiseerd;
 - of `PIXEL_SCREEN_ROTATION` werkelijk 1 of 3 moet zijn;
-- welke waarden `PixelScreen->width()` en `PixelScreen->height()` na `setRotation()` teruggeven.
+- welke waarden `Screen.Pixel.gfx->width()` en `Screen.Pixel.gfx->height()` na `setRotation()` teruggeven.
 
 Vergelijk:
 
@@ -302,7 +313,7 @@ if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || PixelScreen->height()
 
 ### Betekenis
 
-Bij rotatie 0 of 2 verwacht de huidige configuratie dat de ingestelde breedte en hoogte niet omgewisseld worden. De door `PixelScreen->width()` en `PixelScreen->height()` gerapporteerde afmetingen voldoen niet aan die verwachting.
+Bij rotatie 0 of 2 verwacht de huidige configuratie dat de ingestelde breedte en hoogte niet omgewisseld worden. De door `Screen.Pixel.gfx->width()` en `Screen.Pixel.gfx->height()` gerapporteerde afmetingen voldoen niet aan die verwachting.
 
 ### Controle
 
@@ -311,7 +322,7 @@ Controleer:
 - of `ACTIEF_PIXEL_SCREEN` overeenkomt met de werkelijk aangesloten displaymodule;
 - of de concrete displaydriver met de juiste fysieke resolutie werd geïnitialiseerd;
 - of `PIXEL_SCREEN_ROTATION` werkelijk 0 of 2 moet zijn;
-- welke waarden `PixelScreen->width()` en `PixelScreen->height()` na `setRotation()` teruggeven.
+- welke waarden `Screen.Pixel.gfx->width()` en `Screen.Pixel.gfx->height()` na `setRotation()` teruggeven.
 
 Vergelijk:
 
@@ -375,8 +386,8 @@ Controleer:
 - `PIXEL_SCREEN_MARGIN`;
 - `PIXEL_SCREEN_CHARACTER_SPACING`;
 - `PIXEL_SCREEN_LINE_SPACING`;
-- `PixelScreen->width()`;
-- `PixelScreen->height()`;
+- `Screen.Pixel.gfx->width()`;
+- `Screen.Pixel.gfx->height()`;
 - of de schermrotatie de beschikbare breedte en hoogte beïnvloedt zoals verwacht.
 
 ### Gevolg
@@ -398,11 +409,11 @@ ZOEK DIT NU OP
 
 ### Trigger
 
-De eerste normale `SerialScreenConfigureren()`-poging heeft `GA_SERIAL.begin(SERIAL_BAUDRATE)` uitgevoerd, maar de seriële interface werd niet beschikbaar binnen `SERIAL_CONNECT_TIMEOUT_MS`.
+De eerste normale `Screen.Inpluggen()`-poging heeft `GA_SERIAL.begin(SERIAL_BAUDRATE)` uitgevoerd, maar de seriële interface werd niet beschikbaar binnen `SERIAL_CONNECT_TIMEOUT_MS`.
 
 ### Gedrag
 
-De library onthoudt de mislukte poging zodat volgende `PrintToScreen()`-aanroepen niet telkens opnieuw de volledige timeout doorlopen. Een reeds werkend CharacterScreen en/of PixelScreen, of hun geregistreerde callback, krijgt de `CRITICAL: SS001`-melding rechtstreeks; het mislukte Serial-pad wordt daarvoor niet opnieuw gebruikt. De toepassing kan daarna verdergaan via de overige beschikbare uitvoerkanalen.
+De library onthoudt de mislukte poging zodat volgende `Screen.Print()`-aanroepen niet telkens opnieuw de volledige timeout doorlopen. Een reeds werkend CharacterScreen en/of PixelScreen, of hun geregistreerde callback, krijgt de `CRITICAL: SS001`-melding rechtstreeks; het mislukte Serial-pad wordt daarvoor niet opnieuw gebruikt. De toepassing kan daarna verdergaan via de overige beschikbare uitvoerkanalen.
 
 ### Controle
 

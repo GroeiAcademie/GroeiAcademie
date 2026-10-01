@@ -1,12 +1,11 @@
 // ============================================================================
 // Default CharacterScreen
 // ============================================================================
-// ============================================================================
-#include <Wire.h>
 #include <Screen.h>
 #include <Configuratie/ExamplesConfig.h>
 
-// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino structureel niet: Screen.cpp wordt als apart bestand gecompileerd en ziet een #define hier nooit. 
+// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino structureel niet: 
+// Screen.cpp wordt als apart bestand gecompileerd en ziet een #define hier nooit. 
 // Zet SCREEN_TYPE_CHARACTER én SCREEN_TYPE_PIXELS daarom in UserConfig.h (kopieer van UserConfig_template.h) of rechtstreeks in SystemConfig.h. 
 // Onderstaande controle geeft een duidelijke foutmelding als dat nog niet gebeurd is, in plaats van de sketch stil te laten falen.
 #if !((SCREEN_OUTPUT_CONFIG) & SCREEN_TYPE_CHARACTER)
@@ -14,13 +13,14 @@
 #else
 
 void setup() {
-  CharacterScreenConfigureren();
+  Screen = GedeeldeBusNewComponent<struct Screen>(SCREEN_TYPE_CHARACTER);
+  if (Screen == nullptr) exit(0);
 }
 
 void loop() {
   while (true) {
-    PrintToScreen("GROEI ACADEMIE", "TYPE_NONE", LEESTIJD_VOORBEELD_MS);
-    PrintToScreen("EERSTE REGEL", "TWEEDE REGEL", LEESTIJD_VOORBEELD_MS, " NU", "DERDE REGEL", "VIERDE REGEL", WACHTTIJD_TUSSEN_PAGINAS_MS);
+    Screen->Print("GROEI ACADEMIE", "TYPE NONE", LEESTIJD_VOORBEELD_MS);
+    Screen->Print("EERSTE REGEL", "TWEEDE REGEL", LEESTIJD_VOORBEELD_MS, " NU", "DERDE REGEL", "VIERDE REGEL", WACHTTIJD_TUSSEN_PAGINAS_MS);
   }
 }
 #endif

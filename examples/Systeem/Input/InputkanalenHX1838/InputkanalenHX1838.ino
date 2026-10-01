@@ -24,29 +24,24 @@
   #define INPUT_TEST_WEERGAVE_MS 2000UL
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  #include <Adafruit_ST7789.h>
-  Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
-#endif
-
 #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
-void TestFunctieUp()    { PrintToScreen("Toets ingedrukt:", "UP",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieDown()  { PrintToScreen("Toets ingedrukt:", "DOWN",  INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieOk()    { PrintToScreen("Toets ingedrukt:", "OK",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieLeft()  { PrintToScreen("Toets ingedrukt:", "LEFT",  INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieRight() { PrintToScreen("Toets ingedrukt:", "RIGHT", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie1()     { PrintToScreen("Toets ingedrukt:", "1",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie2()     { PrintToScreen("Toets ingedrukt:", "2",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie3()     { PrintToScreen("Toets ingedrukt:", "3",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie4()     { PrintToScreen("Toets ingedrukt:", "4",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie5()     { PrintToScreen("Toets ingedrukt:", "5",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie6()     { PrintToScreen("Toets ingedrukt:", "6",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie7()     { PrintToScreen("Toets ingedrukt:", "7",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie8()     { PrintToScreen("Toets ingedrukt:", "8",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie9()     { PrintToScreen("Toets ingedrukt:", "9",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieSter()  { PrintToScreen("Toets ingedrukt:", "*",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie0()     { PrintToScreen("Toets ingedrukt:", "0",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieHekje() { PrintToScreen("Toets ingedrukt:", "#",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieUp()    { Screen->Print("Toets ingedrukt:", "UP",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieDown()  { Screen->Print("Toets ingedrukt:", "DOWN",  INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieOk()    { Screen->Print("Toets ingedrukt:", "OK",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieLeft()  { Screen->Print("Toets ingedrukt:", "LEFT",  INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieRight() { Screen->Print("Toets ingedrukt:", "RIGHT", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie1()     { Screen->Print("Toets ingedrukt:", "1",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie2()     { Screen->Print("Toets ingedrukt:", "2",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie3()     { Screen->Print("Toets ingedrukt:", "3",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie4()     { Screen->Print("Toets ingedrukt:", "4",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie5()     { Screen->Print("Toets ingedrukt:", "5",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie6()     { Screen->Print("Toets ingedrukt:", "6",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie7()     { Screen->Print("Toets ingedrukt:", "7",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie8()     { Screen->Print("Toets ingedrukt:", "8",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie9()     { Screen->Print("Toets ingedrukt:", "9",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieSter()  { Screen->Print("Toets ingedrukt:", "*",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie0()     { Screen->Print("Toets ingedrukt:", "0",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieHekje() { Screen->Print("Toets ingedrukt:", "#",     INPUT_TEST_WEERGAVE_MS); }
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
   {_LABEL_OPSCHRIFT_UP,    TestFunctieUp},
@@ -68,23 +63,23 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
   {_LABEL_OPSCHRIFT_HEKJE, TestFunctieHekje},
 };
 #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
-void TestFunctie1()     { PrintToScreen("Toets ingedrukt:", "1",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie2()     { PrintToScreen("Toets ingedrukt:", "2",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie3()     { PrintToScreen("Toets ingedrukt:", "3",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie4()     { PrintToScreen("Toets ingedrukt:", "4",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie5()     { PrintToScreen("Toets ingedrukt:", "5",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie6()     { PrintToScreen("Toets ingedrukt:", "6",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie7()     { PrintToScreen("Toets ingedrukt:", "7",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie8()     { PrintToScreen("Toets ingedrukt:", "8",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie9()     { PrintToScreen("Toets ingedrukt:", "9",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieSter()  { PrintToScreen("Toets ingedrukt:", "*",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie0()     { PrintToScreen("Toets ingedrukt:", "0",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieHekje() { PrintToScreen("Toets ingedrukt:", "#",     INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieUp()    { PrintToScreen("Toets ingedrukt:", "UP",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieDown()  { PrintToScreen("Toets ingedrukt:", "DOWN",  INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieOk()    { PrintToScreen("Toets ingedrukt:", "OK",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieLeft()  { PrintToScreen("Toets ingedrukt:", "LEFT",  INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieRight() { PrintToScreen("Toets ingedrukt:", "RIGHT", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie1()     { Screen->Print("Toets ingedrukt:", "1",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie2()     { Screen->Print("Toets ingedrukt:", "2",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie3()     { Screen->Print("Toets ingedrukt:", "3",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie4()     { Screen->Print("Toets ingedrukt:", "4",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie5()     { Screen->Print("Toets ingedrukt:", "5",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie6()     { Screen->Print("Toets ingedrukt:", "6",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie7()     { Screen->Print("Toets ingedrukt:", "7",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie8()     { Screen->Print("Toets ingedrukt:", "8",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie9()     { Screen->Print("Toets ingedrukt:", "9",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieSter()  { Screen->Print("Toets ingedrukt:", "*",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie0()     { Screen->Print("Toets ingedrukt:", "0",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieHekje() { Screen->Print("Toets ingedrukt:", "#",     INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieUp()    { Screen->Print("Toets ingedrukt:", "UP",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieDown()  { Screen->Print("Toets ingedrukt:", "DOWN",  INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieOk()    { Screen->Print("Toets ingedrukt:", "OK",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieLeft()  { Screen->Print("Toets ingedrukt:", "LEFT",  INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieRight() { Screen->Print("Toets ingedrukt:", "RIGHT", INPUT_TEST_WEERGAVE_MS); }
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
   {_LABEL_OPSCHRIFT_1,     TestFunctie1},
@@ -106,27 +101,27 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
   {_LABEL_OPSCHRIFT_RIGHT, TestFunctieRight},
 };
 #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
-void TestFunctieChMinus() { PrintToScreen("Toets ingedrukt:", "CH-",  INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieCh()      { PrintToScreen("Toets ingedrukt:", "CH",   INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieChPlus()  { PrintToScreen("Toets ingedrukt:", "CH+",  INPUT_TEST_WEERGAVE_MS); }
-void TestFunctiePrev()    { PrintToScreen("Toets ingedrukt:", "PREV", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieNext()    { PrintToScreen("Toets ingedrukt:", "NEXT", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctiePlay()    { PrintToScreen("Toets ingedrukt:", "PLAY", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieMinus()   { PrintToScreen("Toets ingedrukt:", "-",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctiePlus()    { PrintToScreen("Toets ingedrukt:", "+",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctieEq()      { PrintToScreen("Toets ingedrukt:", "EQ",   INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie0()       { PrintToScreen("Toets ingedrukt:", "0",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie100Plus() { PrintToScreen("Toets ingedrukt:", "100+", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie200Plus() { PrintToScreen("Toets ingedrukt:", "200+", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie1()       { PrintToScreen("Toets ingedrukt:", "1",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie2()       { PrintToScreen("Toets ingedrukt:", "2",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie3()       { PrintToScreen("Toets ingedrukt:", "3",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie4()       { PrintToScreen("Toets ingedrukt:", "4",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie5()       { PrintToScreen("Toets ingedrukt:", "5",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie6()       { PrintToScreen("Toets ingedrukt:", "6",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie7()       { PrintToScreen("Toets ingedrukt:", "7",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie8()       { PrintToScreen("Toets ingedrukt:", "8",    INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie9()       { PrintToScreen("Toets ingedrukt:", "9",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieChMinus() { Screen->Print("Toets ingedrukt:", "CH-",  INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieCh()      { Screen->Print("Toets ingedrukt:", "CH",   INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieChPlus()  { Screen->Print("Toets ingedrukt:", "CH+",  INPUT_TEST_WEERGAVE_MS); }
+void TestFunctiePrev()    { Screen->Print("Toets ingedrukt:", "PREV", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieNext()    { Screen->Print("Toets ingedrukt:", "NEXT", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctiePlay()    { Screen->Print("Toets ingedrukt:", "PLAY", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieMinus()   { Screen->Print("Toets ingedrukt:", "-",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctiePlus()    { Screen->Print("Toets ingedrukt:", "+",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctieEq()      { Screen->Print("Toets ingedrukt:", "EQ",   INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie0()       { Screen->Print("Toets ingedrukt:", "0",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie100Plus() { Screen->Print("Toets ingedrukt:", "100+", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie200Plus() { Screen->Print("Toets ingedrukt:", "200+", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie1()       { Screen->Print("Toets ingedrukt:", "1",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie2()       { Screen->Print("Toets ingedrukt:", "2",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie3()       { Screen->Print("Toets ingedrukt:", "3",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie4()       { Screen->Print("Toets ingedrukt:", "4",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie5()       { Screen->Print("Toets ingedrukt:", "5",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie6()       { Screen->Print("Toets ingedrukt:", "6",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie7()       { Screen->Print("Toets ingedrukt:", "7",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie8()       { Screen->Print("Toets ingedrukt:", "8",    INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie9()       { Screen->Print("Toets ingedrukt:", "9",    INPUT_TEST_WEERGAVE_MS); }
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
   {_LABEL_OPSCHRIFT_CH_MINUS, TestFunctieChMinus},
@@ -155,23 +150,21 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 
 void setup() {
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
-  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
-  PixelScreen = &pixelScreen;
-#endif
-  ScreensConfigureren();
+  Screen = GedeeldeBusNewComponent<struct Screen>();
+  if (Screen == nullptr) exit(0);
 
-  InputConfigureren();
+  Input = GedeeldeBusNewComponent<struct Input>();
+  if (Input == nullptr) exit(0);
+  Input->InputConfigureren();
 
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
   // Optioneel, enkel voor testdoeleinden: meldt via Serial welke opschriften van de gecompileerde HX1838_TOETSENINDELING ontbreken in mappingTestMenu[]. 
   // Weglaten in productiecode. Enkel actief wanneer INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN in UserConfig.h staat.
-  ControleerMappingVolledigheid(mappingTestMenu);
+  Input->ControleerMappingVolledigheid(mappingTestMenu);
 #endif
 }
 
 void loop() {
-  PrintToScreen("Input-test HX1838", "druk een toets");
-  UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
+  Screen->Print("Input-test HX1838", "druk een toets");
+  Input->UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
 }

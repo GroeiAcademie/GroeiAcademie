@@ -20,7 +20,7 @@ De volledige architecturale motivatie, alle ontwerpbeslissingen, en de technisch
 
 - **Niets is gecompileerd op `arduino-cli` of echte hardware.** Dit is de belangrijkste beperking van dit hele document.
 - UNO R3 ondersteunt enkel de eenvoudige, analoge sensoren (Pulse Sensor, FSR402/RFP602, BioAmp EXG Pill, Piëzo-ademhalingsband). De overige vier pilot-drivers vereisen minimaal UNO R4, en INMP441 vereist specifiek een ESP32-bord.
-- DS18B20 ondersteunt nog geen meerdere sensoren op dezelfde 1-Wire-bus.
+- DS18B20 ondersteunt nog geen meerdere sensoren op dezelfde One-Wire-bus.
 - NeuroSky TGAM mist nog checksumvalidatie.
 - INMP441 is ESP32-specifiek gecodeerd; op RP2040/STM32 geeft dit een onduidelijke compileerfout in plaats van een nette melding.
 - Bestemmingen naar SD-kaart, WiFi/MQTT of Bluetooth bestaan nog niet.
@@ -44,7 +44,7 @@ Deze pilot bevat een aantal architecturale vragen die bewust nog open staan. Wie
 
 - `SENSOR_COMPONENT_*`: hoe koppel je een sensor-instantie ondubbelzinnig aan zijn fysieke pin/adres? (gedeeltelijk al opgelost, DEEL 24)
 - Gedeelde bus-eigendom tussen meerdere subsystemen (I²C/SPI): zie `Systeem/GedeeldeBus/`
-- DS18B20 met meerdere sensoren op dezelfde 1-Wire-bus
+- DS18B20 met meerdere sensoren op dezelfde One-Wire-bus
 - Meerdere borden die naar één centrale plek communiceren: welk NodeId-concept, welke tijdsbasis over borden heen? (DEEL 20)
 
 Volledige technische achtergrond: `Kernel_Sensorlaag_Architectuur_Brainstorming_FASE_1_v1_2_0_03.md` in de experimentele branch.

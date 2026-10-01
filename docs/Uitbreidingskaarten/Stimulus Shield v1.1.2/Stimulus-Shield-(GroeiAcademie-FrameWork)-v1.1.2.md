@@ -156,7 +156,7 @@ De footprints zijn fysiek aanwezig. Als niveauconversie nodig is, wordt de quad 
 
 Het v1.1.2-schema bevat de directe 1x4-keymatrix op H1/D2-D5, de PCF8574-uitbreiding en de HX1838 IR Receiver.
 
-De referentie-/testmodule voor de software is de OTRONIC OT8980. De software blijft chipgeoriënteerd en gebruikt `INPUT_TYPE_PCF8574`, `I2C_ADDRESS_PCF8574` en de Rob Tillaart `PCF8574`-library.
+De referentie-/testmodule voor de software is de OTRONIC OT8980. De software blijft chipgeoriënteerd en gebruikt `INPUT_TYPE_PCF8574` en `I2C_ADDRESS_PCF8574`; vanaf v2.0.0 gebruikt Input dezelfde interne `ExtenderPCF8574`-codebasis als de gewone PCF8574-extender.
 
 | Onderdeel | Functie |
 |---|---|

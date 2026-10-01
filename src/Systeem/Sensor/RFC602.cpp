@@ -1,0 +1,34 @@
+#include "RFC602.h"
+
+#if ADC_BACKEND == ADC_BACKEND_NATIVE
+struct RFP602 sensorRFP602(
+  &ADC_NATIVE,
+  GedeeldeBusComponent::RFP602,
+  HardwareResourceToegang::GEDEELD
+);
+#elif ADC_BACKEND == ADC_BACKEND_ADS1115
+struct RFP602 sensorRFP602(
+  &ADC_ADS1115,
+  GedeeldeBusComponent::RFP602,
+  HardwareResourceToegang::GEDEELD
+);
+#endif
+
+bool RFP602::Activeren() {
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  ADC_ADS1115.setGain(GAIN_TWOTHIRDS);
+#endif
+  return true;
+}
+
+int RFP602::RawAnalogRead(int sensorPin) {
+  if (!actief) {
+    if (!aanmelden() || !controleren() || !inpluggen() || !activeren()) return 0;
+  }
+
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  return ADC_ADS1115.readADC_SingleEnded(sensorPin);
+#else
+  return analogRead(sensorPin);
+#endif
+}

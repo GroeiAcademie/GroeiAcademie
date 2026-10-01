@@ -1,9 +1,8 @@
 // InputkanalenHX1838UserDefined.ino
 // Testtoepassing voor de Input-laag, specifiek voor HX1838_TOETSENINDELING_REMOTE_USER_DEFINED.
 //
-// Deze UserDefined-route is in v1.1.1 uitsluitend beschikbaar met HX1838_BRON_CODES_DEFINE.
-// De configuratie moet op buildniveau in UserConfig.h staan; defines in deze .ino bereiken
-// de apart gecompileerde Input.cpp niet.
+// Deze UserDefined-route is uitsluitend beschikbaar met HX1838_BRON_CODES_DEFINE.
+// De configuratie moet op buildniveau in UserConfig.h staan; defines in deze .ino bereiken de apart gecompileerde Input.cpp niet.
 //
 // Voorbeeld voor UserConfig.h:
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
@@ -16,8 +15,8 @@
 // De huidige HX1838-laag vergelijkt 8-bit commandwaarden (uint8_t).
 //
 // Lokale keuze voor dit voorbeeld:
-// - gedefinieerd: test via UitVoerenFunctieVolgensMappingMetToetsAanslag().
-// - niet gedefinieerd: test rechtstreeks via OpvragenHuidigeToetsAanslag().
+// - gedefinieerd: test via Input.UitVoerenFunctieVolgensMappingMetToetsAanslag().
+// - niet gedefinieerd: test rechtstreeks via Input.OpvragenHuidigeToetsAanslag().
 #define USER_DEFINED_VIA_MAPPING
 
 #include <GroeiAcademie.h>
@@ -28,16 +27,11 @@
   #define INPUT_TEST_WEERGAVE_MS 2000UL
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  #include <Adafruit_ST7789.h>
-  Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
-#endif
-
 #ifdef USER_DEFINED_VIA_MAPPING
-void TestFunctie1() { PrintToScreen("Toets ingedrukt:", "1", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie2() { PrintToScreen("Toets ingedrukt:", "2", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie3() { PrintToScreen("Toets ingedrukt:", "3", INPUT_TEST_WEERGAVE_MS); }
-void TestFunctie4() { PrintToScreen("Toets ingedrukt:", "4", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie1() { Screen->Print("Toets ingedrukt:", "1", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie2() { Screen->Print("Toets ingedrukt:", "2", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie3() { Screen->Print("Toets ingedrukt:", "3", INPUT_TEST_WEERGAVE_MS); }
+void TestFunctie4() { Screen->Print("Toets ingedrukt:", "4", INPUT_TEST_WEERGAVE_MS); }
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
   {_LABEL_OPSCHRIFT_1, TestFunctie1},
@@ -48,30 +42,28 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 #endif
 
 void setup() {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
-  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
-  PixelScreen = &pixelScreen;
-#endif
-  ScreensConfigureren();
-  InputConfigureren();
+  Screen = GedeeldeBusNewComponent<struct Screen>();
+  if (Screen == nullptr) exit(0);
+  Input = GedeeldeBusNewComponent<struct Input>();
+  if (Input == nullptr) exit(0);
+  Input->InputConfigureren();
 
 #if defined(USER_DEFINED_VIA_MAPPING) && defined(INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN)
   // Optioneel, enkel voor testdoeleinden: meldt via Serial welke opschriften van de gecompileerde UserDefined-indeling ontbreken in mappingTestMenu[].
   // Weglaten in productiecode. Enkel actief wanneer INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN in UserConfig.h staat.
-  ControleerMappingVolledigheid(mappingTestMenu);
+  Input->ControleerMappingVolledigheid(mappingTestMenu);
 #endif
 }
 
 void loop() {
-  PrintToScreen("HX1838 UserDefined", "druk een toets");
+  Screen->Print("HX1838 UserDefined", "druk een toets");
 
 #ifdef USER_DEFINED_VIA_MAPPING
-  UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
+  Input->UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
 #else
-  InputResultaat resultaat = OpvragenHuidigeToetsAanslag(true);
+  InputResultaat resultaat = Input->OpvragenHuidigeToetsAanslag(true);
   if (resultaat.inputKanaal == InputKanaal::HX1838 && resultaat.opschriftToetsAanslag != nullptr) {
-    PrintToScreen("Toets ingedrukt:", resultaat.opschriftToetsAanslag, INPUT_TEST_WEERGAVE_MS);
+    Screen->Print("Toets ingedrukt:", resultaat.opschriftToetsAanslag, INPUT_TEST_WEERGAVE_MS);
   }
 #endif
 }

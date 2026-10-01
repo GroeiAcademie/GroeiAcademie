@@ -1,114 +1,28 @@
 // ============================================================================
-// Stimulus — transparante ADC-laag + validatiesketch (Arduino-ADC)
+// ADC Backend — Native
 // ============================================================================
-// LET OP:
-// Dit is een zelfstandig hardware-validatiescript.
-// Het gebruikt bewust niet de volledige Stimulus-librarylogica, en hangt
-// daarom ook NIET af van UserConfig.h/SystemConfig.h — alles wat dit script
-// nodig heeft, staat hieronder zelf gedefinieerd. Zo blijft dit script altijd
-// werken, ongeacht hoe je UserConfig.h voor je eigen project is ingesteld.
-//
-// Voor gewone gebruikers:
-// Gebruik dit script alleen om de hardware te valideren.
-// Gebruik de normale Stimulus-voorbeelden om met de library zelf te werken.
-
-// Doel: de directe Arduino-ADC-route elektrisch en meetkundig testen zonder extra lagen,
-// door dezelfde 4 FSR402/RFP602-lijnen uit te lezen via één vaste backend,
-// zodat Arduino-ADC en ADS1115 afzonderlijk getest en vergeleken kunnen worden.
-//
-// Fysieke validatie:
-// 1. Plaats geen ADS1115-bordje op H5.
-// 2. Verbind H5 pin 7-10 met H6 pin 1-4.
-// 3. H6 pin 1-4 loopt naar Arduino A0-A3.
-//
-// Vereist: geen bijkomende library.
+// Valideert de native ADC-route via de v2.0.0 GedeeldeBus-structuur.
+// ADC_NATIVE wordt eerst aangemeld, gecontroleerd en ingeplugd.
+// De sensorlaag wordt in deze test nog niet gebruikt.
 // ============================================================================
 
-#define ADC_BACKEND_NATIVE  0
-#define ADC_BACKEND_ADS1115 1
-#define ADC_BACKEND ADC_BACKEND_NATIVE
+#include <Systeem/GedeeldeBus/GedeeldeBus.h>
+#include <Configuratie/SystemConfig.h>
 
-#define BOARD_UNO_R3                     0
-#define BOARD_UNO_R4_MINIMA              1
-#define BOARD_UNO_R4_WIFI                2
-#define BOARD_ESP32_D1_UNO_R32           5
-#define BOARD_ESP32S3_ARDI32             3
-#define BOARD_RP2040_CYTRON_MAKER_UNO    4
-#define BOARD_STM32F4_NUCLEO64_F401RE    6
-
-#ifndef BOARD_VERSION
-  #define BOARD_VERSION BOARD_UNO_R3
+#if ADC_BACKEND != ADC_BACKEND_NATIVE
+  #error Deze validatie vereist ADC_BACKEND_NATIVE.
 #endif
 
-#if BOARD_VERSION == BOARD_UNO_R3
-  #define ADC_BITS 10
-#elif (BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI)
-  #define ADC_BITS 14
-#elif BOARD_VERSION == BOARD_ESP32S3_ARDI32
-  #define ADC_BITS 12      // ESP32-S3 Arduino core: analogRead() standaard 12-bit
-#elif BOARD_VERSION == BOARD_ESP32_D1_UNO_R32
-  #define ADC_BITS 12      // zie kanttekening in docs/Configuratie/SystemConfig.md
-#elif BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
-  #define ADC_BITS 10      // Earle Philhower RP2040 core: analogReadResolution() standaard 10-bit
-#elif BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE
-  #define ADC_BITS 10      // STM32duino: analogRead() standaard 10-bit voor Arduino-compatibiliteit
-#else
-  #error Selecteer een geldige BOARD_VERSION.
-#endif
-
-#define PIN_SENSOR_1 A0
-#define PIN_SENSOR_2 A1
-#define PIN_SENSOR_3 A2
-#define PIN_SENSOR_4 A3
 #define STIMULUS_AANTAL_KANALEN 4
 
-#define SERIAL_BAUDRATE 115200 
+uint8_t sensorPin[STIMULUS_AANTAL_KANALEN] = {
+  NativeArduinoPinVan(ADC_PIN_SENSOR_1),
+  NativeArduinoPinVan(ADC_PIN_SENSOR_2),
+  NativeArduinoPinVan(ADC_PIN_SENSOR_3),
+  NativeArduinoPinVan(ADC_PIN_SENSOR_4)
+};
 
-#if defined(ARDUINO_ESP32S3_DEV)
-  #define GA_SERIAL Serial0
-#else
-  #define GA_SERIAL Serial
-#endif
-
-#include <Wire.h>
-
-const int sensorPin[STIMULUS_AANTAL_KANALEN] = { PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4 };
-bool ads1115Aanwezig = false;
 bool metingAfgerond = false;
-
-#ifndef PRINTTOSCREEN_BESTAAT_AL
-void PrintToScreen(const char* regel1, const char* regel2) {
-#ifdef DEBUG
-  GA_SERIAL.print(F("[LCD] ")); GA_SERIAL.print(regel1); GA_SERIAL.print(F(" / ")); GA_SERIAL.println(regel2);
-#endif
-}
-#endif
-
-void InitialiseerADS1115Validatie() {
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  if (!ads.begin(ADS1115_I2C_ADDRESS)) {
-#ifdef DEBUG
-    GA_SERIAL.println(F("ADS1115 niet gevonden"));
-#endif
-    PrintToScreen("ADS1115", "niet gevonden");
-    ads1115Aanwezig = false;
-    return;
-  }
-  ads.setGain(GAIN_TWOTHIRDS);
-  ads1115Aanwezig = true;
-#else
-  ads1115Aanwezig = true;
-#endif
-}
-
-int RawAnalogReadValidatie(int sensorPin) {
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  if (!ads1115Aanwezig) return 0;
-  return ads.readADC_SingleEnded(sensorPin);
-#else
-  return analogRead(sensorPin);
-#endif
-}
 
 struct KanaalStats {
   long n = 0;
@@ -156,18 +70,14 @@ void setup() {
 #endif
 
   GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
+  while (!GA_SERIAL) { ; }
 
-  Wire.begin();
-  InitialiseerADS1115Validatie();
+  if (!ADC_NATIVE.aanmelden() || !ADC_NATIVE.controleren() || !ADC_NATIVE.inpluggen() || !ADC_NATIVE.activeren()) {
+    GA_SERIAL.println(F("ADC_NATIVE kon niet worden ingeplugd."));
+    while (true) { ; }
+  }
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  GA_SERIAL.println(F("=== Validatie: backend = ADS1115 ==="));
-#else
-  GA_SERIAL.println(F("=== Validatie: backend = Arduino-ADC ==="));
-#endif
-
-  GA_SERIAL.println(F("Controleer dat de fysieke connectorkeuze overeenkomt met deze backend."));
+  GA_SERIAL.println(F("=== Validatie: ADC_NATIVE ingeplugd ==="));
   tStart = millis();
 }
 
@@ -179,8 +89,7 @@ void loop() {
   if (nu - laatsteSample >= SAMPLE_INTERVAL_MS) {
     laatsteSample = nu;
     for (uint8_t k = 0; k < STIMULUS_AANTAL_KANALEN; k++) {
-      int waarde = RawAnalogReadValidatie(sensorPin[k]);
-      voegMetingToe(k, waarde);
+      voegMetingToe(k, analogRead(NativeArduinoPinVan(static_cast<HardwareResourcePin>(sensorPin[k]))));
     }
   }
 

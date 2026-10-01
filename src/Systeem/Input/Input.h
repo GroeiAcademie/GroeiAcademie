@@ -7,6 +7,8 @@
 
 #include "../../Configuratie/SystemConfig.h"
 
+#include "../GedeeldeBus/GedeeldeBus.h"
+
 #if ((INPUT_KANAAL_CONFIG) & ~(INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838))
   #error INPUT_KANAAL_CONFIG bevat een onbekend invoertype.
 #endif
@@ -28,15 +30,6 @@
   #endif
   #if (HX1838_ONTVANGER_PIN == ARDUINO_UNO_SHIELD_PIN_SCK)
     #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt SPI SCK. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
-  #endif
-  #if (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_CS)
-    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt PIXEL_SCREEN_CS. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
-  #endif
-  #if (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_DC)
-    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt PIXEL_SCREEN_DC. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
-  #endif
-  #if (HX1838_ONTVANGER_PIN == PIXEL_SCREEN_RST)
-    #warning HX1838_ONTVANGER_PIN conflicteert met een pin die het pixelscherm gebruikt PIXEL_SCREEN_RST. Kies een andere HX1838_ONTVANGER_PIN in UserConfig.h.
   #endif
 #endif
 
@@ -197,143 +190,195 @@ struct MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten {
 };
 
 extern const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTussenToetsaanslagEnUitTeVoerenFunctie[];
-
 extern const byte aantalToetsFuncties;
 
-const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag);
-
-// --- Interne koppeling voor mapping-bewuste LANG_INDRUKKEN-detectie (niet rechtstreeks gebruiken) ---
-// OpvragenHuidigeToetsAanslag() moet, om te weten of/wanneer een LANG_INDRUKKEN-gebeurtenis
-// gegenereerd wordt, ergens een lang-indrukken-drempel (in ms) opvragen voor de toets die nu
-// stabiel ingedrukt is. Standaard gebeurt dat via het globale mappingTussenToetsaanslagEnUitTeVoerenFunctie[]
-// hierboven. De UitVoerenFunctieVolgensMappingMetToetsAanslag-templates verderop in dit bestand
-// zetten deze koppeling vlak vóór de aanroep om naar hún eigen, expliciet meegegeven mapping, zodat
-// ook toepassingen met meerdere menu's (elk met een eigen mapping-array) LANG_INDRUKKEN correct krijgen.
 typedef unsigned long (*LangIndrukkenDrempelOpzoekerFunctie)(const char* opschriftToetsAanslag);
 
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-extern const MappingTussenToetsaanslagEnUitTeVoerenFunctie* _actieveMappingVoorLangIndrukken;
-extern byte _actieveMappingAantalVoorLangIndrukken;
-unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMapping(const char* opschriftToetsAanslag);
+// ============================================================================
+// v2.0.0: Input is het object. Alle Input-runtime, Input-status en GedeeldeBus-kinderen behoren tot dit object.
+// ============================================================================
+struct Input : GedeeldeBusNode {
+  Input();
+  Input(uint8_t INPUT_TYPES_ACTIEF);
 
-extern const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* _actieveMappingMetArgumentenVoorLangIndrukken;
-extern byte _actieveMappingMetArgumentenAantalVoorLangIndrukken;
-unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten(const char* opschriftToetsAanslag);
+  // Input stuurt elke stap door naar zijn kanalen (InputDigital, InputPCF8574, InputHX1838).
+  bool aanmelden() override;
+  bool controleren() override;
+  bool inpluggen() override;
+  bool Activeren() override;
+  bool afmelden() override;
+
+  void InputConfigureren();
+
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag);
+
+  InputResultaat OpvragenHuidigeToetsAanslag(bool wachten = true);
+  InputResultaat OpvragenHuidigeToetsAanslag(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker);
+  InputResultaten OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1);
+
+  void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true);
+
+  template <size_t N>
+  void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+    _actieveMappingVoorLangIndrukken = mapping;
+    _actieveMappingAantalVoorLangIndrukken = (byte)N;
+    InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten, _LangIndrukkenDrempelOpzoekerViaActieveMapping);
+#else
+    InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
+#endif
+    if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
+    const MappingTussenToetsaanslagEnUitTeVoerenFunctie* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
+    if (gevondenMapping == nullptr) return;
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+    if (invoer.gebeurtenis == InputGebeurtenis::LOSGELATEN) {
+      if (gevondenMapping->functieBijLoslaten != nullptr) gevondenMapping->functieBijLoslaten();
+      return;
+    }
+    if (invoer.gebeurtenis == InputGebeurtenis::LANG_INDRUKKEN) {
+      if (gevondenMapping->functieBijLangIndrukken != nullptr) gevondenMapping->functieBijLangIndrukken();
+      return;
+    }
 #endif
 
-template <size_t N>
-const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
-  if (opschriftToetsAanslag == nullptr) return nullptr;
-  for (size_t i = 0; i < N; i++) { if (strcmp(mapping[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) return &mapping[i]; }
-  return nullptr;
-}
+    if (gevondenMapping->functie != nullptr) gevondenMapping->functie();
+  }
 
-template <size_t N>
-const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
-  if (opschriftToetsAanslag == nullptr) return nullptr;
-  for (size_t i = 0; i < N; i++) { if (strcmp(mapping[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) return &mapping[i]; }
-  return nullptr;
-}
+  template <size_t N>
+  void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+    _actieveMappingMetArgumentenVoorLangIndrukken = mapping;
+    _actieveMappingMetArgumentenAantalVoorLangIndrukken = (byte)N;
+    InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten, _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten);
+#else
+    InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
+#endif
+    if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
+    const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
+    if (gevondenMapping == nullptr) return;
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+    if (invoer.gebeurtenis == InputGebeurtenis::LOSGELATEN) {
+      if (gevondenMapping->functieBijLoslaten != nullptr) gevondenMapping->functieBijLoslaten(gevondenMapping->argumentenBijLoslaten);
+      return;
+    }
+    if (invoer.gebeurtenis == InputGebeurtenis::LANG_INDRUKKEN) {
+      if (gevondenMapping->functieBijLangIndrukken != nullptr) gevondenMapping->functieBijLangIndrukken(gevondenMapping->argumentenBijLangIndrukken);
+      return;
+    }
+#endif
+
+    if (gevondenMapping->functie != nullptr) gevondenMapping->functie(gevondenMapping->argumenten);
+  }
 
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
-// Interne werkfunctie, geïmplementeerd in Input.cpp waar KEY_LAYOUT/IR_KEY_LAYOUT voor het actief gecompileerde KEYPAD_TYPE/HX1838_TOETSENINDELING gekend zijn.
-// Niet rechtstreeks door de gebruiker aan te roepen, gebruik ControleerMappingVolledigheid().
-void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag[], byte aantalEntries);
-
-// Controleert of mapping elk opschrift bevat dat het actief gecompileerde KEYPAD_TYPE (of HX1838_TOETSENINDELING) kan opleveren, en meldt via Serial welke ontbreken.
-// Enkel bedoeld om tijdens het testen op te roepen, bijvoorbeeld eenmalig in setup(), niet in productiecode: dit voegt Serial-afhankelijkheid en extra flashgebruik toe.
-// Enkel beschikbaar wanneer INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN in UserConfig.h staat.
-template <size_t N>
-void ControleerMappingVolledigheid(const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
-  const char* opschriftToetsAanslag[N];
-  for (size_t i = 0; i < N; i++) opschriftToetsAanslag[i] = mapping[i].opschriftToetsAanslag;
-  ControleerMappingVolledigheidIntern(opschriftToetsAanslag, N);
-}
-#endif
-
-// ============================================================================
-// PUBLIEKE API
-// ============================================================================
-
-// Initialiseert de geconfigureerde invoerkanalen (pinMode/Wire.begin/IrReceiver.begin),
-// en start bij HX1838 automatisch de kalibratieprocedure als er nog geen geldige kalibratie in EEPROM staat. 
-// Wanneer de geconfigureerde bron de vaste HX1838-mapping gebruikt, worden ontbrekende codes vanuit SystemConfig.h aangevuld.
-// Roept bij INPUT_TYPE_PCF8574 intern InitialiserenGedeeldeBus() aan (experimenteel, GEDEELDE_BUS_PROTOTYPE in SystemConfig.h).
-void InputConfigureren();
-
-// Geeft één toetsaanslag terug via de gecompileerde invoerkanalen. 
-// Bij wachten=true wordt blokkerend gewacht volgens de bestaande Tik-werking; 
-// bij wachten=false wordt alleen de huidige beschikbare status opgevraagd.
-// Bij PCF8574 + HX1838 samen krijgt het fysieke keypad voorrang wanneer beide op hetzelfde moment invoer leveren.
-// Deze functie hoort bij Input: zij vraagt één huidige toetsaanslag op via de geconfigureerde invoerkanalen.
-// Enkel actief wanneer INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID is ingeschakeld: het veld "gebeurtenis" in het
-// teruggegeven InputResultaat kan dan ook InputGebeurtenis::LOSGELATEN, ::LANG_INDRUKKEN of ::TIMEOUT_GEEN_INVOER zijn niet enkel ::TOETSAANSLAG. 
-// Zonder die schakelaar blijft het gedrag exact zoals voorheen.
-InputResultaat OpvragenHuidigeToetsAanslag(bool wachten = true);
-
-// Zelfde werking als hierboven, maar de LANG_INDRUKKEN-drempel wordt via drempelOpzoeker() opgevraagd
-// in plaats van via het globale mappingTussenToetsaanslagEnUitTeVoerenFunctie[]-array. Wordt gebruikt
-// door de UitVoerenFunctieVolgensMappingMetToetsAanslag-templates hieronder; niet bedoeld voor rechtstreeks
-// gebruik in een sketch (gebruik daarvoor gewoon de mapping-templates).
-InputResultaat OpvragenHuidigeToetsAanslag(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker);
-
-InputResultaten OpvragenHuidigeToetsAanslagen(bool wachten = true, byte aantalSimultaan = 1);
-
-void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true);
-
-template <size_t N>
-void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-  _actieveMappingVoorLangIndrukken = mapping;
-  _actieveMappingAantalVoorLangIndrukken = (byte)N;
-  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten, _LangIndrukkenDrempelOpzoekerViaActieveMapping);
-#else
-  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
-#endif
-  if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
-  const MappingTussenToetsaanslagEnUitTeVoerenFunctie* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
-  if (gevondenMapping == nullptr) return;
-
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-  if (invoer.gebeurtenis == InputGebeurtenis::LOSGELATEN) {
-    if (gevondenMapping->functieBijLoslaten != nullptr) gevondenMapping->functieBijLoslaten();
-    return;
-  }
-  if (invoer.gebeurtenis == InputGebeurtenis::LANG_INDRUKKEN) {
-    if (gevondenMapping->functieBijLangIndrukken != nullptr) gevondenMapping->functieBijLangIndrukken();
-    return;
+  template <size_t N>
+  void ControleerMappingVolledigheid(const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
+    const char* opschriftToetsAanslag[N];
+    for (size_t i = 0; i < N; i++) opschriftToetsAanslag[i] = mapping[i].opschriftToetsAanslag;
+    ControleerMappingVolledigheidIntern(opschriftToetsAanslag, N);
   }
 #endif
 
-  if (gevondenMapping->functie != nullptr) gevondenMapping->functie();
-}
-
-// Variant voor mappings die het argumenten-veld (void*) gebruiken. Zelfde werking, andere types.
-template <size_t N>
-void UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-  _actieveMappingMetArgumentenVoorLangIndrukken = mapping;
-  _actieveMappingMetArgumentenAantalVoorLangIndrukken = (byte)N;
-  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten, _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten);
-#else
-  InputResultaat invoer = OpvragenHuidigeToetsAanslag(wachten);
-#endif
-  if (invoer.inputKanaal == InputKanaal::NONE || invoer.opschriftToetsAanslag == nullptr) return;
-  const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* gevondenMapping = OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(invoer.opschriftToetsAanslag, mapping);
-  if (gevondenMapping == nullptr) return;
-
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-  if (invoer.gebeurtenis == InputGebeurtenis::LOSGELATEN) {
-    if (gevondenMapping->functieBijLoslaten != nullptr) gevondenMapping->functieBijLoslaten(gevondenMapping->argumentenBijLoslaten);
-    return;
+private:
+  uint8_t INPUT_TYPES_ACTIEF = INPUT_KANAAL_CONFIG;
+  template <size_t N>
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
+    if (opschriftToetsAanslag == nullptr) return nullptr;
+    for (size_t i = 0; i < N; i++) {
+      if (strcmp(mapping[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) return &mapping[i];
+    }
+    return nullptr;
   }
-  if (invoer.gebeurtenis == InputGebeurtenis::LANG_INDRUKKEN) {
-    if (gevondenMapping->functieBijLangIndrukken != nullptr) gevondenMapping->functieBijLangIndrukken(gevondenMapping->argumentenBijLangIndrukken);
-    return;
+
+  template <size_t N>
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten (&mapping)[N]) {
+    if (opschriftToetsAanslag == nullptr) return nullptr;
+    for (size_t i = 0; i < N; i++) {
+      if (strcmp(mapping[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) return &mapping[i];
+    }
+    return nullptr;
   }
+
+  static unsigned long _StandaardLangIndrukkenDrempelOpzoeker(const char* opschriftToetsAanslag);
+
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctie* _actieveMappingVoorLangIndrukken = nullptr;
+  byte _actieveMappingAantalVoorLangIndrukken = 0;
+  const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten* _actieveMappingMetArgumentenVoorLangIndrukken = nullptr;
+  byte _actieveMappingMetArgumentenAantalVoorLangIndrukken = 0;
+  static unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMapping(const char* opschriftToetsAanslag);
+  static unsigned long _LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten(const char* opschriftToetsAanslag);
+  unsigned long laatsteInvoerTijdstipVoorTimeout = 0;
 #endif
 
-  if (gevondenMapping->functie != nullptr) gevondenMapping->functie(gevondenMapping->argumenten);
-}
+#ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
+  void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag[], byte aantalEntries);
+#endif
+
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+  uint8_t gedeeldeBusInputDigitalPinnen[4] = {};
+  InputDigital* gedeeldeBusInputDigital = nullptr;
+  int DigitaalUitLezenRuweData();
+#endif
+
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+  InputPCF8574* gedeeldeBusInputPCF8574 = nullptr;
+  bool pcf8574Bereikbaar = true;
+  bool pcf8574FoutmeldingWeergegeven = false;
+  void PCF8574OnbereikbaarMelden();
+  bool PCF8574poortPatroonMatrixUitlezenInstellen(byte waarde);
+  bool PCF8574poortPatroonUitlezen(byte& waarde);
+  int PCF8574uitLezenPoortenP0totP7DirectAansluiting();
+  int PCF8574uitLezenPoortenP0totP7MatrixAansluiting();
+#endif
+
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+  int vorigeRauweKeypadPositie = 0;
+  int stabieleKeypadPositie = 0;
+  unsigned long keypadWijzigingSinds = 0;
+  int KeypadUitLezenRuweData();
+  int KeypadUitLezenToetsAanslag();
+  #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  int laatstePositieVoorLoslatenDetectie = 0;
+  unsigned long keypadDrukBeginTijd = 0;
+  bool langIndrukkenAlGemeldVoorHuidigeDruk = false;
+  int KeypadUitLezenLosgelatenPositie();
+  int KeypadUitLezenLangIngedruktePositie(unsigned long drempelMs);
+  #endif
+#endif
+
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+  uint8_t gedeeldeBusInputHX1838Pinnen[1] = {};
+  InputHX1838* gedeeldeBusInputHX1838 = nullptr;
+  uint8_t irCodes[AANTAL_IR_TOETSEN] = {};
+  unsigned long hx1838DecodeTeller = 0;
+  #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  void HX1838toonTabelMetCodes();
+  #endif
+  #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED && defined(HX1838_GENERIEK_CODES_KALIBREREN)
+  void HX1838GeneriekCodesKalibreren();
+  #endif
+  #if !(HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED && defined(HX1838_GENERIEK_CODES_KALIBREREN))
+  bool HX1838mappingUitUserConfigInladen();
+  #endif
+  int HX1838indexUitZoekenVoorSignaal(uint8_t signaalwaarde);
+  bool HX1838toetsKalibreren(byte index);
+  #if HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD || HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
+  bool EEPROMopslagBeginnen();
+  void EEPROMopslagBevestigen();
+  void HX1838kalibratieOpslaan();
+  bool HX1838kalibratieLaden();
+  bool HX1838kalibratieVerifieren();
+  void HX1838kalibratieUitvoeren();
+  #endif
+  int HX1838uitLezenToetsAanslag();
+#endif
+
+  InputResultaat OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker);
+};
+
+extern struct Input* Input;
 
 #endif // INPUT_H

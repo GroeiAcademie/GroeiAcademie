@@ -29,147 +29,60 @@
   #include "../../Language/Library_FR.h"
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-static bool serialScreenGecontroleerd = false;
-static bool serialScreenGeconfigureerd = false;
-static bool serialScreenFoutmeldingWeergegeven = false;
-static void SerialScreenFoutmeldingWeergeven();
-
-static bool SerialScreenConfigureren(bool opnieuwProberen = false) {
-  if (serialScreenGecontroleerd && !opnieuwProberen) return serialScreenGeconfigureerd;
-
-  serialScreenGecontroleerd = true;
-  serialScreenFoutmeldingWeergegeven = false;
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
-
-  const unsigned long startTijd = millis();
-  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-
-  serialScreenGeconfigureerd = (bool)GA_SERIAL;
-  return serialScreenGeconfigureerd;
-}
-#endif
-
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include "../GedeeldeBus/GedeeldeBus.h"
-
-#if (CHARACTERSCREEN_I2C_ADRES_MODUS == 2)
-#include <new>
-#endif
-
 #define CHARACTERSCREEN_KOLOMMEN ((ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2002 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 20 : (ACTIEF_CHARACTER_SCREEN == SCREEN_LCD4002 ? 40 : 16))
 #define CHARACTERSCREEN_REGELS   ((ACTIEF_CHARACTER_SCREEN == SCREEN_LCD1604 || ACTIEF_CHARACTER_SCREEN == SCREEN_LCD2004) ? 4 : 2)
-
-LiquidCrystal_I2C lcd(I2C_ADRES, CHARACTERSCREEN_KOLOMMEN, CHARACTERSCREEN_REGELS);
-CharacterScreenCallback CallbackScreenTypeCharacter = nullptr;
-
-void RegistreerCallbackScreenTypeCharacter(CharacterScreenCallback callback) { CallbackScreenTypeCharacter = callback; }
-
-struct CharacterScreenStatus {
-  bool gecontroleerd;
-  bool characterScreenActief;
-  const char* foutmelding;
-  bool foutmeldingWeergegeven;
-};
-static CharacterScreenStatus characterScreenStatus = { false, false, nullptr, false };
-
-// ============================================================================
-// Interne hulpfunctie (D022): dient uitsluitend als bouwsteen binnen dit
-// bestand, wordt door geen enkel voorbeeld of ander bronbestand aangeroepen.
-// ============================================================================
-static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding);
-
-bool CharacterScreenConfigureren(bool opnieuwProberen) {
-  if (characterScreenStatus.gecontroleerd && !opnieuwProberen) return characterScreenStatus.characterScreenActief;
-  characterScreenStatus.gecontroleerd = true;
-  characterScreenStatus.foutmeldingWeergegeven = false;
-
-  // businitialisatie loopt nu via GedeeldeBus (Systeem/GedeeldeBus/),gedragsbehoudend t.o.v. de vorige, hier lokaal herhaalde ARDI32-logica.
-  InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-
-#if (CHARACTERSCREEN_I2C_ADRES_MODUS == 0)
-  // Geen scan: enkel de handdruk-check op het geconfigureerde I2C_ADRES.
-  Wire.beginTransmission(I2C_ADRES);
-  if (Wire.endTransmission() != 0) {
-    characterScreenStatus.characterScreenActief = false;
-    characterScreenStatus.foutmelding = _FATAL_CS001;
-    return false;
-  }
-#else
-  // Modus 1 en 2: kandidatenlijst aftasten, I2C_ADRES eerst geprobeerd.
-  const uint8_t characterScreenI2CKandidaten[] = { I2C_ADRES, 0x27, 0x3F };
-  const uint8_t characterScreenI2CAantalKandidaten = sizeof(characterScreenI2CKandidaten) / sizeof(characterScreenI2CKandidaten[0]);
-  uint8_t characterScreenI2CGevonden = 0;
-  bool characterScreenI2CGevondenOk = false;
-
-  for (uint8_t i = 0; i < characterScreenI2CAantalKandidaten && !characterScreenI2CGevondenOk; i++) {
-    bool reedsGeprobeerd = false;
-    for (uint8_t j = 0; j < i; j++) {
-      if (characterScreenI2CKandidaten[j] == characterScreenI2CKandidaten[i]) { reedsGeprobeerd = true; break; }
-    }
-    if (reedsGeprobeerd) continue;
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-    if (characterScreenI2CKandidaten[i] == I2C_ADDRESS_PCF8574) continue;
 #endif
 
-    Wire.beginTransmission(characterScreenI2CKandidaten[i]);
-    if (Wire.endTransmission() == 0) {
-      characterScreenI2CGevonden = characterScreenI2CKandidaten[i];
-      characterScreenI2CGevondenOk = true;
-    }
-  }
+Screen::Screen()
+  : Screen(SCREEN_OUTPUT)
+{}
 
-  if (!characterScreenI2CGevondenOk) {
-    characterScreenStatus.characterScreenActief = false;
-    characterScreenStatus.foutmelding = _FATAL_CS001;
-    return false;
-  }
+Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF)
+  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::SCREEN, HardwareResourceToegang::GEDEELD), SCREEN_TYPES_ACTIEF(SCREEN_TYPES_ACTIEF)
+{}
 
-  if (characterScreenI2CGevonden != I2C_ADRES) {
-#if (CHARACTERSCREEN_I2C_ADRES_MODUS == 1)
-    // Enkel rapporteren, niet zelf herstellen: de gevonden waarde in de melding opnemen.
-    static char characterScreenFoutmeldingBuffer[24];
-    snprintf(characterScreenFoutmeldingBuffer, sizeof(characterScreenFoutmeldingBuffer), "%s 0x%02X", _FATAL_CS002, characterScreenI2CGevonden);
-    characterScreenStatus.characterScreenActief = false;
-    characterScreenStatus.foutmelding = characterScreenFoutmeldingBuffer;
-    return false;
-#elif (CHARACTERSCREEN_I2C_ADRES_MODUS == 2)
-    // Zelfherstellend: lcd op exact dezelfde geheugenplek herbouwen met het gevonden adres.
-    lcd.~LiquidCrystal_I2C();
-    new (&lcd) LiquidCrystal_I2C(characterScreenI2CGevonden, CHARACTERSCREEN_KOLOMMEN, CHARACTERSCREEN_REGELS);
-#endif
-  }
-#endif // CHARACTERSCREEN_I2C_ADRES_MODUS
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+Screen::Screen(CharacterScreenCallback callback)
+  : Screen(SCREEN_OUTPUT, callback)
+{}
 
-  lcd.init();
-  lcd.backlight();
-  characterScreenStatus.characterScreenActief = true;
-  return true;
+Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback callback)
+  : Screen(SCREEN_TYPES_ACTIEF) {
+  this->Character.callback = callback;
 }
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-Adafruit_GFX* PixelScreen = nullptr;
-PixelScreenCallback CallbackScreenTypePixel = nullptr;
-bool ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS = false;
+Screen::Screen(PixelScreenCallback callback)
+  : Screen(SCREEN_OUTPUT, callback)
+{}
 
-struct PixelScreenStatus {
-  bool gecontroleerd;
-  bool pixelScreenActief;
-  const char* foutmelding;
-  bool foutmeldingWeergegeven;
-  uint8_t aantalKolommen;
-  uint8_t aantalRegels;
-  int16_t offsetX;
-  int16_t offsetY;
-  uint8_t cursorKolom;
-  uint8_t cursorRegel;
-};
+Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF, PixelScreenCallback callback)
+  : Screen(SCREEN_TYPES_ACTIEF) {
+  this->Pixel.callback = callback;
+}
+#endif
 
-static PixelScreenStatus pixelScreenStatus = { false, false, nullptr, false, 0, 0, 0, 0, 0, 0 };
+#if ((SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER) && (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS))
+Screen::Screen(CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback)
+  : Screen(SCREEN_OUTPUT, characterCallback, pixelCallback)
+{}
 
+Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback)
+  : Screen(SCREEN_TYPES_ACTIEF) {
+  this->Character.callback = characterCallback;
+  this->Pixel.callback = pixelCallback;
+}
+#endif
+
+struct Screen* Screen = nullptr;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+void Screen::Character::RegistreerCallback(CharacterScreenCallback callback) { this->callback = callback; }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
 #define PIXELGRID_MIN_KOLOMMEN 16
 #define PIXELGRID_MAX_KOLOMMEN 40
 
@@ -179,190 +92,124 @@ static PixelScreenStatus pixelScreenStatus = { false, false, nullptr, false, 0, 
 #define PIXEL_SCREEN_CHARACTER_WIDTH  6
 #define PIXEL_SCREEN_CHARACTER_HEIGHT 8
 
-static int16_t PixelScreenKarakterBreedte() { return PIXEL_SCREEN_CHARACTER_WIDTH * PIXEL_SCREEN_TEXT_SIZE; }
-static int16_t PixelScreenKarakterStap() { return PixelScreenKarakterBreedte() + PIXEL_SCREEN_CHARACTER_SPACING; }
-static int16_t PixelScreenRegelHoogte() { return PIXEL_SCREEN_CHARACTER_HEIGHT * PIXEL_SCREEN_TEXT_SIZE; }
-static int16_t PixelScreenRegelStap() { return PixelScreenRegelHoogte() + PIXEL_SCREEN_LINE_SPACING; }
+int16_t Screen::Pixel::KarakterBreedte() { return PIXEL_SCREEN_CHARACTER_WIDTH * PIXEL_SCREEN_TEXT_SIZE; }
+int16_t Screen::Pixel::KarakterStap()    { return KarakterBreedte() + PIXEL_SCREEN_CHARACTER_SPACING; }
+int16_t Screen::Pixel::RegelHoogte()     { return PIXEL_SCREEN_CHARACTER_HEIGHT * PIXEL_SCREEN_TEXT_SIZE; }
+int16_t Screen::Pixel::RegelStap()       { return RegelHoogte() + PIXEL_SCREEN_LINE_SPACING; }
 
-static uint8_t PixelGridClamp(int32_t waarde, uint8_t minimum, uint8_t maximum) {
+uint8_t Screen::Pixel::GridClamp(int32_t waarde, uint8_t minimum, uint8_t maximum) {
   if (waarde < minimum) return minimum;
   if (waarde > maximum) return maximum;
   return (uint8_t)waarde;
 }
 
-void RegistreerCallbackScreenTypePixel(PixelScreenCallback callback) { CallbackScreenTypePixel = callback; }
+void Screen::Pixel::RegistreerCallback(PixelScreenCallback callback) { this->callback = callback; }
 
-// ============================================================================
-// Interne hulpfuncties (D020): dienen uitsluitend als bouwsteen binnen dit
-// bestand, worden door geen enkel voorbeeld of ander bronbestand aangeroepen,
-// en zijn daarom niet langer publiek gedeclareerd in Screen.h.
-// ============================================================================
-static void PixelScreenClear();
-static void PixelScreenSetCursor(uint8_t kolom, uint8_t regel);
-static void PixelScreenPrint(const String& tekst);
-static void PixelScreenFoutmeldingWeergeven(const String& foutmelding);
-
-bool PixelScreenConfigureren(bool opnieuwProberen) {
-  if (pixelScreenStatus.gecontroleerd && !opnieuwProberen) return pixelScreenStatus.pixelScreenActief;
-  pixelScreenStatus.gecontroleerd = true;
-  pixelScreenStatus.foutmeldingWeergegeven = false;
-
-  if (!PixelScreen) {
-    pixelScreenStatus.pixelScreenActief = false;
-    pixelScreenStatus.foutmelding = _FATAL_PS001;
-    return false;
-  }
-
-#if (PIXEL_SCREEN_ROTATION == 1 || PIXEL_SCREEN_ROTATION == 3)
-  if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) { pixelScreenStatus.pixelScreenActief = false; pixelScreenStatus.foutmelding = _FATAL_PS002; return false; }
-#else
-  if (PixelScreen->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || PixelScreen->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) { pixelScreenStatus.pixelScreenActief = false; pixelScreenStatus.foutmelding = _FATAL_PS003; return false; }
-#endif
-
-  int16_t bruikbareBreedte = PixelScreen->width() - (2 * PIXEL_SCREEN_MARGIN);
-  int16_t bruikbareHoogte = PixelScreen->height() - (2 * PIXEL_SCREEN_MARGIN);
-  
-  int32_t ruweKolommen = (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) / PixelScreenKarakterStap();
-  int32_t ruweRegels = (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) / PixelScreenRegelStap();
-
-  // Minimumvereiste (16x2, dezelfde ondergrens als de kleinste ondersteunde characterscherm-resolutie) niet gehaald: geen pixeluitvoer voor TYPE_NONE.
-  if (ruweKolommen < PIXELGRID_MIN_KOLOMMEN || ruweRegels < PIXELGRID_MIN_RIJEN) {
-    pixelScreenStatus.pixelScreenActief = false;
-    pixelScreenStatus.foutmelding = _FATAL_PS004;
-    return false;
-  }
-
-  pixelScreenStatus.aantalKolommen = PixelGridClamp(ruweKolommen, PIXELGRID_MIN_KOLOMMEN, PIXELGRID_MAX_KOLOMMEN);
-  pixelScreenStatus.aantalRegels   = PixelGridClamp(ruweRegels,   PIXELGRID_MIN_RIJEN,     PIXELGRID_MAX_RIJEN);
-
-  // Centreren: restruimte gelijk verdelen links/rechts en boven/onder.
-  int16_t gridBreedtePx = pixelScreenStatus.aantalKolommen * PixelScreenKarakterBreedte() + (pixelScreenStatus.aantalKolommen - 1) * PIXEL_SCREEN_CHARACTER_SPACING;
-  int16_t gridHoogtePx = pixelScreenStatus.aantalRegels * PixelScreenRegelHoogte() + (pixelScreenStatus.aantalRegels - 1) * PIXEL_SCREEN_LINE_SPACING;
-  
-  pixelScreenStatus.offsetX = PIXEL_SCREEN_MARGIN + (bruikbareBreedte - gridBreedtePx) / 2;
-  pixelScreenStatus.offsetY = PIXEL_SCREEN_MARGIN + (bruikbareHoogte - gridHoogtePx) / 2;
-  
-  if (pixelScreenStatus.offsetX < PIXEL_SCREEN_MARGIN) pixelScreenStatus.offsetX = PIXEL_SCREEN_MARGIN;
-  if (pixelScreenStatus.offsetY < PIXEL_SCREEN_MARGIN) pixelScreenStatus.offsetY = PIXEL_SCREEN_MARGIN;
-
-  ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS = pixelScreenStatus.aantalRegels >= 4;
-  PixelScreen->setTextSize(PIXEL_SCREEN_TEXT_SIZE);
-  PixelScreen->setTextColor(PIXEL_SCREEN_TEXT_COLOR, PIXEL_SCREEN_BACKGROUND_COLOR);
-  PixelScreen->setTextWrap(false);
-  pixelScreenStatus.pixelScreenActief = true;
-  return true;
+void Screen::Pixel::Clear() {
+  if (!this->actief || this->gfx == nullptr) return;
+  this->gfx->fillScreen(PIXEL_SCREEN_BACKGROUND_COLOR);
+  this->cursorKolom = 0;
+  this->cursorRegel = 0;
 }
 
-static void PixelScreenClear() {
-  if (!PixelScreenConfigureren()) return;
-  PixelScreen->fillScreen(PIXEL_SCREEN_BACKGROUND_COLOR);
-  pixelScreenStatus.cursorKolom = 0;
-  pixelScreenStatus.cursorRegel = 0;
+void Screen::Pixel::SetCursor(uint8_t kolom, uint8_t regel) {
+  if (!this->actief || this->gfx == nullptr) return;
+  this->cursorKolom = kolom;
+  this->cursorRegel = regel;
+  this->gfx->setCursor(this->offsetX + kolom * KarakterStap(), this->offsetY + regel * RegelStap());
 }
 
-static void PixelScreenSetCursor(uint8_t kolom, uint8_t regel) {
-  if (!PixelScreenConfigureren()) return;
-  pixelScreenStatus.cursorKolom = kolom;
-  pixelScreenStatus.cursorRegel = regel;
-  PixelScreen->setCursor(pixelScreenStatus.offsetX + kolom * PixelScreenKarakterStap(), pixelScreenStatus.offsetY + regel * PixelScreenRegelStap());
-}
-
-static void PixelScreenPrint(const String& tekst) {
-  if (!PixelScreenConfigureren()) return;
+void Screen::Pixel::Print(const String& tekst) {
+  if (!this->actief || this->gfx == nullptr) return;
 
   for (uint16_t index = 0; index < tekst.length(); index++) {
-    // Enkel tekenen zolang de positie binnen het berekende grid valt,
-    // geen automatische regelsprong (dat blijft de verantwoordelijkheid van de aanroeper,
-    // die met vaste regel-indelingen werkt); tekst die niet meer past,
-    // wordt afgekapt in plaats van buiten het grid getekend.
-    if (pixelScreenStatus.cursorRegel >= pixelScreenStatus.aantalRegels) break;
-    if (pixelScreenStatus.cursorKolom + index >= pixelScreenStatus.aantalKolommen) break;
+    // Enkel tekenen zolang de positie binnen het berekende grid valt, geen automatische regelsprong (dat blijft de verantwoordelijkheid van de aanroeper,
+    // die met vaste regel-indelingen werkt); tekst die niet meer past, wordt afgekapt in plaats van buiten het grid getekend.
+    if (this->cursorRegel >= this->aantalRegels) break;
+    if (this->cursorKolom + index >= this->aantalKolommen) break;
 
-    PixelScreen->setCursor(pixelScreenStatus.offsetX + (pixelScreenStatus.cursorKolom + index) * PixelScreenKarakterStap(), pixelScreenStatus.offsetY + pixelScreenStatus.cursorRegel * PixelScreenRegelStap());
-    PixelScreen->print(tekst[index]);
+    this->gfx->setCursor(this->offsetX + (this->cursorKolom + index) * KarakterStap(), this->offsetY + this->cursorRegel * RegelStap());
+    this->gfx->print(tekst[index]);
   }
 
-  pixelScreenStatus.cursorKolom += tekst.length();
+  this->cursorKolom += tekst.length();
 
-  while (pixelScreenStatus.cursorKolom >= pixelScreenStatus.aantalKolommen) {
-    pixelScreenStatus.cursorKolom -= pixelScreenStatus.aantalKolommen;
-    pixelScreenStatus.cursorRegel++;
+  while (this->cursorKolom >= this->aantalKolommen) {
+    this->cursorKolom -= this->aantalKolommen;
+    this->cursorRegel++;
   }
 
   // Begrenzen zodat opeenvolgende te lange teksten nooit onder het grid belanden.
-  if (pixelScreenStatus.cursorRegel >= pixelScreenStatus.aantalRegels) {
-    pixelScreenStatus.cursorRegel = pixelScreenStatus.aantalRegels > 0 ? pixelScreenStatus.aantalRegels - 1 : 0;
+  if (this->cursorRegel >= this->aantalRegels) {
+    this->cursorRegel = this->aantalRegels > 0 ? this->aantalRegels - 1 : 0;
   }
 }
 
-static void PixelScreenFoutmeldingWeergeven(const String& foutmelding) {
+void Screen::Pixel::FoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if (characterScreenStatus.gecontroleerd && characterScreenStatus.characterScreenActief) {
-    if (CallbackScreenTypeCharacter) {
-      CallbackScreenTypeCharacter(foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
+  if (::Screen->Character.actief) {
+    if (::Screen->Character.callback) {
+      ::Screen->Character.callback(foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
     } else {
-      lcd.clear();
-      lcd.setCursor(0, 0); lcd.print(foutmelding);
-      lcd.setCursor(0, 1); lcd.print(FATAL_ZOEK_OP);
+      ::Screen->Character.display.clear();
+      ::Screen->Character.display.setCursor(0, 0); ::Screen->Character.display.print(foutmelding);
+      ::Screen->Character.display.setCursor(0, 1); ::Screen->Character.display.print(FATAL_ZOEK_OP);
       delay(FATAL_LEESTIJD_MS);
     }
+
     return;
   }
 #endif
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
-  // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
+  // Daarom niet binnen SCREEN_TYPE_SERIAL; ook zonder geselecteerde SerialScreen blijft dit terugvalpad beschikbaar.
+  ::GA_SERIAL.begin(SERIAL_BAUDRATE);
+  const unsigned long startTijd = millis();
+  while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 
-  GA_SERIAL.println(foutmelding);
-  GA_SERIAL.println(FATAL_ZOEK_OP);
+  ::GA_SERIAL.println(foutmelding);
+  ::GA_SERIAL.println(FATAL_ZOEK_OP);
 }
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-static void SerialScreenFoutmeldingWeergeven() {
-  if (serialScreenFoutmeldingWeergegeven) return;
-  serialScreenFoutmeldingWeergegeven = true;
-
+void Screen::Serial::FoutmeldingWeergeven() {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if (CallbackScreenTypeCharacter) {
-    CallbackScreenTypeCharacter(_CRITICAL_SS001, FATAL_ZOEK_OP, 0, "", "", "", 0);
-  } else if (characterScreenStatus.gecontroleerd && characterScreenStatus.characterScreenActief) {
-    lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(_CRITICAL_SS001);
-    lcd.setCursor(0, 1); lcd.print(FATAL_ZOEK_OP);
+  if (::Screen->Character.callback) {
+    ::Screen->Character.callback(this->foutmelding != nullptr ? this->foutmelding : _CRITICAL_SS302, FATAL_ZOEK_OP, 0, "", "", "", 0);
+  } else if (::Screen->Character.actief) {
+    ::Screen->Character.display.clear();
+    ::Screen->Character.display.setCursor(0, 0); ::Screen->Character.display.print(this->foutmelding != nullptr ? this->foutmelding : _CRITICAL_SS302);
+    ::Screen->Character.display.setCursor(0, 1); ::Screen->Character.display.print(FATAL_ZOEK_OP);
   }
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  if (CallbackScreenTypePixel) {
-    CallbackScreenTypePixel(ScreenData::TYPE_CRITICAL, _CRITICAL_SS001, FATAL_ZOEK_OP, 0, "", "", "", 0);
-  } else if (pixelScreenStatus.gecontroleerd && pixelScreenStatus.pixelScreenActief) {
-    PixelScreenClear();
-    PixelScreenSetCursor(0, 0); PixelScreenPrint(_CRITICAL_SS001);
-    PixelScreenSetCursor(0, 1); PixelScreenPrint(FATAL_ZOEK_OP);
+  if (::Screen->Pixel.callback) {
+    ::Screen->Pixel.callback(ScreenData::TYPE_CRITICAL, this->foutmelding != nullptr ? this->foutmelding : _CRITICAL_SS302, FATAL_ZOEK_OP, 0, "", "", "", 0);
+  } else if (::Screen->Pixel.actief) {
+    ::Screen->Pixel.Clear();
+    ::Screen->Pixel.SetCursor(0, 0); ::Screen->Pixel.Print(this->foutmelding != nullptr ? this->foutmelding : _CRITICAL_SS302);
+    ::Screen->Pixel.SetCursor(0, 1); ::Screen->Pixel.Print(FATAL_ZOEK_OP);
   }
 #endif
 }
 #endif
 
 // ============================================================================
-// CharacterScreenFoutmeldingWeergeven: gebruikt enkel een reeds geconfigureerd
-// en werkend pixelscherm als terugvalpad; roept zelf nooit een configuratie-
-// functie aan (voorkomt een oneindige lus). Staat buiten het PIXELS-blok,
-// want ze moet ook bestaan wanneer enkel CHARACTER actief is.
+// Character.FoutmeldingWeergeven: gebruikt enkel een reeds actief en werkend pixelscherm als terugvalpad; activeert zelf nooit hardware (voorkomt een oneindige lus). 
+// Staat buiten het PIXELS-blok, want ze moet ook bestaan wanneer enkel CHARACTER actief is.
 // ============================================================================
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
+void Screen::Character::FoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  if (pixelScreenStatus.gecontroleerd && pixelScreenStatus.pixelScreenActief) {
-    if (CallbackScreenTypePixel) {
-      CallbackScreenTypePixel(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
+  if (::Screen->Pixel.actief) {
+    if (::Screen->Pixel.callback) {
+      ::Screen->Pixel.callback(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
     } else {
-      PixelScreenClear();
-      PixelScreenSetCursor(0, 0); PixelScreenPrint(foutmelding);
-      PixelScreenSetCursor(0, 1); PixelScreenPrint(FATAL_ZOEK_OP);
+      ::Screen->Pixel.Clear();
+      ::Screen->Pixel.SetCursor(0, 0); ::Screen->Pixel.Print(foutmelding);
+      ::Screen->Pixel.SetCursor(0, 1); ::Screen->Pixel.Print(FATAL_ZOEK_OP);
       delay(FATAL_LEESTIJD_MS);
     }
     return;
@@ -370,16 +217,17 @@ static void CharacterScreenFoutmeldingWeergeven(const String& foutmelding) {
 #endif
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
-  // Daarom niet binnen DEBUG of SCREEN_TYPE_SERIAL, in tegenstelling tot alle andere Serial-uitvoer in deze bibliotheek.
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
+  // Daarom niet binnen SCREEN_TYPE_SERIAL; ook zonder geselecteerde SerialScreen blijft dit terugvalpad beschikbaar.
+  ::GA_SERIAL.begin(SERIAL_BAUDRATE);
+  const unsigned long startTijd = millis();
+  while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 
-  GA_SERIAL.println(foutmelding);
-  GA_SERIAL.println(FATAL_ZOEK_OP);
+  ::GA_SERIAL.println(foutmelding);
+  ::GA_SERIAL.println(FATAL_ZOEK_OP);
 }
 #endif
 
-static void PrintToScreenIntern(
+void Screen::PrintPrivate(
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
 ScreenData screenData,
 #endif
@@ -389,76 +237,75 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #endif
 
   // --------------------------------------------------------------------------
-  // D022: verplichte, expliciete configuratie — geen impliciete auto-
-  // configuratie meer. Een vergeten of mislukte configuratie wordt hier
-  // gemeld (maximaal één keer) in plaats van stilzwijgend gecorrigeerd.
+  // Verplichte, expliciete Screen-lifecycle — geen impliciete activatie.
+  // Een vergeten of mislukte Inpluggen()-stap wordt hier gemeld (maximaal één keer) in plaats van stilzwijgend gecorrigeerd.
   // --------------------------------------------------------------------------
-  bool configuratiefoutWeergegeven = false;
+  bool lifecycleFoutWeergegeven = false;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  // Enkel afdwingen voor de ingebouwde hardware, een geregistreerde callback
-  // vervangt die volledig en is de eigen verantwoordelijkheid van de gebruiker.
-  if (!CallbackScreenTypeCharacter) {
-    if (!characterScreenStatus.gecontroleerd) {
-      CharacterScreenFoutmeldingWeergeven(_FATAL_CS000);
-      configuratiefoutWeergegeven = true;
-    } else if (!characterScreenStatus.characterScreenActief && !characterScreenStatus.foutmeldingWeergegeven) {
-      CharacterScreenFoutmeldingWeergeven(characterScreenStatus.foutmelding);
-      characterScreenStatus.foutmeldingWeergegeven = true;
-      configuratiefoutWeergegeven = true;
+  // Enkel afdwingen voor de ingebouwde hardware, een geregistreerde callback vervangt die volledig en is de eigen verantwoordelijkheid van de gebruiker.
+  if (!this->actief && !this->Character.callback && !this->Character.actief && !this->Character.foutmeldingWeergegeven) {
+    if (!this->Character.foutmeldingWeergegeven) {
+      if (this->Character.foutmelding != nullptr) {
+        this->Character.FoutmeldingWeergeven(this->Character.foutmelding);
+      } else if (this->Character.gedeeldeBus == nullptr) {
+        this->Character.FoutmeldingWeergeven(_FATAL_CS401);
+      }
+
+      this->Character.foutmeldingWeergegeven = true;
     }
+
+    lifecycleFoutWeergegeven = true;
   }
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   // Zelfde redenering: enkel afdwingen wanneer er geen callback geregistreerd is.
-  if (!CallbackScreenTypePixel) {
-    if (!pixelScreenStatus.gecontroleerd) {
-      PixelScreenFoutmeldingWeergeven(_FATAL_PS000);
-      configuratiefoutWeergegeven = true;
-    } else if (!pixelScreenStatus.pixelScreenActief && !pixelScreenStatus.foutmeldingWeergegeven) {
-      PixelScreenFoutmeldingWeergeven(pixelScreenStatus.foutmelding);
-      pixelScreenStatus.foutmeldingWeergegeven = true;
-      configuratiefoutWeergegeven = true;
+  if (!this->actief && !this->Pixel.callback && !this->Pixel.actief && !this->Pixel.foutmeldingWeergegeven) {
+    if (!this->Pixel.foutmeldingWeergegeven) {
+      if (this->Pixel.foutmelding != nullptr) {
+        this->Pixel.FoutmeldingWeergeven(this->Pixel.foutmelding);
+      } else if (this->Pixel.gedeeldeBus == nullptr) {
+        this->Pixel.FoutmeldingWeergeven(_FATAL_PS401);
+      }
+
+      this->Pixel.foutmeldingWeergegeven = true;
     }
+
+    lifecycleFoutWeergegeven = true;
   }
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-#ifdef DEBUG
-  if (!SerialScreenConfigureren() && !serialScreenFoutmeldingWeergegeven) {
-    SerialScreenFoutmeldingWeergeven();
-    configuratiefoutWeergegeven = true;
+  if (!this->actief && (this->Serial.gedeeldeBus == nullptr || !this->Serial.actief) && !this->Serial.foutmeldingWeergegeven) {
+    this->Serial.FoutmeldingWeergeven();
+    lifecycleFoutWeergegeven = true;
   }
 #endif
-#endif
 
-  if (configuratiefoutWeergegeven) return;
-
-#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  const bool characterScreenActief = !CallbackScreenTypeCharacter && characterScreenStatus.characterScreenActief;
-#endif
+  if (lifecycleFoutWeergegeven) return;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  const bool pixelScreenGeselecteerd = !CallbackScreenTypePixel && screenData == ScreenData::TYPE_NONE;
-  const bool pixelScreenActief = pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief;
+  const bool pixelScreenGeselecteerd = !this->Pixel.callback && screenData != ScreenData::TYPE_DEBUG;
 
-  // Zelfde garantie als CharacterScreenFoutmeldingWeergeven/PixelScreenFoutmeldingWeergeven (CS000/PS000): een TYPE_FATAL/TYPE_PANIC/TYPE_ABORT/TYPE_CRITICAL-melding mag nooit stil verdwijnen. 
-  // Enkel van toepassing wanneer geen enkel scherm en geen enkele callback beschikbaar is; is er wel een scherm of callback, 
-  // dan loopt dit gewoon via het normale, verdere pad hieronder.
-  // Bewuste uitzondering: net als bij CS000/PS000 hierboven, niet binnen DEBUG of SCREEN_TYPE_SERIAL, want dit ís de garantie zelf.
+  // Zelfde garantie als Character.FoutmeldingWeergeven/Pixel.FoutmeldingWeergeven (CS401/PS401): een TYPE_FATAL/TYPE_PANIC/TYPE_ABORT/TYPE_CRITICAL-melding mag nooit stil verdwijnen. 
+  // Enkel van toepassing wanneer geen enkel scherm en geen enkele callback beschikbaar is; is er wel een scherm of callback, dan loopt dit gewoon via het normale, verdere pad hieronder.
+  // Bewuste uitzondering: net als bij CS401/PS401 hierboven, niet binnen DEBUG of SCREEN_TYPE_SERIAL, want dit ís de garantie zelf.
   if (screenData == ScreenData::TYPE_FATAL || screenData == ScreenData::TYPE_PANIC || screenData == ScreenData::TYPE_ABORT || screenData == ScreenData::TYPE_CRITICAL) {
-    bool geenEnkelScreenBeschikbaar = !CallbackScreenTypePixel && !pixelScreenActief;
+    bool geenEnkelScreenBeschikbaar = !this->Pixel.callback && !(pixelScreenGeselecteerd && this->Pixel.actief);
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-    geenEnkelScreenBeschikbaar = geenEnkelScreenBeschikbaar && !CallbackScreenTypeCharacter && !characterScreenActief;
+    geenEnkelScreenBeschikbaar = geenEnkelScreenBeschikbaar && !this->Character.callback && !(!this->Character.callback && this->Character.actief);
 #endif
-    if (geenEnkelScreenBeschikbaar) {
-      GA_SERIAL.begin(SERIAL_BAUDRATE);
-      while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
 
-      if (eersteRegel != "") GA_SERIAL.println(eersteRegel);
-      if (tweedeRegel != "") GA_SERIAL.println(tweedeRegel);
-      if (delayTime) delay(delayTime);
+    if (geenEnkelScreenBeschikbaar) {
+      ::GA_SERIAL.begin(SERIAL_BAUDRATE);
+      const unsigned long startTijd = millis();
+      while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+
+      if (eersteRegel != "") ::GA_SERIAL.println(eersteRegel);
+      if (tweedeRegel != "") ::GA_SERIAL.println(tweedeRegel);
+      if (derdeRegel != "") ::GA_SERIAL.println(derdeRegel);
+      if (vierdeRegel != "") ::GA_SERIAL.println(vierdeRegel);
       return;
     }
   }
@@ -469,66 +316,25 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   // --------------------------------------------------------------------------
   if (eersteRegel != "" || tweedeRegel != "") {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-#ifdef DEBUG
-    if (serialScreenGeconfigureerd) {
-      GA_DEBUG_PRINTLN(eersteRegel);
-      GA_DEBUG_PRINTLN(tweedeRegel);
+    if (this->Serial.actief) {
+      ::GA_SERIAL.println(eersteRegel);
+      ::GA_SERIAL.println(tweedeRegel);
     }
-#endif
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-    if (characterScreenActief) {
-      lcd.clear();
-      lcd.setCursor(0, 0); lcd.print(eersteRegel);
-      lcd.setCursor(0, 1); lcd.print(tweedeRegel);
+    if ((!this->Character.callback && this->Character.actief)) {
+      this->Character.display.clear();
+      this->Character.display.setCursor(0, 0); this->Character.display.print(eersteRegel);
+      this->Character.display.setCursor(0, 1); this->Character.display.print(tweedeRegel);
     }
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    if (pixelScreenActief) {
-      PixelScreenClear();
-      PixelScreenSetCursor(0, 0); PixelScreenPrint(eersteRegel);
-      PixelScreenSetCursor(0, 1); PixelScreenPrint(tweedeRegel);
-    }
-#endif
-  }
-
-  // --------------------------------------------------------------------------
-  // STANDAARDUITVOER: REGEL 3 EN REGEL 4
-  // --------------------------------------------------------------------------
-  if (derdeRegel != "" || vierdeRegel != "") {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-#ifdef DEBUG
-    if (serialScreenGeconfigureerd) {
-      GA_DEBUG_PRINTLN(derdeRegel);
-      GA_DEBUG_PRINTLN(vierdeRegel);
-    }
-#endif
-#endif
-
-    bool tweedePaginaNodig = false;
-#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-    tweedePaginaNodig = tweedePaginaNodig || (characterScreenActief && !ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS);
-#endif
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    tweedePaginaNodig = tweedePaginaNodig || (pixelScreenActief && !ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS);
-#endif
-    if (tweedePaginaNodig && delayTussenPaginas) delay(delayTussenPaginas);
-
-#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-    if (characterScreenActief) {
-      if (!ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS) lcd.clear();
-      lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); lcd.print(derdeRegel);
-      lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); lcd.print(vierdeRegel);
-    }
-#endif
-
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    if (pixelScreenActief) {
-      if (!ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS) PixelScreenClear();
-      PixelScreenSetCursor(0, ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS ? 2 : 0); PixelScreenPrint(derdeRegel);
-      PixelScreenSetCursor(0, ACTIEF_PIXEL_SCREEN_MET_VIER_REGELS ? 3 : 1); PixelScreenPrint(vierdeRegel);
+    if ((pixelScreenGeselecteerd && this->Pixel.actief)) {
+      this->Pixel.Clear();
+      this->Pixel.SetCursor(0, 0); this->Pixel.Print(eersteRegel);
+      this->Pixel.SetCursor(0, 1); this->Pixel.Print(tweedeRegel);
     }
 #endif
   }
@@ -539,13 +345,13 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   bool standaardScreenActief = false;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  standaardScreenActief = standaardScreenActief || characterScreenActief;
+  standaardScreenActief = standaardScreenActief || (!this->Character.callback && this->Character.actief);
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  standaardScreenActief = standaardScreenActief || pixelScreenActief;
+  standaardScreenActief = standaardScreenActief || (pixelScreenGeselecteerd && this->Pixel.actief);
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL) && !(SCREEN_OUTPUT & (SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS))
-  standaardScreenActief = serialScreenGeconfigureerd;
+  standaardScreenActief = this->Serial.actief;
 #endif
 
   if (standaardScreenActief) {
@@ -553,22 +359,57 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 
     if (action != "") {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-      if (characterScreenActief) lcd.print(action);
+      if ((!this->Character.callback && this->Character.actief)) this->Character.display.print(action);
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      if (pixelScreenActief) PixelScreenPrint(action);
+      if ((pixelScreenGeselecteerd && this->Pixel.actief)) this->Pixel.Print(action);
 #endif
     }
   }
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-#ifdef DEBUG
-  if (action != "" && serialScreenGeconfigureerd) {
-    GA_SERIAL.println(action);
+  if (action != "" && this->Serial.actief) {
+    ::GA_SERIAL.println(action);
   }
 #endif
+
+  // --------------------------------------------------------------------------
+  // STANDAARDUITVOER: REGEL 3 EN REGEL 4
+  // --------------------------------------------------------------------------
+  if (derdeRegel != "" || vierdeRegel != "") {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+    if (this->Serial.actief) {
+      ::GA_SERIAL.println(derdeRegel);
+      ::GA_SERIAL.println(vierdeRegel);
+    }
 #endif
+
+    bool tweedePaginaNodig = false;
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+    tweedePaginaNodig = tweedePaginaNodig || ((!this->Character.callback && this->Character.actief) && !ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+    tweedePaginaNodig = tweedePaginaNodig || ((pixelScreenGeselecteerd && this->Pixel.actief) && !this->Pixel.emulateLCDxxx4);
+#endif
+    if (tweedePaginaNodig && delayTussenPaginas) delay(delayTussenPaginas);
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+    if ((!this->Character.callback && this->Character.actief)) {
+      if (!ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS) this->Character.display.clear();
+      this->Character.display.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); this->Character.display.print(derdeRegel);
+      this->Character.display.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); this->Character.display.print(vierdeRegel);
+    }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+    if ((pixelScreenGeselecteerd && this->Pixel.actief)) {
+      if (!this->Pixel.emulateLCDxxx4) this->Pixel.Clear();
+      this->Pixel.SetCursor(0, this->Pixel.emulateLCDxxx4 ? 2 : 0); this->Pixel.Print(derdeRegel);
+      this->Pixel.SetCursor(0, this->Pixel.emulateLCDxxx4 ? 3 : 1); this->Pixel.Print(vierdeRegel);
+    }
+#endif
+  }
 
   // --------------------------------------------------------------------------
   // CALLBACK CHARACTER: ÉÉN AANROEP MET DE VOLLEDIGE OPDRACHT
@@ -579,39 +420,347 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if (CallbackScreenTypeCharacter) CallbackScreenTypeCharacter(eersteRegel, tweedeRegel, callbackDelayTime, action, derdeRegel, vierdeRegel, callbackDelayTussenPaginas);
+  if (this->Character.callback) this->Character.callback(eersteRegel, tweedeRegel, callbackDelayTime, action, derdeRegel, vierdeRegel, callbackDelayTussenPaginas);
 #endif
 
   // --------------------------------------------------------------------------
   // CALLBACK PIXELS: ÉÉN AANROEP MET DE VOLLEDIGE OPDRACHT
   // --------------------------------------------------------------------------
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  if (CallbackScreenTypePixel) CallbackScreenTypePixel(screenData, eersteRegel, tweedeRegel, callbackDelayTime, action, derdeRegel, vierdeRegel, callbackDelayTussenPaginas);
+  if (this->Pixel.callback) this->Pixel.callback(screenData, eersteRegel, tweedeRegel, callbackDelayTime, action, derdeRegel, vierdeRegel, callbackDelayTussenPaginas);
 #endif
 }
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-void PrintToScreen(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintToScreenIntern(screenData, eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
-void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintToScreenIntern(ScreenData::TYPE_NONE, eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
+void Screen::Print(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintPrivate(screenData, eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
+void Screen::Print(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintPrivate(ScreenData::TYPE_NONE, eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
 #else
-void PrintToScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintToScreenIntern(eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
+void Screen::Print(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) { PrintPrivate(eersteRegel, tweedeRegel, delayTime, action, derdeRegel, vierdeRegel, delayTussenPaginas); }
 #endif
 
 // ============================================================================
-// D022: optionele gemakslaag. Roept enkel de configuratiefunctie(s) aan die
-// volgens SCREEN_OUTPUT nodig zijn — geen deprecatie van de losse,
-// granulaire CharacterScreenConfigureren()/PixelScreenConfigureren().
+// v2.0.0: Screen-levenscyclus.
 // ============================================================================
-void ScreensConfigureren(bool opnieuwProberen) {
+// Hulpfuncties voor de levenscyclus van Screen.
+template<typename T>
+static void ChildVerwijderen(T*& child) {
+  if (child != nullptr) {
+    child->afmelden();   // verwijdert het child, want het werd met componentCreated aangemaakt
+    child = nullptr;
+  }
+}
+
+static int AantalUitvoeren(const struct Screen& scherm) {
+  int aantal = 0;
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  CharacterScreenConfigureren(opnieuwProberen);
+  if (scherm.Character.gedeeldeBus != nullptr) aantal++;
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  PixelScreenConfigureren(opnieuwProberen);
+  if (scherm.Pixel.gedeeldeBus != nullptr) aantal++;
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if (!SerialScreenConfigureren(opnieuwProberen) && !serialScreenFoutmeldingWeergegeven) {
-    SerialScreenFoutmeldingWeergeven();
+  if (scherm.Serial.gedeeldeBus != nullptr) aantal++;
+#endif
+  return aantal;
+}
+
+// Elke stap gaat via Screen naar zijn uitvoeren. Een uitvoer die in een stap faalt, wordt gemeld en verwijderd.
+// De andere uitvoeren blijven werken. Enkel wanneer van de gekozen uitvoeren geen enkele overblijft, faalt Screen zelf.
+bool Screen::aanmelden() {
+  if (aangemeld) return true;
+  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_OUTPUT) != this->SCREEN_TYPES_ACTIEF) return false;
+  if (!GedeeldeBusNode::aanmelden()) return false;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_SERIAL) && this->Serial.gedeeldeBus == nullptr) {
+    this->Serial.foutmelding = nullptr;
+    this->Serial.foutmeldingWeergegeven = false;
+    SerialOutput* child = new SerialOutput(this, GedeeldeBusComponent::SERIAL_OUTPUT, HardwareResourcePin::D1, HardwareResourcePin::D0);
+    child->componentCreated = true;
+
+    if (child->aanmelden()) {
+      this->Serial.gedeeldeBus = child;
+    } else {
+      delete child;
+      this->Serial.foutmelding = _ABORT_SS001;
+    }
   }
 #endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_CHARACTER) && this->Character.gedeeldeBus == nullptr) {
+    this->Character.foutmelding = nullptr;
+    this->Character.foutmeldingWeergegeven = false;
+    ::CharacterScreen* child = new ::CharacterScreen(this, GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL);
+    child->componentCreated = true;
+
+    if (child->aanmelden()) {
+      this->Character.gedeeldeBus = child;
+    } else {
+      delete child;
+      this->Character.foutmelding = _ABORT_CS001;
+    }
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_PIXELS) && this->Pixel.gedeeldeBus == nullptr) {
+    this->Pixel.foutmelding = nullptr;
+    this->Pixel.foutmeldingWeergegeven = false;
+    ::PixelScreen* child = new ::PixelScreen(this, GedeeldeBusComponent::PIXEL_SCREEN, PIXEL_SCREEN_CS, HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
+    child->componentCreated = true;
+
+    if (child->aanmelden()) {
+      this->Pixel.gedeeldeBus = child;
+    } else {
+      delete child;
+      this->Pixel.foutmelding = _ABORT_PS001;
+    }
+  }
+#endif
+
+  if (this->SCREEN_TYPES_ACTIEF != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
+    this->ActivatiefoutWeergeven();
+    return false;
+  }
+  return true;
 }
+
+bool Screen::controleren() {
+  if (gecontroleerd) return true;
+  if (!GedeeldeBusNode::controleren()) return false;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (this->Serial.gedeeldeBus != nullptr && !this->Serial.gedeeldeBus->controleren()) {
+    if (this->Serial.gedeeldeBus->conflictGevonden) this->Serial.foutmeldingWeergegeven = true;
+    else this->Serial.foutmelding = _FATAL_SS101;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if (this->Character.gedeeldeBus != nullptr && !this->Character.gedeeldeBus->controleren()) {
+    if (this->Character.gedeeldeBus->conflictGevonden) this->Character.foutmeldingWeergegeven = true;
+    else this->Character.foutmelding = _FATAL_CS101;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (this->Pixel.gedeeldeBus != nullptr && !this->Pixel.gedeeldeBus->controleren()) {
+    if (this->Pixel.gedeeldeBus->conflictGevonden) this->Pixel.foutmeldingWeergegeven = true;
+    else this->Pixel.foutmelding = _FATAL_PS101;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (this->Serial.gedeeldeBus != nullptr && !this->Serial.gedeeldeBus->gecontroleerd) ChildVerwijderen(this->Serial.gedeeldeBus);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if (this->Character.gedeeldeBus != nullptr && !this->Character.gedeeldeBus->gecontroleerd) ChildVerwijderen(this->Character.gedeeldeBus);
+#endif
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (this->Pixel.gedeeldeBus != nullptr && !this->Pixel.gedeeldeBus->gecontroleerd) ChildVerwijderen(this->Pixel.gedeeldeBus);
+#endif
+
+  if (this->SCREEN_TYPES_ACTIEF != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
+    this->ActivatiefoutWeergeven();
+    return false;
+  }
+
+  return true;
+}
+
+// Toont de bewaarde foutmeldingen van uitvoeren die niet werken, op de uitvoeren die wel werken, zoals in v1.1.2.
+// Tijdens de aanmaak is ::Screen nog nullptr, terwijl FoutmeldingWeergeven() en de callbacks ::Screen-> gebruiken.
+// Daarom wijst ::Screen hier tijdelijk naar dit object, daarna wordt de vorige waarde hersteld.
+void Screen::ActivatiefoutWeergeven() {
+  Screen* vorige = ::Screen;
+  ::Screen = this;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if (this->Character.foutmelding != nullptr && !this->Character.foutmeldingWeergegeven) {
+    this->Character.FoutmeldingWeergeven(this->Character.foutmelding);
+    this->Character.foutmeldingWeergegeven = true;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (this->Pixel.foutmelding != nullptr && !this->Pixel.foutmeldingWeergegeven) {
+    this->Pixel.FoutmeldingWeergeven(this->Pixel.foutmelding);
+    this->Pixel.foutmeldingWeergegeven = true;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_SERIAL) && !this->Serial.actief && !this->Serial.foutmeldingWeergegeven) {
+    this->Serial.FoutmeldingWeergeven();
+    this->Serial.foutmeldingWeergegeven = true;
+  }
+#endif
+
+  ::Screen = vorige;
+}
+
+bool Screen::inpluggen() {
+  if (ingeplugd) return true;
+  if (!GedeeldeBusNode::inpluggen()) return false;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if (this->Character.gedeeldeBus != nullptr && !this->Character.gedeeldeBus->inpluggen()) {
+    this->Character.foutmelding = _CRITICAL_CS201;
+    ChildVerwijderen(this->Character.gedeeldeBus);
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (this->Pixel.gedeeldeBus != nullptr && !this->Pixel.gedeeldeBus->inpluggen()) {
+    this->Pixel.foutmelding = _CRITICAL_PS201;
+    ChildVerwijderen(this->Pixel.gedeeldeBus);
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (this->Serial.gedeeldeBus != nullptr && !this->Serial.gedeeldeBus->inpluggen()) {
+    this->Serial.foutmelding = _CRITICAL_SS201;
+    ChildVerwijderen(this->Serial.gedeeldeBus);
+  }
+#endif
+
+  if (this->SCREEN_TYPES_ACTIEF != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
+    this->ActivatiefoutWeergeven();
+    return false;
+  }
+
+  return true;
+}
+
+// Activeren: elke uitvoer activeren, en daarna het scherm zelf instellen (init, rotatie, raster).
+bool Screen::Activeren() {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  if (this->Character.gedeeldeBus != nullptr) {
+    if (this->Character.gedeeldeBus->activeren()) {
+      this->Character.display.init();
+      this->Character.display.backlight();
+      this->Character.actief = true;
+    } else {
+      this->Character.foutmelding = _CRITICAL_CS301;
+      ChildVerwijderen(this->Character.gedeeldeBus);
+    }
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  if (this->Pixel.gedeeldeBus != nullptr) {
+    bool pixelOk = this->Pixel.gedeeldeBus->activeren();
+    if (!pixelOk) this->Pixel.foutmelding = _CRITICAL_PS301;
+
+    if (pixelOk) {
+      this->Pixel.display.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
+      this->Pixel.display.setRotation(PIXEL_SCREEN_ROTATION);
+      this->Pixel.gfx = &this->Pixel.display;
+
+      if (this->Pixel.gfx == nullptr) {
+        this->Pixel.foutmelding = _CRITICAL_PS302;
+        pixelOk = false;
+      } else {
+#if (PIXEL_SCREEN_ROTATION == 1 || PIXEL_SCREEN_ROTATION == 3)
+        if (this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) {
+          this->Pixel.foutmelding = _CRITICAL_PS303;
+          pixelOk = false;
+        }
+#else
+        if (this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) {
+          this->Pixel.foutmelding = _CRITICAL_PS304;
+          pixelOk = false;
+        }
+#endif
+      }
+
+      if (pixelOk) {
+        const int16_t bruikbareBreedte = this->Pixel.gfx->width() - (2 * PIXEL_SCREEN_MARGIN);
+        const int16_t bruikbareHoogte  = this->Pixel.gfx->height() - (2 * PIXEL_SCREEN_MARGIN);
+
+        const int32_t ruweKolommen     = (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) / this->Pixel.KarakterStap();
+        const int32_t ruweRegels       = (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) / this->Pixel.RegelStap();
+
+        if (ruweKolommen < PIXELGRID_MIN_KOLOMMEN || ruweRegels < PIXELGRID_MIN_RIJEN) {
+          this->Pixel.foutmelding = _CRITICAL_PS305;
+          pixelOk = false;
+        } else {
+          this->Pixel.aantalKolommen  = this->Pixel.GridClamp(ruweKolommen, PIXELGRID_MIN_KOLOMMEN, PIXELGRID_MAX_KOLOMMEN);
+          this->Pixel.aantalRegels    = this->Pixel.GridClamp(ruweRegels, PIXELGRID_MIN_RIJEN, PIXELGRID_MAX_RIJEN);
+
+          const int16_t gridBreedtePx = this->Pixel.aantalKolommen * this->Pixel.KarakterBreedte() + (this->Pixel.aantalKolommen - 1) * PIXEL_SCREEN_CHARACTER_SPACING;
+          const int16_t gridHoogtePx  = this->Pixel.aantalRegels * this->Pixel.RegelHoogte() + (this->Pixel.aantalRegels - 1) * PIXEL_SCREEN_LINE_SPACING;
+
+          this->Pixel.offsetX = PIXEL_SCREEN_MARGIN + (bruikbareBreedte - gridBreedtePx) / 2;
+          this->Pixel.offsetY = PIXEL_SCREEN_MARGIN + (bruikbareHoogte - gridHoogtePx) / 2;
+
+          if (this->Pixel.offsetX < PIXEL_SCREEN_MARGIN) this->Pixel.offsetX = PIXEL_SCREEN_MARGIN;
+          if (this->Pixel.offsetY < PIXEL_SCREEN_MARGIN) this->Pixel.offsetY = PIXEL_SCREEN_MARGIN;
+
+          this->Pixel.emulateLCDxxx4 = this->Pixel.aantalRegels >= 4;
+          this->Pixel.gfx->setTextSize(PIXEL_SCREEN_TEXT_SIZE);
+          this->Pixel.gfx->setTextColor(PIXEL_SCREEN_TEXT_COLOR, PIXEL_SCREEN_BACKGROUND_COLOR);
+          this->Pixel.gfx->setTextWrap(false);
+          this->Pixel.actief = true;
+        }
+      }
+    }
+
+    if (!pixelOk) {
+      this->Pixel.gfx = nullptr;
+      this->Pixel.actief = false;
+      ChildVerwijderen(this->Pixel.gedeeldeBus);
+    }
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (this->Serial.gedeeldeBus != nullptr) {
+    if (this->Serial.gedeeldeBus->activeren()) {
+      this->Serial.actief = true;
+    } else {
+      this->Serial.actief = false;
+      this->Serial.foutmelding = _CRITICAL_SS301;
+      ChildVerwijderen(this->Serial.gedeeldeBus);
+    }
+  }
+#endif
+
+  this->ActivatiefoutWeergeven();
+  return this->SCREEN_TYPES_ACTIEF == SCREEN_TYPE_NONE || AantalUitvoeren(*this) > 0;
+}
+
+bool Screen::afmelden() {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  this->Serial.actief = false;
+
+  if (this->Serial.gedeeldeBus != nullptr) {
+    if (!this->Serial.gedeeldeBus->afmelden()) return false;
+    this->Serial.gedeeldeBus = nullptr;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  this->Pixel.actief = false;
+  this->Pixel.gfx = nullptr;
+
+  if (this->Pixel.gedeeldeBus != nullptr) {
+    if (!this->Pixel.gedeeldeBus->afmelden()) return false;
+    this->Pixel.gedeeldeBus = nullptr;
+  }
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  this->Character.actief = false;
+
+  if (this->Character.gedeeldeBus != nullptr) {
+    if (!this->Character.gedeeldeBus->afmelden()) return false;
+    this->Character.gedeeldeBus = nullptr;
+  }
+#endif
+
+  if (::Screen == this) ::Screen = nullptr;
+  return GedeeldeBusNode::afmelden();
+}
+

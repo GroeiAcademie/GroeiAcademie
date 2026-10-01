@@ -30,11 +30,6 @@
   #define INPUT_TEST_WEERGAVE_MS 5000UL
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  #include <Adafruit_ST7789.h>
-  Adafruit_ST7789 pixelScreen(PIXEL_SCREEN_CS, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
-#endif
-
 #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN || HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN
 struct InvoerBuffer {
   char tekst[9];
@@ -53,12 +48,12 @@ void FunctieToevoegen(void* argumenten) {
     buffer.tekst[buffer.lengte] = '\0';
   }
 
-  PrintToScreen("Invoer:", buffer.tekst);
+  Screen->Print("Invoer:", buffer.tekst);
 }
 
 void FunctieBevestigen(void* argumenten) {
   (void)argumenten;
-  PrintToScreen("Bevestigd:", buffer.tekst, INPUT_TEST_WEERGAVE_MS);
+  Screen->Print("Bevestigd:", buffer.tekst, INPUT_TEST_WEERGAVE_MS);
   buffer.lengte = 0;
   buffer.tekst[0] = '\0';
 }
@@ -67,24 +62,24 @@ void FunctieWissen(void* argumenten) {
   (void)argumenten;
   buffer.lengte = 0;
   buffer.tekst[0] = '\0';
-  PrintToScreen("Gewist", "");
+  Screen->Print("Gewist", "");
 }
 
 void FunctieNavigatieOmhoog(void* argumenten) {
   (void)argumenten;
   navigatieTeller++;
-  PrintToScreen("Navigatie:", String(navigatieTeller));
+  Screen->Print("Navigatie:", String(navigatieTeller));
 }
 
 void FunctieNavigatieOmlaag(void* argumenten) {
   (void)argumenten;
   navigatieTeller--;
-  PrintToScreen("Navigatie:", String(navigatieTeller));
+  Screen->Print("Navigatie:", String(navigatieTeller));
 }
 
 void TestFunctie(void* argumenten) {
   const char* opschrift = (const char*)argumenten;
-  PrintToScreen("Toets ingedrukt:", opschrift, INPUT_TEST_WEERGAVE_MS);
+  Screen->Print("Toets ingedrukt:", opschrift, INPUT_TEST_WEERGAVE_MS);
 }
 
   #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN
@@ -158,12 +153,12 @@ void FunctieVolumeOmlaag(void* argumenten) {
 
 void FunctieToonStatus(void* argumenten) {
   AfstandsbedieningStatus* s = (AfstandsbedieningStatus*)argumenten;
-  PrintToScreen("Kanaal: " + String(s->kanaal), "Volume: " + String(s->volume));
+  Screen->Print("Kanaal: " + String(s->kanaal), "Volume: " + String(s->volume));
 }
 
 void TestFunctie(void* argumenten) {
   const char* opschrift = (const char*)argumenten;
-  PrintToScreen("Toets ingedrukt:", opschrift, INPUT_TEST_WEERGAVE_MS);
+  Screen->Print("Toets ingedrukt:", opschrift, INPUT_TEST_WEERGAVE_MS);
 }
 
 const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten mappingTestMenu[] = {
@@ -192,17 +187,15 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten mappingTestMenu
 #endif
 
 void setup() {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  pixelScreen.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
-  pixelScreen.setRotation(PIXEL_SCREEN_ROTATION);
-  PixelScreen = &pixelScreen;
-#endif
-  ScreensConfigureren();
+  Screen = GedeeldeBusNewComponent<struct Screen>();
+  if (Screen == nullptr) exit(0);
 
-  InputConfigureren();
+  Input = GedeeldeBusNewComponent<struct Input>();
+  if (Input == nullptr) exit(0);
+  Input->InputConfigureren();
 }
 
 void loop() {
-  PrintToScreen("Input-test HX1838 (met argumenten)", "druk een toets");
-  UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
+  Screen->Print("Input-test HX1838 (met argumenten)", "druk een toets");
+  Input->UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
 }

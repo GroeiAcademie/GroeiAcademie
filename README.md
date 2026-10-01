@@ -218,13 +218,8 @@ examples/
 │   ├── ADC_Backend/
 │   │   ├── ADC_Backend_ADS1115/
 │   │   └── ADC_Backend_Native/
-│   ├── GedeeldeBus/   # experimenteel, in te schakelen via GEDEELDE_BUS_PROTOTYPE in SystemConfig.h
-│   │   ├── Default_CharacterScreen/
-│   │   ├── Default_CharacterScreen_PixelScreen/
-│   │   ├── Default_PixelScreen/
-│   │   ├── InputkanalenDIGITAL/
-│   │   ├── InputkanalenHX1838/
-│   │   └── InputkanalenPCF8574/
+│   ├── GedeeldeBus/
+│   │   └── Tik_Enkele_Samen_Instortend_Cocktail/
 │   ├── Input/
 │   │   ├── InputkanalenDIGITAL/
 │   │   ├── InputkanalenDIGITALmetArgumenten/

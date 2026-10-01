@@ -84,10 +84,6 @@
 // #define I2C_ADDRESS_ADS1115       0x48                // standaard waarde: 0x48
 #endif
 
-#ifndef ADS1115_I2C_ADDRESS
-// #define ADS1115_I2C_ADDRESS       0x48                // standaard waarde: 0x48 via SW1: ADDR naar GND
-#endif
-
 // Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
 // Bij ADC_BACKEND_NATIVE blijft dit 0. Bij ADC_BACKEND_ADS1115 voorkomt dit dat de I2C-bus zonder onderbreking bevraagd wordt.
 #ifndef WACHT_LOSLATEN_DELAY_MS
@@ -149,9 +145,9 @@
 #endif
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
-// D8 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was. 
+// D8 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was.
 #ifndef HX1838_ONTVANGER_PIN
- // #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D8 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D8
+// #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D8 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D8
 #endif
 
 // HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE: 
@@ -229,20 +225,6 @@
 // #define I2C_ADDRESS_CHARACTER_SCREEN  0x27 // standaard waarde: 0x27
 #endif
 
-#ifndef I2C_ADRES
-// #define I2C_ADRES                     0x27 // standaard waarde: 0x27
-#endif
-
-// CHARACTERSCREEN_I2C_ADRES_MODUS — impact per waarde (zie ook docs/DECISION_LOG.md, D023):
-//   0 = geen scan, enkel de handdruk-check op I2C_ADRES. Kleinste footprint. Gebruik dit wanneer het board tegen zijn geheugengrens zit (bv. UNO R3-grensgevallen).
-//   1 = scan (I2C_ADRES, daarna 0x27, 0x3F) + rapporteren via de foutmelding, geen zelfherstel. Bij een ander gevonden adres: melding tonen, één keer hercompileren met het juiste I2C_ADRES. 
-//       STANDAARD: gebruik dit in elke opstelling waar reproduceerbare, voorspelbare resultaten tellen (onderzoek, metingen, meerdere I2C-apparaten op dezelfde bus).
-//   2 = scan + automatisch herbouwen (placement-new) op het gevonden adres. 
-//       Nooit meer hercompileren bij een ander scherm/adres. Gebruik dit enkel tijdens actief ontwikkelen met wisselende schermen, 
-//       wanneer er geen ander I2C-apparaat op de bus hangt en er geen metingen worden vastgelegd, de scan controleert enkel of een apparaat op dat adres reageert (ACK), niet of het effectief een LCD-scherm is.
-#ifndef CHARACTERSCREEN_I2C_ADRES_MODUS
-// #define CHARACTERSCREEN_I2C_ADRES_MODUS 1             // standaard waarde: 1
-#endif
 
 #ifndef ACTIEF_CHARACTER_SCREEN
 // #define ACTIEF_CHARACTER_SCREEN        SCREEN_LCD1602 // standaard waarde: SCREEN_LCD1602
@@ -250,13 +232,13 @@
 
 // Pixelscherm ----------------------------------------------------------------
 #ifndef PIXEL_SCREEN_CS
-// #define PIXEL_SCREEN_CS                ARDUINO_UNO_SHIELD_PIN_SS // standaard waarde: ARDUINO_UNO_SHIELD_PIN_SS ofwel SS
+// #define PIXEL_SCREEN_CS                HardwareResourcePin::SS // standaard waarde: HardwareResourcePin::SS
 #endif
 #ifndef PIXEL_SCREEN_DC
-// #define PIXEL_SCREEN_DC                ARDUINO_UNO_SHIELD_PIN_D9 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D9
+// #define PIXEL_SCREEN_DC                HardwareResourcePin::D9 // standaard waarde: HardwareResourcePin::D9
 #endif
 #ifndef PIXEL_SCREEN_RST
-// #define PIXEL_SCREEN_RST               ARDUINO_UNO_SHIELD_PIN_D7 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D7
+// #define PIXEL_SCREEN_RST               HardwareResourcePin::D7 // standaard waarde: HardwareResourcePin::D7
 #endif
 
 #ifndef ACTIEF_PIXEL_SCREEN
@@ -284,6 +266,7 @@
 #ifndef PIXEL_SCREEN_LINE_SPACING
 // #define PIXEL_SCREEN_LINE_SPACING      5       // standaard waarde: 5
 #endif
+
 #ifndef PIXEL_SCREEN_TEXT_COLOR
 // #define PIXEL_SCREEN_TEXT_COLOR        0xFFFF  // standaard waarde: 0xFFFF
 #endif
@@ -560,22 +543,402 @@
 #endif
 
 // ============================================================================
+// EXTENDERs
+// ============================================================================
+// Extender-resources:
+// - DEFAULT: EXTENDER_<NAAM>_AANTAL = 0 of 1.
+// - EXPERIMENTEEL: EXTENDER_<NAAM>_AANTAL >= 2.
+// - I2C SDA/SCL en SPI SCK/MISO/MOSI zijn GEDEELD en komen uit de boardconfiguratie.
+// - I2C-adressen, SPI-CS en de extra native extenderaansluitingen hieronder zijn EXCLUSIEF.
+// - HardwareResourcePin::NONE betekent dat die extra aansluiting niet gebruikt/aangesloten is.
+// - Kies voor een EXCLUSIEVE HardwareResourcePin nooit een pin die al exclusief geclaimd is.
+#ifndef EXTENDER_ADS1115_AANTAL
+// #define EXTENDER_ADS1115_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — ADS1115 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
+// #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48  // standaard: 0x48 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze na I2C_ADDRESS_ADS1115. // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1115_1_ALERT_RDY
+// #define EXTENDER_ADS1115_1_ALERT_RDY HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS1115 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_ADS1115_2
+// #define I2C_ADDRESS_EXTENDER_ADS1115_2 0x49  // standaard: 0x49 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze als tweede extender na I2C_ADDRESS_ADS1115. // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1115_2_ALERT_RDY
+// #define EXTENDER_ADS1115_2_ALERT_RDY HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MCP23017_AANTAL
+// #define EXTENDER_MCP23017_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — MCP23017 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
+// #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MCP23017_1_INTA
+// #define EXTENDER_MCP23017_1_INTA HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MCP23017_1_INTB
+// #define EXTENDER_MCP23017_1_INTB HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MCP23017_1_RESET
+// #define EXTENDER_MCP23017_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — MCP23017 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
+// #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MCP23017_2_INTA
+// #define EXTENDER_MCP23017_2_INTA HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MCP23017_2_INTB
+// #define EXTENDER_MCP23017_2_INTB HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MCP23017_2_RESET
+// #define EXTENDER_MCP23017_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_PCF8574_AANTAL
+// #define EXTENDER_PCF8574_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — PCF8574 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
+// #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20  // standaard: 0x20; bij INPUT_TYPE_PCF8574 het volgende vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_PCF8574_1_INT
+// #define EXTENDER_PCF8574_1_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — PCF8574 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
+// #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21  // standaard: 0x21; bij INPUT_TYPE_PCF8574 het tweede vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_PCF8574_2_INT
+// #define EXTENDER_PCF8574_2_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_PCF8575_AANTAL
+// #define EXTENDER_PCF8575_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — PCF8575 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
+// #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_PCF8575_1_INT
+// #define EXTENDER_PCF8575_1_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — PCF8575 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
+// #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_PCF8575_2_INT
+// #define EXTENDER_PCF8575_2_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_TCA9548A_AANTAL
+// #define EXTENDER_TCA9548A_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — TCA9548A #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
+// #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70  // standaard waarde: 0x70  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_TCA9548A_1_RESET
+// #define EXTENDER_TCA9548A_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — TCA9548A #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
+// #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71  // standaard waarde: 0x71  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_TCA9548A_2_RESET
+// #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_ADS7828_AANTAL
+// #define EXTENDER_ADS7828_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — ADS7828 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
+// #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS7828 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
+// #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_DS2482_800_AANTAL
+// #define EXTENDER_DS2482_800_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — DS2482-800 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
+// #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18  // standaard waarde: 0x18  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — DS2482-800 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
+// #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19  // standaard waarde: 0x19  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_ADS1158_AANTAL
+// #define EXTENDER_ADS1158_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — ADS1158 #1
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_ADS1158_1
+// #define CS_PIN_EXTENDER_ADS1158_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1158_1_PWDN
+// #define EXTENDER_ADS1158_1_PWDN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1158_1_RESET
+// #define EXTENDER_ADS1158_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1158_1_START
+// #define EXTENDER_ADS1158_1_START HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS1158 #2
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_ADS1158_2
+// #define CS_PIN_EXTENDER_ADS1158_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1158_2_PWDN
+// #define EXTENDER_ADS1158_2_PWDN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1158_2_RESET
+// #define EXTENDER_ADS1158_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS1158_2_START
+// #define EXTENDER_ADS1158_2_START HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_ADS7953_AANTAL
+// #define EXTENDER_ADS7953_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — ADS7953 #1
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_ADS7953_1
+// #define CS_PIN_EXTENDER_ADS7953_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
+// #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::D5  // standaard waarde: HardwareResourcePin::D5  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
+// #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::D6  // standaard waarde: HardwareResourcePin::D6  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
+// #define EXTENDER_ADS7953_GPIO2_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_1
+// #define EXTENDER_ADS7953_GPIO3_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — ADS7953 #2
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_ADS7953_2
+// #define CS_PIN_EXTENDER_ADS7953_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
+// #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::D7  // standaard waarde: HardwareResourcePin::D7  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
+// #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::D8  // standaard waarde: HardwareResourcePin::D8  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
+// #define EXTENDER_ADS7953_GPIO2_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_2
+// #define EXTENDER_ADS7953_GPIO3_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_CD74HC4067_AANTAL
+// #define EXTENDER_CD74HC4067_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — CD74HC4067 #1
+// ============================================================================
+#ifndef EXTENDER_CD74HC4067_1_EN
+// #define EXTENDER_CD74HC4067_1_EN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_1_S0
+// #define EXTENDER_CD74HC4067_1_S0 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_1_S1
+// #define EXTENDER_CD74HC4067_1_S1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_1_S2
+// #define EXTENDER_CD74HC4067_1_S2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_1_S3
+// #define EXTENDER_CD74HC4067_1_S3 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_1_Z
+// #define EXTENDER_CD74HC4067_1_Z HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_2_EN
+// #define EXTENDER_CD74HC4067_2_EN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_2_S0
+// #define EXTENDER_CD74HC4067_2_S0 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_2_S1
+// #define EXTENDER_CD74HC4067_2_S1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_2_S2
+// #define EXTENDER_CD74HC4067_2_S2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_2_S3
+// #define EXTENDER_CD74HC4067_2_S3 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_CD74HC4067_2_Z
+// #define EXTENDER_CD74HC4067_2_Z HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MAX14830_I2C_AANTAL
+// #define EXTENDER_MAX14830_I2C_AANTAL 0  // standaard waarde: 0
+#endif
+#ifndef EXTENDER_MAX14830_SPI_AANTAL
+// #define EXTENDER_MAX14830_SPI_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — MAX14830 SPI #1
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
+// #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MAX14830_SPI_1_IRQ
+// #define EXTENDER_MAX14830_SPI_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — MAX14830 SPI #2
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
+// #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MAX14830_SPI_2_IRQ
+// #define EXTENDER_MAX14830_SPI_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// DEFAULT — MAX14830 I2C #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_1
+// #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 0x60  // standaard waarde: 0x60  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MAX14830_I2C_1_IRQ
+// #define EXTENDER_MAX14830_I2C_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — MAX14830 I2C #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_2
+// #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 0x61  // standaard waarde: 0x61  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_MAX14830_I2C_2_IRQ
+// #define EXTENDER_MAX14830_I2C_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_SC16IS752_I2C_AANTAL
+// #define EXTENDER_SC16IS752_I2C_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — SC16IS752 I2C #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1
+// #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_I2C_1_IRQ
+// #define EXTENDER_SC16IS752_I2C_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_I2C_1_RESET
+// #define EXTENDER_SC16IS752_I2C_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — SC16IS752 I2C #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2
+// #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_I2C_2_IRQ
+// #define EXTENDER_SC16IS752_I2C_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_I2C_2_RESET
+// #define EXTENDER_SC16IS752_I2C_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_SPI_AANTAL
+// #define EXTENDER_SC16IS752_SPI_AANTAL 0  // standaard waarde: 0
+#endif
+// ============================================================================
+// DEFAULT — SC16IS752 SPI #1
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_SC16IS752_SPI_1
+// #define CS_PIN_EXTENDER_SC16IS752_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_SPI_1_IRQ
+// #define EXTENDER_SC16IS752_SPI_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_SPI_1_RESET
+// #define EXTENDER_SC16IS752_SPI_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+// ============================================================================
+// EXPERIMENTEEL — SC16IS752 SPI #2
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_SC16IS752_SPI_2
+// #define CS_PIN_EXTENDER_SC16IS752_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_SPI_2_IRQ
+// #define EXTENDER_SC16IS752_SPI_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+#ifndef EXTENDER_SC16IS752_SPI_2_RESET
+// #define EXTENDER_SC16IS752_SPI_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
 // ADC BACKEND
 // ============================================================================
 
-// Definieer de pinnen voor de sensoren op jouw sensorboard
-// Bij ADC_BACKEND_ADS1115 zijn dit kanaalnummers 0 tot 3; bij ADC_BACKEND_NATIVE zijn dit Arduino-pinnen.
-#ifndef PIN_SENSOR_1
-// #define PIN_SENSOR_1 A0  // standaard waarde: A0, Analoge pin voor de 1ste test-sensor
+// Definieer de pinnen voor de sensoren op jouw sensorboard.
+// Bij ADC_BACKEND_ADS1115 zijn ADC_PIN_SENSOR_1..4 kanaalnummers 0 tot 3.
+// Bij ADC_BACKEND_NATIVE zijn ADC_PIN_SENSOR_1..4 HardwareResourcePin-waarden.
+#ifndef ADC_PIN_SENSOR_1
+// #define ADC_PIN_SENSOR_1 HardwareResourcePin::A0  // standaard waarde: HardwareResourcePin::A0; bij ADC_BACKEND_ADS1115: 0
 #endif
-#ifndef PIN_SENSOR_2
-// #define PIN_SENSOR_2 A1  // standaard waarde: A1, Analoge pin voor de 2de test-sensor
+#ifndef ADC_PIN_SENSOR_2
+// #define ADC_PIN_SENSOR_2 HardwareResourcePin::A1  // standaard waarde: HardwareResourcePin::A1; bij ADC_BACKEND_ADS1115: 1
 #endif
-#ifndef PIN_SENSOR_3
-// #define PIN_SENSOR_3 A2  // standaard waarde: A2, Analoge pin voor de 3de test-sensor 
+#ifndef ADC_PIN_SENSOR_3
+// #define ADC_PIN_SENSOR_3 HardwareResourcePin::A2  // standaard waarde: HardwareResourcePin::A2; bij ADC_BACKEND_ADS1115: 2
 #endif
-#ifndef PIN_SENSOR_4
-// #define PIN_SENSOR_4 A3  // standaard waarde: A3, Analoge pin voor de 4de test-sensor
+#ifndef ADC_PIN_SENSOR_4
+// #define ADC_PIN_SENSOR_4 HardwareResourcePin::A3  // standaard waarde: HardwareResourcePin::A3; bij ADC_BACKEND_ADS1115: 3
 #endif
 
 // Vertraging tussen samples in de meetlussen 
@@ -587,40 +950,31 @@
 // INPUT
 // ============================================================================
 
-// INPUT_TYPE_DIGITAL: fysieke keypad-aansluitingen op de Arduino Uno-shieldheader.
-// Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
-// De standaardvolgorde is D2,D3,D4,D5; uitsluitend de twee membraan-directtypes gebruiken standaard de gedraaide D3,D2,D5,D4-volgorde.
-// Bestaande PIN_TOETS_1..4-definities blijven ondersteund en hebben voorrang voor backward compatibility.
+// INPUT_TYPE_DIGITAL gebruikt HardwareResourcePin-waarden voor de vier fysieke keypad-aansluitingen.
 #if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-// #define KEYPAD_PIN_K1 ARDUINO_UNO_SHIELD_PIN_D2   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D2
-// #define KEYPAD_PIN_K2 ARDUINO_UNO_SHIELD_PIN_D3   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D3
-// #define KEYPAD_PIN_K3 ARDUINO_UNO_SHIELD_PIN_D4   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D4
-// #define KEYPAD_PIN_K4 ARDUINO_UNO_SHIELD_PIN_D5   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D5
+// #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::D2
+// #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::D3
+// #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::D4
+// #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::D5
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-// #define KEYPAD_PIN_L1 ARDUINO_UNO_SHIELD_PIN_D2   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D2
-// #define KEYPAD_PIN_L2 ARDUINO_UNO_SHIELD_PIN_D3   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D3
-// #define KEYPAD_PIN_R1 ARDUINO_UNO_SHIELD_PIN_D4   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D4
-// #define KEYPAD_PIN_R2 ARDUINO_UNO_SHIELD_PIN_D5   // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D5
+// #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::D2
+// #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::D3
+// #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::D4
+// #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::D5
 
-  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
-// #define KEYPAD_PIN_1 ARDUINO_UNO_SHIELD_PIN_D3    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D3
-// #define KEYPAD_PIN_2 ARDUINO_UNO_SHIELD_PIN_D2    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D2
-// #define KEYPAD_PIN_3 ARDUINO_UNO_SHIELD_PIN_D5    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D5
-// #define KEYPAD_PIN_4 ARDUINO_UNO_SHIELD_PIN_D4    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D4
-
-  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-// #define KEYPAD_PIN_1 ARDUINO_UNO_SHIELD_PIN_D3    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D3
-// #define KEYPAD_PIN_2 ARDUINO_UNO_SHIELD_PIN_D2    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D2
-// #define KEYPAD_PIN_3 ARDUINO_UNO_SHIELD_PIN_D5    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D5
-// #define KEYPAD_PIN_4 ARDUINO_UNO_SHIELD_PIN_D4    // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D4
+  #elif defined(KEYPAD_TYPE) && (KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1)
+// #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::D3
+// #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::D2
+// #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::D5
+// #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::D4
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-// #define KEYPAD_PIN_OUT1 ARDUINO_UNO_SHIELD_PIN_D2 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D2 
-// #define KEYPAD_PIN_OUT2 ARDUINO_UNO_SHIELD_PIN_D3 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D3
-// #define KEYPAD_PIN_OUT3 ARDUINO_UNO_SHIELD_PIN_D4 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D4 
-// #define KEYPAD_PIN_OUT4 ARDUINO_UNO_SHIELD_PIN_D5 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D5 
+// #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::D2
+// #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::D3
+// #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::D4
+// #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::D5
   #endif
 #endif
 
@@ -654,109 +1008,101 @@
   // }
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-  // #define KEYPAD_PIN_K1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_K2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_K3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_K4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_K1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_K2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_K3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_K4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4
-  // #define KEYPAD_PIN_K1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_K2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_K3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_K4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_K5 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
-  // #define KEYPAD_PIN_K6 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
-  // #define KEYPAD_PIN_K7 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
-  // #define KEYPAD_PIN_K8 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
+  // #define INPUT_KEYPAD_PIN_K1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_K2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_K3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_K4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_K5 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_K6 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
+  // #define INPUT_KEYPAD_PIN_K7 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
+  // #define INPUT_KEYPAD_PIN_K8 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-  // #define KEYPAD_PIN_L1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_L2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_R1 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_R2 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_L1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_L2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_4x4
-  // #define KEYPAD_PIN_C4 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_C3 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_C2 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_C1 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_R1 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
-  // #define KEYPAD_PIN_R2 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
-  // #define KEYPAD_PIN_R3 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
-  // #define KEYPAD_PIN_R4 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
+  // #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
+  // #define INPUT_KEYPAD_PIN_R3 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
+  // #define INPUT_KEYPAD_PIN_R4 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
-  // #define KEYPAD_PIN_1  PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_2  PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_3  PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_4  PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_1  PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_2  PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_3  PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_4  PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-  // #define KEYPAD_PIN_1  PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_2  PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_3  PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_4  PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_1  PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_2  PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_3  PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_4  PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4
-  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_C1 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_C2 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_C3 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_C4 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4
-  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_R2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_C1 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_C2 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_C3 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
-  // #define KEYPAD_PIN_C4 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
+  // #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3
-  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_R2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_R3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_R4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_C1 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
-  // #define KEYPAD_PIN_C2 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
-  // #define KEYPAD_PIN_C3 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
+  // #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_R3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_R4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
+  // #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4
-  // #define KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_R2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_R3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_R4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_C1 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
-  // #define KEYPAD_PIN_C2 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
-  // #define KEYPAD_PIN_C3 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
-  // #define KEYPAD_PIN_C4 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
+  // #define INPUT_KEYPAD_PIN_R1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_R2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_R3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_R4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_C1 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_C2 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
+  // #define INPUT_KEYPAD_PIN_C3 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
+  // #define INPUT_KEYPAD_PIN_C4 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-  // #define KEYPAD_PIN_OUT1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_OUT2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_OUT3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_OUT4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_OUT1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_OUT2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_OUT3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_OUT4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4
   // Via de 8 parallelle uitgangen op PCF8574 P0-P7 kunnen enkel de eerste 8 toetsen uitgelezen worden.
-  // #define KEYPAD_PIN_OUT1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
-  // #define KEYPAD_PIN_OUT2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
-  // #define KEYPAD_PIN_OUT3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
-  // #define KEYPAD_PIN_OUT4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
-  // #define KEYPAD_PIN_OUT5 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
-  // #define KEYPAD_PIN_OUT6 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
-  // #define KEYPAD_PIN_OUT7 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
-  // #define KEYPAD_PIN_OUT8 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
+  // #define INPUT_KEYPAD_PIN_OUT1 PCF8574_PIN_P0 // standaard waarde: PCF8574_PIN_P0
+  // #define INPUT_KEYPAD_PIN_OUT2 PCF8574_PIN_P1 // standaard waarde: PCF8574_PIN_P1
+  // #define INPUT_KEYPAD_PIN_OUT3 PCF8574_PIN_P2 // standaard waarde: PCF8574_PIN_P2
+  // #define INPUT_KEYPAD_PIN_OUT4 PCF8574_PIN_P3 // standaard waarde: PCF8574_PIN_P3
+  // #define INPUT_KEYPAD_PIN_OUT5 PCF8574_PIN_P4 // standaard waarde: PCF8574_PIN_P4
+  // #define INPUT_KEYPAD_PIN_OUT6 PCF8574_PIN_P5 // standaard waarde: PCF8574_PIN_P5
+  // #define INPUT_KEYPAD_PIN_OUT7 PCF8574_PIN_P6 // standaard waarde: PCF8574_PIN_P6
+  // #define INPUT_KEYPAD_PIN_OUT8 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
   #endif
 #endif
-
-// Backward compatibility: bestaande configuraties met PIN_TOETS_1..4 blijven ondersteund.
-// Gebruik voor nieuwe INPUT_TYPE_DIGITAL-configuraties bij voorkeur de keypad-specifieke KEYPAD_PIN_...-mapping hierboven.
-// Wanneer PIN_TOETS_1..4 expliciet gedefinieerd worden, hebben ze voorrang op de DIGITAL-defaultmapping.
-// #define PIN_TOETS_1 ARDUINO_UNO_SHIELD_PIN_D3 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D3
-// #define PIN_TOETS_2 ARDUINO_UNO_SHIELD_PIN_D2 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D2
-// #define PIN_TOETS_3 ARDUINO_UNO_SHIELD_PIN_D5 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D5
-// #define PIN_TOETS_4 ARDUINO_UNO_SHIELD_PIN_D4 // standaard waarde: ARDUINO_UNO_SHIELD_PIN_D4
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
 #if defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED

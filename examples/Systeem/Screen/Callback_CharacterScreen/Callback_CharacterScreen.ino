@@ -1,12 +1,11 @@
 // ============================================================================
 // Callback CharacterScreen
 // ============================================================================
-// ============================================================================
-#include <Wire.h>
 #include <Screen.h>
 #include <Configuratie/ExamplesConfig.h>
 
-// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino structureel niet: Screen.cpp wordt als apart bestand gecompileerd en ziet een #define hier nooit. 
+// Dit example stelt SCREEN_OUTPUT_CONFIG NIET zelf in — dat kan een .ino structureel niet: 
+// Screen.cpp wordt als apart bestand gecompileerd en ziet een #define hier nooit. 
 // Zet SCREEN_TYPE_CHARACTER én SCREEN_TYPE_PIXELS daarom in UserConfig.h (kopieer van UserConfig_template.h) of rechtstreeks in SystemConfig.h. 
 // Onderstaande controle geeft een duidelijke foutmelding als dat nog niet gebeurd is, in plaats van de sketch stil te laten falen.
 #if !((SCREEN_OUTPUT_CONFIG) & SCREEN_TYPE_CHARACTER)
@@ -14,15 +13,22 @@
 #else
 
 // Deze callback neemt de volledige characterschermuitvoer over.
-// PrintToScreen() roept haar exact één keer aan en voert voor dit schermtype zelf geen aanvullende schermlogica, wachttijd of action meer uit.
+// Screen.Print() roept haar exact één keer aan en voert voor dit schermtype zelf geen aanvullende schermlogica, wachttijd of action meer uit.
 void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas) {
   if (eersteRegel != "" || tweedeRegel != "") {
     String eersteRegelLC = eersteRegel; eersteRegelLC.toLowerCase();
     String tweedeRegelLC = tweedeRegel; tweedeRegelLC.toLowerCase();
 
-    lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(eersteRegelLC);
-    lcd.setCursor(0, 1); lcd.print(tweedeRegelLC);
+    Screen->Character.display.clear();
+    Screen->Character.display.setCursor(0, 0); Screen->Character.display.print(eersteRegelLC);
+    Screen->Character.display.setCursor(0, 1); Screen->Character.display.print(tweedeRegelLC);
+  }
+
+  if (delayTime) delay(delayTime);
+
+  if (action != "") {
+    String actionLC = action; actionLC.toLowerCase();
+    Screen->Character.display.print(actionLC);
   }
 
   if (derdeRegel != "" || vierdeRegel != "") {
@@ -31,30 +37,23 @@ void MijnCharacterScreen(const String& eersteRegel, const String& tweedeRegel, u
 
     if (!ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS) {
       if (delayTussenPaginas) delay(delayTussenPaginas);
-      lcd.clear();
+      Screen->Character.display.clear();
     }
 
-    lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); lcd.print(derdeRegelLC);
-    lcd.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); lcd.print(vierdeRegelLC);
-  }
-
-  if (delayTime) delay(delayTime);
-
-  if (action != "") {
-    String actionLC = action; actionLC.toLowerCase();
-    lcd.print(actionLC);
+    Screen->Character.display.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 2 : 0); Screen->Character.display.print(derdeRegelLC);
+    Screen->Character.display.setCursor(0, ACTIEF_CHARACTER_SCREEN_MET_VIER_REGELS ? 3 : 1); Screen->Character.display.print(vierdeRegelLC);
   }
 }
 
 void setup() {
-  CharacterScreenConfigureren();
-  RegistreerCallbackScreenTypeCharacter(MijnCharacterScreen);
+  Screen = GedeeldeBusNewComponent<struct Screen>(SCREEN_TYPE_CHARACTER, MijnCharacterScreen);
+  if (Screen == nullptr) exit(0);
 }
 
 void loop() {
   while (true) {
-    PrintToScreen("GROEI ACADEMIE", "CHARACTER SCREEN", LEESTIJD_VOORBEELD_MS);
-    PrintToScreen("EERSTE REGEL", "TWEEDE REGEL", LEESTIJD_VOORBEELD_MS, " NU", "DERDE REGEL", "VIERDE REGEL", WACHTTIJD_TUSSEN_PAGINAS_MS);
+    Screen->Print("GROEI ACADEMIE", "CHARACTER SCREEN", LEESTIJD_VOORBEELD_MS);
+    Screen->Print("EERSTE REGEL", "TWEEDE REGEL", LEESTIJD_VOORBEELD_MS, " NU", "DERDE REGEL", "VIERDE REGEL", WACHTTIJD_TUSSEN_PAGINAS_MS);
   }
 }
 #endif
