@@ -9,6 +9,31 @@ De gecompileerde dependencies hangen af van `INPUT_KANAAL_CONFIG`:
 - `INPUT_TYPE_HX1838`: gebruikt TinyIRReceiver of IRremote, afhankelijk van `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`. HX1838 met `HX1838_BRON_CODES_DEFINE` is released en hardwarematig bevestigd voor beide ontvangstbackends. De standaard ontvangerpin is D8. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 - Niet geselecteerde invoerbackends worden via de preprocessor niet meegecompileerd.
 
+## v2.0.0 lifecycle en runtime-selectie
+
+`Input` wordt in beta v2.0.0 via de gewone GedeeldeBus-lifecycle aangemaakt. De vroegere publieke `InputConfigureren()`-stap bestaat niet meer.
+
+```cpp
+Input = GedeeldeBusNewComponent<struct Input>();
+if (Input == nullptr) exit(0);
+```
+
+Een expliciete runtime-subset kan worden gekozen, bijvoorbeeld:
+
+```cpp
+Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_HX1838);
+```
+
+`Input::typesActief` moet volledig binnen de compile-time `INPUT_KANAAL_CONFIG` vallen. De toegelaten compile-time combinaties zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`. DIGITAL wordt niet met PCF8574 of HX1838 gecombineerd.
+
+De lifecycle is:
+
+```text
+aanmelden() → controleren() → inpluggen() → activeren()
+```
+
+`inpluggen()` bevat alleen de minimale hardwarecontrole die nodig is voor normale werking. Uitgebreide elektronische functietesten horen later in `Diagnose()` en bestaan alleen onder `DEBUG`.
+
 ## HX1838-kalibratie
 
 
@@ -90,7 +115,7 @@ Standaard uitgeschakeld, om geen extra geheugen te verbruiken op geheugenarme bo
 
 - **Loslaten**: geeft de positie terug die net losgelaten werd, als apart `InputResultaat` met `gebeurtenis = LOSGELATEN`. Wanneer voor die toets `functieBijLoslaten` is ingesteld, voert `Input.UitVoerenFunctieVolgensMappingMetToetsAanslag()` die functie uit.
 - **Lang indrukken**: per toets optioneel in te stellen via `functieBijLangIndrukken` en `langIndrukkenDrempelMs` in `MappingTussenToetsaanslagEnUitTeVoerenFunctie`. Wanneer `Input.OpvragenHuidigeToetsAanslag(false)` een `LANG_INDRUKKEN`-gebeurtenis teruggeeft, voert `Input.UitVoerenFunctieVolgensMappingMetToetsAanslag()` de gekoppelde `functieBijLangIndrukken` uit. De gewone `functie` blijft gekoppeld aan `TOETSAANSLAG`. Bij een expliciet meegegeven mapping wordt `langIndrukkenDrempelMs` uit die werkelijk gebruikte mapping opgezocht.
-- **Timeout bij geen invoer**: `INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS`, standaard `0` (geen timeout, huidig gedrag). Bij een waarde groter dan 0 start de timer in `Input.InputConfigureren()` en geeft `Input.OpvragenHuidigeToetsAanslag(false)` na die periode een `InputResultaat` met `gebeurtenis = TIMEOUT_GEEN_INVOER` terug. Ook de huidige enkelvoudig geïmplementeerde `Input.OpvragenHuidigeToetsAanslagen(..., 1)` geeft dit timeoutresultaat door.
+- **Timeout bij geen invoer**: `INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS`, standaard `0` (geen timeout, huidig gedrag). Bij een waarde groter dan 0 wordt de timer tijdens `Input::Activeren()` geïnitialiseerd en geeft `Input.OpvragenHuidigeToetsAanslag(false)` na die periode een `InputResultaat` met `gebeurtenis = TIMEOUT_GEEN_INVOER` terug. Ook de huidige enkelvoudig geïmplementeerde `Input.OpvragenHuidigeToetsAanslagen(..., 1)` geeft dit timeoutresultaat door.
 
 `INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` is de configuratieschakelaar voor de optionele uitgebreide gebeurtenissen.
 
@@ -155,7 +180,7 @@ Een mapping (`MappingTussenToetsaanslagEnUitTeVoerenFunctie[]`, zoals `mappingTe
 
 `Input.ControleerMappingVolledigheid(mapping)` controleert dit tijdens het draaien. Ze doorloopt `KEY_LAYOUT[]`/`IR_KEY_LAYOUT[]` van het actief gecompileerde type en meldt ontbrekende opschriften via `Screen.Print()`. Daardoor volgt de controle dezelfde geselecteerde uitvoerdoelen als de rest van de Screen-laag. Seriële standaarduitvoer via `Screen.Print()` volgt daarbij de actieve Serial-configuratie van de Screen-laag.
 
-De controle is enkel beschikbaar wanneer `INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN` in `UserConfig.h` gedefinieerd is. Zonder die define bestaat de functie nergens in het gecompileerde programma. Er is dan geen extra flashgebruik en geen extra `Serial`-afhankelijkheid. De functie is bedoeld om tijdens het testen op te roepen, bijvoorbeeld eenmalig in `setup()` na `Input.InputConfigureren()`, en niet om in productiecode te laten staan.
+De controle is enkel beschikbaar wanneer `INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN` in `UserConfig.h` gedefinieerd is. Zonder die define bestaat de functie nergens in het gecompileerde programma. Er is dan geen extra flashgebruik en geen extra `Serial`-afhankelijkheid. De functie is bedoeld om tijdens het testen op te roepen, bijvoorbeeld eenmalig in `setup()` nadat `Input` succesvol via `GedeeldeBusNewComponent<struct Input>(...)` is aangemaakt, en niet om in productiecode te laten staan.
 
 De releasevalidatie bevat daarnaast een tekstuele volledigheidscontrole die geen upload of aangesloten board vereist. De gedeelde Windows-testscripts staan onder `extras/` en worden mee gepubliceerd. Alleen `extras/LokalePaden.cmd` is machinespecifiek en blijft via `.gitignore` lokaal; `extras/LokalePaden_template.cmd` wordt wel meegeleverd.
 

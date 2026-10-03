@@ -150,6 +150,19 @@ Buiten een `Screen`-memberfunctie:
 
 ---
 
+## v2.0.0 aanmaken en diagnose
+
+De normale v2-route maakt `Screen` via GedeeldeBus aan:
+
+```cpp
+Screen = GedeeldeBusNewComponent<struct Screen>();
+if (Screen == nullptr) exit(0);
+```
+
+Een runtime-subset of callbacks kunnen via de bestaande constructors worden doorgegeven. `Screen::typesActief` moet binnen de compile-time `SCREEN_OUTPUT` vallen.
+
+De normale lifecycle blijft `aanmelden()` → `controleren()` → `inpluggen()` → `activeren()`. `inpluggen()` bevat de minimale hardwarecontrole die nodig is om Screen bruikbaar te verklaren. Uitgebreide elektronische schermtests horen later in `Diagnose()`; deze functie bestaat uitsluitend wanneer `DEBUG` actief is.
+
 # Lifecycle
 
 ```text

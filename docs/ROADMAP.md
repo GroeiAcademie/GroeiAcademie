@@ -12,6 +12,25 @@ De library blijft modulair en uitbreidbaar. Nieuwe toepassingsgebieden worden pa
 
 Het project wordt vanaf v1.0.0 publiek ontwikkeld als open-sourceproject. Bijdragen uit code, documentatie, vertaling, elektronica, hardware, testen, onderzoek, meetprotocollen en communitywerk zijn welkom. De maintainers bewaken de architectuur, kwaliteit, licentie, onafhankelijkheid en samenhang van het project.
 
+## Beta v2.0.0 — huidige technische fase
+
+De huidige prioriteit is niet het toevoegen van zoveel mogelijk nieuwe sensoren, maar het stabiliseren van de v2-fundering waarop die sensoren later betrouwbaar kunnen worden aangesloten.
+
+Open werk voor beta v2.0.0:
+
+- GedeeldeBus als neutrale lifecycle- en resourcebeheerlaag verder valideren;
+- `Screen`, `Input`, Extenders en Sensoren consequent via dezelfde lifecycle laten werken;
+- Native resourceconflicten, I2C-adressen en Extender-resources systematisch testen;
+- alle Extender-resources blijven benoemen als `ExtenderPins::EP_<pinnaam>`;
+- minimale aanwezigheids-/bruikbaarheidscontrole in `inpluggen()` houden;
+- per component DEBUG-only `Diagnose()` later invullen met echte elektronische functietesten;
+- de elektrische werking van Extenders per kanaal/pin testen;
+- daarna praktijktesten uitvoeren met echte sensoren en randapparatuur;
+- `RFP602` als eerste Sensor op Native ADC en ADS1115 blijven valideren;
+- SensorKernel pas verder uitbouwen nadat deze v2-basis stabiel is.
+
+Een onderdeel is voor v2 pas klaar wanneer architectuur, code, voorbeelden, documentatie én de relevante hardwaretest hetzelfde gedrag beschrijven.
+
 ## 2. Functionele ROADMAP
 
 1. **Aanraking, capacitieve bediening en gebruikersinput**

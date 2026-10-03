@@ -16,6 +16,22 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 | v1.0.0 | 31-07-2026 | ✅ (1 bekende, onschadelijke waarschuwing) | 188 | 184 | 4 | 0 | eerste officiële validatie |
 
 
+
+# v2.0.0 beta — actuele ontwikkelstatus
+
+De v2.0.0-architectuur is nog in beta en wordt actief herbouwd en getest. Er wordt **nog geen definitief v2.0.0-releaseresultaat** geclaimd. Historische resultaten van v1.x blijven hieronder staan en worden niet als v2-resultaat hergebruikt.
+
+Actuele validatiefocus:
+
+- GedeeldeBus-lifecycle en resourceconflicten;
+- Screen via `GedeeldeBusNewComponent`;
+- Input via `GedeeldeBusNewComponent`, zonder publieke `InputConfigureren()`;
+- 14 concrete Extenders en hun `ExtenderPins::EP_<pinnaam>`-resourcebereiken;
+- RFP602 als eerste Sensor, zowel via Native ADC als ADS1115;
+- scheiding tussen normale `inpluggen()`-controle en toekomstige DEBUG-only `Diagnose()`-functietesten.
+
+Elektronische functietesten per Extender en volledige praktijktesten met de beschikbare sensoren zijn nog onderdeel van de beta-validatie en worden niet als voltooid voorgesteld.
+
 # v1.1.2
 
 De broncode, testscripts en documentatie zijn voor v1.1.2 bijgewerkt. De officiële releasevalidatie is in dit pakket nog niet opnieuw uitgevoerd; daarom worden geen v1.1.1-compilatieresultaten als v1.1.2-resultaat overgenomen. Voer vóór publicatie de gebruikelijke releasecycli en Arduino LINT uit en vul daarna bovenstaande overzichtsregel aan.

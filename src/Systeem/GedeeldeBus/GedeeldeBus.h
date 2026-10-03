@@ -266,6 +266,10 @@ struct GedeeldeBusNode {
   // Standaard niets te doen. Dit is de opvolger van EffectiefInpluggen().
   virtual bool Activeren() { return true; }
 
+#ifdef DEBUG
+  virtual void Diagnose() {}
+#endif
+
   // De vijf stappen zijn virtueel, zodat een parent (Screen, Input) zijn children in dezelfde stap kan meenemen.
   // Een override begint met een controle op de eigen toestand, bijvoorbeeld if (ingeplugd) return true;.
   // Een child roept via zijn parent dezelfde stap opnieuw aan, en zonder die controle loopt dat eindeloos door.

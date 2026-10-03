@@ -2,9 +2,26 @@
 
 > Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten.
 
-Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. De huidige versie bevat de toepassing **Stimulus** en de gedeelde systeemlagen **Screen** en **Input**.
+Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. Beta v2.0.0 bouwt de gedeelde basis rond **GedeeldeBus**, **Screen**, **Input**, **Extenders**, **Sensoren** en de toepassing **Stimulus**.
 
 > **Meten is Weten, in plaats van Denken te Weten.**
+
+## Waarom we beta v2.0.0 bouwen
+
+Versie 1.x heeft bewezen dat het GroeiAcademie FrameWork op meerdere Arduino Uno R3-vormfactorborden kan werken met Stimulus, Screen en Input. Tegelijk werd duidelijk dat de oorspronkelijke structuur te klein werd voor de volgende stap: meerdere hardwarebronnen, extenders en sensoren moeten naast elkaar kunnen bestaan zonder dat ieder subsysteem zelf pinnen, bussen, adressen en initialisatie beheert.
+
+Daarom is **v2.0.0 een architecturale herbouw**. GedeeldeBus wordt de neutrale laag die hardware-resources registreert, controleert en volgens één lifecycle inplugt en activeert. Screen, Input, Extenders, Sensoren en toepassingsgebieden blijven zelfstandige, los te testen onderdelen; concrete hardwarekennis blijft zoveel mogelijk bij de component die eigenaar is van die hardware.
+
+De beta-fase is bedoeld om deze nieuwe basis eerst grondig te valideren vóór v2.0.0 stabiel wordt verklaard. De nadruk ligt nu op:
+
+- één lifecycle voor GedeeldeBus-componenten: `aanmelden()` → `controleren()` → `inpluggen()` → `activeren()`;
+- centrale controle op Native resources, I2C-adressen en resources van Extenders;
+- dezelfde architectuur voor `Screen`, `Input`, Extenders en Sensoren;
+- expliciete `ExtenderPins` met de naamgeving `EP_<pinnaam>`;
+- scheiding tussen minimale hardwarecontrole in `inpluggen()` en uitgebreide, alleen onder `DEBUG` beschikbare `Diagnose()`;
+- eerst architectuur- en conflicttesten, daarna elektronische functietesten en tenslotte praktijktesten met echte sensoren en randapparatuur.
+
+**Beta v2.0.0 is dus geen uitbreiding van v1.1.2 met enkele extra componenten, maar de fundering waarop de volgende generatie van het FrameWork wordt gebouwd.**
 
 ## Waar het FrameWork naartoe groei
 
@@ -76,14 +93,14 @@ Op deze foto zie je de geteste schermen, die slechts enkele voorbeelden zijn van
 
 ## Huidige status
 
-- versie: `1.1.2`;
+- versie: `2.0.0` (beta, in ontwikkeling);
 - de actuele boardconstanten en hun volgorde staan in `src/Configuratie/SystemConfig.h`, inclusief `BOARD_UNO_Q` en `BOARD_ESP32S3_DEV`;
 - voor `BOARD_STM32F4_NUCLEO64_F401RE` is de Arduino Uno-shieldheader-mapping D0-D13, A0-A5, SDA/SCL en SPI nu actief in `SystemConfig.h` en per pin overschrijfbaar via `UserConfig.h`;
 - `BOARD_STM32F4_NUCLEO64_F401RE` is hardwarematig getest met CharacterDisplay, ADS1115, PCF8574, PixelScreen en HX1838; selecteer in Arduino IDE **Nucleo-64** met part number **Nucleo F401RE** (`STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE`); details en de vereiste PixelScreen/Adafruit-patch staan in `docs/HARDWARE_SUPPORT.md`;
 - de standaard HX1838-pin is `D8` en de standaard PixelScreen-resetpin is `D7`;
 - hardwarestatus: alle tien ondersteunde boards zijn **geïmplementeerd en getest**; de volledige bevestigde hardwarestatus staat in `docs/HARDWARE_SUPPORT.md` en `extras/TESTRESULTATEN.md`;
-- ontwikkelfase: alpha;
-- huidige implementatie: de Stimulusmodule en de gedeelde Screen- en Input-systeemlagen;
+- ontwikkelfase: beta;
+- huidige implementatie: GedeeldeBus met Native resources, Screen, Input, Extenders, de eerste Sensor (`RFP602`) en de Stimulusmodule;
 - HX1838 met `HX1838_BRON_CODES_DEFINE` is released;
 - `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` laat binnen deze DEFINE-route een eigen afstandsbediening toe via een configureerbaar aantal toetsen en opschriftkoppeling in `UserConfig.h`; de 8-bit commandcodes kunnen via `HX1838_GENERIEK_CODES` worden opgegeven of automatisch worden gekalibreerd wanneer die define ontbreekt;
 - deze HX1838-route is hardwarematig bevestigd met beide ontvangstbackends: TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) en IRremote (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0`);
@@ -258,7 +275,7 @@ GroeiAcademie/
 │   ├── Configuratie/
 │   ├── Systeem/Screen/        # Screen.h, Screen.cpp en ScreenTypes.h
 │   ├── Systeem/Input/         # Input.h, Input.cpp en InputTypes.h
-│   ├── Systeem/GedeeldeBus/   # gedeelde I2C/SPI-businitialisatie (experimenteel, GEDEELDE_BUS_PROTOTYPE)
+│   ├── Systeem/GedeeldeBus/   # lifecycle, resourcebeheer, Native resources en Extenders
 │   └── Toepassingsgebieden/Stimulus/
 ├── examples/
 ├── docs/

@@ -13,13 +13,13 @@ De versienummers volgen de versie in `library.properties`.
 
 ### GedeeldeBus: naamgeving
 
-- `GedeeldeBusInitialiseren()` hernoemd naar `InitialiserenGedeeldeBus()`, gedragsbehoudend. Dit betreft enkel de altijd-actieve basisfunctie; de overige, experimentele `GEDEELDE_BUS_PROTOTYPE`-functienamen (gebruikt in de voorbeelden onder `examples/Systeem/GedeeldeBus/`) vallen hier niet onder.
+- `GedeeldeBusInitialiseren()` werd eerder hernoemd naar `InitialiserenGedeeldeBus()`; in beta v2.0.0 is GedeeldeBus niet langer een aparte prototype-route maar onderdeel van de normale architectuur.
 
 ## 2.0.0
 
 ### Screen
 
-- `Screen` is de enige v2.0.0-Screen-architectuur en werkt via `GEDEELDE_BUS_PROTOTYPE`; de oude niet-GedeeldeBus-Screen-route is verwijderd;
+- `Screen` is de enige v2.0.0-Screen-architectuur en werkt via de normale v2.0.0-GedeeldeBus-lifecycle; de oude niet-GedeeldeBus-Screen-route is verwijderd;
 - alle blijvende Screen-hardware en Screen-status zitten in het `Screen`-object, waaronder `Screen.Character.display`, `Screen.Pixel.display`, `Screen.Pixel.PixelScreen`, callbacks, status en de GedeeldeBus-kinderen;
 - `Screen.Character.display` is het concrete `LiquidCrystal_I2C`-object; `Screen.Pixel.display` is het concrete `Adafruit_ST7789`-object; `Screen.Pixel.PixelScreen` blijft voorlopig de `Adafruit_GFX*`-pointer naar dat object tot de definitieve pointernaam is gekozen;
 - `Screen.Pixel.Configureren()` plugt de PixelScreen-resources via GedeeldeBus in en initialiseert daarna het fysieke pixelscherm; `Screen.Character.Configureren()` doet hetzelfde per CharacterScreen-kanaal; `Screen.Configureren()` configureert de geselecteerde Screen-kanalen gezamenlijk;
@@ -29,9 +29,9 @@ De versienummers volgen de versie in `library.properties`.
 
 ### Input
 
-- `Input` is de enige v2.0.0-Input-architectuur en werkt via `GEDEELDE_BUS_PROTOTYPE`; de oude backward/non-PROTOTYPE-Input-routes zijn verwijderd.
+- `Input` is de enige v2.0.0-Input-architectuur en werkt via de normale v2.0.0-GedeeldeBus-lifecycle; de oude backward/non-PROTOTYPE-Input-routes zijn verwijderd.
 - DIGITAL, PCF8574 en HX1838 worden als GedeeldeBus-kinderen van `Input` ingeplugd; de blijvende Input-status en kanaalstatus zitten in het `Input`-object.
-- de publieke Input-aanroepen lopen via het object, waaronder `Input.InputConfigureren()`, `Input.OpvragenHuidigeToetsAanslag(...)`, `Input.OpvragenHuidigeToetsAanslagen(...)`, `Input.UitVoerenFunctieVolgensMappingMetToetsAanslag(...)` en `Input.ControleerMappingVolledigheid(...)`.
+- de publieke Input-aanroepen lopen via het object; de vroegere publieke `InputConfigureren()`-stap is verwijderd en initialisatie gebeurt volledig via de GedeeldeBus-lifecycle en `Input::Activeren()`.
 - `INPUT_PCF8574` en `EXTENDER_PCF8574` gebruiken dezelfde interne `ExtenderPCF8574`-codebasis; de afzonderlijke externe PCF8574-library is uit de Input-implementatie en uit `library.properties` verwijderd.
 - `GedeeldeBusComponent::INPUT_PCF8574` blijft de exclusieve Input-rol en de shield-pinindeling aanduiden; fysiek telt deze PCF8574 als de eerste gebruikte PCF8574 in de I2C-adresreeks.
 - wanneer `INPUT_PCF8574` het standaardadres `0x20` gebruikt, krijgt `EXTENDER_PCF8574_1` standaard `0x21` en `EXTENDER_PCF8574_2` standaard `0x22`.
@@ -59,6 +59,16 @@ De versienummers volgen de versie in `library.properties`.
 - `ADC_ADS1115` gebruikt standaard `I2C_ADDRESS_ADS1115`; wanneer deze route actief is, schuift `EXTENDER_ADS1115_1` standaard naar het volgende ADS1115-adres en `EXTENDER_ADS1115_2` naar het daaropvolgende adres.
 - de twee bestaande voorbeelden onder `examples/Systeem/ADC_Backend/` valideren voortaan het aanmelden, controleren en inpluggen via GedeeldeBus; de sensorlaag wordt in deze stap nog niet gebruikt.
 - `extras/TestLibraryADC-v2.0.0.cmd` toegevoegd als tijdelijke, gerichte ADC-test op Arduino UNO R4 Minima.
+
+### GedeeldeBus / Extenders / diagnose
+
+- `GedeeldeBusNewComponent<T>(...)` voert de vaste lifecycle `aanmelden()` → `controleren()` → `inpluggen()` → `activeren()` uit;
+- `inpluggen()` blijft de minimale hardwarecontrole voor normale werking;
+- `GedeeldeBusNode` bevat onder `DEBUG` een virtuele dummy `Diagnose()` als voorbereide interface voor latere uitgebreide elektronische functietesten;
+- de 14 concrete Extenders staan elk in een eigen `.h/.cpp` onder `Systeem/GedeeldeBus`;
+- alle waarden van alle `ExtenderPins`-enums gebruiken voortaan consequent `EP_<pinnaam>`; hierdoor botsen fabrikantnamen zoals `GPIO0` niet met bestaande `SystemConfig.h`-macro's;
+- de geldige ExtenderPins-bereiken worden door GedeeldeBus gecontroleerd;
+- `RFP602` is de eerste concrete Sensor onder `src/Systeem/Sensor/`.
 
 ## 1.1.2
 

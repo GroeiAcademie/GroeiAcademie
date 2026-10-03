@@ -1,4 +1,19 @@
 # Testprocedure
+## Testlagen beta v2.0.0
+
+Voor Screen, Input, Extenders en Sensoren worden drie verschillende testlagen onderscheiden. Ze mogen niet als dezelfde test worden beschouwd.
+
+1. **GedeeldeBus-/architectuurtest**
+   Test `aanmelden()`, `controleren()`, geldige/ongeldige resources, conflicten, `inpluggen()` en de normale lifecycle. Deze test bewijst nog niet dat alle elektronische functies van een chip correct werken.
+
+2. **Elektronische functietest**
+   Test de echte fysieke functie: GPIO HIGH/LOW, ADC-referenties, interrupts, UART-loopback, multiplexerkanalen, 1-Wire-kanalen, display-output enzovoort. Deze uitgebreide diagnostiek hoort onder `DEBUG` in of rond `Diagnose()`.
+
+3. **Praktijktest**
+   Test het echte gebruik met de bedoelde sensor, keypad, display of ander randapparaat.
+
+`inpluggen()` blijft beperkt tot de minimale hardwarecontrole die nodig is om normale werking toe te laten. Een succesvolle `inpluggen()` mag daarom nooit als bewijs worden geïnterpreteerd dat alle functies van de component elektronisch doorgemeten zijn.
+
 
 Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meegeleverde testscripts gevalideerd. De gedeelde Windows-`.cmd`-scripts staan onder `extras/` en maken deel uit van de library. Alleen `extras/LokalePaden.cmd` is machinespecifiek en wordt via `.gitignore` niet gepubliceerd; `extras/LokalePaden_template.cmd` wordt wel meegeleverd.
 
@@ -192,7 +207,6 @@ examples\Systeem\GedeeldeBus\
 Het script geeft daarnaast deze extra compileflag mee aan de betrokken testblokken:
 
 ```text
--DGEDEELDE_BUS_PROTOTYPE
 ```
 
 De gewone GedeeldeBus-tests gebruiken `TestLibraryCommon.cmd`. `TestLibraryGedeeldeBusOngeldig.cmd` gebruikt `TestLibraryCommonOngeldig.cmd` met dezelfde INCLUDE-scope. Beide maken momenteel geen deel uit van de vier logs die `TestLibraryGenereerTESTRESULTATEN.cmd` voor de officiële releasevalidatie verwerkt.

@@ -159,3 +159,33 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 **Context:** toegevoegd in v1.1.2. HX1838 DATA gebruikt Arduino Uno-shieldpin `D8`; PixelScreen RST gebruikt Arduino Uno-shieldpin `D7`.
 
+## D032 v2.0.0: GedeeldeBus als neutrale lifecycle- en resourcebeheerlaag
+
+**Besluit:** GedeeldeBus blijft zo klein, neutraal en transparant mogelijk. Screen, Input, Stimulus, Extenders en Sensoren blijven onafhankelijke, los te testen subsystemen. GedeeldeBus beheert generiek aanmelden, controleren, inpluggen, activeren, afmelden en resourceconflicten. Concrete hardwarekennis hoort zoveel mogelijk bij de concrete component.
+
+**Context:** beta v2.0.0, nodig om meerdere hardwarebronnen, Extenders en Sensoren binnen één consistente architectuur te kunnen combineren.
+
+## D033 v2.0.0: vaste lifecycle
+
+**Besluit:** de normale component-lifecycle is `aanmelden()` → `controleren()` → `inpluggen()` → `activeren()`. `GedeeldeBusNewComponent<T>(...)` voert deze stappen in deze volgorde uit en geeft `nullptr` terug wanneer de cyclus niet slaagt.
+
+**Context:** Screen, Input, Extenders en Sensoren gebruiken hiermee dezelfde basis.
+
+## D034 ExtenderPins: vaste prefix EP_
+
+**Besluit:** iedere waarde binnen iedere `enum class ExtenderPins` begint met `EP_`; de rest van de naam blijft de concrete fabrikant-/resourcenaam zo dicht mogelijk volgen. Voorbeelden: `EP_AIN0`, `EP_GPIO0`, `EP_P0`, `EP_GPA0`, `EP_CH0`.
+
+**Context:** voorkomt preprocessorconflicten met bestaande macro's zoals `GPIO0` in `SystemConfig.h` en geeft tegelijk overal dezelfde herkenbare ExtenderPin-naamconventie.
+
+## D035 Inpluggen versus Diagnose
+
+**Besluit:** `inpluggen()` bevat alleen de minimale hardware-/aanwezigheidscontrole die nodig is om een component veilig naar normale werking te laten doorgaan. Uitgebreide elektronische functietesten horen in `Diagnose()`. `Diagnose()` bestaat uitsluitend wanneer `DEBUG` actief is; de basisfunctie is voorlopig een lege virtuele hook.
+
+**Context:** productiecode mag geen uitgebreide testoverhead krijgen. Diagnose moet later per concrete component kunnen worden ingevuld.
+
+## D036 Drie testlagen voor hardwarecomponenten
+
+**Besluit:** hardwarevalidatie wordt onderscheiden in (1) GedeeldeBus-/architectuurtests, (2) elektronische functietests en (3) praktijktests met echte randapparatuur/sensoren. Een geslaagde lifecycle-test is geen bewijs dat alle elektronische functies van een chip zijn doorgemeten.
+
+**Context:** expliciete scheiding voor Screen, Input, Extenders en Sensoren tijdens de beta-v2.0.0-validatie.
+
