@@ -66,20 +66,16 @@ void setup() {
   analogReadResolution(ADC_BITS);
 #endif  
 
-#ifdef DEBUG
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
-  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
-#endif
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
+
+#ifdef DEBUG
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
+#endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFC602.aanmelden();
-  sensorRFC602.controleren();
-  sensorRFC602.inpluggen();
-  sensorRFC602.activeren();
+  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
+  if (sensorRFP602 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -121,13 +117,13 @@ void UitvoerenAlgoritmeEnkelTik() {
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
-    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[sensorNummer]); }
+    for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) { sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]); }
      const int offsetSensor[4] = { Stimulus.offsetSensor1, Stimulus.offsetSensor2, Stimulus.offsetSensor3, Stimulus.offsetSensor4 };
 
     // bepaal welke sensor als eerste actief is
     for (int sensorNummer = AANTAL_SENSOREN_AANWEZIG - 1; sensorNummer >= 0; sensorNummer--) {
-      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
-        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorRFC602.sensorPin[sensorNummer];
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorRFP602->sensorPin[sensorNummer];
         Stimulus.offsetSensorActief = offsetSensor[sensorNummer];
         break;
       }

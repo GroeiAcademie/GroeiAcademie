@@ -100,18 +100,18 @@ typedef void (*PixelScreenCallback)(ScreenData screenData, const String& eersteR
 
 struct Screen : GedeeldeBusNode {
   Screen();
-  Screen(uint8_t SCREEN_TYPES_ACTIEF);
+  Screen(uint8_t typesActief);
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   Screen(CharacterScreenCallback callback);
-  Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback callback);
+  Screen(uint8_t typesActief, CharacterScreenCallback callback);
 #endif
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   Screen(PixelScreenCallback callback);
-  Screen(uint8_t SCREEN_TYPES_ACTIEF, PixelScreenCallback callback);
+  Screen(uint8_t typesActief, PixelScreenCallback callback);
 #endif
 #if ((SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER) && (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS))
   Screen(CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback);
-  Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback);
+  Screen(uint8_t typesActief, CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback);
 #endif
 
   void ActivatiefoutWeergeven();
@@ -188,7 +188,7 @@ struct Screen : GedeeldeBusNode {
 #endif
 
 private:
-  uint8_t SCREEN_TYPES_ACTIEF = SCREEN_OUTPUT;
+  uint8_t typesActief = SCREEN_OUTPUT;
 
   // Screen stuurt elke stap intern door naar zijn uitvoeren (CharacterScreen, PixelScreen, SerialOutput).
   bool aanmelden() override;

@@ -7,6 +7,9 @@
 //=========================================================
 // ABORT
 //=========================================================
+// GedeeldeBus
+#define _ABORT_GB001 "ABORT: GB001" // GedeeldeBus aanmelden() mislukt: GEDEELD-claim zonder geldige identiteit
+
 // CharacterScreen
 #define _ABORT_CS001 "ABORT: CS001" // CharacterScreen aanmelden() mislukt
 
@@ -16,26 +19,15 @@
 // SerialScreen
 #define _ABORT_SS001 "ABORT: SS001" // SerialScreen aanmelden() mislukt
 
-// GedeeldeBus
-#define _ABORT_GB001 "ABORT: GB001" // GedeeldeBus aanmelden() mislukt: GEDEELD-claim zonder geldige identiteit
+// InputKanalen
+#define _ABORT_IN001 "ABORT: IN001" // InputKanalen aanmelden() mislukt
 
 //=========================================================
 // FATAL
 //=========================================================
 #ifndef FATAL_ZOEK_OP
-  #define FATAL_ZOEK_OP "JETZT NACHSEHEN"
+  #define FATAL_ZOEK_OP "ZOEK DIT NU OP"
 #endif
-
-// CharacterScreen
-#define _FATAL_CS101 "FATAL: CS101" // CharacterScreen controleren() mislukt
-#define _FATAL_CS401 "FATAL: CS401" // CharacterScreen tijdens runtime niet actief/beschikbaar
-
-// PixelScreen
-#define _FATAL_PS101 "FATAL: PS101" // PixelScreen controleren() mislukt
-#define _FATAL_PS401 "FATAL: PS401" // PixelScreen tijdens runtime niet actief/beschikbaar
-
-// SerialScreen
-#define _FATAL_SS101 "FATAL: SS101" // SerialScreen controleren() mislukt
 
 // GedeeldeBus
 #define _FATAL_GB101 "FATAL: GB101" // GedeeldeBus controleren() mislukt: minstens een claim EXCLUSIEF, zelfde resource
@@ -50,6 +42,22 @@
 #define _FATAL_GB110 "FATAL: GB110" // GedeeldeBus controleren() mislukt: ongeldig I2C-adres
 #define _FATAL_GB111 "FATAL: GB111" // GedeeldeBus controleren() mislukt: parent/extender biedt gevraagde resource niet aan
 
+// CharacterScreen
+#define _FATAL_CS101 "FATAL: CS101" // CharacterScreen controleren() mislukt
+#define _FATAL_CS401 "FATAL: CS401" // CharacterScreen tijdens runtime niet actief/beschikbaar
+
+// PixelScreen
+#define _FATAL_PS101 "FATAL: PS101" // PixelScreen controleren() mislukt
+#define _FATAL_PS401 "FATAL: PS401" // PixelScreen tijdens runtime niet actief/beschikbaar
+
+// SerialScreen
+#define _FATAL_SS101 "FATAL: SS101" // SerialScreen controleren() mislukt
+
+// InputKanalen
+#define _FATAL_IN101 "FATAL: IN101" // InputKanalen controleren() mislukt
+#define _FATAL_IN401 "FATAL: IN401" // InputKanalen tijdens runtime niet actief/beschikbaar
+#define _FATAL_IN402 "FATAL: IN402" // InputKanalen PCF8574 niet bereikbaar op ingesteld I2C-adres
+
 //=========================================================
 // CRITICAL
 //=========================================================
@@ -61,9 +69,9 @@
 #define _CRITICAL_PS201 "CRITICAL: PS201" // PixelScreen inpluggen() mislukt
 #define _CRITICAL_PS301 "CRITICAL: PS301" // PixelScreen activeren() mislukt
 #define _CRITICAL_PS302 "CRITICAL: PS302" // PixelScreen niet gekoppeld
-#define _CRITICAL_PS303 "CRITICAL: PS303" // Omgewisselde breedte en hoogte komen niet overeen
-#define _CRITICAL_PS304 "CRITICAL: PS304" // Niet-omgewisselde breedte en hoogte komen niet overeen
-#define _CRITICAL_PS305 "CRITICAL: PS305" // Tekstgrid kleiner dan 16x2
+#define _CRITICAL_PS303 "CRITICAL: PS303" // PIXEL_SCREEN_ROTATION 1 of 3: Omgewisselde breedte en hoogte komen niet overeen
+#define _CRITICAL_PS304 "CRITICAL: PS304" // PIXEL_SCREEN_ROTATION 0 of 2: Niet-omgewisselde breedte en hoogte komen niet overeen
+#define _CRITICAL_PS305 "CRITICAL: PS305" // Tekstgrid kleiner dan PIXELGRID_MIN_KOLOMMEN x PIXELGRID_MIN_RIJEN 
 
 // SerialScreen
 #define _CRITICAL_SS201 "CRITICAL: SS201" // SerialScreen inpluggen() mislukt
@@ -71,7 +79,13 @@
 #define _CRITICAL_SS302 "CRITICAL: SS302" // SerialScreen niet beschikbaar na SERIAL_CONNECT_TIMEOUT_MS
 
 // InputKanalen
-#define _FATAL_IN000 "FATAL: IN000" // PCF8574 niet bereikbaar op ingesteld I2C-adres
+#define _CRITICAL_IN201 "CRITICAL: IN201" // InputKanalen inpluggen() mislukt
+#define _CRITICAL_IN202 "CRITICAL: IN202" // InputKanalen HX1838 ingestelde pin kan niet geldig naar een native Arduino-pin worden omgezet
+#define _CRITICAL_IN301 "CRITICAL: IN301" // InputKanalen activeren() mislukt
+#define _CRITICAL_IN302 "CRITICAL: IN302" // InputKanalen HX1838 ontvangstlijn blijft permanent LOW
+#define _CRITICAL_IN303 "CRITICAL: IN303" // InputKanalen HX1838 TinyIRReceiver interruptinitialisatie mislukt
+#define _CRITICAL_IN304 "CRITICAL: IN304" // InputKanalen HX1838 pin is niet bruikbaar voor het vereiste interruptmechanisme
+#define _CRITICAL_IN305 "CRITICAL: IN305" // InputKanalen HX1838 receiver kon na initialisatie niet als correct gestart worden bevestigd
 
 //=========================================================
 // PrintToScreen

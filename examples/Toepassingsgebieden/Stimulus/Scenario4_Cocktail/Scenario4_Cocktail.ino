@@ -67,20 +67,16 @@ void setup() {
   analogReadResolution(ADC_BITS);
 #endif  
 
-#ifdef DEBUG
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
-  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
-#endif
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
+
+#ifdef DEBUG
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
+#endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFC602.aanmelden();
-  sensorRFC602.controleren();
-  sensorRFC602.inpluggen();
-  sensorRFC602.activeren();
+  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
+  if (sensorRFP602 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -148,7 +144,7 @@ void UitvoerenAlgoritmeCocktailTik() {
   Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot alle te meten sensoren ingedrukt zijn geweest.
   int aantalGestarteSensoren = 0;
@@ -156,7 +152,7 @@ void UitvoerenAlgoritmeCocktailTik() {
 
   while (aantalGestarteSensoren < aantalSensorenSimultaanTeMeten) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
+      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
         sensorGekozen[sensorNummer] = true;
         aantalGestarteSensoren++;
       }

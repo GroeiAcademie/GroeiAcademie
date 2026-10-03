@@ -22,13 +22,14 @@ struct RFP602 : Sensor {
     NativeArduinoPinVan(ADC_PIN_SENSOR_3),
     NativeArduinoPinVan(ADC_PIN_SENSOR_4)
 #else
-    ADC_PIN_SENSOR_1,
-    ADC_PIN_SENSOR_2,
-    ADC_PIN_SENSOR_3,
-    ADC_PIN_SENSOR_4
+    static_cast<int>(ADC_PIN_SENSOR_1),
+    static_cast<int>(ADC_PIN_SENSOR_2),
+    static_cast<int>(ADC_PIN_SENSOR_3),
+    static_cast<int>(ADC_PIN_SENSOR_4)
 #endif
   };
 
+  RFP602();
   RFP602(GedeeldeBusNode* parent, GedeeldeBusComponent component,
          HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : Sensor(parent, { nullptr, 0, exclusief_, AANTAL_SENSOREN_AANWEZIG }, component, Extender) {
@@ -42,6 +43,6 @@ struct RFP602 : Sensor {
   int RawAnalogRead(int sensorPin);
 };
 
-extern struct RFP602 sensorRFP602;
+extern struct RFP602* sensorRFP602;
 
 #endif

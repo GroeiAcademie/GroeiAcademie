@@ -1,4 +1,6 @@
-// InputkanalenPCF8574.ino
+// ============================================================================
+// Inputkanalen PCF8574
+// ============================================================================
 // Testtoepassing voor de Input-laag (InputTypes.h/Input.h/Input.cpp), specifiek voor INPUT_TYPE_PCF8574.
 
 // INPUT TESTEN:
@@ -229,9 +231,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
-  Input = GedeeldeBusNewComponent<struct Input>();
+  Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_PCF8574);
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
   // Optioneel, enkel voor testdoeleinden: meldt via Serial welke opschriften van het gecompileerde KEYPAD_TYPE ontbreken in mappingTestMenu[]. 

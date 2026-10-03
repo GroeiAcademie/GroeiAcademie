@@ -1,4 +1,6 @@
-// InputkanalenDIGITALmetArgumenten.ino
+// ============================================================================
+// Inputkanalen DIGITAL met Argumenten
+// ============================================================================
 // Testtoepassing voor de Input-laag, specifiek voor INPUT_TYPE_DIGITAL, die de
 // void*-argumentenaanpak voor InputFunctie demonstreert.
 
@@ -77,9 +79,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
-  Input = GedeeldeBusNewComponent<struct Input>();
+  Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_DIGITAL);
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 }
 
 void loop() {

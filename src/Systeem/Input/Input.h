@@ -199,16 +199,15 @@ typedef unsigned long (*LangIndrukkenDrempelOpzoekerFunctie)(const char* opschri
 // ============================================================================
 struct Input : GedeeldeBusNode {
   Input();
-  Input(uint8_t INPUT_TYPES_ACTIEF);
+  Input(uint8_t typesActief);
 
-  // Input stuurt elke stap door naar zijn kanalen (InputDigital, InputPCF8574, InputHX1838).
+  // Input stuurt elke stap door naar zijn kanalen (InputDigital, InputPCF8574, InputHX1838); kanaalspecifieke inplug- en activeringscontroles blijven binnen deze lifecycle.
   bool aanmelden() override;
   bool controleren() override;
   bool inpluggen() override;
   bool Activeren() override;
   bool afmelden() override;
 
-  void InputConfigureren();
 
   const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag);
 
@@ -282,7 +281,7 @@ struct Input : GedeeldeBusNode {
 #endif
 
 private:
-  uint8_t INPUT_TYPES_ACTIEF = INPUT_KANAAL_CONFIG;
+  uint8_t typesActief = INPUT_KANAAL_CONFIG;
   template <size_t N>
   const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
     if (opschriftToetsAanslag == nullptr) return nullptr;

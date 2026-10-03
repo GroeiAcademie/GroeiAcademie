@@ -1,4 +1,6 @@
-// InputkanalenHX1838metArgumenten.ino
+// ============================================================================
+// Inputkanalen HX1838 met Argumenten
+// ============================================================================
 // ILLUSTRATIEF VOORBEELD van de void*-argumentenaanpak voor InputFunctie, toegepast op INPUT_TYPE_HX1838. Zet in UserConfig.h:
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
 //

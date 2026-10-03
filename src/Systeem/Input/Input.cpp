@@ -6,8 +6,8 @@ Input::Input()
   : Input(INPUT_KANAAL_CONFIG)
 {}
 
-Input::Input(uint8_t INPUT_TYPES_ACTIEF)
-  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::INPUT, HardwareResourceToegang::GEDEELD), INPUT_TYPES_ACTIEF(INPUT_TYPES_ACTIEF)
+Input::Input(uint8_t typesActief)
+  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::INPUT, HardwareResourceToegang::GEDEELD), typesActief(typesActief)
 {}
 
 struct Input* Input = nullptr;
@@ -199,11 +199,13 @@ extern const byte aantalToetsFuncties __attribute__((weak)) = 0;
 // OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag() retourneert de volledige koppeling met opschrift en functiepointer.
 const MappingTussenToetsaanslagEnUitTeVoerenFunctie* Input::OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag) {
   if (opschriftToetsAanslag == nullptr) return nullptr;
+
   for (byte i = 0; i < aantalToetsFuncties; i++) {
     if (strcmp(mappingTussenToetsaanslagEnUitTeVoerenFunctie[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
       return &mappingTussenToetsaanslagEnUitTeVoerenFunctie[i];
     }
   }
+
   return nullptr;
 }
 
@@ -223,23 +225,27 @@ unsigned long Input::_StandaardLangIndrukkenDrempelOpzoeker(const char* opschrif
 #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
 unsigned long Input::_LangIndrukkenDrempelOpzoekerViaActieveMapping(const char* opschriftToetsAanslag) {
   if (::Input->_actieveMappingVoorLangIndrukken == nullptr || opschriftToetsAanslag == nullptr) return 0;
+
   for (byte i = 0; i < ::Input->_actieveMappingAantalVoorLangIndrukken; i++) {
     if (strcmp(::Input->_actieveMappingVoorLangIndrukken[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
       if (::Input->_actieveMappingVoorLangIndrukken[i].functieBijLangIndrukken == nullptr) return 0;
       return ::Input->_actieveMappingVoorLangIndrukken[i].langIndrukkenDrempelMs;
     }
   }
+
   return 0;
 }
 
 unsigned long Input::_LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten(const char* opschriftToetsAanslag) {
   if (::Input->_actieveMappingMetArgumentenVoorLangIndrukken == nullptr || opschriftToetsAanslag == nullptr) return 0;
+
   for (byte i = 0; i < ::Input->_actieveMappingMetArgumentenAantalVoorLangIndrukken; i++) {
     if (strcmp(::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
       if (::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].functieBijLangIndrukken == nullptr) return 0;
       return ::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].langIndrukkenDrempelMs;
     }
   }
+
   return 0;
 }
 #endif
@@ -255,9 +261,11 @@ void Input::ControleerMappingVolledigheidIntern(const char* const opschriftToets
 #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
   for (byte i = 0; i < (sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])); i++) {
     bool gevonden = false;
+
     for (byte j = 0; j < aantalEntries; j++) {
       if (strcmp(KEY_LAYOUT[i].opschrift, opschriftToetsAanslag[j]) == 0) { gevonden = true; break; }
     }
+
     if (!gevonden) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
       Screen->Print(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
@@ -271,9 +279,11 @@ void Input::ControleerMappingVolledigheidIntern(const char* const opschriftToets
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   for (byte i = 0; i < (sizeof(IR_KEY_LAYOUT) / sizeof(IR_KEY_LAYOUT[0])); i++) {
     bool gevonden = false;
+
     for (byte j = 0; j < aantalEntries; j++) {
       if (strcmp(IR_KEY_LAYOUT[i].opschrift, opschriftToetsAanslag[j]) == 0) { gevonden = true; break; }
     }
+
     if (!gevonden) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
       Screen->Print(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
@@ -425,19 +435,26 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   // Zelfde patroon als characterScreenStatus.foutmeldingWeergegeven in Screen.cpp.
 
   void Input::PCF8574OnbereikbaarMelden() {
+#ifdef DEBUG
+    GA_DEBUG_PRINT("DEBUG: IN402 PCF8574 adres=0x");
+    GA_DEBUG_PRINTLN2(I2C_ADDRESS_PCF8574, HEX);
+#endif
     pcf8574Bereikbaar = false;
     if (pcf8574FoutmeldingWeergegeven) return;
     char pcf8574AdresBuffer[17];
     snprintf(pcf8574AdresBuffer, sizeof(pcf8574AdresBuffer), _INPUT_PCF8574_ADRES_LABEL ": 0x%02X", I2C_ADDRESS_PCF8574);
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    Screen->Print(ScreenData::TYPE_FATAL, _FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
+    Screen->Print(ScreenData::TYPE_FATAL, _FATAL_IN402, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
 #else
-    Screen->Print(_FATAL_IN000, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
+    Screen->Print(_FATAL_IN402, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
 #endif
     pcf8574FoutmeldingWeergegeven = true;
   }
 
   bool Input::PCF8574poortPatroonMatrixUitlezenInstellen(byte waarde) {
+#ifdef TRACE
+    GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonMatrixUitlezenInstellen()");
+#endif
     if (!pcf8574Bereikbaar) return false;
     gedeeldeBusInputPCF8574->WriteByte(waarde);
     if (gedeeldeBusInputPCF8574->lastError() == 0) return true;
@@ -446,6 +463,9 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   }
 
   bool Input::PCF8574poortPatroonUitlezen(byte& waarde) {
+#ifdef TRACE
+    GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonUitlezen()");
+#endif
     if (!pcf8574Bereikbaar) return false;
     waarde = gedeeldeBusInputPCF8574->ReadByte();
     if (gedeeldeBusInputPCF8574->lastError() == 0) return true;
@@ -458,6 +478,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       if (!pcf8574Bereikbaar) return 0;
       byte status = 0xFF;
       if (!PCF8574poortPatroonUitlezen(status)) return 0;
+
       for (byte i = 0; i < AANTAL_DIRECT_PINNEN; i++) {
         #if KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
           if (bitRead(status, TOETS_PINNEN[i])) return i + 1;
@@ -477,6 +498,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
           if (!bitRead(status, TOETS_PINNEN[i])) return i + 1;
         #endif
       }
+
       return 0;
     }
   #endif
@@ -484,6 +506,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #if defined(KEYPAD_IS_MATRIX)
     int Input::PCF8574uitLezenPoortenP0totP7MatrixAansluiting() {
       if (!pcf8574Bereikbaar) return 0;
+
       for (byte rij = 0; rij < AANTAL_RIJEN; rij++) {
         byte uitgang = 0xFF;
         bitClear(uitgang, RIJ_PINNEN[rij]);
@@ -522,12 +545,14 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       for (byte rij = 0; rij < 2; rij++) {
         digitalWrite(rijPinnen[rij], LOW);
         delayMicroseconds(50);
+
         for (byte kolom = 0; kolom < 2; kolom++) {
           if (digitalRead(kolomPinnen[kolom]) == LOW) {
             digitalWrite(rijPinnen[rij], HIGH);
             return (rij * 2) + kolom + 1;
           }
         }
+
         digitalWrite(rijPinnen[rij], HIGH);
       }
 
@@ -591,12 +616,14 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 
     if (rauw != stabieleKeypadPositie) {
       stabieleKeypadPositie = rauw;
+
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-        if (stabieleKeypadPositie > 0) {
-          keypadDrukBeginTijd = nu;
-          langIndrukkenAlGemeldVoorHuidigeDruk = false;
-        }
+      if (stabieleKeypadPositie > 0) {
+        keypadDrukBeginTijd = nu;
+        langIndrukkenAlGemeldVoorHuidigeDruk = false;
+      }
       #endif
+
       if (stabieleKeypadPositie > 0) return stabieleKeypadPositie;
     }
 
@@ -609,9 +636,11 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   // zodat stabieleKeypadPositie al up-to-date is.
   int Input::KeypadUitLezenLosgelatenPositie() {
     int resultaat = 0;
+
     if (laatstePositieVoorLoslatenDetectie > 0 && stabieleKeypadPositie == 0) {
       resultaat = laatstePositieVoorLoslatenDetectie;
     }
+
     laatstePositieVoorLoslatenDetectie = stabieleKeypadPositie;
     return resultaat;
   }
@@ -742,6 +771,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
       if (TinyIRReceiverData.justWritten) {
         TinyIRReceiverData.justWritten = false;
+
         if (!(TinyIRReceiverData.Flags & IRDATA_FLAGS_IS_REPEAT)) {
           irCodes[index] = TinyIRReceiverData.Command;
           delay(HX1838_KALIBRATIE_TOETS_PAUZE_MS);
@@ -876,6 +906,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
             Screen->Print(IR_KEY_LAYOUT[index].weergavetekst, _INPUT_HX1838_TOETS_HERKEND, 500);
           }
         }
+
 #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE == 0
         IrReceiver.resume();
 #endif
@@ -939,6 +970,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_IR_ONTVANGEN);
       GA_DEBUG_PRINT("=0x");
       GA_DEBUG_PRINT(String(TinyIRReceiverData.Command, HEX));
+
       if (index >= 0) {
         GA_DEBUG_PRINT(" ");
         GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_VERGELEKEN_MET);
@@ -954,6 +986,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
         GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_GEEN_MATCH);
         GA_DEBUG_PRINT(") #");
       }
+
       GA_DEBUG_PRINTLN(hx1838DecodeTeller);
 #endif
       if (index >= 0) positie = index + 1;
@@ -965,6 +998,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_IR_ONTVANGEN);
       GA_DEBUG_PRINT("=0x");
       GA_DEBUG_PRINT(String(IrReceiver.decodedIRData.command, HEX));
+
       if (index >= 0) {
         GA_DEBUG_PRINT(" ");
         GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_VERGELEKEN_MET);
@@ -980,6 +1014,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
         GA_DEBUG_PRINT(_INPUT_HX1838_DEBUG_GEEN_MATCH);
         GA_DEBUG_PRINT(") #");
       }
+
       GA_DEBUG_PRINTLN(hx1838DecodeTeller);
 #endif
       if (index >= 0) positie = index + 1;
@@ -993,14 +1028,18 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 // ============================================================================
 // PUBLIEKE API
 // ============================================================================
-// Elke stap gaat via Input naar zijn kanalen. Voor Input geldt alles of niets: faalt één kanaal, dan faalt de stap.
+// Elke stap gaat via Input naar zijn kanalen, zelfde werkwijze als Screen: faalt één kanaal, dan valt enkel dat kanaal weg (afmelden() + nullptr); de overige, geselecteerde kanalen worden gewoon geactiveerd.
+// Input faalt pas volledig wanneer geen enkel geselecteerd kanaal overleeft.
 bool Input::aanmelden() {
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::aanmelden()");
+#endif
   if (aangemeld) return true;
-  if ((this->INPUT_TYPES_ACTIEF & INPUT_KANAAL_CONFIG) != this->INPUT_TYPES_ACTIEF) return false;
+  if ((this->typesActief & (INPUT_KANAAL_CONFIG)) != this->typesActief) return false;
   if (!GedeeldeBusNode::aanmelden()) return false;
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  if ((this->INPUT_TYPES_ACTIEF & INPUT_TYPE_DIGITAL) && gedeeldeBusInputDigital == nullptr) {
+  if ((this->typesActief & INPUT_TYPE_DIGITAL) && gedeeldeBusInputDigital == nullptr) {
   #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
     gedeeldeBusInputDigitalPinnen[0] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_K1);
     gedeeldeBusInputDigitalPinnen[1] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_K2);
@@ -1023,10 +1062,9 @@ bool Input::aanmelden() {
     gedeeldeBusInputDigitalPinnen[3] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_OUT4);
   #endif
 
-    InputDigital* kanaal = new InputDigital(
-      this, BezettingPinnen{ nullptr, 0, gedeeldeBusInputDigitalPinnen, 4 },
-      GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceToegang::GEDEELD);
+    InputDigital* kanaal = new InputDigital(this, BezettingPinnen{ nullptr, 0, gedeeldeBusInputDigitalPinnen, 4 }, GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceToegang::GEDEELD);
     kanaal->componentCreated = true;
+
     if (kanaal->aanmelden()) {
       gedeeldeBusInputDigital = kanaal;
     } else {
@@ -1036,11 +1074,10 @@ bool Input::aanmelden() {
 #endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-  if ((this->INPUT_TYPES_ACTIEF & INPUT_TYPE_PCF8574) && gedeeldeBusInputPCF8574 == nullptr) {
-    InputPCF8574* kanaal = new InputPCF8574(
-      this, GedeeldeBusComponent::INPUT_PCF8574, I2C_ADDRESS_PCF8574,
-      HardwareResourcePin::SDA, HardwareResourcePin::SCL, HardwareResourceToegang::GEDEELD);
+  if ((this->typesActief & INPUT_TYPE_PCF8574) && gedeeldeBusInputPCF8574 == nullptr) {
+    InputPCF8574* kanaal = new InputPCF8574(this, GedeeldeBusComponent::INPUT_PCF8574, I2C_ADDRESS_PCF8574, HardwareResourcePin::SDA, HardwareResourcePin::SCL, HardwareResourceToegang::GEDEELD);
     kanaal->componentCreated = true;
+
     if (kanaal->aanmelden()) {
       gedeeldeBusInputPCF8574 = kanaal;
     } else {
@@ -1050,13 +1087,12 @@ bool Input::aanmelden() {
 #endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
-  if ((this->INPUT_TYPES_ACTIEF & INPUT_TYPE_HX1838) && gedeeldeBusInputHX1838 == nullptr) {
+  if ((this->typesActief & INPUT_TYPE_HX1838) && gedeeldeBusInputHX1838 == nullptr) {
     gedeeldeBusInputHX1838Pinnen[0] = static_cast<uint8_t>(ArduinoUnoShieldPinOmzettenNaarHardwareResourcePin(HX1838_ONTVANGER_PIN));
 
-    InputHX1838* kanaal = new InputHX1838(
-      this, BezettingPinnen{ nullptr, 0, gedeeldeBusInputHX1838Pinnen, 1 },
-      GedeeldeBusComponent::INPUT_HX1838, HardwareResourceToegang::GEDEELD);
+    InputHX1838* kanaal = new InputHX1838(this, BezettingPinnen{ nullptr, 0, gedeeldeBusInputHX1838Pinnen, 1 }, GedeeldeBusComponent::INPUT_HX1838, HardwareResourceToegang::GEDEELD);
     kanaal->componentCreated = true;
+
     if (kanaal->aanmelden()) {
       gedeeldeBusInputHX1838 = kanaal;
     } else {
@@ -1065,7 +1101,7 @@ bool Input::aanmelden() {
   }
 #endif
 
-  if (this->INPUT_TYPES_ACTIEF != INPUT_TYPE_NONE
+  if (this->typesActief != INPUT_TYPE_NONE
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
       && gedeeldeBusInputDigital == nullptr
 #endif
@@ -1081,29 +1117,41 @@ bool Input::aanmelden() {
 }
 
 bool Input::controleren() {
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::controleren()");
+#endif
   if (gecontroleerd) return true;
   if (!GedeeldeBusNode::controleren()) return false;
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::controleren(): DIGITAL");
+#endif
   if (gedeeldeBusInputDigital != nullptr && !gedeeldeBusInputDigital->controleren()) {
     gedeeldeBusInputDigital->afmelden();
     gedeeldeBusInputDigital = nullptr;
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::controleren(): PCF8574 I2C");
+#endif
   if (gedeeldeBusInputPCF8574 != nullptr && !gedeeldeBusInputPCF8574->controleren()) {
     gedeeldeBusInputPCF8574->afmelden();
     gedeeldeBusInputPCF8574 = nullptr;
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::controleren(): HX1838");
+#endif
   if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->controleren()) {
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   }
 #endif
 
-  if (this->INPUT_TYPES_ACTIEF != INPUT_TYPE_NONE
+  if (this->typesActief != INPUT_TYPE_NONE
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
       && gedeeldeBusInputDigital == nullptr
 #endif
@@ -1119,29 +1167,43 @@ bool Input::controleren() {
 }
 
 bool Input::inpluggen() {
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::inpluggen()");
+#endif
   if (ingeplugd) return true;
   if (!GedeeldeBusNode::inpluggen()) return false;
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::inpluggen(): DIGITAL");
+#endif
   if (gedeeldeBusInputDigital != nullptr && !gedeeldeBusInputDigital->inpluggen()) {
     gedeeldeBusInputDigital->afmelden();
     gedeeldeBusInputDigital = nullptr;
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::inpluggen(): PCF8574 I2C");
+#endif
   if (gedeeldeBusInputPCF8574 != nullptr && !gedeeldeBusInputPCF8574->inpluggen()) {
     gedeeldeBusInputPCF8574->afmelden();
     gedeeldeBusInputPCF8574 = nullptr;
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
-  if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->inpluggen()) {
+  if (gedeeldeBusInputHX1838 != nullptr && (static_cast<HardwareResourcePin>(gedeeldeBusInputHX1838Pinnen[0]) == HardwareResourcePin::NONE
+    || NativeArduinoPinVan(static_cast<HardwareResourcePin>(gedeeldeBusInputHX1838Pinnen[0])) == static_cast<uint8_t>(HardwareResourcePin::NONE))) {
+    Screen->Print(_CRITICAL_IN202, "", 2000);
+    gedeeldeBusInputHX1838->afmelden();
+    gedeeldeBusInputHX1838 = nullptr;
+  } else if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->inpluggen()) {
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   }
 #endif
 
-  if (this->INPUT_TYPES_ACTIEF != INPUT_TYPE_NONE
+  if (this->typesActief != INPUT_TYPE_NONE
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
       && gedeeldeBusInputDigital == nullptr
 #endif
@@ -1157,67 +1219,100 @@ bool Input::inpluggen() {
 }
 
 bool Input::Activeren() {
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::Activeren()");
+#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::Activeren(): DIGITAL");
+#endif
   if (gedeeldeBusInputDigital != nullptr && !gedeeldeBusInputDigital->activeren()) {
     gedeeldeBusInputDigital->afmelden();
     gedeeldeBusInputDigital = nullptr;
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::Activeren(): PCF8574 I2C");
+#endif
   if (gedeeldeBusInputPCF8574 != nullptr && !gedeeldeBusInputPCF8574->activeren()) {
     gedeeldeBusInputPCF8574->afmelden();
     gedeeldeBusInputPCF8574 = nullptr;
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::Activeren(): HX1838");
+#endif
+/*
+  if (gedeeldeBusInputHX1838 != nullptr && digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
+    delay(5);
+
+    if (digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
+      Screen->Print(_CRITICAL_IN302, "", 2000);
+      gedeeldeBusInputHX1838->afmelden();
+      gedeeldeBusInputHX1838 = nullptr;
+    }
+  }
+
+#ifdef DEBUG
+  if (gedeeldeBusInputHX1838 != nullptr) { GA_DEBUG_PRINT("Input::Activeren(): "); GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT); }
+#endif
+
+  #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+    #if defined(USE_ATTACH_INTERRUPT) && defined(NOT_AN_INTERRUPT)
+      if (gedeeldeBusInputHX1838 != nullptr && digitalPinToInterrupt(HX1838_ONTVANGER_PIN) == NOT_AN_INTERRUPT) {
+        Screen->Print(_CRITICAL_IN304, "", 2000);
+        gedeeldeBusInputHX1838->afmelden();
+        gedeeldeBusInputHX1838 = nullptr;
+      }
+    #endif
+    if (gedeeldeBusInputHX1838 != nullptr && !initPCIInterruptForTinyReceiver()) {
+      Screen->Print(_CRITICAL_IN303, "", 2000);
+      gedeeldeBusInputHX1838->afmelden();
+      gedeeldeBusInputHX1838 = nullptr;
+    }
+  #else
+    if (gedeeldeBusInputHX1838 != nullptr) {
+      IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
+
+      if (!IrReceiver.isIdle()) {
+        delay(5);
+
+        if (!IrReceiver.isIdle()) {
+          Screen->Print(_CRITICAL_IN305, "", 2000);
+          gedeeldeBusInputHX1838->afmelden();
+          gedeeldeBusInputHX1838 = nullptr;
+        }
+      }
+    }
+  #endif
+
+#ifdef DEBUG
+  if (gedeeldeBusInputHX1838 != nullptr) { GA_DEBUG_PRINT("Input::Activeren(): "); GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT); }
+#endif
+*/
+
   if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->activeren()) {
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   }
 #endif
 
-  return this->INPUT_TYPES_ACTIEF == INPUT_TYPE_NONE
+  if (this->typesActief != INPUT_TYPE_NONE
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      || gedeeldeBusInputDigital != nullptr
+      && gedeeldeBusInputDigital == nullptr
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-      || gedeeldeBusInputPCF8574 != nullptr
+      && gedeeldeBusInputPCF8574 == nullptr
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
-      || gedeeldeBusInputHX1838 != nullptr
+      && gedeeldeBusInputHX1838 == nullptr
 #endif
-  ;
-}
+  ) return false;
 
-bool Input::afmelden() {
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
-  if (gedeeldeBusInputHX1838 != nullptr) {
-    if (!gedeeldeBusInputHX1838->afmelden()) return false;
-    gedeeldeBusInputHX1838 = nullptr;
-  }
-#endif
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-  if (gedeeldeBusInputPCF8574 != nullptr) {
-    if (!gedeeldeBusInputPCF8574->afmelden()) return false;
-    gedeeldeBusInputPCF8574 = nullptr;
-  }
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   if (gedeeldeBusInputDigital != nullptr) {
-    if (!gedeeldeBusInputDigital->afmelden()) return false;
-    gedeeldeBusInputDigital = nullptr;
-  }
-#endif
-  if (::Input == this) ::Input = nullptr;
-  return GedeeldeBusNode::afmelden();
-}
-
-void Input::InputConfigureren() {
-  bool gedeeldeBusToestandOk = aanmelden() && controleren() && inpluggen() && activeren();
-
-  if (!gedeeldeBusToestandOk) return;
-
-  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
     #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
       pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_L1), OUTPUT);
       pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_L2), OUTPUT);
@@ -1241,20 +1336,24 @@ void Input::InputConfigureren() {
       pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_3), INPUT_PULLUP);
       pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_4), INPUT_PULLUP);
     #endif
-  #endif
+  }
+#endif
 
-  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-    if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->begin(0xFF)) {
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+  if (gedeeldeBusInputPCF8574 != nullptr) {
+    if (!gedeeldeBusInputPCF8574->begin(0xFF)) {
       PCF8574OnbereikbaarMelden();
     } else {
       pcf8574Bereikbaar = true;
       pcf8574FoutmeldingWeergegeven = false;
     }
-  #endif
+  }
+#endif
 
-  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+  if (gedeeldeBusInputHX1838 != nullptr) {
 #ifdef DEBUG
-    GA_DEBUG_PRINT("InputConfigureren(): ");
+    GA_DEBUG_PRINT("Input::Activeren(): ");
     GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
 #endif
 #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
@@ -1268,7 +1367,7 @@ void Input::InputConfigureren() {
     IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
 #endif
 #ifdef DEBUG
-    GA_DEBUG_PRINT("InputConfigureren(): ");
+    GA_DEBUG_PRINT("Input::Activeren(): ");
     GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT);
 #endif
     #if HX1838_BRON_CODES == HX1838_BRON_CODES_DEFINE
@@ -1294,39 +1393,77 @@ void Input::InputConfigureren() {
         HX1838kalibratieUitvoeren();
       }
     #endif
-  #endif
+  }
+#endif
 
-  #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-    laatsteInvoerTijdstipVoorTimeout = millis();
-    #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
-      vorigeRauweKeypadPositie = 0;
-      stabieleKeypadPositie = 0;
-      keypadWijzigingSinds = millis();
-      laatstePositieVoorLoslatenDetectie = 0;
-      keypadDrukBeginTijd = 0;
-      langIndrukkenAlGemeldVoorHuidigeDruk = false;
-    #endif
+#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
+  laatsteInvoerTijdstipVoorTimeout = millis();
+  #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+    vorigeRauweKeypadPositie = 0;
+    stabieleKeypadPositie = 0;
+    keypadWijzigingSinds = millis();
+    laatstePositieVoorLoslatenDetectie = 0;
+    keypadDrukBeginTijd = 0;
+    langIndrukkenAlGemeldVoorHuidigeDruk = false;
   #endif
+#endif
+
+  return true;
 }
 
+bool Input::afmelden() {
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::afmelden()");
+#endif
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+  if (gedeeldeBusInputHX1838 != nullptr) {
+    if (!gedeeldeBusInputHX1838->afmelden()) return false;
+    gedeeldeBusInputHX1838 = nullptr;
+  }
+#endif
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+  if (gedeeldeBusInputPCF8574 != nullptr) {
+    if (!gedeeldeBusInputPCF8574->afmelden()) return false;
+    gedeeldeBusInputPCF8574 = nullptr;
+  }
+#endif
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+  if (gedeeldeBusInputDigital != nullptr) {
+    if (!gedeeldeBusInputDigital->afmelden()) return false;
+    gedeeldeBusInputDigital = nullptr;
+  }
+#endif
+  if (::Input == this) ::Input = nullptr;
+  return GedeeldeBusNode::afmelden();
+}
+
+
 InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndrukkenDrempelOpzoekerFunctie drempelOpzoeker) {
+#ifdef TRACE
+  GA_SERIAL.println("TRACE: Input::OpvragenHuidigeToetsAanslagIntern()");
+#endif
   InputResultaat resultaat = {InputKanaal::NONE, 0, nullptr};
 
-  #if (INPUT_KANAAL_CONFIG) == INPUT_TYPE_NONE
-    return resultaat;
-  #endif
+#if (INPUT_KANAAL_CONFIG) == INPUT_TYPE_NONE
+  return resultaat;
+#endif
 
-  #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
-    if (wachten) {
-      while (KeypadUitLezenRuweData() != 0) delay(1);
-      vorigeRauweKeypadPositie = 0;
-      stabieleKeypadPositie = 0;
-      keypadWijzigingSinds = millis();
-    }
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+  if (gedeeldeBusInputDigital != nullptr && gedeeldeBusInputDigital->actief && wachten) {
+  #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+  if (gedeeldeBusInputPCF8574 != nullptr && gedeeldeBusInputPCF8574->actief && wachten) {
   #endif
+    while (KeypadUitLezenRuweData() != 0) delay(1);
+    vorigeRauweKeypadPositie = 0;
+    stabieleKeypadPositie = 0;
+    keypadWijzigingSinds = millis();
+  }
+#endif
 
   while (true) {
     #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
+      if (gedeeldeBusInputDigital != nullptr && gedeeldeBusInputDigital->actief) {
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();
       #else
@@ -1337,6 +1474,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
           laatsteInvoerTijdstipVoorTimeout = millis();
         #endif
+
         if (wachten) {
           while (KeypadUitLezenRuweData() != 0) delay(1);
           vorigeRauweKeypadPositie = 0;
@@ -1350,6 +1488,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
       if (!wachten) {
         int losgelatenPositie = KeypadUitLezenLosgelatenPositie();
+
         if (losgelatenPositie > 0 && losgelatenPositie <= AANTAL_KEYPAD_TOETSEN) {
           laatsteInvoerTijdstipVoorTimeout = millis();
           return {InputKanaal::DIGITAL, losgelatenPositie, KEY_LAYOUT[losgelatenPositie - 1].opschrift, InputGebeurtenis::LOSGELATEN};
@@ -1358,8 +1497,10 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         const char* opschriftVoorDrempel = (stabieleKeypadPositie > 0 && stabieleKeypadPositie <= AANTAL_KEYPAD_TOETSEN) ? KEY_LAYOUT[stabieleKeypadPositie - 1].opschrift : nullptr;
         if (opschriftVoorDrempel != nullptr) {
           unsigned long langIndrukkenDrempelMs = drempelOpzoeker(opschriftVoorDrempel);
+
           if (langIndrukkenDrempelMs > 0) {
             int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMs);
+
             if (langIndrukkenPositie > 0) {
               laatsteInvoerTijdstipVoorTimeout = millis();
               return {InputKanaal::DIGITAL, langIndrukkenPositie, KEY_LAYOUT[langIndrukkenPositie - 1].opschrift, InputGebeurtenis::LANG_INDRUKKEN};
@@ -1368,7 +1509,10 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         }
       }
       #endif
+      }
+      
     #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+      if (gedeeldeBusInputPCF8574 != nullptr && gedeeldeBusInputPCF8574->actief) {
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();
       #else
@@ -1386,12 +1530,20 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
           keypadWijzigingSinds = millis();
         }
 
+#ifdef TRACE
+        GA_SERIAL.println("TRACE: Input kanaal PCF8574 toets gevonden");
+#endif
+#ifdef DEBUG
+        GA_DEBUG_PRINT("DEBUG: PCF8574 positie=");
+        GA_DEBUG_PRINTLN(positieKeypad);
+#endif
         return {InputKanaal::PCF8574, positieKeypad, KEY_LAYOUT[positieKeypad - 1].opschrift};
       }
 
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
       if (!wachten) {
         int losgelatenPositie = KeypadUitLezenLosgelatenPositie();
+
         if (losgelatenPositie > 0 && losgelatenPositie <= AANTAL_KEYPAD_TOETSEN) {
           laatsteInvoerTijdstipVoorTimeout = millis();
           return {InputKanaal::PCF8574, losgelatenPositie, KEY_LAYOUT[losgelatenPositie - 1].opschrift, InputGebeurtenis::LOSGELATEN};
@@ -1400,8 +1552,10 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         const char* opschriftVoorDrempel = (stabieleKeypadPositie > 0 && stabieleKeypadPositie <= AANTAL_KEYPAD_TOETSEN) ? KEY_LAYOUT[stabieleKeypadPositie - 1].opschrift : nullptr;
         if (opschriftVoorDrempel != nullptr) {
           unsigned long langIndrukkenDrempelMs = drempelOpzoeker(opschriftVoorDrempel);
+
           if (langIndrukkenDrempelMs > 0) {
             int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMs);
+
             if (langIndrukkenPositie > 0) {
               laatsteInvoerTijdstipVoorTimeout = millis();
               return {InputKanaal::PCF8574, langIndrukkenPositie, KEY_LAYOUT[langIndrukkenPositie - 1].opschrift, InputGebeurtenis::LANG_INDRUKKEN};
@@ -1410,16 +1564,26 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         }
       }
       #endif
+    }
     #endif
 
     #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
+    if (gedeeldeBusInputHX1838 != nullptr && gedeeldeBusInputHX1838->actief) {
       int positieIR = HX1838uitLezenToetsAanslag();
       if (positieIR > 0 && positieIR <= AANTAL_IR_TOETSEN) {
         #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
           laatsteInvoerTijdstipVoorTimeout = millis();
         #endif
+#ifdef TRACE
+        GA_SERIAL.println("TRACE: Input kanaal HX1838 toets gevonden");
+#endif
+#ifdef DEBUG
+        GA_DEBUG_PRINT("DEBUG: HX1838 positie=");
+        GA_DEBUG_PRINTLN(positieIR);
+#endif
         return {InputKanaal::HX1838, positieIR, IR_KEY_LAYOUT[positieIR - 1].opschrift};
       }
+    }
     #endif
 
     #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID

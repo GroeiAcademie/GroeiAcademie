@@ -1,6 +1,8 @@
-// InputkanalenHX1838.ino
+// ============================================================================
+// Inputkanalen HX1838 
+// ============================================================================
 // Testtoepassing voor de Input-laag (InputTypes.h/Input.h/Input.cpp), specifiek voor INPUT_TYPE_HX1838.
-
+//
 // INPUT TESTEN:
 // Dit voorbeeld test uitsluitend INPUT_TYPE_HX1838. Zet in UserConfig.h: #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
 //
@@ -149,13 +151,11 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 #endif
 
 void setup() {
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
-  Input = GedeeldeBusNewComponent<struct Input>();
+  Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_HX1838);
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
   // Optioneel, enkel voor testdoeleinden: meldt via Serial welke opschriften van de gecompileerde HX1838_TOETSENINDELING ontbreken in mappingTestMenu[]. 

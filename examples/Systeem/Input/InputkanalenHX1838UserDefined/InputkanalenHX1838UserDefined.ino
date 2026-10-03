@@ -1,4 +1,6 @@
-// InputkanalenHX1838UserDefined.ino
+// ============================================================================
+// Inputkanalen HX1838 User Defined
+// ============================================================================
 // Testtoepassing voor de Input-laag, specifiek voor HX1838_TOETSENINDELING_REMOTE_USER_DEFINED.
 //
 // Deze UserDefined-route is uitsluitend beschikbaar met HX1838_BRON_CODES_DEFINE.
@@ -44,9 +46,9 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
-  Input = GedeeldeBusNewComponent<struct Input>();
+
+  Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_HX1838);
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
 #if defined(USER_DEFINED_VIA_MAPPING) && defined(INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN)
   // Optioneel, enkel voor testdoeleinden: meldt via Serial welke opschriften van de gecompileerde UserDefined-indeling ontbreken in mappingTestMenu[].
@@ -62,6 +64,7 @@ void loop() {
   Input->UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingTestMenu);
 #else
   InputResultaat resultaat = Input->OpvragenHuidigeToetsAanslag(true);
+
   if (resultaat.inputKanaal == InputKanaal::HX1838 && resultaat.opschriftToetsAanslag != nullptr) {
     Screen->Print("Toets ingedrukt:", resultaat.opschriftToetsAanslag, INPUT_TEST_WEERGAVE_MS);
   }

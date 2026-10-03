@@ -39,6 +39,12 @@ static bool i2cGeinitialiseerd = false;
 static bool spiGeinitialiseerd = false;
 
 void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
+#ifdef TRACE
+  if (GA_SERIAL) {
+    GA_SERIAL.print("TRACE: InitialiserenGedeeldeBus(): ");
+    GA_SERIAL.println(busType == GedeeldeBusType::I2C ? "I2C" : "SPI");
+  }
+#endif
   if (busType == GedeeldeBusType::I2C) {
     if (!i2cGeinitialiseerd) {
       #if BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
@@ -48,11 +54,25 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
       #endif
 
       i2cGeinitialiseerd = true;
+#ifdef DEBUG
+      if (GA_SERIAL) GA_DEBUG_PRINTLN("DEBUG: I2C geinitialiseerd");
+#endif
+#ifdef TRACE
+    } else {
+      if (GA_SERIAL) GA_SERIAL.println("TRACE: I2C reeds geinitialiseerd");
+#endif
     }
   } else if (busType == GedeeldeBusType::SPI) {
     if (!spiGeinitialiseerd) {
       SPI.begin();
       spiGeinitialiseerd = true;
+#ifdef DEBUG
+      if (GA_SERIAL) GA_DEBUG_PRINTLN("DEBUG: SPI geinitialiseerd");
+#endif
+#ifdef TRACE
+    } else {
+      if (GA_SERIAL) GA_SERIAL.println("TRACE: SPI reeds geinitialiseerd");
+#endif
     }
   }
 }
@@ -127,62 +147,6 @@ struct ADC_ADS1115 ADC_ADS1115(
   HardwareResourcePin::NONE,
   HardwareResourceToegang::GEDEELD
 );
-#endif
-
-#if EXTENDER_DS2482_800_AANTAL >= 2
-constexpr ExtenderDS2482v800::Ds2482_800Pinnen ExtenderDS2482v800::ExtenderLijst[];
-#endif
-
-#if EXTENDER_ADS1115_AANTAL >= 2
-constexpr ExtenderADS1115::Ads1115Pinnen ExtenderADS1115::ExtenderLijst[];
-#endif
-
-#if EXTENDER_ADS1158_AANTAL >= 2
-constexpr ExtenderADS1158::Ads1158Pinnen ExtenderADS1158::ExtenderLijst[];
-#endif
-
-#if EXTENDER_ADS7828_AANTAL >= 2
-constexpr ExtenderADS7828::Ads7828Pinnen ExtenderADS7828::ExtenderLijst[];
-#endif
-
-#if EXTENDER_ADS7953_AANTAL >= 2
-constexpr ExtenderADS7953::Ads7953Pinnen ExtenderADS7953::ExtenderLijst[];
-#endif
-
-#if EXTENDER_CD74HC4067_AANTAL >= 2
-constexpr ExtenderCD74HC4067::Cd74hc4067Pinnen ExtenderCD74HC4067::ExtenderLijst[];
-#endif
-
-#if EXTENDER_MCP23017_AANTAL >= 2
-constexpr ExtenderMCP23017::Mcp23017Pinnen ExtenderMCP23017::ExtenderLijst[];
-#endif
-
-#if EXTENDER_PCF8574_AANTAL >= 2
-constexpr ExtenderPCF8574::Pcf8574Pinnen ExtenderPCF8574::ExtenderLijst[];
-#endif
-
-#if EXTENDER_PCF8575_AANTAL >= 2
-constexpr ExtenderPCF8575::Pcf8575Pinnen ExtenderPCF8575::ExtenderLijst[];
-#endif
-
-#if EXTENDER_TCA9548A_AANTAL >= 2
-constexpr ExtenderTCA9548A::Tca9548aPinnen ExtenderTCA9548A::ExtenderLijst[];
-#endif
-
-#if EXTENDER_MAX14830_I2C_AANTAL >= 2
-constexpr ExtenderMAX14830I2C::Max14830I2cPinnen ExtenderMAX14830I2C::ExtenderLijst[];
-#endif
-
-#if EXTENDER_MAX14830_SPI_AANTAL >= 2
-constexpr ExtenderMAX14830SPI::Max14830SpiPinnen ExtenderMAX14830SPI::ExtenderLijst[];
-#endif
-
-#if EXTENDER_SC16IS752_I2C_AANTAL >= 2
-constexpr ExtenderSC16IS752I2C::Sc16is752I2cPinnen ExtenderSC16IS752I2C::ExtenderLijst[];
-#endif
-
-#if EXTENDER_SC16IS752_SPI_AANTAL >= 2
-constexpr ExtenderSC16IS752SPI::Sc16is752SpiPinnen ExtenderSC16IS752SPI::ExtenderLijst[];
 #endif
 
 // Vertaalt een native HardwareResourcePin naar het echte, board-specifieke
@@ -547,6 +511,12 @@ static struct Screen* GedeeldeBusVindHardwareResourceComponentScreen(const Gedee
 }
 
 bool GedeeldeBusNode::aanmelden() {
+#ifdef TRACE
+  if (GA_SERIAL) {
+    GA_SERIAL.print("TRACE: GedeeldeBusNode::aanmelden(): component=0x");
+    GA_SERIAL.println(static_cast<uint8_t>(component), HEX);
+  }
+#endif
   if (aangemeld) return true;
 
   // Structurele wacht: een GEDEELD-claim zonder geldige identiteit is een fout in het component zelf.
@@ -571,10 +541,22 @@ bool GedeeldeBusNode::aanmelden() {
   }
 
   aangemeld = true;
+#ifdef DEBUG
+  if (GA_SERIAL) {
+    GA_DEBUG_PRINT("DEBUG: aanmelden OK component=0x");
+    GA_DEBUG_PRINTLN2(static_cast<uint8_t>(component), HEX);
+  }
+#endif
   return true;
 }
 
 bool GedeeldeBusNode::controleren() {
+#ifdef TRACE
+  if (GA_SERIAL) {
+    GA_SERIAL.print("TRACE: GedeeldeBusNode::controleren(): component=0x");
+    GA_SERIAL.println(static_cast<uint8_t>(component), HEX);
+  }
+#endif
   if (gecontroleerd) return true;
   if (!aangemeld) return false;
   if (parent != nullptr && !parent->controleren()) return false;
@@ -623,18 +605,18 @@ bool GedeeldeBusNode::controleren() {
         bool geldig = true;
 
         switch (parent->component) {
-          case GedeeldeBusComponent::ONE_WIRE_DS2482v800: geldig = waarde <= static_cast<uint8_t>(ExtenderDS2482v800::ExtenderPins::IO7); break;
-          case GedeeldeBusComponent::ADC_ADS1115: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::AIN3); break;
-          case GedeeldeBusComponent::ADC_ADS1158: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1158::ExtenderPins::AIN15); break;
-          case GedeeldeBusComponent::ADC_ADS7828: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7828::ExtenderPins::CH7); break;
-          case GedeeldeBusComponent::ADC_ADS7953: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7953::ExtenderPins::Ch11); break;
-          case GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067: geldig = waarde <= static_cast<uint8_t>(ExtenderCD74HC4067::ExtenderPins::Y15); break;
-          case GedeeldeBusComponent::DIGITAL_PINS_MCP23017: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23017::ExtenderPins::GPB7); break;
-          case GedeeldeBusComponent::DIGITAL_PINS_PCF8574: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8574::ExtenderPins::P7); break;
-          case GedeeldeBusComponent::DIGITAL_PINS_PCF8575: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8575::ExtenderPins::P17); break;
-          case GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A: geldig = waarde <= static_cast<uint8_t>(ExtenderTCA9548A::ExtenderPins::CH7); break;
-          case GedeeldeBusComponent::UART_MAX14830: geldig = waarde <= static_cast<uint8_t>(ExtenderMAX14830I2C::ExtenderPins::UART3); break;
-          case GedeeldeBusComponent::UART_SC16IS752: geldig = waarde <= static_cast<uint8_t>(ExtenderSC16IS752I2C::ExtenderPins::CHANNEL_B); break;
+          case GedeeldeBusComponent::ONE_WIRE_DS2482v800: geldig = waarde <= static_cast<uint8_t>(ExtenderDS2482v800::ExtenderPins::EP_IO7); break;
+          case GedeeldeBusComponent::ADC_ADS1115: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3); break;
+          case GedeeldeBusComponent::ADC_ADS1158: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1158::ExtenderPins::EP_GPIO7); break;
+          case GedeeldeBusComponent::ADC_ADS7828: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7828::ExtenderPins::EP_CH7); break;
+          case GedeeldeBusComponent::ADC_ADS7953: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7953::ExtenderPins::EP_GPIO3); break;
+          case GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067: geldig = waarde <= static_cast<uint8_t>(ExtenderCD74HC4067::ExtenderPins::EP_Y15); break;
+          case GedeeldeBusComponent::DIGITAL_PINS_MCP23017: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23017::ExtenderPins::EP_GPB7); break;
+          case GedeeldeBusComponent::DIGITAL_PINS_PCF8574: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8574::ExtenderPins::EP_P7); break;
+          case GedeeldeBusComponent::DIGITAL_PINS_PCF8575: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8575::ExtenderPins::EP_P17); break;
+          case GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A: geldig = waarde <= static_cast<uint8_t>(ExtenderTCA9548A::ExtenderPins::EP_CH7); break;
+          case GedeeldeBusComponent::UART_MAX14830: geldig = waarde <= static_cast<uint8_t>(ExtenderMAX14830I2C::ExtenderPins::EP_GPIO15); break;
+          case GedeeldeBusComponent::UART_SC16IS752: geldig = waarde <= static_cast<uint8_t>(ExtenderSC16IS752I2C::ExtenderPins::EP_GPIO7); break;
           default: break;
         }
 
@@ -668,9 +650,23 @@ bool GedeeldeBusNode::controleren() {
     HardwareResourceClaimsBetweenTwoNodes(this, n);
   }
 
-  if (conflictGevonden) return false;
+  if (conflictGevonden) {
+#ifdef DEBUG
+    if (GA_SERIAL) {
+      GA_DEBUG_PRINT("DEBUG: controleren conflict component=0x");
+      GA_DEBUG_PRINTLN2(static_cast<uint8_t>(component), HEX);
+    }
+#endif
+    return false;
+  }
 
   gecontroleerd = true;
+#ifdef DEBUG
+  if (GA_SERIAL) {
+    GA_DEBUG_PRINT("DEBUG: controleren OK component=0x");
+    GA_DEBUG_PRINTLN2(static_cast<uint8_t>(component), HEX);
+  }
+#endif
   return true;
 }
 
@@ -681,11 +677,6 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
   struct Screen* vorige = ::Screen;
 
   if (scherm != nullptr) ::Screen = scherm;
-  else {
-    ::GA_SERIAL.begin(SERIAL_BAUDRATE);
-    const unsigned long startTijd = millis();
-    while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-  }
 
   while (GedeeldeBusHuidigeCyclusConflicten != nullptr) {
     GedeeldeBusTijdelijkConflict* r = GedeeldeBusHuidigeCyclusConflicten;
@@ -693,8 +684,11 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
     String regel4 = "";
 
     if (heeftResource) {
-      if (r->isAdres) regel4 = String("I2C-ADRES: 0x") + String(strcmp(r->code, _FATAL_GB110) == 0 ? r->waarde : (r->waarde & 0x7F), HEX);
-      else if (r->native) {
+      if (r->isAdres) {
+        String hexWaarde = String(strcmp(r->code, _FATAL_GB110) == 0 ? r->waarde : (r->waarde & 0x7F), HEX);
+        if (hexWaarde.length() < 2) hexWaarde = "0" + hexWaarde;
+        regel4 = String("I2C-ADRES: 0x") + hexWaarde;
+      } else if (r->native) {
         regel4 = "PIN: ";
 
         switch (static_cast<HardwareResourcePin>(r->waarde)) {

@@ -38,8 +38,8 @@ Screen::Screen()
   : Screen(SCREEN_OUTPUT)
 {}
 
-Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF)
-  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::SCREEN, HardwareResourceToegang::GEDEELD), SCREEN_TYPES_ACTIEF(SCREEN_TYPES_ACTIEF)
+Screen::Screen(uint8_t typesActief)
+  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::SCREEN, HardwareResourceToegang::GEDEELD), typesActief(typesActief)
 {}
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
@@ -47,8 +47,8 @@ Screen::Screen(CharacterScreenCallback callback)
   : Screen(SCREEN_OUTPUT, callback)
 {}
 
-Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback callback)
-  : Screen(SCREEN_TYPES_ACTIEF) {
+Screen::Screen(uint8_t typesActief, CharacterScreenCallback callback)
+  : Screen(typesActief) {
   this->Character.callback = callback;
 }
 #endif
@@ -58,8 +58,8 @@ Screen::Screen(PixelScreenCallback callback)
   : Screen(SCREEN_OUTPUT, callback)
 {}
 
-Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF, PixelScreenCallback callback)
-  : Screen(SCREEN_TYPES_ACTIEF) {
+Screen::Screen(uint8_t typesActief, PixelScreenCallback callback)
+  : Screen(typesActief) {
   this->Pixel.callback = callback;
 }
 #endif
@@ -69,8 +69,8 @@ Screen::Screen(CharacterScreenCallback characterCallback, PixelScreenCallback pi
   : Screen(SCREEN_OUTPUT, characterCallback, pixelCallback)
 {}
 
-Screen::Screen(uint8_t SCREEN_TYPES_ACTIEF, CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback)
-  : Screen(SCREEN_TYPES_ACTIEF) {
+Screen::Screen(uint8_t typesActief, CharacterScreenCallback characterCallback, PixelScreenCallback pixelCallback)
+  : Screen(typesActief) {
   this->Character.callback = characterCallback;
   this->Pixel.callback = pixelCallback;
 }
@@ -163,10 +163,6 @@ void Screen::Pixel::FoutmeldingWeergeven(const String& foutmelding) {
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
   // Daarom niet binnen SCREEN_TYPE_SERIAL; ook zonder geselecteerde SerialScreen blijft dit terugvalpad beschikbaar.
-  ::GA_SERIAL.begin(SERIAL_BAUDRATE);
-  const unsigned long startTijd = millis();
-  while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-
   ::GA_SERIAL.println(foutmelding);
   ::GA_SERIAL.println(FATAL_ZOEK_OP);
 }
@@ -218,10 +214,6 @@ void Screen::Character::FoutmeldingWeergeven(const String& foutmelding) {
 
   // Bewuste uitzondering, geen vergeten #if: dit is de laatste garantie dat een FATAL-fout nooit volledig onzichtbaar blijft. 
   // Daarom niet binnen SCREEN_TYPE_SERIAL; ook zonder geselecteerde SerialScreen blijft dit terugvalpad beschikbaar.
-  ::GA_SERIAL.begin(SERIAL_BAUDRATE);
-  const unsigned long startTijd = millis();
-  while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-
   ::GA_SERIAL.println(foutmelding);
   ::GA_SERIAL.println(FATAL_ZOEK_OP);
 }
@@ -298,10 +290,6 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #endif
 
     if (geenEnkelScreenBeschikbaar) {
-      ::GA_SERIAL.begin(SERIAL_BAUDRATE);
-      const unsigned long startTijd = millis();
-      while (!::GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-
       if (eersteRegel != "") ::GA_SERIAL.println(eersteRegel);
       if (tweedeRegel != "") ::GA_SERIAL.println(tweedeRegel);
       if (derdeRegel != "") ::GA_SERIAL.println(derdeRegel);
@@ -445,6 +433,10 @@ void Screen::Print(const String& eersteRegel, const String& tweedeRegel, unsigne
 template<typename T>
 static void ChildVerwijderen(T*& child) {
   if (child != nullptr) {
+#ifdef TRACE
+    GA_SERIAL.print("TRACE: ChildVerwijderen(): component=0x");
+    GA_SERIAL.println(static_cast<uint8_t>(child->component), HEX);
+#endif
     child->afmelden();   // verwijdert het child, want het werd met componentCreated aangemaakt
     child = nullptr;
   }
@@ -468,11 +460,11 @@ static int AantalUitvoeren(const struct Screen& scherm) {
 // De andere uitvoeren blijven werken. Enkel wanneer van de gekozen uitvoeren geen enkele overblijft, faalt Screen zelf.
 bool Screen::aanmelden() {
   if (aangemeld) return true;
-  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_OUTPUT) != this->SCREEN_TYPES_ACTIEF) return false;
+  if ((this->typesActief & SCREEN_OUTPUT) != this->typesActief) return false;
   if (!GedeeldeBusNode::aanmelden()) return false;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_SERIAL) && this->Serial.gedeeldeBus == nullptr) {
+  if ((this->typesActief & SCREEN_TYPE_SERIAL) && this->Serial.gedeeldeBus == nullptr) {
     this->Serial.foutmelding = nullptr;
     this->Serial.foutmeldingWeergegeven = false;
     SerialOutput* child = new SerialOutput(this, GedeeldeBusComponent::SERIAL_OUTPUT, HardwareResourcePin::D1, HardwareResourcePin::D0);
@@ -488,7 +480,7 @@ bool Screen::aanmelden() {
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_CHARACTER) && this->Character.gedeeldeBus == nullptr) {
+  if ((this->typesActief & SCREEN_TYPE_CHARACTER) && this->Character.gedeeldeBus == nullptr) {
     this->Character.foutmelding = nullptr;
     this->Character.foutmeldingWeergegeven = false;
     ::CharacterScreen* child = new ::CharacterScreen(this, GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL);
@@ -504,7 +496,7 @@ bool Screen::aanmelden() {
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_PIXELS) && this->Pixel.gedeeldeBus == nullptr) {
+  if ((this->typesActief & SCREEN_TYPE_PIXELS) && this->Pixel.gedeeldeBus == nullptr) {
     this->Pixel.foutmelding = nullptr;
     this->Pixel.foutmeldingWeergegeven = false;
     ::PixelScreen* child = new ::PixelScreen(this, GedeeldeBusComponent::PIXEL_SCREEN, PIXEL_SCREEN_CS, HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
@@ -519,7 +511,7 @@ bool Screen::aanmelden() {
   }
 #endif
 
-  if (this->SCREEN_TYPES_ACTIEF != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
+  if (this->typesActief != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
     this->ActivatiefoutWeergeven();
     return false;
   }
@@ -561,7 +553,7 @@ bool Screen::controleren() {
   if (this->Pixel.gedeeldeBus != nullptr && !this->Pixel.gedeeldeBus->gecontroleerd) ChildVerwijderen(this->Pixel.gedeeldeBus);
 #endif
 
-  if (this->SCREEN_TYPES_ACTIEF != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
+  if (this->typesActief != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
     this->ActivatiefoutWeergeven();
     return false;
   }
@@ -591,7 +583,7 @@ void Screen::ActivatiefoutWeergeven() {
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if ((this->SCREEN_TYPES_ACTIEF & SCREEN_TYPE_SERIAL) && !this->Serial.actief && !this->Serial.foutmeldingWeergegeven) {
+  if ((this->typesActief & SCREEN_TYPE_SERIAL) && !this->Serial.actief && !this->Serial.foutmeldingWeergegeven) {
     this->Serial.FoutmeldingWeergeven();
     this->Serial.foutmeldingWeergegeven = true;
   }
@@ -603,6 +595,13 @@ void Screen::ActivatiefoutWeergeven() {
 bool Screen::inpluggen() {
   if (ingeplugd) return true;
   if (!GedeeldeBusNode::inpluggen()) return false;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (this->Serial.gedeeldeBus != nullptr && !this->Serial.gedeeldeBus->inpluggen()) {
+    this->Serial.foutmelding = _CRITICAL_SS201;
+    ChildVerwijderen(this->Serial.gedeeldeBus);
+  }
+#endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   if (this->Character.gedeeldeBus != nullptr && !this->Character.gedeeldeBus->inpluggen()) {
@@ -618,14 +617,7 @@ bool Screen::inpluggen() {
   }
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if (this->Serial.gedeeldeBus != nullptr && !this->Serial.gedeeldeBus->inpluggen()) {
-    this->Serial.foutmelding = _CRITICAL_SS201;
-    ChildVerwijderen(this->Serial.gedeeldeBus);
-  }
-#endif
-
-  if (this->SCREEN_TYPES_ACTIEF != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
+  if (this->typesActief != SCREEN_TYPE_NONE && AantalUitvoeren(*this) == 0) {
     this->ActivatiefoutWeergeven();
     return false;
   }
@@ -635,7 +627,25 @@ bool Screen::inpluggen() {
 
 // Activeren: elke uitvoer activeren, en daarna het scherm zelf instellen (init, rotatie, raster).
 bool Screen::Activeren() {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+  if (this->Serial.gedeeldeBus != nullptr) {
+    if (this->Serial.gedeeldeBus->activeren()) {
+      this->Serial.actief = true;
+#ifdef TRACE
+      ::GA_SERIAL.println("TRACE: Screen::Activeren(): Serial actief, TRACE start");
+#endif
+    } else {
+      this->Serial.actief = false;
+      this->Serial.foutmelding = _CRITICAL_SS301;
+      ChildVerwijderen(this->Serial.gedeeldeBus);
+    }
+  }
+#endif
+
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+#ifdef TRACE
+  ::GA_SERIAL.println("TRACE: Screen::Activeren(): Character");
+#endif
   if (this->Character.gedeeldeBus != nullptr) {
     if (this->Character.gedeeldeBus->activeren()) {
       this->Character.display.init();
@@ -649,6 +659,9 @@ bool Screen::Activeren() {
 #endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+#ifdef TRACE
+  ::GA_SERIAL.println("TRACE: Screen::Activeren(): Pixel");
+#endif
   if (this->Pixel.gedeeldeBus != nullptr) {
     bool pixelOk = this->Pixel.gedeeldeBus->activeren();
     if (!pixelOk) this->Pixel.foutmelding = _CRITICAL_PS301;
@@ -715,20 +728,8 @@ bool Screen::Activeren() {
   }
 #endif
 
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-  if (this->Serial.gedeeldeBus != nullptr) {
-    if (this->Serial.gedeeldeBus->activeren()) {
-      this->Serial.actief = true;
-    } else {
-      this->Serial.actief = false;
-      this->Serial.foutmelding = _CRITICAL_SS301;
-      ChildVerwijderen(this->Serial.gedeeldeBus);
-    }
-  }
-#endif
-
   this->ActivatiefoutWeergeven();
-  return this->SCREEN_TYPES_ACTIEF == SCREEN_TYPE_NONE || AantalUitvoeren(*this) > 0;
+  return this->typesActief == SCREEN_TYPE_NONE || AantalUitvoeren(*this) > 0;
 }
 
 bool Screen::afmelden() {

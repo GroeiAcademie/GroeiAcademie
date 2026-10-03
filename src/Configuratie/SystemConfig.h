@@ -171,12 +171,12 @@
   #define ADC_BACKEND ADC_BACKEND_NATIVE  // wissel dit om van backend te wisselen
 #endif
 
-#if ADC_BACKEND != ADC_BACKEND_NATIVE && ADC_BACKEND != ADC_BACKEND_ADS1115
-  #error Selecteer een geldige ADC_BACKEND.
-#endif
-
 #ifndef I2C_ADDRESS_ADS1115
   #define I2C_ADDRESS_ADS1115 0x48
+#endif
+
+#if ADC_BACKEND != ADC_BACKEND_NATIVE && ADC_BACKEND != ADC_BACKEND_ADS1115
+  #error Selecteer een geldige ADC_BACKEND.
 #endif
 
 // Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().

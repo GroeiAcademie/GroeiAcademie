@@ -67,20 +67,16 @@ void setup() {
   analogReadResolution(ADC_BITS);
 #endif  
 
-#ifdef DEBUG
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
-  while (!GA_SERIAL) { ; } // Wacht hier totdat er een seriële verbinding is
-  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
-#endif
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
+
+#ifdef DEBUG
+  GA_DEBUG_PRINTLN("=== DEBUG GESTART ===");
+#endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFC602.aanmelden();
-  sensorRFC602.controleren();
-  sensorRFC602.inpluggen();
-  sensorRFC602.activeren();
+  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
+  if (sensorRFP602 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -118,14 +114,14 @@ void UitvoerenAlgoritmeSimultaneTik () {
   Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) sensorRFC602.RawAnalogRead(sensorRFC602.sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot twee sensoren ingedrukt zijn geweest.
   int eersteGekozenSensorNummer = -1, tweedeGekozenSensorNummer = -1;
 
   while (eersteGekozenSensorNummer == -1 || tweedeGekozenSensorNummer == -1) {
     for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) {
-      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
         if (eersteGekozenSensorNummer == -1) {
           eersteGekozenSensorNummer = sensorNummer;
         } else if (tweedeGekozenSensorNummer == -1 && eersteGekozenSensorNummer != sensorNummer) {
@@ -136,8 +132,8 @@ void UitvoerenAlgoritmeSimultaneTik () {
   }
 
   // STAP 2: Blijf wachten zolang minstens één van de twee gekozen sensoren nog ingedrukt blijft.
-  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[eersteGekozenSensorNummer], offsetSensor[eersteGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE ||
-         Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFC602.sensorPin[tweedeGekozenSensorNummer], offsetSensor[tweedeGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[eersteGekozenSensorNummer], offsetSensor[eersteGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE ||
+         Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[tweedeGekozenSensorNummer], offsetSensor[tweedeGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE);
 
   // --- EENMALIGE NULMETING ---
   int aantalNulmetingPogingen = 0;

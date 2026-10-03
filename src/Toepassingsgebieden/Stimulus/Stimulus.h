@@ -34,7 +34,7 @@
   #include "../../Language/Library_FR.h"
 #endif
 #include "../../Systeem/Screen/Screen.h"
-#include "../../Systeem/Sensor/RFC602.h"
+#include "../../Systeem/Sensor/RFP602.h"
 
 // ============================================================================
 // CONSTANTEN DIE NIET AANGEPAST MOGEN WORDEN

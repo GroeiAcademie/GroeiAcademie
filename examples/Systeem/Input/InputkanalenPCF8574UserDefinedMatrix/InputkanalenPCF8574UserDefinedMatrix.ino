@@ -1,4 +1,6 @@
-// InputkanalenPCF8574UserDefinedMatrix.ino
+// ============================================================================
+// Inputkanalen PCF8574 User Defined Matrix
+// ============================================================================
 // Testtoepassing voor de Input-laag (InputTypes.h/Input.h/Input.cpp), specifiek voor
 // KEYPAD_TYPE_USER_DEFINED_MATRIX. Enkel bij INPUT_TYPE_PCF8574 beschikbaar.
 
@@ -72,13 +74,11 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 };
 
 void setup() {
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
-  Input = GedeeldeBusNewComponent<struct Input>();
+  Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_PCF8574);
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
   Input->ControleerMappingVolledigheid(mappingTestMenu);

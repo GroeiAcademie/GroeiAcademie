@@ -1,4 +1,6 @@
-// InputkanalenDIGITAL.ino
+// ============================================================================
+// Inputkanalen DIGITAL
+// ============================================================================
 // Testtoepassing voor de Input-laag (InputTypes.h/Input.h/Input.cpp), specifiek voor INPUT_TYPE_DIGITAL.
 
 // INPUT TESTEN:
@@ -57,12 +59,11 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 
 void setup() {
 
-  Screen = GedeeldeBusNewComponent<struct Screen>();
+  Screen = GedeeldeBusNewComponent<struct Screen>(INPUT_TYPE_DIGITAL);
   if (Screen == nullptr) exit(0);
 
   Input = GedeeldeBusNewComponent<struct Input>();
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
 #ifdef INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
   // Optioneel, enkel voor testdoeleinden: meldt via Serial welke opschriften van het gecompileerde KEYPAD_TYPE ontbreken in mappingTestMenu[]. 

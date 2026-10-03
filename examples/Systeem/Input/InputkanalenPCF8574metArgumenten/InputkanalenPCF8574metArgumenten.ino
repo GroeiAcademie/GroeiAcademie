@@ -1,4 +1,6 @@
-// InputkanalenPCF8574metArgumenten.ino
+// ============================================================================
+// Inputkanalen PCF8574 met Argumenten
+// ============================================================================
 // ILLUSTRATIEF VOORBEELD van de void*-argumentenaanpak voor InputFunctie, toegepast op
 // INPUT_TYPE_PCF8574. Zet in UserConfig.h:
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
@@ -239,13 +241,11 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten mappingTestMenu
 #endif
 
 void setup() {
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
-  Input = GedeeldeBusNewComponent<struct Input>();
+  Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_PCF8574);
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 }
 
 void loop() {

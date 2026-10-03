@@ -212,8 +212,7 @@
 //
 // Wat hier niet geselecteerd wordt, wordt niet gecompileerd. Meerdere selecteren doe je door | tussen jouw keuzes te plaatsen.
 //
-// Opmerking:
-// Wanneer DEBUG actief is, voegt de library automatisch SCREEN_TYPE_SERIAL toe. Je hoeft SCREEN_TYPE_SERIAL dus niet zelf te selecteren voor debug-uitvoer.
+// Opmerking: Wanneer DEBUG actief is, voegt de library automatisch SCREEN_TYPE_SERIAL toe. Je hoeft SCREEN_TYPE_SERIAL dus niet zelf te selecteren voor debug-uitvoer.
 //
 // Kies hieronder welke schermuitvoer je wilt gebruiken; staat standaard op: geen uitvoer.
 #ifndef SCREEN_OUTPUT_CONFIG
@@ -305,6 +304,8 @@
 #ifndef SERIAL_CONNECT_TIMEOUT_MS
 // #define SERIAL_CONNECT_TIMEOUT_MS      2000UL   // standaard waarde: 2000UL
 #endif
+
+// #define USE_SERIAL_CONNECT_TIMEOUT_MS // ENKEL wanneer we SERIAL_CONNECT_TIMEOUT_MS wensen te gebruiken in plaats van oneindig wachten!
 
 // ****************************************************************************
 // UITGEBREIDE INSTELLINGEN

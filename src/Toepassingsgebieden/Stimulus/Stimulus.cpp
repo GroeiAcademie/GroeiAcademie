@@ -18,7 +18,7 @@ unsigned long Stimulus::MargeDeler() {
 
 int Stimulus::AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) {
 #ifdef TRACE
-  int raw = sensorRFP602.RawAnalogRead(sensorPin);
+  int raw = sensorRFP602->RawAnalogRead(sensorPin);
   int waarde = raw - offsetSensor;
 
   if (waarde < 0) {
@@ -32,7 +32,7 @@ int Stimulus::AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offsetSensor) 
     GA_DEBUG_PRINTLN(waarde);
   }  
 #else
-  int waarde = sensorRFP602.RawAnalogRead(sensorPin) - offsetSensor;
+  int waarde = sensorRFP602->RawAnalogRead(sensorPin) - offsetSensor;
 #endif
 
   if (waarde < 0) waarde = 0;
@@ -75,7 +75,7 @@ void Stimulus::BepaalSensorOffsets() {
 
   while (millis() - startTijd < OFFSET_METING_TIJD_MS) {
     for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
-      int meting = sensorRFP602.RawAnalogRead(sensorRFP602.sensorPin[sensorNummer]);
+      int meting = sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
       if (aantalMetingen > 1 && meting > hoogsteMeting[sensorNummer]) { hoogsteMeting[sensorNummer] = meting; }
 
 #ifdef TRACE
@@ -298,7 +298,7 @@ int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gem
   ResetStimulusProfiel(gemetenStimulus);
 
   // Eerste meting weggooien: kanaalwissel-artefact ligt structureel boven drempel
-  sensorRFP602.RawAnalogRead(sensorPin);
+  sensorRFP602->RawAnalogRead(sensorPin);
 
   unsigned long timeoutNoActionMs = (timeoutMs > EXIT_NO_ACTION_MS) ? timeoutMs : EXIT_NO_ACTION_MS;
 
@@ -439,7 +439,7 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
   // MaskReedsActieveSensorsBijStart geeft exact aan welke sensoren al actief zijn bij aanvang van de meting. vb: 0b1100 = sensor 1 en sensor 2 zijn al actief bij aanvang.
   if (MaskReedsActieveSensorsBijStart != 0) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]);
+      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]);
     }
 
     // controle vóór initialisatie
@@ -474,7 +474,7 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
       if (millis() - startWachtenOpActie >= timeoutNoActionMs) return EXIT_STATUS_NO_ACTION_TIMEOUT;
 
       for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-        sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]);
+        sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]);
       }
 
       unsigned long nu = millis();
@@ -503,10 +503,10 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
 
     // Eerst alle actuele sensorwaarden opnieuw lezen.
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]);
+      sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]);
     }
 
-    // for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
+    // for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
 
     if (MaskGewensteActieveSensorsBijExit != 0) { 
       // Maak het mask rechtstreeks op basis van de zojuist gelezen actuele drukwaarden.
@@ -562,7 +562,7 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
     }
 
     // Verwerk dezelfde sensorwaarden die hierboven voor het mask gebruikt werden.
-    for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
+    for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
 
     // Stop wanneer de ingestelde timeout bereikt is.
     if (nu - startMeting >= timeoutMs) {
@@ -942,7 +942,7 @@ void Stimulus::WachtTotAlleSensorsLosgelatenVoorTest(int aantalSensorenSimultaan
     alleSensorsLosgelaten = true;
 
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      if (AnalogReadMetGekorigeerdeOffsets(sensorRFP602.sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) alleSensorsLosgelaten = false;
+      if (AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) alleSensorsLosgelaten = false;
     }
 
     if (WACHT_LOSLATEN_DELAY_MS > 0) delay(WACHT_LOSLATEN_DELAY_MS);  // Voorkomt onafgebroken I2C-bevraging bij ADC_BACKEND_ADS1115.
