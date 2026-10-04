@@ -29,6 +29,8 @@ struct RFP602 : Sensor {
 #endif
   };
 
+  unsigned long laatstePoging = 0;
+
   RFP602();
   RFP602(GedeeldeBusNode* parent, GedeeldeBusComponent component,
          HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)

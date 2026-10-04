@@ -19,7 +19,14 @@ bool RFP602::Activeren() {
 
 int RFP602::RawAnalogRead(int sensorPin) {
   if (!actief) {
-    if (!aanmelden() || !controleren() || !inpluggen() || !activeren()) return 0;
+    const unsigned long nu = millis();
+    if (nu - laatstePoging < SENSOR_HERAANMELDEN_NA_PAUZE_MS) return 0;
+    laatstePoging = nu;
+
+    if (!aanmelden() || !controleren() || !inpluggen() || !activeren()) {
+      afmelden();
+      return 0;
+    }
   }
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115

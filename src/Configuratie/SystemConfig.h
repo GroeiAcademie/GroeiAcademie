@@ -388,6 +388,14 @@
   #define SERIAL_CONNECT_TIMEOUT_MS 2000UL
 #endif
 
+// ============================================================================
+// SENSOR
+// ============================================================================
+
+#ifndef SENSOR_HERAANMELDEN_NA_PAUZE_MS
+  #define SENSOR_HERAANMELDEN_NA_PAUZE_MS 100UL // minimale wachttijd tussen twee pogingen om een mislukte sensor opnieuw aan te melden
+#endif
+
 // ****************************************************************************
 // VALIDATIES
 // ****************************************************************************

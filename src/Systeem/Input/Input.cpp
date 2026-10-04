@@ -1213,23 +1213,45 @@ bool Input::inpluggen() {
     gedeeldeBusInputHX1838 = nullptr;
   }
 
+  /* TODO: Alex - IN302 pas opnieuw activeren nadat getest is of digitalRead() vóór de IR-initialisatie
+     op alle 11 boards betrouwbaar dezelfde betekenis heeft. De plaats in inpluggen() blijft behouden.
+  // Zit de ontvanger vast (blijft laag)? Dubbel gecontroleerd om een kortstondige overgang niet te laten
+  // meetellen. Bevestigt enkel dat de pin niet blijvend laag hangt, geen bewijs van echte IR-werking.
+  if (gedeeldeBusInputHX1838 != nullptr && digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
+    delay(5);
+
+    if (digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
+      Screen->Print(_CRITICAL_IN302, "", 2000);
+      gedeeldeBusInputHX1838->afmelden();
+      gedeeldeBusInputHX1838 = nullptr;
+    }
+  }
+  */
+
   if (gedeeldeBusInputHX1838 != nullptr) {
 #ifdef DEBUG
     GA_DEBUG_PRINT("Input::inpluggen(): ");
     GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
 #endif
 #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
-    if (!initPCIInterruptForTinyReceiver()) {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-      GA_SERIAL.println(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL);
+// TODO: Alex - IN304 op de 11 boards testen: controleer of deze interruptcontrole per core correct werkt.
+#if defined(USE_ATTACH_INTERRUPT) && defined(NOT_AN_INTERRUPT)
+    if (gedeeldeBusInputHX1838 != nullptr && digitalPinToInterrupt(HX1838_ONTVANGER_PIN) == NOT_AN_INTERRUPT) {
+      Screen->Print(_CRITICAL_IN304, "", 2000);
+      gedeeldeBusInputHX1838->afmelden();
+      gedeeldeBusInputHX1838 = nullptr;
+    }
 #endif
-      Screen->Print(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT, "", 2000);
+    // TODO: Alex - IN303 op de 11 boards testen waar TinyIRReceiver gebruikt wordt.
+    if (gedeeldeBusInputHX1838 != nullptr && !initPCIInterruptForTinyReceiver()) {
+      Screen->Print(_CRITICAL_IN303, "", 2000);
       gedeeldeBusInputHX1838->afmelden();
       gedeeldeBusInputHX1838 = nullptr;
     }
 #else
     IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
 
+    // TODO: Alex - IN305 op de 11 boards testen waar IRremote gebruikt wordt: controleren of isIdle() direct na begin() een betrouwbare controle is.
     if (!IrReceiver.isIdle()) {
       delay(5);
 
@@ -1290,54 +1312,6 @@ bool Input::Activeren() {
 #ifdef TRACE
   GA_SERIAL.println("TRACE: Input::Activeren(): HX1838");
 #endif
-/*
-  if (gedeeldeBusInputHX1838 != nullptr && digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
-    delay(5);
-
-    if (digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
-      Screen->Print(_CRITICAL_IN302, "", 2000);
-      gedeeldeBusInputHX1838->afmelden();
-      gedeeldeBusInputHX1838 = nullptr;
-    }
-  }
-
-#ifdef DEBUG
-  if (gedeeldeBusInputHX1838 != nullptr) { GA_DEBUG_PRINT("Input::Activeren(): "); GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT); }
-#endif
-
-  #if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
-    #if defined(USE_ATTACH_INTERRUPT) && defined(NOT_AN_INTERRUPT)
-      if (gedeeldeBusInputHX1838 != nullptr && digitalPinToInterrupt(HX1838_ONTVANGER_PIN) == NOT_AN_INTERRUPT) {
-        Screen->Print(_CRITICAL_IN304, "", 2000);
-        gedeeldeBusInputHX1838->afmelden();
-        gedeeldeBusInputHX1838 = nullptr;
-      }
-    #endif
-    if (gedeeldeBusInputHX1838 != nullptr && !initPCIInterruptForTinyReceiver()) {
-      Screen->Print(_CRITICAL_IN303, "", 2000);
-      gedeeldeBusInputHX1838->afmelden();
-      gedeeldeBusInputHX1838 = nullptr;
-    }
-  #else
-    if (gedeeldeBusInputHX1838 != nullptr) {
-      IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
-
-      if (!IrReceiver.isIdle()) {
-        delay(5);
-
-        if (!IrReceiver.isIdle()) {
-          Screen->Print(_CRITICAL_IN305, "", 2000);
-          gedeeldeBusInputHX1838->afmelden();
-          gedeeldeBusInputHX1838 = nullptr;
-        }
-      }
-    }
-  #endif
-
-#ifdef DEBUG
-  if (gedeeldeBusInputHX1838 != nullptr) { GA_DEBUG_PRINT("Input::Activeren(): "); GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT); }
-#endif
-*/
 
   if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->activeren()) {
     gedeeldeBusInputHX1838->afmelden();
@@ -1548,7 +1522,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
         }
 
 #ifdef TRACE
-        GA_SERIAL.println("TRACE: Input kanaal PCF8574 toets gevonden");
+        GA_SERIAL.println("TRACE: Input::PCF8574 key detected");
 #endif
 #ifdef DEBUG
         GA_DEBUG_PRINT("DEBUG: PCF8574 positie=");
@@ -1592,7 +1566,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
           laatsteInvoerTijdstipVoorTimeout = millis();
         #endif
 #ifdef TRACE
-        GA_SERIAL.println("TRACE: Input kanaal HX1838 toets gevonden");
+        GA_SERIAL.println("TRACE: Input::HX1838 key detected");
 #endif
 #ifdef DEBUG
         GA_DEBUG_PRINT("DEBUG: HX1838 positie=");
