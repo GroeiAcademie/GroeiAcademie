@@ -1190,6 +1190,17 @@ bool Input::inpluggen() {
     gedeeldeBusInputPCF8574->afmelden();
     gedeeldeBusInputPCF8574 = nullptr;
   }
+
+  if (gedeeldeBusInputPCF8574 != nullptr) {
+    if (!gedeeldeBusInputPCF8574->begin(0xFF)) {
+      PCF8574OnbereikbaarMelden();
+      gedeeldeBusInputPCF8574->afmelden();
+      gedeeldeBusInputPCF8574 = nullptr;
+    } else {
+      pcf8574Bereikbaar = true;
+      pcf8574FoutmeldingWeergegeven = false;
+    }
+  }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   if (gedeeldeBusInputHX1838 != nullptr && (static_cast<HardwareResourcePin>(gedeeldeBusInputHX1838Pinnen[0]) == HardwareResourcePin::NONE
@@ -1200,6 +1211,41 @@ bool Input::inpluggen() {
   } else if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->inpluggen()) {
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
+  }
+
+  if (gedeeldeBusInputHX1838 != nullptr) {
+#ifdef DEBUG
+    GA_DEBUG_PRINT("Input::inpluggen(): ");
+    GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
+#endif
+#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
+    if (!initPCIInterruptForTinyReceiver()) {
+#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
+      GA_SERIAL.println(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL);
+#endif
+      Screen->Print(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT, "", 2000);
+      gedeeldeBusInputHX1838->afmelden();
+      gedeeldeBusInputHX1838 = nullptr;
+    }
+#else
+    IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
+
+    if (!IrReceiver.isIdle()) {
+      delay(5);
+
+      if (!IrReceiver.isIdle()) {
+        Screen->Print(_CRITICAL_IN305, "", 2000);
+        gedeeldeBusInputHX1838->afmelden();
+        gedeeldeBusInputHX1838 = nullptr;
+      }
+    }
+#endif
+#ifdef DEBUG
+    if (gedeeldeBusInputHX1838 != nullptr) {
+      GA_DEBUG_PRINT("Input::inpluggen(): ");
+      GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT);
+    }
+#endif
   }
 #endif
 
@@ -1339,37 +1385,8 @@ bool Input::Activeren() {
   }
 #endif
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-  if (gedeeldeBusInputPCF8574 != nullptr) {
-    if (!gedeeldeBusInputPCF8574->begin(0xFF)) {
-      PCF8574OnbereikbaarMelden();
-    } else {
-      pcf8574Bereikbaar = true;
-      pcf8574FoutmeldingWeergegeven = false;
-    }
-  }
-#endif
-
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   if (gedeeldeBusInputHX1838 != nullptr) {
-#ifdef DEBUG
-    GA_DEBUG_PRINT("Input::Activeren(): ");
-    GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_VOOR_INIT);
-#endif
-#if HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
-    if (!initPCIInterruptForTinyReceiver()) {
-#if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
-      GA_SERIAL.println(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT_SERIAL);
-#endif
-      Screen->Print(_INPUT_HX1838_INTERRUPT_KOPPELING_MISLUKT, "", 2000);
-    }
-#else
-    IrReceiver.begin(HX1838_ONTVANGER_PIN, DISABLE_LED_FEEDBACK);
-#endif
-#ifdef DEBUG
-    GA_DEBUG_PRINT("Input::Activeren(): ");
-    GA_DEBUG_PRINTLN(_INPUT_HX1838_DEBUG_NA_INIT);
-#endif
     #if HX1838_BRON_CODES == HX1838_BRON_CODES_DEFINE
       #if HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED && defined(HX1838_GENERIEK_CODES_KALIBREREN)
         HX1838GeneriekCodesKalibreren();

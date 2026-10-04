@@ -1,21 +1,18 @@
 # Testprocedure
+
 ## Testlagen beta v2.0.0
 
-Voor Screen, Input, Extenders en Sensoren worden drie verschillende testlagen onderscheiden. Ze mogen niet als dezelfde test worden beschouwd.
+De huidige code en examples maken drie niveaus expliciet van elkaar los:
 
-1. **GedeeldeBus-/architectuurtest**
-   Test `aanmelden()`, `controleren()`, geldige/ongeldige resources, conflicten, `inpluggen()` en de normale lifecycle. Deze test bewijst nog niet dat alle elektronische functies van een chip correct werken.
+1. **Lifecycle- en resourcecontrole**: `aanmelden()`, `controleren()`, `inpluggen()` en `activeren()`, inclusief conflicten en toegelaten/geweigerde `ExtenderPins`.
+2. **Elektronische functietest**: fysieke I/O, ADC, interrupts, UART-loopback, muxkanalen enzovoort. Deze laag is nog niet voor alle componenten geïmplementeerd.
+3. **Praktijktest**: echte Sensor of randapparatuur via de volledige keten.
 
-2. **Elektronische functietest**
-   Test de echte fysieke functie: GPIO HIGH/LOW, ADC-referenties, interrupts, UART-loopback, multiplexerkanalen, 1-Wire-kanalen, display-output enzovoort. Deze uitgebreide diagnostiek hoort onder `DEBUG` in of rond `Diagnose()`.
+Een geslaagde Extender-lifecycletest bewijst dus niet dat alle fysieke chipfuncties elektrisch doorgemeten zijn.
 
-3. **Praktijktest**
-   Test het echte gebruik met de bedoelde sensor, keypad, display of ander randapparaat.
+`GedeeldeBusNode` bevat onder `DEBUG` momenteel alleen een lege virtuele `Diagnose()`-hook. Er bestaan nog geen concrete Diagnose-overrides; elektronische functietests worden dus nog niet automatisch door `Diagnose()` uitgevoerd.
 
-`inpluggen()` blijft beperkt tot de minimale hardwarecontrole die nodig is om normale werking toe te laten. Een succesvolle `inpluggen()` mag daarom nooit als bewijs worden geïnterpreteerd dat alle functies van de component elektronisch doorgemeten zijn.
-
-
-Elke release van het GroeiAcademie FrameWork wordt vóór publicatie met de meegeleverde testscripts gevalideerd. De gedeelde Windows-`.cmd`-scripts staan onder `extras/` en maken deel uit van de library. Alleen `extras/LokalePaden.cmd` is machinespecifiek en wordt via `.gitignore` niet gepubliceerd; `extras/LokalePaden_template.cmd` wordt wel meegeleverd.
+De actuele voorbeelden onder `examples/Systeem/GedeeldeBus/Extenders/` bevatten per Extender een basisvoorbeeld en aparte `ExtenderPins`-tests voor toegelaten en geweigerde resources. `Sensor_RFP602.ino` is de eerste concrete Sensor-lifecycletest.
 
 ## Testscripts
 
@@ -25,7 +22,6 @@ TestLibraryGereleasedOngeldig.cmd
 TestLibraryNieuw.cmd
 TestLibraryNieuwOngeldig.cmd
 TestLibraryGedeeldeBus.cmd
-TestLibraryGedeeldeBusOngeldig.cmd
 TestLibraryDependency.cmd
 TestBoardplatformsDependency.cmd
 TestLibraryMappingControle.cmd
@@ -35,7 +31,7 @@ LokalePaden_template.cmd
 
 De vier releasecompilecycli worden afzonderlijk uitgevoerd: `TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd` en `TestLibraryNieuwOngeldig.cmd`. Daarna voegt `TestLibraryGenereerTESTRESULTATEN.cmd` hun vier logbestanden samen tot `TestLibraryStatusReport.txt` en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit. De mappingcontrole is een verplichte releasevoorwaarde; een fout in die controle verhindert `RELEASEVALIDATIE GESLAAGD`.
 
-`TestLibraryGedeeldeBus.cmd` en `TestLibraryGedeeldeBusOngeldig.cmd` maken geen deel uit van deze vier releasecompilelogs.
+`TestLibraryGedeeldeBus.cmd` maakt geen deel uit van deze vier releasecompilelogs.
 
 ## Padkeuze van de Windows-tests
 
@@ -79,6 +75,10 @@ Voor elk gewoon testscript wordt naast het `.cmd`- en `.txt`-bestand een control
 - bestaat het controlebestand al en is het 0 byte, dan wordt niets opnieuw gegenereerd en gaat de testcyclus verder.
 
 Hierdoor kan de gegenereerde inhoud gecontroleerd en desgewenst overgenomen worden in het betrokken `.cmd`-script. Zodra het controlebestand daarna bewust leeg is, wordt geen nieuwe generatie gestart.
+
+## Bekende inconsistentie in de huidige testscripts
+
+`TestLibraryGereleasedOngeldig.cmd` bevat momenteel nog een historische ongeldige test voor `CHARACTERSCREEN_I2C_ADRES_MODUS=3`. Die configuratiemacro bestaat niet meer in de huidige Screen-code. Dit document vermeldt dat expliciet omdat de code onder `src/` de actuele architectuur bepaalt; het testscriptsbestand is op dit punt nog niet mee opgeschoond.
 
 ## Teststappen
 
@@ -181,7 +181,6 @@ Ook hier is een test alleen `[OK]` wanneer de compilatie faalt én de specifiek 
 De Ongeldig-scripts gebruiken eveneens een controlebestand met dezelfde basisnaam. De lijst met mogelijke `TEST_INO`-bestanden wordt daarbij uitsluitend gelezen uit het overeenkomstige gewone testscript:
 
 - `TestLibraryNieuwOngeldig.cmd` → `TestLibraryNieuw.cmd` (`INCLUDE`: `examples\Systeem\Input\`);
-- `TestLibraryGedeeldeBusOngeldig.cmd` → `TestLibraryGedeeldeBus.cmd` (`INCLUDE`: `examples\Systeem\GedeeldeBus\`);
 - `TestLibraryGereleasedOngeldig.cmd` → `TestLibraryGereleased.cmd` (`EXCLUDE`: `examples\Systeem\Input\` en `examples\Systeem\GedeeldeBus\`).
 
 Ontbrekende `#error`-validaties waarvoor een relevante `TEST_INO` in die scope gevonden wordt, worden als invulblok geschreven in het controlebestand:
@@ -196,7 +195,7 @@ call :EXPECT_FAIL
 
 Bestaat het controlebestand niet, dan wordt het opgebouwd. Is het groter dan 0 byte, dan stoppen de tests zodat de gegenereerde blokken gecontroleerd en desgewenst overgenomen kunnen worden. Is het bestand 0 byte, dan wordt niet opnieuw gegenereerd en starten de bestaande Ongeldig-tests.
 
-### 6. GedeeldeBus-tests: `TestLibraryGedeeldeBus.cmd` en `TestLibraryGedeeldeBusOngeldig.cmd`
+### 6. GedeeldeBus-tests: `TestLibraryGedeeldeBus.cmd`
 
 `TestLibraryGedeeldeBus.cmd` gebruikt `CONTROLE_MODUS=INCLUDE` voor:
 
@@ -204,12 +203,7 @@ Bestaat het controlebestand niet, dan wordt het opgebouwd. Is het groter dan 0 b
 examples\Systeem\GedeeldeBus\
 ```
 
-Het script geeft daarnaast deze extra compileflag mee aan de betrokken testblokken:
-
-```text
-```
-
-De gewone GedeeldeBus-tests gebruiken `TestLibraryCommon.cmd`. `TestLibraryGedeeldeBusOngeldig.cmd` gebruikt `TestLibraryCommonOngeldig.cmd` met dezelfde INCLUDE-scope. Beide maken momenteel geen deel uit van de vier logs die `TestLibraryGenereerTESTRESULTATEN.cmd` voor de officiële releasevalidatie verwerkt.
+De GedeeldeBus-tests gebruiken `TestLibraryCommon.cmd`. Er bestaat in de huidige codebasis geen afzonderlijk `TestLibraryGedeeldeBusOngeldig.cmd`. `TestLibraryGedeeldeBus.cmd` maakt momenteel geen deel uit van de vier logs die `TestLibraryGenereerTESTRESULTATEN.cmd` voor de officiële releasevalidatie verwerkt.
 
 ### 7. Mapping-volledigheidscontrole: `TestLibraryMappingControle.cmd`
 

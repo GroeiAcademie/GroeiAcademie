@@ -1,5 +1,10 @@
 # ROADMAP
 
+## Actuele codebasis beta v2.0.0
+
+De huidige codebasis bevat de boomgebaseerde GedeeldeBus-lifecycle, Screen, Input, 14 concrete Extenders, de concrete Sensor `RFP602` en Stimulus. Alle `ExtenderPins` gebruiken `EP_<pinnaam>`. `Diagnose()` bestaat alleen als lege DEBUG-hook in `GedeeldeBusNode`; concrete elektronische diagnoses blijven open werk. De onderstaande roadmap moet vanuit deze codebasis worden gelezen.
+
+
 Deze ROADMAP beschrijft de ontwikkelrichting van het GroeiAcademie FrameWork. Een onderdeel is pas voltooid wanneer de code, voorbeelden, documentatie en relevante hardwarecontrole met elkaar overeenstemmen.
 
 ## 1. Visie / Doel van het project
@@ -34,7 +39,7 @@ Een onderdeel is voor v2 pas klaar wanneer architectuur, code, voorbeelden, docu
 ## 2. Functionele ROADMAP
 
 1. **Aanraking, capacitieve bediening en gebruikersinput**
-   Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande `PIN_TOETS`-systeem.
+   Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem met de per `KEYPAD_TYPE` bepaalde `INPUT_KEYPAD_PIN_...`-resources.
 
 2. **Aanwezigheid, afstand en locatie**
    Toepasbaar voor aanwezigheid, afstand, beweging, lichaamshouding en locatie in een ruimte.
@@ -368,7 +373,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 ### Aantekening: generiek opt-in-mechanisme voor experimentele functies
 
-Bij `CHARACTERSCREEN_I2C_ADRES_MODUS` (zie `docs/DECISION_LOG.md`, D023) werd een generieke
+Bij de inmiddels achterhaalde `CHARACTERSCREEN_I2C_ADRES_MODUS` (historische beslissing D023 in `docs/DECISION_LOG.md`) werd een generieke
 `BETATESTER`-vlag overwogen om functies die nog niet in alpha zitten toch al testbaar te
 maken. Bewust niet gebouwd: voor precies één concreet experiment een brede infrastructuur
 optuigen is voorbarig, en het zou een tweede, parallel classificatiesysteem naast de

@@ -99,7 +99,7 @@ De vaste keuzewaarden `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115` worden door 
 Het template bevat de huidige instelbare waarden voor:
 
 - `AANTAL_SENSOREN_AANWEZIG`, uitsluitend `2` of `4`;
-- `ADC_BACKEND` en `ADS1115_I2C_ADDRESS`;
+- `ADC_BACKEND` en `I2C_ADDRESS_ADS1115`;
 - `WACHT_LOSLATEN_DELAY_MS`;
 - `ADC_PIN_SENSOR_1` tot en met `ADC_PIN_SENSOR_4`;
 - `BOARD_VERSION`;
@@ -156,3 +156,12 @@ Beschikbare HX1838-toetsenindelingen:
 ## Input-specifieke gebruikersinstellingen
 
 UserDefined PCF8574-keypads moeten al hun vereiste `KEYPAD_GENERIEK_...`-instellingen in `UserConfig.h` krijgen; een `.ino`-define bereikt `Input.cpp` niet. Voor HX1838 begrenst `HX1838_KALIBRATIE_TIMEOUT_MS` (standaard 30000 ms) de wachttijd tijdens kalibratie en verificatie.
+
+
+## Extenders en v2.0.0
+
+`UserConfig.h` kan vóór de fallbackwaarden van `SystemConfig.h` de GedeeldeBus-/Extenderconfiguratie vastleggen. Gebruik daarvoor exact de macro's die in `SystemConfig.h` als `#ifndef`-defaults bestaan, zoals `EXTENDER_<NAAM>_AANTAL`, de bijbehorende I2C-adressen, CS-pinnen en controlpinnen.
+
+De logische resources van een Extender worden niet hier hernoemd of gemapt: die staan als `ExtenderPins::EP_<pinnaam>` in de concrete `Extender*.h`.
+
+Voor lokale compiletests kan `GROEIACADEMIE_IGNORE_USER_CONFIG` worden gedefinieerd; dan laadt `SystemConfig.h` het aanwezige `UserConfig.h` niet.

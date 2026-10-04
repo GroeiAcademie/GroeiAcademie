@@ -1,3 +1,5 @@
+> **Historisch pilotdocument.** Dit document beschrijft de experimentele v1.2.0-sensorenpilot en is **geen beschrijving van de huidige beta v2.0.0-code**. De huidige code heeft `src/Systeem/Sensor/RFP602.h/.cpp` en het actuele sensorvoorbeeld staat onder `examples/Systeem/GedeeldeBus/Sensoren/Sensor_RFP602/`. De hieronder genoemde Sensoren-kernel, pilotdrivers en oude paden behoren tot die historische pilot en zijn niet de huidige v2.0.0-implementatie.
+
 # GroeiAcademie v1.2.0: Sensoren-kernel (experimentele pilot)
 
 **Status: PRERELEASE / experimenteel.** Dit is geen v1.2.0-releasekandidaat, geen vervanging van v1.1.0, en niets hierin is tot nu toe gecompileerd of op hardware getest. Dit document beschrijft een werkende architectuurpilot, bedoeld om mee te testen en feedback op te geven, niet om in productie te gebruiken.
@@ -14,7 +16,7 @@ De volledige architecturale motivatie, alle ontwerpbeslissingen, en de technisch
 - **Acht pilot-drivers**: Pulse Sensor, FSR402/RFP602 (volledig geïntegreerd in de bestaande Stimulus-toepassing), BioAmp EXG Pill, DS18B20, MAX30102, NeuroSky TGAM, INMP441, Piëzo-ademhalingsband.
 - **Bestemming-module**: stuurt sensordata weg naar Serial (werkend) of naar een tweede bord via UART (minimale pilot).
 - **Ontvangst-module**: minimale pilot om data van een ander bord te ontvangen.
-- **Elf testsketches**, elk apart compileerbaar, onder `examples/Systeem/Sensoren/`.
+- **Elf testsketches**, elk apart compileerbaar, onder `examples/Systeem/Sensoren/` in die experimentele pilotbranch (dit pad bestaat niet in de huidige v2.0.0-code).
 
 ## 3. Wat expliciet nog niet werkt of getest is
 

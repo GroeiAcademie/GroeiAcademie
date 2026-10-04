@@ -31,3 +31,8 @@ src/Configuratie/Examples.h
 ```
 
 - [ExamplesConfig.h](ExamplesConfig.md): gedeelde, per script overschrijfbare instellingen voor de examples.
+
+
+## v2.0.0 systeemconfiguratie
+
+De actuele v2-code gebruikt `SystemConfig.h` ook voor GedeeldeBus-gerelateerde configuratie: `BOARD_ID`, `ADC_BACKEND`, `INPUT_KANAAL_CONFIG`, `SCREEN_OUTPUT_CONFIG`, de board-specifieke UNO-shieldmapping en de `EXTENDER_<NAAM>_AANTAL`-/adres-/CS-/controlpininstellingen. Zie [SystemConfig.md](SystemConfig.md) en [GedeeldeBus](../Systeem/GEDEELDEBUS.md).

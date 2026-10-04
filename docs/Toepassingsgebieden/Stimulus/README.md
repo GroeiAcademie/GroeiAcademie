@@ -20,6 +20,17 @@ of:
 #include <GroeiAcademie.h>
 ```
 
+## v2.0.0 Sensorroute
+
+De huidige Stimuluscode neemt `src/Systeem/Sensor/RFP602.h` op en leest de analoge kanalen via de globale pointer `sensorRFP602`. De Stimulusvoorbeelden maken deze Sensor vóór gebruik aan met:
+
+```cpp
+sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
+if (sensorRFP602 == nullptr) exit(0);
+```
+
+`RFP602` hangt compile-time onder `ADC_NATIVE` of `ADC_ADS1115`, afhankelijk van `ADC_BACKEND`. `RawAnalogRead()` gebruikt overeenkomstig `analogRead()` of `ADS1115.readADC_SingleEnded()`.
+
 ## Doel
 
 De module registreert en vergelijkt vingertikken zodat duur, drukverloop en timing reproduceerbaar kunnen worden geoefend.

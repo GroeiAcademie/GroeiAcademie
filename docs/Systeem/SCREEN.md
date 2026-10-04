@@ -101,7 +101,7 @@ Binnen ieder object staan eerst gegevens, statussen en objectreferenties alfabet
 Binnen:
 
 ```cpp
-bool Screen::Inpluggen()
+bool Screen::inpluggen()
 ```
 
 is `this` het huidige `Screen`-object.
@@ -152,16 +152,34 @@ Buiten een `Screen`-memberfunctie:
 
 ## v2.0.0 aanmaken en diagnose
 
-De normale v2-route maakt `Screen` via GedeeldeBus aan:
+`Screen` is een `GedeeldeBusNode`. De standaardconstructor gebruikt `SCREEN_OUTPUT`; andere constructors laten een runtime-subset en Character-/Pixelcallbacks toe.
 
 ```cpp
 Screen = GedeeldeBusNewComponent<struct Screen>();
 if (Screen == nullptr) exit(0);
 ```
 
-Een runtime-subset of callbacks kunnen via de bestaande constructors worden doorgegeven. `Screen::typesActief` moet binnen de compile-time `SCREEN_OUTPUT` vallen.
+Met callbacks:
 
-De normale lifecycle blijft `aanmelden()` → `controleren()` → `inpluggen()` → `activeren()`. `inpluggen()` bevat de minimale hardwarecontrole die nodig is om Screen bruikbaar te verklaren. Uitgebreide elektronische schermtests horen later in `Diagnose()`; deze functie bestaat uitsluitend wanneer `DEBUG` actief is.
+```cpp
+Screen = GedeeldeBusNewComponent<struct Screen>(MijnCharacterScreen, MijnPixelScreen);
+```
+
+Of met expliciete runtime-subset:
+
+```cpp
+Screen = GedeeldeBusNewComponent<struct Screen>(
+  SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS,
+  MijnCharacterScreen,
+  MijnPixelScreen
+);
+```
+
+De runtime-selectie staat in `Screen::typesActief`. De concrete children zijn, afhankelijk van `SCREEN_OUTPUT`, `SerialOutput`, `CharacterScreen` en `PixelScreen`.
+
+`Diagnose()` is nog niet specifiek in `Screen` geïmplementeerd. Alleen de lege virtuele DEBUG-hook uit `GedeeldeBusNode` bestaat.
+
+Belangrijk voor de actuele implementatie: niet elke fysieke controle zit vandaag in `inpluggen()`. `CharacterScreen::Activeren()` controleert of het I2C-adres antwoordt. `PixelScreen::inpluggen()` configureert CS/DC/RST; `PixelScreen::Activeren()` retourneert momenteel `true` en bevat een uitgecommentarieerde ST7789-ID-proef. De documentatie hieronder beschrijft daarom de code zoals ze nu is en niet een toekomstige Diagnose-verdeling.
 
 # Lifecycle
 
@@ -177,16 +195,16 @@ Screen.actief
 Screen.Afmelden()
 ```
 
-`Configureren()` bestaat niet meer voor Screen. Alle Screen-initialisatie loopt via `Screen::Aanmelden()`, `Screen::Controleren()` en `Screen::Inpluggen()`.
+`Configureren()` bestaat niet meer voor Screen. Alle Screen-initialisatie loopt via `Screen::aanmelden()`, `Screen::controleren()` en `Screen::inpluggen()`.
 
 ---
 
-## `Screen::Aanmelden()`
+## `Screen::aanmelden()`
 
-`Screen::Aanmelden()` meldt alleen het parentobject `Screen` aan.
+`Screen::aanmelden()` meldt alleen het parentobject `Screen` aan.
 
 ```cpp
-bool Screen::Aanmelden() {
+bool Screen::aanmelden() {
   return GedeeldeBusNode::aanmelden();
 }
 ```
@@ -217,12 +235,12 @@ actief = true
 
 ---
 
-## `Screen::Controleren()`
+## `Screen::controleren()`
 
-`Screen::Controleren()` controleert het parentobject `Screen`.
+`Screen::controleren()` controleert het parentobject `Screen`.
 
 ```cpp
-bool Screen::Controleren() {
+bool Screen::controleren() {
   return GedeeldeBusNode::controleren();
 }
 ```
@@ -237,7 +255,7 @@ De concrete Character-, Pixel- en Serial-resources worden gecontroleerd door hun
 
 ---
 
-## `Screen::Inpluggen()`
+## `Screen::inpluggen()`
 
 Eerst:
 
@@ -279,7 +297,7 @@ if (this->Character.gedeeldeBus == nullptr) {
     ObjectAanmakenEnInpluggenGedeeldeBus<::CharacterScreen>(
       this,
       GedeeldeBusComponent::CHARACTER_SCREEN,
-      I2C_ADRES,
+      I2C_ADDRESS_CHARACTER_SCREEN,
       HardwareResourcePin::SDA,
       HardwareResourcePin::SCL
     );
@@ -300,7 +318,7 @@ this->actief = false;
 return false;
 ```
 
-Het CharacterScreen gebruikt uitsluitend het geconfigureerde `I2C_ADRES`. Er bestaan geen adresmodi meer en er wordt niet automatisch naar 0x27 of 0x3F uitgeweken.
+Het CharacterScreen gebruikt uitsluitend het geconfigureerde `I2C_ADDRESS_CHARACTER_SCREEN`. Er bestaan geen adresmodi meer en er wordt niet automatisch naar 0x27 of 0x3F uitgeweken.
 
 De fysieke aanwezigheidscontrole gebeurt in `CharacterScreen::Activeren()` op het adres dat reeds door GedeeldeBus is aangemeld en gecontroleerd:
 
@@ -311,7 +329,7 @@ Wire.beginTransmission(adres);
 return Wire.endTransmission() == 0;
 ```
 
-Wanneer deze controle faalt, faalt `GedeeldeBusNode::inpluggen()` en wordt de dynamisch aangemaakte `CharacterScreen`-node afgemeld. `ObjectAanmakenEnInpluggenGedeeldeBus()` geeft dan `nullptr` terug. `Screen::Inpluggen()` zet daarop:
+Wanneer deze controle faalt, faalt `GedeeldeBusNode::inpluggen()` en wordt de dynamisch aangemaakte `CharacterScreen`-node afgemeld. `ObjectAanmakenEnInpluggenGedeeldeBus()` geeft dan `nullptr` terug. `Screen::inpluggen()` zet daarop:
 
 ```cpp
 this->Character.foutmelding = _FATAL_CS001;
@@ -579,7 +597,7 @@ return false;
 
 ---
 
-# `Screen::Afmelden()`
+# `Screen::afmelden()`
 
 Afmelden gebeurt child voor child en daarna pas voor `Screen`.
 
@@ -714,7 +732,7 @@ Regel 1 en regel 2 worden eerst weergegeven. Daarna wordt `delayTime` één keer
 
 ## PixelScreen zonder callback
 
-Fatale activatiefouten van CharacterScreen en PixelScreen worden gemeld met een korte code zoals `CS000` of `PS001`. De volledige betekenis en oplossing staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Is geen van beide schermtypes beschikbaar, dan forceert de library voor deze melding Serial op `SERIAL_BAUDRATE`.
+Screen-fouten worden gemeld met lifecyclegebonden codes zoals `CS001`, `CS301`, `PS001`, `PS305` of `SS302`. De actuele codes en hun betekenis staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Waar mogelijk wordt een fout van één uitvoer via een andere nog werkende Screen-uitvoer gemeld.
 
 Vanaf v2.0.0 bezit `Screen` zelf het concrete `Adafruit_ST7789`-object (`Screen.Pixel.display`) en de algemene `Adafruit_GFX*`-pointer (`Screen.Pixel.gfx`). De sketch maakt geen afzonderlijk `pixelScreen`-object buiten `Screen` meer aan. De normale setup is:
 
@@ -724,7 +742,7 @@ Screen.Controleren();
 Screen.Inpluggen();
 ```
 
-`Screen::Inpluggen()` bestuurt de concrete Character-, Pixel- en Serial-uitvoer. Er bestaan geen afzonderlijke `Screen.Character.Inpluggen()`, `Screen.Pixel.Inpluggen()` of `Screen.Serial.Inpluggen()`-functies. Na een geslaagde PixelScreen-inplug voert `Screen` intern, in deze volgorde, `Screen.Pixel.display.init(...)`, `Screen.Pixel.display.setRotation(...)` en `Screen.Pixel.gfx = &Screen.Pixel.display` uit. Daarna controleert `Screen.Inpluggen()` de gekoppelde `Adafruit_GFX`-instantie, houdt rekening met rotatie 0 tot en met 3, trekt de ingestelde buitenmarges van de beschikbare schermruimte af, berekent het tekstgrid en stelt tekstgrootte, tekstkleur, achtergrondkleur en tekstomloop in.
+`Screen::inpluggen()` bestuurt de concrete Character-, Pixel- en Serial-uitvoer. Er bestaan geen afzonderlijke `Screen.Character.Inpluggen()`, `Screen.Pixel.Inpluggen()` of `Screen.Serial.Inpluggen()`-functies. Na een geslaagde PixelScreen-inplug voert `Screen` intern, in deze volgorde, `Screen.Pixel.display.init(...)`, `Screen.Pixel.display.setRotation(...)` en `Screen.Pixel.gfx = &Screen.Pixel.display` uit. Daarna controleert `Screen.Inpluggen()` de gekoppelde `Adafruit_GFX`-instantie, houdt rekening met rotatie 0 tot en met 3, trekt de ingestelde buitenmarges van de beschikbare schermruimte af, berekent het tekstgrid en stelt tekstgrootte, tekstkleur, achtergrondkleur en tekstomloop in.
 
 Omdat het concrete object onderdeel van `Screen` is, kan de actieve displaydriver nadien rechtstreeks worden aangesproken, bijvoorbeeld `Screen.Pixel.display.setRotation(1);`. Die rechtstreekse driveraanroep wijzigt het fysieke pixelscherm; de standaard `Screen.Print()`-gridberekening blijft gebaseerd op de activatie die door `Screen.Inpluggen()` is uitgevoerd.
 
@@ -808,7 +826,7 @@ Een callback beheert zelf wissen, regelplaatsing, paginering, wachttijden, `acti
 
 ## Aansluitingen
 
-Een I2C-characterscherm gebruikt `VCC`, `GND`, `SDA` en `SCL`. Controleer `I2C_ADRES` en de spanning van de gebruikte backpack.
+Een I2C-characterscherm gebruikt `VCC`, `GND`, `SDA` en `SCL`. Controleer `I2C_ADDRESS_CHARACTER_SCREEN` en de spanning van de gebruikte backpack.
 
 Een SPI-PixelScreen op Arduino UNO gebruikt voor hardware-SPI standaard `D11` als MOSI en `D13` als SCK. `CS`, `DC` en `RST` worden ingesteld met `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`. De standaard `PIXEL_SCREEN_RST` is Arduino Uno-shieldpin `D7`. Controleer altijd de voedingsspanning en logicaniveaus van de concrete displaymodule.
 

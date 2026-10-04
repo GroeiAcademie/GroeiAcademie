@@ -88,7 +88,7 @@ Voor SerialScreen gelden daarnaast:
 
 | Define | Betekenis |
 |---|---|
-| `I2C_ADRES` | I2C-adres van het characterscherm. |
+| `I2C_ADDRESS_CHARACTER_SCREEN` | I2C-adres van het characterscherm. |
 | `ACTIEF_CHARACTER_SCREEN` | Concreet schermtype: `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` of `SCREEN_LCD4002`. |
 | `FATAL_LEESTIJD_MS` | Standaardleestijd voor een FATAL. |
 
@@ -112,7 +112,7 @@ Voor een ST7789 op Arduino UNO gebruikt hardware-SPI de officiële functies `MOS
 
 De standaard PixelScreen-laag berekent de bruikbare breedte en hoogte na aftrek van tweemaal `PIXEL_SCREEN_MARGIN`. Het aantal kolommen en regels wordt daarna bepaald met de vaste Adafruit_GFX-karakterafmetingen, `PIXEL_SCREEN_TEXT_SIZE`, `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING`. Het resulterende grid wordt binnen de bruikbare ruimte gecentreerd.
 
-Fatale Screen-configuratiefouten gebruiken de codes `CS000`–`CS002` (CharacterScreen) en `PS000`–`PS004` (PixelScreen). Zie [Screen-foutcodes](../Systeem/SCREEN_FOUTCODES.md).
+De huidige Screen-code gebruikt lifecyclegebonden codes in de reeksen `CS001/101/201/301/401`, `PS001/101/201/301..305/401` en `SS001/101/201/301/302`. Zie [Screen-foutcodes](../Systeem/SCREEN_FOUTCODES.md).
 
 ## Sensoren
 
@@ -138,7 +138,7 @@ De gebruiker kiest:
 
 `ADC_BACKEND_NATIVE` gebruikt de ingebouwde Arduino-ADC. `ADC_BACKEND_ADS1115` gebruikt een externe ADS1115 via I2C en vereist de optionele library Adafruit ADS1X15.
 
-`ADS1115_I2C_ADDRESS` bepaalt het adres. `WACHT_LOSLATEN_DELAY_MS` voorkomt bij ADS1115 dat de I2C-bus onafgebroken bevraagd wordt.
+`I2C_ADDRESS_ADS1115` bepaalt het adres. `WACHT_LOSLATEN_DELAY_MS` voorkomt bij ADS1115 dat de I2C-bus onafgebroken bevraagd wordt.
 
 ## BOARD_VERSION en ADC-resolutie
 
@@ -247,3 +247,51 @@ Bron voor de board- en pinmapping: de officiële `boards.txt` en `variants/d1_un
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
 `SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. Bij `INPUT_TYPE_DIGITAL` wordt per `KEYPAD_TYPE` vastgelegd welk keypadlabel op welke Arduino Uno-shieldpin aangesloten is. De `INPUT_KEYPAD_PIN_...`-namen volgen het gekozen keypadtype: drukknoppen direct gebruiken `K1..K4`, matrixvarianten gebruiken hun rij-/kolomlabels, membraan-directtypes gebruiken `1..4` en touch-directtypes gebruiken `OUT1..OUT4`. Drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden D3,D2,D5,D4 omdat die softwaremapping de vaste flatkabelvolgorde volgt, zodat er geen draden fysiek gewisseld moeten worden. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
+
+
+## GedeeldeBus en Extenders (v2.0.0)
+
+De code in `SystemConfig.h` bevat voor v2.0.0 ook de configuratie van GedeeldeBus-componenten.
+
+### BOARD_ID
+
+```cpp
+#ifndef BOARD_ID
+  #define BOARD_ID 1
+#endif
+```
+
+`BOARD_ID` is een compile-time identificatie en staat los van `BOARD_VERSION`.
+
+### Extenderaantallen
+
+Voor iedere concrete Extender bestaat een `EXTENDER_<NAAM>_AANTAL`. De standaardwaarde is 0. De commentaar in de code markeert 0 of 1 als de standaardroute en `>= 2` als experimenteel.
+
+De huidige aantalmacro's zijn:
+
+```text
+EXTENDER_ADS1115_AANTAL
+EXTENDER_ADS1158_AANTAL
+EXTENDER_ADS7828_AANTAL
+EXTENDER_ADS7953_AANTAL
+EXTENDER_CD74HC4067_AANTAL
+EXTENDER_DS2482_800_AANTAL
+EXTENDER_MAX14830_I2C_AANTAL
+EXTENDER_MAX14830_SPI_AANTAL
+EXTENDER_MCP23017_AANTAL
+EXTENDER_PCF8574_AANTAL
+EXTENDER_PCF8575_AANTAL
+EXTENDER_SC16IS752_I2C_AANTAL
+EXTENDER_SC16IS752_SPI_AANTAL
+EXTENDER_TCA9548A_AANTAL
+```
+
+Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of controlpinnen gedefinieerd. De concrete defaults en validaties staan in `SystemConfig.h`; deze pagina duplicereert die waarden niet wanneer ze component-specifiek zijn.
+
+### ExtenderPins
+
+`ExtenderPins` zelf worden niet in `SystemConfig.h` gedefinieerd. De geldige resources staan in de concrete `Extender*.h` en gebruiken overal `EP_<pinnaam>`. Zie [GedeeldeBus](../Systeem/GEDEELDEBUS.md).
+
+### ADC en RFP602
+
+`ADC_BACKEND` kiest tussen `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115`. De betekenis van `ADC_PIN_SENSOR_1..4` hangt daarvan af: bij ADS1115 zijn het kanaalnummers; bij Native zijn het `HardwareResourcePin`-waarden. De concrete Sensor `RFP602` gebruikt deze vier configuratiewaarden.

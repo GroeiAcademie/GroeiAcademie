@@ -1,4 +1,7 @@
 
+
+> **Versiegrens:** dit document hoort bij de Stimulus Shield **hardware v1.1.2**. Eventuele softwarecode, configuratienamen of voorbeelden uit de v1.1.2-periode zijn historisch en mogen niet als actuele beta v2.0.0-API worden gelezen. Voor de huidige softwarearchitectuur gelden `README.md`, `docs/ARCHITECTURE.md` en de code onder `src/`.
+
 # Stimulus uitbreiding met ADS1115, TFTSPI en HX1838
 
 > Status: actuele hardwaredocumentatie v1.1.2. ADS1115 blijft ondersteund als hardwarematig geteste uitbreiding.

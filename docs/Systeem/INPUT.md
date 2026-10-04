@@ -5,34 +5,45 @@
 De gecompileerde dependencies hangen af van `INPUT_KANAAL_CONFIG`:
 
 - `INPUT_TYPE_DIGITAL`: geen extra externe library.
-- `INPUT_TYPE_PCF8574`: gebruikt `Wire` en dezelfde interne `ExtenderPCF8574`-codebasis als `EXTENDER_PCF8574`; er is geen afzonderlijke externe PCF8574-library meer nodig.
+- `INPUT_TYPE_PCF8574`: gebruikt `Wire` en dezelfde interne `ExtenderPCF8574`-codebasis als `EXTENDER_PCF8574`; de Input-implementatie gebruikt de externe PCF8574-library niet meer. `library.properties` declareert `PCF8574 (>=0.4.0)` in de huidige codebasis wel nog als algemene dependency.
 - `INPUT_TYPE_HX1838`: gebruikt TinyIRReceiver of IRremote, afhankelijk van `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`. HX1838 met `HX1838_BRON_CODES_DEFINE` is released en hardwarematig bevestigd voor beide ontvangstbackends. De standaard ontvangerpin is D8. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 - Niet geselecteerde invoerbackends worden via de preprocessor niet meegecompileerd.
 
 ## v2.0.0 lifecycle en runtime-selectie
 
-`Input` wordt in beta v2.0.0 via de gewone GedeeldeBus-lifecycle aangemaakt. De vroegere publieke `InputConfigureren()`-stap bestaat niet meer.
+`Input` is een `GedeeldeBusNode` met `typesActief`. De standaardconstructor gebruikt `INPUT_KANAAL_CONFIG`; de tweede constructor accepteert een runtime-subset.
+
+De compile-time configuratie accepteert in `Input.h` exact:
+
+```text
+INPUT_TYPE_NONE
+INPUT_TYPE_DIGITAL
+INPUT_TYPE_PCF8574
+INPUT_TYPE_HX1838
+INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838
+```
+
+`INPUT_TYPE_DIGITAL` wordt dus niet gecombineerd met PCF8574 of HX1838. Een runtime-subset moet volledig binnen `INPUT_KANAAL_CONFIG` vallen; `Input::aanmelden()` controleert dit.
+
+Normaal aanmaken:
 
 ```cpp
 Input = GedeeldeBusNewComponent<struct Input>();
 if (Input == nullptr) exit(0);
 ```
 
-Een expliciete runtime-subset kan worden gekozen, bijvoorbeeld:
+Runtime-subset, alleen wanneer die subset compile-time aanwezig is:
 
 ```cpp
 Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_HX1838);
+if (Input == nullptr) exit(0);
 ```
 
-`Input::typesActief` moet volledig binnen de compile-time `INPUT_KANAAL_CONFIG` vallen. De toegelaten compile-time combinaties zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`. DIGITAL wordt niet met PCF8574 of HX1838 gecombineerd.
+De concrete GedeeldeBus-children zijn `InputDigital`, `InputPCF8574` en `InputHX1838`. `aanmelden()`, `controleren()`, `inpluggen()` en `Activeren()` sturen de lifecycle door. Wanneer één child faalt wordt dat child afgemeld; `Input` faalt pas volledig wanneer geen enkel geselecteerd kanaal overblijft (behalve bij `INPUT_TYPE_NONE`).
 
-De lifecycle is:
+De vroegere publieke `InputConfigureren()`-stap bestaat niet meer. In de huidige code voert `Input::inpluggen()` de minimale hardwarecontrole uit die nodig is om een kanaal als bruikbaar te behouden: de PCF8574 wordt met `begin(0xFF)` werkelijk via I2C aangesproken; TinyIRReceiver moet zijn interruptkoppeling kunnen initialiseren; bij IRremote wordt `begin()` gevolgd door de bestaande korte `isIdle()`-stabiliteitscontrole. Een kanaal dat daarbij faalt wordt afgemeld en op `nullptr` gezet vóór wordt gecontroleerd of minstens één geselecteerd kanaal overblijft. `Input::Activeren()` configureert daarna de digitale `pinMode()`-instellingen, activeert de overgebleven GedeeldeBus-kinderen en verwerkt voor HX1838 de gekozen mapping- of kalibratiebron.
 
-```text
-aanmelden() → controleren() → inpluggen() → activeren()
-```
-
-`inpluggen()` bevat alleen de minimale hardwarecontrole die nodig is voor normale werking. Uitgebreide elektronische functietesten horen later in `Diagnose()` en bestaan alleen onder `DEBUG`.
+`Diagnose()` is nog niet specifiek in `Input` geïmplementeerd; alleen de lege DEBUG-hook uit `GedeeldeBusNode` bestaat.
 
 ## HX1838-kalibratie
 

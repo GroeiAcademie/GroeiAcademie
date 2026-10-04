@@ -18,12 +18,12 @@ De beta-fase is bedoeld om deze nieuwe basis eerst grondig te valideren vóór v
 - centrale controle op Native resources, I2C-adressen en resources van Extenders;
 - dezelfde architectuur voor `Screen`, `Input`, Extenders en Sensoren;
 - expliciete `ExtenderPins` met de naamgeving `EP_<pinnaam>`;
-- scheiding tussen minimale hardwarecontrole in `inpluggen()` en uitgebreide, alleen onder `DEBUG` beschikbare `Diagnose()`;
+- `Diagnose()` is als DEBUG-only virtuele hook voorbereid; concrete elektronische diagnoses moeten nog per component worden gebouwd;
 - eerst architectuur- en conflicttesten, daarna elektronische functietesten en tenslotte praktijktesten met echte sensoren en randapparatuur.
 
 **Beta v2.0.0 is dus geen uitbreiding van v1.1.2 met enkele extra componenten, maar de fundering waarop de volgende generatie van het FrameWork wordt gebouwd.**
 
-## Waar het FrameWork naartoe groei
+## Waar het FrameWork naartoe groeit
 
 Het GroeiAcademie FrameWork vormt één uitbreidbaar framework waarin software, elektronica, hardware, sensormetingen, biofeedback, onderzoek, onderwijs en toepassingen binnen Neuro-Linguïstisch Programmeren samenkomen.
 
@@ -39,7 +39,7 @@ Het project wordt vanaf v1.0.0 publiek ontwikkeld als open-sourceproject. Bijdra
 4. **Baseline bepalen**
 5. **Betrouwbaarheid van metingen bepalen**
 6. **Beweging, houding en lichaamsbeweging**
-7. **Bio-elektrische en biopotentiÃ«le signalen**
+7. **Bio-elektrische en biopotentiële signalen**
 8. **Druk, kracht en aanraking**
 9. **Effect van interventies objectiveren**
 10. **Emoties kalibreren**
@@ -149,7 +149,7 @@ De validatie omvat:
 
 - Arduino LINT (Library Manager)
 - volledige gereleasete regressie op Arduino UNO R4 Minima en een minimale gerichte regressie op de overige boards;
-- optioneel `extras/TestLibraryGereleasedVolledigeRegresietesten.cmd` voor de volledige historische gereleasete regressiedekking, selecteerbaar per `Screen`, `Input`, `Stimulus` of combinatie;
+- `extras/TestLibraryGereleased.cmd` voor de huidige gereleasete regressieset; daarnaast bestaan gerichte v2-testscripts `TestLibraryADC-v2.0.0.cmd`, `TestLibraryInput-v2.0.0.cmd`, `TestLibraryScreen-v2.0.0.cmd` en `TestLibraryGedeeldeBus.cmd`;
 - afzonderlijke HX1838-validatie met geldige en bewust ongeldige configuraties;
 - menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
 - Arduino UNO R3;
@@ -207,13 +207,13 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 - `INPUT_KANAAL_CONFIG`;
 - `KEYPAD_TYPE` en, bij een UserDefined-keypad, alle vereiste `KEYPAD_GENERIEK_...`-instellingen;
 - `I2C_ADDRESS_PCF8574` wanneer `INPUT_TYPE_PCF8574` gebruikt wordt;
-- `I2C_ADRES`;
+- `I2C_ADDRESS_CHARACTER_SCREEN`;
 - `ACTIEF_CHARACTER_SCREEN`;
 - `ACTIEF_PIXEL_SCREEN`;
 - `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`;
 - `PIXEL_SCREEN_ROTATION`;
 - `AANTAL_SENSOREN_AANWEZIG`;
-- `PIN_SENSOR_1` tot en met `PIN_SENSOR_4`;
+- `ADC_PIN_SENSOR_1` tot en met `ADC_PIN_SENSOR_4`;
 - `BOARD_VERSION`;
 - `ADC_BACKEND` (`ADC_BACKEND_NATIVE` of `ADC_BACKEND_ADS1115`): zie hierboven bij Afhankelijkheid.
 
@@ -236,7 +236,23 @@ examples/
 │   │   ├── ADC_Backend_ADS1115/
 │   │   └── ADC_Backend_Native/
 │   ├── GedeeldeBus/
-│   │   └── Tik_Enkele_Samen_Instortend_Cocktail/
+│   │   ├── Extenders/
+│   │   │   ├── Extender_ADS1115/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_ADS1158/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_ADS7828/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_ADS7953/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_CD74HC4067/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_DS2482v800/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_MAX14830_I2C/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_MAX14830_SPI/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_MCP23017/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_PCF8574/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_PCF8575/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_SC16IS752_I2C/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_SC16IS752_SPI/ + 2 ExtenderPins-tests
+│   │   │   └── Extender_TCA9548A/ + 2 ExtenderPins-tests
+│   │   └── Sensoren/
+│   │       └── Sensor_RFP602/
 │   ├── Input/
 │   │   ├── InputkanalenDIGITAL/
 │   │   ├── InputkanalenDIGITALmetArgumenten/
@@ -270,15 +286,30 @@ examples/
 GroeiAcademie/
 ├── src/
 │   ├── GroeiAcademie.h
+│   ├── Input.h
 │   ├── Screen.h
 │   ├── Stimulus.h
+│   ├── SystemConfig.h
 │   ├── Configuratie/
-│   ├── Systeem/Screen/        # Screen.h, Screen.cpp en ScreenTypes.h
-│   ├── Systeem/Input/         # Input.h, Input.cpp en InputTypes.h
-│   ├── Systeem/GedeeldeBus/   # lifecycle, resourcebeheer, Native resources en Extenders
-│   └── Toepassingsgebieden/Stimulus/
+│   ├── Language/
+│   ├── Systeem/
+│   │   ├── GedeeldeBus/       # GedeeldeBus.h/.cpp + 14 Extender .h/.cpp-paren
+│   │   ├── Input/             # Input.h, Input.cpp, InputTypes.h
+│   │   ├── Screen/            # Screen.h, Screen.cpp, ScreenTypes.h
+│   │   └── Sensor/            # RFP602.h/.cpp
+│   └── Toepassingsgebieden/
+│       └── Stimulus/          # Stimulus.h/.cpp
 ├── examples/
+│   ├── Systeem/
+│   │   ├── ADC_Backend/
+│   │   ├── GedeeldeBus/
+│   │   │   ├── Extenders/
+│   │   │   └── Sensoren/
+│   │   ├── Input/
+│   │   └── Screen/
+│   └── Toepassingsgebieden/Stimulus/
 ├── docs/
+├── extras/
 ├── library.properties
 ├── keywords.txt
 └── README.md
@@ -312,6 +343,7 @@ Aangevraagde en goedgekeurde uitbreidingen voor volgende releases staan in [de r
 
 - [Project Constitution](PROJECT_CONSTITUTION.md)
 - [Architectuur](docs/ARCHITECTURE.md)
+- [GedeeldeBus](docs/Systeem/GEDEELDEBUS.md)
 - [Configuratie](docs/Configuratie/README.md)
 - [Screen](docs/Systeem/SCREEN.md)
 - [Screen-foutcodes](docs/Systeem/SCREEN_FOUTCODES.md)

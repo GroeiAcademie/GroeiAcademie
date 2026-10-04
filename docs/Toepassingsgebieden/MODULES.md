@@ -48,6 +48,9 @@ Een gepland toepassingsgebied mag niet als werkende libraryfunctionaliteit worde
 
 ## 1. Stimulus en conditionering
 
+In beta v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `RFP602`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op `ADC_NATIVE` of `ADC_ADS1115`.
+
+
 ### Leerdoel
 
 Een stimulus met vingertikken reproduceerbaar leren zetten en activeren.
@@ -147,7 +150,7 @@ Geplande meetdoelen zijn borst- en buikbeweging, lichaamshouding, beweging, trem
 
 ## 11. Aanraking, capacitieve bediening en gebruikersinput
 
-Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande `PIN_TOETS`-systeem: stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking.
+Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem met de per `KEYPAD_TYPE` bepaalde `INPUT_KEYPAD_PIN_...`-resources: stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking.
 
 ## 12. Aanwezigheid, afstand en locatie
 

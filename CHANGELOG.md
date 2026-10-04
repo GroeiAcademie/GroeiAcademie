@@ -2,6 +2,8 @@
 
 Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestand bijgehouden.
 
+Historische secties beschrijven de toestand van die release en kunnen daarom bestandsnamen, paden en API’s noemen die in de huidige beta v2.0.0 niet meer bestaan. De sectie `2.0.0` beschrijft de huidige ontwikkellijn.
+
 De versienummers volgen de versie in `library.properties`.
 
 ## [Unreleased]
@@ -17,12 +19,14 @@ De versienummers volgen de versie in `library.properties`.
 
 ## 2.0.0
 
+- documentatie opnieuw uit de actuele v2.0.0-code afgeleid: filestructuur, GedeeldeBus-lifecycle, Extenders, `EP_`-resources, RFP602 en de huidige dummy `Diagnose()` zijn met de broncode gelijkgetrokken;
+
 ### Screen
 
 - `Screen` is de enige v2.0.0-Screen-architectuur en werkt via de normale v2.0.0-GedeeldeBus-lifecycle; de oude niet-GedeeldeBus-Screen-route is verwijderd;
 - alle blijvende Screen-hardware en Screen-status zitten in het `Screen`-object, waaronder `Screen.Character.display`, `Screen.Pixel.display`, `Screen.Pixel.PixelScreen`, callbacks, status en de GedeeldeBus-kinderen;
 - `Screen.Character.display` is het concrete `LiquidCrystal_I2C`-object; `Screen.Pixel.display` is het concrete `Adafruit_ST7789`-object; `Screen.Pixel.PixelScreen` blijft voorlopig de `Adafruit_GFX*`-pointer naar dat object tot de definitieve pointernaam is gekozen;
-- `Screen.Pixel.Configureren()` plugt de PixelScreen-resources via GedeeldeBus in en initialiseert daarna het fysieke pixelscherm; `Screen.Character.Configureren()` doet hetzelfde per CharacterScreen-kanaal; `Screen.Configureren()` configureert de geselecteerde Screen-kanalen gezamenlijk;
+- `Screen` doorloopt de normale GedeeldeBus-lifecycle (`aanmelden()` → `controleren()` → `inpluggen()` → `activeren()`); de geselecteerde Character-, Pixel- en Serial-kinderen worden daarin afzonderlijk verwerkt; fysieke initialisatie gebeurt in de lifecycle van het betreffende kind;
 - de afzonderlijke `Adafruit_ST7789 pixelScreen(...)`-constructie, `pixelScreen.init(...)`, `pixelScreen.setRotation(...)` en `PixelScreen = &pixelScreen` verdwijnen uit de Screen-voorbeelden;
 - de vijf dubbele Screen-voorbeelden onder `examples/Systeem/GedeeldeBus/` zijn verwijderd; de vijf voorbeelden onder `examples/Systeem/Screen/` gebruiken de v2.0.0-object-API;
 - `extras/TestLibraryScreen-v2.0.0.cmd` toegevoegd als tijdelijke, gerichte Screen-test op Arduino UNO R4 Minima.
@@ -31,8 +35,8 @@ De versienummers volgen de versie in `library.properties`.
 
 - `Input` is de enige v2.0.0-Input-architectuur en werkt via de normale v2.0.0-GedeeldeBus-lifecycle; de oude backward/non-PROTOTYPE-Input-routes zijn verwijderd.
 - DIGITAL, PCF8574 en HX1838 worden als GedeeldeBus-kinderen van `Input` ingeplugd; de blijvende Input-status en kanaalstatus zitten in het `Input`-object.
-- de publieke Input-aanroepen lopen via het object; de vroegere publieke `InputConfigureren()`-stap is verwijderd en initialisatie gebeurt volledig via de GedeeldeBus-lifecycle en `Input::Activeren()`.
-- `INPUT_PCF8574` en `EXTENDER_PCF8574` gebruiken dezelfde interne `ExtenderPCF8574`-codebasis; de afzonderlijke externe PCF8574-library is uit de Input-implementatie en uit `library.properties` verwijderd.
+- de publieke Input-aanroepen lopen via het object; de vroegere publieke `InputConfigureren()`-stap is verwijderd en initialisatie gebeurt volledig via de GedeeldeBus-lifecycle; minimale PCF8574/HX1838-hardwarecontrole gebeurt in `Input::inpluggen()` en de overgebleven kanalen worden daarna via `Input::Activeren()` operationeel gemaakt.
+- `INPUT_PCF8574` en `EXTENDER_PCF8574` gebruiken dezelfde interne `ExtenderPCF8574`-codebasis; de externe PCF8574-library wordt niet meer door de Input-implementatie gebruikt. `library.properties` declareert `PCF8574 (>=0.4.0)` momenteel nog als dependency.
 - `GedeeldeBusComponent::INPUT_PCF8574` blijft de exclusieve Input-rol en de shield-pinindeling aanduiden; fysiek telt deze PCF8574 als de eerste gebruikte PCF8574 in de I2C-adresreeks.
 - wanneer `INPUT_PCF8574` het standaardadres `0x20` gebruikt, krijgt `EXTENDER_PCF8574_1` standaard `0x21` en `EXTENDER_PCF8574_2` standaard `0x22`.
 - de negen dubbele Input-voorbeelden onder `examples/Systeem/GedeeldeBus/` zijn verwijderd; de negen voorbeelden onder `examples/Systeem/Input/` gebruiken de v2.0.0-object-API.
@@ -45,7 +49,7 @@ De versienummers volgen de versie in `library.properties`.
 - `ADC_NATIVE` en `ADC_ADS1115` zijn configureerbare GedeeldeBus-objecten; `sensorRFP602` wordt op de geselecteerde ADC-route ingeplugd en Stimulus leest via `sensorRFP602`.
 - bij `ADC_ADS1115` gebruikt `sensorRFP602` hetzelfde `ADC_ADS1115`-object dat van `ExtenderADS1115` erft; een afzonderlijk `Adafruit_ADS1115`-object binnen Stimulus is verwijderd.
 - de vijf Stimulus-voorbeelden gebruiken de v2.0.0-object-API van `Screen`, `Input` en `Stimulus`; het dubbele gecombineerde Stimulus-voorbeeld onder `examples/Systeem/GedeeldeBus/` is verwijderd.
-- `extras/TestLibraryStimulus-v2.0.0.cmd` toegevoegd als tijdelijke Stimulus-test op Arduino UNO R4 Minima, met beide ADC-backends en alle acht Screen-configuraties.
+- de vijf Stimulus-voorbeelden blijven de actuele v2.0.0-testbasis voor de Stimulus-objectroute; in `extras/` bestaat momenteel geen afzonderlijk `TestLibraryStimulus-v2.0.0.cmd`.
 - de eerste RFP602-sensorlaag is toegevoegd als directe, één-op-één omzetting van de bestaande Stimulus-uitlezing;
 - `sensorRFP602` wordt als Sensor-kind op de gekozen ADC-extender ingeplugd;
 - `sensorRFP602.RawAnalogRead(...)` neemt de directe sample-uitlezing over van `Stimulus.RawAnalogRead(...)`;
@@ -63,7 +67,7 @@ De versienummers volgen de versie in `library.properties`.
 ### GedeeldeBus / Extenders / diagnose
 
 - `GedeeldeBusNewComponent<T>(...)` voert de vaste lifecycle `aanmelden()` → `controleren()` → `inpluggen()` → `activeren()` uit;
-- `inpluggen()` blijft de minimale hardwarecontrole voor normale werking;
+- `inpluggen()` is de lifecycle-stap voor het inpluggen en de noodzakelijke basisinitialisatie van resources; in de huidige code zitten sommige concrete hardwarecontroles nog in `Activeren()`;
 - `GedeeldeBusNode` bevat onder `DEBUG` een virtuele dummy `Diagnose()` als voorbereide interface voor latere uitgebreide elektronische functietesten;
 - de 14 concrete Extenders staan elk in een eigen `.h/.cpp` onder `Systeem/GedeeldeBus`;
 - alle waarden van alle `ExtenderPins`-enums gebruiken voortaan consequent `EP_<pinnaam>`; hierdoor botsen fabrikantnamen zoals `GPIO0` niet met bestaande `SystemConfig.h`-macro's;

@@ -1,5 +1,8 @@
 # Decision Log
 
+> Dit logboek bewaart ook historische beslissingen. Namen, paden en API’s in oudere beslissingen kunnen dus bewust afwijken van de huidige beta v2.0.0-code. Wanneer een beslissing expliciet is achterhaald, staat dat bij die beslissing vermeld.
+
+
 Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer en vervangen oudere besluiten niet stilzwijgend.
 
 ## D001 Projectnaam
@@ -93,6 +96,8 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D022 Screen-configuratie: verplicht en expliciet, geen impliciete auto-configuratie
 
+**Status: achterhaald in beta v2.0.0.** De huidige Screen-code gebruikt de GedeeldeBus-objectlifecycle; de hieronder genoemde losse `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()` behoren tot de vroegere architectuur. Onderstaande tekst blijft staan als historische beslissing.
+
 **Besluit:** `CharacterScreenConfigureren()` wordt toegevoegd, symmetrisch met de bestaande `PixelScreenConfigureren()`: beide doen een echte hardwarecontrole (I2C-handdruk resp. resolutiecontrole), bewaren enkel hun eigen status en foutcode, en tonen zelf niets. `PrintToScreenIntern()` controleert voortaan vooraan of de vereiste configuratiefunctie is aangeroepen en toont, maximaal één keer, de gepaste foutmelding (`CS000`/`PS000` bij een vergeten aanroep, de opgeslagen foutcode bij een mislukte configuratie): daarna stopt die aanroep. De bestaande impliciete auto-configuratie van `PixelScreen` (`if (pixelScreenGeselecteerd && pixelScreenStatus.pixelScreenActief) PixelScreenConfigureren();`) wordt volledig verwijderd, zonder fallback. `ScreensConfigureren()` wordt toegevoegd als optionele gemakslaag die, aan de hand van `SCREEN_OUTPUT`, enkel de nodige configuratiefunctie(s) aanroept: de losse `CharacterScreenConfigureren()`/`PixelScreenConfigureren()` blijven gewoon publiek en worden niet gedeprecieerd, want `PixelScreenConfigureren()` wordt al in 8 van de 12 voorbeelden rechtstreeks gebruikt.
 
 **Gevolg, bewust aanvaard:** een sketch die vandaag werkt zonder expliciete `PixelScreenConfigureren()`-aanroep (steunend op de verwijderde impliciete auto-configuratie) werkt na deze wijziging niet meer: dit is een bewuste breaking change.
@@ -100,6 +105,8 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 **Context:** dezelfde redenering als D020: nog geen gekende externe gebruikers, dus nu bijna kosteloos; later zou dit een verplichte deprecatiecyclus vereisen (D019).
 
 ## D023 CHARACTERSCREEN_I2C_ADRES_MODUS
+
+**Status: achterhaald in beta v2.0.0.** De huidige code gebruikt `I2C_ADDRESS_CHARACTER_SCREEN`; de beschreven adresmodi en automatische kandidatenlijst bestaan niet meer. Onderstaande tekst blijft staan als historische beslissing.
 
 **Besluit:** `CharacterScreenConfigureren()` krijgt een instelbare `CHARACTERSCREEN_I2C_ADRES_MODUS` (default `1`) om om te gaan met I2C-characterschermen waarvan het adres niet vooraf gekend is:
 
@@ -112,6 +119,8 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 **Context:** aanleiding was een concrete situatie (LCD2004-schermen met onbekend/wisselend I2C-adres, wens om niet telkens te moeten hercompileren).
 
 ## D024 Configuratiecontrole geldt enkel voor de ingebouwde hardware
+
+**Status: achterhaald in beta v2.0.0.** De huidige Screen-code gebruikt de GedeeldeBus-objectlifecycle; de hieronder genoemde losse `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()` behoren tot de vroegere architectuur. Onderstaande tekst blijft staan als historische beslissing.
 
 **Besluit:** het configuratiecontroleblok in `PrintToScreenIntern()` (dat `CS000`/`PS000` toont bij een vergeten configuratie-aanroep) geldt enkel wanneer er geen callback geregistreerd is voor dat schermtype. Is er een `CallbackScreenTypeCharacter`/`CallbackScreenTypePixel` geregistreerd, dan wordt die callback niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is: de callback-gebruiker blijft zelf verantwoordelijk voor het al dan niet configureren van de ingebouwde hardware, indien die callback ze nog gebruikt.
 
@@ -179,7 +188,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D035 Inpluggen versus Diagnose
 
-**Besluit:** `inpluggen()` bevat alleen de minimale hardware-/aanwezigheidscontrole die nodig is om een component veilig naar normale werking te laten doorgaan. Uitgebreide elektronische functietesten horen in `Diagnose()`. `Diagnose()` bestaat uitsluitend wanneer `DEBUG` actief is; de basisfunctie is voorlopig een lege virtuele hook.
+**Besluit:** uitgebreide elektronische functietesten horen in `Diagnose()` en `Diagnose()` bestaat uitsluitend wanneer `DEBUG` actief is; de basisfunctie is voorlopig een lege virtuele hook. De bestaande componentcode wordt stapsgewijs naar die grens gebracht; de huidige implementatie bevat nog hardwarecontroles in zowel `inpluggen()` als `Activeren()` (bijvoorbeeld de CharacterScreen-I2C-controle in `Activeren()`).
 
 **Context:** productiecode mag geen uitgebreide testoverhead krijgen. Diagnose moet later per concrete component kunnen worden ingevuld.
 

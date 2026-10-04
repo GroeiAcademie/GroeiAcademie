@@ -11,7 +11,7 @@ Meerdere sensoren hieronder meten hetzelfde of een overlappend signaal. Er is no
 * TTP224, 1-kanaals capacitieve touch-sensor module (1x4), 4 aanraakvlakken
 * TTP229, 16-kanaals capacitieve touch-sensor module (4x4), vaak gebruikt als digitaal keypad
 
-Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande `PIN_TOETS`-systeem.
+Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem met de per `KEYPAD_TYPE` bepaalde `INPUT_KEYPAD_PIN_...`-resources.
 
 ## Ademhaling
 
@@ -171,3 +171,8 @@ Mogelijke toepassingen:
 * lichaamshouding.
 
 De OV7670 alleen garandeert nog niet dat pupil- of oogmetingen voldoende betrouwbaar uitgevoerd kunnen worden. Daarvoor zijn ook belichting, optiek en beeldverwerking bepalend.
+
+
+## Sensorcode in beta v2.0.0
+
+Los van deze hardware-inventaris bevat de huidige broncode één concrete Sensorclass: `RFP602` in `src/Systeem/Sensor/RFP602.h/.cpp`. Deze class beheert maximaal vier analoge kanalen voor Stimulus en kan via `ADC_BACKEND` onder de Native ADC of ADS1115 hangen. Dit is een softwarestatus en geen uitbreiding van de bovenstaande fysieke hardware-inventaris.

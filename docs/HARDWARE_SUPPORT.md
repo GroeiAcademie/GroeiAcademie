@@ -25,6 +25,10 @@ HX1838 met `HX1838_BRON_CODES_DEFINE` is released. Zowel TinyIRReceiver (`HX1838
 
 De gemelde waarschuwing van de externe library `LiquidCrystal I2C` betreft de architectuurmetadata van die library. Een Arduino Uno R3-vormfactorbord geldt pas als volledig hardwarematig gevalideerd wanneer de relevante voorbeelden op echte hardware zijn uitgevoerd en de resultaten zijn vastgelegd.
 
+## v2.0.0 Extenders en Sensoren
+
+De broncode bevat 14 concrete Extenderclasses onder `src/Systeem/GedeeldeBus/` en `RFP602` onder `src/Systeem/Sensor/`. Hun aanwezigheid in de broncode of het slagen van een lifecycle-/resourcevoorbeeld is niet hetzelfde als een volledige elektronische hardwarevalidatie van iedere functie van die chip. Die validatiestatus moet afzonderlijk worden vastgelegd wanneer de elektronische functietests zijn uitgevoerd.
+
 ## Vereiste Arduino IDE-boardselecties
 
 | Boardnaam | FQBN | Platform-ID | Boards Manager package / core | Exacte boardselectie in Arduino IDE | Pinstrategie |
@@ -236,7 +240,7 @@ De standaard Screen-laag gebruikt een I2C-characterscherm via `LiquidCrystal_I2C
 Standaardconfiguratie:
 
 ```cpp
-#define I2C_ADRES 0x27
+#define I2C_ADDRESS_CHARACTER_SCREEN 0x27
 #define ACTIEF_CHARACTER_SCREEN SCREEN_LCD1602
 ```
 
@@ -244,7 +248,7 @@ Controleer het werkelijke I2C-adres van de module. Veelvoorkomende adressen zijn
 
 ### PixelScreen
 
-PixelScreen wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` in `SCREEN_OUTPUT` staat. De algemene Screen-laag gebruikt `Adafruit_GFX`; de concrete displaydriver wordt door de toepassing geïnitialiseerd. Voor een ST7789 op Arduino UNO zijn `D11` (MOSI) en `D13` (SCK) de hardware-SPI-pinnen. `CS`, `DC` en `RST` zijn configureerbaar.
+PixelScreen wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` in `SCREEN_OUTPUT` staat. De Screen-laag bezit zelf het concrete `Adafruit_ST7789`-object en gebruikt daarnaast een `Adafruit_GFX*`-pointer voor de generieke pixeluitvoer; de toepassing hoeft die displaydriver in de huidige v2.0.0-objectroute niet afzonderlijk te construeren. Voor een ST7789 op Arduino UNO zijn `D11` (MOSI) en `D13` (SCK) de hardware-SPI-pinnen. `CS`, `DC` en `RST` zijn configureerbaar.
 
 Voor de STM32F4 Nucleo-F401RE-acceptatiebuild is een externe dependencybeperking gekend: `Adafruit ST7735 and ST7789 Library` kan bij de gebruikte STM32-core stoppen op `wiring_private.h: No such file or directory`. De maintainer-test classificeert uitsluitend die specifieke fout als verwachte dependencybeperking; dit is geen bevestigde PixelScreen-ondersteuning op Nucleo-F401RE en andere compilefouten blijven acceptatiefouten.
 
