@@ -112,11 +112,13 @@ InvoerBuffer buffer = {"", 0};
 
 void FunctieToevoegen(void* argumenten) {
   const char* opschrift = (const char*)argumenten;
+
   if (buffer.lengte < 8) {
     buffer.tekst[buffer.lengte] = opschrift[0];
     buffer.lengte++;
     buffer.tekst[buffer.lengte] = '\0';
   }
+
   Screen->Print("Invoer:", buffer.tekst);
 }
 

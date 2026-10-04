@@ -19,13 +19,13 @@
 ExtenderADS1115 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS1115,
-  I2C_ADDRESS_EXTENDER_ADS1115_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL, EXTENDER_ADS1115_1_ALERT_RDY
+  I2C_ADDRESS_EXTENDER_ADS1115_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_ADS1115_1_ALERT_RDY
 );
 #else
 ExtenderADS1115 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS1115,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 

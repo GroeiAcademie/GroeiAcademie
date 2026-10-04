@@ -179,7 +179,7 @@ PCF8574 (>=0.4.0)
 IRremote
 ```
 
-Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `ADC_BACKEND` en `INPUT_KANAAL_CONFIG` bepalen welke onderdelen werkelijk worden gecompileerd.
+Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `ADC_BACKEND`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderADS1115` blijft beschikbaar wanneer de ADS1115-ADC-backend actief is en `ExtenderPCF8574` wanneer Input via PCF8574 actief is.
 
 ## Configuratie
 

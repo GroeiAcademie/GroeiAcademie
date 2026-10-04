@@ -18,13 +18,13 @@
 ExtenderPCF8575 extender(
   &Native,
   GedeeldeBusComponent::DIGITAL_PINS_PCF8575,
-  I2C_ADDRESS_EXTENDER_PCF8575_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL, EXTENDER_PCF8575_1_INT
+  I2C_ADDRESS_EXTENDER_PCF8575_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8575_1_INT
 );
 #else
 ExtenderPCF8575 extender(
   &Native,
   GedeeldeBusComponent::DIGITAL_PINS_PCF8575,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 
@@ -50,7 +50,7 @@ uint8_t ExtenderPins[] = {
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, sizeof(ExtenderPins) / sizeof(ExtenderPins[0]) },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

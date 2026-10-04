@@ -45,6 +45,7 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
     GA_SERIAL.println(busType == GedeeldeBusType::I2C ? "I2C" : "SPI");
   }
 #endif
+
   if (busType == GedeeldeBusType::I2C) {
     if (!i2cGeinitialiseerd) {
       #if BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
@@ -142,8 +143,8 @@ struct ADC_ADS1115 ADC_ADS1115(
   &Native,
   GedeeldeBusComponent::ADC_ADS1115,
   I2C_ADDRESS_ADS1115,
-  HardwareResourcePin::SDA,
-  HardwareResourcePin::SCL,
+  HardwareResourcePin::NP_SDA,
+  HardwareResourcePin::NP_SCL,
   HardwareResourcePin::NONE,
   HardwareResourceToegang::GEDEELD
 );
@@ -157,32 +158,32 @@ uint8_t NativeArduinoPinVan(HardwareResourcePin resource, uint8_t pinOverride) {
   uint8_t pin = static_cast<uint8_t>(HardwareResourcePin::NONE);
 
   switch (resource) {
-    case HardwareResourcePin::D0:     pin = ARDUINO_UNO_SHIELD_PIN_D0;   break;
-    case HardwareResourcePin::D1:     pin = ARDUINO_UNO_SHIELD_PIN_D1;   break;
-    case HardwareResourcePin::D2:     pin = ARDUINO_UNO_SHIELD_PIN_D2;   break;
-    case HardwareResourcePin::D3:     pin = ARDUINO_UNO_SHIELD_PIN_D3;   break;
-    case HardwareResourcePin::D4:     pin = ARDUINO_UNO_SHIELD_PIN_D4;   break;
-    case HardwareResourcePin::D5:     pin = ARDUINO_UNO_SHIELD_PIN_D5;   break;
-    case HardwareResourcePin::D6:     pin = ARDUINO_UNO_SHIELD_PIN_D6;   break;
-    case HardwareResourcePin::D7:     pin = ARDUINO_UNO_SHIELD_PIN_D7;   break;
-    case HardwareResourcePin::D8:     pin = ARDUINO_UNO_SHIELD_PIN_D8;   break;
-    case HardwareResourcePin::D9:     pin = ARDUINO_UNO_SHIELD_PIN_D9;   break;
-    case HardwareResourcePin::D10:    pin = ARDUINO_UNO_SHIELD_PIN_D10;  break;
-    case HardwareResourcePin::D11:    pin = ARDUINO_UNO_SHIELD_PIN_D11;  break;
-    case HardwareResourcePin::D12:    pin = ARDUINO_UNO_SHIELD_PIN_D12;  break;
-    case HardwareResourcePin::D13:    pin = ARDUINO_UNO_SHIELD_PIN_D13;  break;
-    case HardwareResourcePin::A0:     pin = ARDUINO_UNO_SHIELD_PIN_A0;   break;
-    case HardwareResourcePin::A1:     pin = ARDUINO_UNO_SHIELD_PIN_A1;   break;
-    case HardwareResourcePin::A2:     pin = ARDUINO_UNO_SHIELD_PIN_A2;   break;
-    case HardwareResourcePin::A3:     pin = ARDUINO_UNO_SHIELD_PIN_A3;   break;
-    case HardwareResourcePin::A4:     pin = ARDUINO_UNO_SHIELD_PIN_A4;   break;
-    case HardwareResourcePin::A5:     pin = ARDUINO_UNO_SHIELD_PIN_A5;   break;
-    case HardwareResourcePin::SDA:    pin = ARDUINO_UNO_SHIELD_PIN_SDA;  break;
-    case HardwareResourcePin::SCL:    pin = ARDUINO_UNO_SHIELD_PIN_SCL;  break;
-    case HardwareResourcePin::MISO:   pin = ARDUINO_UNO_SHIELD_PIN_MISO; break;
-    case HardwareResourcePin::MOSI:   pin = ARDUINO_UNO_SHIELD_PIN_MOSI; break;
-    case HardwareResourcePin::SCK:    pin = ARDUINO_UNO_SHIELD_PIN_SCK;  break;
-    case HardwareResourcePin::SS:     pin = ARDUINO_UNO_SHIELD_PIN_SS;   break;
+    case HardwareResourcePin::NP_D0:     pin = ARDUINO_UNO_SHIELD_PIN_D0;   break;
+    case HardwareResourcePin::NP_D1:     pin = ARDUINO_UNO_SHIELD_PIN_D1;   break;
+    case HardwareResourcePin::NP_D2:     pin = ARDUINO_UNO_SHIELD_PIN_D2;   break;
+    case HardwareResourcePin::NP_D3:     pin = ARDUINO_UNO_SHIELD_PIN_D3;   break;
+    case HardwareResourcePin::NP_D4:     pin = ARDUINO_UNO_SHIELD_PIN_D4;   break;
+    case HardwareResourcePin::NP_D5:     pin = ARDUINO_UNO_SHIELD_PIN_D5;   break;
+    case HardwareResourcePin::NP_D6:     pin = ARDUINO_UNO_SHIELD_PIN_D6;   break;
+    case HardwareResourcePin::NP_D7:     pin = ARDUINO_UNO_SHIELD_PIN_D7;   break;
+    case HardwareResourcePin::NP_D8:     pin = ARDUINO_UNO_SHIELD_PIN_D8;   break;
+    case HardwareResourcePin::NP_D9:     pin = ARDUINO_UNO_SHIELD_PIN_D9;   break;
+    case HardwareResourcePin::NP_D10:    pin = ARDUINO_UNO_SHIELD_PIN_D10;  break;
+    case HardwareResourcePin::NP_D11:    pin = ARDUINO_UNO_SHIELD_PIN_D11;  break;
+    case HardwareResourcePin::NP_D12:    pin = ARDUINO_UNO_SHIELD_PIN_D12;  break;
+    case HardwareResourcePin::NP_D13:    pin = ARDUINO_UNO_SHIELD_PIN_D13;  break;
+    case HardwareResourcePin::NP_A0:     pin = ARDUINO_UNO_SHIELD_PIN_A0;   break;
+    case HardwareResourcePin::NP_A1:     pin = ARDUINO_UNO_SHIELD_PIN_A1;   break;
+    case HardwareResourcePin::NP_A2:     pin = ARDUINO_UNO_SHIELD_PIN_A2;   break;
+    case HardwareResourcePin::NP_A3:     pin = ARDUINO_UNO_SHIELD_PIN_A3;   break;
+    case HardwareResourcePin::NP_A4:     pin = ARDUINO_UNO_SHIELD_PIN_A4;   break;
+    case HardwareResourcePin::NP_A5:     pin = ARDUINO_UNO_SHIELD_PIN_A5;   break;
+    case HardwareResourcePin::NP_SDA:    pin = ARDUINO_UNO_SHIELD_PIN_SDA;  break;
+    case HardwareResourcePin::NP_SCL:    pin = ARDUINO_UNO_SHIELD_PIN_SCL;  break;
+    case HardwareResourcePin::NP_MISO:   pin = ARDUINO_UNO_SHIELD_PIN_MISO; break;
+    case HardwareResourcePin::NP_MOSI:   pin = ARDUINO_UNO_SHIELD_PIN_MOSI; break;
+    case HardwareResourcePin::NP_SCK:    pin = ARDUINO_UNO_SHIELD_PIN_SCK;  break;
+    case HardwareResourcePin::NP_SS:     pin = ARDUINO_UNO_SHIELD_PIN_SS;   break;
     case HardwareResourcePin::CUSTOM: pin = pinOverride; break;
     case HardwareResourcePin::NONE:   break;
   }
@@ -190,26 +191,26 @@ uint8_t NativeArduinoPinVan(HardwareResourcePin resource, uint8_t pinOverride) {
 }
 
 HardwareResourcePin ArduinoUnoShieldPinOmzettenNaarHardwareResourcePin(uint8_t pin) {
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D0)  return HardwareResourcePin::D0;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D1)  return HardwareResourcePin::D1;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D2)  return HardwareResourcePin::D2;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D3)  return HardwareResourcePin::D3;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D4)  return HardwareResourcePin::D4;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D5)  return HardwareResourcePin::D5;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D6)  return HardwareResourcePin::D6;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D7)  return HardwareResourcePin::D7;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D8)  return HardwareResourcePin::D8;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D9)  return HardwareResourcePin::D9;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D10) return HardwareResourcePin::D10;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D11) return HardwareResourcePin::D11;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D12) return HardwareResourcePin::D12;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_D13) return HardwareResourcePin::D13;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_A0)  return HardwareResourcePin::A0;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_A1)  return HardwareResourcePin::A1;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_A2)  return HardwareResourcePin::A2;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_A3)  return HardwareResourcePin::A3;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_A4)  return HardwareResourcePin::A4;
-  if (pin == ARDUINO_UNO_SHIELD_PIN_A5)  return HardwareResourcePin::A5;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D0)  return HardwareResourcePin::NP_D0;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D1)  return HardwareResourcePin::NP_D1;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D2)  return HardwareResourcePin::NP_D2;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D3)  return HardwareResourcePin::NP_D3;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D4)  return HardwareResourcePin::NP_D4;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D5)  return HardwareResourcePin::NP_D5;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D6)  return HardwareResourcePin::NP_D6;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D7)  return HardwareResourcePin::NP_D7;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D8)  return HardwareResourcePin::NP_D8;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D9)  return HardwareResourcePin::NP_D9;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D10) return HardwareResourcePin::NP_D10;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D11) return HardwareResourcePin::NP_D11;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D12) return HardwareResourcePin::NP_D12;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_D13) return HardwareResourcePin::NP_D13;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_A0)  return HardwareResourcePin::NP_A0;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_A1)  return HardwareResourcePin::NP_A1;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_A2)  return HardwareResourcePin::NP_A2;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_A3)  return HardwareResourcePin::NP_A3;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_A4)  return HardwareResourcePin::NP_A4;
+  if (pin == ARDUINO_UNO_SHIELD_PIN_A5)  return HardwareResourcePin::NP_A5;
   return HardwareResourcePin::NONE;
 }
 
@@ -236,32 +237,32 @@ static bool BestaandeAanmeldingOfAfmeldenToggelenOpGedeeldeBus(GedeeldeBusAanOfA
   uint8_t pin = GEDEELDE_BUS_GEEN_PIN;
 
   switch (resource) {
-    case HardwareResourcePin::D0:     pin = ARDUINO_UNO_SHIELD_PIN_D0;   break;
-    case HardwareResourcePin::D1:     pin = ARDUINO_UNO_SHIELD_PIN_D1;   break;
-    case HardwareResourcePin::D2:     pin = ARDUINO_UNO_SHIELD_PIN_D2;   break;
-    case HardwareResourcePin::D3:     pin = ARDUINO_UNO_SHIELD_PIN_D3;   break;
-    case HardwareResourcePin::D4:     pin = ARDUINO_UNO_SHIELD_PIN_D4;   break;
-    case HardwareResourcePin::D5:     pin = ARDUINO_UNO_SHIELD_PIN_D5;   break;
-    case HardwareResourcePin::D6:     pin = ARDUINO_UNO_SHIELD_PIN_D6;   break;
-    case HardwareResourcePin::D7:     pin = ARDUINO_UNO_SHIELD_PIN_D7;   break;
-    case HardwareResourcePin::D8:     pin = ARDUINO_UNO_SHIELD_PIN_D8;   break;
-    case HardwareResourcePin::D9:     pin = ARDUINO_UNO_SHIELD_PIN_D9;   break;
-    case HardwareResourcePin::D10:    pin = ARDUINO_UNO_SHIELD_PIN_D10;  break;
-    case HardwareResourcePin::D11:    pin = ARDUINO_UNO_SHIELD_PIN_D11;  break;
-    case HardwareResourcePin::D12:    pin = ARDUINO_UNO_SHIELD_PIN_D12;  break;
-    case HardwareResourcePin::D13:    pin = ARDUINO_UNO_SHIELD_PIN_D13;  break;
-    case HardwareResourcePin::A0:     pin = ARDUINO_UNO_SHIELD_PIN_A0;   break;
-    case HardwareResourcePin::A1:     pin = ARDUINO_UNO_SHIELD_PIN_A1;   break;
-    case HardwareResourcePin::A2:     pin = ARDUINO_UNO_SHIELD_PIN_A2;   break;
-    case HardwareResourcePin::A3:     pin = ARDUINO_UNO_SHIELD_PIN_A3;   break;
-    case HardwareResourcePin::A4:     pin = ARDUINO_UNO_SHIELD_PIN_A4;   break;
-    case HardwareResourcePin::A5:     pin = ARDUINO_UNO_SHIELD_PIN_A5;   break;
-    case HardwareResourcePin::SDA:    pin = ARDUINO_UNO_SHIELD_PIN_SDA;  break;
-    case HardwareResourcePin::SCL:    pin = ARDUINO_UNO_SHIELD_PIN_SCL;  break;
-    case HardwareResourcePin::MISO:   pin = ARDUINO_UNO_SHIELD_PIN_MISO; break;
-    case HardwareResourcePin::MOSI:   pin = ARDUINO_UNO_SHIELD_PIN_MOSI; break;
-    case HardwareResourcePin::SCK:    pin = ARDUINO_UNO_SHIELD_PIN_SCK;  break;
-    case HardwareResourcePin::SS:     pin = ARDUINO_UNO_SHIELD_PIN_SS;   break;
+    case HardwareResourcePin::NP_D0:     pin = ARDUINO_UNO_SHIELD_PIN_D0;   break;
+    case HardwareResourcePin::NP_D1:     pin = ARDUINO_UNO_SHIELD_PIN_D1;   break;
+    case HardwareResourcePin::NP_D2:     pin = ARDUINO_UNO_SHIELD_PIN_D2;   break;
+    case HardwareResourcePin::NP_D3:     pin = ARDUINO_UNO_SHIELD_PIN_D3;   break;
+    case HardwareResourcePin::NP_D4:     pin = ARDUINO_UNO_SHIELD_PIN_D4;   break;
+    case HardwareResourcePin::NP_D5:     pin = ARDUINO_UNO_SHIELD_PIN_D5;   break;
+    case HardwareResourcePin::NP_D6:     pin = ARDUINO_UNO_SHIELD_PIN_D6;   break;
+    case HardwareResourcePin::NP_D7:     pin = ARDUINO_UNO_SHIELD_PIN_D7;   break;
+    case HardwareResourcePin::NP_D8:     pin = ARDUINO_UNO_SHIELD_PIN_D8;   break;
+    case HardwareResourcePin::NP_D9:     pin = ARDUINO_UNO_SHIELD_PIN_D9;   break;
+    case HardwareResourcePin::NP_D10:    pin = ARDUINO_UNO_SHIELD_PIN_D10;  break;
+    case HardwareResourcePin::NP_D11:    pin = ARDUINO_UNO_SHIELD_PIN_D11;  break;
+    case HardwareResourcePin::NP_D12:    pin = ARDUINO_UNO_SHIELD_PIN_D12;  break;
+    case HardwareResourcePin::NP_D13:    pin = ARDUINO_UNO_SHIELD_PIN_D13;  break;
+    case HardwareResourcePin::NP_A0:     pin = ARDUINO_UNO_SHIELD_PIN_A0;   break;
+    case HardwareResourcePin::NP_A1:     pin = ARDUINO_UNO_SHIELD_PIN_A1;   break;
+    case HardwareResourcePin::NP_A2:     pin = ARDUINO_UNO_SHIELD_PIN_A2;   break;
+    case HardwareResourcePin::NP_A3:     pin = ARDUINO_UNO_SHIELD_PIN_A3;   break;
+    case HardwareResourcePin::NP_A4:     pin = ARDUINO_UNO_SHIELD_PIN_A4;   break;
+    case HardwareResourcePin::NP_A5:     pin = ARDUINO_UNO_SHIELD_PIN_A5;   break;
+    case HardwareResourcePin::NP_SDA:    pin = ARDUINO_UNO_SHIELD_PIN_SDA;  break;
+    case HardwareResourcePin::NP_SCL:    pin = ARDUINO_UNO_SHIELD_PIN_SCL;  break;
+    case HardwareResourcePin::NP_MISO:   pin = ARDUINO_UNO_SHIELD_PIN_MISO; break;
+    case HardwareResourcePin::NP_MOSI:   pin = ARDUINO_UNO_SHIELD_PIN_MOSI; break;
+    case HardwareResourcePin::NP_SCK:    pin = ARDUINO_UNO_SHIELD_PIN_SCK;  break;
+    case HardwareResourcePin::NP_SS:     pin = ARDUINO_UNO_SHIELD_PIN_SS;   break;
     case HardwareResourcePin::CUSTOM: pin = pinOverride; break;
     case HardwareResourcePin::NONE:   break;
   }
@@ -329,26 +330,26 @@ bool AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent component, Har
 bool I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin sdaResource, HardwareResourcePin sclResource, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
   InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
 
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::I2C, sdaResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::I2C, sclResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_I2C, sdaResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_I2C, sclResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
 
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::I2C, HardwareResourcePin::NONE, HardwareResourceToegang::EXCLUSIEF, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::SLAVE, adres);
+  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_I2C, HardwareResourcePin::NONE, HardwareResourceToegang::EXCLUSIEF, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::SLAVE, adres);
 }
 
 bool SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, HardwareResourcePin misoResource, HardwareResourcePin mosiResource, HardwareResourcePin sckResource, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
   InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
 
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::SPI, misoResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::SPI, mosiResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::SPI, sckResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER);
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_SPI, misoResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
+  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_SPI, mosiResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
+  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_SPI, sckResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER);
 }
 
 bool EEPROMAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::EEPROM, HardwareResourcePin::NONE, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup);
+  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_EEPROM, HardwareResourcePin::NONE, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup);
 }
 
 bool UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::UART, HardwareResourcePin::NONE, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup);
+  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_UART, HardwareResourcePin::NONE, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup);
 }
 
 bool AanmeldingenOpConflictenControlerenOpGedeeldeBus(uint8_t* conflictIndexA, uint8_t* conflictIndexB) {
@@ -361,7 +362,7 @@ bool AanmeldingenOpConflictenControlerenOpGedeeldeBus(uint8_t* conflictIndexA, u
       const GedeeldeBusHardwareResourceAanmelding& b = registraties[j];
 
       bool zelfdePin = a.pin != GEDEELDE_BUS_GEEN_PIN && b.pin != GEDEELDE_BUS_GEEN_PIN && a.pin == b.pin && (a.toegang == HardwareResourceToegang::EXCLUSIEF || b.toegang == HardwareResourceToegang::EXCLUSIEF);
-      bool zelfdeI2CAdres = a.type == HardwareResourceType::I2C && b.type == HardwareResourceType::I2C && a.adres != GEDEELDE_BUS_GEEN_ADRES && a.adres == b.adres && a.component != b.component;
+      bool zelfdeI2CAdres = a.type == HardwareResourceType::RT_I2C && b.type == HardwareResourceType::RT_I2C && a.adres != GEDEELDE_BUS_GEEN_ADRES && a.adres == b.adres && a.component != b.component;
 
       if (zelfdePin || zelfdeI2CAdres) {
         if (conflictIndexA != nullptr) *conflictIndexA = i;
@@ -504,7 +505,7 @@ static struct Screen* GedeeldeBusVindHardwareResourceComponentScreen(const Gedee
   while (wortel->parent != nullptr) wortel = wortel->parent;
 
   for (const GedeeldeBusNode* n = wortel; n != nullptr; n = GedeeldeBusNode::VolgendeInBoom(n, wortel)) {
-    if (n->component == GedeeldeBusComponent::SCREEN) return (struct Screen*)n;
+    if (n->component == GedeeldeBusComponent::GC_SCREEN) return (struct Screen*)n;
   }
 
   return nullptr;
@@ -605,18 +606,54 @@ bool GedeeldeBusNode::controleren() {
         bool geldig = true;
 
         switch (parent->component) {
+#if EXTENDER_DS2482_800_AANTAL > 0
           case GedeeldeBusComponent::ONE_WIRE_DS2482v800: geldig = waarde <= static_cast<uint8_t>(ExtenderDS2482v800::ExtenderPins::EP_IO7); break;
+#endif
+#if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
           case GedeeldeBusComponent::ADC_ADS1115: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3); break;
+#endif
+#if EXTENDER_ADS1158_AANTAL > 0
           case GedeeldeBusComponent::ADC_ADS1158: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1158::ExtenderPins::EP_GPIO7); break;
+#endif
+#if EXTENDER_ADS7828_AANTAL > 0
           case GedeeldeBusComponent::ADC_ADS7828: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7828::ExtenderPins::EP_CH7); break;
+#endif
+#if EXTENDER_ADS7953_AANTAL > 0
           case GedeeldeBusComponent::ADC_ADS7953: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7953::ExtenderPins::EP_GPIO3); break;
+#endif
+#if EXTENDER_CD74HC4067_AANTAL > 0
           case GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067: geldig = waarde <= static_cast<uint8_t>(ExtenderCD74HC4067::ExtenderPins::EP_Y15); break;
+#endif
+#if EXTENDER_MCP23017_AANTAL > 0
           case GedeeldeBusComponent::DIGITAL_PINS_MCP23017: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23017::ExtenderPins::EP_GPB7); break;
+#endif
+#if EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
           case GedeeldeBusComponent::DIGITAL_PINS_PCF8574: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8574::ExtenderPins::EP_P7); break;
+#endif
+#if EXTENDER_PCF8575_AANTAL > 0
           case GedeeldeBusComponent::DIGITAL_PINS_PCF8575: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8575::ExtenderPins::EP_P17); break;
+#endif
+#if EXTENDER_TCA9548A_AANTAL > 0
           case GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A: geldig = waarde <= static_cast<uint8_t>(ExtenderTCA9548A::ExtenderPins::EP_CH7); break;
-          case GedeeldeBusComponent::UART_MAX14830: geldig = waarde <= static_cast<uint8_t>(ExtenderMAX14830I2C::ExtenderPins::EP_GPIO15); break;
-          case GedeeldeBusComponent::UART_SC16IS752: geldig = waarde <= static_cast<uint8_t>(ExtenderSC16IS752I2C::ExtenderPins::EP_GPIO7); break;
+#endif
+#if EXTENDER_MAX14830_I2C_AANTAL > 0 || EXTENDER_MAX14830_SPI_AANTAL > 0
+          case GedeeldeBusComponent::UART_MAX14830:
+#if EXTENDER_MAX14830_I2C_AANTAL > 0
+            geldig = waarde <= static_cast<uint8_t>(ExtenderMAX14830I2C::ExtenderPins::EP_GPIO15);
+#else
+            geldig = waarde <= static_cast<uint8_t>(ExtenderMAX14830SPI::ExtenderPins::EP_GPIO15);
+#endif
+            break;
+#endif
+#if EXTENDER_SC16IS752_I2C_AANTAL > 0 || EXTENDER_SC16IS752_SPI_AANTAL > 0
+          case GedeeldeBusComponent::UART_SC16IS752:
+#if EXTENDER_SC16IS752_I2C_AANTAL > 0
+            geldig = waarde <= static_cast<uint8_t>(ExtenderSC16IS752I2C::ExtenderPins::EP_GPIO7);
+#else
+            geldig = waarde <= static_cast<uint8_t>(ExtenderSC16IS752SPI::ExtenderPins::EP_GPIO7);
+#endif
+            break;
+#endif
           default: break;
         }
 
@@ -692,34 +729,38 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
         regel4 = "PIN: ";
 
         switch (static_cast<HardwareResourcePin>(r->waarde)) {
-          case HardwareResourcePin::D0: regel4 += "D0"; break;
-          case HardwareResourcePin::D1: regel4 += "D1"; break;
-          case HardwareResourcePin::D2: regel4 += "D2"; break;
-          case HardwareResourcePin::D3: regel4 += "D3"; break;
-          case HardwareResourcePin::D4: regel4 += "D4"; break;
-          case HardwareResourcePin::D5: regel4 += "D5"; break;
-          case HardwareResourcePin::D6: regel4 += "D6"; break;
-          case HardwareResourcePin::D7: regel4 += "D7"; break;
-          case HardwareResourcePin::D8: regel4 += "D8"; break;
-          case HardwareResourcePin::D9: regel4 += "D9"; break;
-          case HardwareResourcePin::D10: regel4 += "D10"; break;
-          case HardwareResourcePin::D11: regel4 += "D11"; break;
-          case HardwareResourcePin::D12: regel4 += "D12"; break;
-          case HardwareResourcePin::D13: regel4 += "D13"; break;
-          case HardwareResourcePin::A0: regel4 += "A0"; break;
-          case HardwareResourcePin::A1: regel4 += "A1"; break;
-          case HardwareResourcePin::A2: regel4 += "A2"; break;
-          case HardwareResourcePin::A3: regel4 += "A3"; break;
-          case HardwareResourcePin::A4: regel4 += "A4"; break;
-          case HardwareResourcePin::A5: regel4 += "A5"; break;
-          case HardwareResourcePin::SDA: regel4 += "SDA"; break;
-          case HardwareResourcePin::SCL: regel4 += "SCL"; break;
-          case HardwareResourcePin::MISO: regel4 += "MISO"; break;
-          case HardwareResourcePin::MOSI: regel4 += "MOSI"; break;
-          case HardwareResourcePin::SCK: regel4 += "SCK"; break;
-          case HardwareResourcePin::SS: regel4 += "SS"; break;
+          case HardwareResourcePin::NP_D0:   regel4 += "D0";   break;
+          case HardwareResourcePin::NP_D1:   regel4 += "D1";   break;
+          case HardwareResourcePin::NP_D2:   regel4 += "D2";   break;
+          case HardwareResourcePin::NP_D3:   regel4 += "D3";   break;
+          case HardwareResourcePin::NP_D4:   regel4 += "D4";   break;
+          case HardwareResourcePin::NP_D5:   regel4 += "D5";   break;
+          case HardwareResourcePin::NP_D6:   regel4 += "D6";   break;
+          case HardwareResourcePin::NP_D7:   regel4 += "D7";   break;
+          case HardwareResourcePin::NP_D8:   regel4 += "D8";   break;
+          case HardwareResourcePin::NP_D9:   regel4 += "D9";   break;
+          case HardwareResourcePin::NP_D10:  regel4 += "D10";  break;
+          case HardwareResourcePin::NP_D11:  regel4 += "D11";  break;
+          case HardwareResourcePin::NP_D12:  regel4 += "D12";  break;
+          case HardwareResourcePin::NP_D13:  regel4 += "D13";  break;
+
+          case HardwareResourcePin::NP_A0:   regel4 += "A0";   break;
+          case HardwareResourcePin::NP_A1:   regel4 += "A1";   break;
+          case HardwareResourcePin::NP_A2:   regel4 += "A2";   break;
+          case HardwareResourcePin::NP_A3:   regel4 += "A3";   break;
+          case HardwareResourcePin::NP_A4:   regel4 += "A4";   break;
+          case HardwareResourcePin::NP_A5:   regel4 += "A5";   break;
+
+          case HardwareResourcePin::NP_SDA:  regel4 += "SDA";  break;
+          case HardwareResourcePin::NP_SCL:  regel4 += "SCL";  break;
+
+          case HardwareResourcePin::NP_MISO: regel4 += "MISO"; break;
+          case HardwareResourcePin::NP_MOSI: regel4 += "MOSI"; break;
+          case HardwareResourcePin::NP_SCK:  regel4 += "SCK";  break;
+          case HardwareResourcePin::NP_SS:   regel4 += "SS";   break;
+
           case HardwareResourcePin::CUSTOM: regel4 += "CUSTOM"; break;
-          case HardwareResourcePin::NONE: regel4 += "NONE"; break;
+          case HardwareResourcePin::NONE:   regel4 += "NONE";   break;
         }
         
         regel4 += " ("; regel4 += String(NativeArduinoPinVan(static_cast<HardwareResourcePin>(r->waarde))); regel4 += ")";

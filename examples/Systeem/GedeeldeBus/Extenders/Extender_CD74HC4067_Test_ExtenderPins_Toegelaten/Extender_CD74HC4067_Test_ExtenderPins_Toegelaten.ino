@@ -50,7 +50,7 @@ uint8_t ExtenderPins[] = {
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, sizeof(ExtenderPins) / sizeof(ExtenderPins[0]) },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

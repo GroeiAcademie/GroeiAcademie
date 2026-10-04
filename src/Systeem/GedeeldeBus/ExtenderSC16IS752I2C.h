@@ -16,18 +16,18 @@ struct ExtenderSC16IS752I2C : HardwareResourceTypeI2C {
     EP_GPIO7     = 0x09  // GPIO7 / RIA
   };
 
-  HardwareResourcePin IRQ, RESET;
+  HardwareResourcePin np_IRQ, np_RESET;
   uint8_t exclusiefMetIrqReset_[3];
 
   // ============================================================================
   // DEFAULT — SC16IS752 I2C #1
   // ============================================================================
   #if EXTENDER_SC16IS752_I2C_AANTAL == 1
-  ExtenderSC16IS752I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin SDA, HardwareResourcePin SCL, HardwareResourcePin IRQ, HardwareResourcePin RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, SDA, SCL, Extender), IRQ(IRQ), RESET(RESET) {
+  ExtenderSC16IS752I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_IRQ, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_IRQ(np_IRQ), np_RESET(np_RESET) {
     exclusiefMetIrqReset_[0] = exclusief_[0];
-    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(IRQ);
-    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(RESET);
+    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(np_IRQ);
+    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIrqReset_, 3 };
   }
   #endif
@@ -47,11 +47,11 @@ struct ExtenderSC16IS752I2C : HardwareResourceTypeI2C {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderSC16IS752I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SDA, HardwareResourcePin SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, SDA, SCL, Extender), IRQ(ExtenderLijst[teller].irq), RESET(ExtenderLijst[teller].reset) {
+  ExtenderSC16IS752I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_IRQ(ExtenderLijst[teller].irq), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetIrqReset_[0] = exclusief_[0];
-    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(IRQ);
-    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(RESET);
+    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(np_IRQ);
+    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIrqReset_, 3 };
   }
   #endif

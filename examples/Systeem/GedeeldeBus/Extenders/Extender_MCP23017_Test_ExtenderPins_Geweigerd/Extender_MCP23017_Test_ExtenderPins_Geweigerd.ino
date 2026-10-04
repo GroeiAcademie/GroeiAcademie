@@ -18,13 +18,13 @@
 ExtenderMCP23017 extender(
   &Native,
   GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
-  I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET
+  I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET
 );
 #else
 ExtenderMCP23017 extender(
   &Native,
   GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 
@@ -33,7 +33,7 @@ uint8_t ExtenderPins[] = { 0x10 };
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, 1 },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

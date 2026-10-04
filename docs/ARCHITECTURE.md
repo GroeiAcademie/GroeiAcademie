@@ -153,9 +153,11 @@ Er zijn in de huidige code nog geen concrete `Diagnose()`-overrides. Uitgebreide
 
 ### Native resources
 
-`HardwareResourcePin` beschrijft alleen fysieke resources van de UNO-vormfactor: `D0..D13`, `A0..A5`, `SDA`, `SCL`, `MISO`, `MOSI`, `SCK`, `SS`, `CUSTOM` en `NONE`.
+`HardwareResourcePin` gebruikt voor de fysieke resources van de UNO-vormfactor de prefix `NP_`: `NP_D0..NP_D13`, `NP_A0..NP_A5`, `NP_SDA`, `NP_SCL`, `NP_MISO`, `NP_MOSI`, `NP_SCK` en `NP_SS`. `CUSTOM` en `NONE` blijven zonder `NP_`: dit zijn speciale waarden en geen fysieke pinnen.
 
 `NativeArduinoPinVan()` vertaalt zo'n logische resource naar het board-specifieke Arduino-pinnummer uit `SystemConfig.h`. ExtenderPins gaan nooit door deze functie.
+
+De waarden van `HardwareResourceType` gebruiken de prefix `RT_`, bijvoorbeeld `RT_I2C`, `RT_SPI`, `RT_GPIO` en `RT_INTERRUPT`. De groepswaarden binnen `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER` en `GC_SENSOR`; concrete componentwaarden behouden hun eigen naam.
 
 ### Gedeelde en exclusieve claims
 
@@ -177,7 +179,8 @@ I2C-adressen worden intern als exclusieve claim in hetzelfde mechanisme behandel
 
 ## Concrete Extenders
 
-De huidige code bevat 14 concrete Extenders:
+De huidige code bevat 14 concrete Extenders. Alleen een Extender die compile-time effectief nodig is, wordt mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender; daarnaast gebruikt de ADC-route `ExtenderADS1115` wanneer `ADC_BACKEND == ADC_BACKEND_ADS1115` en gebruikt Input `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat.
+
 
 1. `ExtenderADS1115`
 2. `ExtenderADS1158`

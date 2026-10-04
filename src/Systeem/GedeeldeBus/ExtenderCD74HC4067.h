@@ -21,21 +21,21 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
     EP_Y15 = 0x0F  // Bidirectioneel analoog kanaal Y15, via gemeenschappelijke pin Z
   };
 
-  HardwareResourcePin S0, S1, S2, S3, EN, Z;
+  HardwareResourcePin np_S0, np_S1, np_S2, np_S3, np_EN, np_Z;
   uint8_t exclusief_[6];
 
   // ============================================================================
   // DEFAULT — CD74HC4067 #1
   // ============================================================================
   #if EXTENDER_CD74HC4067_AANTAL == 1
-  ExtenderCD74HC4067(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin S0, HardwareResourcePin S1, HardwareResourcePin S2, HardwareResourcePin S3, HardwareResourcePin EN, HardwareResourcePin Z, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 6 }, component, Extender), S0(S0), S1(S1), S2(S2), S3(S3), EN(EN), Z(Z) {
-    exclusief_[0] = static_cast<uint8_t>(S0);
-    exclusief_[1] = static_cast<uint8_t>(S1);
-    exclusief_[2] = static_cast<uint8_t>(S2);
-    exclusief_[3] = static_cast<uint8_t>(S3);
-    exclusief_[4] = static_cast<uint8_t>(EN);
-    exclusief_[5] = static_cast<uint8_t>(Z);
+  ExtenderCD74HC4067(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_S0, HardwareResourcePin np_S1, HardwareResourcePin np_S2, HardwareResourcePin np_S3, HardwareResourcePin np_EN, HardwareResourcePin np_Z, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 6 }, component, Extender), np_S0(np_S0), np_S1(np_S1), np_S2(np_S2), np_S3(np_S3), np_EN(np_EN), np_Z(np_Z) {
+    exclusief_[0] = static_cast<uint8_t>(np_S0);
+    exclusief_[1] = static_cast<uint8_t>(np_S1);
+    exclusief_[2] = static_cast<uint8_t>(np_S2);
+    exclusief_[3] = static_cast<uint8_t>(np_S3);
+    exclusief_[4] = static_cast<uint8_t>(np_EN);
+    exclusief_[5] = static_cast<uint8_t>(np_Z);
   }
   #endif
 
@@ -55,25 +55,25 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
   #undef BUNDEL_EXTENDER
 
   ExtenderCD74HC4067(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 6 }, component, Extender), S0(ExtenderLijst[teller].s0), S1(ExtenderLijst[teller].s1), S2(ExtenderLijst[teller].s2), S3(ExtenderLijst[teller].s3), EN(ExtenderLijst[teller].en), Z(ExtenderLijst[teller].z) {
-    exclusief_[0] = static_cast<uint8_t>(S0);
-    exclusief_[1] = static_cast<uint8_t>(S1);
-    exclusief_[2] = static_cast<uint8_t>(S2);
-    exclusief_[3] = static_cast<uint8_t>(S3);
-    exclusief_[4] = static_cast<uint8_t>(EN);
-    exclusief_[5] = static_cast<uint8_t>(Z);
+    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 6 }, component, Extender), np_S0(ExtenderLijst[teller].s0), np_S1(ExtenderLijst[teller].s1), np_S2(ExtenderLijst[teller].s2), np_S3(ExtenderLijst[teller].s3), np_EN(ExtenderLijst[teller].en), np_Z(ExtenderLijst[teller].z) {
+    exclusief_[0] = static_cast<uint8_t>(np_S0);
+    exclusief_[1] = static_cast<uint8_t>(np_S1);
+    exclusief_[2] = static_cast<uint8_t>(np_S2);
+    exclusief_[3] = static_cast<uint8_t>(np_S3);
+    exclusief_[4] = static_cast<uint8_t>(np_EN);
+    exclusief_[5] = static_cast<uint8_t>(np_Z);
   }
   #endif
 
   bool inpluggen() override {
     if (ingeplugd) return true;
-    if (S0 == HardwareResourcePin::NONE || S1 == HardwareResourcePin::NONE || S2 == HardwareResourcePin::NONE || S3 == HardwareResourcePin::NONE) return false;
+    if (np_S0 == HardwareResourcePin::NONE || np_S1 == HardwareResourcePin::NONE || np_S2 == HardwareResourcePin::NONE || np_S3 == HardwareResourcePin::NONE) return false;
     if (!GedeeldeBusNode::inpluggen()) return false;
-    pinMode(NativeArduinoPinVan(S0), OUTPUT);
-    pinMode(NativeArduinoPinVan(S1), OUTPUT);
-    pinMode(NativeArduinoPinVan(S2), OUTPUT);
-    pinMode(NativeArduinoPinVan(S3), OUTPUT);
-    if (EN != HardwareResourcePin::NONE) pinMode(NativeArduinoPinVan(EN), OUTPUT);
+    pinMode(NativeArduinoPinVan(np_S0), OUTPUT);
+    pinMode(NativeArduinoPinVan(np_S1), OUTPUT);
+    pinMode(NativeArduinoPinVan(np_S2), OUTPUT);
+    pinMode(NativeArduinoPinVan(np_S3), OUTPUT);
+    if (np_EN != HardwareResourcePin::NONE) pinMode(NativeArduinoPinVan(np_EN), OUTPUT);
     return true;
   }
 };

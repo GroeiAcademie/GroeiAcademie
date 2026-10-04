@@ -19,13 +19,13 @@
 ExtenderTCA9548A extender(
   &Native,
   GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A,
-  I2C_ADDRESS_EXTENDER_TCA9548A_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL, EXTENDER_TCA9548A_1_RESET
+  I2C_ADDRESS_EXTENDER_TCA9548A_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_TCA9548A_1_RESET
 );
 #else
 ExtenderTCA9548A extender(
   &Native,
   GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 

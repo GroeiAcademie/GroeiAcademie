@@ -1,13 +1,11 @@
 // ============================================================================
 // ADC Backend — Native
 // ============================================================================
-// Valideert de native ADC-route via de v2.0.0 GedeeldeBus-structuur.
-// ADC_NATIVE wordt eerst aangemeld, gecontroleerd en ingeplugd.
-// De sensorlaag wordt in deze test nog niet gebruikt.
+// Valideert uitsluitend de native ADC-backend.
+// Geen GedeeldeBus-test: deze test leest rechtstreeks de vier analoge ingangen.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <SystemConfig.h>
 
 #if ADC_BACKEND != ADC_BACKEND_NATIVE
   #error Deze validatie vereist ADC_BACKEND_NATIVE.
@@ -15,11 +13,11 @@
 
 #define STIMULUS_AANTAL_KANALEN 4
 
-uint8_t sensorPin[STIMULUS_AANTAL_KANALEN] = {
-  NativeArduinoPinVan(ADC_PIN_SENSOR_1),
-  NativeArduinoPinVan(ADC_PIN_SENSOR_2),
-  NativeArduinoPinVan(ADC_PIN_SENSOR_3),
-  NativeArduinoPinVan(ADC_PIN_SENSOR_4)
+const uint8_t sensorPin[STIMULUS_AANTAL_KANALEN] = {
+  A0,
+  A1,
+  A2,
+  A3
 };
 
 bool metingAfgerond = false;
@@ -72,12 +70,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  if (!ADC_NATIVE.aanmelden() || !ADC_NATIVE.controleren() || !ADC_NATIVE.inpluggen() || !ADC_NATIVE.activeren()) {
-    GA_SERIAL.println(F("ADC_NATIVE kon niet worden ingeplugd."));
-    while (true) { ; }
-  }
-
-  GA_SERIAL.println(F("=== Validatie: ADC_NATIVE ingeplugd ==="));
+  GA_SERIAL.println(F("=== Validatie: ADC_NATIVE ==="));
   tStart = millis();
 }
 
@@ -89,7 +82,7 @@ void loop() {
   if (nu - laatsteSample >= SAMPLE_INTERVAL_MS) {
     laatsteSample = nu;
     for (uint8_t k = 0; k < STIMULUS_AANTAL_KANALEN; k++) {
-      voegMetingToe(k, analogRead(NativeArduinoPinVan(static_cast<HardwareResourcePin>(sensorPin[k]))));
+      voegMetingToe(k, analogRead(sensorPin[k]));
     }
   }
 

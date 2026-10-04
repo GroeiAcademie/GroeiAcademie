@@ -1,7 +1,5 @@
-// v2.0.0 Stimulus-voorbeeld.
 // ============================================================================
 // Scenario 1 — EnkelTik
-// ============================================================================
 // ============================================================================
 // Dit example dwingt ADC_BACKEND/SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan
 // een .ino structureel niet: Stimulus.cpp/Screen.cpp worden als aparte
@@ -84,7 +82,6 @@ void setup() {
   //-- pinMode(PIN_TOETS_4, INPUT_PULLUP);
   Input = GedeeldeBusNewComponent<struct Input>();
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
   Screen->Print(LCD_START_L1, LCD_START_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
   Stimulus.ResetAlleTellers();

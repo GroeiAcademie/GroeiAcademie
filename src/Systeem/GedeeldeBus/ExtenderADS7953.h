@@ -34,9 +34,9 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
   // DEFAULT — ADS7953 #1
   // ============================================================================
   #if EXTENDER_ADS7953_AANTAL == 1
-  ExtenderADS7953(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin CS, HardwareResourcePin SCK, HardwareResourcePin MISO, HardwareResourcePin MOSI, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, CS, SCK, MISO, MOSI, Extender) {
-    exclusiefMetGpio_[0] = static_cast<uint8_t>(CS);
+  ExtenderADS7953(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender) {
+    exclusiefMetGpio_[0] = static_cast<uint8_t>(np_CS);
     exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO0)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO0_TO_UNO_1);
     exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO1)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO1_TO_UNO_1);
     exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO2)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO2_TO_UNO_1);
@@ -66,8 +66,8 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderADS7953(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SCK, HardwareResourcePin MISO, HardwareResourcePin MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, SCK, MISO, MOSI, Extender) {
+  ExtenderADS7953(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender) {
     exclusiefMetGpio_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
     exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO0)] = static_cast<uint8_t>(ExtenderLijst[teller].gpio0);
     exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO1)] = static_cast<uint8_t>(ExtenderLijst[teller].gpio1);

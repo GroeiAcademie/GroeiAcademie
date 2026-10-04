@@ -13,17 +13,17 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C {
     EP_CH7 = 0x07  // I2C-kanaal 7: SD7 + SC7
   };
 
-  HardwareResourcePin RESET;
+  HardwareResourcePin np_RESET;
   uint8_t exclusiefMetReset_[2];
 
   // ============================================================================
   // DEFAULT — TCA9548A #1
   // ============================================================================
   #if EXTENDER_TCA9548A_AANTAL == 1
-  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin SDA, HardwareResourcePin SCL, HardwareResourcePin RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, SDA, SCL, Extender), RESET(RESET) {
+  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_RESET(np_RESET) {
     exclusiefMetReset_[0] = exclusief_[0];
-    exclusiefMetReset_[1] = static_cast<uint8_t>(RESET);
+    exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };
   }
   #endif
@@ -43,10 +43,10 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SDA, HardwareResourcePin SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, SDA, SCL, Extender), RESET(ExtenderLijst[teller].reset) {
+  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetReset_[0] = exclusief_[0];
-    exclusiefMetReset_[1] = static_cast<uint8_t>(RESET);
+    exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };
   }
   #endif

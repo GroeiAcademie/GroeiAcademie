@@ -315,13 +315,13 @@
 
 // Pixelscherm --------------------------------------------------------------------
 #ifndef PIXEL_SCREEN_CS
-  #define PIXEL_SCREEN_CS              HardwareResourcePin::SS
+  #define PIXEL_SCREEN_CS              HardwareResourcePin::NP_SS
 #endif
 #ifndef PIXEL_SCREEN_DC
-  #define PIXEL_SCREEN_DC              HardwareResourcePin::D9
+  #define PIXEL_SCREEN_DC              HardwareResourcePin::NP_D9
 #endif
 #ifndef PIXEL_SCREEN_RST
-  #define PIXEL_SCREEN_RST             HardwareResourcePin::D7
+  #define PIXEL_SCREEN_RST             HardwareResourcePin::NP_D7
 #endif
 
 #ifndef ACTIEF_PIXEL_SCREEN
@@ -1269,11 +1269,11 @@
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
-    #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::D5
+    #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::NP_D5
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
-    #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::D6
+    #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::NP_D6
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
@@ -1294,11 +1294,11 @@
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
-    #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::D7
+    #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::NP_D7
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
-    #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::D8
+    #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::NP_D8
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
@@ -1535,16 +1535,16 @@
   #endif
 #else
   #ifndef ADC_PIN_SENSOR_1
-    #define ADC_PIN_SENSOR_1 HardwareResourcePin::A0  // standaard waarde: HardwareResourcePin::A0, Analoge pin voor de 1ste test-sensor
+    #define ADC_PIN_SENSOR_1 HardwareResourcePin::NP_A0  // standaard waarde: HardwareResourcePin::NP_A0, Analoge pin voor de 1ste test-sensor
   #endif
   #ifndef ADC_PIN_SENSOR_2
-    #define ADC_PIN_SENSOR_2 HardwareResourcePin::A1  // standaard waarde: HardwareResourcePin::A1, Analoge pin voor de 2de test-sensor
+    #define ADC_PIN_SENSOR_2 HardwareResourcePin::NP_A1  // standaard waarde: HardwareResourcePin::NP_A1, Analoge pin voor de 2de test-sensor
   #endif
   #ifndef ADC_PIN_SENSOR_3
-    #define ADC_PIN_SENSOR_3 HardwareResourcePin::A2  // standaard waarde: HardwareResourcePin::A2, Analoge pin voor de 3de test-sensor
+    #define ADC_PIN_SENSOR_3 HardwareResourcePin::NP_A2  // standaard waarde: HardwareResourcePin::NP_A2, Analoge pin voor de 3de test-sensor
   #endif
   #ifndef ADC_PIN_SENSOR_4
-    #define ADC_PIN_SENSOR_4 HardwareResourcePin::A3  // standaard waarde: HardwareResourcePin::A3, Analoge pin voor de 4de test-sensor
+    #define ADC_PIN_SENSOR_4 HardwareResourcePin::NP_A3  // standaard waarde: HardwareResourcePin::NP_A3, Analoge pin voor de 4de test-sensor
   #endif
 #endif
 
@@ -1622,10 +1622,10 @@
         #error "INPUT_KEYPAD_PIN_K1 t/m INPUT_KEYPAD_PIN_K4 moeten samen gedefinieerd worden."
       #endif
     #else
-      #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::D2
-      #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::D3
-      #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::D4
-      #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::D5
+      #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::NP_D2
+      #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::NP_D3
+      #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::NP_D4
+      #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::NP_D5
     #endif
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
     #if defined(INPUT_KEYPAD_PIN_L1) || defined(INPUT_KEYPAD_PIN_L2) || defined(INPUT_KEYPAD_PIN_R1) || defined(INPUT_KEYPAD_PIN_R2)
@@ -1633,10 +1633,10 @@
         #error "INPUT_KEYPAD_PIN_L1, INPUT_KEYPAD_PIN_L2, INPUT_KEYPAD_PIN_R1 en INPUT_KEYPAD_PIN_R2 moeten samen gedefinieerd worden."
       #endif
     #else
-      #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::D2
-      #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::D3
-      #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::D4
-      #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::D5
+      #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::NP_D2
+      #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::NP_D3
+      #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::NP_D4
+      #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::NP_D5
     #endif
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
     // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
@@ -1646,10 +1646,10 @@
         #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
       #endif
     #else
-      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::D3
-      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::D2
-      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::D5
-      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::D4
+      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::NP_D3
+      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::NP_D2
+      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::NP_D5
+      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::NP_D4
     #endif
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
     // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
@@ -1659,10 +1659,10 @@
         #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
       #endif
     #else    
-      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::D3
-      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::D2
-      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::D5
-      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::D4
+      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::NP_D3
+      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::NP_D2
+      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::NP_D5
+      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::NP_D4
     #endif
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
     #if defined(INPUT_KEYPAD_PIN_OUT1) || defined(INPUT_KEYPAD_PIN_OUT2) || defined(INPUT_KEYPAD_PIN_OUT3) || defined(INPUT_KEYPAD_PIN_OUT4)
@@ -1670,10 +1670,10 @@
         #error "INPUT_KEYPAD_PIN_OUT1 t/m INPUT_KEYPAD_PIN_OUT4 moeten samen gedefinieerd worden."
       #endif
     #else
-      #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::D2
-      #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::D3
-      #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::D4
-      #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::D5
+      #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::NP_D2
+      #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::NP_D3
+      #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::NP_D4
+      #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::NP_D5
     #endif
   #else
     #error "Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."

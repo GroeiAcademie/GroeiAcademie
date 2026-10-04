@@ -13,6 +13,11 @@ De versienummers volgen de versie in `library.properties`.
 - het project overweegt om ondersteuning voor Arduino UNO R3 te schrappen vanaf v1.1.3, wegens te weinig beschikbaar geheugen voor recentere functionaliteit (zoals `GedeeldeBus`, die `std::initializer_list` gebruikt);
 - nog geen definitieve beslissing; deze aankondiging dient als vooraankondiging, in lijn met het deprecatiebeleid uit `ROADMAP.md`.
 
+### GedeeldeBus: compile-time Extenders
+
+- alleen Extenders die via `EXTENDER_<NAAM>_AANTAL`, `ADC_BACKEND` of `INPUT_KANAAL_CONFIG` effectief nodig zijn, worden mee gecompileerd; niet gebruikte Extenderheaders en Extendercode blijven buiten de build;
+- `ExtenderADS1115` blijft beschikbaar voor `ADC_BACKEND_ADS1115`; `ExtenderPCF8574` blijft beschikbaar voor `INPUT_TYPE_PCF8574`.
+
 ### GedeeldeBus: naamgeving
 
 - `GedeeldeBusInitialiseren()` werd eerder hernoemd naar `InitialiserenGedeeldeBus()`; in beta v2.0.0 is GedeeldeBus niet langer een aparte prototype-route maar onderdeel van de normale architectuur.

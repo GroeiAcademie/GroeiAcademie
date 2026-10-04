@@ -19,13 +19,13 @@
 ExtenderADS7828 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS7828,
-  I2C_ADDRESS_EXTENDER_ADS7828_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL
+  I2C_ADDRESS_EXTENDER_ADS7828_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL
 );
 #else
 ExtenderADS7828 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS7828,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 

@@ -33,7 +33,7 @@ uint8_t ExtenderPins[] = { 0x10 };
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, 1 },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

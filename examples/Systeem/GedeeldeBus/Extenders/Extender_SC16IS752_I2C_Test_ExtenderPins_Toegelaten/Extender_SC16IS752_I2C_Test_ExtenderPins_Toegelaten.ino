@@ -18,13 +18,13 @@
 ExtenderSC16IS752I2C extender(
   &Native,
   GedeeldeBusComponent::UART_SC16IS752,
-  I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL, EXTENDER_SC16IS752_I2C_1_IRQ, EXTENDER_SC16IS752_I2C_1_RESET
+  I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_SC16IS752_I2C_1_IRQ, EXTENDER_SC16IS752_I2C_1_RESET
 );
 #else
 ExtenderSC16IS752I2C extender(
   &Native,
   GedeeldeBusComponent::UART_SC16IS752,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 
@@ -44,7 +44,7 @@ uint8_t ExtenderPins[] = {
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, sizeof(ExtenderPins) / sizeof(ExtenderPins[0]) },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

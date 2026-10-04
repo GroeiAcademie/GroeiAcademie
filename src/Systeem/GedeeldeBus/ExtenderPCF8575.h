@@ -21,17 +21,17 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C {
     EP_P17 = 0x0F  // Quasi-bidirectionele digitale I/O P17, tweede byte
   };
 
-  HardwareResourcePin INT;
+  HardwareResourcePin np_INT;
   uint8_t exclusiefMetInt_[2];
 
   // ============================================================================
   // DEFAULT — PCF8575 #1
   // ============================================================================
   #if EXTENDER_PCF8575_AANTAL == 1
-  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin SDA, HardwareResourcePin SCL, HardwareResourcePin INT, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, SDA, SCL, Extender), INT(INT) {
+  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INT, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_INT(np_INT) {
     exclusiefMetInt_[0] = exclusief_[0];
-    exclusiefMetInt_[1] = static_cast<uint8_t>(INT);
+    exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
   }
   #endif
@@ -51,10 +51,10 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SDA, HardwareResourcePin SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, SDA, SCL, Extender), INT(ExtenderLijst[teller].intPin) {
+  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_INT(ExtenderLijst[teller].intPin) {
     exclusiefMetInt_[0] = exclusief_[0];
-    exclusiefMetInt_[1] = static_cast<uint8_t>(INT);
+    exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
   }
   #endif

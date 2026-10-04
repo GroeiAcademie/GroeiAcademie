@@ -18,13 +18,13 @@
 ExtenderADS1158 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS1158,
-  CS_PIN_EXTENDER_ADS1158_1, HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, EXTENDER_ADS1158_1_START, EXTENDER_ADS1158_1_RESET, EXTENDER_ADS1158_1_PWDN
+  CS_PIN_EXTENDER_ADS1158_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_ADS1158_1_START, EXTENDER_ADS1158_1_RESET, EXTENDER_ADS1158_1_PWDN
 );
 #else
 ExtenderADS1158 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS1158,
-  HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, 0
+  HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, 0
 );
 #endif
 
@@ -58,7 +58,7 @@ uint8_t ExtenderPins[] = {
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, sizeof(ExtenderPins) / sizeof(ExtenderPins[0]) },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

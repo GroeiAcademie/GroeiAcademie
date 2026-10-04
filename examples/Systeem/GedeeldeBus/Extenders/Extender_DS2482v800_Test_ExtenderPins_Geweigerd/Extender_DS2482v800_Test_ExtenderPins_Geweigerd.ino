@@ -18,13 +18,13 @@
 ExtenderDS2482v800 extender(
   &Native,
   GedeeldeBusComponent::ONE_WIRE_DS2482v800,
-  I2C_ADDRESS_EXTENDER_DS2482_800_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL
+  I2C_ADDRESS_EXTENDER_DS2482_800_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL
 );
 #else
 ExtenderDS2482v800 extender(
   &Native,
   GedeeldeBusComponent::ONE_WIRE_DS2482v800,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 
@@ -33,7 +33,7 @@ uint8_t ExtenderPins[] = { 0x08 };
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, 1 },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

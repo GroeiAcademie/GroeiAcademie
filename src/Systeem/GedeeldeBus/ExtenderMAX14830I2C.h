@@ -25,17 +25,17 @@ struct ExtenderMAX14830I2C : HardwareResourceTypeI2C {
     EP_GPIO15 = 0x13  // GPIO15, gekoppeld aan UART3
   };
 
-  HardwareResourcePin IRQ;
+  HardwareResourcePin np_IRQ;
   uint8_t exclusiefMetIrq_[2];
 
   // ============================================================================
   // DEFAULT — MAX14830 I2C #1
   // ============================================================================
   #if EXTENDER_MAX14830_I2C_AANTAL == 1
-  ExtenderMAX14830I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin SDA, HardwareResourcePin SCL, HardwareResourcePin IRQ, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, SDA, SCL, Extender), IRQ(IRQ) {
+  ExtenderMAX14830I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_IRQ, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_IRQ(np_IRQ) {
     exclusiefMetIrq_[0] = exclusief_[0];
-    exclusiefMetIrq_[1] = static_cast<uint8_t>(IRQ);
+    exclusiefMetIrq_[1] = static_cast<uint8_t>(np_IRQ);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIrq_, 2 };
   }
   #endif
@@ -55,10 +55,10 @@ struct ExtenderMAX14830I2C : HardwareResourceTypeI2C {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderMAX14830I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SDA, HardwareResourcePin SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, SDA, SCL, Extender), IRQ(ExtenderLijst[teller].irq) {
+  ExtenderMAX14830I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_IRQ(ExtenderLijst[teller].irq) {
     exclusiefMetIrq_[0] = exclusief_[0];
-    exclusiefMetIrq_[1] = static_cast<uint8_t>(IRQ);
+    exclusiefMetIrq_[1] = static_cast<uint8_t>(np_IRQ);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIrq_, 2 };
   }
   #endif

@@ -231,13 +231,13 @@
 
 // Pixelscherm ----------------------------------------------------------------
 #ifndef PIXEL_SCREEN_CS
-// #define PIXEL_SCREEN_CS                HardwareResourcePin::SS // standaard waarde: HardwareResourcePin::SS
+// #define PIXEL_SCREEN_CS                HardwareResourcePin::NP_SS // standaard waarde: HardwareResourcePin::NP_SS
 #endif
 #ifndef PIXEL_SCREEN_DC
-// #define PIXEL_SCREEN_DC                HardwareResourcePin::D9 // standaard waarde: HardwareResourcePin::D9
+// #define PIXEL_SCREEN_DC                HardwareResourcePin::NP_D9 // standaard waarde: HardwareResourcePin::NP_D9
 #endif
 #ifndef PIXEL_SCREEN_RST
-// #define PIXEL_SCREEN_RST               HardwareResourcePin::D7 // standaard waarde: HardwareResourcePin::D7
+// #define PIXEL_SCREEN_RST               HardwareResourcePin::NP_D7 // standaard waarde: HardwareResourcePin::NP_D7
 #endif
 
 #ifndef ACTIEF_PIXEL_SCREEN
@@ -751,10 +751,10 @@
 // #define CS_PIN_EXTENDER_ADS7953_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
-// #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::D5  // standaard waarde: HardwareResourcePin::D5  // EXCLUSIEF
+// #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::NP_D5  // standaard waarde: HardwareResourcePin::NP_D5  // EXCLUSIEF
 #endif
 #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
-// #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::D6  // standaard waarde: HardwareResourcePin::D6  // EXCLUSIEF
+// #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::NP_D6  // standaard waarde: HardwareResourcePin::NP_D6  // EXCLUSIEF
 #endif
 #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
 // #define EXTENDER_ADS7953_GPIO2_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
@@ -769,10 +769,10 @@
 // #define CS_PIN_EXTENDER_ADS7953_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
-// #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::D7  // standaard waarde: HardwareResourcePin::D7  // EXCLUSIEF
+// #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::NP_D7  // standaard waarde: HardwareResourcePin::NP_D7  // EXCLUSIEF
 #endif
 #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
-// #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::D8  // standaard waarde: HardwareResourcePin::D8  // EXCLUSIEF
+// #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
 #endif
 #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
 // #define EXTENDER_ADS7953_GPIO2_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
@@ -930,16 +930,16 @@
 // Bij ADC_BACKEND_ADS1115 zijn ADC_PIN_SENSOR_1..4 kanaalnummers 0 tot 3.
 // Bij ADC_BACKEND_NATIVE zijn ADC_PIN_SENSOR_1..4 HardwareResourcePin-waarden.
 #ifndef ADC_PIN_SENSOR_1
-// #define ADC_PIN_SENSOR_1 HardwareResourcePin::A0  // standaard waarde: HardwareResourcePin::A0; bij ADC_BACKEND_ADS1115: 0
+// #define ADC_PIN_SENSOR_1 HardwareResourcePin::NP_A0  // standaard waarde: HardwareResourcePin::NP_A0; bij ADC_BACKEND_ADS1115: 0
 #endif
 #ifndef ADC_PIN_SENSOR_2
-// #define ADC_PIN_SENSOR_2 HardwareResourcePin::A1  // standaard waarde: HardwareResourcePin::A1; bij ADC_BACKEND_ADS1115: 1
+// #define ADC_PIN_SENSOR_2 HardwareResourcePin::NP_A1  // standaard waarde: HardwareResourcePin::NP_A1; bij ADC_BACKEND_ADS1115: 1
 #endif
 #ifndef ADC_PIN_SENSOR_3
-// #define ADC_PIN_SENSOR_3 HardwareResourcePin::A2  // standaard waarde: HardwareResourcePin::A2; bij ADC_BACKEND_ADS1115: 2
+// #define ADC_PIN_SENSOR_3 HardwareResourcePin::NP_A2  // standaard waarde: HardwareResourcePin::NP_A2; bij ADC_BACKEND_ADS1115: 2
 #endif
 #ifndef ADC_PIN_SENSOR_4
-// #define ADC_PIN_SENSOR_4 HardwareResourcePin::A3  // standaard waarde: HardwareResourcePin::A3; bij ADC_BACKEND_ADS1115: 3
+// #define ADC_PIN_SENSOR_4 HardwareResourcePin::NP_A3  // standaard waarde: HardwareResourcePin::NP_A3; bij ADC_BACKEND_ADS1115: 3
 #endif
 
 // Vertraging tussen samples in de meetlussen 
@@ -954,28 +954,28 @@
 // INPUT_TYPE_DIGITAL gebruikt HardwareResourcePin-waarden voor de vier fysieke keypad-aansluitingen.
 #if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-// #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::D2
-// #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::D3
-// #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::D4
-// #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::D5
+// #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::NP_D2
+// #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::NP_D3
+// #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::NP_D4
+// #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::NP_D5
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-// #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::D2
-// #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::D3
-// #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::D4
-// #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::D5
+// #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::NP_D2
+// #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::NP_D3
+// #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::NP_D4
+// #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::NP_D5
 
   #elif defined(KEYPAD_TYPE) && (KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1)
-// #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::D3
-// #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::D2
-// #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::D5
-// #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::D4
+// #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::NP_D3
+// #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::NP_D2
+// #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::NP_D5
+// #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::NP_D4
 
   #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-// #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::D2
-// #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::D3
-// #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::D4
-// #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::D5
+// #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::NP_D2
+// #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::NP_D3
+// #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::NP_D4
+// #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::NP_D5
   #endif
 #endif
 

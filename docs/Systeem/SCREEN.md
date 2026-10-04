@@ -216,7 +216,7 @@ Screen::Screen()
   : GedeeldeBusNode(
       &Native,
       { nullptr, 0, nullptr, 0 },
-      GedeeldeBusComponent::SCREEN,
+      GedeeldeBusComponent::GC_SCREEN,
       HardwareResourceToegang::GEDEELD
     )
 {}
@@ -298,8 +298,8 @@ if (this->Character.gedeeldeBus == nullptr) {
       this,
       GedeeldeBusComponent::CHARACTER_SCREEN,
       I2C_ADDRESS_CHARACTER_SCREEN,
-      HardwareResourcePin::SDA,
-      HardwareResourcePin::SCL
+      HardwareResourcePin::NP_SDA,
+      HardwareResourcePin::NP_SCL
     );
 }
 ```
@@ -381,9 +381,9 @@ if (this->Pixel.gedeeldeBus == nullptr) {
       this,
       GedeeldeBusComponent::PIXEL_SCREEN,
       PIXEL_SCREEN_CS,
-      HardwareResourcePin::SCK,
-      HardwareResourcePin::MISO,
-      HardwareResourcePin::MOSI,
+      HardwareResourcePin::NP_SCK,
+      HardwareResourcePin::NP_MISO,
+      HardwareResourcePin::NP_MOSI,
       PIXEL_SCREEN_DC,
       PIXEL_SCREEN_RST
     );
@@ -532,8 +532,8 @@ if (this->Serial.gedeeldeBus == nullptr) {
     ObjectAanmakenEnInpluggenGedeeldeBus<SerialOutput>(
       this,
       GedeeldeBusComponent::SERIAL_OUTPUT,
-      HardwareResourcePin::D1,
-      HardwareResourcePin::D0
+      HardwareResourcePin::NP_D1,
+      HardwareResourcePin::NP_D0
     );
 }
 ```

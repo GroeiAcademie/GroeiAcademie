@@ -18,13 +18,13 @@
 ExtenderMAX14830SPI extender(
   &Native,
   GedeeldeBusComponent::UART_MAX14830,
-  CS_PIN_EXTENDER_MAX14830_SPI_1, HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, EXTENDER_MAX14830_SPI_1_IRQ
+  CS_PIN_EXTENDER_MAX14830_SPI_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_MAX14830_SPI_1_IRQ
 );
 #else
 ExtenderMAX14830SPI extender(
   &Native,
   GedeeldeBusComponent::UART_MAX14830,
-  HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, 0
+  HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, 0
 );
 #endif
 
@@ -33,7 +33,7 @@ uint8_t ExtenderPins[] = { 0x14 };
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, 1 },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

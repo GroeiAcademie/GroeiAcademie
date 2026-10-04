@@ -7,7 +7,7 @@ Input::Input()
 {}
 
 Input::Input(uint8_t typesActief)
-  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::INPUT, HardwareResourceToegang::GEDEELD), typesActief(typesActief)
+  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::GC_INPUT, HardwareResourceToegang::GEDEELD), typesActief(typesActief)
 {}
 
 struct Input* Input = nullptr;
@@ -1075,7 +1075,7 @@ bool Input::aanmelden() {
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   if ((this->typesActief & INPUT_TYPE_PCF8574) && gedeeldeBusInputPCF8574 == nullptr) {
-    InputPCF8574* kanaal = new InputPCF8574(this, GedeeldeBusComponent::INPUT_PCF8574, I2C_ADDRESS_PCF8574, HardwareResourcePin::SDA, HardwareResourcePin::SCL, HardwareResourceToegang::GEDEELD);
+    InputPCF8574* kanaal = new InputPCF8574(this, GedeeldeBusComponent::INPUT_PCF8574, I2C_ADDRESS_PCF8574, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
     kanaal->componentCreated = true;
 
     if (kanaal->aanmelden()) {

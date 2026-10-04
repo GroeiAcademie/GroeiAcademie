@@ -9,16 +9,16 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, Adafruit_ADS1115 {
     EP_AIN3 = 0x03  // Analoge ingang AIN3
   };
 
-  HardwareResourcePin ALERT_RDY;
+  HardwareResourcePin np_ALERT_RDY;
   uint8_t exclusiefMetAlert_[2];
 
   // ============================================================================
   // ADS1115-BASIS — gedeeld door ADC_ADS1115 en EXTENDER_ADS1115
   // ============================================================================
-  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin SDA, HardwareResourcePin SCL, HardwareResourcePin ALERT_RDY, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, SDA, SCL, Extender), ALERT_RDY(ALERT_RDY) {
+  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_ALERT_RDY, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_ALERT_RDY(np_ALERT_RDY) {
     exclusiefMetAlert_[0] = exclusief_[0];
-    exclusiefMetAlert_[1] = static_cast<uint8_t>(ALERT_RDY);
+    exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };
   }
 
@@ -46,10 +46,10 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, Adafruit_ADS1115 {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SDA, HardwareResourcePin SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, SDA, SCL, Extender), ALERT_RDY(ExtenderLijst[teller].alertRdy) {
+  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_ALERT_RDY(ExtenderLijst[teller].alertRdy) {
     exclusiefMetAlert_[0] = exclusief_[0];
-    exclusiefMetAlert_[1] = static_cast<uint8_t>(ALERT_RDY);
+    exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };
   }
   #endif

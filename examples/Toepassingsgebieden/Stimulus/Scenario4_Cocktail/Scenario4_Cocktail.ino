@@ -1,7 +1,5 @@
-// v2.0.0 Stimulus-voorbeeld.
 // ============================================================================
 // Scenario 4 — Cocktail
-// ============================================================================
 // ============================================================================
 // Dit example dwingt ADC_BACKEND/SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan
 // een .ino structureel niet: Stimulus.cpp/Screen.cpp worden als aparte
@@ -39,7 +37,6 @@ bool ToetsPositieIngedrukt(const char* opschrift, int positie) {
   snprintf(sNotatie, sizeof(sNotatie), "S%d", positie);
   return strcmp(opschrift, cijferNotatie) == 0 || strcmp(opschrift, sNotatie) == 0;
 }
-
 
 // INSTORTEND SCORINGSVORM (enkel gebruikt bij Scenario 3, stap 3)
 int instortendOfGradueel = INSTORTEND_SCORING_BINAIR; // Kan verhoogd worden met instortendOfGradueel++ na succesvolle sessies (net als stimulusVersie) 
@@ -85,7 +82,6 @@ void setup() {
   //-- pinMode(PIN_TOETS_4, INPUT_PULLUP);
   Input = GedeeldeBusNewComponent<struct Input>();
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 
   Screen->Print(LCD_START_L1, LCD_START_L2, LCD_LEESTIJD_MEDEDELING_KORT_MS);
   Stimulus.ResetAlleTellers();

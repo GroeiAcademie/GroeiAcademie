@@ -160,7 +160,11 @@ UserDefined PCF8574-keypads moeten al hun vereiste `KEYPAD_GENERIEK_...`-instell
 
 ## Extenders en v2.0.0
 
+Native pinnamen in deze configuratie gebruiken `HardwareResourcePin::NP_...`. `HardwareResourcePin::CUSTOM` en `HardwareResourcePin::NONE` zijn speciale niet-pinwaarden en behouden hun naam zonder `NP_`.
+
 `UserConfig.h` kan vóór de fallbackwaarden van `SystemConfig.h` de GedeeldeBus-/Extenderconfiguratie vastleggen. Gebruik daarvoor exact de macro's die in `SystemConfig.h` als `#ifndef`-defaults bestaan, zoals `EXTENDER_<NAAM>_AANTAL`, de bijbehorende I2C-adressen, CS-pinnen en controlpinnen.
+
+`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. `ExtenderADS1115` blijft ook nodig wanneer ADS1115 als `ADC_BACKEND` actief is en `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
 
 De logische resources van een Extender worden niet hier hernoemd of gemapt: die staan als `ExtenderPins::EP_<pinnaam>` in de concrete `Extender*.h`.
 

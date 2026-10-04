@@ -21,19 +21,19 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C {
     EP_GPB7 = 0x0F  // Digitale I/O GPB7, bank B
   };
 
-  HardwareResourcePin INTA, INTB, RESET;
+  HardwareResourcePin np_INTA, np_INTB, np_RESET;
   uint8_t exclusiefMetIntReset_[4];
 
   // ============================================================================
   // DEFAULT — MCP23017 #1
   // ============================================================================
   #if EXTENDER_MCP23017_AANTAL == 1
-  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin SDA, HardwareResourcePin SCL, HardwareResourcePin INTA, HardwareResourcePin INTB, HardwareResourcePin RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, SDA, SCL, Extender), INTA(INTA), INTB(INTB), RESET(RESET) {
+  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INTA, HardwareResourcePin np_INTB, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_INTA(np_INTA), np_INTB(np_INTB), np_RESET(np_RESET) {
     exclusiefMetIntReset_[0] = exclusief_[0];
-    exclusiefMetIntReset_[1] = static_cast<uint8_t>(INTA);
-    exclusiefMetIntReset_[2] = static_cast<uint8_t>(INTB);
-    exclusiefMetIntReset_[3] = static_cast<uint8_t>(RESET);
+    exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
+    exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
+    exclusiefMetIntReset_[3] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIntReset_, 4 };
   }
   #endif
@@ -53,12 +53,12 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SDA, HardwareResourcePin SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, SDA, SCL, Extender), INTA(ExtenderLijst[teller].inta), INTB(ExtenderLijst[teller].intb), RESET(ExtenderLijst[teller].reset) {
+  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_INTA(ExtenderLijst[teller].inta), np_INTB(ExtenderLijst[teller].intb), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetIntReset_[0] = exclusief_[0];
-    exclusiefMetIntReset_[1] = static_cast<uint8_t>(INTA);
-    exclusiefMetIntReset_[2] = static_cast<uint8_t>(INTB);
-    exclusiefMetIntReset_[3] = static_cast<uint8_t>(RESET);
+    exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
+    exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
+    exclusiefMetIntReset_[3] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIntReset_, 4 };
   }
   #endif

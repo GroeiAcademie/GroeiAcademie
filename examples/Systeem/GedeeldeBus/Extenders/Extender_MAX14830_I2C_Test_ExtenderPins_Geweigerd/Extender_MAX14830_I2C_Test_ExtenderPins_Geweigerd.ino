@@ -18,13 +18,13 @@
 ExtenderMAX14830I2C extender(
   &Native,
   GedeeldeBusComponent::UART_MAX14830,
-  I2C_ADDRESS_EXTENDER_MAX14830_I2C_1, HardwareResourcePin::SDA, HardwareResourcePin::SCL, EXTENDER_MAX14830_I2C_1_IRQ
+  I2C_ADDRESS_EXTENDER_MAX14830_I2C_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MAX14830_I2C_1_IRQ
 );
 #else
 ExtenderMAX14830I2C extender(
   &Native,
   GedeeldeBusComponent::UART_MAX14830,
-  HardwareResourcePin::SDA, HardwareResourcePin::SCL, 0
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
 );
 #endif
 
@@ -33,7 +33,7 @@ uint8_t ExtenderPins[] = { 0x14 };
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, 1 },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

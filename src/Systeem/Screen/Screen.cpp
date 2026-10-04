@@ -39,7 +39,7 @@ Screen::Screen()
 {}
 
 Screen::Screen(uint8_t typesActief)
-  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::SCREEN, HardwareResourceToegang::GEDEELD), typesActief(typesActief)
+  : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::GC_SCREEN, HardwareResourceToegang::GEDEELD), typesActief(typesActief)
 {}
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
@@ -467,7 +467,7 @@ bool Screen::aanmelden() {
   if ((this->typesActief & SCREEN_TYPE_SERIAL) && this->Serial.gedeeldeBus == nullptr) {
     this->Serial.foutmelding = nullptr;
     this->Serial.foutmeldingWeergegeven = false;
-    SerialOutput* child = new SerialOutput(this, GedeeldeBusComponent::SERIAL_OUTPUT, HardwareResourcePin::D1, HardwareResourcePin::D0);
+    SerialOutput* child = new SerialOutput(this, GedeeldeBusComponent::SERIAL_OUTPUT, HardwareResourcePin::NP_D1, HardwareResourcePin::NP_D0);
     child->componentCreated = true;
 
     if (child->aanmelden()) {
@@ -483,7 +483,7 @@ bool Screen::aanmelden() {
   if ((this->typesActief & SCREEN_TYPE_CHARACTER) && this->Character.gedeeldeBus == nullptr) {
     this->Character.foutmelding = nullptr;
     this->Character.foutmeldingWeergegeven = false;
-    ::CharacterScreen* child = new ::CharacterScreen(this, GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::SDA, HardwareResourcePin::SCL);
+    ::CharacterScreen* child = new ::CharacterScreen(this, GedeeldeBusComponent::CHARACTER_SCREEN, I2C_ADDRESS_CHARACTER_SCREEN, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
     child->componentCreated = true;
 
     if (child->aanmelden()) {
@@ -499,7 +499,7 @@ bool Screen::aanmelden() {
   if ((this->typesActief & SCREEN_TYPE_PIXELS) && this->Pixel.gedeeldeBus == nullptr) {
     this->Pixel.foutmelding = nullptr;
     this->Pixel.foutmeldingWeergegeven = false;
-    ::PixelScreen* child = new ::PixelScreen(this, GedeeldeBusComponent::PIXEL_SCREEN, PIXEL_SCREEN_CS, HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
+    ::PixelScreen* child = new ::PixelScreen(this, GedeeldeBusComponent::PIXEL_SCREEN, PIXEL_SCREEN_CS, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
     child->componentCreated = true;
 
     if (child->aanmelden()) {

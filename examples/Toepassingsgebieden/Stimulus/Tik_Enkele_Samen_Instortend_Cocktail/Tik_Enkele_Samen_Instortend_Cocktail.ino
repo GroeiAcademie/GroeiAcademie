@@ -1,7 +1,5 @@
-// Stimulus-voorbeeld v2.0.0
 // ============================================================================
 // Tik — Enkel, samen, instortend en cocktail
-// ============================================================================
 // ============================================================================
 // Dit example dwingt ADC_BACKEND/SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan een .ino structureel niet: 
 // Stimulus.cpp/Screen.cpp worden als aparte bestanden gecompileerd en zien een #define hier nooit. 
@@ -29,7 +27,6 @@
 #include <GroeiAcademie.h>
 #include <Configuratie/Examples.h>
 #include <Configuratie/ExamplesConfig.h>
-
 
 // Vergelijkt het opschrift van de ingedrukte toets met een positie (1-4), ongeacht of het
 // actieve keypad de cijfernotatie ("1") of de S-notatie ("S1") gebruikt voor die positie.

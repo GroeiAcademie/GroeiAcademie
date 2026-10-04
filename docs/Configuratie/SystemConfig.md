@@ -253,6 +253,8 @@ Bron voor de board- en pinmapping: de officiële `boards.txt` en `variants/d1_un
 
 De code in `SystemConfig.h` bevat voor v2.0.0 ook de configuratie van GedeeldeBus-componenten.
 
+In de GedeeldeBus-API gebruiken `HardwareResourceType`-waarden de prefix `RT_`. Echte native `HardwareResourcePin`-waarden gebruiken `NP_`; `HardwareResourcePin::CUSTOM` en `HardwareResourcePin::NONE` blijven als speciale niet-pinwaarden ongewijzigd. De vier groepswaarden van `GedeeldeBusComponent` heten `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER` en `GC_SENSOR`.
+
 ### BOARD_ID
 
 ```cpp
@@ -266,6 +268,8 @@ De code in `SystemConfig.h` bevat voor v2.0.0 ook de configuratie van GedeeldeBu
 ### Extenderaantallen
 
 Voor iedere concrete Extender bestaat een `EXTENDER_<NAAM>_AANTAL`. De standaardwaarde is 0. De commentaar in de code markeert 0 of 1 als de standaardroute en `>= 2` als experimenteel.
+
+Een Extender met `EXTENDER_<NAAM>_AANTAL == 0` wordt niet mee gecompileerd. Twee gedeelde codebasissen vormen een uitzondering wanneer ze elders effectief nodig zijn: `ExtenderADS1115` bij `ADC_BACKEND == ADC_BACKEND_ADS1115` en `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat. Zo blijven niet gebruikte Extenders buiten de build.
 
 De huidige aantalmacro's zijn:
 

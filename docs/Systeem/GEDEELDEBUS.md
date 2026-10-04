@@ -78,9 +78,11 @@ Dit is nog een dummy. Er zijn in de huidige code geen concrete `Diagnose()`-over
 
 ## Native resources
 
-`HardwareResourcePin` omvat `D0..D13`, `A0..A5`, `SDA`, `SCL`, `MISO`, `MOSI`, `SCK`, `SS`, `CUSTOM` en `NONE`. `NativeArduinoPinVan()` vertaalt die naar de boardmapping in `SystemConfig.h`.
+`HardwareResourcePin` gebruikt `NP_D0..NP_D13`, `NP_A0..NP_A5`, `NP_SDA`, `NP_SCL`, `NP_MISO`, `NP_MOSI`, `NP_SCK` en `NP_SS` voor de echte native pinnen. `CUSTOM` en `NONE` blijven zonder `NP_`, omdat dit speciale waarden zijn en geen pinnen. `NativeArduinoPinVan()` vertaalt de native pinwaarden naar de boardmapping in `SystemConfig.h`.
 
 ExtenderPins zijn geen `HardwareResourcePin` en worden niet via `NativeArduinoPinVan()` vertaald.
+
+De waarden van `HardwareResourceType` gebruiken overal `RT_`. De vier groepswaarden in `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER` en `GC_SENSOR`; concrete componentwaarden, zoals `INPUT_PCF8574`, `ADC_ADS1115` en `RFP602`, behouden hun eigen naam.
 
 ## Claims en conflicten
 
@@ -113,6 +115,8 @@ I2C-adressen worden intern met bit `0x80` gemarkeerd en als exclusieve claim beh
 ## Extenders en ExtenderPins
 
 Alle 14 concrete Extenders staan in afzonderlijke `.h/.cpp`-bestanden. Iedere waarde in `enum class ExtenderPins` begint met `EP_`.
+
+Alleen Extenders die compile-time effectief gebruikt worden, worden mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender. `ExtenderADS1115` wordt daarnaast mee gecompileerd wanneer `ADC_BACKEND == ADC_BACKEND_ADS1115`, omdat `ADC_ADS1115` ervan erft. `ExtenderPCF8574` wordt daarnaast mee gecompileerd wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat, omdat `InputPCF8574` dezelfde codebasis gebruikt. Niet gebruikte Extenderheaders worden niet geïncludeerd; de afzonderlijke Extender-`.cpp` levert alleen code wanneer de daarin benodigde meervoudige `ExtenderLijst` werkelijk nodig is.
 
 | Extender | actuele `ExtenderPins` uit de header |
 |---|---|

@@ -194,7 +194,6 @@ void setup() {
 
   Input = GedeeldeBusNewComponent<struct Input>();
   if (Input == nullptr) exit(0);
-  Input->InputConfigureren();
 }
 
 void loop() {

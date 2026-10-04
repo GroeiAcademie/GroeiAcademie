@@ -16,18 +16,18 @@ struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
     EP_GPIO7     = 0x09  // GPIO7 / RIA
   };
 
-  HardwareResourcePin IRQ, RESET;
+  HardwareResourcePin np_IRQ, np_RESET;
   uint8_t exclusiefMetIrqReset_[3];
 
   // ============================================================================
   // DEFAULT — SC16IS752 SPI #1
   // ============================================================================
   #if EXTENDER_SC16IS752_SPI_AANTAL == 1
-  ExtenderSC16IS752SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin CS, HardwareResourcePin SCK, HardwareResourcePin MISO, HardwareResourcePin MOSI, HardwareResourcePin IRQ, HardwareResourcePin RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, CS, SCK, MISO, MOSI, Extender), IRQ(IRQ), RESET(RESET) {
-    exclusiefMetIrqReset_[0] = static_cast<uint8_t>(CS);
-    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(IRQ);
-    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(RESET);
+  ExtenderSC16IS752SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_IRQ, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender), np_IRQ(np_IRQ), np_RESET(np_RESET) {
+    exclusiefMetIrqReset_[0] = static_cast<uint8_t>(np_CS);
+    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(np_IRQ);
+    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrqReset_, 3 };
   }
   #endif
@@ -47,11 +47,11 @@ struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderSC16IS752SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SCK, HardwareResourcePin MISO, HardwareResourcePin MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, SCK, MISO, MOSI, Extender), IRQ(ExtenderLijst[teller].irq), RESET(ExtenderLijst[teller].reset) {
+  ExtenderSC16IS752SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_IRQ(ExtenderLijst[teller].irq), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetIrqReset_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
-    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(IRQ);
-    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(RESET);
+    exclusiefMetIrqReset_[1] = static_cast<uint8_t>(np_IRQ);
+    exclusiefMetIrqReset_[2] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrqReset_, 3 };
   }
   #endif

@@ -18,13 +18,13 @@
 ExtenderSC16IS752SPI extender(
   &Native,
   GedeeldeBusComponent::UART_SC16IS752,
-  CS_PIN_EXTENDER_SC16IS752_SPI_1, HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, EXTENDER_SC16IS752_SPI_1_IRQ, EXTENDER_SC16IS752_SPI_1_RESET
+  CS_PIN_EXTENDER_SC16IS752_SPI_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_SC16IS752_SPI_1_IRQ, EXTENDER_SC16IS752_SPI_1_RESET
 );
 #else
 ExtenderSC16IS752SPI extender(
   &Native,
   GedeeldeBusComponent::UART_SC16IS752,
-  HardwareResourcePin::SCK, HardwareResourcePin::MISO, HardwareResourcePin::MOSI, 0
+  HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, 0
 );
 #endif
 
@@ -44,7 +44,7 @@ uint8_t ExtenderPins[] = {
 GedeeldeBusNode SensorTest(
   &extender,
   { nullptr, 0, ExtenderPins, sizeof(ExtenderPins) / sizeof(ExtenderPins[0]) },
-  GedeeldeBusComponent::SENSOR,
+  GedeeldeBusComponent::GC_SENSOR,
   HardwareResourceToegang::GEDEELD
 );
 

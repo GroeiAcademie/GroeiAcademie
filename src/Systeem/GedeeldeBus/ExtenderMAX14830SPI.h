@@ -26,17 +26,17 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
     EP_GPIO15 = 0x13  // GPIO15, gekoppeld aan UART3
   };
 
-  HardwareResourcePin IRQ;
+  HardwareResourcePin np_IRQ;
   uint8_t exclusiefMetIrq_[2];
 
   // ============================================================================
   // DEFAULT — MAX14830 SPI #1
   // ============================================================================
   #if EXTENDER_MAX14830_SPI_AANTAL == 1
-  ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin CS, HardwareResourcePin SCK, HardwareResourcePin MISO, HardwareResourcePin MOSI, HardwareResourcePin IRQ, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, CS, SCK, MISO, MOSI, Extender), IRQ(IRQ) {
-    exclusiefMetIrq_[0] = static_cast<uint8_t>(CS);
-    exclusiefMetIrq_[1] = static_cast<uint8_t>(IRQ);
+  ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_IRQ, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender), np_IRQ(np_IRQ) {
+    exclusiefMetIrq_[0] = static_cast<uint8_t>(np_CS);
+    exclusiefMetIrq_[1] = static_cast<uint8_t>(np_IRQ);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrq_, 2 };
   }
   #endif
@@ -56,10 +56,10 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin SCK, HardwareResourcePin MISO, HardwareResourcePin MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, SCK, MISO, MOSI, Extender), IRQ(ExtenderLijst[teller].irq) {
+  ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_IRQ(ExtenderLijst[teller].irq) {
     exclusiefMetIrq_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
-    exclusiefMetIrq_[1] = static_cast<uint8_t>(IRQ);
+    exclusiefMetIrq_[1] = static_cast<uint8_t>(np_IRQ);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrq_, 2 };
   }
   #endif
