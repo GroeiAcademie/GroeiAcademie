@@ -97,17 +97,17 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
   } else if (busType == GedeeldeBusType::SPI) {
     if (!spiGeinitialiseerd) {
       #if defined(BOARD_UNO_Q) // Zet de CS (SS) van het pixelscreen HARD HOOG vóór SPI.begin(). Dit voorkomt dat het pixelscreen de gedeelde I2C-klok/data stoort tijdens de opstartpuls.
-        pinMode(ARDUINO_UNO_SHIELD_PIN_SS, OUTPUT);
-        digitalWrite(ARDUINO_UNO_SHIELD_PIN_SS, HIGH);
-        delay(50);
+      pinMode(ARDUINO_UNO_SHIELD_PIN_SS, OUTPUT);
+      digitalWrite(ARDUINO_UNO_SHIELD_PIN_SS, HIGH);
+      delay(50);
       #endif
 
-      SPI.begin();
-      
+      SPI.begin();    
+
       #if defined(BOARD_UNO_Q)
         delay(100); 
       #endif
-      
+
       spiGeinitialiseerd = true;
     }
   }
@@ -150,10 +150,8 @@ struct ADC_ADS1115 ADC_ADS1115(
 );
 #endif
 
-// Vertaalt een native HardwareResourcePin naar het echte, board-specifieke
-// Arduino-pinnummer. Enkel geldig voor native boardresources (D0-D13, A0-A5,
-// SDA, SCL, MISO, MOSI, SCK, SS). Extenderpins (ExtenderPins per Extender)
-// gaan hier NOOIT doorheen - die blijven resources van hun eigen Extender.
+// Vertaalt een native HardwareResourcePin naar het echte, board-specifieke Arduino-pinnummer. Enkel geldig voor native boardresources (D0-D13, A0-A5,
+// SDA, SCL, MISO, MOSI, SCK, SS). Extenderpins (ExtenderPins per Extender) gaan hier NOOIT doorheen - die blijven resources van hun eigen Extender.
 uint8_t NativeArduinoPinVan(HardwareResourcePin resource, uint8_t pinOverride) {
   uint8_t pin = static_cast<uint8_t>(HardwareResourcePin::NONE);
 
@@ -172,21 +170,29 @@ uint8_t NativeArduinoPinVan(HardwareResourcePin resource, uint8_t pinOverride) {
     case HardwareResourcePin::NP_D11:    pin = ARDUINO_UNO_SHIELD_PIN_D11;  break;
     case HardwareResourcePin::NP_D12:    pin = ARDUINO_UNO_SHIELD_PIN_D12;  break;
     case HardwareResourcePin::NP_D13:    pin = ARDUINO_UNO_SHIELD_PIN_D13;  break;
+
     case HardwareResourcePin::NP_A0:     pin = ARDUINO_UNO_SHIELD_PIN_A0;   break;
     case HardwareResourcePin::NP_A1:     pin = ARDUINO_UNO_SHIELD_PIN_A1;   break;
     case HardwareResourcePin::NP_A2:     pin = ARDUINO_UNO_SHIELD_PIN_A2;   break;
     case HardwareResourcePin::NP_A3:     pin = ARDUINO_UNO_SHIELD_PIN_A3;   break;
+#ifdef ARDUINO_UNO_SHIELD_PIN_A4
     case HardwareResourcePin::NP_A4:     pin = ARDUINO_UNO_SHIELD_PIN_A4;   break;
+#endif
+#ifdef ARDUINO_UNO_SHIELD_PIN_A5
     case HardwareResourcePin::NP_A5:     pin = ARDUINO_UNO_SHIELD_PIN_A5;   break;
+#endif
+
     case HardwareResourcePin::NP_SDA:    pin = ARDUINO_UNO_SHIELD_PIN_SDA;  break;
     case HardwareResourcePin::NP_SCL:    pin = ARDUINO_UNO_SHIELD_PIN_SCL;  break;
     case HardwareResourcePin::NP_MISO:   pin = ARDUINO_UNO_SHIELD_PIN_MISO; break;
     case HardwareResourcePin::NP_MOSI:   pin = ARDUINO_UNO_SHIELD_PIN_MOSI; break;
     case HardwareResourcePin::NP_SCK:    pin = ARDUINO_UNO_SHIELD_PIN_SCK;  break;
     case HardwareResourcePin::NP_SS:     pin = ARDUINO_UNO_SHIELD_PIN_SS;   break;
-    case HardwareResourcePin::CUSTOM: pin = pinOverride; break;
-    case HardwareResourcePin::NONE:   break;
+
+    case HardwareResourcePin::CUSTOM:    pin = pinOverride;                 break;
+    case HardwareResourcePin::NONE:      break;
   }
+
   return pin;
 }
 
@@ -205,194 +211,19 @@ HardwareResourcePin ArduinoUnoShieldPinOmzettenNaarHardwareResourcePin(uint8_t p
   if (pin == ARDUINO_UNO_SHIELD_PIN_D11) return HardwareResourcePin::NP_D11;
   if (pin == ARDUINO_UNO_SHIELD_PIN_D12) return HardwareResourcePin::NP_D12;
   if (pin == ARDUINO_UNO_SHIELD_PIN_D13) return HardwareResourcePin::NP_D13;
+
   if (pin == ARDUINO_UNO_SHIELD_PIN_A0)  return HardwareResourcePin::NP_A0;
   if (pin == ARDUINO_UNO_SHIELD_PIN_A1)  return HardwareResourcePin::NP_A1;
   if (pin == ARDUINO_UNO_SHIELD_PIN_A2)  return HardwareResourcePin::NP_A2;
   if (pin == ARDUINO_UNO_SHIELD_PIN_A3)  return HardwareResourcePin::NP_A3;
+#ifdef ARDUINO_UNO_SHIELD_PIN_A4
   if (pin == ARDUINO_UNO_SHIELD_PIN_A4)  return HardwareResourcePin::NP_A4;
+#endif
+#ifdef ARDUINO_UNO_SHIELD_PIN_A5
   if (pin == ARDUINO_UNO_SHIELD_PIN_A5)  return HardwareResourcePin::NP_A5;
+#endif
   return HardwareResourcePin::NONE;
 }
-
-#ifdef GEDEELDE_BUS_PROTOTYPE_OUD_VERWORPEN
-// ============================================================================
-// Onderstaand blok is de OUDE, verworpen array-implementatie - hoort niet meer bij de huidige boomarchitectuur (GedeeldeBusNode, in GedeeldeBus.h zelf).
-// Bewust uitgeschakeld (nooit-actieve macro-naam) i.p.v. verwijderd, als historische referentie. Alle echte logica zit nu inline in GedeeldeBus.h.
-// ============================================================================
-
-static GedeeldeBusHardwareResourceAanmelding* OpvragenPointerAanmeldingenOpGedeeldeBus() {
-  static GedeeldeBusHardwareResourceAanmelding registraties[GEDEELDE_BUS_MAX_AANMELDINGEN_HARDWARE_RESOURCES];
-  return registraties;
-}
-
-static uint8_t& AantalInterneAanmeldingenOpGedeeldeBus() {
-  static uint8_t aantalRegistraties = 0;
-  return aantalRegistraties;
-}
-
-// Interne, niet-publieke as: welke van de twee tegengestelde bewerkingen wordt uitgevoerd.
-enum class GedeeldeBusAanOfAfmelden : uint8_t { AANMELDEN = 0x00, AFMELDEN = 0x01 };
-
-static bool BestaandeAanmeldingOfAfmeldenToggelenOpGedeeldeBus(GedeeldeBusAanOfAfmelden actie, GedeeldeBusComponent component, HardwareResourceType type, HardwareResourcePin resource, HardwareResourceToegang toegang, GedeeldeBusRol rol, uint8_t adres, uint8_t pinOverride) {
-  uint8_t pin = GEDEELDE_BUS_GEEN_PIN;
-
-  switch (resource) {
-    case HardwareResourcePin::NP_D0:     pin = ARDUINO_UNO_SHIELD_PIN_D0;   break;
-    case HardwareResourcePin::NP_D1:     pin = ARDUINO_UNO_SHIELD_PIN_D1;   break;
-    case HardwareResourcePin::NP_D2:     pin = ARDUINO_UNO_SHIELD_PIN_D2;   break;
-    case HardwareResourcePin::NP_D3:     pin = ARDUINO_UNO_SHIELD_PIN_D3;   break;
-    case HardwareResourcePin::NP_D4:     pin = ARDUINO_UNO_SHIELD_PIN_D4;   break;
-    case HardwareResourcePin::NP_D5:     pin = ARDUINO_UNO_SHIELD_PIN_D5;   break;
-    case HardwareResourcePin::NP_D6:     pin = ARDUINO_UNO_SHIELD_PIN_D6;   break;
-    case HardwareResourcePin::NP_D7:     pin = ARDUINO_UNO_SHIELD_PIN_D7;   break;
-    case HardwareResourcePin::NP_D8:     pin = ARDUINO_UNO_SHIELD_PIN_D8;   break;
-    case HardwareResourcePin::NP_D9:     pin = ARDUINO_UNO_SHIELD_PIN_D9;   break;
-    case HardwareResourcePin::NP_D10:    pin = ARDUINO_UNO_SHIELD_PIN_D10;  break;
-    case HardwareResourcePin::NP_D11:    pin = ARDUINO_UNO_SHIELD_PIN_D11;  break;
-    case HardwareResourcePin::NP_D12:    pin = ARDUINO_UNO_SHIELD_PIN_D12;  break;
-    case HardwareResourcePin::NP_D13:    pin = ARDUINO_UNO_SHIELD_PIN_D13;  break;
-    case HardwareResourcePin::NP_A0:     pin = ARDUINO_UNO_SHIELD_PIN_A0;   break;
-    case HardwareResourcePin::NP_A1:     pin = ARDUINO_UNO_SHIELD_PIN_A1;   break;
-    case HardwareResourcePin::NP_A2:     pin = ARDUINO_UNO_SHIELD_PIN_A2;   break;
-    case HardwareResourcePin::NP_A3:     pin = ARDUINO_UNO_SHIELD_PIN_A3;   break;
-    case HardwareResourcePin::NP_A4:     pin = ARDUINO_UNO_SHIELD_PIN_A4;   break;
-    case HardwareResourcePin::NP_A5:     pin = ARDUINO_UNO_SHIELD_PIN_A5;   break;
-    case HardwareResourcePin::NP_SDA:    pin = ARDUINO_UNO_SHIELD_PIN_SDA;  break;
-    case HardwareResourcePin::NP_SCL:    pin = ARDUINO_UNO_SHIELD_PIN_SCL;  break;
-    case HardwareResourcePin::NP_MISO:   pin = ARDUINO_UNO_SHIELD_PIN_MISO; break;
-    case HardwareResourcePin::NP_MOSI:   pin = ARDUINO_UNO_SHIELD_PIN_MOSI; break;
-    case HardwareResourcePin::NP_SCK:    pin = ARDUINO_UNO_SHIELD_PIN_SCK;  break;
-    case HardwareResourcePin::NP_SS:     pin = ARDUINO_UNO_SHIELD_PIN_SS;   break;
-    case HardwareResourcePin::CUSTOM: pin = pinOverride; break;
-    case HardwareResourcePin::NONE:   break;
-  }
-
-  GedeeldeBusHardwareResourceAanmelding* registraties = OpvragenPointerAanmeldingenOpGedeeldeBus();
-  uint8_t& aantalRegistraties = AantalInterneAanmeldingenOpGedeeldeBus();
-
-  if (actie == GedeeldeBusAanOfAfmelden::AANMELDEN) {
-    for (uint8_t i = 0; i < aantalRegistraties; i++) {
-      const GedeeldeBusHardwareResourceAanmelding& bestaand = registraties[i];
-      if (bestaand.component == component && bestaand.type == type && bestaand.resource == resource && bestaand.pin == pin && bestaand.toegang == toegang && bestaand.rol == rol && bestaand.adres == adres) return true;
-    }
-
-    if (aantalRegistraties >= GEDEELDE_BUS_MAX_AANMELDINGEN_HARDWARE_RESOURCES) return false;
-    registraties[aantalRegistraties++] = { component, type, resource, pin, toegang, rol, adres };
-    return true;
-  }
-
-  for (uint8_t i = 0; i < aantalRegistraties; i++) {
-    const GedeeldeBusHardwareResourceAanmelding& bestaand = registraties[i];
-
-    if (bestaand.component == component && bestaand.type == type && bestaand.resource == resource && bestaand.pin == pin && bestaand.toegang == toegang && bestaand.rol == rol && bestaand.adres == adres) {
-      registraties[i] = registraties[aantalRegistraties - 1];
-      aantalRegistraties--;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent component, HardwareResourceType type, HardwareResourcePin resource, HardwareResourceToegang toegang, bool gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol rol, uint8_t adres, uint8_t pinOverride) {
-  bool aangemeld = BestaandeAanmeldingOfAfmeldenToggelenOpGedeeldeBus(GedeeldeBusAanOfAfmelden::AANMELDEN, component, type, resource, toegang, rol, adres, pinOverride);
-  if (!aangemeld) return false;
-
-  if (!gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-    bool magInpluggen = AanmeldingenInpluggenOpGedeeldeBus();
-
-    if (!magInpluggen) {
-      // CRITICAL: conflict tijdens LOOP. De zonet aangemelde resource wordt weer afgemeld,
-      // zodat er geen conflicterende registratie blijft hangen. De aanroeper krijgt false
-      // terug en is zelf verantwoordelijk voor de melding (GedeeldeBus.h kent Screen niet).
-      BestaandeAanmeldingOfAfmeldenToggelenOpGedeeldeBus(GedeeldeBusAanOfAfmelden::AFMELDEN, component, type, resource, toegang, rol, adres, pinOverride);
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool AfmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent component, HardwareResourceType type, HardwareResourcePin resource, HardwareResourceToegang toegang, bool gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol rol, uint8_t adres, uint8_t pinOverride) {
-  bool afgemeld = BestaandeAanmeldingOfAfmeldenToggelenOpGedeeldeBus(GedeeldeBusAanOfAfmelden::AFMELDEN, component, type, resource, toegang, rol, adres, pinOverride);
-  if (!afgemeld) return false;
-
-  if (!gedeeldeBusAanmeldenOfAfmeldenInSetup) return AanmeldingenInpluggenOpGedeeldeBus();
-  return true;
-}
-
-bool AanmeldenHardwareResourcesOpGedeeldeBus(GedeeldeBusComponent component, HardwareResourceType type, std::initializer_list<uint8_t> pinnen, HardwareResourceToegang toegang, bool gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol rol) {
-  for (uint8_t pin : pinnen) {
-    if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, type, HardwareResourcePin::CUSTOM, toegang, gedeeldeBusAanmeldenOfAfmeldenInSetup, rol, GEDEELDE_BUS_GEEN_ADRES, pin)) return false;
-  }
-  return true;
-}
-
-bool I2CAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin sdaResource, HardwareResourcePin sclResource, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-  InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_I2C, sdaResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_I2C, sclResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_I2C, HardwareResourcePin::NONE, HardwareResourceToegang::EXCLUSIEF, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::SLAVE, adres);
-}
-
-bool SPIAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, HardwareResourcePin misoResource, HardwareResourcePin mosiResource, HardwareResourcePin sckResource, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-  InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
-
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_SPI, misoResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-  if (!AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_SPI, mosiResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER)) return false;
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_SPI, sckResource, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup, GedeeldeBusRol::MASTER);
-}
-
-bool EEPROMAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_EEPROM, HardwareResourcePin::NONE, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup);
-}
-
-bool UARTAanmeldenOpGedeeldeBus(GedeeldeBusComponent component, bool gedeeldeBusAanmeldenOfAfmeldenInSetup) {
-  return AanmeldenHardwareResourcesOpGedeeldeBus(component, HardwareResourceType::RT_UART, HardwareResourcePin::NONE, HardwareResourceToegang::GEDEELD, gedeeldeBusAanmeldenOfAfmeldenInSetup);
-}
-
-bool AanmeldingenOpConflictenControlerenOpGedeeldeBus(uint8_t* conflictIndexA, uint8_t* conflictIndexB) {
-  GedeeldeBusHardwareResourceAanmelding* registraties = OpvragenPointerAanmeldingenOpGedeeldeBus();
-  uint8_t aantalRegistraties = AantalInterneAanmeldingenOpGedeeldeBus();
-
-  for (uint8_t i = 0; i < aantalRegistraties; i++) {
-    for (uint8_t j = i + 1; j < aantalRegistraties; j++) {
-      const GedeeldeBusHardwareResourceAanmelding& a = registraties[i];
-      const GedeeldeBusHardwareResourceAanmelding& b = registraties[j];
-
-      bool zelfdePin = a.pin != GEDEELDE_BUS_GEEN_PIN && b.pin != GEDEELDE_BUS_GEEN_PIN && a.pin == b.pin && (a.toegang == HardwareResourceToegang::EXCLUSIEF || b.toegang == HardwareResourceToegang::EXCLUSIEF);
-      bool zelfdeI2CAdres = a.type == HardwareResourceType::RT_I2C && b.type == HardwareResourceType::RT_I2C && a.adres != GEDEELDE_BUS_GEEN_ADRES && a.adres == b.adres && a.component != b.component;
-
-      if (zelfdePin || zelfdeI2CAdres) {
-        if (conflictIndexA != nullptr) *conflictIndexA = i;
-        if (conflictIndexB != nullptr) *conflictIndexB = j;
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-bool AanmeldingenInpluggenOpGedeeldeBus() {
-  return AanmeldingenOpConflictenControlerenOpGedeeldeBus();
-}
-
-void AantalAanmeldingenOpNulZettenOpGedeeldeBus() {
-  AantalInterneAanmeldingenOpGedeeldeBus() = 0;
-}
-
-uint8_t OpvragenAantalAanmeldingenOpGedeeldeBus() {
-  return AantalInterneAanmeldingenOpGedeeldeBus();
-}
-
-const GedeeldeBusHardwareResourceAanmelding* OpvragenPointerAanmeldingOpGedeeldeBus(uint8_t index) {
-  if (index >= AantalInterneAanmeldingenOpGedeeldeBus()) return nullptr;
-  return &OpvragenPointerAanmeldingenOpGedeeldeBus()[index];
-}
-
-#endif // GEDEELDE_BUS_PROTOTYPE
 
 // ============================================================================
 // Naam per component. Regel: INPUT/INPUT_*, SCREEN/*_SCREEN, SERIAL_OUTPUT -> volledig.
