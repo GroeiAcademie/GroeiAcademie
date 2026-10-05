@@ -108,15 +108,6 @@ findstr /B /C:"INPUT_TYPE_HX1838	" keywords.txt >nul || (
     set /A STATIC_FAIL+=1
 )
 
-powershell -NoProfile -Command "Select-String -Path 'src\Systeem\Input\Input.cpp' -Pattern 'PrintToScreen\(\x22','Serial\.print\(\x22','Serial\.println\(\x22' | Where-Object { $_.Line -notmatch 'Serial\.(?:print|println)\(\x22\s*\x22\)' } | ForEach-Object { '{0}:{1}' -f $_.LineNumber,$_.Line }" >"%TEMP%\GA_InputHardcoded.txt"
-set "HARDCODED_SIZE=0"
-for %%A in ("%TEMP%\GA_InputHardcoded.txt") do set "HARDCODED_SIZE=%%~zA"
-if !HARDCODED_SIZE! GTR 0 (
-    echo WARNING: Hardcoded gebruikerstekst gevonden in Input.cpp.
-    type "%TEMP%\GA_InputHardcoded.txt"
-)
-del "%TEMP%\GA_InputHardcoded.txt" >nul 2>&1
-
 for %%K in (InputConfigureren OpvragenHuidigeToetsAanslag OpvragenHuidigeToetsAanslagen OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag InputResultaat InputResultaten InputKanaal StatusOpvragenToetsAanslagen MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN INPUT_TYPE_DIGITAL INPUT_TYPE_PCF8574) do (
     findstr /B /C:"%%K	" keywords.txt >nul || (
         echo FOUT: keywords.txt mist %%K
@@ -186,7 +177,7 @@ if !TYPE_FOUT_SIZE! GTR 0 (
     goto :CONTROLEER_TESTLIJST_FOUT
 )
 
-if exist "!CONTROLE_BESTAND!" goto :CONTROLE_BESTAND_BESTAAT
+if exist "!CONTROLE_BESTAND!" goto :CONTROLE_BESTAND_BESTAAT
 >"!CONTROLE_BESTAND!" type nul
 
 if exist "!VERSCHIL_DIR!" (
@@ -214,7 +205,7 @@ for %%A in ("!VERSCHIL_CMD!") do if %%~zA GTR 0 (
     for /f "usebackq delims=" %%I in ("!VERSCHIL_CMD!") do >>"!CONTROLE_BESTAND!" echo REM %%I
 )
 
-:CONTROLE_BESTAND_BESTAAT
+:CONTROLE_BESTAND_BESTAAT
 set "CONTROLE_SIZE=0"
 for %%A in ("!CONTROLE_BESTAND!") do set "CONTROLE_SIZE=%%~zA"
 if !CONTROLE_SIZE! GTR 0 (

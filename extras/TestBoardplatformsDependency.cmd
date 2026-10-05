@@ -63,7 +63,7 @@ set "BOARD_5_FQBN=esp32:esp32:d1_uno32"
 set "BOARD_5_PLATFORM=esp32:esp32"
 set "BOARD_5_PACKAGE=esp32 by Espressif Systems"
 
-set "BOARD_6_NAME=Cytron Maker UNNO RP2040"
+set "BOARD_6_NAME=Cytron Maker UNO RP2040"
 set "BOARD_6_FQBN=rp2040:rp2040:cytron_maker_uno_rp2040"
 set "BOARD_6_PLATFORM=rp2040:rp2040"
 set "BOARD_6_PACKAGE=Raspberry Pi Pico/RP2040/RP2350 by Earle F. Philhower, III"
