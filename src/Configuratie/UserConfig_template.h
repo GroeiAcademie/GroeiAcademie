@@ -66,10 +66,25 @@
 // #define BOARD_ID 1   // standaard waarde: 1, wijzig dit per fysiek bord
 #endif
 
+
+
+// ============================================================================
+// EXTENDER Library keuze
+// ============================================================================
+
+#ifndef EXTENDER_ADS1115_LIBRARY
+// #define EXTENDER_ADS1115_LIBRARY EXTENDER_ADS1115_LIBRARY_ADAFRUIT  // standaard; alternatief: EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
+#endif
+
+#ifndef EXTENDER_PCF8574_LIBRARY
+// #define EXTENDER_PCF8574_LIBRARY EXTENDER_PCF8574_LIBRARY_NONE          // standaard: bestaande FrameWork-implementatie
+// #define EXTENDER_PCF8574_LIBRARY EXTENDER_PCF8574_LIBRARY_ROB_TILLAART  // alternatief testpad
+#endif
+
 // ============================================================================
 // ADC BACKEND: jouw instellingen
 // ============================================================================
-// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de Adafruit ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
+// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de gekozen ADS1115-library geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
 #ifndef AANTAL_SENSOREN_AANWEZIG
 // #define AANTAL_SENSOREN_AANWEZIG  2                   // standaard waarde: 2
@@ -553,12 +568,14 @@
 // - I2C-adressen, SPI-CS en de extra native extenderaansluitingen hieronder zijn EXCLUSIEF.
 // - HardwareResourcePin::NONE betekent dat die extra aansluiting niet gebruikt/aangesloten is.
 // - Kies voor een EXCLUSIEVE HardwareResourcePin nooit een pin die al exclusief geclaimd is.
-#ifndef EXTENDER_ADS1115_AANTAL
-// #define EXTENDER_ADS1115_AANTAL 0  // standaard waarde: 0
-#endif
+
 // ============================================================================
 // DEFAULT — ADS1115 #1
 // ============================================================================
+#ifndef EXTENDER_ADS1115_AANTAL
+// #define EXTENDER_ADS1115_AANTAL 0  // standaard waarde: 0
+#endif
+
 #ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
 // #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48  // standaard: 0x48 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze na I2C_ADDRESS_ADS1115. // EXCLUSIEF
 #endif

@@ -76,6 +76,23 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
     if (np_EN != HardwareResourcePin::NONE) pinMode(NativeArduinoPinVan(np_EN), OUTPUT);
     return true;
   }
+
+  void selectChannel(ExtenderPins kanaal) {
+    const uint8_t waarde = static_cast<uint8_t>(kanaal);
+    digitalWrite(NativeArduinoPinVan(np_S0), (waarde & 0x01) ? HIGH : LOW);
+    digitalWrite(NativeArduinoPinVan(np_S1), (waarde & 0x02) ? HIGH : LOW);
+    digitalWrite(NativeArduinoPinVan(np_S2), (waarde & 0x04) ? HIGH : LOW);
+    digitalWrite(NativeArduinoPinVan(np_S3), (waarde & 0x08) ? HIGH : LOW);
+  }
+
+  void enable() {
+    if (np_EN != HardwareResourcePin::NONE) digitalWrite(NativeArduinoPinVan(np_EN), LOW);
+  }
+
+  void disable() {
+    if (np_EN != HardwareResourcePin::NONE) digitalWrite(NativeArduinoPinVan(np_EN), HIGH);
+  }
+
 };
 
 #endif

@@ -7,7 +7,51 @@
 #include "../../Configuratie/SystemConfig.h"
 
 #if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
-  #include <Adafruit_ADS1X15.h>
+  #if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
+    #include <Adafruit_ADS1X15.h>
+  #elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
+    #include <ADS1X15.h>
+
+    // Compatibiliteit met de bestaande ADS1115-aanroepen in het FrameWork.
+    #ifndef GAIN_TWOTHIRDS
+      #define GAIN_TWOTHIRDS ADS1X15_GAIN_6144MV
+    #endif
+    #ifndef GAIN_ONE
+      #define GAIN_ONE ADS1X15_GAIN_4096MV
+    #endif
+    #ifndef GAIN_TWO
+      #define GAIN_TWO ADS1X15_GAIN_2048MV
+    #endif
+    #ifndef GAIN_FOUR
+      #define GAIN_FOUR ADS1X15_GAIN_1024MV
+    #endif
+    #ifndef GAIN_EIGHT
+      #define GAIN_EIGHT ADS1X15_GAIN_0512MV
+    #endif
+    #ifndef GAIN_SIXTEEN
+      #define GAIN_SIXTEEN ADS1X15_GAIN_0256MV
+    #endif
+  #endif
+#endif
+
+#if (EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)) && EXTENDER_PCF8574_LIBRARY == EXTENDER_PCF8574_LIBRARY_ROB_TILLAART
+  #include <PCF8574.h>
+#endif
+
+#if EXTENDER_PCF8575_AANTAL > 0
+  #include <PCF8575.h>
+#endif
+
+#if EXTENDER_MCP23017_AANTAL > 0
+  #include <MCP23017.h>
+#endif
+
+#if EXTENDER_TCA9548A_AANTAL > 0
+  #include <TCA9548.h>
+#endif
+
+#if EXTENDER_DS2482_800_AANTAL > 0
+  #include <Adafruit_DS248x.h>
 #endif
 
 // ============================================================================

@@ -1,12 +1,12 @@
 // ============================================================================
 // ADC Backend — ADS1115
 // ============================================================================
-// Valideert uitsluitend de ADS1115 ADC-backend.
-// Geen GedeeldeBus-test: deze test gebruikt rechtstreeks de Adafruit ADS1115-driver.
+// Valideert de ADS1115 ADC-backend via de uniforme FrameWork-interface.
+// Dezelfde test compileert voor EXTENDER_ADS1115_LIBRARY_ADAFRUIT en EXTENDER_ADS1115_LIBRARY_ROB_TILLAART.
 // ============================================================================
 
-#include <SystemConfig.h>
-#include <Adafruit_ADS1X15.h>
+#include <Systeem/GedeeldeBus/GedeeldeBus.h>
+#include <Configuratie/SystemConfig.h>
 
 #if ADC_BACKEND != ADC_BACKEND_ADS1115
   #error Deze validatie vereist ADC_BACKEND_ADS1115.
@@ -20,8 +20,6 @@ const uint8_t sensorPin[STIMULUS_AANTAL_KANALEN] = {
   ADC_PIN_SENSOR_3,
   ADC_PIN_SENSOR_4
 };
-
-Adafruit_ADS1115 ads1115;
 
 bool ads1115Aanwezig = false;
 bool metingAfgerond = false;
@@ -70,13 +68,17 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  ads1115Aanwezig = ads1115.begin(I2C_ADDRESS_ADS1115);
+  ads1115Aanwezig = ADC_ADS1115.aanmelden()
+    && ADC_ADS1115.controleren()
+    && ADC_ADS1115.inpluggen()
+    && ADC_ADS1115.activeren();
+
   if (!ads1115Aanwezig) {
     GA_SERIAL.println(F("ADS1115 niet bereikbaar."));
     while (true) { ; }
   }
 
-  ads1115.setGain(GAIN_TWOTHIRDS);
+  ADC_ADS1115.setGain(GAIN_TWOTHIRDS);
   GA_SERIAL.println(F("=== Validatie: ADC_ADS1115 ==="));
   tStart = millis();
 }
@@ -89,7 +91,7 @@ void loop() {
   if (nu - laatsteSample >= SAMPLE_INTERVAL_MS) {
     laatsteSample = nu;
     for (uint8_t k = 0; k < STIMULUS_AANTAL_KANALEN; k++) {
-      voegMetingToe(k, ads1115.readADC_SingleEnded(sensorPin[k]));
+      voegMetingToe(k, ADC_ADS1115.readADC(sensorPin[k]));
     }
   }
 

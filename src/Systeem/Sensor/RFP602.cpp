@@ -30,7 +30,7 @@ int RFP602::RawAnalogRead(int sensorPin) {
   }
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
-  return ADC_ADS1115.readADC_SingleEnded(sensorPin);
+  return ADC_ADS1115.readADC(sensorPin);
 #else
   return analogRead(sensorPin);
 #endif

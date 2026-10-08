@@ -1,10 +1,8 @@
 // ============================================================================
 // Extender — DS2482v800
 // ============================================================================
-// Basistest voor ExtenderDS2482v800.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
-// inpluggen() en activeren() worden getest via een echte client/sensor.
+// Driver-/lifecycletest voor ExtenderDS2482v800.
+// Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
@@ -33,7 +31,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  GA_SERIAL.println(F("=== ExtenderDS2482v800 aanmelden/controleren-test ==="));
+  GA_SERIAL.println(F("=== ExtenderDS2482v800 driver-/lifecycletest ==="));
 
   bool gelukt = extender.aanmelden();
   GA_SERIAL.print(F("aanmelden: "));
@@ -43,6 +41,30 @@ void setup() {
     gelukt = extender.controleren();
     GA_SERIAL.print(F("controleren: "));
     GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.inpluggen();
+    GA_SERIAL.print(F("inpluggen: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.activeren();
+    GA_SERIAL.print(F("activeren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.selectChannel(0);
+    GA_SERIAL.print(F("selectChannel(0): "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    const bool oneWireAanwezig = extender.OneWireReset();
+    GA_SERIAL.print(F("OneWireReset: "));
+    GA_SERIAL.println(oneWireAanwezig ? F("DEVICE") : F("GEEN DEVICE"));
   }
 
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);

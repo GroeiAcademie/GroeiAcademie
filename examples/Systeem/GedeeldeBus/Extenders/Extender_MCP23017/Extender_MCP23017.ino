@@ -1,10 +1,8 @@
 // ============================================================================
 // Extender — MCP23017
 // ============================================================================
-// Basistest voor ExtenderMCP23017.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
-// inpluggen() en activeren() worden getest via een echte client/sensor.
+// Driver-/lifecycletest voor ExtenderMCP23017.
+// Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
@@ -33,7 +31,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  GA_SERIAL.println(F("=== ExtenderMCP23017 aanmelden/controleren-test ==="));
+  GA_SERIAL.println(F("=== ExtenderMCP23017 driver-/lifecycletest ==="));
 
   bool gelukt = extender.aanmelden();
   GA_SERIAL.print(F("aanmelden: "));
@@ -43,6 +41,26 @@ void setup() {
     gelukt = extender.controleren();
     GA_SERIAL.print(F("controleren: "));
     GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.inpluggen();
+    GA_SERIAL.print(F("inpluggen: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.activeren();
+    GA_SERIAL.print(F("activeren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.pinMode1(0, OUTPUT);
+    if (gelukt) gelukt = extender.write1(0, LOW);
+    const uint8_t waarde = extender.read1(0);
+    GA_SERIAL.print(F("pinMode1/write1/read1 P0: "));
+    GA_SERIAL.println(waarde);
   }
 
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);

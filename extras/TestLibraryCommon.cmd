@@ -344,33 +344,49 @@ set "COMPILE_RESULT=!errorlevel!"
 type "!COMPILE_LOG!"
 
 if "!COMPILE_RESULT!"=="0" (
-    set "GEHEUGEN_FQBN=!FQBN_ACTIEF!"
-    set "GEHEUGEN_BOARD_VERSION=!BOARD_VERSION_ACTIEF!"
-    set "GEHEUGEN_BESTAND=!TEST_BESTAND!"
-    set "GEHEUGEN_TEST=!TEST_NAAM_ACTIEF!"
-    set "GEHEUGEN_STATUS=OK"
-    call :REGISTREER_GEHEUGENGEBRUIK "!COMPILE_LOG!"
-    call :TEL_OK
-) else (
-    set "EXPECTED_MEMORY_LIMIT=0"
-    if "!FQBN_ACTIEF!"=="arduino:avr:uno" if /I "!TEST_BESTAND!"=="Tik_Enkele_Samen_Instortend_Cocktail.ino" (
-        for %%S in (4 5 6 7) do if not "!TEST_FLAGS_ACTIEF:-DSCREEN_OUTPUT_CONFIG=%%S=!"=="!TEST_FLAGS_ACTIEF!" (
-            findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
-            if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
-        )
-    )
-    if "!EXPECTED_MEMORY_LIMIT!"=="1" (
+    if /I "!TEST_NAAM_ACTIEF!"=="SCREEN_OUTPUT_CONFIG=1" (
+        call :TEL_FAIL
+        echo [FOUT][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF! ^| compileerde terwijl een compile-fout verwacht werd
+    ) else (
         set "GEHEUGEN_FQBN=!FQBN_ACTIEF!"
         set "GEHEUGEN_BOARD_VERSION=!BOARD_VERSION_ACTIEF!"
         set "GEHEUGEN_BESTAND=!TEST_BESTAND!"
         set "GEHEUGEN_TEST=!TEST_NAAM_ACTIEF!"
-        set "GEHEUGEN_STATUS=VERWACHTE_GEHEUGENBEPERKING"
+        set "GEHEUGEN_STATUS=OK"
         call :REGISTREER_GEHEUGENGEBRUIK "!COMPILE_LOG!"
-        call :TEL_EXPECTED_MEMORY
-        echo [VERWACHTE GEHEUGENBEPERKING][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF!
+        call :TEL_OK
+    )
+) else (
+    if /I "!TEST_NAAM_ACTIEF!"=="SCREEN_OUTPUT_CONFIG=1" (
+        findstr /C:"Stel SCREEN_OUTPUT_CONFIG in UserConfig.h of SystemConfig.h in op (minstens) SCREEN_TYPE_CHARACTER." "!COMPILE_LOG!" >nul
+        if not errorlevel 1 (
+            call :TEL_OK
+            echo [OK][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF! ^| verwachte compile-fout
+        ) else (
+            call :TEL_FAIL
+            echo [FOUT][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF! ^| andere compile-fout dan verwacht
+        )
     ) else (
-        call :TEL_FAIL
-        echo [FOUT][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF!
+        set "EXPECTED_MEMORY_LIMIT=0"
+        if "!FQBN_ACTIEF!"=="arduino:avr:uno" if /I "!TEST_BESTAND!"=="Tik_Enkele_Samen_Instortend_Cocktail.ino" (
+            for %%S in (4 5 6 7) do if not "!TEST_FLAGS_ACTIEF:-DSCREEN_OUTPUT_CONFIG=%%S=!"=="!TEST_FLAGS_ACTIEF!" (
+                findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
+                if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
+            )
+        )
+        if "!EXPECTED_MEMORY_LIMIT!"=="1" (
+            set "GEHEUGEN_FQBN=!FQBN_ACTIEF!"
+            set "GEHEUGEN_BOARD_VERSION=!BOARD_VERSION_ACTIEF!"
+            set "GEHEUGEN_BESTAND=!TEST_BESTAND!"
+            set "GEHEUGEN_TEST=!TEST_NAAM_ACTIEF!"
+            set "GEHEUGEN_STATUS=VERWACHTE_GEHEUGENBEPERKING"
+            call :REGISTREER_GEHEUGENGEBRUIK "!COMPILE_LOG!"
+            call :TEL_EXPECTED_MEMORY
+            echo [VERWACHTE GEHEUGENBEPERKING][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF!
+        ) else (
+            call :TEL_FAIL
+            echo [FOUT][!FQBN_GROEP!] !FQBN_ACTIEF! ^| !BOARD_VERSION_ACTIEF! ^| !TEST_NAAM_ACTIEF!
+        )
     )
 )
 del /Q "!COMPILE_LOG!" >nul 2>&1

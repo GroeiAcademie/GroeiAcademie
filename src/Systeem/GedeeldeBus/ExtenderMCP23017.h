@@ -1,7 +1,7 @@
 #ifndef EXTENDERMCP23017_H
 #define EXTENDERMCP23017_H
 
-struct ExtenderMCP23017 : HardwareResourceTypeI2C {
+struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
   enum class ExtenderPins : uint8_t {
     EP_GPA0 = 0x00, // Digitale I/O GPA0, bank A
     EP_GPA1 = 0x01, // Digitale I/O GPA1, bank A
@@ -29,7 +29,7 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C {
   // ============================================================================
   #if EXTENDER_MCP23017_AANTAL == 1
   ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INTA, HardwareResourcePin np_INTB, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_INTA(np_INTA), np_INTB(np_INTB), np_RESET(np_RESET) {
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), MCP23017(adres, &Wire), np_INTA(np_INTA), np_INTB(np_INTB), np_RESET(np_RESET) {
     exclusiefMetIntReset_[0] = exclusief_[0];
     exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
     exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
@@ -54,7 +54,7 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C {
   #undef BUNDEL_EXTENDER
 
   ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_INTA(ExtenderLijst[teller].inta), np_INTB(ExtenderLijst[teller].intb), np_RESET(ExtenderLijst[teller].reset) {
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), MCP23017(ExtenderLijst[teller].adres, &Wire), np_INTA(ExtenderLijst[teller].inta), np_INTB(ExtenderLijst[teller].intb), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetIntReset_[0] = exclusief_[0];
     exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
     exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
@@ -62,6 +62,11 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C {
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIntReset_, 4 };
   }
   #endif
+
+  bool Activeren() override {
+    return MCP23017::begin() && MCP23017::isConnected();
+  }
+
 };
 
 #endif

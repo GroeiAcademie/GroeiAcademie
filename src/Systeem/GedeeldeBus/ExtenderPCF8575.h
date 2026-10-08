@@ -1,7 +1,7 @@
 #ifndef EXTENDERPCF8575_H
 #define EXTENDERPCF8575_H
 
-struct ExtenderPCF8575 : HardwareResourceTypeI2C {
+struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
   enum class ExtenderPins : uint8_t {
     EP_P00 = 0x00, // Quasi-bidirectionele digitale I/O P00, eerste byte
     EP_P01 = 0x01, // Quasi-bidirectionele digitale I/O P01, eerste byte
@@ -29,7 +29,7 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C {
   // ============================================================================
   #if EXTENDER_PCF8575_AANTAL == 1
   ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INT, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_INT(np_INT) {
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), PCF8575(adres, &Wire), np_INT(np_INT) {
     exclusiefMetInt_[0] = exclusief_[0];
     exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
@@ -52,12 +52,17 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C {
   #undef BUNDEL_EXTENDER
 
   ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_INT(ExtenderLijst[teller].intPin) {
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), PCF8575(ExtenderLijst[teller].adres, &Wire), np_INT(ExtenderLijst[teller].intPin) {
     exclusiefMetInt_[0] = exclusief_[0];
     exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
   }
   #endif
+
+  bool Activeren() override {
+    return PCF8575::begin() && PCF8575::isConnected();
+  }
+
 };
 
 #endif

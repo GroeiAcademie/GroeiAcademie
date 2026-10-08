@@ -1,7 +1,7 @@
 #ifndef EXTENDERDS2482V800_H
 #define EXTENDERDS2482V800_H
 
-struct ExtenderDS2482v800 : HardwareResourceTypeI2C {
+struct ExtenderDS2482v800 : HardwareResourceTypeI2C, Adafruit_DS248x {
   enum class ExtenderPins : uint8_t {
     EP_IO0 = 0x00, // 1-Wire I/O-kanaal IO0
     EP_IO1 = 0x01, // 1-Wire I/O-kanaal IO1
@@ -38,6 +38,11 @@ struct ExtenderDS2482v800 : HardwareResourceTypeI2C {
   ExtenderDS2482v800(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender) {}
   #endif
+
+  bool Activeren() override {
+    return Adafruit_DS248x::begin(&Wire, adres);
+  }
+
 };
 
 #endif

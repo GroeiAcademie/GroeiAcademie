@@ -456,7 +456,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonMatrixUitlezenInstellen()");
 #endif
     if (!pcf8574Bereikbaar) return false;
-    gedeeldeBusInputPCF8574->WriteByte(waarde);
+    gedeeldeBusInputPCF8574->write8(waarde);
     if (gedeeldeBusInputPCF8574->lastError() == 0) return true;
     PCF8574OnbereikbaarMelden();
     return false;
@@ -467,7 +467,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonUitlezen()");
 #endif
     if (!pcf8574Bereikbaar) return false;
-    waarde = gedeeldeBusInputPCF8574->ReadByte();
+    waarde = gedeeldeBusInputPCF8574->read8();
     if (gedeeldeBusInputPCF8574->lastError() == 0) return true;
     PCF8574OnbereikbaarMelden();
     return false;
@@ -1191,16 +1191,6 @@ bool Input::inpluggen() {
     gedeeldeBusInputPCF8574 = nullptr;
   }
 
-  if (gedeeldeBusInputPCF8574 != nullptr) {
-    if (!gedeeldeBusInputPCF8574->begin(0xFF)) {
-      PCF8574OnbereikbaarMelden();
-      gedeeldeBusInputPCF8574->afmelden();
-      gedeeldeBusInputPCF8574 = nullptr;
-    } else {
-      pcf8574Bereikbaar = true;
-      pcf8574FoutmeldingWeergegeven = false;
-    }
-  }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   if (gedeeldeBusInputHX1838 != nullptr && (static_cast<HardwareResourcePin>(gedeeldeBusInputHX1838Pinnen[0]) == HardwareResourcePin::NONE
@@ -1303,9 +1293,15 @@ bool Input::Activeren() {
 #ifdef TRACE
   GA_SERIAL.println("TRACE: Input::Activeren(): PCF8574 I2C");
 #endif
-  if (gedeeldeBusInputPCF8574 != nullptr && !gedeeldeBusInputPCF8574->activeren()) {
-    gedeeldeBusInputPCF8574->afmelden();
-    gedeeldeBusInputPCF8574 = nullptr;
+  if (gedeeldeBusInputPCF8574 != nullptr) {
+    if (!gedeeldeBusInputPCF8574->activeren()) {
+      PCF8574OnbereikbaarMelden();
+      gedeeldeBusInputPCF8574->afmelden();
+      gedeeldeBusInputPCF8574 = nullptr;
+    } else {
+      pcf8574Bereikbaar = true;
+      pcf8574FoutmeldingWeergegeven = false;
+    }
   }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)

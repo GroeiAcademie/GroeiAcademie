@@ -23,6 +23,24 @@
   #define ADC_BACKEND_ADS1115              1  // externe 16-bit ADC via I2C
 #endif
 
+// EXTENDER Library keuze:
+
+// ADS1115-library: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
+#ifndef EXTENDER_ADS1115_LIBRARY_ADAFRUIT
+  #define EXTENDER_ADS1115_LIBRARY_ADAFRUIT      0
+#endif
+#ifndef EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
+  #define EXTENDER_ADS1115_LIBRARY_ROB_TILLAART  1
+#endif
+
+// PCF8574-library: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
+#ifndef EXTENDER_PCF8574_LIBRARY_NONE
+  #define EXTENDER_PCF8574_LIBRARY_NONE          0
+#endif
+#ifndef EXTENDER_PCF8574_LIBRARY_ROB_TILLAART
+  #define EXTENDER_PCF8574_LIBRARY_ROB_TILLAART  1
+#endif
+
 // GPIO: General Purpose Input/Output, programmeerbare pin op een computerchip of printplaat waarvan de functie via software kan worden ingesteld.
 #define GPIO0    0
 #define GPIO1    1
@@ -87,6 +105,22 @@
       #define GROEIACADEMIE_USER_CONFIG_GELADEN
     #endif
   #endif
+#endif
+
+#ifndef EXTENDER_ADS1115_LIBRARY
+  #define EXTENDER_ADS1115_LIBRARY EXTENDER_ADS1115_LIBRARY_ADAFRUIT
+#endif
+
+#if EXTENDER_ADS1115_LIBRARY != EXTENDER_ADS1115_LIBRARY_ADAFRUIT && EXTENDER_ADS1115_LIBRARY != EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
+  #error Selecteer een geldige EXTENDER_ADS1115_LIBRARY.
+#endif
+
+#ifndef EXTENDER_PCF8574_LIBRARY
+  #define EXTENDER_PCF8574_LIBRARY EXTENDER_PCF8574_LIBRARY_NONE
+#endif
+
+#if EXTENDER_PCF8574_LIBRARY != EXTENDER_PCF8574_LIBRARY_NONE && EXTENDER_PCF8574_LIBRARY != EXTENDER_PCF8574_LIBRARY_ROB_TILLAART
+  #error Selecteer een geldige EXTENDER_PCF8574_LIBRARY.
 #endif
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -157,8 +191,9 @@
 // ============================================================================
 // ADC BACKEND
 // ----------------------------------------------------------------------------
-// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de Adafruit ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
+// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de gekozen ADS1115-library geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
+
 #ifndef AANTAL_SENSOREN_AANWEZIG
   #define AANTAL_SENSOREN_AANWEZIG  2
 #endif

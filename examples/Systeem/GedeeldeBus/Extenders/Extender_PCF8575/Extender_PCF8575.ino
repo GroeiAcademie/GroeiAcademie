@@ -1,10 +1,8 @@
 // ============================================================================
 // Extender — PCF8575
 // ============================================================================
-// Basistest voor ExtenderPCF8575.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
-// inpluggen() en activeren() worden getest via een echte client/sensor.
+// Driver-/lifecycletest voor ExtenderPCF8575.
+// Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
@@ -33,7 +31,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  GA_SERIAL.println(F("=== ExtenderPCF8575 aanmelden/controleren-test ==="));
+  GA_SERIAL.println(F("=== ExtenderPCF8575 driver-/lifecycletest ==="));
 
   bool gelukt = extender.aanmelden();
   GA_SERIAL.print(F("aanmelden: "));
@@ -43,6 +41,25 @@ void setup() {
     gelukt = extender.controleren();
     GA_SERIAL.print(F("controleren: "));
     GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.inpluggen();
+    GA_SERIAL.print(F("inpluggen: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.activeren();
+    GA_SERIAL.print(F("activeren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    extender.write16(0xFFFF);
+    const uint16_t waarde = extender.read16();
+    GA_SERIAL.print(F("write16/read16: 0x"));
+    GA_SERIAL.println(waarde, HEX);
   }
 
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);

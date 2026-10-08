@@ -1,10 +1,9 @@
 // ============================================================================
 // Extender — ADS1115
 // ============================================================================
-// Basistest voor ExtenderADS1115.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
-// inpluggen() en activeren() worden getest via een echte client/sensor.
+// Driver-/lifecycletest voor ExtenderADS1115.
+// Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna de publieke FrameWork-interface.
+// Dezelfde test compileert voor EXTENDER_ADS1115_LIBRARY_ADAFRUIT en EXTENDER_ADS1115_LIBRARY_ROB_TILLAART.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
@@ -33,7 +32,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  GA_SERIAL.println(F("=== ExtenderADS1115 aanmelden/controleren-test ==="));
+  GA_SERIAL.println(F("=== ExtenderADS1115 driver-/lifecycletest ==="));
 
   bool gelukt = extender.aanmelden();
   GA_SERIAL.print(F("aanmelden: "));
@@ -43,6 +42,39 @@ void setup() {
     gelukt = extender.controleren();
     GA_SERIAL.print(F("controleren: "));
     GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.inpluggen();
+    GA_SERIAL.print(F("inpluggen: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.activeren();
+    GA_SERIAL.print(F("activeren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    extender.setGain(GAIN_TWOTHIRDS);
+
+    for (uint8_t sensorPin = 0; sensorPin < 4; sensorPin++) {
+      const int16_t waarde = extender.readADC(sensorPin);
+      GA_SERIAL.print(F("readADC AIN"));
+      GA_SERIAL.print(sensorPin);
+      GA_SERIAL.print(F(": "));
+      GA_SERIAL.print(waarde);
+      GA_SERIAL.print(F(" = "));
+      GA_SERIAL.print(extender.toVoltage(waarde), 6);
+      GA_SERIAL.println(F(" V"));
+    }
+
+    extender.requestADC(0);
+    while (!extender.isReady()) { ; }
+    const int16_t waarde = extender.getValue();
+    GA_SERIAL.print(F("requestADC/isReady/getValue AIN0: "));
+    GA_SERIAL.println(waarde);
   }
 
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);

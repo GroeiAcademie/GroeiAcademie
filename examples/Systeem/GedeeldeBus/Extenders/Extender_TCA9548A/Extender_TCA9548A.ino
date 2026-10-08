@@ -1,10 +1,8 @@
 // ============================================================================
 // Extender — TCA9548A
 // ============================================================================
-// Basistest voor ExtenderTCA9548A.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
-// inpluggen() en activeren() worden getest via een echte client/sensor.
+// Driver-/lifecycletest voor ExtenderTCA9548A.
+// Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
@@ -33,7 +31,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  GA_SERIAL.println(F("=== ExtenderTCA9548A aanmelden/controleren-test ==="));
+  GA_SERIAL.println(F("=== ExtenderTCA9548A driver-/lifecycletest ==="));
 
   bool gelukt = extender.aanmelden();
   GA_SERIAL.print(F("aanmelden: "));
@@ -42,6 +40,24 @@ void setup() {
   if (gelukt) {
     gelukt = extender.controleren();
     GA_SERIAL.print(F("controleren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.inpluggen();
+    GA_SERIAL.print(F("inpluggen: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.activeren();
+    GA_SERIAL.print(F("activeren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.selectChannel(0);
+    GA_SERIAL.print(F("selectChannel(0): "));
     GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
   }
 

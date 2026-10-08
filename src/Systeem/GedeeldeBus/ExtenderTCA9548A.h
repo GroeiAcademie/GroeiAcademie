@@ -1,7 +1,7 @@
 #ifndef EXTENDERTCA9548A_H
 #define EXTENDERTCA9548A_H
 
-struct ExtenderTCA9548A : HardwareResourceTypeI2C {
+struct ExtenderTCA9548A : HardwareResourceTypeI2C, TCA9548 {
   enum class ExtenderPins : uint8_t {
     EP_CH0 = 0x00, // I2C-kanaal 0: SD0 + SC0
     EP_CH1 = 0x01, // I2C-kanaal 1: SD1 + SC1
@@ -21,7 +21,7 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C {
   // ============================================================================
   #if EXTENDER_TCA9548A_AANTAL == 1
   ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_RESET(np_RESET) {
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), TCA9548(adres, &Wire), np_RESET(np_RESET) {
     exclusiefMetReset_[0] = exclusief_[0];
     exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };
@@ -44,12 +44,20 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C {
   #undef BUNDEL_EXTENDER
 
   ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_RESET(ExtenderLijst[teller].reset) {
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), TCA9548(ExtenderLijst[teller].adres, &Wire), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetReset_[0] = exclusief_[0];
     exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };
   }
   #endif
+
+  bool Activeren() override {
+    if (np_RESET != HardwareResourcePin::NONE) {
+      TCA9548::setResetPin(NativeArduinoPinVan(np_RESET));
+    }
+    return TCA9548::begin() && TCA9548::isConnected();
+  }
+
 };
 
 #endif

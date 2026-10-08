@@ -1,10 +1,8 @@
 // ============================================================================
 // Extender — CD74HC4067
 // ============================================================================
-// Basistest voor ExtenderCD74HC4067.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
-// inpluggen() en activeren() worden getest via een echte client/sensor.
+// Driver-/lifecycletest voor ExtenderCD74HC4067.
+// Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
@@ -33,7 +31,7 @@ void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
 
-  GA_SERIAL.println(F("=== ExtenderCD74HC4067 aanmelden/controleren-test ==="));
+  GA_SERIAL.println(F("=== ExtenderCD74HC4067 driver-/lifecycletest ==="));
 
   bool gelukt = extender.aanmelden();
   GA_SERIAL.print(F("aanmelden: "));
@@ -43,6 +41,25 @@ void setup() {
     gelukt = extender.controleren();
     GA_SERIAL.print(F("controleren: "));
     GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.inpluggen();
+    GA_SERIAL.print(F("inpluggen: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    gelukt = extender.activeren();
+    GA_SERIAL.print(F("activeren: "));
+    GA_SERIAL.println(gelukt ? F("OK") : F("FOUT"));
+  }
+
+  if (gelukt) {
+    extender.disable();
+    extender.selectChannel(ExtenderCD74HC4067::ExtenderPins::EP_Y0);
+    extender.enable();
+    GA_SERIAL.println(F("disable/selectChannel(Y0)/enable: OK"));
   }
 
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);
