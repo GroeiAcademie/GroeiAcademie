@@ -1,13 +1,12 @@
 // ============================================================================
-// Extender — PCF8574
+// Extender: PCF8574
 // ============================================================================
 // Driver-/lifecycletest voor ExtenderPCF8574.
 // Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna de publieke FrameWork-interface.
-// Configuratie gebeurt via UserConfig.h.
+// Configuratie #define EXTENDER_PCF8574_AANTAL 1 of 2 gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_PCF8574_AANTAL == 0
   #error Zet EXTENDER_PCF8574_AANTAL in UserConfig.h op minstens 1 voor deze test.
@@ -62,8 +61,8 @@ void setup() {
     GA_SERIAL.println(waarde, HEX);
 
     extender.pinMode(ExtenderPCF8574::ExtenderPins::EP_P0, INPUT);
-    extender.write(ExtenderPCF8574::ExtenderPins::EP_P0, HIGH);
-    const uint8_t pinWaarde = extender.read(ExtenderPCF8574::ExtenderPins::EP_P0);
+    extender.write(static_cast<uint8_t>(ExtenderPCF8574::ExtenderPins::EP_P0), HIGH);
+    const uint8_t pinWaarde = extender.read(static_cast<uint8_t>(ExtenderPCF8574::ExtenderPins::EP_P0));
     GA_SERIAL.print(F("pinMode/write/read P0: "));
     GA_SERIAL.println(pinWaarde);
 

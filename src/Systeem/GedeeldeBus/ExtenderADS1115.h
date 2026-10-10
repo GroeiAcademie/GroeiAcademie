@@ -1,11 +1,7 @@
 #ifndef EXTENDERADS1115_H
 #define EXTENDERADS1115_H
 
-#if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-struct ExtenderADS1115 : HardwareResourceTypeI2C, Adafruit_ADS1115 {
-#elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
 struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
-#endif
   enum class ExtenderPins : uint8_t {
     EP_AIN0 = 0x00, // Analoge ingang AIN0
     EP_AIN1 = 0x01, // Analoge ingang AIN1
@@ -20,39 +16,16 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
   // ADS1115-BASIS — gedeeld door ADC_ADS1115 en EXTENDER_ADS1115
   // ============================================================================
   ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_ALERT_RDY, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-#if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), np_ALERT_RDY(np_ALERT_RDY) {
-#elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
     : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), ADS1115(adres, &Wire), np_ALERT_RDY(np_ALERT_RDY) {
-#endif
     exclusiefMetAlert_[0] = exclusief_[0];
     exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };
   }
 
-  bool begin() {
-    InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-#if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-    return Adafruit_ADS1115::begin(adres);
-#elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-    return ADS1115::begin();
-#endif
-  }
-
-  int16_t readADC(uint8_t sensorPin) {
-#if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-    return Adafruit_ADS1115::readADC_SingleEnded(sensorPin);
-#elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-    return ADS1115::readADC(sensorPin);
-  #endif
-  }
 
   bool Activeren() override {
-#if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-    return begin();
-#elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-    return begin() && ADS1115::isConnected();
-#endif
+    InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
+    return ADS1115::begin() && ADS1115::isConnected();
   }
 
   // ============================================================================
@@ -71,11 +44,7 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
   #undef BUNDEL_EXTENDER
 
   ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-#if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), np_ALERT_RDY(ExtenderLijst[teller].alertRdy) {
-#elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
     : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), ADS1115(ExtenderLijst[teller].adres, &Wire), np_ALERT_RDY(ExtenderLijst[teller].alertRdy) {
-#endif
     exclusiefMetAlert_[0] = exclusief_[0];
     exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };

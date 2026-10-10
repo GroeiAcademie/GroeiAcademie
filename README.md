@@ -174,7 +174,7 @@ De verplichte afhankelijkheden staan in `library.properties`:
 LiquidCrystal I2C
 Adafruit GFX Library
 Adafruit ST7735 and ST7789 Library
-Adafruit ADS1X15
+ADS1X15 van Rob Tillaart
 PCF8574 (>=0.4.0)
 IRremote
 ```

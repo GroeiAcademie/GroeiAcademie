@@ -1,5 +1,18 @@
 # Changelog
 
+
+## 2026-10-08 — Extenders: vaste libraries en documentatie
+
+- `ExtenderADS1115` gebruikt voortaan uitsluitend **Rob Tillaart ADS1X15 0.6.2**; de keuze voor Adafruit ADS1X15 is uit de actuele configuratie en code verwijderd.
+- `ExtenderPCF8574` gebruikt voortaan uitsluitend **Rob Tillaart PCF8574 0.4.5**; de keuze tussen eigen driver en Rob Tillaart is uit de actuele configuratie en code verwijderd.
+- ADS1115 en PCF8574 erven de publieke API van de gekozen Rob-library rechtstreeks.
+- `ExtenderPCF8574::pinMode(ExtenderPins, uint8_t)` blijft als FrameWork-extra behouden.
+- De bestaande Rob-Extenders `ExtenderPCF8575`, `ExtenderMCP23017` en `ExtenderTCA9548A` erven eveneens rechtstreeks hun Rob-library.
+- Voor alle 14 bestaande Extenders staat de Extenderdocumentatie rechtstreeks onder `docs/Systeem/`.
+- Bij library-gebaseerde Extenders verwijst de eigen `.md` expliciet naar de officiële librarydocumentatie voor de volledige publieke API; de FrameWork-documentatie beperkt zich tot integratie en eigen aanvullingen.
+- Historische documentatie van eerdere releases, waaronder v1.1.2, blijft historisch ongewijzigd.
+- Hardware-/acceptatietests van de nieuwe vaste ADS1115- en PCF8574-keuze blijven nog uit te voeren.
+
 Alle betekenisvolle wijzigingen aan GroeiAcademie FrameWork worden in dit bestand bijgehouden.
 
 Historische secties beschrijven de toestand van die release en kunnen daarom bestandsnamen, paden en API’s noemen die in de huidige beta v2.0.0 niet meer bestaan. De sectie `2.0.0` beschrijft de huidige ontwikkellijn.
@@ -41,7 +54,7 @@ De versienummers volgen de versie in `library.properties`.
 - `Input` is de enige v2.0.0-Input-architectuur en werkt via de normale v2.0.0-GedeeldeBus-lifecycle; de oude backward/non-PROTOTYPE-Input-routes zijn verwijderd.
 - DIGITAL, PCF8574 en HX1838 worden als GedeeldeBus-kinderen van `Input` ingeplugd; de blijvende Input-status en kanaalstatus zitten in het `Input`-object.
 - de publieke Input-aanroepen lopen via het object; de vroegere publieke `InputConfigureren()`-stap is verwijderd en initialisatie gebeurt volledig via de GedeeldeBus-lifecycle; minimale PCF8574/HX1838-hardwarecontrole gebeurt in `Input::inpluggen()` en de overgebleven kanalen worden daarna via `Input::Activeren()` operationeel gemaakt.
-- `INPUT_PCF8574` en `EXTENDER_PCF8574` gebruiken dezelfde interne `ExtenderPCF8574`-codebasis; de externe PCF8574-library wordt niet meer door de Input-implementatie gebruikt. `library.properties` declareert `PCF8574 (>=0.4.0)` momenteel nog als dependency.
+- `INPUT_PCF8574` en `EXTENDER_PCF8574` gebruiken dezelfde interne `ExtenderPCF8574`-codebasis; Input gebruikt de PCF8574-functionaliteit via `ExtenderPCF8574`, die rechtstreeks van Rob Tillaart `PCF8574` erft. `library.properties` declareert `PCF8574 (>=0.4.0)` momenteel nog als dependency.
 - `GedeeldeBusComponent::INPUT_PCF8574` blijft de exclusieve Input-rol en de shield-pinindeling aanduiden; fysiek telt deze PCF8574 als de eerste gebruikte PCF8574 in de I2C-adresreeks.
 - wanneer `INPUT_PCF8574` het standaardadres `0x20` gebruikt, krijgt `EXTENDER_PCF8574_1` standaard `0x21` en `EXTENDER_PCF8574_2` standaard `0x22`.
 - de negen dubbele Input-voorbeelden onder `examples/Systeem/GedeeldeBus/` zijn verwijderd; de negen voorbeelden onder `examples/Systeem/Input/` gebruiken de v2.0.0-object-API.

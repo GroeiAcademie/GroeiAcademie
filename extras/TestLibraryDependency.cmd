@@ -37,8 +37,7 @@ set "INSTALLED_LIBS_LOG=%TEMP%\GroeiAcademieInstalledLibs_%RANDOM%.txt"
 
 set /A MISSING_COUNT=0
 set /A INSTALLED_NU=0
-
-for %%L in ("LiquidCrystal I2C" "Adafruit GFX Library" "Adafruit ST7735 and ST7789 Library" "Adafruit ADS1X15" "ADS1X15" "PCF8574" "PCF8575" "MCP23017" "TCA9548" "Adafruit DS248x" "IRremote") do (
+for %%L in ("LiquidCrystal I2C" "Adafruit GFX Library" "Adafruit ST7735 and ST7789 Library" "ADS1X15" "PCF8574" "PCF8575" "MCP23017" "TCA9548" "Adafruit DS248x" "IRremote") do (
     findstr /I /B /C:"%%~L " "!INSTALLED_LIBS_LOG!" >nul
     if errorlevel 1 (
         echo ONTBREEKT : %%~L

@@ -1,5 +1,5 @@
 // ============================================================================
-// ADC Backend — Native
+// ADC Backend: Native
 // ============================================================================
 // Valideert uitsluitend de native ADC-backend.
 // Geen GedeeldeBus-test: deze test leest rechtstreeks de vier analoge ingangen.

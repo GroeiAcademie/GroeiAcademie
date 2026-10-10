@@ -1,13 +1,12 @@
 // ============================================================================
-// Extender — MCP23017
+// Extender: MCP23017
 // ============================================================================
 // Driver-/lifecycletest voor ExtenderMCP23017.
 // Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_MCP23017_AANTAL == 0
   #error Zet EXTENDER_MCP23017_AANTAL in UserConfig.h op minstens 1 voor deze test.

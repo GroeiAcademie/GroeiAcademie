@@ -29,7 +29,6 @@ void setup() {
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 
-
   GA_SERIAL.println(F("=== RFP602 lifecycle-test ==="));
 #if ADC_BACKEND == ADC_BACKEND_NATIVE
   GA_SERIAL.println(F("ADC_BACKEND: NATIVE"));

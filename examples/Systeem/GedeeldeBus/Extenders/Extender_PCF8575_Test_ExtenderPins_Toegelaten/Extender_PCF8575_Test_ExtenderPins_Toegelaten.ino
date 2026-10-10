@@ -1,14 +1,12 @@
 // ============================================================================
-// ExtenderPCF8575 — Test ExtenderPins Toegelaten
+// ExtenderPCF8575: Test ExtenderPins Toegelaten
 // ============================================================================
 // Test alle ExtenderPins die deze extender momenteel aanbiedt.
-// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware
-// ingeplugd of geactiveerd.
+// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware ingeplugd of geactiveerd.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_PCF8575_AANTAL == 0
   #error Zet EXTENDER_PCF8575_AANTAL in UserConfig.h op minstens 1 voor deze test.

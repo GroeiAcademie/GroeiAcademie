@@ -1,14 +1,12 @@
 // ============================================================================
-// ExtenderSC16IS752I2C — Test ExtenderPins Toegelaten
+// ExtenderSC16IS752 I2C: Test ExtenderPins Toegelaten
 // ============================================================================
 // Test alle ExtenderPins die deze extender momenteel aanbiedt.
-// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware
-// ingeplugd of geactiveerd.
+// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware ingeplugd of geactiveerd.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_SC16IS752_I2C_AANTAL == 0
   #error Zet EXTENDER_SC16IS752_I2C_AANTAL in UserConfig.h op minstens 1 voor deze test.

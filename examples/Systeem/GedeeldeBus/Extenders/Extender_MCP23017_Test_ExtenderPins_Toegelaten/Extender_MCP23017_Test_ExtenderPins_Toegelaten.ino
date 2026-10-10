@@ -1,14 +1,12 @@
 // ============================================================================
-// ExtenderMCP23017 — Test ExtenderPins Toegelaten
+// ExtenderMCP23017: Test ExtenderPins Toegelaten
 // ============================================================================
 // Test alle ExtenderPins die deze extender momenteel aanbiedt.
-// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware
-// ingeplugd of geactiveerd.
+// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware ingeplugd of geactiveerd.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_MCP23017_AANTAL == 0
   #error Zet EXTENDER_MCP23017_AANTAL in UserConfig.h op minstens 1 voor deze test.

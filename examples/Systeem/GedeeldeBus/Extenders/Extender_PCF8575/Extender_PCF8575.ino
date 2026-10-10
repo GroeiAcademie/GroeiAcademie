@@ -1,13 +1,12 @@
 // ============================================================================
-// Extender — PCF8575
+// Extender: PCF8575
 // ============================================================================
 // Driver-/lifecycletest voor ExtenderPCF8575.
 // Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_PCF8575_AANTAL == 0
   #error Zet EXTENDER_PCF8575_AANTAL in UserConfig.h op minstens 1 voor deze test.

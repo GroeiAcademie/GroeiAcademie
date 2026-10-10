@@ -1,15 +1,13 @@
 // ============================================================================
-// Extender — ADS7828
+// Extender: ADS7828
 // ============================================================================
 // Basistest voor ExtenderADS7828.
-// Deze test valideert alleen de GedeeldeBus-stappen:
-// aanmelden() -> controleren().
+// Deze test valideert alleen de GedeeldeBus-stappen: aanmelden() -> controleren().
 // inpluggen() en activeren() worden getest via een echte client/sensor.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_ADS7828_AANTAL == 0
   #error Zet EXTENDER_ADS7828_AANTAL in UserConfig.h op minstens 1 voor deze test.

@@ -12,7 +12,7 @@ RFP602::RFP602()
 
 bool RFP602::Activeren() {
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
-  ADC_ADS1115.setGain(GAIN_TWOTHIRDS);
+  ADC_ADS1115.setGain(ADS1X15_GAIN_6144MV);
 #endif
   return true;
 }

@@ -1,14 +1,12 @@
 // ============================================================================
-// Extender — ADS1115
+// Extender: ADS1115
 // ============================================================================
 // Driver-/lifecycletest voor ExtenderADS1115.
 // Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna de publieke FrameWork-interface.
-// Dezelfde test compileert voor EXTENDER_ADS1115_LIBRARY_ADAFRUIT en EXTENDER_ADS1115_LIBRARY_ROB_TILLAART.
-// Configuratie gebeurt via UserConfig.h.
+// Configuratie #define EXTENDER_ADS1115_AANTAL 1 of 2 gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
   #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1 voor deze test.
@@ -57,7 +55,7 @@ void setup() {
   }
 
   if (gelukt) {
-    extender.setGain(GAIN_TWOTHIRDS);
+    extender.setGain(ADS1X15_GAIN_6144MV);
 
     for (uint8_t sensorPin = 0; sensorPin < 4; sensorPin++) {
       const int16_t waarde = extender.readADC(sensorPin);

@@ -1,12 +1,11 @@
 // ============================================================================
-// ADC Backend — ADS1115
+// ADC Backend: ADS1115
 // ============================================================================
 // Valideert de ADS1115 ADC-backend via de uniforme FrameWork-interface.
-// Dezelfde test compileert voor EXTENDER_ADS1115_LIBRARY_ADAFRUIT en EXTENDER_ADS1115_LIBRARY_ROB_TILLAART.
+// Druk onmiddelijk op de aangesloten RFC602-senoren.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if ADC_BACKEND != ADC_BACKEND_ADS1115
   #error Deze validatie vereist ADC_BACKEND_ADS1115.
@@ -78,7 +77,7 @@ void setup() {
     while (true) { ; }
   }
 
-  ADC_ADS1115.setGain(GAIN_TWOTHIRDS);
+  ADC_ADS1115.setGain(ADS1X15_GAIN_6144MV);
   GA_SERIAL.println(F("=== Validatie: ADC_ADS1115 ==="));
   tStart = millis();
 }

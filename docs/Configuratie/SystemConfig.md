@@ -136,7 +136,7 @@ De gebruiker kiest:
 #define ADC_BACKEND ADC_BACKEND_NATIVE
 ```
 
-`ADC_BACKEND_NATIVE` gebruikt de ingebouwde Arduino-ADC. `ADC_BACKEND_ADS1115` gebruikt een externe ADS1115 via I2C en vereist de optionele library Adafruit ADS1X15.
+`ADC_BACKEND_NATIVE` gebruikt de ingebouwde Arduino-ADC. `ADC_BACKEND_ADS1115` gebruikt een externe ADS1115 via I2C en vereist de optionele library ADS1X15 van Rob Tillaart.
 
 `I2C_ADDRESS_ADS1115` bepaalt het adres. `WACHT_LOSLATEN_DELAY_MS` voorkomt bij ADS1115 dat de I2C-bus onafgebroken bevraagd wordt.
 

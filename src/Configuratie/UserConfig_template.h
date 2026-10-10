@@ -69,22 +69,9 @@
 
 
 // ============================================================================
-// EXTENDER Library keuze
-// ============================================================================
-
-#ifndef EXTENDER_ADS1115_LIBRARY
-// #define EXTENDER_ADS1115_LIBRARY EXTENDER_ADS1115_LIBRARY_ADAFRUIT  // standaard; alternatief: EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-#endif
-
-#ifndef EXTENDER_PCF8574_LIBRARY
-// #define EXTENDER_PCF8574_LIBRARY EXTENDER_PCF8574_LIBRARY_NONE          // standaard: bestaande FrameWork-implementatie
-// #define EXTENDER_PCF8574_LIBRARY EXTENDER_PCF8574_LIBRARY_ROB_TILLAART  // alternatief testpad
-#endif
-
-// ============================================================================
 // ADC BACKEND: jouw instellingen
 // ============================================================================
-// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de gekozen ADS1115-library geïnstalleerd zijn via de Arduino Library Manager.
+// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de ADS1X15-library van Rob Tillaart geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
 #ifndef AANTAL_SENSOREN_AANWEZIG
 // #define AANTAL_SENSOREN_AANWEZIG  2                   // standaard waarde: 2
@@ -570,374 +557,581 @@
 // - Kies voor een EXCLUSIEVE HardwareResourcePin nooit een pin die al exclusief geclaimd is.
 
 // ============================================================================
-// DEFAULT — ADS1115 #1
+// EXTENDER: ADS1115
 // ============================================================================
 #ifndef EXTENDER_ADS1115_AANTAL
 // #define EXTENDER_ADS1115_AANTAL 0  // standaard waarde: 0
 #endif
 
+// ============================================================================
+// DEFAULT: ADS1115 #1
+// ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
 // #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48  // standaard: 0x48 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze na I2C_ADDRESS_ADS1115. // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS1115_1_ALERT_RDY
 // #define EXTENDER_ADS1115_1_ALERT_RDY HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — ADS1115 #2
+// EXPERIMENTEEL: ADS1115 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_ADS1115_2
 // #define I2C_ADDRESS_EXTENDER_ADS1115_2 0x49  // standaard: 0x49 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze als tweede extender na I2C_ADDRESS_ADS1115. // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS1115_2_ALERT_RDY
 // #define EXTENDER_ADS1115_2_ALERT_RDY HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_MCP23017_AANTAL
-// #define EXTENDER_MCP23017_AANTAL 0  // standaard waarde: 0
-#endif
-// ============================================================================
-// DEFAULT — MCP23017 #1
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
-// #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MCP23017_1_INTA
-// #define EXTENDER_MCP23017_1_INTA HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MCP23017_1_INTB
-// #define EXTENDER_MCP23017_1_INTB HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MCP23017_1_RESET
-// #define EXTENDER_MCP23017_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — MCP23017 #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
-// #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MCP23017_2_INTA
-// #define EXTENDER_MCP23017_2_INTA HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MCP23017_2_INTB
-// #define EXTENDER_MCP23017_2_INTB HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MCP23017_2_RESET
-// #define EXTENDER_MCP23017_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
 
-#ifndef EXTENDER_PCF8574_AANTAL
-// #define EXTENDER_PCF8574_AANTAL 0  // standaard waarde: 0
-#endif
 // ============================================================================
-// DEFAULT — PCF8574 #1
+// EXTENDER: ADS1158
 // ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
-// #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20  // standaard: 0x20; bij INPUT_TYPE_PCF8574 het volgende vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_PCF8574_1_INT
-// #define EXTENDER_PCF8574_1_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — PCF8574 #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
-// #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21  // standaard: 0x21; bij INPUT_TYPE_PCF8574 het tweede vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_PCF8574_2_INT
-// #define EXTENDER_PCF8574_2_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-
-#ifndef EXTENDER_PCF8575_AANTAL
-// #define EXTENDER_PCF8575_AANTAL 0  // standaard waarde: 0
-#endif
-// ============================================================================
-// DEFAULT — PCF8575 #1
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
-// #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_PCF8575_1_INT
-// #define EXTENDER_PCF8575_1_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — PCF8575 #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
-// #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_PCF8575_2_INT
-// #define EXTENDER_PCF8575_2_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-
-#ifndef EXTENDER_TCA9548A_AANTAL
-// #define EXTENDER_TCA9548A_AANTAL 0  // standaard waarde: 0
-#endif
-// ============================================================================
-// DEFAULT — TCA9548A #1
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
-// #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70  // standaard waarde: 0x70  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_TCA9548A_1_RESET
-// #define EXTENDER_TCA9548A_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — TCA9548A #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
-// #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71  // standaard waarde: 0x71  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_TCA9548A_2_RESET
-// #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-
-#ifndef EXTENDER_ADS7828_AANTAL
-// #define EXTENDER_ADS7828_AANTAL 0  // standaard waarde: 0
-#endif
-// ============================================================================
-// DEFAULT — ADS7828 #1
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
-// #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — ADS7828 #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
-// #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
-#endif
-
-#ifndef EXTENDER_DS2482_800_AANTAL
-// #define EXTENDER_DS2482_800_AANTAL 0  // standaard waarde: 0
-#endif
-// ============================================================================
-// DEFAULT — DS2482-800 #1
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
-// #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18  // standaard waarde: 0x18  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — DS2482-800 #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
-// #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19  // standaard waarde: 0x19  // EXCLUSIEF
-#endif
-
 #ifndef EXTENDER_ADS1158_AANTAL
 // #define EXTENDER_ADS1158_AANTAL 0  // standaard waarde: 0
 #endif
+
 // ============================================================================
-// DEFAULT — ADS1158 #1
+// DEFAULT: ADS1158 #1
 // ============================================================================
 #ifndef CS_PIN_EXTENDER_ADS1158_1
 // #define CS_PIN_EXTENDER_ADS1158_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS1158_1_PWDN
 // #define EXTENDER_ADS1158_1_PWDN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS1158_1_RESET
 // #define EXTENDER_ADS1158_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+
 #endif
 #ifndef EXTENDER_ADS1158_1_START
 // #define EXTENDER_ADS1158_1_START HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — ADS1158 #2
+// EXPERIMENTEEL: ADS1158 #2
 // ============================================================================
 #ifndef CS_PIN_EXTENDER_ADS1158_2
 // #define CS_PIN_EXTENDER_ADS1158_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS1158_2_PWDN
 // #define EXTENDER_ADS1158_2_PWDN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS1158_2_RESET
 // #define EXTENDER_ADS1158_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+
 #endif
 #ifndef EXTENDER_ADS1158_2_START
 // #define EXTENDER_ADS1158_2_START HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
+
+// ============================================================================
+// EXTENDER: ADS7828
+// ============================================================================
+#ifndef EXTENDER_ADS7828_AANTAL
+// #define EXTENDER_ADS7828_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: ADS7828 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
+// #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: ADS7828 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
+// #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: ADS7953
+// ============================================================================
 #ifndef EXTENDER_ADS7953_AANTAL
 // #define EXTENDER_ADS7953_AANTAL 0  // standaard waarde: 0
 #endif
+
 // ============================================================================
-// DEFAULT — ADS7953 #1
+// DEFAULT: ADS7953 #1
 // ============================================================================
 #ifndef CS_PIN_EXTENDER_ADS7953_1
 // #define CS_PIN_EXTENDER_ADS7953_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
 // #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::NP_D5  // standaard waarde: HardwareResourcePin::NP_D5  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
 // #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::NP_D6  // standaard waarde: HardwareResourcePin::NP_D6  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
 // #define EXTENDER_ADS7953_GPIO2_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_1
 // #define EXTENDER_ADS7953_GPIO3_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — ADS7953 #2
+// EXPERIMENTEEL: ADS7953 #2
 // ============================================================================
 #ifndef CS_PIN_EXTENDER_ADS7953_2
 // #define CS_PIN_EXTENDER_ADS7953_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
 // #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::NP_D7  // standaard waarde: HardwareResourcePin::NP_D7  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
 // #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
 // #define EXTENDER_ADS7953_GPIO2_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_2
 // #define EXTENDER_ADS7953_GPIO3_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
+
+// ============================================================================
+// EXTENDER: CD74HC4067
+// ============================================================================
 #ifndef EXTENDER_CD74HC4067_AANTAL
 // #define EXTENDER_CD74HC4067_AANTAL 0  // standaard waarde: 0
 #endif
+
 // ============================================================================
-// DEFAULT — CD74HC4067 #1
+// DEFAULT: CD74HC4067 #1
 // ============================================================================
 #ifndef EXTENDER_CD74HC4067_1_EN
 // #define EXTENDER_CD74HC4067_1_EN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_1_S0
 // #define EXTENDER_CD74HC4067_1_S0 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_1_S1
 // #define EXTENDER_CD74HC4067_1_S1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_1_S2
 // #define EXTENDER_CD74HC4067_1_S2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_1_S3
 // #define EXTENDER_CD74HC4067_1_S3 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_1_Z
 // #define EXTENDER_CD74HC4067_1_Z HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
+// ============================================================================
+// EXPERIMENTEEL: CD74HC4067 #2
+// ============================================================================
 #ifndef EXTENDER_CD74HC4067_2_EN
 // #define EXTENDER_CD74HC4067_2_EN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_2_S0
 // #define EXTENDER_CD74HC4067_2_S0 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_2_S1
 // #define EXTENDER_CD74HC4067_2_S1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_2_S2
 // #define EXTENDER_CD74HC4067_2_S2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_2_S3
 // #define EXTENDER_CD74HC4067_2_S3 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_CD74HC4067_2_Z
 // #define EXTENDER_CD74HC4067_2_Z HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
+
+// ============================================================================
+// EXTENDER: DS2482-800
+// ============================================================================
+#ifndef EXTENDER_DS2482_800_AANTAL
+// #define EXTENDER_DS2482_800_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: DS2482-800 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
+// #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18  // standaard waarde: 0x18  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: DS2482-800 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
+// #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19  // standaard waarde: 0x19  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: I2C_EEPROM
+// ============================================================================
+#ifndef EXTENDER_I2C_EEPROM_AANTAL
+// #define EXTENDER_I2C_EEPROM_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: I2C_EEPROM #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_1
+// #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_1 0x50  // standaard waarde: 0x50  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: I2C_EEPROM #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_2
+// #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_2 0x51  // standaard waarde: 0x51  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: MAX14830 I2C
+// ============================================================================
 #ifndef EXTENDER_MAX14830_I2C_AANTAL
 // #define EXTENDER_MAX14830_I2C_AANTAL 0  // standaard waarde: 0
 #endif
-#ifndef EXTENDER_MAX14830_SPI_AANTAL
-// #define EXTENDER_MAX14830_SPI_AANTAL 0  // standaard waarde: 0
-#endif
+
 // ============================================================================
-// DEFAULT — MAX14830 SPI #1
-// ============================================================================
-#ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
-// #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MAX14830_SPI_1_IRQ
-// #define EXTENDER_MAX14830_SPI_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-// ============================================================================
-// EXPERIMENTEEL — MAX14830 SPI #2
-// ============================================================================
-#ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
-// #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-#ifndef EXTENDER_MAX14830_SPI_2_IRQ
-// #define EXTENDER_MAX14830_SPI_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-// ============================================================================
-// DEFAULT — MAX14830 I2C #1
+// DEFAULT: MAX14830 I2C #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_1
 // #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 0x60  // standaard waarde: 0x60  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_MAX14830_I2C_1_IRQ
 // #define EXTENDER_MAX14830_I2C_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — MAX14830 I2C #2
+// EXPERIMENTEEL: MAX14830 I2C #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_2
 // #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 0x61  // standaard waarde: 0x61  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_MAX14830_I2C_2_IRQ
 // #define EXTENDER_MAX14830_I2C_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
+
+// ============================================================================
+// EXTENDER: MAX14830 SPI
+// ============================================================================
+#ifndef EXTENDER_MAX14830_SPI_AANTAL
+// #define EXTENDER_MAX14830_SPI_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: MAX14830 SPI #1
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
+// #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MAX14830_SPI_1_IRQ
+// #define EXTENDER_MAX14830_SPI_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: MAX14830 SPI #2
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
+// #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MAX14830_SPI_2_IRQ
+// #define EXTENDER_MAX14830_SPI_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: MCP23017
+// ============================================================================
+#ifndef EXTENDER_MCP23017_AANTAL
+// #define EXTENDER_MCP23017_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: MCP23017 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
+// #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MCP23017_1_INTA
+// #define EXTENDER_MCP23017_1_INTA HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MCP23017_1_INTB
+// #define EXTENDER_MCP23017_1_INTB HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MCP23017_1_RESET
+// #define EXTENDER_MCP23017_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: MCP23017 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
+// #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MCP23017_2_INTA
+// #define EXTENDER_MCP23017_2_INTA HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_MCP23017_2_INTB
+// #define EXTENDER_MCP23017_2_INTB HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+
+#endif
+#ifndef EXTENDER_MCP23017_2_RESET
+// #define EXTENDER_MCP23017_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: MCP23S17
+// ============================================================================
+#ifndef EXTENDER_MCP23S17_AANTAL
+// #define EXTENDER_MCP23S17_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: MCP23S17 #1
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_MCP23S17_1
+// #define CS_PIN_EXTENDER_MCP23S17_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: MCP23S17 #2
+// ============================================================================
+#ifndef CS_PIN_EXTENDER_MCP23S17_2
+// #define CS_PIN_EXTENDER_MCP23S17_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: PCA9685
+// ============================================================================
+#ifndef EXTENDER_PCA9685_AANTAL
+// #define EXTENDER_PCA9685_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: PCA9685 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCA9685_1
+// #define I2C_ADDRESS_EXTENDER_PCA9685_1 0x40  // standaard waarde: 0x40  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: PCA9685 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCA9685_2
+// #define I2C_ADDRESS_EXTENDER_PCA9685_2 0x41  // standaard waarde: 0x41  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: PCF8574
+// ============================================================================
+#ifndef EXTENDER_PCF8574_AANTAL
+// #define EXTENDER_PCF8574_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: PCF8574 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
+// #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20  // standaard: 0x20; bij INPUT_TYPE_PCF8574 het volgende vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_PCF8574_1_INT
+// #define EXTENDER_PCF8574_1_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: PCF8574 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
+// #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21  // standaard: 0x21; bij INPUT_TYPE_PCF8574 het tweede vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_PCF8574_2_INT
+// #define EXTENDER_PCF8574_2_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: PCF8575
+// ============================================================================
+#ifndef EXTENDER_PCF8575_AANTAL
+// #define EXTENDER_PCF8575_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: PCF8575 #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
+// #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_PCF8575_1_INT
+// #define EXTENDER_PCF8575_1_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: PCF8575 #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
+// #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_PCF8575_2_INT
+// #define EXTENDER_PCF8575_2_INT HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+
+// ============================================================================
+// EXTENDER: SC16IS752 I2C
+// ============================================================================
 #ifndef EXTENDER_SC16IS752_I2C_AANTAL
 // #define EXTENDER_SC16IS752_I2C_AANTAL 0  // standaard waarde: 0
 #endif
+
 // ============================================================================
-// DEFAULT — SC16IS752 I2C #1
+// DEFAULT: SC16IS752 I2C #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1
 // #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
+
 #endif
 #ifndef EXTENDER_SC16IS752_I2C_1_IRQ
 // #define EXTENDER_SC16IS752_I2C_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+
 #endif
 #ifndef EXTENDER_SC16IS752_I2C_1_RESET
 // #define EXTENDER_SC16IS752_I2C_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — SC16IS752 I2C #2
+// EXPERIMENTEEL: SC16IS752 I2C #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2
 // #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_SC16IS752_I2C_2_IRQ
 // #define EXTENDER_SC16IS752_I2C_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_SC16IS752_I2C_2_RESET
 // #define EXTENDER_SC16IS752_I2C_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
+
+// ============================================================================
+// EXTENDER: SC16IS752 SPI
+// ============================================================================
 #ifndef EXTENDER_SC16IS752_SPI_AANTAL
 // #define EXTENDER_SC16IS752_SPI_AANTAL 0  // standaard waarde: 0
 #endif
+
 // ============================================================================
-// DEFAULT — SC16IS752 SPI #1
+// DEFAULT: SC16IS752 SPI #1
 // ============================================================================
 #ifndef CS_PIN_EXTENDER_SC16IS752_SPI_1
 // #define CS_PIN_EXTENDER_SC16IS752_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_SC16IS752_SPI_1_IRQ
 // #define EXTENDER_SC16IS752_SPI_1_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_SC16IS752_SPI_1_RESET
 // #define EXTENDER_SC16IS752_SPI_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — SC16IS752 SPI #2
+// EXPERIMENTEEL: SC16IS752 SPI #2
 // ============================================================================
 #ifndef CS_PIN_EXTENDER_SC16IS752_SPI_2
 // #define CS_PIN_EXTENDER_SC16IS752_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_SC16IS752_SPI_2_IRQ
 // #define EXTENDER_SC16IS752_SPI_2_IRQ HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
 #ifndef EXTENDER_SC16IS752_SPI_2_RESET
 // #define EXTENDER_SC16IS752_SPI_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
+
+
+// ============================================================================
+// EXTENDER: TCA9548A
+// ============================================================================
+#ifndef EXTENDER_TCA9548A_AANTAL
+// #define EXTENDER_TCA9548A_AANTAL 0  // standaard waarde: 0
+#endif
+
+// ============================================================================
+// DEFAULT: TCA9548A #1
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
+// #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70  // standaard waarde: 0x70  // EXCLUSIEF
+#endif
+
+#ifndef EXTENDER_TCA9548A_1_RESET
+// #define EXTENDER_TCA9548A_1_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: TCA9548A #2
+// ============================================================================
+#ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
+// #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71  // standaard waarde: 0x71  // EXCLUSIEF
+
+#endif
+#ifndef EXTENDER_TCA9548A_2_RESET
+// #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
 
 // ============================================================================
 // ADC BACKEND

@@ -7,39 +7,27 @@
 #include "../../Configuratie/SystemConfig.h"
 
 #if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
-  #if EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-    #include <Adafruit_ADS1X15.h>
-  #elif EXTENDER_ADS1115_LIBRARY == EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-    #include <ADS1X15.h>
-
-    // Compatibiliteit met de bestaande ADS1115-aanroepen in het FrameWork.
-    #ifndef GAIN_TWOTHIRDS
-      #define GAIN_TWOTHIRDS ADS1X15_GAIN_6144MV
-    #endif
-    #ifndef GAIN_ONE
-      #define GAIN_ONE ADS1X15_GAIN_4096MV
-    #endif
-    #ifndef GAIN_TWO
-      #define GAIN_TWO ADS1X15_GAIN_2048MV
-    #endif
-    #ifndef GAIN_FOUR
-      #define GAIN_FOUR ADS1X15_GAIN_1024MV
-    #endif
-    #ifndef GAIN_EIGHT
-      #define GAIN_EIGHT ADS1X15_GAIN_0512MV
-    #endif
-    #ifndef GAIN_SIXTEEN
-      #define GAIN_SIXTEEN ADS1X15_GAIN_0256MV
-    #endif
-  #endif
+  #include <ADS1X15.h>
 #endif
 
-#if (EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)) && EXTENDER_PCF8574_LIBRARY == EXTENDER_PCF8574_LIBRARY_ROB_TILLAART
+#if EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   #include <PCF8574.h>
 #endif
 
 #if EXTENDER_PCF8575_AANTAL > 0
   #include <PCF8575.h>
+#endif
+
+#if EXTENDER_I2C_EEPROM_AANTAL > 0
+  #include <I2C_eeprom.h>
+#endif
+
+#if EXTENDER_MCP23S17_AANTAL > 0
+  #include <MCP23S17.h>
+#endif
+
+#if EXTENDER_PCA9685_AANTAL > 0
+  #include <PCA9685.h>
 #endif
 
 #if EXTENDER_MCP23017_AANTAL > 0
@@ -608,6 +596,9 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 #if EXTENDER_DS2482_800_AANTAL > 0
   #include "ExtenderDS2482v800.h"
 #endif
+#if EXTENDER_I2C_EEPROM_AANTAL > 0
+  #include "ExtenderI2C_EEPROM.h"
+#endif
 #if EXTENDER_MAX14830_I2C_AANTAL > 0
   #include "ExtenderMAX14830I2C.h"
 #endif
@@ -616,6 +607,12 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 #endif
 #if EXTENDER_MCP23017_AANTAL > 0
   #include "ExtenderMCP23017.h"
+#endif
+#if EXTENDER_MCP23S17_AANTAL > 0
+  #include "ExtenderMCP23S17.h"
+#endif
+#if EXTENDER_PCA9685_AANTAL > 0
+  #include "ExtenderPCA9685.h"
 #endif
 #if EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   #include "ExtenderPCF8574.h"

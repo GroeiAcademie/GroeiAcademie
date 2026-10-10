@@ -1,14 +1,12 @@
 // ============================================================================
-// ExtenderADS1115 — Test ExtenderPins Toegelaten
+// ExtenderADS1115: Test ExtenderPins Toegelaten
 // ============================================================================
 // Test alle ExtenderPins die deze extender momenteel aanbiedt.
-// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware
-// ingeplugd of geactiveerd.
-// Configuratie gebeurt via UserConfig.h.
+// De test gebruikt alleen aanmelden() en controleren(); er wordt geen hardware ingeplugd of geactiveerd.
+// Configuratie #define EXTENDER_ADS1115_AANTAL 1 of 2 gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
   #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1 voor deze test.

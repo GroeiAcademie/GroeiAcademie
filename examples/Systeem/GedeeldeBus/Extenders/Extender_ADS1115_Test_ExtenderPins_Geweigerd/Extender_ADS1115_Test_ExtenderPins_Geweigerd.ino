@@ -1,14 +1,13 @@
 // ============================================================================
-// ExtenderADS1115 — Test ExtenderPins Geweigerd
+// ExtenderADS1115: Test ExtenderPins Geweigerd
 // ============================================================================
 // Test één ExtenderPin direct buiten de momenteel aangeboden set.
 // aanmelden() mag slagen; controleren() MOET weigeren met GB111.
 // Er wordt geen hardware ingeplugd of geactiveerd.
-// Configuratie gebeurt via UserConfig.h.
+// Configuratie #define EXTENDER_ADS1115_AANTAL 1 of 2 gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
   #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1 voor deze test.

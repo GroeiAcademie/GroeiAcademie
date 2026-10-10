@@ -23,24 +23,6 @@
   #define ADC_BACKEND_ADS1115              1  // externe 16-bit ADC via I2C
 #endif
 
-// EXTENDER Library keuze:
-
-// ADS1115-library: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
-#ifndef EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-  #define EXTENDER_ADS1115_LIBRARY_ADAFRUIT      0
-#endif
-#ifndef EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-  #define EXTENDER_ADS1115_LIBRARY_ROB_TILLAART  1
-#endif
-
-// PCF8574-library: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
-#ifndef EXTENDER_PCF8574_LIBRARY_NONE
-  #define EXTENDER_PCF8574_LIBRARY_NONE          0
-#endif
-#ifndef EXTENDER_PCF8574_LIBRARY_ROB_TILLAART
-  #define EXTENDER_PCF8574_LIBRARY_ROB_TILLAART  1
-#endif
-
 // GPIO: General Purpose Input/Output, programmeerbare pin op een computerchip of printplaat waarvan de functie via software kan worden ingesteld.
 #define GPIO0    0
 #define GPIO1    1
@@ -107,21 +89,6 @@
   #endif
 #endif
 
-#ifndef EXTENDER_ADS1115_LIBRARY
-  #define EXTENDER_ADS1115_LIBRARY EXTENDER_ADS1115_LIBRARY_ADAFRUIT
-#endif
-
-#if EXTENDER_ADS1115_LIBRARY != EXTENDER_ADS1115_LIBRARY_ADAFRUIT && EXTENDER_ADS1115_LIBRARY != EXTENDER_ADS1115_LIBRARY_ROB_TILLAART
-  #error Selecteer een geldige EXTENDER_ADS1115_LIBRARY.
-#endif
-
-#ifndef EXTENDER_PCF8574_LIBRARY
-  #define EXTENDER_PCF8574_LIBRARY EXTENDER_PCF8574_LIBRARY_NONE
-#endif
-
-#if EXTENDER_PCF8574_LIBRARY != EXTENDER_PCF8574_LIBRARY_NONE && EXTENDER_PCF8574_LIBRARY != EXTENDER_PCF8574_LIBRARY_ROB_TILLAART
-  #error Selecteer een geldige EXTENDER_PCF8574_LIBRARY.
-#endif
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1033,16 +1000,15 @@
 // EXPERIMENTEEL: EXTENDER_<NAAM>_AANTAL >= 2.
 // ============================================================================
 
-// --- I2C-Extenders ---
-// SDA en SCL zijn GEDEELDE native resources en komen uit de boardconfiguratie.
-// Elk I2C-adres hieronder is EXCLUSIEF op dezelfde I2C-bus.
-// Extra native aansluitingen (INT, IRQ, RESET, ALERT_RDY, ...) zijn EXCLUSIEF
-// wanneer ze hieronder per extender-instance als HardwareResourcePin worden ingesteld.
+// ============================================================================
+// EXTENDER: ADS1115
+// ============================================================================
 #ifndef EXTENDER_ADS1115_AANTAL
   #define EXTENDER_ADS1115_AANTAL 0
 #endif
+
 // ============================================================================
-// DEFAULT — ADS1115 #1
+// DEFAULT: ADS1115 #1
 // ============================================================================
 #if EXTENDER_ADS1115_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
@@ -1054,8 +1020,9 @@
     #define EXTENDER_ADS1115_1_ALERT_RDY HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — ADS1115 #2
+// EXPERIMENTEEL: ADS1115 #2
 // ============================================================================
 #if EXTENDER_ADS1115_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
@@ -1068,196 +1035,16 @@
   #endif
 #endif
 
-#ifndef EXTENDER_MCP23017_AANTAL
-  #define EXTENDER_MCP23017_AANTAL 0
-#endif
-// ============================================================================
-// DEFAULT — MCP23017 #1
-// ============================================================================
-#if EXTENDER_MCP23017_AANTAL >= 1
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
-    #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MCP23017_1_INTA
-    #define EXTENDER_MCP23017_1_INTA HardwareResourcePin::NONE
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MCP23017_1_INTB
-    #define EXTENDER_MCP23017_1_INTB HardwareResourcePin::NONE
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MCP23017_1_RESET
-    #define EXTENDER_MCP23017_1_RESET HardwareResourcePin::NONE
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — MCP23017 #2
-// ============================================================================
-#if EXTENDER_MCP23017_AANTAL >= 2
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
-    #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MCP23017_2_INTA
-    #define EXTENDER_MCP23017_2_INTA HardwareResourcePin::NONE
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MCP23017_2_INTB
-    #define EXTENDER_MCP23017_2_INTB HardwareResourcePin::NONE
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MCP23017_2_RESET
-    #define EXTENDER_MCP23017_2_RESET HardwareResourcePin::NONE
-  #endif
-#endif
 
-#ifndef EXTENDER_PCF8574_AANTAL
-  #define EXTENDER_PCF8574_AANTAL 0
-#endif
 // ============================================================================
-// DEFAULT — PCF8574 #1
+// EXTENDER: ADS1158
 // ============================================================================
-#if EXTENDER_PCF8574_AANTAL >= 1
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
-    #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_PCF8574_1_INT
-    #define EXTENDER_PCF8574_1_INT HardwareResourcePin::NONE
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — PCF8574 #2
-// ============================================================================
-#if EXTENDER_PCF8574_AANTAL >= 2
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
-    #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_PCF8574_2_INT
-    #define EXTENDER_PCF8574_2_INT HardwareResourcePin::NONE
-  #endif
-#endif
-
-#ifndef EXTENDER_PCF8575_AANTAL
-  #define EXTENDER_PCF8575_AANTAL 0
-#endif
-// ============================================================================
-// DEFAULT — PCF8575 #1
-// ============================================================================
-#if EXTENDER_PCF8575_AANTAL >= 1
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
-    #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_PCF8575_1_INT
-    #define EXTENDER_PCF8575_1_INT HardwareResourcePin::NONE
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — PCF8575 #2
-// ============================================================================
-#if EXTENDER_PCF8575_AANTAL >= 2
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
-    #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_PCF8575_2_INT
-    #define EXTENDER_PCF8575_2_INT HardwareResourcePin::NONE
-  #endif
-#endif
-
-#ifndef EXTENDER_TCA9548A_AANTAL
-  #define EXTENDER_TCA9548A_AANTAL 0
-#endif
-// ============================================================================
-// DEFAULT — TCA9548A #1
-// ============================================================================
-#if EXTENDER_TCA9548A_AANTAL >= 1
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
-    #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_TCA9548A_1_RESET
-    #define EXTENDER_TCA9548A_1_RESET HardwareResourcePin::NONE
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — TCA9548A #2
-// ============================================================================
-#if EXTENDER_TCA9548A_AANTAL >= 2
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
-    #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_TCA9548A_2_RESET
-    #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE
-  #endif
-#endif
-
-#ifndef EXTENDER_ADS7828_AANTAL
-  #define EXTENDER_ADS7828_AANTAL 0
-#endif
-// ============================================================================
-// DEFAULT — ADS7828 #1
-// ============================================================================
-#if EXTENDER_ADS7828_AANTAL >= 1
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
-    #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — ADS7828 #2
-// ============================================================================
-#if EXTENDER_ADS7828_AANTAL >= 2
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
-    #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49
-  #endif
-#endif
-
-#ifndef EXTENDER_DS2482_800_AANTAL
-  #define EXTENDER_DS2482_800_AANTAL 0
-#endif
-// ============================================================================
-// DEFAULT — DS2482-800 #1
-// ============================================================================
-#if EXTENDER_DS2482_800_AANTAL >= 1
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
-    #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — DS2482-800 #2
-// ============================================================================
-#if EXTENDER_DS2482_800_AANTAL >= 2
-  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
-  #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
-    #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19
-  #endif
-#endif
-
-// --- SPI-Extenders (CS-pin i.p.v. adres) ---
-// SCK, MISO en MOSI zijn GEDEELDE native resources en komen uit de boardconfiguratie.
-// CS is per extender-instance EXCLUSIEF en moet expliciet op een vrije HardwareResourcePin worden ingesteld.
-// Extra native aansluitingen (IRQ, RESET, START, PWDN, GPIO..., ...) zijn EXCLUSIEF
-// wanneer ze hieronder per extender-instance als HardwareResourcePin worden ingesteld.
 #ifndef EXTENDER_ADS1158_AANTAL
   #define EXTENDER_ADS1158_AANTAL 0
 #endif
+
 // ============================================================================
-// DEFAULT — ADS1158 #1
+// DEFAULT: ADS1158 #1
 // ============================================================================
 #if EXTENDER_ADS1158_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
@@ -1277,8 +1064,9 @@
     #define EXTENDER_ADS1158_1_START HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — ADS1158 #2
+// EXPERIMENTEEL: ADS1158 #2
 // ============================================================================
 #if EXTENDER_ADS1158_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
@@ -1299,11 +1087,44 @@
   #endif
 #endif
 
+
+// ============================================================================
+// EXTENDER: ADS7828
+// ============================================================================
+#ifndef EXTENDER_ADS7828_AANTAL
+  #define EXTENDER_ADS7828_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: ADS7828 #1
+// ============================================================================
+#if EXTENDER_ADS7828_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
+    #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: ADS7828 #2
+// ============================================================================
+#if EXTENDER_ADS7828_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
+    #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: ADS7953
+// ============================================================================
 #ifndef EXTENDER_ADS7953_AANTAL
   #define EXTENDER_ADS7953_AANTAL 0
 #endif
+
 // ============================================================================
-// DEFAULT — ADS7953 #1
+// DEFAULT: ADS7953 #1
 // ============================================================================
 #if EXTENDER_ADS7953_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
@@ -1327,8 +1148,9 @@
     #define EXTENDER_ADS7953_GPIO3_TO_UNO_1 HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — ADS7953 #2
+// EXPERIMENTEEL: ADS7953 #2
 // ============================================================================
 #if EXTENDER_ADS7953_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
@@ -1353,13 +1175,16 @@
   #endif
 #endif
 
-// --- Geen protocol (native select-pinnen, geen adres/CS) ---
-// EN, S0, S1, S2, S3 en Z zijn per extender-instance EXCLUSIEVE native resources.
+
+// ============================================================================
+// EXTENDER: CD74HC4067
+// ============================================================================
 #ifndef EXTENDER_CD74HC4067_AANTAL
   #define EXTENDER_CD74HC4067_AANTAL 0
 #endif
+
 // ============================================================================
-// DEFAULT — CD74HC4067 #1
+// DEFAULT: CD74HC4067 #1
 // ============================================================================
 #if EXTENDER_CD74HC4067_AANTAL >= 1
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
@@ -1387,8 +1212,9 @@
     #define EXTENDER_CD74HC4067_1_Z HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — CD74HC4067 #2
+// EXPERIMENTEEL: CD74HC4067 #2
 // ============================================================================
 #if EXTENDER_CD74HC4067_AANTAL >= 2
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
@@ -1417,43 +1243,70 @@
   #endif
 #endif
 
-// --- I2C-of-SPI-keuze door de aanmelder (twee tellingen mogelijk) ---
-// I2C: SDA/SCL zijn GEDEELD; het I2C-adres en de extra native aansluitingen zijn EXCLUSIEF.
-// SPI: SCK/MISO/MOSI zijn GEDEELD; CS en de extra native aansluitingen zijn EXCLUSIEF.
+
+// ============================================================================
+// EXTENDER: DS2482-800
+// ============================================================================
+#ifndef EXTENDER_DS2482_800_AANTAL
+  #define EXTENDER_DS2482_800_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: DS2482-800 #1
+// ============================================================================
+#if EXTENDER_DS2482_800_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
+    #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: DS2482-800 #2
+// ============================================================================
+#if EXTENDER_DS2482_800_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
+    #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: I2C_EEPROM
+// ============================================================================
+#ifndef EXTENDER_I2C_EEPROM_AANTAL
+  #define EXTENDER_I2C_EEPROM_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: I2C_EEPROM #1
+// ============================================================================
+#if EXTENDER_I2C_EEPROM_AANTAL >= 1
+  #ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_1
+    #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_1 0x50
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: I2C_EEPROM #2
+// ============================================================================
+#if EXTENDER_I2C_EEPROM_AANTAL >= 2
+  #ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_2
+    #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_2 0x51
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: MAX14830 I2C
+// ============================================================================
 #ifndef EXTENDER_MAX14830_I2C_AANTAL
   #define EXTENDER_MAX14830_I2C_AANTAL 0
 #endif
-#ifndef EXTENDER_MAX14830_SPI_AANTAL
-  #define EXTENDER_MAX14830_SPI_AANTAL 0
-#endif
+
 // ============================================================================
-// DEFAULT — MAX14830 SPI #1
-// ============================================================================
-#if EXTENDER_MAX14830_SPI_AANTAL >= 1
-  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
-    #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MAX14830_SPI_1_IRQ
-    #define EXTENDER_MAX14830_SPI_1_IRQ HardwareResourcePin::NONE
-  #endif
-#endif
-// ============================================================================
-// EXPERIMENTEEL — MAX14830 SPI #2
-// ============================================================================
-#if EXTENDER_MAX14830_SPI_AANTAL >= 2
-  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
-    #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE
-  #endif
-  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_MAX14830_SPI_2_IRQ
-    #define EXTENDER_MAX14830_SPI_2_IRQ HardwareResourcePin::NONE
-  #endif
-#endif
-// ============================================================================
-// DEFAULT — MAX14830 I2C #1
+// DEFAULT: MAX14830 I2C #1
 // ============================================================================
 #if EXTENDER_MAX14830_I2C_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
@@ -1465,8 +1318,9 @@
     #define EXTENDER_MAX14830_I2C_1_IRQ HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — MAX14830 I2C #2
+// EXPERIMENTEEL: MAX14830 I2C #2
 // ============================================================================
 #if EXTENDER_MAX14830_I2C_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
@@ -1479,11 +1333,228 @@
   #endif
 #endif
 
+
+// ============================================================================
+// EXTENDER: MAX14830 SPI
+// ============================================================================
+#ifndef EXTENDER_MAX14830_SPI_AANTAL
+  #define EXTENDER_MAX14830_SPI_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: MAX14830 SPI #1
+// ============================================================================
+#if EXTENDER_MAX14830_SPI_AANTAL >= 1
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
+    #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MAX14830_SPI_1_IRQ
+    #define EXTENDER_MAX14830_SPI_1_IRQ HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: MAX14830 SPI #2
+// ============================================================================
+#if EXTENDER_MAX14830_SPI_AANTAL >= 2
+  // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
+  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
+    #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MAX14830_SPI_2_IRQ
+    #define EXTENDER_MAX14830_SPI_2_IRQ HardwareResourcePin::NONE
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: MCP23017
+// ============================================================================
+#ifndef EXTENDER_MCP23017_AANTAL
+  #define EXTENDER_MCP23017_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: MCP23017 #1
+// ============================================================================
+#if EXTENDER_MCP23017_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
+    #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_1_INTA
+    #define EXTENDER_MCP23017_1_INTA HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_1_INTB
+    #define EXTENDER_MCP23017_1_INTB HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_1_RESET
+    #define EXTENDER_MCP23017_1_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: MCP23017 #2
+// ============================================================================
+#if EXTENDER_MCP23017_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
+    #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_2_INTA
+    #define EXTENDER_MCP23017_2_INTA HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_2_INTB
+    #define EXTENDER_MCP23017_2_INTB HardwareResourcePin::NONE
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_MCP23017_2_RESET
+    #define EXTENDER_MCP23017_2_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: MCP23S17
+// ============================================================================
+#ifndef EXTENDER_MCP23S17_AANTAL
+  #define EXTENDER_MCP23S17_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: MCP23S17 #1
+// ============================================================================
+#if EXTENDER_MCP23S17_AANTAL >= 1
+  #ifndef CS_PIN_EXTENDER_MCP23S17_1
+    #define CS_PIN_EXTENDER_MCP23S17_1 HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: MCP23S17 #2
+// ============================================================================
+#if EXTENDER_MCP23S17_AANTAL >= 2
+  #ifndef CS_PIN_EXTENDER_MCP23S17_2
+    #define CS_PIN_EXTENDER_MCP23S17_2 HardwareResourcePin::NONE
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: PCA9685
+// ============================================================================
+#ifndef EXTENDER_PCA9685_AANTAL
+  #define EXTENDER_PCA9685_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: PCA9685 #1
+// ============================================================================
+#if EXTENDER_PCA9685_AANTAL >= 1
+  #ifndef I2C_ADDRESS_EXTENDER_PCA9685_1
+    #define I2C_ADDRESS_EXTENDER_PCA9685_1 0x40
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: PCA9685 #2
+// ============================================================================
+#if EXTENDER_PCA9685_AANTAL >= 2
+  #ifndef I2C_ADDRESS_EXTENDER_PCA9685_2
+    #define I2C_ADDRESS_EXTENDER_PCA9685_2 0x41
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: PCF8574
+// ============================================================================
+#ifndef EXTENDER_PCF8574_AANTAL
+  #define EXTENDER_PCF8574_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: PCF8574 #1
+// ============================================================================
+#if EXTENDER_PCF8574_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
+    #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8574_1_INT
+    #define EXTENDER_PCF8574_1_INT HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: PCF8574 #2
+// ============================================================================
+#if EXTENDER_PCF8574_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
+    #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8574_2_INT
+    #define EXTENDER_PCF8574_2_INT HardwareResourcePin::NONE
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: PCF8575
+// ============================================================================
+#ifndef EXTENDER_PCF8575_AANTAL
+  #define EXTENDER_PCF8575_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: PCF8575 #1
+// ============================================================================
+#if EXTENDER_PCF8575_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
+    #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8575_1_INT
+    #define EXTENDER_PCF8575_1_INT HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: PCF8575 #2
+// ============================================================================
+#if EXTENDER_PCF8575_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
+    #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_PCF8575_2_INT
+    #define EXTENDER_PCF8575_2_INT HardwareResourcePin::NONE
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: SC16IS752 I2C
+// ============================================================================
 #ifndef EXTENDER_SC16IS752_I2C_AANTAL
   #define EXTENDER_SC16IS752_I2C_AANTAL 0
 #endif
+
 // ============================================================================
-// DEFAULT — SC16IS752 I2C #1
+// DEFAULT: SC16IS752 I2C #1
 // ============================================================================
 #if EXTENDER_SC16IS752_I2C_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
@@ -1499,8 +1570,9 @@
     #define EXTENDER_SC16IS752_I2C_1_RESET HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — SC16IS752 I2C #2
+// EXPERIMENTEEL: SC16IS752 I2C #2
 // ============================================================================
 #if EXTENDER_SC16IS752_I2C_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
@@ -1516,11 +1588,17 @@
     #define EXTENDER_SC16IS752_I2C_2_RESET HardwareResourcePin::NONE
   #endif
 #endif
+
+
+// ============================================================================
+// EXTENDER: SC16IS752 SPI
+// ============================================================================
 #ifndef EXTENDER_SC16IS752_SPI_AANTAL
   #define EXTENDER_SC16IS752_SPI_AANTAL 0
 #endif
+
 // ============================================================================
-// DEFAULT — SC16IS752 SPI #1
+// DEFAULT: SC16IS752 SPI #1
 // ============================================================================
 #if EXTENDER_SC16IS752_SPI_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
@@ -1536,8 +1614,9 @@
     #define EXTENDER_SC16IS752_SPI_1_RESET HardwareResourcePin::NONE
   #endif
 #endif
+
 // ============================================================================
-// EXPERIMENTEEL — SC16IS752 SPI #2
+// EXPERIMENTEEL: SC16IS752 SPI #2
 // ============================================================================
 #if EXTENDER_SC16IS752_SPI_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
@@ -1551,6 +1630,42 @@
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_SC16IS752_SPI_2_RESET
     #define EXTENDER_SC16IS752_SPI_2_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+
+// ============================================================================
+// EXTENDER: TCA9548A
+// ============================================================================
+#ifndef EXTENDER_TCA9548A_AANTAL
+  #define EXTENDER_TCA9548A_AANTAL 0
+#endif
+
+// ============================================================================
+// DEFAULT: TCA9548A #1
+// ============================================================================
+#if EXTENDER_TCA9548A_AANTAL >= 1
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
+    #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_TCA9548A_1_RESET
+    #define EXTENDER_TCA9548A_1_RESET HardwareResourcePin::NONE
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: TCA9548A #2
+// ============================================================================
+#if EXTENDER_TCA9548A_AANTAL >= 2
+  // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
+  #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
+    #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71
+  #endif
+  // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
+  #ifndef EXTENDER_TCA9548A_2_RESET
+    #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE
   #endif
 #endif
 

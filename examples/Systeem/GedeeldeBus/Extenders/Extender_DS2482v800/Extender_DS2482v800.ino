@@ -1,13 +1,12 @@
 // ============================================================================
-// Extender — DS2482v800
+// Extender: DS2482v800
 // ============================================================================
 // Driver-/lifecycletest voor ExtenderDS2482v800.
 // Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_DS2482_800_AANTAL == 0
   #error Zet EXTENDER_DS2482_800_AANTAL in UserConfig.h op minstens 1 voor deze test.

@@ -1,13 +1,12 @@
 // ============================================================================
-// Extender — TCA9548A
+// Extender: TCA9548A
 // ============================================================================
 // Driver-/lifecycletest voor ExtenderTCA9548A.
 // Test: aanmelden() -> controleren() -> inpluggen() -> activeren() en daarna minimaal één echte driverfunctie.
 // Configuratie gebeurt via UserConfig.h.
 // ============================================================================
 
-#include <Systeem/GedeeldeBus/GedeeldeBus.h>
-#include <Configuratie/SystemConfig.h>
+#include <GroeiAcademie.h>
 
 #if EXTENDER_TCA9548A_AANTAL == 0
   #error Zet EXTENDER_TCA9548A_AANTAL in UserConfig.h op minstens 1 voor deze test.
