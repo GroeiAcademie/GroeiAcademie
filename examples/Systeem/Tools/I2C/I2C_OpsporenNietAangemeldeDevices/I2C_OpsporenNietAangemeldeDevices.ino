@@ -1,3 +1,13 @@
+// ============================================================================
+// Tool: I2C_OpsporenNietAangemeldeDevices
+// ============================================================================
+// Scant de fysieke I2C-bus en vergelijkt de gevonden adressen aangemeld op de GedeeldeBus.
+// Toont fysieke I2C-devices die niet in GedeeldeBus zijn aangemeld.
+// Testconfiguratie: I2C-shield met CharacterScreen, PCF8574 en ADS1115.
+// De shieldcomponenten worden voor de diagnose aangemeld via Screen, RFP602 en Input,
+// op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #include <I2C_SCANNER.h>
 
@@ -6,6 +16,15 @@ I2C_SCANNER i2cScanner;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+
+  Screen = GedeeldeBusNewComponent<struct Screen>();
+  if (Screen == nullptr) exit(0);
+
+  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
+  if (sensorRFP602 == nullptr) exit(0);
+
+  Input = GedeeldeBusNewComponent<struct Input>();
+  if (Input == nullptr) exit(0);
 
   InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
   i2cScanner.begin();
@@ -24,7 +43,12 @@ void setup() {
 
     const GedeeldeBusNode* node = &Native;
     while (node != nullptr) {
-      if (node->gedeeldeIdentiteiten == GedeeldeBusIdentiteitI2C) {
+      if (
+      node->gedeeldeIdentiteiten != nullptr &&
+      node->aangemeldePinnen.aantalGedeeld == 2 &&
+      node->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA &&
+      node->gedeeldeIdentiteiten[1] == HardwareResourceIdentiteit::I2C_SCL
+    ) {
         const HardwareResourceTypeI2C* i2c = static_cast<const HardwareResourceTypeI2C*>(node);
         if (i2c->adres == adres) {
           aangemeld = true;

@@ -2,7 +2,7 @@
 // ADC Backend: ADS1115
 // ============================================================================
 // Valideert de ADS1115 ADC-backend via de uniforme FrameWork-interface.
-// Druk onmiddelijk op de aangesloten RFC602-senoren.
+// Druk onmiddelijk op de aangesloten RFP602-senoren.
 // ============================================================================
 
 #include <GroeiAcademie.h>

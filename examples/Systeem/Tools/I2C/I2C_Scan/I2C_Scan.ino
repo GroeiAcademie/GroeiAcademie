@@ -1,3 +1,10 @@
+// ============================================================================
+// Tool: I2C_Scan
+// ============================================================================
+// Scant de fysieke I2C-bus van adres 0x08 tot en met 0x77.
+// Toont alle gevonden adressen en het totaal aantal gevonden devices.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #include <I2C_SCANNER.h>
 
