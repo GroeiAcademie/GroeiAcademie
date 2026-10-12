@@ -14,7 +14,7 @@
   #error Zet DATA_LAYER_FLASH_AANTAL op minstens 1 voor deze test.
 #endif
 
-struct FLASH* FLASH = nullptr;
+struct DataFLASH* FLASH = nullptr;
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
   GA_SERIAL.print(stap);
@@ -36,7 +36,7 @@ void setup() {
 
   for (GedeeldeBusNode* sameParent = Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
     if (sameParent->component == GedeeldeBusComponent::DATA_FLASH) {
-      FLASH = static_cast<struct FLASH*>(sameParent);
+      FLASH = static_cast<struct DataFLASH*>(sameParent);
       break;
     }
   }

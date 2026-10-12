@@ -30,19 +30,19 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
     EP_GPIO7 = 0x17  // General-purpose digitale I/O GPIO7
   };
 
-  HardwareResourcePin np_START, np_RESET, PWDN;
+  HardwareResourcePin np_START, np_RESET, np_PWDN;
   uint8_t exclusiefMetControle_[4];
 
   // ============================================================================
   // DEFAULT: ADS1158 #1
   // ============================================================================
   #if EXTENDER_ADS1158_AANTAL == 1
-  ExtenderADS1158(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_START, HardwareResourcePin np_RESET, HardwareResourcePin PWDN, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender), np_START(np_START), np_RESET(np_RESET), PWDN(PWDN) {
+  ExtenderADS1158(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_START, HardwareResourcePin np_RESET, HardwareResourcePin np_PWDN, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender), np_START(np_START), np_RESET(np_RESET), np_PWDN(np_PWDN) {
     exclusiefMetControle_[0] = static_cast<uint8_t>(np_CS);
     exclusiefMetControle_[1] = static_cast<uint8_t>(np_START);
     exclusiefMetControle_[2] = static_cast<uint8_t>(np_RESET);
-    exclusiefMetControle_[3] = static_cast<uint8_t>(PWDN);
+    exclusiefMetControle_[3] = static_cast<uint8_t>(np_PWDN);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetControle_, 4 };
   }
   #endif
@@ -63,11 +63,11 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
   #undef BUNDEL_EXTENDER
 
   ExtenderADS1158(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_START(ExtenderLijst[teller].start), np_RESET(ExtenderLijst[teller].reset), PWDN(ExtenderLijst[teller].pwdn) {
+    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_START(ExtenderLijst[teller].start), np_RESET(ExtenderLijst[teller].reset), np_PWDN(ExtenderLijst[teller].pwdn) {
     exclusiefMetControle_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
     exclusiefMetControle_[1] = static_cast<uint8_t>(np_START);
     exclusiefMetControle_[2] = static_cast<uint8_t>(np_RESET);
-    exclusiefMetControle_[3] = static_cast<uint8_t>(PWDN);
+    exclusiefMetControle_[3] = static_cast<uint8_t>(np_PWDN);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetControle_, 4 };
   }
   #endif

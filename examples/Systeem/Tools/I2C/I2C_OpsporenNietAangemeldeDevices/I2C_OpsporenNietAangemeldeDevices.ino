@@ -18,13 +18,13 @@ void setup() {
   while (!GA_SERIAL) { ; }
 
   Screen = GedeeldeBusNewComponent<struct Screen>();
-  if (Screen == nullptr) exit(0);
+  if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }
 
   sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
-  if (sensorRFP602 == nullptr) exit(0);
+  if (sensorRFP602 == nullptr) { GA_SERIAL.println(F("FOUT: RFP602")); while (true) { ; } }
 
   Input = GedeeldeBusNewComponent<struct Input>();
-  if (Input == nullptr) exit(0);
+  if (Input == nullptr) { GA_SERIAL.println(F("FOUT: Input")); while (true) { ; } }
 
   InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
   i2cScanner.begin();

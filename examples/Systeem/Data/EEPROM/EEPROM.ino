@@ -14,7 +14,7 @@
   #error Zet DATA_LAYER_EEPROM_AANTAL op minstens 1 voor deze test.
 #endif
 
-struct EEPROM* EEPROM = nullptr;
+struct DataEEPROM* EEPROM = nullptr;
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
   GA_SERIAL.print(stap);
@@ -36,7 +36,7 @@ void setup() {
 
   for (GedeeldeBusNode* sameParent = Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
     if (sameParent->component == GedeeldeBusComponent::DATA_EEPROM) {
-      EEPROM = static_cast<struct EEPROM*>(sameParent);
+      EEPROM = static_cast<struct DataEEPROM*>(sameParent);
       break;
     }
   }

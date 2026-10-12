@@ -13,9 +13,9 @@
 #endif
 
 #if EXTENDER_PCA9685_AANTAL == 1
-ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::GC_EXTENDER, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
+ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
 #else
-ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::GC_EXTENDER, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0);
+ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::PWM_PCA9685, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0);
 #endif
 
 void setup() {

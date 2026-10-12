@@ -336,7 +336,7 @@
 // #define SERIAL_CONNECT_TIMEOUT_MS      2000UL   // standaard waarde: 2000UL
 #endif
 
-// #define USE_SERIAL_CONNECT_TIMEOUT_MS // ENKEL wanneer we SERIAL_CONNECT_TIMEOUT_MS wensen te gebruiken in plaats van oneindig wachten!
+// #define REDIRECT_SERIAL_CONNECT_TIMEOUT_MS // ENKEL wanneer we SERIAL_CONNECT_TIMEOUT_MS wensen te gebruiken in plaats van oneindig wachten!
 
 
 // ============================================================================
@@ -679,7 +679,7 @@
 // DEFAULT: microSD #1
 // ============================================================================
 #ifndef DATA_LAYER_MICROSD_1_CS_PIN
-// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
+// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef DATA_LAYER_MICROSD_1_FIFO_SIZE
@@ -822,11 +822,11 @@
 #endif
 
 #ifndef EXTENDER_ADS7953_1_GPIO0_TO_UNO
-// #define EXTENDER_ADS7953_1_GPIO0_TO_UNO HardwareResourcePin::NP_D5  // standaard waarde: HardwareResourcePin::NP_D5  // EXCLUSIEF
+// #define EXTENDER_ADS7953_1_GPIO0_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS7953_1_GPIO1_TO_UNO
-// #define EXTENDER_ADS7953_1_GPIO1_TO_UNO HardwareResourcePin::NP_D6  // standaard waarde: HardwareResourcePin::NP_D6  // EXCLUSIEF
+// #define EXTENDER_ADS7953_1_GPIO1_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS7953_1_GPIO2_TO_UNO
@@ -845,11 +845,11 @@
 #endif
 
 #ifndef EXTENDER_ADS7953_2_GPIO0_TO_UNO
-// #define EXTENDER_ADS7953_2_GPIO0_TO_UNO HardwareResourcePin::NP_D7  // standaard waarde: HardwareResourcePin::NP_D7  // EXCLUSIEF
+// #define EXTENDER_ADS7953_2_GPIO0_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS7953_2_GPIO1_TO_UNO
-// #define EXTENDER_ADS7953_2_GPIO1_TO_UNO HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
+// #define EXTENDER_ADS7953_2_GPIO1_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS7953_2_GPIO2_TO_UNO

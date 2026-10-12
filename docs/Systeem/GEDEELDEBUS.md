@@ -2,7 +2,7 @@
 
 ## Status
 
-Deze pagina beschrijft de actuele implementatie in `src/Systeem/GedeeldeBus/GedeeldeBus.h/.cpp` en de 14 concrete Extenderbestanden van beta v2.0.0.
+Deze pagina beschrijft de actuele implementatie in `src/Systeem/GedeeldeBus/GedeeldeBus.h/.cpp` en de 16 concrete Extenderbestanden van beta v2.0.0.
 
 ## Doel
 
@@ -23,6 +23,8 @@ src/Systeem/GedeeldeBus/
 ├── ExtenderMAX14830I2C.h/.cpp
 ├── ExtenderMAX14830SPI.h/.cpp
 ├── ExtenderMCP23017.h/.cpp
+├── ExtenderMCP23S17.h/.cpp
+├── ExtenderPCA9685.h/.cpp
 ├── ExtenderPCF8574.h/.cpp
 ├── ExtenderPCF8575.h/.cpp
 ├── ExtenderSC16IS752I2C.h/.cpp
@@ -82,7 +84,7 @@ Dit is nog een dummy. Er zijn in de huidige code geen concrete `Diagnose()`-over
 
 ExtenderPins zijn geen `HardwareResourcePin` en worden niet via `NativeArduinoPinVan()` vertaald.
 
-De waarden van `HardwareResourceType` gebruiken overal `RT_`. De vier groepswaarden in `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER` en `GC_SENSOR`; concrete componentwaarden, zoals `INPUT_PCF8574`, `ADC_ADS1115` en `RFP602`, behouden hun eigen naam.
+De waarden van `HardwareResourceType` gebruiken overal `RT_`. De vijf groepswaarden in `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_DATA`, `GC_EXTENDER` en `GC_SENSOR`; concrete componentwaarden, zoals `INPUT_PCF8574`, `ADC_ADS1115` en `RFP602`, behouden hun eigen naam.
 
 ## Claims en conflicten
 
@@ -114,7 +116,7 @@ I2C-adressen worden intern met bit `0x80` gemarkeerd en als exclusieve claim beh
 
 ## Extenders en ExtenderPins
 
-Alle 14 concrete Extenders staan in afzonderlijke `.h/.cpp`-bestanden. Iedere waarde in `enum class ExtenderPins` begint met `EP_`.
+Alle 16 concrete Extenders staan in afzonderlijke `.h/.cpp`-bestanden. Iedere waarde in `enum class ExtenderPins` begint met `EP_`.
 
 Alleen Extenders die compile-time effectief gebruikt worden, worden mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender. `ExtenderADS1115` wordt daarnaast mee gecompileerd wanneer `ADC_BACKEND == ADC_BACKEND_ADS1115`, omdat `ADC_ADS1115` ervan erft. `ExtenderPCF8574` wordt daarnaast mee gecompileerd wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat, omdat `InputPCF8574` dezelfde codebasis gebruikt. Niet gebruikte Extenderheaders worden niet geïncludeerd; de afzonderlijke Extender-`.cpp` levert alleen code wanneer de daarin benodigde meervoudige `ExtenderLijst` werkelijk nodig is.
 
@@ -129,6 +131,8 @@ Alleen Extenders die compile-time effectief gebruikt worden, worden mee gecompil
 | `ExtenderMAX14830I2C` | `EP_UART0..EP_UART3`, `EP_GPIO0..EP_GPIO15` |
 | `ExtenderMAX14830SPI` | `EP_UART0..EP_UART3`, `EP_GPIO0..EP_GPIO15` |
 | `ExtenderMCP23017` | `EP_GPA0..EP_GPA7`, `EP_GPB0..EP_GPB7` |
+| `ExtenderMCP23S17` | `EP_GPA0..EP_GPA7`, `EP_GPB0..EP_GPB7` |
+| `ExtenderPCA9685` | `EP_PWM0..EP_PWM15` |
 | `ExtenderPCF8574` | `EP_P0..EP_P7` |
 | `ExtenderPCF8575` | `EP_P00..EP_P07`, `EP_P10..EP_P17` |
 | `ExtenderSC16IS752I2C` | `EP_CHANNEL_A`, `EP_CHANNEL_B`, `EP_GPIO0..EP_GPIO7` |
@@ -159,6 +163,6 @@ Onder `examples/Systeem/GedeeldeBus/Extenders/` bestaan per Extender:
 - `Extender_<naam>_Test_ExtenderPins_Toegelaten.ino`;
 - `Extender_<naam>_Test_ExtenderPins_Geweigerd.ino`.
 
-Onder `examples/Systeem/GedeeldeBus/Sensoren/` staat `Sensor_RFP602.ino`.
+Onder `examples/Systeem/GedeeldeBus/Sensoren/` staan `Sensor_RFP602.ino`, `Sensor_RFP602_DIRECT.ino`, `Sensor_RFP602_FLASH.ino` en `Sensor_RFP602_MICROSD.ino`.
 
 Deze tests moeten niet worden geïnterpreteerd als een volledige elektronische functietest van alle chipfuncties. Zie `extras/TESTEN.md`.

@@ -164,6 +164,10 @@
   #error REDIRECT_SERIAL bevat een onbekende redirect.
 #endif
 
+#if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD && !defined(REDIRECT_SERIAL_CONNECT_TIMEOUT_MS)
+  #error REDIRECT_SERIAL_TO_MICROSD vereist REDIRECT_SERIAL_CONNECT_TIMEOUT_MS.
+#endif
+
 #if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
   #include "../Systeem/Data/RedirectSerial.h"
   #define GA_SERIAL RedirectSerial()
@@ -1143,7 +1147,7 @@
 // ============================================================================
 #if DATA_LAYER_MICROSD_AANTAL >= 1
   #ifndef DATA_LAYER_MICROSD_1_CS_PIN
-    #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8
+    #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NONE
   #endif
   #ifndef DATA_LAYER_MICROSD_1_FIFO_SIZE
     #define DATA_LAYER_MICROSD_1_FIFO_SIZE 0
@@ -1248,6 +1252,10 @@
   #define EXTENDER_ADS1115_AANTAL 0
 #endif
 
+#if EXTENDER_ADS1115_AANTAL > 2
+  #error EXTENDER_ADS1115_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: ADS1115 #1
 // ============================================================================
@@ -1282,6 +1290,10 @@
 // ============================================================================
 #ifndef EXTENDER_ADS1158_AANTAL
   #define EXTENDER_ADS1158_AANTAL 0
+#endif
+
+#if EXTENDER_ADS1158_AANTAL > 2
+  #error EXTENDER_ADS1158_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================
@@ -1336,6 +1348,10 @@
   #define EXTENDER_ADS7828_AANTAL 0
 #endif
 
+#if EXTENDER_ADS7828_AANTAL > 2
+  #error EXTENDER_ADS7828_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: ADS7828 #1
 // ============================================================================
@@ -1364,6 +1380,10 @@
   #define EXTENDER_ADS7953_AANTAL 0
 #endif
 
+#if EXTENDER_ADS7953_AANTAL > 2
+  #error EXTENDER_ADS7953_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: ADS7953 #1
 // ============================================================================
@@ -1374,11 +1394,11 @@
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_1_GPIO0_TO_UNO
-    #define EXTENDER_ADS7953_1_GPIO0_TO_UNO HardwareResourcePin::NP_D5
+    #define EXTENDER_ADS7953_1_GPIO0_TO_UNO HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_1_GPIO1_TO_UNO
-    #define EXTENDER_ADS7953_1_GPIO1_TO_UNO HardwareResourcePin::NP_D6
+    #define EXTENDER_ADS7953_1_GPIO1_TO_UNO HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_1_GPIO2_TO_UNO
@@ -1400,11 +1420,11 @@
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_2_GPIO0_TO_UNO
-    #define EXTENDER_ADS7953_2_GPIO0_TO_UNO HardwareResourcePin::NP_D7
+    #define EXTENDER_ADS7953_2_GPIO0_TO_UNO HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_2_GPIO1_TO_UNO
-    #define EXTENDER_ADS7953_2_GPIO1_TO_UNO HardwareResourcePin::NP_D8
+    #define EXTENDER_ADS7953_2_GPIO1_TO_UNO HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS7953_2_GPIO2_TO_UNO
@@ -1422,6 +1442,10 @@
 // ============================================================================
 #ifndef EXTENDER_CD74HC4067_AANTAL
   #define EXTENDER_CD74HC4067_AANTAL 0
+#endif
+
+#if EXTENDER_CD74HC4067_AANTAL > 2
+  #error EXTENDER_CD74HC4067_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================
@@ -1492,6 +1516,10 @@
   #define EXTENDER_DS2482_800_AANTAL 0
 #endif
 
+#if EXTENDER_DS2482_800_AANTAL > 2
+  #error EXTENDER_DS2482_800_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: DS2482-800 #1
 // ============================================================================
@@ -1518,6 +1546,10 @@
 // ============================================================================
 #ifndef EXTENDER_MAX14830_I2C_AANTAL
   #define EXTENDER_MAX14830_I2C_AANTAL 0
+#endif
+
+#if EXTENDER_MAX14830_I2C_AANTAL > 2
+  #error EXTENDER_MAX14830_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================
@@ -1556,6 +1588,10 @@
   #define EXTENDER_MAX14830_SPI_AANTAL 0
 #endif
 
+#if EXTENDER_MAX14830_SPI_AANTAL > 2
+  #error EXTENDER_MAX14830_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: MAX14830 SPI #1
 // ============================================================================
@@ -1590,6 +1626,10 @@
 // ============================================================================
 #ifndef EXTENDER_MCP23017_AANTAL
   #define EXTENDER_MCP23017_AANTAL 0
+#endif
+
+#if EXTENDER_MCP23017_AANTAL > 2
+  #error EXTENDER_MCP23017_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================
@@ -1644,6 +1684,10 @@
   #define EXTENDER_MCP23S17_AANTAL 0
 #endif
 
+#if EXTENDER_MCP23S17_AANTAL > 2
+  #error EXTENDER_MCP23S17_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: MCP23S17 #1
 // ============================================================================
@@ -1670,6 +1714,10 @@
   #define EXTENDER_PCA9685_AANTAL 0
 #endif
 
+#if EXTENDER_PCA9685_AANTAL > 2
+  #error EXTENDER_PCA9685_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: PCA9685 #1
 // ============================================================================
@@ -1694,6 +1742,10 @@
 // ============================================================================
 #ifndef EXTENDER_PCF8574_AANTAL
   #define EXTENDER_PCF8574_AANTAL 0
+#endif
+
+#if EXTENDER_PCF8574_AANTAL > 2
+  #error EXTENDER_PCF8574_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================
@@ -1732,6 +1784,10 @@
   #define EXTENDER_PCF8575_AANTAL 0
 #endif
 
+#if EXTENDER_PCF8575_AANTAL > 2
+  #error EXTENDER_PCF8575_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: PCF8575 #1
 // ============================================================================
@@ -1766,6 +1822,10 @@
 // ============================================================================
 #ifndef EXTENDER_SC16IS752_I2C_AANTAL
   #define EXTENDER_SC16IS752_I2C_AANTAL 0
+#endif
+
+#if EXTENDER_SC16IS752_I2C_AANTAL > 2
+  #error EXTENDER_SC16IS752_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================
@@ -1812,6 +1872,10 @@
   #define EXTENDER_SC16IS752_SPI_AANTAL 0
 #endif
 
+#if EXTENDER_SC16IS752_SPI_AANTAL > 2
+  #error EXTENDER_SC16IS752_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
 // ============================================================================
 // DEFAULT: SC16IS752 SPI #1
 // ============================================================================
@@ -1854,6 +1918,10 @@
 // ============================================================================
 #ifndef EXTENDER_TCA9548A_AANTAL
   #define EXTENDER_TCA9548A_AANTAL 0
+#endif
+
+#if EXTENDER_TCA9548A_AANTAL > 2
+  #error EXTENDER_TCA9548A_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 // ============================================================================

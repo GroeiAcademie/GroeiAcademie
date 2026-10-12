@@ -78,41 +78,6 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
   }
 }
 
-/*
-void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
-  if (busType == GedeeldeBusType::I2C) {
-    if (!i2cGeinitialiseerd) {
-      #if BOARD_VERSION == BOARD_ESP32S3_ARDI32
-        Wire.begin(ARDUINO_UNO_SHIELD_PIN_SDA, ARDUINO_UNO_SHIELD_PIN_SCL);
-      #else
-        Wire.begin();
-      #endif
-      
-      #if defined(BOARD_UNO_Q) // Extra hersteltijd voor het Zephyr RTOS om threads en interrupts te ordenen
-        delay(150); 
-      #endif
-      
-      i2cGeinitialiseerd = true;
-    }
-  } else if (busType == GedeeldeBusType::SPI) {
-    if (!spiGeinitialiseerd) {
-      #if defined(BOARD_UNO_Q) // Zet de CS (SS) van het pixelscreen HARD HOOG vóór SPI.begin(). Dit voorkomt dat het pixelscreen de gedeelde I2C-klok/data stoort tijdens de opstartpuls.
-      pinMode(ARDUINO_UNO_SHIELD_PIN_SS, OUTPUT);
-      digitalWrite(ARDUINO_UNO_SHIELD_PIN_SS, HIGH);
-      delay(50);
-      #endif
-
-      SPI.begin();    
-
-      #if defined(BOARD_UNO_Q)
-        delay(100); 
-      #endif
-
-      spiGeinitialiseerd = true;
-    }
-  }
-}
-*/
 
 bool IsGedeeldeBusGeinitialiseerd(GedeeldeBusType busType) {
   if (busType == GedeeldeBusType::I2C) return i2cGeinitialiseerd;
@@ -321,7 +286,6 @@ bool HardwareResourceTypeI2C::controleren() {
     GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB110, component, component, adres, true);
     exclusief_[0] = static_cast<uint8_t>(HardwareResourcePin::NONE);
     GedeeldeBusNode::controleren();
-    exclusief_[0] = static_cast<uint8_t>(adres | 0x80);
     gecontroleerd = false;
     conflictGevonden = true;
     return false;
@@ -459,6 +423,9 @@ bool GedeeldeBusNode::controleren() {
 #if EXTENDER_MCP23017_AANTAL > 0
           case GedeeldeBusComponent::DIGITAL_PINS_MCP23017: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23017::ExtenderPins::EP_GPB7); break;
 #endif
+#if EXTENDER_MCP23S17_AANTAL > 0
+          case GedeeldeBusComponent::DIGITAL_PINS_MCP23S17: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23S17::ExtenderPins::EP_GPB7); break;
+#endif
 #if EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
           case GedeeldeBusComponent::DIGITAL_PINS_PCF8574: geldig = waarde <= static_cast<uint8_t>(ExtenderPCF8574::ExtenderPins::EP_P7); break;
 #endif
@@ -485,6 +452,9 @@ bool GedeeldeBusNode::controleren() {
             geldig = waarde <= static_cast<uint8_t>(ExtenderSC16IS752SPI::ExtenderPins::EP_GPIO7);
 #endif
             break;
+#endif
+#if EXTENDER_PCA9685_AANTAL > 0
+          case GedeeldeBusComponent::PWM_PCA9685: geldig = waarde <= static_cast<uint8_t>(ExtenderPCA9685::ExtenderPins::EP_PWM15); break;
 #endif
           default: break;
         }
@@ -606,7 +576,7 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
       scherm->Print(r->code, GedeeldeBusComponentNaam(r->A), FATAL_LEESTIJD_MS, "", GedeeldeBusComponentNaam(r->B), regel4, FATAL_LEESTIJD_MS);
 #endif
       // Print() wacht enkel TUSSEN regel 1-2 en regel 3-4, niet erna. Zonder deze wacht zou de volgende melding in deze lus pagina 2 van de huidige meteen overschrijven, onleesbaar.
-      delay(FATAL_LEESTIJD_MS);
+      if (r->volgende != nullptr) delay(FATAL_LEESTIJD_MS);
     } else {
       ::GA_SERIAL.println(r->code);
       ::GA_SERIAL.println(GedeeldeBusComponentNaam(r->A));

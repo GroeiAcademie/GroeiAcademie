@@ -2,7 +2,7 @@
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
 
-bool FLASH::Activeren() {
+bool DataFLASH::Activeren() {
   return SPIFlash::begin();
 }
 

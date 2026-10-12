@@ -4,7 +4,7 @@
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
 namespace {
-  File File[2];
+  File FileRecording[2];
 }
 #endif
 
@@ -43,14 +43,14 @@ bool Data::aanmelden() {
   if (this->typesActief & DATA_TYPE_EEPROM) {
     #if DATA_LAYER_EEPROM_AANTAL >= 1
       {
-        struct EEPROM* kanaal = new struct EEPROM(this, DATA_LAYER_EEPROM_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        struct DataEEPROM* kanaal = new struct DataEEPROM(this, DATA_LAYER_EEPROM_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
         if (!kanaal->aanmelden()) delete kanaal;
       }
     #endif
     #if DATA_LAYER_EEPROM_AANTAL >= 2
       {
-        struct EEPROM* kanaal = new struct EEPROM(this, DATA_LAYER_EEPROM_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        struct DataEEPROM* kanaal = new struct DataEEPROM(this, DATA_LAYER_EEPROM_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
         if (!kanaal->aanmelden()) delete kanaal;
       }
@@ -62,14 +62,14 @@ bool Data::aanmelden() {
   if (this->typesActief & DATA_TYPE_MICROSD) {
     #if DATA_LAYER_MICROSD_AANTAL >= 1
       {
-        struct microSD* kanaal = new struct microSD(this, DATA_LAYER_MICROSD_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
         if (!kanaal->aanmelden()) delete kanaal;
       }
     #endif
     #if DATA_LAYER_MICROSD_AANTAL >= 2
       {
-        struct microSD* kanaal = new struct microSD(this, DATA_LAYER_MICROSD_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
         if (!kanaal->aanmelden()) delete kanaal;
       }
@@ -81,14 +81,14 @@ bool Data::aanmelden() {
   if (this->typesActief & DATA_TYPE_FLASH) {
     #if DATA_LAYER_FLASH_AANTAL >= 1
       {
-        struct FLASH* kanaal = new struct FLASH(this, DATA_LAYER_FLASH_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        struct DataFLASH* kanaal = new struct DataFLASH(this, DATA_LAYER_FLASH_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
         if (!kanaal->aanmelden()) delete kanaal;
       }
     #endif
     #if DATA_LAYER_FLASH_AANTAL >= 2
       {
-        struct FLASH* kanaal = new struct FLASH(this, DATA_LAYER_FLASH_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        struct DataFLASH* kanaal = new struct DataFLASH(this, DATA_LAYER_FLASH_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
         if (!kanaal->aanmelden()) delete kanaal;
       }
@@ -298,7 +298,7 @@ void Data::StreamStart() {
     for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
       if (sameParent->component != GedeeldeBusComponent::DATA_FLASH || !sameParent->actief) continue;
 
-      struct FLASH* kanaal = static_cast<struct FLASH*>(sameParent);
+      struct DataFLASH* kanaal = static_cast<struct DataFLASH*>(sameParent);
       uint8_t teller = 0;
 #if DATA_LAYER_FLASH_AANTAL >= 2
       if (kanaal->np_CS == DATA_LAYER_FLASH_2_CS_PIN) teller = 1;
@@ -320,7 +320,7 @@ void Data::StreamWrite(int ruweData) {
     for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
       if (sameParent->component != GedeeldeBusComponent::DATA_FLASH || !sameParent->actief) continue;
 
-      struct FLASH* kanaal = static_cast<struct FLASH*>(sameParent);
+      struct DataFLASH* kanaal = static_cast<struct DataFLASH*>(sameParent);
       uint8_t teller = 0;
 #if DATA_LAYER_FLASH_AANTAL >= 2
       if (kanaal->np_CS == DATA_LAYER_FLASH_2_CS_PIN) teller = 1;
@@ -340,7 +340,7 @@ int Data::StreamRead() {
     for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
       if (sameParent->component != GedeeldeBusComponent::DATA_FLASH || !sameParent->actief) continue;
 
-      struct FLASH* kanaal = static_cast<struct FLASH*>(sameParent);
+      struct DataFLASH* kanaal = static_cast<struct DataFLASH*>(sameParent);
       if (kanaal->np_CS != DATA_LAYER_FLASH_1_CS_PIN) continue;
 
       int gelezen = ruweData;
@@ -365,12 +365,12 @@ void Data::RecordStart() {
   for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
     if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
 
-    struct microSD* kanaal = static_cast<struct microSD*>(sameParent);
+    struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
     uint8_t teller = 0;
 #if DATA_LAYER_MICROSD_AANTAL >= 2
     if (kanaal->np_CS == DATA_LAYER_MICROSD_2_CS_PIN) teller = 1;
 #endif
-    if (!File[teller]) File[teller] = kanaal->open(RFP602_DATA_RECORD_FILE, FILE_WRITE);
+    if (!FileRecording[teller]) FileRecording[teller] = kanaal->open(RFP602_DATA_RECORD_FILE, FILE_WRITE);
   }
 #endif
 }
@@ -382,7 +382,7 @@ void Data::RecordWrite(int ruweData) {
 
   RecordStart();
   for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_AANTAL && teller < 2; teller++) {
-    if (File[teller]) File[teller].println(ruweData);
+    if (FileRecording[teller]) FileRecording[teller].println(ruweData);
   }
 #endif
 }
@@ -395,13 +395,13 @@ int Data::RecordRead() {
     for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
       if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
 
-      struct microSD* kanaal = static_cast<struct microSD*>(sameParent);
+      struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
       if (kanaal->np_CS != DATA_LAYER_MICROSD_1_CS_PIN) continue;
 
-      File[0] = kanaal->open(RFP602_DATA_RECORD_FILE);
-      if (!File[0]) return SensorRead();
-      const int gelezen = File[0].parseInt();
-      File[0].close();
+      FileRecording[0] = kanaal->open(RFP602_DATA_RECORD_FILE);
+      if (!FileRecording[0]) return SensorRead();
+      const int gelezen = FileRecording[0].parseInt();
+      FileRecording[0].close();
       ruweData = gelezen;
       return ruweData;
     }
@@ -413,9 +413,9 @@ int Data::RecordRead() {
 void Data::RecordStop() {
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
   for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_AANTAL && teller < 2; teller++) {
-    if (File[teller]) {
-      File[teller].flush();
-      File[teller].close();
+    if (FileRecording[teller]) {
+      FileRecording[teller].flush();
+      FileRecording[teller].close();
     }
   }
 #endif

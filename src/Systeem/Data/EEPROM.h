@@ -7,8 +7,8 @@
 
   #include <I2C_eeprom.h>
 
-struct EEPROM : HardwareResourceTypeI2C, I2C_eeprom {
-  EEPROM(GedeeldeBusNode* parent, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+struct DataEEPROM : HardwareResourceTypeI2C, I2C_eeprom {
+  DataEEPROM(GedeeldeBusNode* parent, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : HardwareResourceTypeI2C(parent, GedeeldeBusComponent::DATA_EEPROM, adres, np_SDA, np_SCL, Extender), I2C_eeprom(adres, &Wire) {}
 
   bool Activeren() override;

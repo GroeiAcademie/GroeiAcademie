@@ -237,3 +237,6 @@ REDIRECT_SERIAL_FILE "serial.log"
 `REDIRECT_SERIAL_NONE` betekent geen redirect. `GA_SERIAL` blijft de bestaande `Serial` of `Serial0` gebruiken.
 
 `REDIRECT_SERIAL_TO_MICROSD` maakt de noodzakelijke Data/microSD-route automatisch beschikbaar. De toepassing hoeft daarvoor niet zelf `DATA_TYPE_MICROSD` aan `DATA_LAYER_CONFIG` toe te voegen en hoeft niet zelf `Data` aan te maken. De output wordt via de door `Data` aangemaakte microSD-route naar `REDIRECT_SERIAL_FILE` geschreven. Er wordt niet tegelijk naar de fysieke Serial geschreven.
+
+
+Bij REDIRECT_SERIAL_TO_MICROSD moet GA_SERIAL.begin() aangeroepen worden vóór GedeeldeBusNewComponent<struct Screen>().

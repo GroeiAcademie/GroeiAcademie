@@ -54,7 +54,7 @@
 // Meerdere aanroepen zijn veilig: enkel de eerste aanroep initialiseert de bus effectief.
 // ============================================================================
 
-// SPI-ondersteuning is voorbereid voor toekomstig gebruik. Momenteel heeft GedeeldeBusType::SPI nog geen actieve aanroeper in Input, Screen of Stimulus.
+// GedeeldeBusType::SPI wordt gebruikt door PixelScreen, de SPI-Extenders en Data (microSD, FLASH).
 // GedeeldeBusType: geeft aan welke gedeelde bus geïnitialiseerd moet worden.
 enum class GedeeldeBusType : uint8_t {
   I2C                = 0x00,
@@ -72,8 +72,7 @@ bool IsGedeeldeBusGeinitialiseerd(GedeeldeBusType busType);
 void ResettenGedeeldeBus();
 
 // ============================================================================
-// PROTOTYPE: centrale registratie van hardware-resources.
-// Deze volledige uitbreiding bestaat alleen wanneer GEDEELDE_BUS_PROTOTYPE vóór het includen van dit bestand gedefinieerd is.
+// Centrale registratie van hardware-resources.
 // ============================================================================
 
 // GedeeldeBusComponent: geeft aan welk onderdeel van het GROEI ACADEMIE FrameWork een hardware-resource gebruikt.
@@ -113,8 +112,9 @@ void ResettenGedeeldeBus();
   /*                                */ \
   /* DigitalPins */ \
   X(DIGITAL_PINS_MCP23017,        0x35) /* GedeeldeBusComponent::DIGITAL_PINS_MCP23017 */ \
-  X(DIGITAL_PINS_PCF8574,         0x36) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8574 */ \
-  X(DIGITAL_PINS_PCF8575,         0x37) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8575 */ \
+  X(DIGITAL_PINS_MCP23S17,        0x36) /* GedeeldeBusComponent::DIGITAL_PINS_MCP23S17 */ \
+  X(DIGITAL_PINS_PCF8574,         0x37) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8574 */ \
+  X(DIGITAL_PINS_PCF8575,         0x38) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8575 */ \
   /*                                */ \
   /* I2C-multiplexer */ \
   X(I2C_MULTIPLEXER_TCA9548A,     0x40) /* GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A */ \
@@ -122,9 +122,12 @@ void ResettenGedeeldeBus();
   /* One-Wire */ \
   X(ONE_WIRE_DS2482v800,          0x45) /* GedeeldeBusComponent::ONE_WIRE_DS2482v800 */ \
   /*                                */ \
+  /* PWM */ \
+  X(PWM_PCA9685,                  0x50) /* GedeeldeBusComponent::PWM_PCA9685 */ \
+  /*                                */ \
   /* UART */ \
-  X(UART_MAX14830,                0x50) /* GedeeldeBusComponent::UART_MAX14830 */ \
-  X(UART_SC16IS752,               0x51) /* GedeeldeBusComponent::UART_SC16IS752 */ \
+  X(UART_MAX14830,                0x55) /* GedeeldeBusComponent::UART_MAX14830 */ \
+  X(UART_SC16IS752,               0x56) /* GedeeldeBusComponent::UART_SC16IS752 */ \
   /*                                */ \
   /* SENSOR ----------------------- */ \
   X(GC_SENSOR,                       0xA0) /* GedeeldeBusComponent::GC_SENSOR */ \
@@ -385,6 +388,8 @@ struct GedeeldeBusNode {
     if (prevChild != nullptr) prevChild->nextChild = nextChild;
     else if (parent != nullptr) parent->firstChild = nextChild;
     if (nextChild != nullptr) nextChild->prevChild = prevChild;
+    nextChild = nullptr;
+    prevChild = nullptr;
     aangemeld = false;
     gecontroleerd = false;
     ingeplugd = false;
@@ -403,7 +408,7 @@ struct GedeeldeBusNode {
   // Hulpfuncties voor de conflictcontrole.
   // --------------------------------------------------------------------------
   // Een I2C-adres is opgeslagen als adres | 0x80 en valt daardoor buiten het bereik van de pinwaarden.
-  static bool IsAdres(uint8_t waarde) { return waarde >= 0x80 && waarde != static_cast<uint8_t>(HardwareResourcePin::NONE); }
+  static bool IsAdres(uint8_t waarde) { return waarde >= 0x80 && waarde != static_cast<uint8_t>(HardwareResourcePin::NONE) && waarde != static_cast<uint8_t>(HardwareResourcePin::CUSTOM); }
 
   // firstExtenderNode: nullptr betekent de pinnen van het board zelf (Native).
   // Een Extender (componentcode 0x20 t/m 0x7F, behalve ADC_NATIVE) biedt zijn children een eigen pinruimte.
@@ -563,6 +568,8 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
     if (ingeplugd) return true;
     if (np_CS == HardwareResourcePin::NONE) return false;
     if (!GedeeldeBusNode::inpluggen()) return false;
+    pinMode(NativeArduinoPinVan(np_CS), OUTPUT);
+    digitalWrite(NativeArduinoPinVan(np_CS), HIGH);
     InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
     return true;
   }
@@ -762,7 +769,7 @@ struct SerialOutput : GedeeldeBusNode {
   bool Activeren() override {
     GA_SERIAL.begin(SERIAL_BAUDRATE);
 
-#ifdef USE_SERIAL_CONNECT_TIMEOUT_MS
+#ifdef REDIRECT_SERIAL_CONNECT_TIMEOUT_MS
     const unsigned long startTijd = millis();
     while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 #ifdef TRACE

@@ -7,12 +7,12 @@
 #include "microSD.h"
 
 namespace {
-  File File;
+  File FileSerial;
   bool initialiseren = false;
 }
 
 void RedirectSerial::begin(unsigned long) {
-  if (File || initialiseren) return;
+  if (FileSerial || initialiseren) return;
 
   initialiseren = true;
 
@@ -38,10 +38,10 @@ void RedirectSerial::begin(unsigned long) {
     for (GedeeldeBusNode* sameParent = ::Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
       if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
 
-      struct microSD* kanaal = static_cast<struct microSD*>(sameParent);
+      struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
       if (kanaal->np_CS != DATA_LAYER_MICROSD_1_CS_PIN) continue;
 
-      File = kanaal->open(REDIRECT_SERIAL_FILE, FILE_WRITE);
+      FileSerial = kanaal->open(REDIRECT_SERIAL_FILE, FILE_WRITE);
       break;
     }
   }
@@ -50,14 +50,14 @@ void RedirectSerial::begin(unsigned long) {
 }
 
 RedirectSerial::operator bool() {
-  return !initialiseren && static_cast<bool>(File);
+  return !initialiseren && static_cast<bool>(FileSerial);
 }
 
 size_t RedirectSerial::write(uint8_t byte) {
   if (initialiseren) return 0;
-  if (!File) begin(0);
-  if (!File) return 0;
-  return File.write(byte);
+  if (!FileSerial) begin(0);
+  if (!FileSerial) return 0;
+  return FileSerial.write(byte);
 }
 
 #endif

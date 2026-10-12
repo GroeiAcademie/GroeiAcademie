@@ -48,6 +48,7 @@ void setup() {
 }
 
 void loop() {
+  if (sensorRFP602 == nullptr || Data == nullptr) return;
   for (uint8_t sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
     sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
     GA_SERIAL.print(F("Sensor "));

@@ -14,7 +14,7 @@
   #error Zet DATA_LAYER_MICROSD_AANTAL op minstens 1 voor deze test.
 #endif
 
-struct microSD* microSD = nullptr;
+struct DataMicroSD* microSD = nullptr;
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
   GA_SERIAL.print(stap);
@@ -36,7 +36,7 @@ void setup() {
 
   for (GedeeldeBusNode* sameParent = Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
     if (sameParent->component == GedeeldeBusComponent::DATA_MICROSD) {
-      microSD = static_cast<struct microSD*>(sameParent);
+      microSD = static_cast<struct DataMicroSD*>(sameParent);
       break;
     }
   }
