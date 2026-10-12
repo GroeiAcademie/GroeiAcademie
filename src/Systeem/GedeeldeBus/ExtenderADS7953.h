@@ -31,32 +31,32 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
   uint8_t exclusiefMetGpio_[5];
 
   // ============================================================================
-  // DEFAULT — ADS7953 #1
+  // DEFAULT: ADS7953 #1
   // ============================================================================
   #if EXTENDER_ADS7953_AANTAL == 1
   ExtenderADS7953(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender) {
     exclusiefMetGpio_[0] = static_cast<uint8_t>(np_CS);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO0)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO0_TO_UNO_1);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO1)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO1_TO_UNO_1);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO2)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO2_TO_UNO_1);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO3)] = static_cast<uint8_t>(EXTENDER_ADS7953_GPIO3_TO_UNO_1);
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO0)] = static_cast<uint8_t>(EXTENDER_ADS7953_1_GPIO0_TO_UNO);
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO1)] = static_cast<uint8_t>(EXTENDER_ADS7953_1_GPIO1_TO_UNO);
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO2)] = static_cast<uint8_t>(EXTENDER_ADS7953_1_GPIO2_TO_UNO);
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO3)] = static_cast<uint8_t>(EXTENDER_ADS7953_1_GPIO3_TO_UNO);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetGpio_, 5 };
   }
   #endif
 
   // ============================================================================
-  // EXPERIMENTEEL — ADS7953 — AANTAL >= 2
+  // EXPERIMENTEEL: ADS7953 #2
   // ============================================================================
   #if EXTENDER_ADS7953_AANTAL >= 2
   struct Ads7953Pinnen { HardwareResourcePin csPin; HardwareResourcePin gpio0; HardwareResourcePin gpio1; HardwareResourcePin gpio2; HardwareResourcePin gpio3; };
 
   #define BUNDEL_EXTENDER(N) { \
-    CS_PIN_EXTENDER_ADS7953_##N, \
-    EXTENDER_ADS7953_GPIO0_TO_UNO_##N, \
-    EXTENDER_ADS7953_GPIO1_TO_UNO_##N, \
-    EXTENDER_ADS7953_GPIO2_TO_UNO_##N, \
-    EXTENDER_ADS7953_GPIO3_TO_UNO_##N \
+    EXTENDER_ADS7953_##N##_CS_PIN, \
+    EXTENDER_ADS7953_##N##_GPIO0_TO_UNO, \
+    EXTENDER_ADS7953_##N##_GPIO1_TO_UNO, \
+    EXTENDER_ADS7953_##N##_GPIO2_TO_UNO, \
+    EXTENDER_ADS7953_##N##_GPIO3_TO_UNO \
   }
 
   static constexpr Ads7953Pinnen ExtenderLijst[] = {

@@ -16,7 +16,7 @@
 ExtenderADS7953 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS7953,
-  CS_PIN_EXTENDER_ADS7953_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI
+  EXTENDER_ADS7953_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI
 );
 #else
 ExtenderADS7953 extender(

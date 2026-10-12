@@ -7,7 +7,7 @@
 // De volledige oorspronkelijke structuur, headers, commentaren, volgorde en witregels uit SystemConfig.h blijven hieronder behouden.
 //
 // ============================================================================
-// BELANGRIJK: CENTRALE GEBRUIKERSCONFIGURATIE
+// BELANGRIJK: CENTRALE GEBRUIKERSCONFIGURATIE ================================
 // ============================================================================
 // Screen.cpp en Stimulus.cpp worden door de Arduino-toolchain als losse, onafhankelijke bestanden gecompileerd, niet samen met je .ino. 
 // Instellingen die bepalen wat in deze librarybestanden wordt gecompileerd horen daarom in UserConfig.h of, als officiële fallback, in SystemConfig.h.
@@ -27,22 +27,24 @@
 // ****************************************************************************
 
 // ============================================================================
-// TAAL: jouw keuze
+// TAAL: jouw keuze ===========================================================
 // ============================================================================
 // #define LANGUAGE_NL // standaard waarde
 // #define LANGUAGE_DE
 // #define LANGUAGE_EN
 // #define LANGUAGE_FR
 
+
 // ============================================================================
-// DEBUG & TRACE: jouw keuze
+// DEBUG & TRACE: jouw keuze ==================================================
 // ============================================================================
 // #define DEBUG // ENKEL wanneer DEBUG nodig, staan hier geen commentaar '//' tekens voor :)
 // #define TRACE // ENKEL wanneer TRACE nodig, staan hier geen commentaar '//' tekens voor :)
 // GA_DEBUG_PRINT, GA_DEBUG_PRINTLN en GA_DEBUG_PRINTLN2 worden door SystemConfig.h afgeleid uit DEBUG.
 
+
 // ============================================================================
-// BOARD_VERSION: jouw keuze
+// BOARD_VERSION: jouw keuze ==================================================
 // ============================================================================
 // De automatische detectie in SystemConfig.h gebruikt de compiler-/boardmacro van de geselecteerde Arduino-boardcore.
 //
@@ -57,8 +59,9 @@
 // #define BOARD_VERSION BOARD_UNO_R4_MINIMA // geen standaard waarde, wordt automatisch bepaald in SystemConfig.h
 #endif
 
+
 // ============================================================================
-// BOARD_ID: jouw instellingen
+// BOARD_ID: jouw instellingen ================================================
 // ============================================================================
 // BOARD_ID: generieke, per-fysiek-bord-identiteit. 
 // (FUTURE) Wijzig per fysiek bord, bijvoorbeeld wanneer meerdere borden met elkaar moeten communiceren en elkaar moeten kunnen onderscheiden. Nog zonder functioneel effect zolang er geen bord-overschrijdende communicatie gebruikt wordt.
@@ -67,9 +70,8 @@
 #endif
 
 
-
 // ============================================================================
-// ADC BACKEND: jouw instellingen
+// ADC BACKEND: jouw instellingen =============================================
 // ============================================================================
 // LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de ADS1X15-library van Rob Tillaart geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
@@ -92,8 +94,29 @@
 // #define WACHT_LOSLATEN_DELAY_MS 0UL // standaard waarde: 0UL
 #endif
 
+
 // ============================================================================
-// INPUT: jouw instellingen
+// DATA =======================================================================
+// ============================================================================
+// DATA_LAYER_CONFIG bepaalt welke datatypes in deze build aanwezig zijn.
+// Combineer meerdere datatypes met de bitwise OR-operator |.
+//
+// Mogelijke waarden:
+// 1  = geen Data-class                            (DATA_TYPE_NONE)
+// 2  = direct via Data-class                       (DATA_TYPE_DIRECT)
+// 4  = EEPROM                                      (DATA_TYPE_EEPROM)
+// 8  = FLASH                                       (DATA_TYPE_FLASH)
+// 16 = microSD                                     (DATA_TYPE_MICROSD)
+// Combineer meerdere datatypes met |.
+//
+// Wat hier niet geselecteerd wordt, wordt niet gecompileerd.
+#ifndef DATA_LAYER_CONFIG
+// #define DATA_LAYER_CONFIG DATA_TYPE_NONE
+#endif
+
+
+// ============================================================================
+// INPUT: jouw instellingen ===================================================
 // ============================================================================
 
 #ifndef INPUT_DEBOUNCE_MS
@@ -135,6 +158,7 @@
 // #define KEYPAD_TYPE KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 // standaard waarde: KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 
 #endif
 
+
 // INPUT_TYPE_PCF8574 ---------------------------------------------------------
 
 // PCF8574 (OT8980): 0x20 t.e.m. 0x27 via A0/A1/A2; elk apparaat op dezelfde I2C-bus moet een uniek adres hebben.
@@ -145,6 +169,7 @@
 #ifndef TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED
 // #define TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH // standaard waarde: TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH (ofwel TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW)
 #endif
+
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
 // D8 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was.
@@ -190,8 +215,9 @@
 // Kost extra flashgeheugen en Serial-afhankelijkheid, standaard uit. Niet aanraden om aan te laten in productiecode.
 // #define INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
 
+
 // ============================================================================
-// OUTPUT: jouw instellingen
+// OUTPUT: jouw instellingen ==================================================
 // ============================================================================
 
 // FATAL
@@ -221,6 +247,7 @@
 // #define SCREEN_OUTPUT_CONFIG SCREEN_TYPE_NONE // standaard waarde: SCREEN_TYPE_NONE 
 #endif
 
+
 // Characterscherm ----------------------------------------------------------------
 #ifndef I2C_ADDRESS_CHARACTER_SCREEN
 // #define I2C_ADDRESS_CHARACTER_SCREEN  0x27 // standaard waarde: 0x27
@@ -230,6 +257,7 @@
 #ifndef ACTIEF_CHARACTER_SCREEN
 // #define ACTIEF_CHARACTER_SCREEN        SCREEN_LCD1602 // standaard waarde: SCREEN_LCD1602
 #endif
+
 
 // Pixelscherm ----------------------------------------------------------------
 #ifndef PIXEL_SCREEN_CS
@@ -298,6 +326,7 @@
 // #define PIXEL_SCREEN_KLEUR_PANIC       0xFFFF   // standaard waarde: 0xFFFF, wit, springt er maximaal uit op een donkere achtergrond
 #endif
 
+
 // SerialScreen ---------------------------------------------------------------
 #ifndef SERIAL_BAUDRATE
 // #define SERIAL_BAUDRATE              115200UL   // standaard waarde: 115200UL
@@ -309,12 +338,41 @@
 
 // #define USE_SERIAL_CONNECT_TIMEOUT_MS // ENKEL wanneer we SERIAL_CONNECT_TIMEOUT_MS wensen te gebruiken in plaats van oneindig wachten!
 
+
+// ============================================================================
+// SENSOREN ===================================================================
+// ============================================================================
+
+// ============================================================================
+// RFP602 DATA
+// ============================================================================
+#ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+#ifndef RFP602_DATA_RECORD_FILE
+// #define RFP602_DATA_RECORD_FILE "RFP602.log"
+#endif
+
+
+// ============================================================================
+// SERIAL REDIRECT ============================================================
+// ============================================================================
+#ifndef REDIRECT_SERIAL
+// #define REDIRECT_SERIAL REDIRECT_SERIAL_NONE
+#endif
+
+#ifndef REDIRECT_SERIAL_FILE
+// #define REDIRECT_SERIAL_FILE "serial.log"
+#endif
+
+
 // ****************************************************************************
 // UITGEBREIDE INSTELLINGEN
 // ****************************************************************************
 
 // ============================================================================
-// BOARD_VERSION EN ARDUINO UNO-SHIELDPINNEN
+// BOARD_VERSION EN ARDUINO UNO-SHIELDPINNEN ==================================
 // ============================================================================
 
 // Gebruik GPIOxx-labels in plaats van kale cijfers, zodat de mapping controleerbaar blijft.
@@ -545,8 +603,103 @@
   // #define ARDUINO_UNO_SHIELD_PIN_SCK  PIN_SPI_SCK  // ARDUINO_UNO_SHIELD_PIN_D13
 #endif
 
+
 // ============================================================================
-// EXTENDERs
+// DATA =======================================================================
+// ============================================================================
+
+// ============================================================================
+// DATA: EEPROM
+// ============================================================================
+#ifndef DATA_LAYER_EEPROM_AANTAL
+// #define DATA_LAYER_EEPROM_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_EEPROM actief is, anders 0
+#endif
+
+// ============================================================================
+// DEFAULT: EEPROM #1
+// ============================================================================
+#ifndef DATA_LAYER_EEPROM_1_I2C_ADDRESS
+// #define DATA_LAYER_EEPROM_1_I2C_ADDRESS 0x50  // standaard waarde: 0x50  // EXCLUSIEF
+#endif
+
+#ifndef DATA_LAYER_EEPROM_1_FIFO_SIZE
+// #define DATA_LAYER_EEPROM_1_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: EEPROM #2
+// ============================================================================
+#ifndef DATA_LAYER_EEPROM_2_I2C_ADDRESS
+// #define DATA_LAYER_EEPROM_2_I2C_ADDRESS 0x51  // standaard waarde: 0x51  // EXCLUSIEF
+#endif
+
+#ifndef DATA_LAYER_EEPROM_2_FIFO_SIZE
+// #define DATA_LAYER_EEPROM_2_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+
+// ============================================================================
+// DATA: FLASH
+// ============================================================================
+#ifndef DATA_LAYER_FLASH_AANTAL
+// #define DATA_LAYER_FLASH_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_FLASH actief is, anders 0
+#endif
+
+// ============================================================================
+// DEFAULT: FLASH #1
+// ============================================================================
+#ifndef DATA_LAYER_FLASH_1_CS_PIN
+// #define DATA_LAYER_FLASH_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef DATA_LAYER_FLASH_1_FIFO_SIZE
+// #define DATA_LAYER_FLASH_1_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: FLASH #2
+// ============================================================================
+#ifndef DATA_LAYER_FLASH_2_CS_PIN
+// #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef DATA_LAYER_FLASH_2_FIFO_SIZE
+// #define DATA_LAYER_FLASH_2_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+
+// ============================================================================
+// DATA: microSD
+// ============================================================================
+#ifndef DATA_LAYER_MICROSD_AANTAL
+// #define DATA_LAYER_MICROSD_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_MICROSD actief is, anders 0
+#endif
+
+// ============================================================================
+// DEFAULT: microSD #1
+// ============================================================================
+#ifndef DATA_LAYER_MICROSD_1_CS_PIN
+// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
+#endif
+
+#ifndef DATA_LAYER_MICROSD_1_FIFO_SIZE
+// #define DATA_LAYER_MICROSD_1_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: microSD #2
+// ============================================================================
+#ifndef DATA_LAYER_MICROSD_2_CS_PIN
+// #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+#ifndef DATA_LAYER_MICROSD_2_FIFO_SIZE
+// #define DATA_LAYER_MICROSD_2_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+
+// ============================================================================
+// EXTENDERs ==================================================================
 // ============================================================================
 // Extender-resources:
 // - DEFAULT: EXTENDER_<NAAM>_AANTAL = 0 of 1.
@@ -596,8 +749,8 @@
 // ============================================================================
 // DEFAULT: ADS1158 #1
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_ADS1158_1
-// #define CS_PIN_EXTENDER_ADS1158_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS1158_1_CS_PIN
+// #define EXTENDER_ADS1158_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS1158_1_PWDN
@@ -615,8 +768,8 @@
 // ============================================================================
 // EXPERIMENTEEL: ADS1158 #2
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_ADS1158_2
-// #define CS_PIN_EXTENDER_ADS1158_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS1158_2_CS_PIN
+// #define EXTENDER_ADS1158_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS1158_2_PWDN
@@ -664,47 +817,47 @@
 // ============================================================================
 // DEFAULT: ADS7953 #1
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_ADS7953_1
-// #define CS_PIN_EXTENDER_ADS7953_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_1_CS_PIN
+// #define EXTENDER_ADS7953_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
-// #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::NP_D5  // standaard waarde: HardwareResourcePin::NP_D5  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_1_GPIO0_TO_UNO
+// #define EXTENDER_ADS7953_1_GPIO0_TO_UNO HardwareResourcePin::NP_D5  // standaard waarde: HardwareResourcePin::NP_D5  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
-// #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::NP_D6  // standaard waarde: HardwareResourcePin::NP_D6  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_1_GPIO1_TO_UNO
+// #define EXTENDER_ADS7953_1_GPIO1_TO_UNO HardwareResourcePin::NP_D6  // standaard waarde: HardwareResourcePin::NP_D6  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
-// #define EXTENDER_ADS7953_GPIO2_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_1_GPIO2_TO_UNO
+// #define EXTENDER_ADS7953_1_GPIO2_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_1
-// #define EXTENDER_ADS7953_GPIO3_TO_UNO_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_1_GPIO3_TO_UNO
+// #define EXTENDER_ADS7953_1_GPIO3_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: ADS7953 #2
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_ADS7953_2
-// #define CS_PIN_EXTENDER_ADS7953_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_2_CS_PIN
+// #define EXTENDER_ADS7953_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
-// #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::NP_D7  // standaard waarde: HardwareResourcePin::NP_D7  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_2_GPIO0_TO_UNO
+// #define EXTENDER_ADS7953_2_GPIO0_TO_UNO HardwareResourcePin::NP_D7  // standaard waarde: HardwareResourcePin::NP_D7  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
-// #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_2_GPIO1_TO_UNO
+// #define EXTENDER_ADS7953_2_GPIO1_TO_UNO HardwareResourcePin::NP_D8  // standaard waarde: HardwareResourcePin::NP_D8  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
-// #define EXTENDER_ADS7953_GPIO2_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_2_GPIO2_TO_UNO
+// #define EXTENDER_ADS7953_2_GPIO2_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_2
-// #define EXTENDER_ADS7953_GPIO3_TO_UNO_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_ADS7953_2_GPIO3_TO_UNO
+// #define EXTENDER_ADS7953_2_GPIO3_TO_UNO HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 
@@ -793,28 +946,6 @@
 
 
 // ============================================================================
-// EXTENDER: I2C_EEPROM
-// ============================================================================
-#ifndef EXTENDER_I2C_EEPROM_AANTAL
-// #define EXTENDER_I2C_EEPROM_AANTAL 0  // standaard waarde: 0
-#endif
-
-// ============================================================================
-// DEFAULT: I2C_EEPROM #1
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_1
-// #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_1 0x50  // standaard waarde: 0x50  // EXCLUSIEF
-#endif
-
-// ============================================================================
-// EXPERIMENTEEL: I2C_EEPROM #2
-// ============================================================================
-#ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_2
-// #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_2 0x51  // standaard waarde: 0x51  // EXCLUSIEF
-#endif
-
-
-// ============================================================================
 // EXTENDER: MAX14830 I2C
 // ============================================================================
 #ifndef EXTENDER_MAX14830_I2C_AANTAL
@@ -854,8 +985,8 @@
 // ============================================================================
 // DEFAULT: MAX14830 SPI #1
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
-// #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_MAX14830_SPI_1_CS_PIN
+// #define EXTENDER_MAX14830_SPI_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_MAX14830_SPI_1_IRQ
@@ -865,8 +996,8 @@
 // ============================================================================
 // EXPERIMENTEEL: MAX14830 SPI #2
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
-// #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_MAX14830_SPI_2_CS_PIN
+// #define EXTENDER_MAX14830_SPI_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_MAX14830_SPI_2_IRQ
@@ -930,15 +1061,15 @@
 // ============================================================================
 // DEFAULT: MCP23S17 #1
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_MCP23S17_1
-// #define CS_PIN_EXTENDER_MCP23S17_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_MCP23S17_1_CS_PIN
+// #define EXTENDER_MCP23S17_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: MCP23S17 #2
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_MCP23S17_2
-// #define CS_PIN_EXTENDER_MCP23S17_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_MCP23S17_2_CS_PIN
+// #define EXTENDER_MCP23S17_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 
@@ -1072,8 +1203,8 @@
 // ============================================================================
 // DEFAULT: SC16IS752 SPI #1
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_SC16IS752_SPI_1
-// #define CS_PIN_EXTENDER_SC16IS752_SPI_1 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_SC16IS752_SPI_1_CS_PIN
+// #define EXTENDER_SC16IS752_SPI_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_SC16IS752_SPI_1_IRQ
@@ -1087,8 +1218,8 @@
 // ============================================================================
 // EXPERIMENTEEL: SC16IS752 SPI #2
 // ============================================================================
-#ifndef CS_PIN_EXTENDER_SC16IS752_SPI_2
-// #define CS_PIN_EXTENDER_SC16IS752_SPI_2 HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef EXTENDER_SC16IS752_SPI_2_CS_PIN
+// #define EXTENDER_SC16IS752_SPI_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_SC16IS752_SPI_2_IRQ
@@ -1129,9 +1260,22 @@
 // #define EXTENDER_TCA9548A_2_RESET HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
+
 // ============================================================================
+// SENSOREN ===================================================================
 // ============================================================================
+
 // ============================================================================
+// RFP602 DATA
+// ============================================================================
+#ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+#ifndef RFP602_DATA_RECORD_FILE
+// #define RFP602_DATA_RECORD_FILE "rfp602.log"
+#endif
+
 
 // ============================================================================
 // ADC BACKEND
@@ -1158,8 +1302,9 @@
 // #define DELAY_US 100     // standaard waarde berekend aan de hand van automatisch gedetecteerde BOARD_VERSION
 #endif
 
+
 // ============================================================================
-// INPUT
+// INPUT ======================================================================
 // ============================================================================
 
 // INPUT_TYPE_DIGITAL gebruikt HardwareResourcePin-waarden voor de vier fysieke keypad-aansluitingen.
@@ -1189,6 +1334,7 @@
 // #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::NP_D5
   #endif
 #endif
+
 
 // INPUT_TYPE_PCF8574: logische aansluitingen op PCF8574 P0-P7 ----------------
 // Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
@@ -1315,6 +1461,7 @@
   // #define INPUT_KEYPAD_PIN_OUT8 PCF8574_PIN_P7 // standaard waarde: PCF8574_PIN_P7
   #endif
 #endif
+
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
 #if defined(HX1838_TOETSENINDELING) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED

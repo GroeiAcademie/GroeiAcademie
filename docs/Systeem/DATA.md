@@ -1,0 +1,239 @@
+# Data
+
+Status: v2.0.0 in ontwikkeling.
+
+## Structuur
+
+`DATA_TYPE_NONE` is de oude werkwijze zonder Data-class. De sensor geeft zijn gemeten waarde rechtstreeks terug aan de toepassing.
+
+Wanneer een ander Data-type actief is, is Data een top-level GedeeldeBus-component onder `Native`. De gewone toepassing maakt alleen `Data` aan. `Data` maakt zelf de geconfigureerde concrete media aan en voert hun GedeeldeBus-lifecycle uit.
+
+```text
+DATA_TYPE_NONE
+└─ sensor -> toepassing
+
+Native
+└─ Data
+   ├─ DIRECT
+   ├─ EEPROM  : I2C
+   ├─ FLASH   : SPI
+   └─ microSD : SPI
+```
+
+`DIRECT` is geen opslagmedium. `DIRECT` gebruikt de Data-class voor real-time doorgeven. Zonder FIFO bewaart `Data` de laatst gemeten waarde. Met FIFO worden de waarden via de RAM CircularBuffer/FIFO doorgegeven.
+
+## Configuratie
+
+`DATA_LAYER_CONFIG` bepaalt welke Data-werking in deze build aanwezig is.
+
+```cpp
+#define DATA_LAYER_CONFIG DATA_TYPE_NONE
+#define DATA_LAYER_CONFIG DATA_TYPE_DIRECT
+#define DATA_LAYER_CONFIG DATA_TYPE_EEPROM | DATA_TYPE_FLASH | DATA_TYPE_MICROSD
+```
+
+De huidige typewaarden zijn:
+
+```cpp
+#define DATA_TYPE_NONE     0x01
+#define DATA_TYPE_DIRECT   0x02
+#define DATA_TYPE_EEPROM   0x04
+#define DATA_TYPE_FLASH    0x08
+#define DATA_TYPE_MICROSD  0x10
+```
+
+`DATA_TYPE_NONE` kan niet met een ander Data-type worden gecombineerd.
+
+## NONE
+
+`DATA_TYPE_NONE` gebruikt geen Data-class. Voor RFP602 blijft de bestaande route behouden:
+
+```text
+RawAnalogRead(...)
+-> gemeten waarde
+-> return naar toepassing
+```
+
+## DIRECT
+
+`DATA_TYPE_DIRECT` gebruikt de Data-class:
+
+```text
+RFP602
+-> Data->SensorWrite(ruweData)
+-> Data->SensorRead()
+-> toepassing
+```
+
+Voor RFP602 bepaalt:
+
+```cpp
+RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+```
+
+of DIRECT een FIFO gebruikt.
+
+```text
+0   = geen FIFO; SensorRead() geeft de laatst gemeten waarde terug
+> 0 = RAM CircularBuffer/FIFO; SensorRead() haalt de volgende waarde uit de FIFO
+```
+
+De FIFO-grootte hoort bij de sensor. Voor andere sensoren wordt hun eigen sensorconfiguratie gebruikt.
+
+## EEPROM
+
+EEPROM gebruikt I2C en de library `I2C_EEPROM` van Rob Tillaart.
+
+```cpp
+DATA_LAYER_EEPROM_AANTAL
+DATA_LAYER_EEPROM_1_I2C_ADDRESS
+DATA_LAYER_EEPROM_2_I2C_ADDRESS
+```
+
+SDA en SCL komen uit de boardconfiguratie.
+
+## microSD
+
+microSD gebruikt SPI en de officiële Arduino library `SD`.
+
+```cpp
+DATA_LAYER_MICROSD_AANTAL
+DATA_LAYER_MICROSD_1_CS_PIN
+DATA_LAYER_MICROSD_2_CS_PIN
+```
+
+SCK, MISO en MOSI komen uit de boardconfiguratie.
+
+Voor RFP602 bepaalt:
+
+```cpp
+RFP602_DATA_RECORD_FILE
+```
+
+het bestand voor sensordata-recording.
+
+## FLASH
+
+FLASH gebruikt SPI en de huidige kandidaat-library `SPIMemory`. De concrete libraryclass is `SPIFlash`. De librarykeuze moet op de volledige bestaande boardmatrix getest worden. Er worden geen boards op voorhand uitgesloten.
+
+```cpp
+DATA_LAYER_FLASH_AANTAL
+DATA_LAYER_FLASH_1_CS_PIN
+DATA_LAYER_FLASH_2_CS_PIN
+```
+
+SCK, MISO en MOSI komen uit de boardconfiguratie.
+
+Voor continue sensordata geldt:
+
+```text
+STREAMING
+├─ microSD
+└─ FLASH
+
+RECORDING
+└─ microSD
+```
+
+EEPROM blijft beschikbaar als Data-medium, maar wordt niet gebruikt voor continue sensorstromen.
+
+## RAM FIFO / CircularBuffer
+
+De gekozen RAM FIFO-library is `CircularBuffer` van rlogiacco.
+
+Voor DIRECT wordt de FIFO-grootte per sensor geconfigureerd. Voor RFP602:
+
+```cpp
+RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+```
+
+De bestaande media-instellingen blijven per concrete Data-instantie beschikbaar:
+
+```cpp
+DATA_LAYER_EEPROM_1_FIFO_SIZE
+DATA_LAYER_EEPROM_2_FIFO_SIZE
+DATA_LAYER_MICROSD_1_FIFO_SIZE
+DATA_LAYER_MICROSD_2_FIFO_SIZE
+DATA_LAYER_FLASH_1_FIFO_SIZE
+DATA_LAYER_FLASH_2_FIFO_SIZE
+```
+
+`DATA_FIFO_ACTIEF` wordt niet door de gebruiker ingesteld. `SystemConfig.h` leidt deze compile-time waarde automatisch af uit de ingestelde FIFO-groottes.
+
+## Sensorgrens
+
+Een sensor maakt geen medium aan en hoeft niet te weten of zijn data via DIRECT, STREAMING of RECORDING wordt afgehandeld. Wanneer Data actief is, krijgt de sensor bij creatie een pointer naar `Data` mee.
+
+Voor RFP602:
+
+```cpp
+Data->SensorWrite(ruweData);
+Data->SensorRead();
+```
+
+Bij `DATA_TYPE_NONE` is er geen Data-class in de sensorroute en blijft de directe returnwaarde van `RawAnalogRead(...)` actief.
+
+## Data-interface
+
+```cpp
+Data->SensorWrite(...);
+Data->SensorRead();
+
+Data->StreamStart();
+Data->StreamWrite(...);
+Data->StreamRead();
+Data->StreamStop();
+
+Data->RecordStart();
+Data->RecordWrite(...);
+Data->RecordRead();
+Data->RecordStop();
+```
+
+De sensor gebruikt STREAMING en RECORDING niet rechtstreeks. De toepassing kiest die werking. De concrete media behouden daarnaast hun volledige geërfde library-API.
+
+## Sensorvoorbeelden
+
+```text
+Sensor_RFP602.ino
+-> DATA_TYPE_NONE
+-> oude werking zonder Data-class
+
+Sensor_RFP602_DIRECT.ino
+-> DATA_TYPE_DIRECT
+-> Data->SensorWrite(...)
+-> Data->SensorRead()
+-> optionele RFP602 FIFO
+
+Sensor_RFP602_FLASH.ino
+-> DATA_TYPE_FLASH
+-> Data STREAMING naar FLASH
+
+Sensor_RFP602_MICROSD.ino
+-> DATA_TYPE_MICROSD
+-> Data RECORDING naar microSD
+```
+
+## Media-tests
+
+De media-validatietests maken `Data` aan en gebruiken daarna het door `Data` aangemaakte concrete child-object. Ze maken hetzelfde medium niet nogmaals aan.
+
+```text
+examples/Systeem/Data/EEPROM/EEPROM.ino
+examples/Systeem/Data/FLASH/FLASH.ino
+examples/Systeem/Data/microSD/microSD.ino
+```
+
+## Serial redirect
+
+Alle seriële frameworkuitvoer loopt via `GA_SERIAL`.
+
+```cpp
+REDIRECT_SERIAL_NONE
+REDIRECT_SERIAL_TO_MICROSD
+REDIRECT_SERIAL_FILE "serial.log"
+```
+
+`REDIRECT_SERIAL_NONE` betekent geen redirect. `GA_SERIAL` blijft de bestaande `Serial` of `Serial0` gebruiken.
+
+`REDIRECT_SERIAL_TO_MICROSD` maakt de noodzakelijke Data/microSD-route automatisch beschikbaar. De toepassing hoeft daarvoor niet zelf `DATA_TYPE_MICROSD` aan `DATA_LAYER_CONFIG` toe te voegen en hoeft niet zelf `Data` aan te maken. De output wordt via de door `Data` aangemaakte microSD-route naar `REDIRECT_SERIAL_FILE` geschreven. Er wordt niet tegelijk naar de fysieke Serial geschreven.

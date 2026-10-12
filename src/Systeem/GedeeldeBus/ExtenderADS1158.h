@@ -34,7 +34,7 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
   uint8_t exclusiefMetControle_[4];
 
   // ============================================================================
-  // DEFAULT — ADS1158 #1
+  // DEFAULT: ADS1158 #1
   // ============================================================================
   #if EXTENDER_ADS1158_AANTAL == 1
   ExtenderADS1158(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_START, HardwareResourcePin np_RESET, HardwareResourcePin PWDN, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
@@ -48,12 +48,12 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
   #endif
 
   // ============================================================================
-  // EXPERIMENTEEL — ADS1158 — AANTAL >= 2
+  // EXPERIMENTEEL: ADS1158 #2
   // ============================================================================
   #if EXTENDER_ADS1158_AANTAL >= 2
   struct Ads1158Pinnen { HardwareResourcePin csPin; HardwareResourcePin pwdn; HardwareResourcePin reset; HardwareResourcePin start; };
 
-  #define BUNDEL_EXTENDER(N) { CS_PIN_EXTENDER_ADS1158_##N, EXTENDER_ADS1158_##N##_PWDN, EXTENDER_ADS1158_##N##_RESET, EXTENDER_ADS1158_##N##_START }
+  #define BUNDEL_EXTENDER(N) { EXTENDER_ADS1158_##N##_CS_PIN, EXTENDER_ADS1158_##N##_PWDN, EXTENDER_ADS1158_##N##_RESET, EXTENDER_ADS1158_##N##_START }
 
   static constexpr Ads1158Pinnen ExtenderLijst[] = {
     BUNDEL_EXTENDER(1),

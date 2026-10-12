@@ -14,6 +14,7 @@ GroeiAcademie FrameWork wordt als één samenwerkende Arduino-library ontwikkeld
 GroeiAcademie/
 ├── src/
 │   ├── GroeiAcademie.h
+│   ├── Data.h
 │   ├── Input.h
 │   ├── Screen.h
 │   ├── Stimulus.h
@@ -31,6 +32,11 @@ GroeiAcademie/
 │   │   ├── UserExample_*_template.h
 │   │   └── UserLibrary_*_template.h
 │   ├── Systeem/
+│   │   ├── Data/
+│   │   │   ├── Data.h/.cpp
+│   │   │   ├── EEPROM.h/.cpp
+│   │   │   ├── microSD.h/.cpp
+│   │   │   └── FLASH.h/.cpp
 │   │   ├── GedeeldeBus/
 │   │   │   ├── GedeeldeBus.h
 │   │   │   ├── GedeeldeBus.cpp
@@ -67,6 +73,7 @@ GroeiAcademie/
 ├── examples/
 │   ├── Systeem/
 │   │   ├── ADC_Backend/
+│   │   ├── Data/
 │   │   ├── GedeeldeBus/
 │   │   │   ├── Extenders/
 │   │   │   └── Sensoren/
@@ -101,9 +108,10 @@ Gebruikers kunnen de volledige library opnemen met:
 #include <GroeiAcademie.h>
 ```
 
-`src/GroeiAcademie.h` neemt momenteel `Screen.h`, `Stimulus.h` en `Input.h` op. Daarnaast zijn de publieke moduleheaders rechtstreeks beschikbaar:
+`src/GroeiAcademie.h` neemt momenteel `Data.h`, `Screen.h`, `Stimulus.h` en `Input.h` op. Daarnaast zijn de publieke moduleheaders rechtstreeks beschikbaar:
 
 ```cpp
+#include <Data.h>
 #include <Input.h>
 #include <Screen.h>
 #include <Stimulus.h>
@@ -119,6 +127,34 @@ GedeeldeBus is de gemeenschappelijke boom- en resourcebeheerlaag. De generieke k
 De actuele boom gebruikt één `GedeeldeBusNode`-structuur voor root-, parent- en childnodes. `Native` is de root. Top-level componenten hangen aan `Native`; een Sensor kan als child van een ADC-extender hangen; Input en Screen maken zelf children aan voor hun concrete kanalen.
 
 De code gebruikt geen centrale array met een vast maximum. Elke node bevat `parent`, `firstChild`, `nextChild` en `prevChild` en krijgt bij constructie een uniek `id` via `volgendeGedeeldeBusId`.
+
+## Data
+
+Data is een top-level GedeeldeBus-component onder `Native`. De Data-componentcodes staan vóór het Extender-bereik: `GC_DATA` t/m `DATA_MICROSD` gebruiken `0x14` t/m `0x17`; `0x20` t/m `0x7F` blijft het functionele Extender-bereik. De gewone toepassing maakt `Data` aan; `Data` maakt zelf de geselecteerde concrete media aan en voert hun lifecycle uit.
+
+```text
+DATA_TYPE_NONE
+└─ sensor -> toepassing
+
+Native
+└─ Data
+   ├─ DIRECT
+   ├─ EEPROM  : I2C
+   ├─ FLASH   : SPI
+   └─ microSD : SPI
+```
+
+`DATA_LAYER_CONFIG` bepaalt welke types gecompileerd zijn. `DATA_TYPE_NONE` behoudt de oude route zonder Data-class. Net als bij Input kan bij `GedeeldeBusNewComponent<struct Data>(...)` een subset als objectfilter worden meegegeven. `DIRECT` is geen opslagmedium. Zonder FIFO bewaart DIRECT de laatst gemeten waarde; met de sensor-specifieke FIFO loopt de real-time gegevensstroom via `CircularBuffer`. EEPROM, FLASH en microSD zijn concrete children van Data.
+
+Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `Data->SensorWrite(...)`. Lezen gebeurt via `Data->SensorRead()`. STREAMING, RECORDING, mediumkeuze, FIFO en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
+
+De publieke Data-interface voor STREAMING en RECORDING gebruikt de vastgelegde namen `StreamStart(...)`, `StreamWrite(...)`, `StreamRead(...)`, `StreamStop(...)`, `RecordStart(...)`, `RecordWrite(...)`, `RecordRead(...)` en `RecordStop(...)`. Deze functies horen bij `Data`; ze horen niet bij de sensor. Concrete media behouden daarnaast de volledige API die zij van hun gebruikte library erven.
+
+Voor continue sensordata gebruikt STREAMING in deze fase microSD of FLASH. RECORDING gebruikt microSD. EEPROM blijft als Data-medium beschikbaar, maar niet voor continue sensorstromen.
+
+Serial-redirect grijpt centraal aan op `GA_SERIAL`. `REDIRECT_SERIAL_NONE` behoudt de gewone `Serial`/`Serial0`-route. `REDIRECT_SERIAL_TO_MICROSD` gebruikt via `RedirectSerial` het door Data aangemaakte microSD-medium en schrijft de seriële bytes naar `REDIRECT_SERIAL_FILE`, standaard `"serial.log"`. De Serial-redirect gebruikt een eigen bestandshandle en blijft gescheiden van sensordata-recording.
+
+Zie [Data](Systeem/DATA.md).
 
 ## Lifecycle
 
@@ -157,7 +193,7 @@ Er zijn in de huidige code nog geen concrete `Diagnose()`-overrides. Uitgebreide
 
 `NativeArduinoPinVan()` vertaalt zo'n logische resource naar het board-specifieke Arduino-pinnummer uit `SystemConfig.h`. ExtenderPins gaan nooit door deze functie.
 
-De waarden van `HardwareResourceType` gebruiken de prefix `RT_`, bijvoorbeeld `RT_I2C`, `RT_SPI`, `RT_GPIO` en `RT_INTERRUPT`. De groepswaarden binnen `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER` en `GC_SENSOR`; concrete componentwaarden behouden hun eigen naam.
+De waarden van `HardwareResourceType` gebruiken de prefix `RT_`, bijvoorbeeld `RT_I2C`, `RT_SPI`, `RT_GPIO` en `RT_INTERRUPT`. De groepswaarden binnen `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER`, `GC_SENSOR` en `GC_DATA`; concrete componentwaarden behouden hun eigen naam.
 
 ### Gedeelde en exclusieve claims
 

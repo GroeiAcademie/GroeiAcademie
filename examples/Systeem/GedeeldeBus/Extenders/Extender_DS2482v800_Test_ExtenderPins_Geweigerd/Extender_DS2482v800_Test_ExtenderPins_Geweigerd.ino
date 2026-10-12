@@ -49,7 +49,7 @@ void setup() {
 
   if (!gelukt) {
     GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);
-    GA_SERIAL.println(F("RESULTAAT: FOUT — extender zelf faalt vóór ExtenderPins-test"));
+    GA_SERIAL.println(F("FOUT: extender zelf faalt vóór ExtenderPins-test"));
     return;
   }
 

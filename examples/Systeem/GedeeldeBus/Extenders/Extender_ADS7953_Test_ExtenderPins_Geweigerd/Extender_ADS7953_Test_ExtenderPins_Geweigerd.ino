@@ -17,7 +17,7 @@
 ExtenderADS7953 extender(
   &Native,
   GedeeldeBusComponent::ADC_ADS7953,
-  CS_PIN_EXTENDER_ADS7953_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI
+  EXTENDER_ADS7953_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI
 );
 #else
 ExtenderADS7953 extender(
@@ -49,7 +49,7 @@ void setup() {
 
   if (!gelukt) {
     GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);
-    GA_SERIAL.println(F("RESULTAAT: FOUT — extender zelf faalt vóór ExtenderPins-test"));
+    GA_SERIAL.println(F("FOUT: extender zelf faalt vóór ExtenderPins-test"));
     return;
   }
 

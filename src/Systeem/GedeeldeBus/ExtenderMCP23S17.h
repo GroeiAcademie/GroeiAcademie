@@ -35,7 +35,7 @@ struct ExtenderMCP23S17 : HardwareResourceTypeSPI, MCP23S17 {
   #if EXTENDER_MCP23S17_AANTAL >= 2
   struct Mcp23s17Pinnen { HardwareResourcePin csPin; };
 
-  #define BUNDEL_EXTENDER(N) { CS_PIN_EXTENDER_MCP23S17_##N }
+  #define BUNDEL_EXTENDER(N) { EXTENDER_MCP23S17_##N##_CS_PIN }
 
   static constexpr Mcp23s17Pinnen ExtenderLijst[] = {
     BUNDEL_EXTENDER(1),

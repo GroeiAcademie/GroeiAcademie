@@ -18,10 +18,6 @@
   #include <PCF8575.h>
 #endif
 
-#if EXTENDER_I2C_EEPROM_AANTAL > 0
-  #include <I2C_eeprom.h>
-#endif
-
 #if EXTENDER_MCP23S17_AANTAL > 0
   #include <MCP23S17.h>
 #endif
@@ -96,6 +92,12 @@ void ResettenGedeeldeBus();
   X(CHARACTER_SCREEN,             0x11) /* GedeeldeBusComponent::CHARACTER_SCREEN */ \
   X(PIXEL_SCREEN,                 0x12) /* GedeeldeBusComponent::PIXEL_SCREEN */ \
   X(SERIAL_OUTPUT,                0x13) /* GedeeldeBusComponent::SERIAL_OUTPUT */ \
+  /*                                */ \
+  /* DATA ------------------------- */ \
+  X(GC_DATA,                       0x14) /* GedeeldeBusComponent::GC_DATA */ \
+  X(DATA_EEPROM,                   0x15) /* GedeeldeBusComponent::DATA_EEPROM */ \
+  X(DATA_FLASH,                    0x16) /* GedeeldeBusComponent::DATA_FLASH */ \
+  X(DATA_MICROSD,                  0x17) /* GedeeldeBusComponent::DATA_MICROSD */ \
   /*                                */ \
   /* EXTENDER --------------------- */ \
   X(GC_EXTENDER,                     0x20) /* GedeeldeBusComponent::GC_EXTENDER */ \
@@ -575,7 +577,7 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 };
 
 // ============================================================================
-// CONCRETE EXTENDERS — blijven architecturaal onderdeel van GedeeldeBus,
+// CONCRETE EXTENDERS: blijven architecturaal onderdeel van GedeeldeBus,
 // maar staan voor onderhoud en leesbaarheid elk in een eigen bestand.
 // ============================================================================
 #if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
@@ -595,9 +597,6 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 #endif
 #if EXTENDER_DS2482_800_AANTAL > 0
   #include "ExtenderDS2482v800.h"
-#endif
-#if EXTENDER_I2C_EEPROM_AANTAL > 0
-  #include "ExtenderI2C_EEPROM.h"
 #endif
 #if EXTENDER_MAX14830_I2C_AANTAL > 0
   #include "ExtenderMAX14830I2C.h"
@@ -631,7 +630,7 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 #endif
 
 // ============================================================================
-// ADC-BASIS — ADC_NATIVE en ADC_ADS1115 worden als ADC-extender ingeplugd.
+// ADC-BASIS: ADC_NATIVE en ADC_ADS1115 worden als ADC-extender ingeplugd.
 // De sensorlaag wordt pas daarna op de gekozen ADC-extender ingeplugd.
 // ============================================================================
 struct ADC_NATIVE : GedeeldeBusNode {

@@ -1,7 +1,7 @@
 // ============================================================================
 // Sensor: RFP602
 // ============================================================================
-// Basis-lifecycletest voor RFP602.
+// Basis-lifecycletest voor RFP602 zonder Data-class.
 // UserConfig.h kiest de ADC-backend:
 //   ADC_BACKEND_NATIVE
 //   ADC_BACKEND_ADS1115
@@ -9,6 +9,10 @@
 // ============================================================================
 
 #include <GroeiAcademie.h>
+
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  #error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE voor deze test.
+#endif
 
 #if ADC_BACKEND != ADC_BACKEND_NATIVE && ADC_BACKEND != ADC_BACKEND_ADS1115
   #error Sensor_RFP602 ondersteunt in deze test ADC_BACKEND_NATIVE of ADC_BACKEND_ADS1115.
@@ -38,7 +42,7 @@ void setup() {
 
   sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
   const bool gelukt = sensorRFP602 != nullptr;
-  ToonResultaat(F("aanmelden/controleren/inpluggen/activeren"), gelukt);
+  ToonResultaat(F("Sensor aanmelden/controleren/inpluggen/activeren"), gelukt);
 
   if (!gelukt) {
     GA_SERIAL.println(F("RESULTAAT: FOUT"));

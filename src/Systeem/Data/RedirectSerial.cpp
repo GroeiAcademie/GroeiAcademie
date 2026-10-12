@@ -1,0 +1,63 @@
+#include "../../Configuratie/SystemConfig.h"
+
+#if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+
+#include "RedirectSerial.h"
+#include "Data.h"
+#include "microSD.h"
+
+namespace {
+  File File;
+  bool initialiseren = false;
+}
+
+void RedirectSerial::begin(unsigned long) {
+  if (File || initialiseren) return;
+
+  initialiseren = true;
+
+  if (::Data == nullptr) {
+    ::Data = new struct Data();
+    ::Data->componentCreated = true;
+
+    const bool geslaagd = static_cast<GedeeldeBusNode*>(::Data)->aanmelden() &&
+                          static_cast<GedeeldeBusNode*>(::Data)->controleren() &&
+                          static_cast<GedeeldeBusNode*>(::Data)->inpluggen() &&
+                          static_cast<GedeeldeBusNode*>(::Data)->activeren();
+    GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(static_cast<GedeeldeBusNode*>(::Data));
+
+    if (!geslaagd) {
+      struct Data* object = ::Data;
+      if (object->aangemeld) static_cast<GedeeldeBusNode*>(object)->afmelden();
+      else delete object;
+      ::Data = nullptr;
+    }
+  }
+
+  if (::Data != nullptr) {
+    for (GedeeldeBusNode* sameParent = ::Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
+      if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
+
+      struct microSD* kanaal = static_cast<struct microSD*>(sameParent);
+      if (kanaal->np_CS != DATA_LAYER_MICROSD_1_CS_PIN) continue;
+
+      File = kanaal->open(REDIRECT_SERIAL_FILE, FILE_WRITE);
+      break;
+    }
+  }
+
+  initialiseren = false;
+}
+
+RedirectSerial::operator bool() {
+  return !initialiseren && static_cast<bool>(File);
+}
+
+size_t RedirectSerial::write(uint8_t byte) {
+  if (initialiseren) return 0;
+  if (!File) begin(0);
+  if (!File) return 0;
+  return File.write(byte);
+}
+
+#endif

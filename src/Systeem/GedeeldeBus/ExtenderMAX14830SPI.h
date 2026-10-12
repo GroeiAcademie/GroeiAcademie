@@ -30,7 +30,7 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
   uint8_t exclusiefMetIrq_[2];
 
   // ============================================================================
-  // DEFAULT — MAX14830 SPI #1
+  // DEFAULT: MAX14830 SPI #1
   // ============================================================================
   #if EXTENDER_MAX14830_SPI_AANTAL == 1
   ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_IRQ, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
@@ -42,12 +42,12 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
   #endif
 
   // ============================================================================
-  // EXPERIMENTEEL — MAX14830 SPI — AANTAL >= 2
+  // EXPERIMENTEEL: MAX14830 SPI #2
   // ============================================================================
   #if EXTENDER_MAX14830_SPI_AANTAL >= 2
   struct Max14830SpiPinnen { HardwareResourcePin csPin; HardwareResourcePin irq; };
 
-  #define BUNDEL_EXTENDER(N) { CS_PIN_EXTENDER_MAX14830_SPI_##N, EXTENDER_MAX14830_SPI_##N##_IRQ }
+  #define BUNDEL_EXTENDER(N) { EXTENDER_MAX14830_SPI_##N##_CS_PIN, EXTENDER_MAX14830_SPI_##N##_IRQ }
 
   static constexpr Max14830SpiPinnen ExtenderLijst[] = {
     BUNDEL_EXTENDER(1),

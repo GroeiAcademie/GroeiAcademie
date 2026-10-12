@@ -205,13 +205,23 @@ examples\Systeem\GedeeldeBus\
 
 De GedeeldeBus-tests gebruiken `TestLibraryCommon.cmd`. Er bestaat in de huidige codebasis geen afzonderlijk `TestLibraryGedeeldeBusOngeldig.cmd`. `TestLibraryGedeeldeBus.cmd` maakt momenteel geen deel uit van de vier logs die `TestLibraryGenereerTESTRESULTATEN.cmd` voor de officiële releasevalidatie verwerkt.
 
-### 7. Mapping-volledigheidscontrole: `TestLibraryMappingControle.cmd`
+### 7. Data-tests: `TestLibraryData-v2.0.0.cmd`
+
+`TestLibraryData-v2.0.0.cmd` gebruikt `CONTROLE_MODUS=INCLUDE` voor:
+
+```text
+examples\Systeem\Data\
+```
+
+De huidige testlijst compileert de EEPROM-, microSD- en FLASH-voorbeelden afzonderlijk. De EEPROM-test gebruikt `DATA_TYPE_EEPROM`; de microSD-test gebruikt `DATA_TYPE_MICROSD`; de FLASH-test gebruikt `DATA_TYPE_FLASH`. Daarnaast wordt `Sensor_RFP602.ino` gecompileerd met `DATA_TYPE_NONE` en `REDIRECT_SERIAL_TO_MICROSD`. Daarmee wordt gecontroleerd dat Serial redirect de noodzakelijke Data/microSD-route zelf mee compileert en niet vereist dat `DATA_TYPE_MICROSD` in `DATA_LAYER_CONFIG` staat. Alle tests lopen via `TestLibraryCommon.cmd`. De FLASH-test gebruikt `SPIMemory`. Er worden in deze Data-test geen boards vooraf uitgesloten; de boardmatrix toont zelf welke combinaties compileren en welke niet.
+
+### 8. Mapping-volledigheidscontrole: `TestLibraryMappingControle.cmd`
 
 `TestLibraryMappingControle.cmd` behoudt voor DIGITAL, PCF8574 en HX1838 een brede tekstuele aanwezigheidstest op `mappingTestMenu[]` in `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino`. De referentielijsten bevatten de volledige opschriftenset van de gecontroleerde types.
 
 Voor de drie ingebouwde HX1838-toetsenindelingen wordt aanvullend per `HX1838_TOETSENINDELING` de eigen `#if`/`#elif`-tak in `InputkanalenHX1838.ino` gecontroleerd. Binnen die tak controleert het script zowel de aanwezigheid als de verwachte volgorde van de opschriften. `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` is hiervan bewust uitgezonderd omdat de opschriften door de gebruiker worden bepaald; daarvoor wordt `InputkanalenHX1838UserDefined.ino` gecompileerd met een expliciete generieke testconfiguratie. De referentietabellen worden handmatig onderhouden en moeten bij nieuwe of gewijzigde ingebouwde keypadtypes/toetsenindelingen mee bijgewerkt worden.
 
-### 8. Testresultaten genereren: `TestLibraryGenereerTESTRESULTATEN.cmd`
+### 9. Testresultaten genereren: `TestLibraryGenereerTESTRESULTATEN.cmd`
 
 De vier compilecycli schrijven elk hun eigen logbestand:
 

@@ -20,7 +20,7 @@ struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
   uint8_t exclusiefMetIrqReset_[3];
 
   // ============================================================================
-  // DEFAULT — SC16IS752 SPI #1
+  // DEFAULT: SC16IS752 SPI #1
   // ============================================================================
   #if EXTENDER_SC16IS752_SPI_AANTAL == 1
   ExtenderSC16IS752SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_IRQ, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
@@ -33,12 +33,12 @@ struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
   #endif
 
   // ============================================================================
-  // EXPERIMENTEEL — SC16IS752 SPI — AANTAL >= 2
+  // EXPERIMENTEEL: SC16IS752 SPI #2
   // ============================================================================
   #if EXTENDER_SC16IS752_SPI_AANTAL >= 2
   struct Sc16is752SpiPinnen { HardwareResourcePin csPin; HardwareResourcePin irq; HardwareResourcePin reset; };
 
-  #define BUNDEL_EXTENDER(N) { CS_PIN_EXTENDER_SC16IS752_SPI_##N, EXTENDER_SC16IS752_SPI_##N##_IRQ, EXTENDER_SC16IS752_SPI_##N##_RESET }
+  #define BUNDEL_EXTENDER(N) { EXTENDER_SC16IS752_SPI_##N##_CS_PIN, EXTENDER_SC16IS752_SPI_##N##_IRQ, EXTENDER_SC16IS752_SPI_##N##_RESET }
 
   static constexpr Sc16is752SpiPinnen ExtenderLijst[] = {
     BUNDEL_EXTENDER(1),

@@ -4,6 +4,14 @@
 #include "../Systeem/Input/InputTypes.h"
 #include "../Systeem/Screen/ScreenTypes.h"
 
+// ADC BACKEND: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
+#ifndef ADC_BACKEND_NATIVE
+  #define ADC_BACKEND_NATIVE               0  // ingebouwde ADC van de Arduino
+#endif
+#ifndef ADC_BACKEND_ADS1115
+  #define ADC_BACKEND_ADS1115              1  // externe 16-bit ADC via I2C
+#endif
+
 // BOARD_VERSIONs: ondersteunde ARDUINO UNO-vormfactor boards die vóór UserConfig.h beschikbaar moeten zijn.
 #define BOARD_UNO_R3                       0
 #define BOARD_UNO_R4_MINIMA                1
@@ -15,13 +23,12 @@
 #define BOARD_RP2040_CYTRON_MAKER_UNO      4
 #define BOARD_STM32F4_NUCLEO64_F401RE      6
 
-// ADC BACKEND: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
-#ifndef ADC_BACKEND_NATIVE
-  #define ADC_BACKEND_NATIVE               0  // ingebouwde ADC van de Arduino
-#endif
-#ifndef ADC_BACKEND_ADS1115
-  #define ADC_BACKEND_ADS1115              1  // externe 16-bit ADC via I2C
-#endif
+// DATA: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
+#define DATA_TYPE_NONE                     0x01
+#define DATA_TYPE_DIRECT                   0x02
+#define DATA_TYPE_EEPROM                   0x04
+#define DATA_TYPE_FLASH                    0x08
+#define DATA_TYPE_MICROSD                  0x10
 
 // GPIO: General Purpose Input/Output, programmeerbare pin op een computerchip of printplaat waarvan de functie via software kan worden ingesteld.
 #define GPIO0    0
@@ -79,6 +86,10 @@
 #define GPIO48  48
 #define GPIO49  49
 
+// SERIAL REDIRECT: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
+#define REDIRECT_SERIAL_NONE               0
+#define REDIRECT_SERIAL_TO_MICROSD         1
+
 // opladen van UserConfig.h
 #ifndef GROEIACADEMIE_IGNORE_USER_CONFIG
   #if defined(__has_include)
@@ -101,14 +112,15 @@
 // ****************************************************************************
 
 // ============================================================================
-// TAAL: standaard keuze
+// TAAL: standaard keuze ======================================================
 // ============================================================================
 #if !defined(LANGUAGE_NL) && !defined(LANGUAGE_DE) && !defined(LANGUAGE_EN) && !defined(LANGUAGE_FR)
   #define LANGUAGE_NL // #define LANGUAGE_DE | #define LANGUAGE_EN | #define LANGUAGE_FR
 #endif
 
+
 // ============================================================================
-// BOARD_VERSION 
+// BOARD_VERSION ==============================================================
 // ============================================================================
 #ifndef BOARD_VERSION
   // Automatische detectie gebruikt de compiler-/boardmacro van de geselecteerde Arduino-boardcore.
@@ -140,11 +152,27 @@
 // gebruikt de library die keuze en wordt bovenstaande automatische detectie niet uitgevoerd (de #ifndef hierboven slaat dan over). 
 // Enkel wanneer BOARD_VERSION nergens vooraf gedefinieerd is, bepaalt dit bestand het board automatisch op basis van de compiler-/boardmacro's van de Arduino IDE.
 
-#if BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV 
+#ifndef REDIRECT_SERIAL
+  #define REDIRECT_SERIAL REDIRECT_SERIAL_NONE
+#endif
+
+#ifndef REDIRECT_SERIAL_FILE
+  #define REDIRECT_SERIAL_FILE "serial.log"
+#endif
+
+#if REDIRECT_SERIAL != REDIRECT_SERIAL_NONE && REDIRECT_SERIAL != REDIRECT_SERIAL_TO_MICROSD
+  #error REDIRECT_SERIAL bevat een onbekende redirect.
+#endif
+
+#if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+  #include "../Systeem/Data/RedirectSerial.h"
+  #define GA_SERIAL RedirectSerial()
+#elif BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
   #define GA_SERIAL Serial0
 #else
   #define GA_SERIAL Serial
 #endif
+
 
 // ============================================================================
 // BOARD_ID: generieke, per-fysiek-bord-identiteit, bewust hier in SystemConfig.h en niet in een subsysteem-specifiek configuratiebestand, want "welk fysiek bord is dit" is geen eigenschap van één subsysteem. 
@@ -155,8 +183,9 @@
   #define BOARD_ID  1
 #endif
 
+
 // ============================================================================
-// ADC BACKEND
+// ADC BACKEND ================================================================
 // ----------------------------------------------------------------------------
 // LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de gekozen ADS1115-library geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
@@ -191,8 +220,17 @@
   #endif
 #endif
 
+
 // ============================================================================
-// INPUT
+// DATA =======================================================================
+// ============================================================================
+#ifndef DATA_LAYER_CONFIG
+  #define DATA_LAYER_CONFIG DATA_TYPE_NONE
+#endif
+
+
+// ============================================================================
+// INPUT ======================================================================
 // ============================================================================
 
 #ifndef INPUT_DEBOUNCE_MS
@@ -227,6 +265,7 @@
   #endif
 #endif
 
+
 // INPUT_TYPE_PCF8574 ---------------------------------------------------------
 #ifndef I2C_ADDRESS_PCF8574
   #define I2C_ADDRESS_PCF8574 0x20
@@ -235,6 +274,7 @@
 #ifndef TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED
   #define TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH
 #endif
+
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
 // D8 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was. 
@@ -274,8 +314,9 @@
 // Kost extra flashgeheugen en Serial-afhankelijkheid, standaard uit. Niet aanraden om aan te laten in productiecode.
 // #define INPUT_MAPPING_EXTRA_CONTROLES_INSCHAKELEN
 
+
 // ============================================================================
-// OUTPUT
+// OUTPUT =====================================================================
 // ============================================================================
 
 // FATAL
@@ -306,6 +347,7 @@
   #define SCREEN_OUTPUT_CONFIG SCREEN_TYPE_NONE
 #endif
 
+
 // Characterscherm ----------------------------------------------------------------
 #ifndef I2C_ADDRESS_CHARACTER_SCREEN
   #define I2C_ADDRESS_CHARACTER_SCREEN 0x27
@@ -314,6 +356,7 @@
 #ifndef ACTIEF_CHARACTER_SCREEN
   #define ACTIEF_CHARACTER_SCREEN        SCREEN_LCD1602
 #endif
+
 
 // Pixelscherm --------------------------------------------------------------------
 #ifndef PIXEL_SCREEN_CS
@@ -381,6 +424,7 @@
   #define PIXEL_SCREEN_KLEUR_PANIC       0xFFFF   // wit, springt er maximaal uit op een donkere achtergrond
 #endif
 
+
 // SerialScreen -------------------------------------------------------------------
 #ifndef SERIAL_BAUDRATE
   #define SERIAL_BAUDRATE 115200UL
@@ -390,13 +434,27 @@
   #define SERIAL_CONNECT_TIMEOUT_MS 2000UL
 #endif
 
+
 // ============================================================================
-// SENSOR
+// SENSOREN ===================================================================
 // ============================================================================
 
 #ifndef SENSOR_HERAANMELDEN_NA_PAUZE_MS
   #define SENSOR_HERAANMELDEN_NA_PAUZE_MS 100UL // minimale wachttijd tussen twee pogingen om een mislukte sensor opnieuw aan te melden
 #endif
+
+
+// ============================================================================
+// RFP602 DATA
+// ============================================================================
+#ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+  #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0
+#endif
+
+#ifndef RFP602_DATA_RECORD_FILE
+  #define RFP602_DATA_RECORD_FILE "RFP602.log"
+#endif
+
 
 // ****************************************************************************
 // VALIDATIES
@@ -414,12 +472,13 @@
   #error Selecteer slechts een taal in UserConfig.h of SystemConfig.h.
 #endif
 
+
 // ****************************************************************************
 // UITGBREIDE INSTELLINGEN
 // ****************************************************************************
 
 // ============================================================================
-// BOARD_VERSION VERSUS ARDUINO UNO-SHIELDPINNEN
+// BOARD_VERSION VERSUS ARDUINO UNO-SHIELDPINNEN ==============================
 // ============================================================================
 
 // Gebruik deze GPIOxx-labels in plaats van kale cijfers, zodat de mapping leesbaar en controleerbaar blijft.
@@ -991,8 +1050,190 @@
 
 #endif
 
+
 // ============================================================================
-// EXTENDERS
+// DATA =======================================================================
+// ============================================================================
+
+// ============================================================================
+// DATA: EEPROM
+// ============================================================================
+#ifndef DATA_LAYER_EEPROM_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM)
+    #define DATA_LAYER_EEPROM_AANTAL 1
+  #else
+    #define DATA_LAYER_EEPROM_AANTAL 0
+  #endif
+#endif
+
+// ============================================================================
+// DEFAULT: EEPROM #1
+// ============================================================================
+#if DATA_LAYER_EEPROM_AANTAL >= 1
+  #ifndef DATA_LAYER_EEPROM_1_I2C_ADDRESS
+    #define DATA_LAYER_EEPROM_1_I2C_ADDRESS 0x50
+  #endif
+  #ifndef DATA_LAYER_EEPROM_1_FIFO_SIZE
+    #define DATA_LAYER_EEPROM_1_FIFO_SIZE 0
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: EEPROM #2
+// ============================================================================
+#if DATA_LAYER_EEPROM_AANTAL >= 2
+  #ifndef DATA_LAYER_EEPROM_2_I2C_ADDRESS
+    #define DATA_LAYER_EEPROM_2_I2C_ADDRESS 0x51
+  #endif
+  #ifndef DATA_LAYER_EEPROM_2_FIFO_SIZE
+    #define DATA_LAYER_EEPROM_2_FIFO_SIZE 0
+  #endif
+#endif
+
+
+// ============================================================================
+// DATA: FLASH
+// ============================================================================
+#ifndef DATA_LAYER_FLASH_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
+    #define DATA_LAYER_FLASH_AANTAL 1
+  #else
+    #define DATA_LAYER_FLASH_AANTAL 0
+  #endif
+#endif
+
+// ============================================================================
+// DEFAULT: FLASH #1
+// ============================================================================
+#if DATA_LAYER_FLASH_AANTAL >= 1
+  #ifndef DATA_LAYER_FLASH_1_CS_PIN
+    #define DATA_LAYER_FLASH_1_CS_PIN HardwareResourcePin::NONE
+  #endif
+  #ifndef DATA_LAYER_FLASH_1_FIFO_SIZE
+    #define DATA_LAYER_FLASH_1_FIFO_SIZE 0
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: FLASH #2
+// ============================================================================
+#if DATA_LAYER_FLASH_AANTAL >= 2
+  #ifndef DATA_LAYER_FLASH_2_CS_PIN
+    #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE
+  #endif
+  #ifndef DATA_LAYER_FLASH_2_FIFO_SIZE
+    #define DATA_LAYER_FLASH_2_FIFO_SIZE 0
+  #endif
+#endif
+
+
+// ============================================================================
+// DATA: microSD
+// ============================================================================
+#ifndef DATA_LAYER_MICROSD_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+    #define DATA_LAYER_MICROSD_AANTAL 1
+  #else
+    #define DATA_LAYER_MICROSD_AANTAL 0
+  #endif
+#endif
+
+// ============================================================================
+// DEFAULT: microSD #1
+// ============================================================================
+#if DATA_LAYER_MICROSD_AANTAL >= 1
+  #ifndef DATA_LAYER_MICROSD_1_CS_PIN
+    #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8
+  #endif
+  #ifndef DATA_LAYER_MICROSD_1_FIFO_SIZE
+    #define DATA_LAYER_MICROSD_1_FIFO_SIZE 0
+  #endif
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: microSD #2
+// ============================================================================
+#if DATA_LAYER_MICROSD_AANTAL >= 2
+  #ifndef DATA_LAYER_MICROSD_2_CS_PIN
+    #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE
+  #endif
+  #ifndef DATA_LAYER_MICROSD_2_FIFO_SIZE
+    #define DATA_LAYER_MICROSD_2_FIFO_SIZE 0
+  #endif
+#endif
+
+
+// ============================================================================
+// DATA: Validatie
+// ============================================================================
+#ifdef DATA_FIFO_ACTIEF
+  #undef DATA_FIFO_ACTIEF
+#endif
+
+#if (defined(RFP602_DATA_LAYER_DIRECT_FIFO_SIZE) && RFP602_DATA_LAYER_DIRECT_FIFO_SIZE > 0) || \
+    (defined(DATA_LAYER_EEPROM_1_FIFO_SIZE) && DATA_LAYER_EEPROM_1_FIFO_SIZE > 0) || \
+    (defined(DATA_LAYER_EEPROM_2_FIFO_SIZE) && DATA_LAYER_EEPROM_2_FIFO_SIZE > 0) || \
+    (defined(DATA_LAYER_MICROSD_1_FIFO_SIZE) && DATA_LAYER_MICROSD_1_FIFO_SIZE > 0) || \
+    (defined(DATA_LAYER_MICROSD_2_FIFO_SIZE) && DATA_LAYER_MICROSD_2_FIFO_SIZE > 0) || \
+    (defined(DATA_LAYER_FLASH_1_FIFO_SIZE) && DATA_LAYER_FLASH_1_FIFO_SIZE > 0) || \
+    (defined(DATA_LAYER_FLASH_2_FIFO_SIZE) && DATA_LAYER_FLASH_2_FIFO_SIZE > 0)
+  #define DATA_FIFO_ACTIEF 1
+#else
+  #define DATA_FIFO_ACTIEF 0
+#endif
+
+
+#if ((DATA_LAYER_CONFIG) & ~(DATA_TYPE_NONE | DATA_TYPE_DIRECT | DATA_TYPE_EEPROM | DATA_TYPE_FLASH | DATA_TYPE_MICROSD))
+  #error DATA_LAYER_CONFIG bevat een onbekend datatype.
+#endif
+
+#if (DATA_LAYER_CONFIG) == 0
+  #error DATA_LAYER_CONFIG moet minstens één datatype bevatten.
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_NONE) && (DATA_LAYER_CONFIG) != DATA_TYPE_NONE
+  #error DATA_TYPE_NONE kan niet met een ander datatype worden gecombineerd.
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM) && DATA_LAYER_EEPROM_AANTAL < 1
+  #error DATA_TYPE_EEPROM vereist DATA_LAYER_EEPROM_AANTAL >= 1.
+#endif
+
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM) && DATA_LAYER_EEPROM_AANTAL > 0
+  #error DATA_LAYER_EEPROM_AANTAL > 0 vereist DATA_TYPE_EEPROM in DATA_LAYER_CONFIG.
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) && DATA_LAYER_MICROSD_AANTAL < 1
+  #error DATA_TYPE_MICROSD vereist DATA_LAYER_MICROSD_AANTAL >= 1.
+#endif
+
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) && REDIRECT_SERIAL != REDIRECT_SERIAL_TO_MICROSD && DATA_LAYER_MICROSD_AANTAL > 0
+  #error DATA_LAYER_MICROSD_AANTAL > 0 vereist DATA_TYPE_MICROSD in DATA_LAYER_CONFIG of REDIRECT_SERIAL_TO_MICROSD.
+#endif
+
+#if DATA_LAYER_EEPROM_AANTAL > 2
+  #error DATA_LAYER_EEPROM_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
+#if DATA_LAYER_MICROSD_AANTAL > 2
+  #error DATA_LAYER_MICROSD_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH) && DATA_LAYER_FLASH_AANTAL < 1
+  #error DATA_TYPE_FLASH vereist DATA_LAYER_FLASH_AANTAL >= 1.
+#endif
+
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH) && DATA_LAYER_FLASH_AANTAL > 0
+  #error DATA_LAYER_FLASH_AANTAL > 0 vereist DATA_TYPE_FLASH in DATA_LAYER_CONFIG.
+#endif
+
+#if DATA_LAYER_FLASH_AANTAL > 2
+  #error DATA_LAYER_FLASH_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
+
+// ============================================================================
+// EXTENDERS ==================================================================
 // ============================================================================
 // Elke EXTENDER_<NAAM>_AANTAL bepaalt hoeveel instanties er zijn; elke adres-/CS-macro staat achter zijn eigen if op dat aantal, 
 // zodat er nooit een macro bestaat voor een instantie die niet actief is.
@@ -1048,8 +1289,8 @@
 // ============================================================================
 #if EXTENDER_ADS1158_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_ADS1158_1
-    #define CS_PIN_EXTENDER_ADS1158_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS1158_1_CS_PIN
+    #define EXTENDER_ADS1158_1_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS1158_1_PWDN
@@ -1070,8 +1311,8 @@
 // ============================================================================
 #if EXTENDER_ADS1158_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_ADS1158_2
-    #define CS_PIN_EXTENDER_ADS1158_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS1158_2_CS_PIN
+    #define EXTENDER_ADS1158_2_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS1158_2_PWDN
@@ -1128,24 +1369,24 @@
 // ============================================================================
 #if EXTENDER_ADS7953_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_ADS7953_1
-    #define CS_PIN_EXTENDER_ADS7953_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS7953_1_CS_PIN
+    #define EXTENDER_ADS7953_1_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_1
-    #define EXTENDER_ADS7953_GPIO0_TO_UNO_1 HardwareResourcePin::NP_D5
+  #ifndef EXTENDER_ADS7953_1_GPIO0_TO_UNO
+    #define EXTENDER_ADS7953_1_GPIO0_TO_UNO HardwareResourcePin::NP_D5
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_1
-    #define EXTENDER_ADS7953_GPIO1_TO_UNO_1 HardwareResourcePin::NP_D6
+  #ifndef EXTENDER_ADS7953_1_GPIO1_TO_UNO
+    #define EXTENDER_ADS7953_1_GPIO1_TO_UNO HardwareResourcePin::NP_D6
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_1
-    #define EXTENDER_ADS7953_GPIO2_TO_UNO_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS7953_1_GPIO2_TO_UNO
+    #define EXTENDER_ADS7953_1_GPIO2_TO_UNO HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_1
-    #define EXTENDER_ADS7953_GPIO3_TO_UNO_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS7953_1_GPIO3_TO_UNO
+    #define EXTENDER_ADS7953_1_GPIO3_TO_UNO HardwareResourcePin::NONE
   #endif
 #endif
 
@@ -1154,24 +1395,24 @@
 // ============================================================================
 #if EXTENDER_ADS7953_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_ADS7953_2
-    #define CS_PIN_EXTENDER_ADS7953_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS7953_2_CS_PIN
+    #define EXTENDER_ADS7953_2_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO0_TO_UNO_2
-    #define EXTENDER_ADS7953_GPIO0_TO_UNO_2 HardwareResourcePin::NP_D7
+  #ifndef EXTENDER_ADS7953_2_GPIO0_TO_UNO
+    #define EXTENDER_ADS7953_2_GPIO0_TO_UNO HardwareResourcePin::NP_D7
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO1_TO_UNO_2
-    #define EXTENDER_ADS7953_GPIO1_TO_UNO_2 HardwareResourcePin::NP_D8
+  #ifndef EXTENDER_ADS7953_2_GPIO1_TO_UNO
+    #define EXTENDER_ADS7953_2_GPIO1_TO_UNO HardwareResourcePin::NP_D8
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO2_TO_UNO_2
-    #define EXTENDER_ADS7953_GPIO2_TO_UNO_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS7953_2_GPIO2_TO_UNO
+    #define EXTENDER_ADS7953_2_GPIO2_TO_UNO HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
-  #ifndef EXTENDER_ADS7953_GPIO3_TO_UNO_2
-    #define EXTENDER_ADS7953_GPIO3_TO_UNO_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_ADS7953_2_GPIO3_TO_UNO
+    #define EXTENDER_ADS7953_2_GPIO3_TO_UNO HardwareResourcePin::NONE
   #endif
 #endif
 
@@ -1273,32 +1514,6 @@
 
 
 // ============================================================================
-// EXTENDER: I2C_EEPROM
-// ============================================================================
-#ifndef EXTENDER_I2C_EEPROM_AANTAL
-  #define EXTENDER_I2C_EEPROM_AANTAL 0
-#endif
-
-// ============================================================================
-// DEFAULT: I2C_EEPROM #1
-// ============================================================================
-#if EXTENDER_I2C_EEPROM_AANTAL >= 1
-  #ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_1
-    #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_1 0x50
-  #endif
-#endif
-
-// ============================================================================
-// EXPERIMENTEEL: I2C_EEPROM #2
-// ============================================================================
-#if EXTENDER_I2C_EEPROM_AANTAL >= 2
-  #ifndef I2C_ADDRESS_EXTENDER_I2C_EEPROM_2
-    #define I2C_ADDRESS_EXTENDER_I2C_EEPROM_2 0x51
-  #endif
-#endif
-
-
-// ============================================================================
 // EXTENDER: MAX14830 I2C
 // ============================================================================
 #ifndef EXTENDER_MAX14830_I2C_AANTAL
@@ -1346,8 +1561,8 @@
 // ============================================================================
 #if EXTENDER_MAX14830_SPI_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_1
-    #define CS_PIN_EXTENDER_MAX14830_SPI_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_MAX14830_SPI_1_CS_PIN
+    #define EXTENDER_MAX14830_SPI_1_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_MAX14830_SPI_1_IRQ
@@ -1360,8 +1575,8 @@
 // ============================================================================
 #if EXTENDER_MAX14830_SPI_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_MAX14830_SPI_2
-    #define CS_PIN_EXTENDER_MAX14830_SPI_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_MAX14830_SPI_2_CS_PIN
+    #define EXTENDER_MAX14830_SPI_2_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_MAX14830_SPI_2_IRQ
@@ -1433,8 +1648,8 @@
 // DEFAULT: MCP23S17 #1
 // ============================================================================
 #if EXTENDER_MCP23S17_AANTAL >= 1
-  #ifndef CS_PIN_EXTENDER_MCP23S17_1
-    #define CS_PIN_EXTENDER_MCP23S17_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_MCP23S17_1_CS_PIN
+    #define EXTENDER_MCP23S17_1_CS_PIN HardwareResourcePin::NONE
   #endif
 #endif
 
@@ -1442,8 +1657,8 @@
 // EXPERIMENTEEL: MCP23S17 #2
 // ============================================================================
 #if EXTENDER_MCP23S17_AANTAL >= 2
-  #ifndef CS_PIN_EXTENDER_MCP23S17_2
-    #define CS_PIN_EXTENDER_MCP23S17_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_MCP23S17_2_CS_PIN
+    #define EXTENDER_MCP23S17_2_CS_PIN HardwareResourcePin::NONE
   #endif
 #endif
 
@@ -1602,8 +1817,8 @@
 // ============================================================================
 #if EXTENDER_SC16IS752_SPI_AANTAL >= 1
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_SC16IS752_SPI_1
-    #define CS_PIN_EXTENDER_SC16IS752_SPI_1 HardwareResourcePin::NONE
+  #ifndef EXTENDER_SC16IS752_SPI_1_CS_PIN
+    #define EXTENDER_SC16IS752_SPI_1_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_SC16IS752_SPI_1_IRQ
@@ -1620,8 +1835,8 @@
 // ============================================================================
 #if EXTENDER_SC16IS752_SPI_AANTAL >= 2
   // EXCLUSIEF: CS van deze extender-instance; kies een vrije HardwareResourcePin.
-  #ifndef CS_PIN_EXTENDER_SC16IS752_SPI_2
-    #define CS_PIN_EXTENDER_SC16IS752_SPI_2 HardwareResourcePin::NONE
+  #ifndef EXTENDER_SC16IS752_SPI_2_CS_PIN
+    #define EXTENDER_SC16IS752_SPI_2_CS_PIN HardwareResourcePin::NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_SC16IS752_SPI_2_IRQ
@@ -1669,12 +1884,9 @@
   #endif
 #endif
 
-// ============================================================================
-// ============================================================================
-// ============================================================================
 
 // ============================================================================
-// ADC BACKEND
+// ADC BACKEND ================================================================
 // ============================================================================
 
 // Definieer de pinnen voor de sensoren op jouw sensorboard
@@ -1760,8 +1972,9 @@
   #error ADC_BITS moet 10, 12, 14 of 15 zijn.
 #endif
 
+
 // ============================================================================
-// INPUT
+// INPUT ======================================================================
 // ============================================================================
 
 // INPUT_TYPE_DIGITAL ---------------------------------------------------------
@@ -1836,6 +2049,7 @@
   #else
     #error "Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
   #endif
+
 
 // INPUT_TYPE_PCF8574 ---------------------------------------------------------
 #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
@@ -2107,6 +2321,7 @@
 
 #endif
 
+
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED
   #if HX1838_BRON_CODES != HX1838_BRON_CODES_DEFINE
@@ -2312,8 +2527,9 @@
   #endif
 #endif
 
+
 // ============================================================================
-// DEBUG INSTELLINGEN 
+// DEBUG INSTELLINGEN =========================================================
 // ============================================================================
 #ifdef TRACE 
   #ifndef DEBUG

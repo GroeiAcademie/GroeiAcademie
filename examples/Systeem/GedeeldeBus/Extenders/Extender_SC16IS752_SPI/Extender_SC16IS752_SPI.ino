@@ -17,7 +17,7 @@
 ExtenderSC16IS752SPI extender(
   &Native,
   GedeeldeBusComponent::UART_SC16IS752,
-  CS_PIN_EXTENDER_SC16IS752_SPI_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_SC16IS752_SPI_1_IRQ, EXTENDER_SC16IS752_SPI_1_RESET
+  EXTENDER_SC16IS752_SPI_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_SC16IS752_SPI_1_IRQ, EXTENDER_SC16IS752_SPI_1_RESET
 );
 #else
 ExtenderSC16IS752SPI extender(

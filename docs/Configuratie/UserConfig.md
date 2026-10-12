@@ -92,6 +92,72 @@ Voor de ingebouwde indelingen geldt verder: `HX1838_BRON_CODES_DEFINE` gebruikt 
 
 De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken. Voor `INPUT_TYPE_DIGITAL` gebeurt dit per `KEYPAD_TYPE`: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden standaard D3,D2,D5,D4. Deze pinnen worden als `HardwareResourcePin`-waarden opgegeven.
 
+## Serial redirect
+
+De gewone werking gebruikt geen redirect:
+
+```cpp
+// #define REDIRECT_SERIAL REDIRECT_SERIAL_NONE
+// #define REDIRECT_SERIAL_FILE "serial.log"
+```
+
+Voor redirect naar microSD:
+
+```cpp
+#define REDIRECT_SERIAL REDIRECT_SERIAL_TO_MICROSD
+#define REDIRECT_SERIAL_FILE "serial.log"
+```
+
+`REDIRECT_SERIAL_TO_MICROSD` maakt de noodzakelijke Data/microSD-route automatisch beschikbaar. `DATA_TYPE_MICROSD` hoeft daarvoor niet apart in `DATA_LAYER_CONFIG` te staan. `REDIRECT_SERIAL_NONE` betekent dat `GA_SERIAL` gewoon naar de bestaande `Serial` of `Serial0` blijft gaan.
+
+## Data
+
+Data wordt via `DATA_LAYER_CONFIG` geconfigureerd. Meerdere Data-types kunnen met `|` worden gecombineerd.
+
+```cpp
+// #define DATA_LAYER_CONFIG DATA_TYPE_NONE
+// #define DATA_LAYER_CONFIG DATA_TYPE_EEPROM | DATA_TYPE_MICROSD | DATA_TYPE_FLASH
+```
+
+Beschikbare huidige types zijn `DATA_TYPE_NONE`, `DATA_TYPE_DIRECT`, `DATA_TYPE_EEPROM`, `DATA_TYPE_FLASH` en `DATA_TYPE_MICROSD`.
+
+EEPROM gebruikt momenteel uitsluitend I2C:
+
+```cpp
+// #define DATA_LAYER_EEPROM_AANTAL 1
+// #define DATA_LAYER_EEPROM_1_I2C_ADDRESS 0x50
+// #define DATA_LAYER_EEPROM_2_I2C_ADDRESS 0x51
+```
+
+Wanneer `DATA_TYPE_EEPROM` actief is en `DATA_LAYER_EEPROM_AANTAL` niet expliciet is ingesteld, wordt standaard één EEPROM-instance gebruikt.
+
+microSD gebruikt momenteel uitsluitend SPI via de officiële Arduino `SD` library:
+
+```cpp
+// #define DATA_LAYER_MICROSD_AANTAL 1
+// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8
+// #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE
+```
+
+FLASH gebruikt uitsluitend SPI via `SPIMemory`:
+
+```cpp
+// #define DATA_LAYER_FLASH_AANTAL 1
+// #define DATA_LAYER_FLASH_1_CS_PIN HardwareResourcePin::NONE
+// #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE
+```
+
+SDA/SCL voor EEPROM en SCK/MISO/MOSI voor microSD en FLASH komen uit de bestaande boardconfiguratie. Alleen de instance-specifieke I2C-adressen en CS-pinnen worden hier ingesteld.
+
+Voor RFP602:
+
+```cpp
+// #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0
+// #define RFP602_DATA_RECORD_FILE "rfp602.log"
+```
+
+`RFP602_DATA_LAYER_DIRECT_FIFO_SIZE` is `0` voor DIRECT zonder FIFO; een waarde groter dan `0` activeert de RAM CircularBuffer/FIFO voor RFP602. `RFP602_DATA_RECORD_FILE` bepaalt het microSD-bestand voor RFP602-recording.
+
 ## ADC-backend
 
 De vaste keuzewaarden `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115` worden door `SystemConfig.h` beschikbaar gemaakt vóór `UserConfig.h` wordt geladen. Daardoor kunnen de gewone en backendafhankelijke instellingen in `UserConfig.h` deze namen veilig gebruiken.
@@ -169,3 +235,8 @@ Native pinnamen in deze configuratie gebruiken `HardwareResourcePin::NP_...`. `H
 De logische resources van een Extender worden niet hier hernoemd of gemapt: die staan als `ExtenderPins::EP_<pinnaam>` in de concrete `Extender*.h`.
 
 Voor lokale compiletests kan `GROEIACADEMIE_IGNORE_USER_CONFIG` worden gedefinieerd; dan laadt `SystemConfig.h` het aanwezige `UserConfig.h` niet.
+
+
+## Data FIFO
+
+De FIFO-grootte wordt per sensor ingesteld. Voor RFP602 bepaalt `RFP602_DATA_LAYER_DIRECT_FIFO_SIZE` de DIRECT-buffer: `0` bewaart alleen de laatst gemeten waarde; een waarde groter dan `0` activeert de RAM CircularBuffer/FIFO. `DATA_FIFO_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.

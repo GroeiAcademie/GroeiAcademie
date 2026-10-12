@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
+#include "../Data/Data.h"
 #include "../../Configuratie/SystemConfig.h"
 
 // ============================================================================
@@ -13,6 +14,9 @@
 // Voorlopig biedt de sensor alleen de directe leesfunctie RawAnalogRead().
 // ============================================================================
 struct RFP602 : Sensor {
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  struct Data* Data;
+#endif
   uint8_t exclusief_[4];
 
   const int sensorPin[4] = {
@@ -32,14 +36,30 @@ struct RFP602 : Sensor {
   unsigned long laatstePoging = 0;
 
   RFP602();
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  RFP602(struct Data* Data);
+#endif
   RFP602(GedeeldeBusNode* parent, GedeeldeBusComponent component,
          HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+#if DATA_LAYER_CONFIG == DATA_TYPE_NONE
     : Sensor(parent, { nullptr, 0, exclusief_, AANTAL_SENSOREN_AANWEZIG }, component, Extender) {
     exclusief_[0] = static_cast<uint8_t>(ADC_PIN_SENSOR_1);
     exclusief_[1] = static_cast<uint8_t>(ADC_PIN_SENSOR_2);
     exclusief_[2] = static_cast<uint8_t>(ADC_PIN_SENSOR_3);
     exclusief_[3] = static_cast<uint8_t>(ADC_PIN_SENSOR_4);
   }
+#else
+    : RFP602(parent, component, ::Data, Extender) {}
+
+  RFP602(GedeeldeBusNode* parent, GedeeldeBusComponent component, struct Data* Data,
+         HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : Sensor(parent, { nullptr, 0, exclusief_, AANTAL_SENSOREN_AANWEZIG }, component, Extender), Data(Data) {
+    exclusief_[0] = static_cast<uint8_t>(ADC_PIN_SENSOR_1);
+    exclusief_[1] = static_cast<uint8_t>(ADC_PIN_SENSOR_2);
+    exclusief_[2] = static_cast<uint8_t>(ADC_PIN_SENSOR_3);
+    exclusief_[3] = static_cast<uint8_t>(ADC_PIN_SENSOR_4);
+  }
+#endif
 
   bool Activeren() override;
   int RawAnalogRead(int sensorPin);

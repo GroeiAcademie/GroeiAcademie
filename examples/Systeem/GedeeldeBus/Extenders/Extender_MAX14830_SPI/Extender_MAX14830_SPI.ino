@@ -17,7 +17,7 @@
 ExtenderMAX14830SPI extender(
   &Native,
   GedeeldeBusComponent::UART_MAX14830,
-  CS_PIN_EXTENDER_MAX14830_SPI_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_MAX14830_SPI_1_IRQ
+  EXTENDER_MAX14830_SPI_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_MAX14830_SPI_1_IRQ
 );
 #else
 ExtenderMAX14830SPI extender(

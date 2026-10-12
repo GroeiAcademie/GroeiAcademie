@@ -428,6 +428,7 @@ bool GedeeldeBusNode::controleren() {
   if (parent != nullptr && parent == firstExtenderNode()) {
     const uint8_t code = static_cast<uint8_t>(component);
 
+    // Componentcodes 0x20 t/m 0x7F zijn Extenders.
     if (!(code >= 0x20 && code <= 0x7F)) {
       for (uint8_t i = 0; i < AantalClaims(); i++) {
         bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;

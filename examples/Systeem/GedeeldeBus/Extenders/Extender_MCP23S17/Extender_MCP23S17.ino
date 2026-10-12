@@ -13,7 +13,7 @@
 #endif
 
 #if EXTENDER_MCP23S17_AANTAL == 1
-ExtenderMCP23S17 extender(&Native, GedeeldeBusComponent::GC_EXTENDER, CS_PIN_EXTENDER_MCP23S17_1, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI);
+ExtenderMCP23S17 extender(&Native, GedeeldeBusComponent::GC_EXTENDER, EXTENDER_MCP23S17_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI);
 #else
 ExtenderMCP23S17 extender(&Native, GedeeldeBusComponent::GC_EXTENDER, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, 0);
 #endif
