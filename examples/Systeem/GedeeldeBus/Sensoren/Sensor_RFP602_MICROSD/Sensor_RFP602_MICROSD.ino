@@ -43,7 +43,7 @@ void setup() {
     return;
   }
 
-  Data->RecordStart();
+  Data->RecordingStart();
   GA_SERIAL.println(F("RESULTAAT: OK"));
 }
 
@@ -51,7 +51,7 @@ void loop() {
   if (sensorRFP602 == nullptr || Data == nullptr) return;
   for (uint8_t sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
     const int ruweData = sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
-    Data->RecordWrite(ruweData);
+    Data->RecordingWrite(ruweData);
     GA_SERIAL.print(F("Sensor "));
     GA_SERIAL.print(sensorNummer + 1);
     GA_SERIAL.print(F(": "));

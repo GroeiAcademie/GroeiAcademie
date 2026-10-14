@@ -179,16 +179,20 @@ Bij `DATA_TYPE_NONE` is er geen Data-class in de sensorroute en blijft de direct
 Data->SensorWrite(...);
 Data->SensorRead();
 
-Data->StreamStart();
-Data->StreamWrite(...);
-Data->StreamRead();
-Data->StreamStop();
+Data->StreamingStart();
+Data->StreamingWrite(...);
+Data->StreamingRead();
+Data->StreamingStop();
 
-Data->RecordStart();
-Data->RecordWrite(...);
+Data->RecordingStart();
+Data->RecordingWrite(...);
 Data->RecordRead();
-Data->RecordStop();
+Data->RecordingStop();
 ```
+
+Data faalt alleen wanneer geen enkel gevraagd medium overblijft. Een medium dat niet werkt, wordt afgemeld; de andere media blijven werken. DIRECT (RAM-FIFO) is geen medium op de bus en blijft altijd over.
+
+microSD schrijft na `DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL` regels, of na `DATA_LAYER_MICROSD_FLUSH_NA_MS` milliseconden sinds de vorige flush, weg naar de kaart. Roep `RecordingStop()` aan voor je de stroom onderbreekt.
 
 De sensor gebruikt STREAMING en RECORDING niet rechtstreeks. De toepassing kiest die werking. De concrete media behouden daarnaast hun volledige geërfde library-API.
 

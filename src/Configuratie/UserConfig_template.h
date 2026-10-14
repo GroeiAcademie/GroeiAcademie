@@ -350,6 +350,19 @@
 // #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM CircularBuffer/FIFO
 #endif
 
+#ifndef RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 1 (RFP602-sensor 1)
+#endif
+#ifndef RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 2 (RFP602-sensor 2)
+#endif
+#ifndef RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 3 (RFP602-sensor 3)
+#endif
+#ifndef RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 4 (RFP602-sensor 4)
+#endif
+
 #ifndef RFP602_DATA_RECORD_FILE
 // #define RFP602_DATA_RECORD_FILE "RFP602.log"
 #endif
@@ -619,7 +632,7 @@
 // DEFAULT: EEPROM #1
 // ============================================================================
 #ifndef DATA_LAYER_EEPROM_1_I2C_ADDRESS
-// #define DATA_LAYER_EEPROM_1_I2C_ADDRESS 0x50  // standaard waarde: 0x50  // EXCLUSIEF
+// #define DATA_LAYER_EEPROM_1_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef DATA_LAYER_EEPROM_1_FIFO_SIZE
@@ -630,7 +643,7 @@
 // EXPERIMENTEEL: EEPROM #2
 // ============================================================================
 #ifndef DATA_LAYER_EEPROM_2_I2C_ADDRESS
-// #define DATA_LAYER_EEPROM_2_I2C_ADDRESS 0x51  // standaard waarde: 0x51  // EXCLUSIEF
+// #define DATA_LAYER_EEPROM_2_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef DATA_LAYER_EEPROM_2_FIFO_SIZE
@@ -671,6 +684,14 @@
 // ============================================================================
 // DATA: microSD
 // ============================================================================
+#ifndef DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL
+// #define DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL 50  // standaard waarde: 50; geldig bereik: 1 t/m 255 regels
+#endif
+
+#ifndef DATA_LAYER_MICROSD_FLUSH_NA_MS
+// #define DATA_LAYER_MICROSD_FLUSH_NA_MS 5000UL  // standaard waarde: 5000UL; maximale tijd in ms tussen twee flushes naar de kaart
+#endif
+
 #ifndef DATA_LAYER_MICROSD_AANTAL
 // #define DATA_LAYER_MICROSD_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_MICROSD actief is, anders 0
 #endif
@@ -720,7 +741,7 @@
 // DEFAULT: ADS1115 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
-// #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48  // standaard: 0x48 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze na I2C_ADDRESS_ADS1115. // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_ADS1115_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS1115_1_ALERT_RDY
@@ -731,7 +752,7 @@
 // EXPERIMENTEEL: ADS1115 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_ADS1115_2
-// #define I2C_ADDRESS_EXTENDER_ADS1115_2 0x49  // standaard: 0x49 bij ADC_BACKEND_NATIVE; bij ADC_BACKEND_ADS1115 volgt deze als tweede extender na I2C_ADDRESS_ADS1115. // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_ADS1115_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_ADS1115_2_ALERT_RDY
@@ -796,14 +817,14 @@
 // DEFAULT: ADS7828 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
-// #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_ADS7828_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: ADS7828 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
-// #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_ADS7828_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 
@@ -934,14 +955,14 @@
 // DEFAULT: DS2482-800 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
-// #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18  // standaard waarde: 0x18  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_DS2482_800_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: DS2482-800 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
-// #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19  // standaard waarde: 0x19  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_DS2482_800_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 
@@ -956,7 +977,7 @@
 // DEFAULT: MAX14830 I2C #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_1
-// #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 0x60  // standaard waarde: 0x60  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_MAX14830_I2C_1_IRQ
@@ -967,7 +988,7 @@
 // EXPERIMENTEEL: MAX14830 I2C #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_2
-// #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 0x61  // standaard waarde: 0x61  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_MAX14830_I2C_2_IRQ
@@ -1016,7 +1037,7 @@
 // DEFAULT: MCP23017 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
-// #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_MCP23017_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_MCP23017_1_INTA
@@ -1035,7 +1056,7 @@
 // EXPERIMENTEEL: MCP23017 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
-// #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_MCP23017_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_MCP23017_2_INTA
@@ -1084,14 +1105,14 @@
 // DEFAULT: PCA9685 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_PCA9685_1
-// #define I2C_ADDRESS_EXTENDER_PCA9685_1 0x40  // standaard waarde: 0x40  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_PCA9685_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: PCA9685 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_PCA9685_2
-// #define I2C_ADDRESS_EXTENDER_PCA9685_2 0x41  // standaard waarde: 0x41  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_PCA9685_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 
@@ -1106,7 +1127,7 @@
 // DEFAULT: PCF8574 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
-// #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20  // standaard: 0x20; bij INPUT_TYPE_PCF8574 het volgende vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_PCF8574_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_PCF8574_1_INT
@@ -1117,7 +1138,7 @@
 // EXPERIMENTEEL: PCF8574 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
-// #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21  // standaard: 0x21; bij INPUT_TYPE_PCF8574 het tweede vrije adres na I2C_ADDRESS_PCF8574  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_PCF8574_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_PCF8574_2_INT
@@ -1136,7 +1157,7 @@
 // DEFAULT: PCF8575 #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
-// #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20  // standaard waarde: 0x20  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_PCF8575_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_PCF8575_1_INT
@@ -1147,7 +1168,7 @@
 // EXPERIMENTEEL: PCF8575 #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
-// #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21  // standaard waarde: 0x21  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_PCF8575_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_PCF8575_2_INT
@@ -1166,7 +1187,7 @@
 // DEFAULT: SC16IS752 I2C #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1
-// #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 0x48  // standaard waarde: 0x48  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 
 #endif
 #ifndef EXTENDER_SC16IS752_I2C_1_IRQ
@@ -1181,7 +1202,7 @@
 // EXPERIMENTEEL: SC16IS752 I2C #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2
-// #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 0x49  // standaard waarde: 0x49  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_SC16IS752_I2C_2_IRQ
@@ -1242,7 +1263,7 @@
 // DEFAULT: TCA9548A #1
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
-// #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70  // standaard waarde: 0x70  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_TCA9548A_1 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 #ifndef EXTENDER_TCA9548A_1_RESET
@@ -1253,7 +1274,7 @@
 // EXPERIMENTEEL: TCA9548A #2
 // ============================================================================
 #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
-// #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71  // standaard waarde: 0x71  // EXCLUSIEF
+// #define I2C_ADDRESS_EXTENDER_TCA9548A_2 I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 
 #endif
 #ifndef EXTENDER_TCA9548A_2_RESET
@@ -1270,6 +1291,19 @@
 // ============================================================================
 #ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
 // #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM CircularBuffer/FIFO
+#endif
+
+#ifndef RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 1 (RFP602-sensor 1)
+#endif
+#ifndef RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 2 (RFP602-sensor 2)
+#endif
+#ifndef RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 3 (RFP602-sensor 3)
+#endif
+#ifndef RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE
+// #define RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 4 (RFP602-sensor 4)
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE

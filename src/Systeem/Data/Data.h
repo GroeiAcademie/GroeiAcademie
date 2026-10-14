@@ -26,6 +26,16 @@ struct Data;
   #include "FLASH.h"
 #endif
 
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
+struct SensorFIFO {   // één FIFO per channel; het geheugen geeft de sensor op
+  int* buffer;
+  uint16_t sizeFIFO;
+  bool LIFO;          // false = oudste waarde eerst (FIFO), true = nieuwste waarde eerst (LIFO)
+  uint16_t first;     // plaats van de oudste waarde
+  uint16_t count;     // aantal waarden in de FIFO
+};
+#endif
+
 struct Data : GedeeldeBusNode {
   Data();
   Data(uint8_t typesActief);
@@ -39,22 +49,23 @@ struct Data : GedeeldeBusNode {
   void SensorWrite(int ruweData);
   int SensorRead();
 
-  void StreamStart();
-  void StreamWrite(int ruweData);
-  int StreamRead();
-  void StreamStop();
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
+  void WriteFIFO(SensorFIFO& channel, int value);
+  bool ReadFIFO(SensorFIFO& channel, int& value);
+#endif
 
-  void RecordStart();
-  void RecordWrite(int ruweData);
+  void StreamingStart();
+  void StreamingWrite(int ruweData);
+  int StreamingRead();
+  void StreamingStop();
+
+  void RecordingStart();
+  void RecordingWrite(int ruweData);
   int RecordRead();
-  void RecordStop();
+  void RecordingStop();
 
   uint8_t typesActief;
   int ruweData = 0;
-
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && RFP602_DATA_LAYER_DIRECT_FIFO_SIZE > 0
-  CircularBuffer<int, RFP602_DATA_LAYER_DIRECT_FIFO_SIZE> ruweDataFIFO;
-#endif
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
   uint32_t adres[2] = { 0, 0 };

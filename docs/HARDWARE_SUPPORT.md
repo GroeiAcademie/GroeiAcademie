@@ -27,6 +27,8 @@ De gemelde waarschuwing van de externe library `LiquidCrystal I2C` betreft de ar
 
 ## v2.0.0 Extenders en Sensoren
 
+UNO R3 wordt in v2.0.0 gebruikt als test- en compatibiliteitsplatform. Niet alle subsystemen en configuraties worden op UNO R3 ondersteund of meegecompileerd.
+
 De broncode bevat 14 concrete Extenderclasses onder `src/Systeem/GedeeldeBus/` en `RFP602` onder `src/Systeem/Sensor/`. Hun aanwezigheid in de broncode of het slagen van een lifecycle-/resourcevoorbeeld is niet hetzelfde als een volledige elektronische hardwarevalidatie van iedere functie van die chip. Die validatiestatus moet afzonderlijk worden vastgelegd wanneer de elektronische functietests zijn uitgevoerd.
 
 ## Vereiste Arduino IDE-boardselecties

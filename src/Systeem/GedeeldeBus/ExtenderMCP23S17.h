@@ -49,7 +49,26 @@ struct ExtenderMCP23S17 : HardwareResourceTypeSPI, MCP23S17 {
   #endif
 
   bool Activeren() override {
-    return MCP23S17::begin() && MCP23S17::isConnected();
+    // isConnected() van de library geeft bij SPI altijd true: de controle gebeurt hier door teruglezen.
+    const bool gelukt = MCP23S17::begin() && MCP23S17::isConnected();
+
+    // Teruglezen: IPOL A bewaren, testwaarde 0x55 schrijven en teruglezen, daarna altijd de oorspronkelijke waarde terugzetten.
+    // Kan de oorspronkelijke waarde niet gelezen worden, dan wordt er niets geschreven en faalt de test.
+    // Zonder chip leest MISO 0xFF of 0x00, nooit 0x55.
+    bool terugGelezen = gelukt;
+    if (gelukt) {
+      uint8_t oorspronkelijk = 0;
+      terugGelezen = MCP23S17::getPolarity8(0, oorspronkelijk);
+      if (terugGelezen) {
+        uint8_t waarde = 0;
+        terugGelezen = MCP23S17::setPolarity8(0, 0x55) && MCP23S17::getPolarity8(0, waarde) && waarde == 0x55;
+        uint8_t hersteld = 0;
+        const bool herstelGelukt = MCP23S17::setPolarity8(0, oorspronkelijk) && MCP23S17::getPolarity8(0, hersteld) && hersteld == oorspronkelijk;
+        terugGelezen = terugGelezen && herstelGelukt;
+      }
+    }
+
+    return FoutDiagnoseSPI(gelukt, MCP23S17::lastError(), terugGelezen);
   }
 };
 

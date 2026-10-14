@@ -41,7 +41,11 @@ void RedirectSerial::begin(unsigned long) {
       struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
       if (kanaal->np_CS != DATA_LAYER_MICROSD_1_CS_PIN) continue;
 
+#if defined(ARDUINO_ARCH_ESP32)
+      FileSerial = kanaal->open(REDIRECT_SERIAL_FILE, FILE_APPEND);
+#else
       FileSerial = kanaal->open(REDIRECT_SERIAL_FILE, FILE_WRITE);
+#endif
       break;
     }
   }
@@ -57,7 +61,9 @@ size_t RedirectSerial::write(uint8_t byte) {
   if (initialiseren) return 0;
   if (!FileSerial) begin(0);
   if (!FileSerial) return 0;
-  return FileSerial.write(byte);
+  const size_t geschreven = FileSerial.write(byte);
+  if (byte == '\n') FileSerial.flush();
+  return geschreven;
 }
 
 #endif

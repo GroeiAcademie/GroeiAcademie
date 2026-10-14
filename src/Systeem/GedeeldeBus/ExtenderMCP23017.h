@@ -64,7 +64,24 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
   #endif
 
   bool Activeren() override {
-    return MCP23017::begin() && MCP23017::isConnected();
+    const bool gelukt = MCP23017::begin() && MCP23017::isConnected();
+
+    // Teruglezen: IPOL A bewaren, testwaarde 0x55 schrijven en teruglezen, daarna altijd de oorspronkelijke waarde terugzetten.
+    // Kan de oorspronkelijke waarde niet gelezen worden, dan wordt er niets geschreven en faalt de test.
+    bool terugGelezen = gelukt;
+    if (gelukt) {
+      uint8_t oorspronkelijk = 0;
+      terugGelezen = MCP23017::getPolarity8(0, oorspronkelijk);
+      if (terugGelezen) {
+        uint8_t waarde = 0;
+        terugGelezen = MCP23017::setPolarity8(0, 0x55) && MCP23017::getPolarity8(0, waarde) && waarde == 0x55;
+        uint8_t hersteld = 0;
+        const bool herstelGelukt = MCP23017::setPolarity8(0, oorspronkelijk) && MCP23017::getPolarity8(0, hersteld) && hersteld == oorspronkelijk;
+        terugGelezen = terugGelezen && herstelGelukt;
+      }
+    }
+
+    return FoutDiagnoseI2C(gelukt, MCP23017::lastError(), terugGelezen);
   }
 
 };

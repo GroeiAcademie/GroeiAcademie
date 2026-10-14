@@ -219,6 +219,8 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 
 Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
 
+UNO R3 wordt in v2.0.0 gebruikt als test- en compatibiliteitsplatform. Niet alle subsystemen en configuraties worden op UNO R3 ondersteund of meegecompileerd.
+
 ## Snel starten
 
 Gebruik bij voorkeur de publieke hoofdheader:

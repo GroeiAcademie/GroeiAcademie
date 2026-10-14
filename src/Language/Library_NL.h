@@ -58,6 +58,16 @@
 //=========================================================
 // CRITICAL
 //=========================================================
+// GedeeldeBus
+#define _CRITICAL_GB201 "CRITICAL: GB201" // GedeeldeBus inpluggen() mislukt
+#define _CRITICAL_GB202 "CRITICAL: GB202" // GedeeldeBus inpluggen() mislukt: bus start niet
+#define _CRITICAL_GB301 "CRITICAL: GB301" // GedeeldeBus activeren() mislukt
+#define _CRITICAL_GB302 "CRITICAL: GB302" // GedeeldeBus activeren() mislukt: geen antwoord op I2C-adres
+#define _CRITICAL_GB303 "CRITICAL: GB303" // GedeeldeBus activeren() mislukt: antwoord, maar initialisatie van de library mislukt
+#define _CRITICAL_GB304 "CRITICAL: GB304" // GedeeldeBus activeren() mislukt: SPI-component antwoordt niet geldig
+#define _CRITICAL_GB305 "CRITICAL: GB305" // GedeeldeBus activeren() mislukt: I2C-busfout of timeout
+#define _CRITICAL_GB306 "CRITICAL: GB306" // GedeeldeBus activeren() mislukt: verkeerde chip, teruglezen klopt niet
+
 // CharacterScreen
 #define _CRITICAL_CS201 "CRITICAL: CS201" // CharacterScreen inpluggen() mislukt
 #define _CRITICAL_CS301 "CRITICAL: CS301" // CharacterScreen activeren() mislukt

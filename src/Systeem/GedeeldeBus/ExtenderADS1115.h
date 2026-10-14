@@ -25,7 +25,9 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
 
   bool Activeren() override {
     InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-    return ADS1115::begin() && ADS1115::isConnected();
+    // Geen teruglezen: het configregister behoudt na een reset van het board de waarde van de vorige schets, dus er is geen vaste waarde om mee te vergelijken.
+    const bool gelukt = ADS1115::begin() && ADS1115::isConnected();
+    return FoutDiagnoseI2C(gelukt, ADS1115::getError(), gelukt);
   }
 
   // ============================================================================

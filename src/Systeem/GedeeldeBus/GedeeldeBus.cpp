@@ -48,15 +48,18 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
 
   if (busType == GedeeldeBusType::I2C) {
     if (!i2cGeinitialiseerd) {
+      // Enkel op ESP32 geeft Wire.begin() een bool terug; op de andere cores is Wire.begin() void.
       #if BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
-        Wire.begin(ARDUINO_UNO_SHIELD_PIN_SDA, ARDUINO_UNO_SHIELD_PIN_SCL);
+        i2cGeinitialiseerd = Wire.begin(ARDUINO_UNO_SHIELD_PIN_SDA, ARDUINO_UNO_SHIELD_PIN_SCL);
+      #elif defined(ARDUINO_ARCH_ESP32)
+        i2cGeinitialiseerd = Wire.begin();
       #else
         Wire.begin();
+        i2cGeinitialiseerd = true;
       #endif
 
-      i2cGeinitialiseerd = true;
 #ifdef DEBUG
-      if (GA_SERIAL) GA_DEBUG_PRINTLN("DEBUG: I2C geinitialiseerd");
+      if (i2cGeinitialiseerd && GA_SERIAL) GA_DEBUG_PRINTLN("DEBUG: I2C geinitialiseerd");
 #endif
 #ifdef TRACE
     } else {
@@ -99,8 +102,13 @@ struct ADC_NATIVE ADC_NATIVE(
   GedeeldeBusComponent::ADC_NATIVE,
   ADC_PIN_SENSOR_1,
   ADC_PIN_SENSOR_2,
+#if AANTAL_SENSOREN_AANWEZIG == 4
   ADC_PIN_SENSOR_3,
   ADC_PIN_SENSOR_4,
+#else
+  HardwareResourcePin::NONE,   // enkel de pinnen van de aanwezige sensoren claimen
+  HardwareResourcePin::NONE,
+#endif
   HardwareResourceToegang::GEDEELD
 );
 #elif ADC_BACKEND == ADC_BACKEND_ADS1115
@@ -294,6 +302,170 @@ bool HardwareResourceTypeI2C::controleren() {
   return GedeeldeBusNode::controleren();
 }
 
+bool GedeeldeBusNode::activeren() {
+#ifdef TRACE
+  if (GA_SERIAL) {
+    GA_SERIAL.print("TRACE: GedeeldeBusNode::activeren(): component=0x");
+    GA_SERIAL.println(static_cast<uint8_t>(component), HEX);
+  }
+#endif
+
+  if (actief) return true;
+  if (!ingeplugd) return false;
+  if (parent != nullptr && !parent->actief && !parent->activerenBezig && !parent->activeren()) return false;
+
+  activerenBezig = true;
+#if EXTENDER_TCA9548A_AANTAL > 0
+  // Achter een TCA9548A: eerst het kanaal van dit component openen, na Activeren() alle kanalen sluiten.
+  if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->SelectChannel(this);
+#endif
+  const bool gelukt = Activeren();
+#if EXTENDER_TCA9548A_AANTAL > 0
+  if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->disableAllChannels();
+#endif
+  activerenBezig = false;
+  if (!gelukt) return false;
+
+  actief = true;
+
+#ifdef DEBUG
+  if (GA_SERIAL) {
+    GA_DEBUG_PRINT("DEBUG: activeren OK component=0x");
+    GA_DEBUG_PRINTLN2(static_cast<uint8_t>(component), HEX);
+  }
+#endif
+
+  return true;
+}
+
+bool HardwareResourceTypeI2C::inpluggen() {
+  if (ingeplugd) return true;
+  if (!GedeeldeBusNode::inpluggen()) return false;
+  InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
+
+  // Kan enkel op ESP32 mislukken: daar geeft Wire.begin() een bool terug.
+  if (!IsGedeeldeBusGeinitialiseerd(GedeeldeBusType::I2C)) {
+#ifdef DEBUG
+    GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB202, component, component, adres, true);
+#else
+    GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB201, component, component, adres, true);
+#endif
+    ingeplugd = false;
+    return false;
+  }
+
+  return true;
+}
+
+bool HardwareResourceTypeI2C::FoutDiagnoseI2C(bool gelukt, int fout, bool terugGelezen) {
+  if (gelukt && terugGelezen) return true;
+
+  // Enkel bij een mislukte begin() het adres zelf testen, om de oorzaak te vinden.
+  // endTransmission(): 0 = antwoord, 2 = geen antwoord op het adres, 4 = andere busfout, 5 = timeout.
+#if defined(DEBUG) || defined(TRACE)
+  uint8_t i2cStatus = 0;
+  if (!gelukt) {
+    Wire.beginTransmission(adres);
+    i2cStatus = Wire.endTransmission();
+  }
+#endif
+
+#ifdef TRACE
+  if (GA_SERIAL) {
+    GA_SERIAL.print("TRACE: FoutDiagnoseI2C(): component=0x");
+    GA_SERIAL.print(static_cast<uint8_t>(component), HEX);
+    GA_SERIAL.print(" adres=0x");
+    GA_SERIAL.print(adres, HEX);
+    GA_SERIAL.print(" begin=");
+    GA_SERIAL.print(gelukt ? "OK" : "FOUT");
+    GA_SERIAL.print(" teruglezen=");
+    GA_SERIAL.print(terugGelezen ? "OK" : "FOUT");
+    GA_SERIAL.print(" endTransmission=");
+    GA_SERIAL.print(i2cStatus);
+    GA_SERIAL.print(" library fout=");
+    GA_SERIAL.println(fout);
+  }
+#endif
+
+#ifdef DEBUG
+  if (gelukt) {
+    GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB306, component, component, adres, true);
+  } else if (i2cStatus == 2) {
+    GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB302, component, component, adres, true);
+  } else if (i2cStatus == 4 || i2cStatus == 5) {
+    GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB305, component, component, adres, true);
+  } else {
+    GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB303, component, component, static_cast<uint8_t>(fout), false);
+  }
+#else
+  (void)fout;
+  GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB301, component, component, adres, true);
+#endif
+
+  return false;
+}
+
+bool HardwareResourceTypeSPI::controleren() {
+  if (gecontroleerd) return true;
+
+  // Zonder CS kan een SPI-component nooit geselecteerd worden: verplichte resource ontbreekt.
+  if (np_CS == HardwareResourcePin::NONE) {
+    GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB108, component, component, static_cast<uint8_t>(np_CS), false, true);
+    GedeeldeBusNode::controleren();
+    gecontroleerd = false;
+    conflictGevonden = true;
+    return false;
+  }
+
+  return GedeeldeBusNode::controleren();
+}
+
+bool HardwareResourceTypeSPI::FoutDiagnoseSPI(bool gelukt, int fout, bool terugGelezen) {
+  if (gelukt && terugGelezen) return true;
+
+  const bool native = (firstExtenderNode() == nullptr);
+
+#ifdef TRACE
+  if (GA_SERIAL) {
+    GA_SERIAL.print("TRACE: FoutDiagnoseSPI(): component=0x");
+    GA_SERIAL.print(static_cast<uint8_t>(component), HEX);
+    GA_SERIAL.print(" CS=");
+    GA_SERIAL.print(static_cast<uint8_t>(np_CS));
+    GA_SERIAL.print(" begin=");
+    GA_SERIAL.print(gelukt ? "OK" : "FOUT");
+    GA_SERIAL.print(" teruglezen=");
+    GA_SERIAL.print(terugGelezen ? "OK" : "FOUT");
+    GA_SERIAL.print(" library fout=");
+    GA_SERIAL.println(fout);
+  }
+#else
+  (void)fout;
+#endif
+
+#ifdef DEBUG
+  GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB304, component, component, static_cast<uint8_t>(np_CS), false, native);
+#else
+  GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB301, component, component, static_cast<uint8_t>(np_CS), false, native);
+#endif
+
+  return false;
+}
+
+bool PixelScreen::controleren() {
+  if (gecontroleerd) return true;
+
+  // Zonder DC kan het scherm geen commando's van data onderscheiden: verplichte resource ontbreekt.
+  if (np_DC == HardwareResourcePin::NONE) {
+    GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB108, component, component, static_cast<uint8_t>(np_DC), false, true);
+    HardwareResourceTypeSPI::controleren();
+    gecontroleerd = false;
+    conflictGevonden = true;
+    return false;
+  }
+
+  return HardwareResourceTypeSPI::controleren();
+}
+
 // Zoekt Screen in de boom, nodig omdat de globale ::Screen tijdens GedeeldeBusNewComponent<Screen>() zelf nog nullptr is, want de toewijzing gebeurt pas na de return, bij de aanroeper.
 static struct Screen* GedeeldeBusVindHardwareResourceComponentScreen(const GedeeldeBusNode* vanaf) {
   const GedeeldeBusNode* wortel = vanaf;
@@ -390,10 +562,8 @@ bool GedeeldeBusNode::controleren() {
   }
 
   if (parent != nullptr && parent == firstExtenderNode()) {
-    const uint8_t code = static_cast<uint8_t>(component);
-
     // Componentcodes 0x20 t/m 0x7F zijn Extenders.
-    if (!(code >= 0x20 && code <= 0x7F)) {
+    if (!IsExtenderComponent(component)) {
       for (uint8_t i = 0; i < AantalClaims(); i++) {
         bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
         const uint8_t waarde = ClaimWaarde(i, exclusief, identiteit);
@@ -509,6 +679,14 @@ bool GedeeldeBusNode::controleren() {
   return true;
 }
 
+void GedeeldeBusVerwijderTijdelijkeConflicten() {
+  while (GedeeldeBusHuidigeCyclusConflicten != nullptr) {
+    GedeeldeBusTijdelijkConflict* r = GedeeldeBusHuidigeCyclusConflicten;
+    GedeeldeBusHuidigeCyclusConflicten = r->volgende;
+    delete r;
+  }
+}
+
 void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
   if (GedeeldeBusHuidigeCyclusConflicten == nullptr) return;
 
@@ -523,7 +701,12 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
     String regel4 = "";
 
     if (heeftResource) {
-      if (r->isAdres) {
+      if (strcmp(r->code, _CRITICAL_GB303) == 0) {
+        // GB303: de waarde is de foutcode van de library, geen pin of adres.
+        String hexWaarde = String(r->waarde, HEX);
+        if (hexWaarde.length() < 2) hexWaarde = "0" + hexWaarde;
+        regel4 = String("FOUT: 0x") + hexWaarde;
+      } else if (r->isAdres) {
         String hexWaarde = String(strcmp(r->code, _FATAL_GB110) == 0 ? r->waarde : (r->waarde & 0x7F), HEX);
         if (hexWaarde.length() < 2) hexWaarde = "0" + hexWaarde;
         regel4 = String("I2C-ADRES: 0x") + hexWaarde;
@@ -571,7 +754,7 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
 
     if (scherm != nullptr) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      scherm->Print(ScreenData::TYPE_FATAL, r->code, GedeeldeBusComponentNaam(r->A), FATAL_LEESTIJD_MS, "", GedeeldeBusComponentNaam(r->B), regel4, FATAL_LEESTIJD_MS);
+      scherm->Print(strncmp(r->code, "CRITICAL", 8) == 0 ? ScreenData::TYPE_CRITICAL : ScreenData::TYPE_FATAL, r->code, GedeeldeBusComponentNaam(r->A), FATAL_LEESTIJD_MS, "", GedeeldeBusComponentNaam(r->B), regel4, FATAL_LEESTIJD_MS);
 #else
       scherm->Print(r->code, GedeeldeBusComponentNaam(r->A), FATAL_LEESTIJD_MS, "", GedeeldeBusComponentNaam(r->B), regel4, FATAL_LEESTIJD_MS);
 #endif

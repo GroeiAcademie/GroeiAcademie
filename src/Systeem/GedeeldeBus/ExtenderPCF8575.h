@@ -60,7 +60,9 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
   #endif
 
   bool Activeren() override {
-    return PCF8575::begin() && PCF8575::isConnected();
+    // Geen teruglezen: de PCF8575 heeft geen register, alleen quasi-bidirectionele pinnen waarvan de stand van de aansluiting afhangt.
+    const bool gelukt = PCF8575::begin() && PCF8575::isConnected();
+    return FoutDiagnoseI2C(gelukt, PCF8575::lastError(), gelukt);
   }
 
 };

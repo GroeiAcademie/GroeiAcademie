@@ -346,34 +346,8 @@ struct GedeeldeBusNode {
 
   // Activeren: de hook Activeren() uitvoeren, nadat de parent actief is.
   // Wanneer de parent net zijn children activeert (activerenBezig), wordt die niet opnieuw geactiveerd.
-  virtual bool activeren() {
-#ifdef TRACE
-    if (GA_SERIAL) {
-      GA_SERIAL.print("TRACE: GedeeldeBusNode::activeren(): component=0x");
-      GA_SERIAL.println(static_cast<uint8_t>(component), HEX);
-    }
-#endif
-
-    if (actief) return true;
-    if (!ingeplugd) return false;
-    if (parent != nullptr && !parent->actief && !parent->activerenBezig && !parent->activeren()) return false;
-
-    activerenBezig = true;
-    const bool gelukt = Activeren();
-    activerenBezig = false;
-    if (!gelukt) return false;
-
-    actief = true;
-
-#ifdef DEBUG
-    if (GA_SERIAL) {
-      GA_DEBUG_PRINT("DEBUG: activeren OK component=0x");
-      GA_DEBUG_PRINTLN2(static_cast<uint8_t>(component), HEX);
-    }
-#endif
-
-    return true;
-  }
+  // Lichaam in GedeeldeBus.cpp: daar is ExtenderTCA9548A gekend, voor het kanaal van een component achter een TCA9548A.
+  virtual bool activeren();
 
   virtual bool afmelden() {
 #ifdef TRACE
@@ -410,12 +384,17 @@ struct GedeeldeBusNode {
   // Een I2C-adres is opgeslagen als adres | 0x80 en valt daardoor buiten het bereik van de pinwaarden.
   static bool IsAdres(uint8_t waarde) { return waarde >= 0x80 && waarde != static_cast<uint8_t>(HardwareResourcePin::NONE) && waarde != static_cast<uint8_t>(HardwareResourcePin::CUSTOM); }
 
+  // IsExtenderComponent: de enige plaats die bepaalt welke componentcodes Extenders zijn.
+  static bool IsExtenderComponent(GedeeldeBusComponent c) {
+    const uint8_t code = static_cast<uint8_t>(c);
+    return code >= 0x20 && code <= 0x7F && c != GedeeldeBusComponent::ADC_NATIVE;
+  }
+
   // firstExtenderNode: nullptr betekent de pinnen van het board zelf (Native).
   // Een Extender (componentcode 0x20 t/m 0x7F, behalve ADC_NATIVE) biedt zijn children een eigen pinruimte.
   const GedeeldeBusNode* firstExtenderNode() const {
     for (const GedeeldeBusNode* voorouder = parent; voorouder != nullptr; voorouder = voorouder->parent) {
-      const uint8_t code = static_cast<uint8_t>(voorouder->component);
-      if (code >= 0x20 && code <= 0x7F && voorouder->component != GedeeldeBusComponent::ADC_NATIVE) return voorouder;
+      if (IsExtenderComponent(voorouder->component)) return voorouder;
     }
 
     return nullptr;
@@ -466,6 +445,7 @@ struct GedeeldeBusNode {
 // Sluit de huidige registratiecyclus af: toont elk GB-conflict dat sinds de start van deze cyclus werd geregistreerd,
 // op wat op dat moment al werkt, en geeft de tijdelijke lijst volledig vrij. Lichaam in GedeeldeBus.cpp, want deze functie moet Screen.h kunnen includeren.
 void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf);
+void GedeeldeBusVerwijderTijdelijkeConflicten();
 
 // GedeeldeBusNewComponent: maakt met new één GedeeldeBus-object aan en voert aanmelden(), controleren(), inpluggen() en activeren() in de juiste volgorde uit.
 // Geeft nullptr terug wanneer een stap faalt.
@@ -512,12 +492,15 @@ struct HardwareResourceTypeI2C : GedeeldeBusNode {
 
   bool controleren() override;
 
-  bool inpluggen() override {
-    if (ingeplugd) return true;
-    if (!GedeeldeBusNode::inpluggen()) return false;
-    InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-    return true;
-  }
+  // Lichaam in GedeeldeBus.cpp: meldt GB201 (standaard) of GB202 (DEBUG) wanneer de I2C-bus niet start.
+  bool inpluggen() override;
+
+  // FoutDiagnoseI2C: sluit Activeren() van een I2C-component af. Lichaam in GedeeldeBus.cpp.
+  // gelukt = resultaat van begin() van de library, fout = foutcode van de library (0 als die er geen heeft),
+  // terugGelezen = resultaat van de controle door teruglezen (gelijk aan gelukt wanneer er geen teruglezen is).
+  // Bij een fout: standaard GB301; met DEBUG GB302, GB303, GB305 of GB306 volgens de oorzaak.
+  // GB303 bewaart de fout in 1 byte; een signed libraryfout zoals -102 verschijnt daardoor als 0x9A. TRACE toont de oorspronkelijke waarde -102.
+  bool FoutDiagnoseI2C(bool gelukt, int fout, bool terugGelezen);
 
   // Over te erven basisfuncties - kale Wire-wrappers, generiek voor elk I2C-Extender.
   void WriteByte(uint8_t data) {
@@ -564,6 +547,13 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
     exclusief_[0] = static_cast<uint8_t>(np_CS);
   }
 
+  // Lichaam in GedeeldeBus.cpp: meldt GB108 wanneer CS ontbreekt.
+  bool controleren() override;
+
+  // FoutDiagnoseSPI: sluit Activeren() van een SPI-component af. Lichaam in GedeeldeBus.cpp.
+  // Zelfde parameters als FoutDiagnoseI2C. SPI kent geen ACK: een fout wordt standaard GB301, met DEBUG GB304.
+  bool FoutDiagnoseSPI(bool gelukt, int fout, bool terugGelezen);
+
   bool inpluggen() override {
     if (ingeplugd) return true;
     if (np_CS == HardwareResourcePin::NONE) return false;
@@ -575,10 +565,15 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
   }
 
   // Over te erven basisfunctie - kale SPI-wrapper, generiek voor elk SPI-Extender.
-  uint8_t Transfer(uint8_t data) {
-    digitalWrite(NativeArduinoPinVan(np_CS), LOW);
-    uint8_t resultaat = SPI.transfer(data);
-    digitalWrite(NativeArduinoPinVan(np_CS), HIGH);
+  // Met SPISettings, zodat elke SPI-component zijn eigen snelheid en modus krijgt op de gedeelde bus.
+  // Let op: NativeArduinoPinVan(np_CS) is alleen juist voor CS op een pin van het board, niet voor CS op een Extender.
+  uint8_t Transfer(uint8_t data, SPISettings instellingen) {
+    const uint8_t csPin = NativeArduinoPinVan(np_CS);
+    SPI.beginTransaction(instellingen);
+    digitalWrite(csPin, LOW);
+    const uint8_t resultaat = SPI.transfer(data);
+    digitalWrite(csPin, HIGH);
+    SPI.endTransaction();
     return resultaat;
   }
 };
@@ -700,6 +695,9 @@ struct PixelScreen : HardwareResourceTypeSPI {
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetDcRst_, 3 };
   }
 
+  // Lichaam in GedeeldeBus.cpp: meldt GB108 wanneer DC ontbreekt.
+  bool controleren() override;
+
   // Inpluggen: de pinnen instellen en in rusttoestand zetten.
   bool inpluggen() override {
     if (ingeplugd) return true;
@@ -815,8 +813,17 @@ struct InputPCF8574 : ExtenderPCF8574 {
 // Tussenstruct voor alle sensoren. Leeg vandaag; hier komen later de sensor-specifieke functies bij (ReadyForData, DataOpslaan, ...) die niet in
 // GedeeldeBusNode zelf horen, want dat zou ook de Extenders raken.
 // ============================================================================
+struct SensorFIFO;   // staat in Data.h
+
 struct Sensor : GedeeldeBusNode {
   using GedeeldeBusNode::GedeeldeBusNode;
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
+  // FIFO per channel: elke sensor erft deze functies; de FIFO/LIFO-logica staat in Data.
+  SensorFIFO* FIFO = nullptr;      // tabel van de sensor, één per channel
+  uint8_t numberOfChannels = 0;
+  void WriteFIFO(uint8_t numberChannel, int value);
+  bool ReadFIFO(uint8_t numberChannel, int& value);   // false = FIFO leeg; value = laatst gemeten waarde
+#endif
 };
 
 // ============================================================================

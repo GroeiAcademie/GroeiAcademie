@@ -7,6 +7,8 @@
 - Voor alle beschikbare libraryfuncties, parameters, returnwaarden en library-specifiek gedrag: raadpleeg de officiële documentatie van **Rob Tillaart `TCA9548`**.
 - Deze `.md` dupliceert die library-API bewust niet.
 
+De publieke API van ExtenderTCA9548A is de API van TCA9548 0.3.2 van Rob Tillaart. Een wissel van bibliotheek breekt sketches die deze API gebruiken.
+
 ## FrameWork-integratie
 
 Huidige overerving:

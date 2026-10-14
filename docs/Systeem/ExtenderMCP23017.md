@@ -7,6 +7,8 @@
 - Voor alle beschikbare libraryfuncties, parameters, returnwaarden en library-specifiek gedrag: raadpleeg de officiële documentatie van **Rob Tillaart `MCP23017`**.
 - Deze `.md` dupliceert die library-API bewust niet.
 
+De publieke API van ExtenderMCP23017 is de API van MCP23017_RT 0.9.3 van Rob Tillaart. Een wissel van bibliotheek breekt sketches die deze API gebruiken.
+
 ## FrameWork-integratie
 
 Huidige overerving:

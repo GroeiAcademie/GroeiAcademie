@@ -38,9 +38,13 @@ int RFP602::RawAnalogRead(int sensorPin) {
     laatstePoging = nu;
 
     if (!aanmelden() || !controleren() || !inpluggen() || !activeren()) {
+      if (!heraangemeldConflictGetoond) GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(this);
+      else GedeeldeBusVerwijderTijdelijkeConflicten();
+      heraangemeldConflictGetoond = true;
       afmelden();
       return 0;
     }
+    heraangemeldConflictGetoond = false;
   }
 
 #if ADC_BACKEND == ADC_BACKEND_ADS1115
@@ -52,5 +56,46 @@ int RFP602::RawAnalogRead(int sensorPin) {
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   if (Data != nullptr) Data->SensorWrite(ruweData);
 #endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
+  // In de FIFO van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
+  for (uint8_t sensorNummer = 1; sensorNummer <= AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
+    if (this->sensorPin[sensorNummer - 1] == sensorPin) { WriteFIFO(sensorNummer, ruweData); break; }
+  }
+#endif
   return ruweData;
+}
+
+bool RFP602::StartAnalogRead(int sensorPin) {
+  if (!actief) return false;
+  laatstePin = sensorPin;
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  ADC_ADS1115.requestADC(sensorPin);
+#else
+  laatsteWaarde = analogRead(sensorPin);
+#endif
+  return true;
+}
+
+bool RFP602::IsAnalogReadKlaar() {
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  return ADC_ADS1115.isReady();
+#else
+  return true;
+#endif
+}
+
+int RFP602::GetAnalogRead() {
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  laatsteWaarde = ADC_ADS1115.getValue();
+#endif
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  if (Data != nullptr) Data->SensorWrite(laatsteWaarde);
+#endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
+  // In de FIFO van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
+  for (uint8_t sensorNummer = 1; sensorNummer <= AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
+    if (sensorPin[sensorNummer - 1] == laatstePin) { WriteFIFO(sensorNummer, laatsteWaarde); break; }
+  }
+#endif
+  return laatsteWaarde;
 }

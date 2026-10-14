@@ -51,11 +51,32 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C, TCA9548 {
   }
   #endif
 
+  // SelectChannel: opent alleen het kanaal waarop kind hangt (zijn claim EP_CH0 tot EP_CH7).
+  // Niet te verwarren met selectChannel() van TCA9548 (kleine s): dat is de bibliotheekfunctie met een kanaalnummer.
+  bool SelectChannel(GedeeldeBusNode* kind) {
+    for (uint8_t i = 0; i < kind->AantalClaims(); i++) {
+      bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
+      const uint8_t waarde = kind->ClaimWaarde(i, exclusief, identiteit);
+      if (waarde <= static_cast<uint8_t>(ExtenderPins::EP_CH7)) return TCA9548::selectChannel(waarde);
+    }
+    return false;
+  }
+
   bool Activeren() override {
     if (np_RESET != HardwareResourcePin::NONE) {
       TCA9548::setResetPin(NativeArduinoPinVan(np_RESET));
     }
-    return TCA9548::begin() && TCA9548::isConnected();
+    const bool gelukt = TCA9548::begin() && TCA9548::isConnected();
+
+    // Teruglezen volgens datasheet: het controleregister is lees- en schrijfbaar. 0x00 schrijven (wat begin() vraagt) en teruglezen; er gaat geen kanaal open.
+    bool terugGelezen = gelukt;
+    if (gelukt) {
+      Wire.beginTransmission(adres);
+      Wire.write(static_cast<uint8_t>(0x00));
+      terugGelezen = (Wire.endTransmission() == 0) && (Wire.requestFrom(adres, (uint8_t)1) == 1) && (Wire.read() == 0x00);
+    }
+
+    return FoutDiagnoseI2C(gelukt, TCA9548::getError(), terugGelezen);
   }
 
 };

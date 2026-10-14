@@ -10,6 +10,13 @@ call "%~dp0TestLibraryCommon.cmd" %*
 exit /b %errorlevel%
 
 :TESTLIJST
+set TEST_INO="examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik\Scenario1_EnkelTik.ino"
+set TEST_NAAM="INPUT_TYPE_NONE"
+set TEST_FLAGS="-DINPUT_KANAAL_CONFIG=INPUT_TYPE_NONE"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\Input\InputkanalenDIGITAL\InputkanalenDIGITAL.ino"
 set TEST_NAAM="INPUT_TYPE_DIGITAL | KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"
 set TEST_FLAGS="-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4"

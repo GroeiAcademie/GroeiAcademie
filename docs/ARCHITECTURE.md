@@ -146,9 +146,9 @@ Native
 
 `DATA_LAYER_CONFIG` bepaalt welke types gecompileerd zijn. `DATA_TYPE_NONE` behoudt de oude route zonder Data-class. Net als bij Input kan bij `GedeeldeBusNewComponent<struct Data>(...)` een subset als objectfilter worden meegegeven. `DIRECT` is geen opslagmedium. Zonder FIFO bewaart DIRECT de laatst gemeten waarde; met de sensor-specifieke FIFO loopt de real-time gegevensstroom via `CircularBuffer`. EEPROM, FLASH en microSD zijn concrete children van Data.
 
-Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `Data->SensorWrite(...)`. Lezen gebeurt via `Data->SensorRead()`. STREAMING, RECORDING, mediumkeuze, FIFO en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
+Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `Data->SensorWrite(...)`. Lezen gebeurt via `Data->SensorRead(...)`. STREAMING, RECORDING, mediumkeuze, FIFO en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
 
-De publieke Data-interface voor STREAMING en RECORDING gebruikt de vastgelegde namen `StreamStart(...)`, `StreamWrite(...)`, `StreamRead(...)`, `StreamStop(...)`, `RecordStart(...)`, `RecordWrite(...)`, `RecordRead(...)` en `RecordStop(...)`. Deze functies horen bij `Data`; ze horen niet bij de sensor. Concrete media behouden daarnaast de volledige API die zij van hun gebruikte library erven.
+De publieke Data-interface voor STREAMING en RECORDING gebruikt de vastgelegde namen `StreamingStart(...)`, `StreamingWrite(...)`, `StreamingRead(...)`, `StreamingStop(...)`, `RecordingStart(...)`, `RecordingWrite(...)`, `RecordRead(...)` en `RecordingStop(...)`. Deze functies horen bij `Data`; ze horen niet bij de sensor. Concrete media behouden daarnaast de volledige API die zij van hun gebruikte library erven.
 
 Voor continue sensordata gebruikt STREAMING in deze fase microSD of FLASH. RECORDING gebruikt microSD. EEPROM blijft als Data-medium beschikbaar, maar niet voor continue sensorstromen.
 

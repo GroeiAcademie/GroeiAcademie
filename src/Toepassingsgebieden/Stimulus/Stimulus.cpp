@@ -275,8 +275,7 @@ SynchronisatieProfiel Stimulus::MaakSynchronisatieProfielAlleSensoren(SensorMeet
   }
 
   synchronisatie.aantalSensorenGestart = aantalSensorenGestart;
-  if (aantalSensorenGestart == 0) return synchronisatie;
-//  if (aantalSensorenGestart == 0 || aantalSensorenGestart != aantalSensorenSimultaanTeMeten) return synchronisatie; // TODO errorafhandeling
+  if (aantalSensorenGestart == 0 || aantalSensorenGestart != aantalSensorenSimultaanTeMeten) return synchronisatie; // niet alle gevraagde sensoren gestart = test ongeldig
 
   synchronisatie.verschilStartTijd = laatsteStartTijd - eersteStartTijd;
   synchronisatie.verschilEindTijd = laatsteEindTijd - eersteEindTijd;

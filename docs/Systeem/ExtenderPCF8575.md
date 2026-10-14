@@ -7,6 +7,8 @@
 - Voor alle beschikbare libraryfuncties, parameters, returnwaarden en library-specifiek gedrag: raadpleeg de officiële documentatie van **Rob Tillaart `PCF8575`**.
 - Deze `.md` dupliceert die library-API bewust niet.
 
+De publieke API van ExtenderPCF8575 is de API van PCF8575 0.3.0 van Rob Tillaart. Een wissel van bibliotheek breekt sketches die deze API gebruiken.
+
 ## FrameWork-integratie
 
 Huidige overerving:

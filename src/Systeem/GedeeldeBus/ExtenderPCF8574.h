@@ -51,7 +51,9 @@ struct ExtenderPCF8574 : HardwareResourceTypeI2C, PCF8574 {
 
   bool Activeren() override {
     InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
-    return PCF8574::begin() && PCF8574::isConnected();
+    // Geen teruglezen: de PCF8574 heeft geen register, alleen quasi-bidirectionele pinnen waarvan de stand van de aansluiting afhangt.
+    const bool gelukt = PCF8574::begin() && PCF8574::isConnected();
+    return FoutDiagnoseI2C(gelukt, PCF8574::lastError(), gelukt);
   }
 
   // Bestaande FrameWork-extra: de PCF8574 heeft geen apart richtingsregister.

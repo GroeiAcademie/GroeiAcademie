@@ -40,7 +40,10 @@ struct ExtenderDS2482v800 : HardwareResourceTypeI2C, Adafruit_DS248x {
   #endif
 
   bool Activeren() override {
-    return Adafruit_DS248x::begin(&Wire, adres);
+    // Geen extra teruglezen: begin() voert zelf een reset uit en controleert het RST-bit in het statusregister.
+    // Adafruit_DS248x heeft geen foutcode: 0 meegeven.
+    const bool gelukt = Adafruit_DS248x::begin(&Wire, adres);
+    return FoutDiagnoseI2C(gelukt, 0, gelukt);
   }
 
 };

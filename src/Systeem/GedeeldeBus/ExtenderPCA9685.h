@@ -49,7 +49,13 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
   #endif
 
   bool Activeren() override {
-    return PCA9685::begin() && PCA9685::isConnected();
+    const bool gelukt = PCA9685::begin() && PCA9685::isConnected();
+
+    // Teruglezen: begin() schreef MODE1 met het standaardmasker van de library (AUTOINCR en ALLCALL); die bits moeten terug te lezen zijn.
+    const uint8_t verwacht = PCA9685_MODE1_AUTOINCR | PCA9685_MODE1_ALLCALL;
+    const bool terugGelezen = gelukt && ((PCA9685::getMode1() & verwacht) == verwacht);
+
+    return FoutDiagnoseI2C(gelukt, PCA9685::lastError(), terugGelezen);
   }
 };
 

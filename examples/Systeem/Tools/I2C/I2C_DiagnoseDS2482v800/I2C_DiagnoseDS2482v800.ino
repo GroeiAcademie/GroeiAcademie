@@ -116,9 +116,9 @@ void setup() {
     while (extender.OneWireSearch(adres)) {
       GA_SERIAL.print(F("1-Wire adres: "));
 
-      for (uint8_t teller = 0; teller < 8; teller++) {
-        if (adres[teller] < 0x10) GA_SERIAL.print('0');
-        GA_SERIAL.print(adres[teller], HEX);
+      for (uint8_t byteNumber = 0; byteNumber < 8; byteNumber++) {
+        if (adres[byteNumber] < 0x10) GA_SERIAL.print('0');
+        GA_SERIAL.print(adres[byteNumber], HEX);
       }
 
       GA_SERIAL.println();

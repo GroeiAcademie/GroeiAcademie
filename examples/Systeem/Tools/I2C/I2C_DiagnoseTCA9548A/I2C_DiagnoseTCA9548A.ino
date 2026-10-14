@@ -81,6 +81,14 @@ void setup() {
   GA_SERIAL.print(i2cScanner.pingTime(extender.adres));
   GA_SERIAL.println(F(" us"));
 
+  // Eerst scannen met alle kanalen dicht. Wat dan antwoordt, hangt op Native (niet achter deze TCA9548A)
+  // en wordt per kanaal overgeslagen. 1 bit per adres 0x00 tot 0x7F.
+  extender.disableAllChannels();
+  uint8_t adresOpNativeI2C[16] = {};
+  for (uint8_t adres = 0x08; adres <= 0x77; adres++) {
+    if (i2cScanner.ping(adres) > 0) adresOpNativeI2C[adres / 8] |= (1 << (adres % 8));
+  }
+
   for (uint8_t teller = 0; teller < 8; teller++) {
     GA_SERIAL.println();
     GA_SERIAL.print(F("Kanaal: "));
@@ -105,6 +113,7 @@ void setup() {
 
     for (uint8_t adres = 0x08; adres <= 0x77; adres++) {
       if (adres == extender.adres) continue;
+      if (adresOpNativeI2C[adres / 8] & (1 << (adres % 8))) continue;
       if (i2cScanner.ping(adres) == 0) continue;
 
       GA_SERIAL.print(F("0x"));

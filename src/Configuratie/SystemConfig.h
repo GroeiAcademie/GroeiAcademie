@@ -86,6 +86,9 @@
 #define GPIO48  48
 #define GPIO49  49
 
+// I2C
+#define I2C_ADDRESS_NONE                   0xFF
+
 // SERIAL REDIRECT: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
 #define REDIRECT_SERIAL_NONE               0
 #define REDIRECT_SERIAL_TO_MICROSD         1
@@ -453,6 +456,19 @@
 // ============================================================================
 #ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
   #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0
+#endif
+
+#ifndef RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE
+  #define RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+#endif
+#ifndef RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE
+  #define RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+#endif
+#ifndef RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE
+  #define RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
+#endif
+#ifndef RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE
+  #define RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE
@@ -1075,7 +1091,7 @@
 // ============================================================================
 #if DATA_LAYER_EEPROM_AANTAL >= 1
   #ifndef DATA_LAYER_EEPROM_1_I2C_ADDRESS
-    #define DATA_LAYER_EEPROM_1_I2C_ADDRESS 0x50
+    #define DATA_LAYER_EEPROM_1_I2C_ADDRESS I2C_ADDRESS_NONE
   #endif
   #ifndef DATA_LAYER_EEPROM_1_FIFO_SIZE
     #define DATA_LAYER_EEPROM_1_FIFO_SIZE 0
@@ -1087,7 +1103,7 @@
 // ============================================================================
 #if DATA_LAYER_EEPROM_AANTAL >= 2
   #ifndef DATA_LAYER_EEPROM_2_I2C_ADDRESS
-    #define DATA_LAYER_EEPROM_2_I2C_ADDRESS 0x51
+    #define DATA_LAYER_EEPROM_2_I2C_ADDRESS I2C_ADDRESS_NONE
   #endif
   #ifndef DATA_LAYER_EEPROM_2_FIFO_SIZE
     #define DATA_LAYER_EEPROM_2_FIFO_SIZE 0
@@ -1134,6 +1150,17 @@
 // ============================================================================
 // DATA: microSD
 // ============================================================================
+#ifndef DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL
+  #define DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL 50
+#endif
+#if DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL < 1 || DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL > 255
+  #error DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL moet tussen 1 en 255 liggen.
+#endif
+
+#ifndef DATA_LAYER_MICROSD_FLUSH_NA_MS
+  #define DATA_LAYER_MICROSD_FLUSH_NA_MS 5000UL
+#endif
+
 #ifndef DATA_LAYER_MICROSD_AANTAL
   #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
     #define DATA_LAYER_MICROSD_AANTAL 1
@@ -1175,6 +1202,10 @@
 #endif
 
 #if (defined(RFP602_DATA_LAYER_DIRECT_FIFO_SIZE) && RFP602_DATA_LAYER_DIRECT_FIFO_SIZE > 0) || \
+    (RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE > 0) || \
+    (RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE > 0) || \
+    (RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE > 0) || \
+    (RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE > 0) || \
     (defined(DATA_LAYER_EEPROM_1_FIFO_SIZE) && DATA_LAYER_EEPROM_1_FIFO_SIZE > 0) || \
     (defined(DATA_LAYER_EEPROM_2_FIFO_SIZE) && DATA_LAYER_EEPROM_2_FIFO_SIZE > 0) || \
     (defined(DATA_LAYER_MICROSD_1_FIFO_SIZE) && DATA_LAYER_MICROSD_1_FIFO_SIZE > 0) || \
@@ -1262,7 +1293,7 @@
 #if EXTENDER_ADS1115_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
-    #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48
+    #define I2C_ADDRESS_EXTENDER_ADS1115_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS1115_1_ALERT_RDY
@@ -1276,7 +1307,7 @@
 #if EXTENDER_ADS1115_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_ADS1115_2
-    #define I2C_ADDRESS_EXTENDER_ADS1115_2 0x49
+    #define I2C_ADDRESS_EXTENDER_ADS1115_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS1115_2_ALERT_RDY
@@ -1358,7 +1389,7 @@
 #if EXTENDER_ADS7828_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_ADS7828_1
-    #define I2C_ADDRESS_EXTENDER_ADS7828_1 0x48
+    #define I2C_ADDRESS_EXTENDER_ADS7828_1 I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1368,7 +1399,7 @@
 #if EXTENDER_ADS7828_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_ADS7828_2
-    #define I2C_ADDRESS_EXTENDER_ADS7828_2 0x49
+    #define I2C_ADDRESS_EXTENDER_ADS7828_2 I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1526,7 +1557,7 @@
 #if EXTENDER_DS2482_800_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_1
-    #define I2C_ADDRESS_EXTENDER_DS2482_800_1 0x18
+    #define I2C_ADDRESS_EXTENDER_DS2482_800_1 I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1536,7 +1567,7 @@
 #if EXTENDER_DS2482_800_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_DS2482_800_2
-    #define I2C_ADDRESS_EXTENDER_DS2482_800_2 0x19
+    #define I2C_ADDRESS_EXTENDER_DS2482_800_2 I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1558,7 +1589,7 @@
 #if EXTENDER_MAX14830_I2C_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_1
-    #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 0x60
+    #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_MAX14830_I2C_1_IRQ
@@ -1572,7 +1603,7 @@
 #if EXTENDER_MAX14830_I2C_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_MAX14830_I2C_2
-    #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 0x61
+    #define I2C_ADDRESS_EXTENDER_MAX14830_I2C_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_MAX14830_I2C_2_IRQ
@@ -1638,7 +1669,7 @@
 #if EXTENDER_MCP23017_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_MCP23017_1
-    #define I2C_ADDRESS_EXTENDER_MCP23017_1 0x20
+    #define I2C_ADDRESS_EXTENDER_MCP23017_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_MCP23017_1_INTA
@@ -1660,7 +1691,7 @@
 #if EXTENDER_MCP23017_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_MCP23017_2
-    #define I2C_ADDRESS_EXTENDER_MCP23017_2 0x21
+    #define I2C_ADDRESS_EXTENDER_MCP23017_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_MCP23017_2_INTA
@@ -1723,7 +1754,7 @@
 // ============================================================================
 #if EXTENDER_PCA9685_AANTAL >= 1
   #ifndef I2C_ADDRESS_EXTENDER_PCA9685_1
-    #define I2C_ADDRESS_EXTENDER_PCA9685_1 0x40
+    #define I2C_ADDRESS_EXTENDER_PCA9685_1 I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1732,7 +1763,7 @@
 // ============================================================================
 #if EXTENDER_PCA9685_AANTAL >= 2
   #ifndef I2C_ADDRESS_EXTENDER_PCA9685_2
-    #define I2C_ADDRESS_EXTENDER_PCA9685_2 0x41
+    #define I2C_ADDRESS_EXTENDER_PCA9685_2 I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1754,7 +1785,7 @@
 #if EXTENDER_PCF8574_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_PCF8574_1
-    #define I2C_ADDRESS_EXTENDER_PCF8574_1 0x20
+    #define I2C_ADDRESS_EXTENDER_PCF8574_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_PCF8574_1_INT
@@ -1768,7 +1799,7 @@
 #if EXTENDER_PCF8574_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_PCF8574_2
-    #define I2C_ADDRESS_EXTENDER_PCF8574_2 0x21
+    #define I2C_ADDRESS_EXTENDER_PCF8574_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_PCF8574_2_INT
@@ -1794,7 +1825,7 @@
 #if EXTENDER_PCF8575_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_PCF8575_1
-    #define I2C_ADDRESS_EXTENDER_PCF8575_1 0x20
+    #define I2C_ADDRESS_EXTENDER_PCF8575_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_PCF8575_1_INT
@@ -1808,7 +1839,7 @@
 #if EXTENDER_PCF8575_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_PCF8575_2
-    #define I2C_ADDRESS_EXTENDER_PCF8575_2 0x21
+    #define I2C_ADDRESS_EXTENDER_PCF8575_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_PCF8575_2_INT
@@ -1834,7 +1865,7 @@
 #if EXTENDER_SC16IS752_I2C_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1
-    #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 0x48
+    #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_SC16IS752_I2C_1_IRQ
@@ -1852,7 +1883,7 @@
 #if EXTENDER_SC16IS752_I2C_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2
-    #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 0x49
+    #define I2C_ADDRESS_EXTENDER_SC16IS752_I2C_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_SC16IS752_I2C_2_IRQ
@@ -1930,7 +1961,7 @@
 #if EXTENDER_TCA9548A_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_1
-    #define I2C_ADDRESS_EXTENDER_TCA9548A_1 0x70
+    #define I2C_ADDRESS_EXTENDER_TCA9548A_1 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_TCA9548A_1_RESET
@@ -1944,7 +1975,7 @@
 #if EXTENDER_TCA9548A_AANTAL >= 2
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_TCA9548A_2
-    #define I2C_ADDRESS_EXTENDER_TCA9548A_2 0x71
+    #define I2C_ADDRESS_EXTENDER_TCA9548A_2 I2C_ADDRESS_NONE
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_TCA9548A_2_RESET

@@ -78,6 +78,40 @@ In `GedeeldeBusNode` staat momenteel:
 
 Dit is nog een dummy. Er zijn in de huidige code geen concrete `Diagnose()`-overrides. Daardoor heeft een releasebuild geen Diagnose-interface en voert een DEBUG-build nog geen uitgebreide elektronische componenttests uit.
 
+## Foutcodes
+
+De GedeeldeBus-codes staan in `src/Language/Library_*.h`. Het niveau volgt `SCREEN_FOUTCODES.md`: `x0xx` ABORT, `x1xx` FATAL, `x2xx`/`x3xx` CRITICAL.
+
+| Code | Niveau | Stap | Betekenis | Getoonde waarde | Build |
+|---|---|---|---|---|---|
+| GB001 | ABORT | `aanmelden()` | GEDEELD-claim zonder geldige identiteit | | gedefinieerd, wordt in de code nog nergens gemeld |
+| GB101 | FATAL | `controleren()` | minstens een claim EXCLUSIEF, zelfde resource | pin | altijd |
+| GB102 | FATAL | `controleren()` | zelfde I2C-adres, zelfde bus | I2C-adres | altijd |
+| GB103 | FATAL | `controleren()` | twee GEDEELD-claims, andere identiteit | pin | altijd |
+| GB104 | FATAL | `controleren()` | parent is exclusief al bezet door een andere child | geen | altijd |
+| GB105 | FATAL | `controleren()` | binnen een component twee EXCLUSIEF-claims op dezelfde resource | pin | altijd |
+| GB106 | FATAL | `controleren()` | binnen een component EXCLUSIEF- en GEDEELD-claim op dezelfde resource | pin | altijd |
+| GB107 | FATAL | `controleren()` | binnen een component twee GEDEELD-claims, andere identiteit | pin | altijd |
+| GB108 | FATAL | `controleren()` | verplichte resource ontbreekt (CS van een SPI-component, DC van een PixelScreen) | pin | altijd |
+| GB109 | FATAL | `controleren()` | I2C-adres niet toegestaan voor dit hardwaretype | | gedefinieerd, wordt in de code nog nergens gemeld |
+| GB110 | FATAL | `controleren()` | ongeldig I2C-adres | I2C-adres | altijd |
+| GB111 | FATAL | `controleren()` | parent/extender biedt gevraagde resource niet aan | ExtenderPin | altijd |
+| GB201 | CRITICAL | `inpluggen()` | inpluggen mislukt | I2C-adres | standaard |
+| GB202 | CRITICAL | `inpluggen()` | bus start niet | I2C-adres | DEBUG |
+| GB301 | CRITICAL | `activeren()` | activeren mislukt | I2C-adres of CS-pin | standaard |
+| GB302 | CRITICAL | `activeren()` | geen antwoord op I2C-adres | I2C-adres | DEBUG |
+| GB303 | CRITICAL | `activeren()` | antwoord, maar initialisatie van de library mislukt | foutcode van de library | DEBUG |
+| GB304 | CRITICAL | `activeren()` | SPI-component antwoordt niet geldig | CS-pin | DEBUG |
+| GB305 | CRITICAL | `activeren()` | I2C-busfout of timeout | I2C-adres | DEBUG |
+| GB306 | CRITICAL | `activeren()` | verkeerde chip, teruglezen klopt niet | I2C-adres | DEBUG |
+
+Opmerkingen:
+
+- Een standaardbuild meldt bij `inpluggen()` en `activeren()` alleen GB201 en GB301. Een DEBUG-build vervangt die door de code met de oorzaak (GB202, GB302 tot GB306). Met TRACE komt per component een extra TRACE-regel met de details.
+- GB202 kan alleen op ESP32 afgaan: daar geeft `Wire.begin()` een resultaat terug. Op de andere cores is `Wire.begin()` `void`.
+- GB303 bewaart de foutcode van de library in 1 byte. Een signed libraryfout zoals -102 (ADS1X15) verschijnt daardoor als 0x9A. TRACE toont de oorspronkelijke waarde -102.
+- Ontbreken bij een PixelScreen zowel CS als DC, dan komt GB108 twee keer: één keer voor CS en één keer voor DC.
+
 ## Native resources
 
 `HardwareResourcePin` gebruikt `NP_D0..NP_D13`, `NP_A0..NP_A5`, `NP_SDA`, `NP_SCL`, `NP_MISO`, `NP_MOSI`, `NP_SCK` en `NP_SS` voor de echte native pinnen. `CUSTOM` en `NONE` blijven zonder `NP_`, omdat dit speciale waarden zijn en geen pinnen. `NativeArduinoPinVan()` vertaalt de native pinwaarden naar de boardmapping in `SystemConfig.h`.

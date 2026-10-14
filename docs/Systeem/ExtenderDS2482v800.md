@@ -7,6 +7,8 @@
 - Voor alle beschikbare libraryfuncties, parameters, returnwaarden en library-specifiek gedrag: raadpleeg de officiële documentatie van **Adafruit `Adafruit_DS248x`**.
 - Deze `.md` dupliceert die library-API bewust niet.
 
+De publieke API van ExtenderDS2482v800 is de API van Adafruit DS248x 1.2.0 van Adafruit. Een wissel van bibliotheek breekt sketches die deze API gebruiken.
+
 ## FrameWork-integratie
 
 Huidige overerving:

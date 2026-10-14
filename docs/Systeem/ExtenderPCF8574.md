@@ -6,6 +6,8 @@
 
 De publieke functies van `PCF8574`, waaronder `read()`, `write()`, `read8()`, `write8()`, `lastError()` en `isConnected()`, worden rechtstreeks geërfd en worden niet opnieuw gewrapt.
 
+De publieke API van ExtenderPCF8574 is de API van PCF8574 0.4.6 van Rob Tillaart. Een wissel van bibliotheek breekt sketches die deze API gebruiken.
+
 ## Eigen FrameWork-functionaliteit
 
 - GedeeldeBus-resourcebeheer via `HardwareResourceTypeI2C`.

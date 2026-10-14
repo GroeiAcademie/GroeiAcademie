@@ -467,7 +467,13 @@ bool Screen::aanmelden() {
   if ((this->typesActief & SCREEN_TYPE_SERIAL) && this->Serial.gedeeldeBus == nullptr) {
     this->Serial.foutmelding = nullptr;
     this->Serial.foutmeldingWeergegeven = false;
+    // D0/D1 alleen claimen op boards waar GA_SERIAL echt op D0/D1 zit. Op R4, RP2040 en Ardi32 loopt Serial via USB of andere pinnen.
+    // UNO Q: nog niet nagekeken in de officiële documentatie; daarom voorlopig ongewijzigd (D0/D1 geclaimd).
+#if BOARD_VERSION == BOARD_UNO_R3 || BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_DEV || BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE || BOARD_VERSION == BOARD_UNO_Q
     SerialOutput* child = new SerialOutput(this, GedeeldeBusComponent::SERIAL_OUTPUT, HardwareResourcePin::NP_D1, HardwareResourcePin::NP_D0);
+#else
+    SerialOutput* child = new SerialOutput(this, GedeeldeBusComponent::SERIAL_OUTPUT, HardwareResourcePin::NONE, HardwareResourcePin::NONE);
+#endif
     child->componentCreated = true;
 
     if (child->aanmelden()) {

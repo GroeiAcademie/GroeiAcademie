@@ -6,6 +6,8 @@
 
 De publieke functies van `ADS1115` worden rechtstreeks geërfd en worden hier niet opnieuw gewrapt. Voor de volledige library-API geldt de documentatie van ADS1X15 van Rob Tillaart.
 
+De publieke API van ExtenderADS1115 is de API van ADS1X15 0.6.2 van Rob Tillaart. Een wissel van bibliotheek breekt sketches die deze API gebruiken.
+
 ## Eigen FrameWork-functionaliteit
 
 - GedeeldeBus-resourcebeheer via `HardwareResourceTypeI2C`.

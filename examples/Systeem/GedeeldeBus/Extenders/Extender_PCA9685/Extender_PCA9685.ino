@@ -23,6 +23,7 @@ void setup() {
   while (!GA_SERIAL) { ; }
   bool gelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren();
   if (gelukt) gelukt = (extender.setPWM(0, 0, 0) == 0);
+  GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
 void loop() {}

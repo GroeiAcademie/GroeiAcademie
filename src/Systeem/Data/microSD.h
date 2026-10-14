@@ -10,7 +10,11 @@
     #include <vfs_api.h>
   #endif
 
+#if defined(ARDUINO_ARCH_RP2040)
+struct DataMicroSD : HardwareResourceTypeSPI, SDClass {
+#else
 struct DataMicroSD : HardwareResourceTypeSPI, SDFileSystemClass {
+#endif
   DataMicroSD(GedeeldeBusNode* parent, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : HardwareResourceTypeSPI(parent, GedeeldeBusComponent::DATA_MICROSD, np_CS, np_SCK, np_MISO, np_MOSI, Extender)
 #if defined(ARDUINO_ARCH_ESP32)
