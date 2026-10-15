@@ -19,6 +19,13 @@ SensorMeetStatus	KEYWORD1
 StimulusProfiel	KEYWORD1
 SynchronisatieProfiel	KEYWORD1
 
+# Data
+Data	KEYWORD1
+DataEEPROM	KEYWORD1
+DataFLASH	KEYWORD1
+FRAM_I2C	KEYWORD1
+DataMicroSD	KEYWORD1
+
 #######################################
 # Functies (KEYWORD2)
 #######################################
@@ -47,6 +54,18 @@ RegelStap	KEYWORD2
 RegistreerCallback	KEYWORD2
 SetCursor	KEYWORD2
 
+# Data
+SensorWrite	KEYWORD2
+SensorRead	KEYWORD2
+StreamingStart	KEYWORD2
+StreamingWrite	KEYWORD2
+StreamingRead	KEYWORD2
+StreamingStop	KEYWORD2
+RecordingStart	KEYWORD2
+RecordingWrite	KEYWORD2
+RecordRead	KEYWORD2
+RecordingStop	KEYWORD2
+
 # Stimulus
 AnalogReadMetGekorigeerdeOffsets	KEYWORD2
 BepaalSensorOffsets	KEYWORD2
@@ -64,6 +83,21 @@ WachtTotAlleSensorsLosgelatenVoorTest	KEYWORD2
 #######################################
 # Constanten (LITERAL1)
 #######################################
+
+# Data
+DATA_LAYER_CONFIG	LITERAL1
+DATA_TYPE_NONE	LITERAL1
+DATA_TYPE_DIRECT	LITERAL1
+DATA_TYPE_EEPROM	LITERAL1
+DATA_TYPE_FLASH	LITERAL1
+DATA_TYPE_FRAM	LITERAL1
+DATA_TYPE_MICROSD	LITERAL1
+DATA_FRAM	LITERAL1
+DATA_LAYER_FRAM_AANTAL	LITERAL1
+DATA_LAYER_FRAM_1_I2C_ADDRESS	LITERAL1
+DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE	LITERAL1
+DATA_LAYER_FRAM_2_I2C_ADDRESS	LITERAL1
+DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE	LITERAL1
 
 # Input - kanalen en algemeen
 INPUT_TYPE_NONE	LITERAL1

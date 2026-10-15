@@ -96,8 +96,9 @@ void ResettenGedeeldeBus();
   X(GC_DATA,                       0x14) /* GedeeldeBusComponent::GC_DATA */ \
   X(DATA_EEPROM,                   0x15) /* GedeeldeBusComponent::DATA_EEPROM */ \
   X(DATA_FLASH,                    0x16) /* GedeeldeBusComponent::DATA_FLASH */ \
-  X(DATA_MICROSD,                  0x17) /* GedeeldeBusComponent::DATA_MICROSD */ \
-  /*                                */ \
+  X(DATA_FRAM,                     0x17) /* GedeeldeBusComponent::DATA_FRAM */ \
+  X(DATA_MICROSD,                  0x18) /* GedeeldeBusComponent::DATA_MICROSD */ \
+   /*                                */ \
   /* EXTENDER --------------------- */ \
   X(GC_EXTENDER,                     0x20) /* GedeeldeBusComponent::GC_EXTENDER */ \
   /* ADC */ \
@@ -813,16 +814,17 @@ struct InputPCF8574 : ExtenderPCF8574 {
 // Tussenstruct voor alle sensoren. Leeg vandaag; hier komen later de sensor-specifieke functies bij (ReadyForData, DataOpslaan, ...) die niet in
 // GedeeldeBusNode zelf horen, want dat zou ook de Extenders raken.
 // ============================================================================
-struct SensorFIFO;   // staat in Data.h
+struct SensorQueueOrStack;   // staat in Data.h
 
 struct Sensor : GedeeldeBusNode {
   using GedeeldeBusNode::GedeeldeBusNode;
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
-  // FIFO per channel: elke sensor erft deze functies; de FIFO/LIFO-logica staat in Data.
-  SensorFIFO* FIFO = nullptr;      // tabel van de sensor, één per channel
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+  // QueueOrStack per channel: elke sensor erft deze functies; de FIFO/LIFO-logica staat in Data.
+  SensorQueueOrStack* QueueOrStack = nullptr;      // tabel van de sensor, één per channel
   uint8_t numberOfChannels = 0;
-  void WriteFIFO(uint8_t numberChannel, int value);
-  bool ReadFIFO(uint8_t numberChannel, int& value);   // false = FIFO leeg; value = laatst gemeten waarde
+  void WriteQueueOrStack(uint8_t numberChannel, int value);
+  int8_t ReadQueueOrStackStatus(uint8_t numberChannel);   // 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
+  int ReadQueueOrStackValue(uint8_t numberChannel);       // volgende waarde; leeg = lastValue; sensor bestaat niet = 0
 #endif
 };
 

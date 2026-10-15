@@ -125,7 +125,8 @@ De vaste Data-keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
 #define DATA_TYPE_DIRECT   0x02
 #define DATA_TYPE_EEPROM   0x04
 #define DATA_TYPE_FLASH    0x08
-#define DATA_TYPE_MICROSD  0x10
+#define DATA_TYPE_FRAM     0x10
+#define DATA_TYPE_MICROSD  0x20
 ```
 
 `DATA_LAYER_CONFIG` bepaalt welke Data-types in deze build aanwezig zijn. Meerdere types worden gecombineerd met `|`. De standaardwaarde is `DATA_TYPE_NONE`.
@@ -137,20 +138,9 @@ Voor EEPROM geldt:
 | `DATA_LAYER_EEPROM_AANTAL` | Aantal EEPROM-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_EEPROM` actief is, anders 0. |
 | `DATA_LAYER_EEPROM_1_I2C_ADDRESS` | I2C-adres van EEPROM #1, standaard `0x50`. |
 | `DATA_LAYER_EEPROM_2_I2C_ADDRESS` | I2C-adres van EEPROM #2, standaard `0x51`. |
-| `DATA_LAYER_EEPROM_1_FIFO_SIZE` / `_2_` | `0` = direct; groter dan `0` = RAM CircularBuffer/FIFO voor die instantie. |
+| `DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
 
 De huidige EEPROM-implementatie gebruikt uitsluitend I2C. SDA en SCL komen uit de bestaande boardconfiguratie.
-
-Voor microSD geldt:
-
-| Define | Betekenis |
-|---|---|
-| `DATA_LAYER_MICROSD_AANTAL` | Aantal microSD-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_MICROSD` actief is, anders 0. |
-| `DATA_LAYER_MICROSD_1_CS_PIN` | Exclusieve CS-pin van microSD #1, standaard `HardwareResourcePin::NP_D8`. |
-| `DATA_LAYER_MICROSD_2_CS_PIN` | Exclusieve CS-pin van microSD #2, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_MICROSD_1_FIFO_SIZE` / `_2_` | `0` = direct; groter dan `0` = RAM CircularBuffer/FIFO voor die instantie. |
-
-De huidige microSD-implementatie gebruikt uitsluitend SPI via de officiële Arduino `SD` library. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
 
 Voor FLASH geldt:
 
@@ -159,15 +149,37 @@ Voor FLASH geldt:
 | `DATA_LAYER_FLASH_AANTAL` | Aantal FLASH-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FLASH` actief is, anders 0. |
 | `DATA_LAYER_FLASH_1_CS_PIN` | Exclusieve CS-pin van FLASH #1, standaard `HardwareResourcePin::NONE`. |
 | `DATA_LAYER_FLASH_2_CS_PIN` | Exclusieve CS-pin van FLASH #2, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_FLASH_1_FIFO_SIZE` / `_2_` | `0` = direct; groter dan `0` = RAM CircularBuffer/FIFO voor die instantie. |
+| `DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
 
 FLASH gebruikt uitsluitend SPI via `SPIMemory`. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
+
+Voor FRAM geldt:
+
+| Define | Betekenis |
+|---|---|
+| `DATA_LAYER_FRAM_AANTAL` | Aantal FRAM-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FRAM` actief is, anders 0. |
+| `DATA_LAYER_FRAM_1_I2C_ADDRESS` | I2C-adres van FRAM #1. De fallback in `SystemConfig.h` is `I2C_ADDRESS_NONE`; voor de MB85RC256V wordt in de test `0x50` gebruikt. |
+| `DATA_LAYER_FRAM_2_I2C_ADDRESS` | I2C-adres van FRAM #2. De fallback in `SystemConfig.h` is `I2C_ADDRESS_NONE`. |
+| `DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
+
+De huidige FRAM-implementatie gebruikt uitsluitend I2C via Rob Tillaart `FRAM_I2C` en class `FRAM`. SDA en SCL komen uit de bestaande boardconfiguratie.
+
+Voor microSD geldt:
+
+| Define | Betekenis |
+|---|---|
+| `DATA_LAYER_MICROSD_AANTAL` | Aantal microSD-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_MICROSD` actief is, anders 0. |
+| `DATA_LAYER_MICROSD_1_CS_PIN` | Exclusieve CS-pin van microSD #1, standaard `HardwareResourcePin::NP_D8`. |
+| `DATA_LAYER_MICROSD_2_CS_PIN` | Exclusieve CS-pin van microSD #2, standaard `HardwareResourcePin::NONE`. |
+| `DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
+
+De huidige microSD-implementatie gebruikt uitsluitend SPI via de officiële Arduino `SD` library. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
 
 Voor RFP602 zijn daarnaast beschikbaar:
 
 | Define | Betekenis |
 |---|---|
-| `RFP602_DATA_LAYER_DIRECT_FIFO_SIZE` | `0` = DIRECT bewaart alleen de laatst gemeten waarde; groter dan `0` = RAM CircularBuffer/FIFO voor RFP602. |
+| `RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE` | `0` = DIRECT bewaart alleen de laatst gemeten waarde; groter dan `0` = RAM-QueueOrStack voor RFP602 (per channel aan te passen met `RFP602_CHANNEL_1..4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE`). |
 | `RFP602_DATA_RECORD_FILE` | Bestandsnaam voor RFP602-recording op microSD; standaard `"rfp602.log"`. |
 
 ## Sensoren
@@ -357,6 +369,6 @@ Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of cont
 `ADC_BACKEND` kiest tussen `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115`. De betekenis van `ADC_PIN_SENSOR_1..4` hangt daarvan af: bij ADS1115 zijn het kanaalnummers; bij Native zijn het `HardwareResourcePin`-waarden. De concrete Sensor `RFP602` gebruikt deze vier configuratiewaarden.
 
 
-## Data FIFO
+## Data QueueOrStack
 
-Per Data-instantie kan een RAM CircularBuffer/FIFO worden ingesteld met `DATA_LAYER_<TYPE>_<NR>_FIFO_SIZE`. `0` betekent direct schrijven; een waarde groter dan `0` activeert de FIFO voor die instantie. `DATA_FIFO_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
+De instellingen `DATA_LAYER_<TYPE>_<NR>_QUEUE_OR_STACK_SIZE` per Data-instantie zijn nog niet in gebruik. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.

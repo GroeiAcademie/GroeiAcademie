@@ -56,10 +56,10 @@ int RFP602::RawAnalogRead(int sensorPin) {
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   if (Data != nullptr) Data->SensorWrite(ruweData);
 #endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
-  // In de FIFO van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+  // In de QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
   for (uint8_t sensorNummer = 1; sensorNummer <= AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
-    if (this->sensorPin[sensorNummer - 1] == sensorPin) { WriteFIFO(sensorNummer, ruweData); break; }
+    if (this->sensorPin[sensorNummer - 1] == sensorPin) { WriteQueueOrStack(sensorNummer, ruweData); break; }
   }
 #endif
   return ruweData;
@@ -91,10 +91,10 @@ int RFP602::GetAnalogRead() {
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   if (Data != nullptr) Data->SensorWrite(laatsteWaarde);
 #endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
-  // In de FIFO van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+  // In de QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
   for (uint8_t sensorNummer = 1; sensorNummer <= AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
-    if (sensorPin[sensorNummer - 1] == laatstePin) { WriteFIFO(sensorNummer, laatsteWaarde); break; }
+    if (sensorPin[sensorNummer - 1] == laatstePin) { WriteQueueOrStack(sensorNummer, laatsteWaarde); break; }
   }
 #endif
   return laatsteWaarde;

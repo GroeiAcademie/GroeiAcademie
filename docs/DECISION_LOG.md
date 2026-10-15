@@ -198,3 +198,8 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 **Context:** expliciete scheiding voor Screen, Input, Extenders en Sensoren tijdens de beta-v2.0.0-validatie.
 
+## D037 v2.0.0: FRAM als afzonderlijk Data-medium
+
+**Besluit:** `DATA_FRAM` wordt als afzonderlijk Data-component opgenomen naast EEPROM, FLASH en microSD. De eerste concrete route is `FRAM_I2C` via Rob Tillaart `FRAM_I2C`; Fujitsu MB85RC256V gebruikt de libraryclass `FRAM`. Aanmelden, controleren, inpluggen en activeren blijven volledig binnen de bestaande GedeeldeBus-lifecycle. `FRAM_SPI` blijft optioneel voor later en wordt in deze stap niet geïmplementeerd.
+
+**Context:** beta v2.0.0. FRAM biedt niet-vluchtige opslag met zeer veel schrijfcycli en vormt daarom een afzonderlijke opslagoptie; de bestaande STREAMING- en RECORDING-routes worden in deze stap niet gewijzigd.

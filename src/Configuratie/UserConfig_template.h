@@ -102,11 +102,12 @@
 // Combineer meerdere datatypes met de bitwise OR-operator |.
 //
 // Mogelijke waarden:
-// 1  = geen Data-class                            (DATA_TYPE_NONE)
+// 1  = geen Data-class                             (DATA_TYPE_NONE)
 // 2  = direct via Data-class                       (DATA_TYPE_DIRECT)
 // 4  = EEPROM                                      (DATA_TYPE_EEPROM)
 // 8  = FLASH                                       (DATA_TYPE_FLASH)
-// 16 = microSD                                     (DATA_TYPE_MICROSD)
+// 16 = FRAM                                        (DATA_TYPE_FRAM)
+// 32 = microSD                                     (DATA_TYPE_MICROSD)
 // Combineer meerdere datatypes met |.
 //
 // Wat hier niet geselecteerd wordt, wordt niet gecompileerd.
@@ -346,21 +347,21 @@
 // ============================================================================
 // RFP602 DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM CircularBuffer/FIFO
+#ifndef RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM QueueOrStack (FIFO of LIFO)
 #endif
 
-#ifndef RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 1 (RFP602-sensor 1)
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 1 (RFP602-sensor 1)
 #endif
-#ifndef RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 2 (RFP602-sensor 2)
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 2 (RFP602-sensor 2)
 #endif
-#ifndef RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 3 (RFP602-sensor 3)
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 3 (RFP602-sensor 3)
 #endif
-#ifndef RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 4 (RFP602-sensor 4)
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 4 (RFP602-sensor 4)
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE
@@ -635,8 +636,8 @@
 // #define DATA_LAYER_EEPROM_1_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_EEPROM_1_FIFO_SIZE
-// #define DATA_LAYER_EEPROM_1_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#ifndef DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
 #endif
 
 // ============================================================================
@@ -646,8 +647,8 @@
 // #define DATA_LAYER_EEPROM_2_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_EEPROM_2_FIFO_SIZE
-// #define DATA_LAYER_EEPROM_2_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#ifndef DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
 #endif
 
 
@@ -665,8 +666,8 @@
 // #define DATA_LAYER_FLASH_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_FLASH_1_FIFO_SIZE
-// #define DATA_LAYER_FLASH_1_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#ifndef DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
 #endif
 
 // ============================================================================
@@ -676,8 +677,38 @@
 // #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_FLASH_2_FIFO_SIZE
-// #define DATA_LAYER_FLASH_2_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#ifndef DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#endif
+
+
+// ============================================================================
+// DATA: FRAM
+// ============================================================================
+#ifndef DATA_LAYER_FRAM_AANTAL
+// #define DATA_LAYER_FRAM_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_FRAM actief is, anders 0
+#endif
+
+// ============================================================================
+// DEFAULT: FRAM #1
+// ============================================================================
+#ifndef DATA_LAYER_FRAM_1_I2C_ADDRESS
+// #define DATA_LAYER_FRAM_1_I2C_ADDRESS 0x50  // MB85RC256V standaardadres 0x50
+#endif
+
+#ifndef DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#endif
+
+// ============================================================================
+// EXPERIMENTEEL: FRAM #2
+// ============================================================================
+#ifndef DATA_LAYER_FRAM_2_I2C_ADDRESS
+// #define DATA_LAYER_FRAM_2_I2C_ADDRESS 0x51
+#endif
+
+#ifndef DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
 #endif
 
 
@@ -703,8 +734,8 @@
 // #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_MICROSD_1_FIFO_SIZE
-// #define DATA_LAYER_MICROSD_1_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#ifndef DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
 #endif
 
 // ============================================================================
@@ -714,8 +745,8 @@
 // #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_MICROSD_2_FIFO_SIZE
-// #define DATA_LAYER_MICROSD_2_FIFO_SIZE 0  // 0 = direct; > 0 = RAM CircularBuffer/FIFO
+#ifndef DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE
+// #define DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
 #endif
 
 
@@ -1289,21 +1320,21 @@
 // ============================================================================
 // RFP602 DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM CircularBuffer/FIFO
+#ifndef RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM QueueOrStack (FIFO of LIFO)
 #endif
 
-#ifndef RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_1_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 1 (RFP602-sensor 1)
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 1 (RFP602-sensor 1)
 #endif
-#ifndef RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_2_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 2 (RFP602-sensor 2)
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 2 (RFP602-sensor 2)
 #endif
-#ifndef RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_3_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 3 (RFP602-sensor 3)
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 3 (RFP602-sensor 3)
 #endif
-#ifndef RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE
-// #define RFP602_KANAAL_4_DATA_LAYER_DIRECT_FIFO_SIZE RFP602_DATA_LAYER_DIRECT_FIFO_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_FIFO_SIZE; FIFO-grootte voor kanaal 4 (RFP602-sensor 4)
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 4 (RFP602-sensor 4)
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE

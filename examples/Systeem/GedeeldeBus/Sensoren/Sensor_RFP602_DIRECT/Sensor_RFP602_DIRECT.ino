@@ -2,8 +2,8 @@
 // Sensor: RFP602 DIRECT
 // ============================================================================
 // RFP602 via de Data-class.
-// Zonder FIFO geeft SensorRead() de laatst gemeten waarde terug.
-// Met RFP602_KANAAL_x_DATA_LAYER_DIRECT_FIFO_SIZE > 0 leest ReadFIFO() de FIFO van dat channel.
+// Zonder QueueOrStack geeft ReadQueueOrStackValue() de laatst gemeten waarde van die sensor terug.
+// Met RFP602_CHANNEL_x_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0 leest ReadQueueOrStackValue() de QueueOrStack van dat channel.
 // ============================================================================
 
 #include <GroeiAcademie.h>
@@ -54,13 +54,7 @@ void loop() {
     GA_SERIAL.print(F("Sensor "));
     GA_SERIAL.print(sensorNummer + 1);
     GA_SERIAL.print(F(": "));
-#if DATA_FIFO_ACTIEF
-    int value = 0;
-    sensorRFP602->ReadFIFO(sensorNummer + 1, value);
-    GA_SERIAL.println(value);
-#else
-    GA_SERIAL.println(Data->SensorRead());
-#endif
+    GA_SERIAL.println(sensorRFP602->ReadQueueOrStackValue(sensorNummer + 1));
   }
 
   GA_SERIAL.println();

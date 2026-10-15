@@ -24,6 +24,13 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+set TEST_INO="examples\Systeem\Data\FRAM\FRAM.ino"
+set TEST_NAAM="Data FRAM_I2C"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_FRAM -DDATA_LAYER_FRAM_1_I2C_ADDRESS=0x50"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\Data\microSD\microSD.ino"
 set TEST_NAAM="Data microSD"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD"

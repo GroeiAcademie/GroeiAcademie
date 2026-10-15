@@ -10,29 +10,32 @@ struct Data;
 
 #if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
 
-#if DATA_FIFO_ACTIEF
-  #include <CircularBuffer.hpp>
-#endif
-
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM)
   #include "EEPROM.h"
-#endif
-
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-  #include "microSD.h"
 #endif
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
   #include "FLASH.h"
 #endif
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
-struct SensorFIFO {   // één FIFO per channel; het geheugen geeft de sensor op
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM)
+  #include "FRAM_I2C.h"
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+  #include "microSD.h"
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+struct SensorQueueOrStack {   // één per channel; het geheugen van de QueueOrStack geeft de sensor op
+  int lastValue;          // laatst gemeten waarde van dit channel, ook zonder QueueOrStack
+#if DATA_QUEUE_OR_STACK_ACTIEF
   int* buffer;
-  uint16_t sizeFIFO;
-  bool LIFO;          // false = oudste waarde eerst (FIFO), true = nieuwste waarde eerst (LIFO)
-  uint16_t first;     // plaats van de oudste waarde
-  uint16_t count;     // aantal waarden in de FIFO
+  uint16_t sizeQueueOrStack;
+  bool LIFO;              // false = oudste waarde eerst (FIFO), true = nieuwste waarde eerst (LIFO)
+  uint16_t firstIndex;    // plaats van de oudste waarde
+  uint16_t countNumber;   // aantal waarden in de QueueOrStack
+#endif
 };
 #endif
 
@@ -49,9 +52,10 @@ struct Data : GedeeldeBusNode {
   void SensorWrite(int ruweData);
   int SensorRead();
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
-  void WriteFIFO(SensorFIFO& channel, int value);
-  bool ReadFIFO(SensorFIFO& channel, int& value);
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+  void WriteQueueOrStack(SensorQueueOrStack& channel, int value);
+  int8_t ReadQueueOrStackStatus(SensorQueueOrStack& channel);   // 0 = waarde klaar, -1 = leeg
+  int ReadQueueOrStackValue(SensorQueueOrStack& channel);       // volgende waarde; leeg = lastValue
 #endif
 
   void StreamingStart();

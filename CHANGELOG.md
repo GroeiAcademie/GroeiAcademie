@@ -39,6 +39,15 @@ De versienummers volgen de versie in `library.properties`.
 
 - documentatie opnieuw uit de actuele v2.0.0-code afgeleid: filestructuur, GedeeldeBus-lifecycle, Extenders, `EP_`-resources, RFP602 en de huidige dummy `Diagnose()` zijn met de broncode gelijkgetrokken;
 
+### Data
+
+- `DATA_TYPE_FRAM` toegevoegd als extra Data-type naast DIRECT, EEPROM, FLASH en microSD;
+- `FRAM_I2C` toegevoegd als I2C-child van `Data`, volgens dezelfde bestaande GedeeldeBus-lifecycle als de andere concrete Data-media;
+- de implementatie gebruikt Rob Tillaart `FRAM_I2C` en erft rechtstreeks van class `FRAM`; de huidige referentie is MB85RC256V 32 KB;
+- `GedeeldeBusComponent::DATA_FRAM` gebruikt componentcode `0x17`;
+- `TestLibraryData-v2.0.0.cmd` compileert `examples/Systeem/Data/FRAM/FRAM.ino` met I2C-adres `0x50`; de hardware-stresstest staat in `extras/stress/Test_FRAM/Test_FRAM.ino`;
+- `library.properties` bevat `FRAM_I2C` als dependency.
+
 ### Screen
 
 - `Screen` is de enige v2.0.0-Screen-architectuur en werkt via de normale v2.0.0-GedeeldeBus-lifecycle; de oude niet-GedeeldeBus-Screen-route is verwijderd;

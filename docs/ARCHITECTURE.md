@@ -35,8 +35,9 @@ GroeiAcademie/
 │   │   ├── Data/
 │   │   │   ├── Data.h/.cpp
 │   │   │   ├── EEPROM.h/.cpp
-│   │   │   ├── microSD.h/.cpp
-│   │   │   └── FLASH.h/.cpp
+│   │   │   ├── FLASH.h/.cpp
+│   │   │   ├── FRAM_I2C.h/.cpp
+│   │   │   └── microSD.h/.cpp
 │   │   ├── GedeeldeBus/
 │   │   │   ├── GedeeldeBus.h
 │   │   │   ├── GedeeldeBus.cpp
@@ -130,7 +131,7 @@ De code gebruikt geen centrale array met een vast maximum. Elke node bevat `pare
 
 ## Data
 
-Data is een top-level GedeeldeBus-component onder `Native`. De Data-componentcodes staan vóór het Extender-bereik: `GC_DATA` t/m `DATA_MICROSD` gebruiken `0x14` t/m `0x17`; `0x20` t/m `0x7F` blijft het functionele Extender-bereik. De gewone toepassing maakt `Data` aan; `Data` maakt zelf de geselecteerde concrete media aan en voert hun lifecycle uit.
+Data is een top-level GedeeldeBus-component onder `Native`. De Data-componentcodes staan vóór het Extender-bereik: `GC_DATA` t/m `DATA_MICROSD` gebruiken `0x14` t/m `0x18`; `0x20` t/m `0x7F` blijft het functionele Extender-bereik. De gewone toepassing maakt `Data` aan; `Data` maakt zelf de geselecteerde concrete media aan en voert hun lifecycle uit.
 
 ```text
 DATA_TYPE_NONE
@@ -139,14 +140,15 @@ DATA_TYPE_NONE
 Native
 └─ Data
    ├─ DIRECT
-   ├─ EEPROM  : I2C
-   ├─ FLASH   : SPI
-   └─ microSD : SPI
+   ├─ EEPROM   : I2C
+   ├─ FRAM     : I2C
+   ├─ FLASH    : SPI
+   └─ microSD  : SPI
 ```
 
-`DATA_LAYER_CONFIG` bepaalt welke types gecompileerd zijn. `DATA_TYPE_NONE` behoudt de oude route zonder Data-class. Net als bij Input kan bij `GedeeldeBusNewComponent<struct Data>(...)` een subset als objectfilter worden meegegeven. `DIRECT` is geen opslagmedium. Zonder FIFO bewaart DIRECT de laatst gemeten waarde; met de sensor-specifieke FIFO loopt de real-time gegevensstroom via `CircularBuffer`. EEPROM, FLASH en microSD zijn concrete children van Data.
+`DATA_LAYER_CONFIG` bepaalt welke types gecompileerd zijn. `DATA_TYPE_NONE` behoudt de oude route zonder Data-class. Net als bij Input kan bij `GedeeldeBusNewComponent<struct Data>(...)` een subset als objectfilter worden meegegeven. `DIRECT` is geen opslagmedium. Zonder QueueOrStack bewaart DIRECT per channel de laatst gemeten waarde; met de sensor-specifieke QueueOrStack (FIFO of LIFO) loopt de real-time gegevensstroom via eigen code in Data. EEPROM, FRAM_I2C, FLASH en microSD zijn concrete children van Data.
 
-Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `Data->SensorWrite(...)`. Lezen gebeurt via `Data->SensorRead(...)`. STREAMING, RECORDING, mediumkeuze, FIFO en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
+Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `Data->SensorWrite(...)`. Lezen gebeurt via `Data->SensorRead(...)`; per channel via `ReadQueueOrStackStatus(...)` en `ReadQueueOrStackValue(...)`, die elke sensor van `Sensor` erft. STREAMING, RECORDING, mediumkeuze, QueueOrStack en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
 
 De publieke Data-interface voor STREAMING en RECORDING gebruikt de vastgelegde namen `StreamingStart(...)`, `StreamingWrite(...)`, `StreamingRead(...)`, `StreamingStop(...)`, `RecordingStart(...)`, `RecordingWrite(...)`, `RecordRead(...)` en `RecordingStop(...)`. Deze functies horen bij `Data`; ze horen niet bij de sensor. Concrete media behouden daarnaast de volledige API die zij van hun gebruikte library erven.
 
@@ -340,6 +342,7 @@ vaste keuzewaarden die vóór UserConfig nodig zijn
 - Adafruit ST7735 and ST7789 Library;
 - ADS1X15 van Rob Tillaart;
 - PCF8574 (>=0.4.0);
+- FRAM_I2C van Rob Tillaart;
 - IRremote.
 
 Niet iedere build gebruikt alle dependencycode. Preprocessorconfiguratie bepaalt welke subsystemen werkelijk worden gecompileerd.

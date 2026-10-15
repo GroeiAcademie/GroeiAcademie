@@ -176,6 +176,7 @@ Adafruit GFX Library
 Adafruit ST7735 and ST7789 Library
 ADS1X15 van Rob Tillaart
 PCF8574 (>=0.4.0)
+FRAM_I2C van Rob Tillaart
 IRremote
 ```
 
@@ -237,6 +238,11 @@ examples/
 │   ├── ADC_Backend/
 │   │   ├── ADC_Backend_ADS1115/
 │   │   └── ADC_Backend_Native/
+│   ├── Data/
+│   │   ├── EEPROM/
+│   │   ├── FLASH/
+│   │   ├── FRAM/
+│   │   └── microSD/
 │   ├── GedeeldeBus/
 │   │   ├── Extenders/
 │   │   │   ├── Extender_ADS1115/ + 2 ExtenderPins-tests

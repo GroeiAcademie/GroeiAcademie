@@ -1,11 +1,12 @@
 /*
-Test_microSD.ino bevat nu 6 stresstests:
+Test_microSD.ino bevat nu 7 stresstests:
 1. Native #1 alleen
 2. Native #2 alleen
 3. PCF8574-CS alleen
 4. Native #1 + Native #2
-5. Native #1 + PCF8574-CS
-6. Native #1 + Native #2 + PCF8574-CS
+5. Native #2 + PCF8574-CS
+6. Native #1 + PCF8574-CS
+7. Native #1 + Native #2 + PCF8574-CS
 
 microSD #1 Native
 SCK  -> D13
@@ -63,7 +64,10 @@ SdFat32 sdNative1;
 SdFat32 sdNative2;
 SdFat32 sdExtender;
 
-uint8_t schrijfBuffer[BLOK_GROOTTE];
+// Gecorrigeerd: Unieke buffers per kaart om contaminatie te voorkomen
+uint8_t schrijfBuffer1[BLOK_GROOTTE];
+uint8_t schrijfBuffer2[BLOK_GROOTTE];
+uint8_t schrijfBuffer3[BLOK_GROOTTE];
 uint8_t leesBuffer[BLOK_GROOTTE];
 
 void sdCsInit(SdCsPin_t pin) {
@@ -92,6 +96,7 @@ void setup() {
   }
 
   Wire.begin();
+  Wire.setClock(400000); // Gecorrigeerd: Voorkom SPI-timeouts door I2C te versnellen naar 400kHz
 
   if (!pcf8574.begin(0xFF)) {
     Serial.println("PCF8574: NIET GEVONDEN");
@@ -102,13 +107,19 @@ void setup() {
   sdCsInit(SD_CS_NATIVE_2);
   sdCsInit(SD_CS_EXTENDER);
 
+  // Initialiseer de buffers met een unieke basiswaarde per kaart
   for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-    schrijfBuffer[i] = static_cast<uint8_t>(i);
+    schrijfBuffer1[i] = static_cast<uint8_t>(i);
+    schrijfBuffer2[i] = static_cast<uint8_t>(i + 1);
+    schrijfBuffer3[i] = static_cast<uint8_t>(i + 2);
   }
 
   Serial.println();
   Serial.println("=== microSD #1: Native CS via eigen sdCsWrite() ===");
 
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
   if (!sdNative1.cardBegin(SdSpiConfig(SD_CS_NATIVE_1, SHARED_SPI, SD_SCK_MHZ(4)))) {
     Serial.println("INIT: FOUT IN LAAG 1, KAART/SPI");
     sdNative1.printSdError(&Serial);
@@ -126,7 +137,7 @@ void setup() {
       bool schrijfFout = false;
 
       for (uint32_t blok = 0; blok < AANTAL_BLOKKEN; blok++) {
-        if (bestand.write(schrijfBuffer, BLOK_GROOTTE) != BLOK_GROOTTE) {
+        if (bestand.write(schrijfBuffer1, BLOK_GROOTTE) != BLOK_GROOTTE) {
           schrijfFout = true;
           break;
         }
@@ -148,7 +159,7 @@ void setup() {
         }
 
         for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-          if (leesBuffer[i] != schrijfBuffer[i]) {
+          if (leesBuffer[i] != schrijfBuffer1[i]) {
             inhoudFout = true;
             break;
           }
@@ -178,6 +189,9 @@ void setup() {
   Serial.println();
   Serial.println("=== microSD #2: tweede Native CS via eigen sdCsWrite() ===");
 
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
   if (!sdNative2.cardBegin(SdSpiConfig(SD_CS_NATIVE_2, SHARED_SPI, SD_SCK_MHZ(4)))) {
     Serial.println("INIT: FOUT IN LAAG 1, KAART/SPI");
     sdNative2.printSdError(&Serial);
@@ -195,7 +209,7 @@ void setup() {
       bool schrijfFout = false;
 
       for (uint32_t blok = 0; blok < AANTAL_BLOKKEN; blok++) {
-        if (bestand.write(schrijfBuffer, BLOK_GROOTTE) != BLOK_GROOTTE) {
+        if (bestand.write(schrijfBuffer2, BLOK_GROOTTE) != BLOK_GROOTTE) {
           schrijfFout = true;
           break;
         }
@@ -217,7 +231,7 @@ void setup() {
         }
 
         for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-          if (leesBuffer[i] != schrijfBuffer[i]) {
+          if (leesBuffer[i] != schrijfBuffer2[i]) {
             inhoudFout = true;
             break;
           }
@@ -247,6 +261,9 @@ void setup() {
   Serial.println();
   Serial.println("=== microSD #3: CS via PCF8574 ===");
 
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
   if (!sdExtender.cardBegin(SdSpiConfig(SD_CS_EXTENDER, SHARED_SPI, SD_SCK_MHZ(4)))) {
     Serial.println("INIT: FOUT IN LAAG 1, KAART/SPI");
     sdExtender.printSdError(&Serial);
@@ -264,7 +281,7 @@ void setup() {
       bool schrijfFout = false;
 
       for (uint32_t blok = 0; blok < AANTAL_BLOKKEN; blok++) {
-        if (bestand.write(schrijfBuffer, BLOK_GROOTTE) != BLOK_GROOTTE) {
+        if (bestand.write(schrijfBuffer3, BLOK_GROOTTE) != BLOK_GROOTTE) {
           schrijfFout = true;
           break;
         }
@@ -286,7 +303,7 @@ void setup() {
         }
 
         for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-          if (leesBuffer[i] != schrijfBuffer[i]) {
+          if (leesBuffer[i] != schrijfBuffer3[i]) {
             inhoudFout = true;
             break;
           }
@@ -318,9 +335,15 @@ void setup() {
   Serial.println("=== microSD STRESS: 100 cycli per kaart, afwisselend 64 en 512 bytes per write ===");
   Serial.println("LET OP: STRESS.BIN wordt telkens overschreven.");
 
-  if (!sdNative1.fatType()) {
+  sdNative1.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (!sdNative1.cardBegin(SdSpiConfig(SD_CS_NATIVE_1, SHARED_SPI, SD_SCK_MHZ(4))) ||
+      !sdNative1.volumeBegin()) {
     Serial.println("microSD #1 Native");
     Serial.println("INIT: FOUT, STRESS OVERGESLAGEN");
+    sdNative1.end();
   } else {
   {
     uint16_t fouten = 0;
@@ -328,8 +351,9 @@ void setup() {
     uint32_t totaalRead = 0;
 
     for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
-      for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-        schrijfBuffer[i] = static_cast<uint8_t>(i + herhaling);
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+        schrijfBuffer1[i] = static_cast<uint8_t>(i + herhaling);
       }
 
       File32 bestand = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
@@ -347,8 +371,7 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        if (bestand.write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand.write(schrijfBuffer1, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
@@ -363,16 +386,15 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        uint16_t gelezen = bestand.read(
-          leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE);
+        uint16_t gelezen = bestand.read(leesBuffer, bytesOmTeSchrijven);
 
-        if (gelezen != ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (gelezen != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != schrijfBuffer[i]) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          if (leesBuffer[i] != schrijfBuffer1[i]) {
             inhoudFout = true;
             break;
           }
@@ -403,9 +425,15 @@ void setup() {
   }
   }
 
-  if (!sdNative2.fatType()) {
+  sdNative2.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (!sdNative2.cardBegin(SdSpiConfig(SD_CS_NATIVE_2, SHARED_SPI, SD_SCK_MHZ(4))) ||
+      !sdNative2.volumeBegin()) {
     Serial.println("microSD #2 Native");
     Serial.println("INIT: FOUT, STRESS OVERGESLAGEN");
+    sdNative2.end();
   } else {
   {
     uint16_t fouten = 0;
@@ -413,8 +441,9 @@ void setup() {
     uint32_t totaalRead = 0;
 
     for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
-      for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-        schrijfBuffer[i] = static_cast<uint8_t>(i + herhaling + 1);
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+        schrijfBuffer2[i] = static_cast<uint8_t>(i + herhaling + 1);
       }
 
       File32 bestand = sdNative2.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
@@ -432,8 +461,7 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        if (bestand.write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand.write(schrijfBuffer2, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
@@ -448,16 +476,15 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        uint16_t gelezen = bestand.read(
-          leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE);
+        uint16_t gelezen = bestand.read(leesBuffer, bytesOmTeSchrijven);
 
-        if (gelezen != ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (gelezen != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != schrijfBuffer[i]) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          if (leesBuffer[i] != schrijfBuffer2[i]) {
             inhoudFout = true;
             break;
           }
@@ -488,9 +515,15 @@ void setup() {
   }
   }
 
-  if (!sdExtender.fatType()) {
+  sdExtender.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (!sdExtender.cardBegin(SdSpiConfig(SD_CS_EXTENDER, SHARED_SPI, SD_SCK_MHZ(4))) ||
+      !sdExtender.volumeBegin()) {
     Serial.println("microSD #3 PCF8574 CS");
     Serial.println("INIT: FOUT, STRESS OVERGESLAGEN");
+    sdExtender.end();
   } else {
   {
     uint16_t fouten = 0;
@@ -498,8 +531,9 @@ void setup() {
     uint32_t totaalRead = 0;
 
     for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
-      for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-        schrijfBuffer[i] = static_cast<uint8_t>(i + herhaling + 2);
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+        schrijfBuffer3[i] = static_cast<uint8_t>(i + herhaling + 2);
       }
 
       File32 bestand = sdExtender.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
@@ -517,8 +551,7 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        if (bestand.write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand.write(schrijfBuffer3, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
@@ -533,16 +566,15 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        uint16_t gelezen = bestand.read(
-          leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE);
+        uint16_t gelezen = bestand.read(leesBuffer, bytesOmTeSchrijven);
 
-        if (gelezen != ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (gelezen != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != schrijfBuffer[i]) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          if (leesBuffer[i] != schrijfBuffer3[i]) {
             inhoudFout = true;
             break;
           }
@@ -577,21 +609,33 @@ void setup() {
   Serial.println();
   Serial.println("=== microSD STRESS: Native #1 + Native #2 tegelijk actief ===");
 
-  if (sdNative1.fatType() && sdNative2.fatType()) {
+  sdNative1.end();
+  sdNative2.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (sdNative1.cardBegin(SdSpiConfig(SD_CS_NATIVE_1, SHARED_SPI, SD_SCK_MHZ(4))) &&
+      sdNative1.volumeBegin() &&
+      (sdCsWrite(SD_CS_NATIVE_1, HIGH),
+       sdCsWrite(SD_CS_NATIVE_2, HIGH),
+       sdCsWrite(SD_CS_EXTENDER, HIGH),
+       sdNative2.cardBegin(SdSpiConfig(SD_CS_NATIVE_2, SHARED_SPI, SD_SCK_MHZ(4)))) &&
+      sdNative2.volumeBegin()) {
   {
     uint16_t fouten = 0;
     uint32_t totaalWrite = 0;
     uint32_t totaalRead = 0;
 
     for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
-      File32 bestand[2];
-      bestand[0] = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
-      bestand[1] = sdNative2.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      File32 bestand1, bestand2;
+      bestand1 = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      bestand2 = sdNative2.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
 
-      if (!bestand[0] || !bestand[1]) {
+      if (!bestand1 || !bestand2) {
         fouten++;
-        if (bestand[0]) bestand[0].close();
-        if (bestand[1]) bestand[1].close();
+        if (bestand1) bestand1.close();
+        if (bestand2) bestand2.close();
         continue;
       }
 
@@ -604,43 +648,40 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-          schrijfBuffer[i] = static_cast<uint8_t>(i + herhaling);
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          schrijfBuffer1[i] = static_cast<uint8_t>(i + herhaling);
+          schrijfBuffer2[i] = static_cast<uint8_t>(i + herhaling);
         }
+        schrijfBuffer2[0] = static_cast<uint8_t>(herhaling + 1);
 
-        if (bestand[0].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand1.write(schrijfBuffer1, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
 
-        schrijfBuffer[0] = static_cast<uint8_t>(herhaling + 1);
-
-        if (bestand[1].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand2.write(schrijfBuffer2, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
       }
 
-      bestand[0].flush();
-      bestand[1].flush();
+      bestand1.flush();
+      bestand2.flush();
       totaalWrite += micros() - start;
 
-      bestand[0].rewind();
-      bestand[1].rewind();
+      bestand1.rewind();
+      bestand2.rewind();
       start = micros();
 
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        if (bestand[0].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand1.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
           if (leesBuffer[i] != static_cast<uint8_t>(i + herhaling)) {
             inhoudFout = true;
             break;
@@ -649,16 +690,14 @@ void setup() {
 
         if (inhoudFout) break;
 
-        if (bestand[1].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand2.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != ((i == 0)
-              ? static_cast<uint8_t>(herhaling + 1)
-              : static_cast<uint8_t>(i + herhaling))) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          uint8_t verwachteWaarde = (i == 0) ? static_cast<uint8_t>(herhaling + 1) : static_cast<uint8_t>(i + herhaling);
+          if (leesBuffer[i] != verwachteWaarde) {
             inhoudFout = true;
             break;
           }
@@ -668,8 +707,8 @@ void setup() {
       }
 
       totaalRead += micros() - start;
-      bestand[0].close();
-      bestand[1].close();
+      bestand1.close();
+      bestand2.close();
 
       if (schrijfFout || leesFout || inhoudFout) fouten++;
     }
@@ -690,23 +729,35 @@ void setup() {
   }
 
   Serial.println();
-  Serial.println("=== microSD STRESS: Native #1 + PCF8574 CS tegelijk actief ===");
+  Serial.println("=== microSD STRESS: Native #2 + PCF8574 CS tegelijk actief ===");
 
-  if (sdNative1.fatType() && sdExtender.fatType()) {
+  sdNative2.end();
+  sdExtender.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (sdNative2.cardBegin(SdSpiConfig(SD_CS_NATIVE_2, SHARED_SPI, SD_SCK_MHZ(4))) &&
+      sdNative2.volumeBegin() &&
+      (sdCsWrite(SD_CS_NATIVE_1, HIGH),
+       sdCsWrite(SD_CS_NATIVE_2, HIGH),
+       sdCsWrite(SD_CS_EXTENDER, HIGH),
+       sdExtender.cardBegin(SdSpiConfig(SD_CS_EXTENDER, SHARED_SPI, SD_SCK_MHZ(4)))) &&
+      sdExtender.volumeBegin()) {
   {
     uint16_t fouten = 0;
     uint32_t totaalWrite = 0;
     uint32_t totaalRead = 0;
 
     for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
-      File32 bestand[2];
-      bestand[0] = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
-      bestand[1] = sdExtender.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      File32 bestand2, bestand3;
+      bestand2 = sdNative2.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      bestand3 = sdExtender.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
 
-      if (!bestand[0] || !bestand[1]) {
+      if (!bestand2 || !bestand3) {
         fouten++;
-        if (bestand[0]) bestand[0].close();
-        if (bestand[1]) bestand[1].close();
+        if (bestand2) bestand2.close();
+        if (bestand3) bestand3.close();
         continue;
       }
 
@@ -719,43 +770,40 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-          schrijfBuffer[i] = static_cast<uint8_t>(i + herhaling);
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          schrijfBuffer2[i] = static_cast<uint8_t>(i + herhaling);
+          schrijfBuffer3[i] = static_cast<uint8_t>(i + herhaling);
         }
+        schrijfBuffer3[0] = static_cast<uint8_t>(herhaling + 2);
 
-        if (bestand[0].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand2.write(schrijfBuffer2, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
 
-        schrijfBuffer[0] = static_cast<uint8_t>(herhaling + 2);
-
-        if (bestand[1].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand3.write(schrijfBuffer3, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
       }
 
-      bestand[0].flush();
-      bestand[1].flush();
+      bestand2.flush();
+      bestand3.flush();
       totaalWrite += micros() - start;
 
-      bestand[0].rewind();
-      bestand[1].rewind();
+      bestand2.rewind();
+      bestand3.rewind();
       start = micros();
 
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        if (bestand[0].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand2.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
           if (leesBuffer[i] != static_cast<uint8_t>(i + herhaling)) {
             inhoudFout = true;
             break;
@@ -764,16 +812,14 @@ void setup() {
 
         if (inhoudFout) break;
 
-        if (bestand[1].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand3.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != ((i == 0)
-              ? static_cast<uint8_t>(herhaling + 2)
-              : static_cast<uint8_t>(i + herhaling))) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          uint8_t verwachteWaarde = (i == 0) ? static_cast<uint8_t>(herhaling + 2) : static_cast<uint8_t>(i + herhaling);
+          if (leesBuffer[i] != verwachteWaarde) {
             inhoudFout = true;
             break;
           }
@@ -783,8 +829,130 @@ void setup() {
       }
 
       totaalRead += micros() - start;
-      bestand[0].close();
-      bestand[1].close();
+      bestand2.close();
+      bestand3.close();
+
+      if (schrijfFout || leesFout || inhoudFout) fouten++;
+    }
+
+    Serial.println("microSD #2 Native + microSD #3 PCF8574 CS");
+    Serial.print("CYCLI: ");
+    Serial.println(100);
+    Serial.print("FOUTEN: ");
+    Serial.println(fouten);
+    Serial.print("GEM WRITE us: ");
+    Serial.println(totaalWrite / 100UL);
+    Serial.print("GEM READ us: ");
+    Serial.println(totaalRead / 100UL);
+  }
+  } else {
+    Serial.println("microSD #2 Native + microSD #3 PCF8574 CS");
+    Serial.println("INIT: FOUT, STRESS OVERGESLAGEN");
+  }
+
+  Serial.println();
+  Serial.println("=== microSD STRESS: Native #1 + PCF8574 CS tegelijk actief ===");
+
+  sdNative1.end();
+  sdExtender.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (sdNative1.cardBegin(SdSpiConfig(SD_CS_NATIVE_1, SHARED_SPI, SD_SCK_MHZ(4))) &&
+      sdNative1.volumeBegin() &&
+      (sdCsWrite(SD_CS_NATIVE_1, HIGH),
+       sdCsWrite(SD_CS_NATIVE_2, HIGH),
+       sdCsWrite(SD_CS_EXTENDER, HIGH),
+       sdExtender.cardBegin(SdSpiConfig(SD_CS_EXTENDER, SHARED_SPI, SD_SCK_MHZ(4)))) &&
+      sdExtender.volumeBegin()) {
+  {
+    uint16_t fouten = 0;
+    uint32_t totaalWrite = 0;
+    uint32_t totaalRead = 0;
+
+    for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      File32 bestand1, bestand3;
+      bestand1 = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      bestand3 = sdExtender.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+
+      if (!bestand1 || !bestand3) {
+        fouten++;
+        if (bestand1) bestand1.close();
+        if (bestand3) bestand3.close();
+        continue;
+      }
+
+      bool schrijfFout = false;
+      bool leesFout = false;
+      bool inhoudFout = false;
+
+      uint32_t start = micros();
+
+      for (uint32_t blok = 0;
+           blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
+           blok++) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          schrijfBuffer1[i] = static_cast<uint8_t>(i + herhaling);
+          schrijfBuffer3[i] = static_cast<uint8_t>(i + herhaling);
+        }
+        schrijfBuffer3[0] = static_cast<uint8_t>(herhaling + 2);
+
+        if (bestand1.write(schrijfBuffer1, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
+          schrijfFout = true;
+          break;
+        }
+
+        if (bestand3.write(schrijfBuffer3, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
+          schrijfFout = true;
+          break;
+        }
+      }
+
+      bestand1.flush();
+      bestand3.flush();
+      totaalWrite += micros() - start;
+
+      bestand1.rewind();
+      bestand3.rewind();
+      start = micros();
+
+      for (uint32_t blok = 0;
+           blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
+           blok++) {
+        if (bestand1.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
+          leesFout = true;
+          break;
+        }
+
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          if (leesBuffer[i] != static_cast<uint8_t>(i + herhaling)) {
+            inhoudFout = true;
+            break;
+          }
+        }
+
+        if (inhoudFout) break;
+
+        if (bestand3.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
+          leesFout = true;
+          break;
+        }
+
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          uint8_t verwachteWaarde = (i == 0) ? static_cast<uint8_t>(herhaling + 2) : static_cast<uint8_t>(i + herhaling);
+          if (leesBuffer[i] != verwachteWaarde) {
+            inhoudFout = true;
+            break;
+          }
+        }
+
+        if (inhoudFout) break;
+      }
+
+      totaalRead += micros() - start;
+      bestand1.close();
+      bestand3.close();
 
       if (schrijfFout || leesFout || inhoudFout) fouten++;
     }
@@ -807,23 +975,41 @@ void setup() {
   Serial.println();
   Serial.println("=== microSD STRESS: Native #1 + Native #2 + PCF8574 CS tegelijk actief ===");
 
-  if (sdNative1.fatType() && sdNative2.fatType() && sdExtender.fatType()) {
+  sdNative1.end();
+  sdNative2.end();
+  sdExtender.end();
+  sdCsWrite(SD_CS_NATIVE_1, HIGH);
+  sdCsWrite(SD_CS_NATIVE_2, HIGH);
+  sdCsWrite(SD_CS_EXTENDER, HIGH);
+  if (sdNative1.cardBegin(SdSpiConfig(SD_CS_NATIVE_1, SHARED_SPI, SD_SCK_MHZ(4))) &&
+      sdNative1.volumeBegin() &&
+      (sdCsWrite(SD_CS_NATIVE_1, HIGH),
+       sdCsWrite(SD_CS_NATIVE_2, HIGH),
+       sdCsWrite(SD_CS_EXTENDER, HIGH),
+       sdNative2.cardBegin(SdSpiConfig(SD_CS_NATIVE_2, SHARED_SPI, SD_SCK_MHZ(4)))) &&
+      sdNative2.volumeBegin() &&
+      (sdCsWrite(SD_CS_NATIVE_1, HIGH),
+       sdCsWrite(SD_CS_NATIVE_2, HIGH),
+       sdCsWrite(SD_CS_EXTENDER, HIGH),
+       sdExtender.cardBegin(SdSpiConfig(SD_CS_EXTENDER, SHARED_SPI, SD_SCK_MHZ(4)))) &&
+      sdExtender.volumeBegin()) {
   {
     uint16_t fouten = 0;
     uint32_t totaalWrite = 0;
     uint32_t totaalRead = 0;
 
     for (uint16_t herhaling = 0; herhaling < 100; herhaling++) {
-      File32 bestand[3];
-      bestand[0] = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
-      bestand[1] = sdNative2.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
-      bestand[2] = sdExtender.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      uint16_t bytesOmTeSchrijven = (herhaling & 1) ? 64 : BLOK_GROOTTE;
+      File32 bestand1, bestand2, bestand3;
+      bestand1 = sdNative1.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      bestand2 = sdNative2.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
+      bestand3 = sdExtender.open("STRESS.BIN", O_RDWR | O_CREAT | O_TRUNC);
 
-      if (!bestand[0] || !bestand[1] || !bestand[2]) {
+      if (!bestand1 || !bestand2 || !bestand3) {
         fouten++;
-        if (bestand[0]) bestand[0].close();
-        if (bestand[1]) bestand[1].close();
-        if (bestand[2]) bestand[2].close();
+        if (bestand1) bestand1.close();
+        if (bestand2) bestand2.close();
+        if (bestand3) bestand3.close();
         continue;
       }
 
@@ -836,53 +1022,49 @@ void setup() {
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        for (uint16_t i = 0; i < BLOK_GROOTTE; i++) {
-          schrijfBuffer[i] = static_cast<uint8_t>(i + herhaling);
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          schrijfBuffer1[i] = static_cast<uint8_t>(i + herhaling);
+          schrijfBuffer2[i] = static_cast<uint8_t>(i + herhaling);
+          schrijfBuffer3[i] = static_cast<uint8_t>(i + herhaling);
         }
+        schrijfBuffer2[0] = static_cast<uint8_t>(herhaling + 1);
+        schrijfBuffer3[0] = static_cast<uint8_t>(herhaling + 2);
 
-        if (bestand[0].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand1.write(schrijfBuffer1, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
 
-        schrijfBuffer[0] = static_cast<uint8_t>(herhaling + 1);
-
-        if (bestand[1].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand2.write(schrijfBuffer2, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
 
-        schrijfBuffer[0] = static_cast<uint8_t>(herhaling + 2);
-
-        if (bestand[2].write(schrijfBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand3.write(schrijfBuffer3, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           schrijfFout = true;
           break;
         }
       }
 
-      bestand[0].flush();
-      bestand[1].flush();
-      bestand[2].flush();
+      bestand1.flush();
+      bestand2.flush();
+      bestand3.flush();
       totaalWrite += micros() - start;
 
-      bestand[0].rewind();
-      bestand[1].rewind();
-      bestand[2].rewind();
+      bestand1.rewind();
+      bestand2.rewind();
+      bestand3.rewind();
       start = micros();
 
       for (uint32_t blok = 0;
            blok < ((herhaling & 1) ? (AANTAL_BLOKKEN * 8UL) : AANTAL_BLOKKEN);
            blok++) {
-        if (bestand[0].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand1.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
           if (leesBuffer[i] != static_cast<uint8_t>(i + herhaling)) {
             inhoudFout = true;
             break;
@@ -891,16 +1073,14 @@ void setup() {
 
         if (inhoudFout) break;
 
-        if (bestand[1].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand2.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != ((i == 0)
-              ? static_cast<uint8_t>(herhaling + 1)
-              : static_cast<uint8_t>(i + herhaling))) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          uint8_t verwachteWaarde = (i == 0) ? static_cast<uint8_t>(herhaling + 1) : static_cast<uint8_t>(i + herhaling);
+          if (leesBuffer[i] != verwachteWaarde) {
             inhoudFout = true;
             break;
           }
@@ -908,16 +1088,14 @@ void setup() {
 
         if (inhoudFout) break;
 
-        if (bestand[2].read(leesBuffer, (herhaling & 1) ? 64 : BLOK_GROOTTE) !=
-            ((herhaling & 1) ? 64 : BLOK_GROOTTE)) {
+        if (bestand3.read(leesBuffer, bytesOmTeSchrijven) != bytesOmTeSchrijven) {
           leesFout = true;
           break;
         }
 
-        for (uint16_t i = 0; i < ((herhaling & 1) ? 64 : BLOK_GROOTTE); i++) {
-          if (leesBuffer[i] != ((i == 0)
-              ? static_cast<uint8_t>(herhaling + 2)
-              : static_cast<uint8_t>(i + herhaling))) {
+        for (uint16_t i = 0; i < bytesOmTeSchrijven; i++) {
+          uint8_t verwachteWaarde = (i == 0) ? static_cast<uint8_t>(herhaling + 2) : static_cast<uint8_t>(i + herhaling);
+          if (leesBuffer[i] != verwachteWaarde) {
             inhoudFout = true;
             break;
           }
@@ -927,9 +1105,9 @@ void setup() {
       }
 
       totaalRead += micros() - start;
-      bestand[0].close();
-      bestand[1].close();
-      bestand[2].close();
+      bestand1.close();
+      bestand2.close();
+      bestand3.close();
 
       if (schrijfFout || leesFout || inhoudFout) fouten++;
     }

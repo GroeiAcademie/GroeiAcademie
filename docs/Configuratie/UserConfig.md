@@ -116,10 +116,10 @@ Data wordt via `DATA_LAYER_CONFIG` geconfigureerd. Meerdere Data-types kunnen me
 
 ```cpp
 // #define DATA_LAYER_CONFIG DATA_TYPE_NONE
-// #define DATA_LAYER_CONFIG DATA_TYPE_EEPROM | DATA_TYPE_MICROSD | DATA_TYPE_FLASH
+// #define DATA_LAYER_CONFIG DATA_TYPE_EEPROM | DATA_TYPE_FLASH | DATA_TYPE_FRAM | DATA_TYPE_MICROSD
 ```
 
-Beschikbare huidige types zijn `DATA_TYPE_NONE`, `DATA_TYPE_DIRECT`, `DATA_TYPE_EEPROM`, `DATA_TYPE_FLASH` en `DATA_TYPE_MICROSD`.
+Beschikbare huidige types zijn `DATA_TYPE_NONE`, `DATA_TYPE_DIRECT`, `DATA_TYPE_EEPROM`, `DATA_TYPE_FLASH`, `DATA_TYPE_FRAM` en `DATA_TYPE_MICROSD`.
 
 EEPROM gebruikt momenteel uitsluitend I2C:
 
@@ -131,14 +131,6 @@ EEPROM gebruikt momenteel uitsluitend I2C:
 
 Wanneer `DATA_TYPE_EEPROM` actief is en `DATA_LAYER_EEPROM_AANTAL` niet expliciet is ingesteld, wordt standaard één EEPROM-instance gebruikt.
 
-microSD gebruikt momenteel uitsluitend SPI via de officiële Arduino `SD` library:
-
-```cpp
-// #define DATA_LAYER_MICROSD_AANTAL 1
-// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8
-// #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE
-```
-
 FLASH gebruikt uitsluitend SPI via `SPIMemory`:
 
 ```cpp
@@ -147,16 +139,34 @@ FLASH gebruikt uitsluitend SPI via `SPIMemory`:
 // #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE
 ```
 
-SDA/SCL voor EEPROM en SCK/MISO/MOSI voor microSD en FLASH komen uit de bestaande boardconfiguratie. Alleen de instance-specifieke I2C-adressen en CS-pinnen worden hier ingesteld.
+FRAM gebruikt momenteel uitsluitend I2C via Rob Tillaart `FRAM_I2C`:
+
+```cpp
+// #define DATA_LAYER_FRAM_AANTAL 1
+// #define DATA_LAYER_FRAM_1_I2C_ADDRESS 0x50
+// #define DATA_LAYER_FRAM_2_I2C_ADDRESS 0x51
+```
+
+Wanneer `DATA_TYPE_FRAM` actief is en `DATA_LAYER_FRAM_AANTAL` niet expliciet is ingesteld, wordt standaard één FRAM-instance gebruikt. Voor de huidige MB85RC256V-referentie is `0x50` het standaardadres van de hardware; stel het adres expliciet in.
+
+microSD gebruikt momenteel uitsluitend SPI via de officiële Arduino `SD` library:
+
+```cpp
+// #define DATA_LAYER_MICROSD_AANTAL 1
+// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NP_D8
+// #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE
+```
+
+SDA/SCL voor EEPROM en FRAM en SCK/MISO/MOSI voor microSD en FLASH komen uit de bestaande boardconfiguratie. Alleen de instance-specifieke I2C-adressen en CS-pinnen worden hier ingesteld.
 
 Voor RFP602:
 
 ```cpp
-// #define RFP602_DATA_LAYER_DIRECT_FIFO_SIZE 0
+// #define RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE 0
 // #define RFP602_DATA_RECORD_FILE "rfp602.log"
 ```
 
-`RFP602_DATA_LAYER_DIRECT_FIFO_SIZE` is `0` voor DIRECT zonder FIFO; een waarde groter dan `0` activeert de RAM CircularBuffer/FIFO voor RFP602. `RFP602_DATA_RECORD_FILE` bepaalt het microSD-bestand voor RFP602-recording.
+`RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE` is `0` voor DIRECT zonder QueueOrStack; een waarde groter dan `0` activeert de RAM-QueueOrStack voor RFP602. `RFP602_DATA_RECORD_FILE` bepaalt het microSD-bestand voor RFP602-recording.
 
 ## ADC-backend
 
@@ -237,6 +247,6 @@ De logische resources van een Extender worden niet hier hernoemd of gemapt: die 
 Voor lokale compiletests kan `GROEIACADEMIE_IGNORE_USER_CONFIG` worden gedefinieerd; dan laadt `SystemConfig.h` het aanwezige `UserConfig.h` niet.
 
 
-## Data FIFO
+## Data QueueOrStack
 
-De FIFO-grootte wordt per sensor ingesteld. Voor RFP602 bepaalt `RFP602_DATA_LAYER_DIRECT_FIFO_SIZE` de DIRECT-buffer: `0` bewaart alleen de laatst gemeten waarde; een waarde groter dan `0` activeert de RAM CircularBuffer/FIFO. `DATA_FIFO_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
+De QueueOrStack-grootte wordt per sensor ingesteld. Voor RFP602 bepaalt `RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE` de DIRECT-buffer: `0` bewaart alleen de laatst gemeten waarde per channel; een waarde groter dan `0` activeert de RAM-QueueOrStack. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.

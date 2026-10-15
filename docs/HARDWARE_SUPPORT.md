@@ -19,6 +19,10 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke controles. De st
 
 Voor de dependencycontrole delen WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) de technische aanduiding `ESP32-WROOM-32U` en dezelfde FQBN `esp32:esp32:d1_uno32`. Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) en SB Components Ardi-32 (ESP32-S3-WROOM-1) delen in diezelfde dependencycontrole `ESP32-S3-WROOM-1`, FQBN `esp32:esp32:esp32s3` en het package `esp32 by Espressif Systems`.
 
+### Data FRAM_I2C
+
+De Data-laag ondersteunt `DATA_TYPE_FRAM` via Rob Tillaart `FRAM_I2C`. De eerste concrete ondersteunde chip is Fujitsu `MB85RC256V` (32 KB), standaard I2C-adres `0x50`. `examples/Systeem/Data/FRAM/FRAM.ino` controleert de Data/GedeeldeBus-lifecycle, capaciteit en byte-toegang. `extras/stress/Test_FRAM/Test_FRAM.ino` voert de 1000 write/read/verify-cycli uit. Dit is een beschikbare hardwaretest; een bord/chipcombinatie wordt pas als hardwarematig bevestigd beschouwd nadat deze test op echte hardware is uitgevoerd.
+
 ### HX1838-validatie
 
 HX1838 met `HX1838_BRON_CODES_DEFINE` is released. Zowel TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) als IRremote (`= 0`) zijn hardwarematig bevestigd. De standaard `HX1838_ONTVANGER_PIN` is Arduino Uno-shieldpin `D8`. De standaard `PIXEL_SCREEN_RST` is Arduino Uno-shieldpin `D7`. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
@@ -247,6 +251,11 @@ Standaardconfiguratie:
 ```
 
 Controleer het werkelijke I2C-adres van de module. Veelvoorkomende adressen zijn `0x27` en `0x3F`.
+### FRAM_I2C
+
+De Data-laag bevat een I2C-FRAM-route via Rob Tillaart `FRAM_I2C`. De huidige referentie is de Fujitsu MB85RC256V van 32 KB met standaardadres `0x50`. De libraryclass is `FRAM`.
+
+De compiletest staat in `examples/Systeem/Data/FRAM/FRAM.ino`. De hardware-stresstest staat in `extras/stress/Test_FRAM/Test_FRAM.ino`. Hardwareondersteuning wordt pas bevestigd nadat deze route op de betrokken Arduino Uno R3-vormfactorborden met echte FRAM-hardware is uitgevoerd en vastgelegd.
 
 ### PixelScreen
 

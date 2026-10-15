@@ -60,25 +60,6 @@ bool Data::aanmelden() {
   }
 #endif
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-  if (this->typesActief & DATA_TYPE_MICROSD) {
-    #if DATA_LAYER_MICROSD_AANTAL >= 1
-      {
-        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
-        kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
-      }
-    #endif
-    #if DATA_LAYER_MICROSD_AANTAL >= 2
-      {
-        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
-        kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
-      }
-    #endif
-  }
-#endif
-
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
   if (this->typesActief & DATA_TYPE_FLASH) {
     #if DATA_LAYER_FLASH_AANTAL >= 1
@@ -98,7 +79,45 @@ bool Data::aanmelden() {
   }
 #endif
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-FIFO) is geen kind en blijft altijd over.
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM)
+  if (this->typesActief & DATA_TYPE_FRAM) {
+    #if DATA_LAYER_FRAM_AANTAL >= 1
+      {
+        struct FRAM_I2C* kanaal = new struct FRAM_I2C(this, DATA_LAYER_FRAM_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+        if (!kanaal->aanmelden()) delete kanaal;
+      }
+    #endif
+    #if DATA_LAYER_FRAM_AANTAL >= 2
+      {
+        struct FRAM_I2C* kanaal = new struct FRAM_I2C(this, DATA_LAYER_FRAM_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+        if (!kanaal->aanmelden()) delete kanaal;
+      }
+    #endif
+  }
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+  if (this->typesActief & DATA_TYPE_MICROSD) {
+    #if DATA_LAYER_MICROSD_AANTAL >= 1
+      {
+        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+        if (!kanaal->aanmelden()) delete kanaal;
+      }
+    #endif
+    #if DATA_LAYER_MICROSD_AANTAL >= 2
+      {
+        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+        if (!kanaal->aanmelden()) delete kanaal;
+      }
+    #endif
+  }
+#endif
+
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
   uint8_t teller = 0;
   for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
   if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
@@ -120,7 +139,7 @@ bool Data::controleren() {
     sameParent = object;
   }
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-FIFO) is geen kind en blijft altijd over.
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
   uint8_t teller = 0;
   for (sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
   if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
@@ -142,7 +161,7 @@ bool Data::inpluggen() {
     sameParent = object;
   }
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-FIFO) is geen kind en blijft altijd over.
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
   uint8_t teller = 0;
   for (sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
   if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
@@ -161,7 +180,7 @@ bool Data::Activeren() {
     sameParent = object;
   }
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-FIFO) is geen kind en blijft altijd over.
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
   uint8_t teller = 0;
   for (sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
   if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
@@ -194,37 +213,57 @@ int Data::SensorRead() {
   return ruweData;
 }
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT) && DATA_FIFO_ACTIEF
-void Data::WriteFIFO(SensorFIFO& channel, int value) {
-  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.sizeFIFO == 0) return;
-  channel.buffer[(channel.first + channel.count) % channel.sizeFIFO] = value;
-  if (channel.count < channel.sizeFIFO) channel.count++;
-  else channel.first = (channel.first + 1) % channel.sizeFIFO;   // vol: de oudste waarde wordt overschreven
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+void Data::WriteQueueOrStack(SensorQueueOrStack& channel, int value) {
+  channel.lastValue = value;
+#if DATA_QUEUE_OR_STACK_ACTIEF
+  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.sizeQueueOrStack == 0) return;
+  channel.buffer[(channel.firstIndex + channel.countNumber) % channel.sizeQueueOrStack] = value;
+  if (channel.countNumber < channel.sizeQueueOrStack) channel.countNumber++;
+  else channel.firstIndex = (channel.firstIndex + 1) % channel.sizeQueueOrStack;   // vol: de oudste waarde wordt overschreven
+#endif
 }
 
-bool Data::ReadFIFO(SensorFIFO& channel, int& value) {
-  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.count == 0) {
-    value = ruweData;   // leeg: laatst gemeten waarde
-    return false;
-  }
-  if (channel.LIFO) value = channel.buffer[(channel.first + channel.count - 1) % channel.sizeFIFO];   // nieuwste eerst
+int8_t Data::ReadQueueOrStackStatus(SensorQueueOrStack& channel) {
+#if DATA_QUEUE_OR_STACK_ACTIEF
+  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.countNumber == 0) return -1;   // leeg
+  return 0;   // waarde klaar
+#else
+  (void)channel;
+  return -1;   // zonder QueueOrStack: altijd leeg
+#endif
+}
+
+int Data::ReadQueueOrStackValue(SensorQueueOrStack& channel) {
+#if DATA_QUEUE_OR_STACK_ACTIEF
+  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.countNumber == 0) return channel.lastValue;   // leeg: laatst gemeten waarde van dit channel
+  int value;
+  if (channel.LIFO) value = channel.buffer[(channel.firstIndex + channel.countNumber - 1) % channel.sizeQueueOrStack];   // nieuwste eerst
   else {
-    value = channel.buffer[channel.first];   // oudste eerst
-    channel.first = (channel.first + 1) % channel.sizeFIFO;
+    value = channel.buffer[channel.firstIndex];   // oudste eerst
+    channel.firstIndex = (channel.firstIndex + 1) % channel.sizeQueueOrStack;
   }
-  channel.count--;
-  return true;
+  channel.countNumber--;
+  return value;
+#else
+  return channel.lastValue;   // zonder QueueOrStack: laatst gemeten waarde van dit channel
+#endif
 }
 
 // Overgeërfd door elke sensor: geeft het channel van de sensor door aan Data.
-void Sensor::WriteFIFO(uint8_t numberChannel, int value) {
-  if (::Data == nullptr || FIFO == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return;
-  ::Data->WriteFIFO(FIFO[numberChannel - 1], value);
+void Sensor::WriteQueueOrStack(uint8_t numberChannel, int value) {
+  if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return;
+  ::Data->WriteQueueOrStack(QueueOrStack[numberChannel - 1], value);
 }
 
-bool Sensor::ReadFIFO(uint8_t numberChannel, int& value) {
-  if (::Data == nullptr || FIFO == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return false;
-  return ::Data->ReadFIFO(FIFO[numberChannel - 1], value);
+int8_t Sensor::ReadQueueOrStackStatus(uint8_t numberChannel) {
+  if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return -2;   // sensor bestaat niet
+  return ::Data->ReadQueueOrStackStatus(QueueOrStack[numberChannel - 1]);
+}
+
+int Sensor::ReadQueueOrStackValue(uint8_t numberChannel) {
+  if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return 0;   // sensor bestaat niet
+  return ::Data->ReadQueueOrStackValue(QueueOrStack[numberChannel - 1]);
 }
 #endif
 

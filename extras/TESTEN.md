@@ -213,7 +213,7 @@ De GedeeldeBus-tests gebruiken `TestLibraryCommon.cmd`. Er bestaat in de huidige
 examples\Systeem\Data\
 ```
 
-De huidige testlijst compileert de EEPROM-, microSD- en FLASH-voorbeelden afzonderlijk. De EEPROM-test gebruikt `DATA_TYPE_EEPROM`; de microSD-test gebruikt `DATA_TYPE_MICROSD`; de FLASH-test gebruikt `DATA_TYPE_FLASH`. Daarnaast wordt `Sensor_RFP602.ino` gecompileerd met `DATA_TYPE_NONE` en `REDIRECT_SERIAL_TO_MICROSD`. Daarmee wordt gecontroleerd dat Serial redirect de noodzakelijke Data/microSD-route zelf mee compileert en niet vereist dat `DATA_TYPE_MICROSD` in `DATA_LAYER_CONFIG` staat. Alle tests lopen via `TestLibraryCommon.cmd`. De FLASH-test gebruikt `SPIMemory`. Er worden in deze Data-test geen boards vooraf uitgesloten; de boardmatrix toont zelf welke combinaties compileren en welke niet.
+De huidige testlijst compileert de EEPROM-, FLASH-, FRAM_I2C- en microSD-voorbeelden afzonderlijk. De EEPROM-test gebruikt `DATA_TYPE_EEPROM`; de FLASH-test gebruikt `DATA_TYPE_FLASH`; de FRAM_I2C-test gebruikt `DATA_TYPE_FRAM` met `DATA_LAYER_FRAM_1_I2C_ADDRESS=0x50`; de microSD-test gebruikt `DATA_TYPE_MICROSD`. Daarnaast wordt `Sensor_RFP602.ino` gecompileerd met `DATA_TYPE_NONE` en `REDIRECT_SERIAL_TO_MICROSD`. Daarmee wordt gecontroleerd dat Serial redirect de noodzakelijke Data/microSD-route zelf mee compileert en niet vereist dat `DATA_TYPE_MICROSD` in `DATA_LAYER_CONFIG` staat. Alle tests lopen via `TestLibraryCommon.cmd`. De FLASH-test gebruikt `SPIMemory`. Er worden in deze Data-test geen boards vooraf uitgesloten; de boardmatrix toont zelf welke combinaties compileren en welke niet.
 
 ### 8. Mapping-volledigheidscontrole: `TestLibraryMappingControle.cmd`
 
