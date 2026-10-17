@@ -33,6 +33,9 @@ Open werk voor beta v2.0.0:
 - daarna praktijktesten uitvoeren met echte sensoren en randapparatuur;
 - `RFP602` als eerste Sensor op Native ADC en ADS1115 blijven valideren;
 - SensorKernel pas verder uitbouwen nadat deze v2-basis stabiel is.
+- Data-media (D038 tot D040) compileren op ESP32, ESP32-S3, RP2040, Nucleo F401RE en UNO Q; vooral de native EEPROM (ESP32/RP2040: `begin()` en `commit()`), SdFat op ESP32 en de UNO Q zonder native EEPROM;
+- Data-media hardwarematig testen, in deze volgorde: FLASH met buffer 0 en 256 (snelheid en teruglezen), native EEPROM samen met HX1838, CS via PCF8574 voor FLASH, microSD alleen en daarna met CS via PCF8574 (`SD_CHIP_SELECT_MODE` 1);
+- config per sensor-pin om de Extender te kiezen (D039), wanneer een sensor het nodig heeft.
 
 Een onderdeel is voor v2 pas klaar wanneer architectuur, code, voorbeelden, documentatie én de relevante hardwaretest hetzelfde gedrag beschrijven.
 

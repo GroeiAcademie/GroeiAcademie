@@ -83,6 +83,7 @@ Voor SerialScreen gelden daarnaast:
 | `SERIAL_BAUDRATE` | Baudrate voor de seriële uitvoer; standaard `115200UL`. |
 | `GA_SERIAL` | Seriële projectabstractie. Zonder redirect: `Serial0` bij `BOARD_ESP32S3_ARDI32` en `BOARD_ESP32S3_DEV`, anders `Serial`. Met `REDIRECT_SERIAL_TO_MICROSD`: `RedirectSerial`. |
 | `REDIRECT_SERIAL` | `REDIRECT_SERIAL_NONE` betekent geen redirect. `REDIRECT_SERIAL_TO_MICROSD` leidt `GA_SERIAL` om naar microSD via Recording. |
+| `REDIRECT_SERIAL_CONNECT_TIMEOUT_MS` | Schakelaar zonder waarde, verplicht bij `REDIRECT_SERIAL_TO_MICROSD` (anders `#error`): wacht maximaal `SERIAL_CONNECT_TIMEOUT_MS` op Serial in plaats van eindeloos. |
 | `REDIRECT_SERIAL_FILE` | Bestandsnaam voor de Serial-redirect; standaard `"serial.log"`. |
 | `SERIAL_CONNECT_TIMEOUT_MS` | Maximale wachttijd bij de eerste normale SerialScreen-verbinding; standaard `2000UL`. Na timeout wordt Serial voor die sessie als niet beschikbaar beschouwd en wordt `CRITICAL: SS001` op beschikbare andere schermen/callbacks gemeld. |
 
@@ -162,7 +163,7 @@ Voor FLASH geldt:
 | `DATA_LAYER_FLASH_SPI_AANTAL` | Aantal FLASH-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FLASH_SPI` actief is, anders 0. |
 | `DATA_LAYER_FLASH_SPI_1_CS_PIN` | Exclusieve CS-pin van FLASH #1, standaard `HardwareResourcePin::NONE`. |
 | `DATA_LAYER_FLASH_SPI_2_CS_PIN` | Exclusieve CS-pin van FLASH #2, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE` / `_2_` | Naam voorlopig. Schrijfbuffer in RAM: `0` (standaard, geen buffer), of minstens `sizeof(int)` (`2` op de UNO R3, `4` op de 32-bit boards) t/m `256` bytes. Zie `DATA.md`. |
+| `DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE` / `_2_` | Schrijfbuffer in RAM: `0` (standaard, geen buffer), of minstens `sizeof(int)` (`2` op de UNO R3, `4` op de 32-bit boards) t/m `256` bytes. Zie `DATA.md`. |
 
 FLASH gebruikt uitsluitend SPI via `Adafruit SPIFlash` (`Adafruit_SPIFlashBase`, zonder cache) met het eigen transport `TransportFLASHviaSPI`. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
 
@@ -186,13 +187,13 @@ Voor microSD geldt:
 
 De huidige microSD-implementatie gebruikt uitsluitend SPI via `SdFat` (`SdFat32`, de "SdFat - Adafruit Fork"). SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
 
-Voor CS via een Extender (namen voorlopig, zie `DATA.md`):
+Voor CS via een Extender (zie `DATA.md`):
 
 | Instelling | Betekenis |
 |---|---|
 | `DATA_LAYER_FLASH_SPI_<NR>_CS_EXTENDER`, `DATA_LAYER_MICROSD_SPI_<NR>_CS_EXTENDER` | Component van de Extender met CS, bv. `GedeeldeBusComponent::DIGITAL_PINS_PCF8574`. Niet ingesteld = CS op het board. |
 | `..._CS_EXTENDER_I2C_ADDRESS` | I2C-adres van die Extender; verplicht samen met de vorige. |
-| `GEDEELDE_BUS_GEMENGDE_PINNEN` | `0` standaard; wordt automatisch `1` zodra een `_CS_EXTENDER` ingesteld is. |
+| `GEDEELDE_BUS_MIXED_PINS` | `0` standaard; wordt automatisch `1` zodra een `_CS_EXTENDER` ingesteld is. |
 
 Voor RFP602 zijn daarnaast beschikbaar:
 

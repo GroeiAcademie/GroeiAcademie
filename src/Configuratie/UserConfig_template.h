@@ -668,7 +668,7 @@
 #endif
 
 #ifndef DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE
-// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0  // NAAM VOORLOPIG. standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
+// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
 #endif
 
 // ============================================================================
@@ -679,14 +679,14 @@
 #endif
 
 #ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
-// #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0  // NAAM VOORLOPIG. standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
+// #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
 #endif
 
-// CS via een Extender (NAAM VOORLOPIG): zet de drie instellingen samen. DATA_LAYER_FLASH_SPI_1_CS_PIN wordt dan de pin op de Extender.
+// CS via een Extender: zet de drie instellingen samen. DATA_LAYER_FLASH_SPI_1_CS_PIN wordt dan de pin op de Extender.
 // De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board.
 #ifndef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
-// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // NAAM VOORLOPIG: welke Extender CS schakelt
-// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // NAAM VOORLOPIG: I2C-adres van die Extender
+// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
+// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // I2C-adres van die Extender
 // #define DATA_LAYER_FLASH_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 #endif
 
@@ -742,11 +742,11 @@
 // #define DATA_LAYER_MICROSD_SPI_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-// CS via een Extender (NAAM VOORLOPIG): zet de drie instellingen samen. DATA_LAYER_MICROSD_SPI_1_CS_PIN wordt dan de pin op de Extender.
+// CS via een Extender: zet de drie instellingen samen. DATA_LAYER_MICROSD_SPI_1_CS_PIN wordt dan de pin op de Extender.
 // De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board. Vereist SD_CHIP_SELECT_MODE 1 of 2 in SdFatConfig.h van SdFat - Adafruit Fork.
 #ifndef DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER
-// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // NAAM VOORLOPIG: welke Extender CS schakelt
-// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // NAAM VOORLOPIG: I2C-adres van die Extender
+// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
+// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // I2C-adres van die Extender
 // #define DATA_LAYER_MICROSD_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 #endif
 
@@ -765,8 +765,8 @@
 // ============================================================================
 // GEDEELDEBUS: GEMENGDE PINNEN
 // ============================================================================
-#ifndef GEDEELDE_BUS_GEMENGDE_PINNEN
-// #define GEDEELDE_BUS_GEMENGDE_PINNEN 0  // NAAM VOORLOPIG. standaard waarde: 0; 1 = per exclusieve pin het board of een Extender (bv. CS van een SPI-chip op een PCF8574). Wordt automatisch 1 bij een Data-chip met CS via een Extender.
+#ifndef GEDEELDE_BUS_MIXED_PINS
+// #define GEDEELDE_BUS_MIXED_PINS 0  // standaard waarde: 0; 1 = per exclusieve pin het board of een Extender (bv. CS van een SPI-chip op een PCF8574). Wordt automatisch 1 bij een Data-chip met CS via een Extender.
 #endif
 
 // ============================================================================

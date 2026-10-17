@@ -6,7 +6,7 @@
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE) && BOARD_VERSION != BOARD_UNO_Q
 
 DataEEPROMviaNative::~DataEEPROMviaNative() {
-  struct Data* data = static_cast<struct Data*>(parent);   // NAAM VOORLOPIG: de ouder (Data) van deze chip
+  struct Data* data = static_cast<struct Data*>(parent);   // de ouder (Data) van deze chip
   if (data != nullptr && data->EEPROMviaNative == this) data->EEPROMviaNative = nullptr;
 }
 
@@ -29,14 +29,14 @@ uint8_t Data::ReadNativeEEPROM(uint16_t adres) {
 
 void Data::WriteNativeEEPROM(uint16_t adres, uint8_t waarde) {
   if (EEPROMviaNative == nullptr || adres >= DATA_LAYER_EEPROM_NATIVE_SIZE) return;
-  const int plaats = HX1838_EEPROM_NATIVE_SIZE + adres;   // NAAM VOORLOPIG: echt adres in de native EEPROM
+  const int positie = HX1838_EEPROM_NATIVE_SIZE + adres;   // echt adres in de native EEPROM
 #if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV || BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
   // Alleen schrijven wanneer de waarde verandert; meteen commit(), want een volgende begin() (bv. van Input) leest het geheugen opnieuw in.
-  if (EEPROM.read(plaats) == waarde) return;
-  EEPROM.write(plaats, waarde);
+  if (EEPROM.read(positie) == waarde) return;
+  EEPROM.write(positie, waarde);
   EEPROM.commit();
 #else
-  EEPROM.update(plaats, waarde);   // schrijft alleen wanneer de waarde verandert: minder slijtage
+  EEPROM.update(positie, waarde);   // schrijft alleen wanneer de waarde verandert: minder slijtage
 #endif
 }
 
@@ -54,7 +54,7 @@ void Data::WriteNativeEEPROM(uint16_t adres, uint8_t waarde) { (void)adres; (voi
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_I2C)
 
 DataEEPROMviaI2C::~DataEEPROMviaI2C() {
-  struct Data* data = static_cast<struct Data*>(parent);   // NAAM VOORLOPIG: de ouder (Data) van deze chip
+  struct Data* data = static_cast<struct Data*>(parent);   // de ouder (Data) van deze chip
   if (data == nullptr) return;
   for (uint8_t teller = 0; teller < DATA_LAYER_EEPROM_I2C_AANTAL; teller++) {
     if (data->EEPROMviaI2C[teller] == this) data->EEPROMviaI2C[teller] = nullptr;

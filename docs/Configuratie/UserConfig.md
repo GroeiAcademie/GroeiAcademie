@@ -143,7 +143,7 @@ FLASH gebruikt uitsluitend SPI via `Adafruit SPIFlash` (zonder cache, met een ei
 // #define DATA_LAYER_FLASH_SPI_AANTAL 1
 // #define DATA_LAYER_FLASH_SPI_1_CS_PIN HardwareResourcePin::NONE
 // #define DATA_LAYER_FLASH_SPI_2_CS_PIN HardwareResourcePin::NONE
-// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0   // naam voorlopig; 0 = geen buffer; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = schrijfbuffer in RAM (zie DATA.md)
+// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0   // 0 = geen buffer; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = schrijfbuffer in RAM (zie DATA.md)
 ```
 
 FRAM gebruikt momenteel uitsluitend I2C via Rob Tillaart `FRAM_I2C`:
@@ -164,7 +164,7 @@ microSD gebruikt momenteel uitsluitend SPI via `SdFat` (de "SdFat - Adafruit For
 // #define DATA_LAYER_MICROSD_SPI_2_CS_PIN HardwareResourcePin::NONE
 ```
 
-CS van FLASH of microSD kan ook op een Extender (PCF8574, PCF8575, MCP23017) met `DATA_LAYER_..._CS_EXTENDER`, `DATA_LAYER_..._CS_EXTENDER_I2C_ADDRESS` en de pin op die Extender in `DATA_LAYER_..._CS_PIN` (namen voorlopig; zie `DATA.md`). Voor microSD moet dan `SD_CHIP_SELECT_MODE` in `SdFatConfig.h` op `1` of `2` staan.
+CS van FLASH of microSD kan ook op een Extender (PCF8574, PCF8575, MCP23017) met `DATA_LAYER_..._CS_EXTENDER`, `DATA_LAYER_..._CS_EXTENDER_I2C_ADDRESS` en de pin op die Extender in `DATA_LAYER_..._CS_PIN` (zie `DATA.md`). Voor microSD moet dan `SD_CHIP_SELECT_MODE` in `SdFatConfig.h` op `1` of `2` staan.
 
 SDA/SCL voor EEPROM en FRAM en SCK/MISO/MOSI voor microSD en FLASH komen uit de bestaande boardconfiguratie. Alleen de instance-specifieke I2C-adressen en CS-pinnen worden hier ingesteld.
 

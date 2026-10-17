@@ -96,8 +96,8 @@ void ResettenGedeeldeBus() {
 uint8_t volgendeGedeeldeBusId = 0;
 GedeeldeBusNode Native(nullptr, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::ROOT, HardwareResourceToegang::GEDEELD);
 
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
-GedeeldeBusNode* GedeeldeBusZoekExtender(GedeeldeBusComponent extender, uint8_t extenderAdres) {
+#if GEDEELDE_BUS_MIXED_PINS
+GedeeldeBusNode* GedeeldeBusFindI2CExtender(GedeeldeBusComponent extender, uint8_t extenderAdres) {
   for (const GedeeldeBusNode* n = &Native; n != nullptr; n = GedeeldeBusNode::VolgendeInBoom(n, &Native)) {
     // Alleen de Extenders met digitale pinnen voor dit gebruik: PCF8574, PCF8575 en MCP23017. Die zijn alle drie I2C,
     // dus de omzetting naar HardwareResourceTypeI2C hieronder is alleen voor deze drie geldig. Elk ander component: overslaan.
@@ -111,12 +111,12 @@ GedeeldeBusNode* GedeeldeBusZoekExtender(GedeeldeBusComponent extender, uint8_t 
   return nullptr;
 }
 
-bool HardwareResourceTypeSPI::VerbindenCSExtender(GedeeldeBusComponent extender, uint8_t extenderAdres) {
-  csGebied_[0] = GedeeldeBusZoekExtender(extender, extenderAdres);
-  gebiedPerClaim = csGebied_;
-  if (csGebied_[0] == nullptr) np_CS = HardwareResourcePin::NONE;   // controleren() meldt dan GB108
+bool HardwareResourceTypeSPI::ConnectCStoExtender(GedeeldeBusComponent extender, uint8_t extenderAdres) {
+  extenderCS[0] = GedeeldeBusFindI2CExtender(extender, extenderAdres);
+  ownerClaim = extenderCS;
+  if (extenderCS[0] == nullptr) np_CS = HardwareResourcePin::NONE;   // controleren() meldt dan GB108
   exclusief_[0] = static_cast<uint8_t>(np_CS);
-  return csGebied_[0] != nullptr;
+  return extenderCS[0] != nullptr;
 }
 #endif
 
@@ -267,7 +267,7 @@ static void GedeeldeBusAanmakenTijdelijkConflict(const char* code, GedeeldeBusCo
 }
 
 void GedeeldeBusNode::HardwareResourceClaimsBetweenTwoNodes(GedeeldeBusNode* a, const GedeeldeBusNode* b) {
-#if !GEDEELDE_BUS_GEMENGDE_PINNEN
+#if !GEDEELDE_BUS_MIXED_PINS
   if (a->firstExtenderNode() != b->firstExtenderNode()) return;
   const bool native = (a->firstExtenderNode() == nullptr);
 #endif
@@ -283,10 +283,10 @@ void GedeeldeBusNode::HardwareResourceClaimsBetweenTwoNodes(GedeeldeBusNode* a, 
       const uint8_t waardeB = b->ClaimWaarde(y, exclusiefB, idB);
       if (waardeB == geen) continue;
       if (IsAdres(waardeA) != IsAdres(waardeB)) continue;
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
+#if GEDEELDE_BUS_MIXED_PINS
       // Per claim het gebied: alleen claims in hetzelfde gebied (het board of dezelfde Extender) kunnen botsen.
-      const GedeeldeBusNode* gebied = a->GebiedVanClaim(x);
-      if (gebied != b->GebiedVanClaim(y)) continue;
+      const GedeeldeBusNode* gebied = a->GetOwnerClaim(x);
+      if (gebied != b->GetOwnerClaim(y)) continue;
       const bool native = (gebied == nullptr);
 #endif
 
@@ -455,8 +455,8 @@ bool HardwareResourceTypeSPI::controleren() {
 bool HardwareResourceTypeSPI::FoutDiagnoseSPI(bool gelukt, int fout, bool terugGelezen) {
   if (gelukt && terugGelezen) return true;
 
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
-  const bool native = (GebiedVanClaim(0) == nullptr);   // claim 0 = CS
+#if GEDEELDE_BUS_MIXED_PINS
+  const bool native = (GetOwnerClaim(0) == nullptr);   // claim 0 = CS
 #else
   const bool native = (firstExtenderNode() == nullptr);
 #endif
@@ -567,7 +567,7 @@ bool GedeeldeBusNode::controleren() {
 
   conflictGevonden = false;
   const uint8_t geen = static_cast<uint8_t>(HardwareResourcePin::NONE);
-#if !GEDEELDE_BUS_GEMENGDE_PINNEN
+#if !GEDEELDE_BUS_MIXED_PINS
   const bool native = (firstExtenderNode() == nullptr);
 #endif
 
@@ -582,9 +582,9 @@ bool GedeeldeBusNode::controleren() {
       bool exclusiefB = false; HardwareResourceIdentiteit idB = HardwareResourceIdentiteit::GEEN;
       const uint8_t waardeB = ClaimWaarde(y, exclusiefB, idB);
       if (waardeB == geen || IsAdres(waardeB)) continue;
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
-      const GedeeldeBusNode* gebied = GebiedVanClaim(x);
-      if (gebied != GebiedVanClaim(y)) continue;
+#if GEDEELDE_BUS_MIXED_PINS
+      const GedeeldeBusNode* gebied = GetOwnerClaim(x);
+      if (gebied != GetOwnerClaim(y)) continue;
       const bool native = (gebied == nullptr);
 #endif
 
@@ -611,8 +611,8 @@ bool GedeeldeBusNode::controleren() {
         bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
         const uint8_t waarde = ClaimWaarde(i, exclusief, identiteit);
         if (waarde == geen || IsAdres(waarde)) continue;
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
-        if (GebiedVanClaim(i) != parent) continue;   // claim met een eigen Extender: hieronder apart gecontroleerd
+#if GEDEELDE_BUS_MIXED_PINS
+        if (GetOwnerClaim(i) != parent) continue;   // claim met een eigen Extender: hieronder apart gecontroleerd
 #endif
 
         bool geldig = true;
@@ -683,11 +683,11 @@ bool GedeeldeBusNode::controleren() {
     }
   }
 
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
-  // Exclusieve claims met een eigen Extender: de pin moet op die Extender bestaan. Alleen Extenders met digitale pinnen (ModusPin/SchrijvenPin/LezenPin).
-  if (gebiedPerClaim != nullptr) {
+#if GEDEELDE_BUS_MIXED_PINS
+  // Exclusieve claims met een eigen Extender: de pin moet op die Extender bestaan. Alleen Extenders met digitale pinnen (SetExtenderPinMode/WriteExtenderPin/ReadExtenderPin).
+  if (ownerClaim != nullptr) {
     for (uint8_t i = 0; i < aangemeldePinnen.aantalExclusief; i++) {
-      const GedeeldeBusNode* extender = gebiedPerClaim[i];
+      const GedeeldeBusNode* extender = ownerClaim[i];
       const uint8_t waarde = aangemeldePinnen.exclusievePinnen[i];
       if (extender == nullptr || waarde == geen) continue;
 

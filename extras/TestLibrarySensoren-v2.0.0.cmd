@@ -68,9 +68,9 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_GemengdePinnen\Sensor_GemengdePinnen.ino"
-set TEST_NAAM="Sensor gemengde pinnen | 2 board + 2 PCF8574"
-set TEST_FLAGS="-DGEDEELDE_BUS_GEMENGDE_PINNEN=1 -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_MixedPins\Sensor_MixedPins.ino"
+set TEST_NAAM="Sensor Mixed Pins | 2 board + 2 PCF8574"
+set TEST_FLAGS="-DGEDEELDE_BUS_MIXED_PINS=1 -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT

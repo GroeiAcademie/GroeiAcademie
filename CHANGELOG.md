@@ -53,8 +53,8 @@ De versienummers volgen de versie in `library.properties`.
 - microSD: `SD` vervangen door `SdFat` (via de "SdFat - Adafruit Fork", zodat FLASH en microSD samen compileren);
 - `library.properties`: `SD` en `SPIMemory` weg, `Adafruit SPIFlash` en `SdFat - Adafruit Fork` erbij;
 - Data-componentcodes in de volgorde van de bits: `DATA_DIRECT` 0x15, `DATA_EEPROM` 0x16, `DATA_FLASH` 0x17, `DATA_FRAM` 0x18, `DATA_MICROSD` 0x19;
-- de nooit gebruikte `DATA_LAYER_<MEDIUM>_<NR>_QUEUE_OR_STACK_SIZE` zijn verwijderd; nieuw: FLASH-schrijfbuffer `DATA_LAYER_FLASH_SPI_<NR>_BUFFER_SIZE` (naam voorlopig, standaard 0);
-- GedeeldeBus: gemengde pinnen (`GEDEELDE_BUS_GEMENGDE_PINNEN`, naam voorlopig): per exclusieve pin het board of een Extender; FLASH en microSD kunnen CS op een PCF8574, PCF8575 of MCP23017 hebben (O8).
+- de nooit gebruikte `DATA_LAYER_<MEDIUM>_<NR>_QUEUE_OR_STACK_SIZE` zijn verwijderd; nieuw: FLASH-schrijfbuffer `DATA_LAYER_FLASH_SPI_<NR>_BUFFER_SIZE` (standaard 0);
+- GedeeldeBus: gemengde pinnen (`GEDEELDE_BUS_MIXED_PINS`): per exclusieve pin het board of een Extender; FLASH en microSD kunnen CS op een PCF8574, PCF8575 of MCP23017 hebben (O8).
 
 ### Data
 

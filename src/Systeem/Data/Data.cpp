@@ -16,7 +16,7 @@ namespace {
 // ============================================================================
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
   #if (DATA_LAYER_FLASH_SPI_AANTAL >= 1 && DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0) || (DATA_LAYER_FLASH_SPI_AANTAL >= 2 && DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE > 0)
-    #define FLASH_BUFFER_ACTIEF 1   // NAAM VOORLOPIG: alleen in dit bestand
+    #define FLASH_BUFFER_ACTIEF 1   // alleen in dit bestand
   #else
     #define FLASH_BUFFER_ACTIEF 0
   #endif
@@ -31,13 +31,13 @@ namespace {
     #endif
 namespace {
   #if DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0
-  uint8_t bufferFLASH1[DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE];   // NAAM VOORLOPIG
+  uint8_t bufferFLASH1[DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE];
   #endif
   #if DATA_LAYER_FLASH_SPI_AANTAL >= 2 && DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE > 0
-  uint8_t bufferFLASH2[DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE];   // NAAM VOORLOPIG
+  uint8_t bufferFLASH2[DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE];
   #endif
 
-  // Per FLASH-chip: de buffer (nullptr = geen buffer), zijn grootte en hoeveel bytes erin wachten (NAAM VOORLOPIG).
+  // Per FLASH-chip: de buffer (nullptr = geen buffer), zijn grootte en hoeveel bytes erin wachten.
   uint8_t* const bufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {
   #if DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0
     bufferFLASH1
@@ -53,19 +53,19 @@ namespace {
     #endif
   #endif
   };
-  const uint16_t grootteBufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {
+  const uint16_t sizeBufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {
     DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE
   #if DATA_LAYER_FLASH_SPI_AANTAL >= 2
     , DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
   #endif
   };
-  uint16_t gevuldBufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {};
+  uint16_t countBufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {};
 
-  // De wachtende bytes van één chip naar FLASH schrijven, achter de vorige (NAAM VOORLOPIG).
-  void LegenBufferFLASH(struct Data* data, uint8_t teller) {
+  // De wachtende bytes van één chip naar FLASH schrijven, achter de vorige.
+  void FlushBufferFLASH(struct Data* data, uint8_t teller) {
     struct DataFLASHviaSPI* kanaal = data->FLASHviaSPI[teller];
-    const uint16_t gevuld = gevuldBufferFLASH[teller];
-    gevuldBufferFLASH[teller] = 0;
+    const uint16_t gevuld = countBufferFLASH[teller];
+    countBufferFLASH[teller] = 0;
     if (gevuld == 0 || kanaal == nullptr || !kanaal->actief) return;
     if (kanaal->writeBuffer(data->adres[teller], bufferFLASH[teller], gevuld) == gevuld) data->adres[teller] += gevuld;
   }
@@ -156,9 +156,9 @@ bool Data::aanmelden() {
                       DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
                       DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
                       "DATA_LAYER_FLASH_SPI_1_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
-        if (kanaal->VerbindenCSExtender(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER, DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS)) {
-          kanaal->transport.csExtender = kanaal->csGebied_[0];
-          kanaal->transport.csPin = static_cast<uint8_t>(kanaal->np_CS);
+        if (kanaal->ConnectCStoExtender(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER, DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS)) {
+          kanaal->transport.extenderCS = kanaal->extenderCS[0];
+          kanaal->transport.pinCS = static_cast<uint8_t>(kanaal->np_CS);
         }
   #endif
         if (kanaal->aanmelden()) FLASHviaSPI[0] = kanaal;
@@ -175,9 +175,9 @@ bool Data::aanmelden() {
                       DATA_LAYER_FLASH_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
                       DATA_LAYER_FLASH_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
                       "DATA_LAYER_FLASH_SPI_2_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
-        if (kanaal->VerbindenCSExtender(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER, DATA_LAYER_FLASH_SPI_2_CS_EXTENDER_I2C_ADDRESS)) {
-          kanaal->transport.csExtender = kanaal->csGebied_[0];
-          kanaal->transport.csPin = static_cast<uint8_t>(kanaal->np_CS);
+        if (kanaal->ConnectCStoExtender(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER, DATA_LAYER_FLASH_SPI_2_CS_EXTENDER_I2C_ADDRESS)) {
+          kanaal->transport.extenderCS = kanaal->extenderCS[0];
+          kanaal->transport.pinCS = static_cast<uint8_t>(kanaal->np_CS);
         }
   #endif
         if (kanaal->aanmelden()) FLASHviaSPI[1] = kanaal;
@@ -220,7 +220,7 @@ bool Data::aanmelden() {
                       DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
                       DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
                       "DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
-        kanaal->VerbindenCSExtender(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER, DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS);
+        kanaal->ConnectCStoExtender(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER, DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS);
   #endif
         if (kanaal->aanmelden()) MICROSDviaSPI[0] = kanaal;
         else delete kanaal;
@@ -236,7 +236,7 @@ bool Data::aanmelden() {
                       DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
                       DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
                       "DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
-        kanaal->VerbindenCSExtender(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER, DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER_I2C_ADDRESS);
+        kanaal->ConnectCStoExtender(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER, DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER_I2C_ADDRESS);
   #endif
         if (kanaal->aanmelden()) MICROSDviaSPI[1] = kanaal;
         else delete kanaal;
@@ -308,7 +308,7 @@ bool Data::afmelden() {
   RecordingStop();
 #endif
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI) && FLASH_BUFFER_ACTIEF
-  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) LegenBufferFLASH(this, teller);   // vóór de chips verdwijnen
+  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) FlushBufferFLASH(this, teller);   // vóór de chips verdwijnen
 #endif
   GedeeldeBusNode* sameParent = firstChild;
   while (sameParent != nullptr) {
@@ -397,7 +397,7 @@ void Data::StreamingStart() {
       struct DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
       if (kanaal == nullptr || !kanaal->actief) continue;
   #if FLASH_BUFFER_ACTIEF
-      gevuldBufferFLASH[teller] = 0;   // nieuwe stroom: wat nog in de buffer zat, vervalt
+      countBufferFLASH[teller] = 0;   // nieuwe stroom: wat nog in de buffer zat, vervalt
   #endif
       adres[teller] = 0;
       kanaal->eraseSector(0);
@@ -418,10 +418,10 @@ void Data::StreamingWrite(int ruweData) {
   #if FLASH_BUFFER_ACTIEF
       if (bufferFLASH[teller] != nullptr) {
         // In de buffer; vol = in één keer naar FLASH.
-        if (gevuldBufferFLASH[teller] + sizeof(ruweData) > grootteBufferFLASH[teller]) LegenBufferFLASH(this, teller);
-        memcpy(bufferFLASH[teller] + gevuldBufferFLASH[teller], &ruweData, sizeof(ruweData));
-        gevuldBufferFLASH[teller] += sizeof(ruweData);
-        if (gevuldBufferFLASH[teller] + sizeof(ruweData) > grootteBufferFLASH[teller]) LegenBufferFLASH(this, teller);
+        if (countBufferFLASH[teller] + sizeof(ruweData) > sizeBufferFLASH[teller]) FlushBufferFLASH(this, teller);
+        memcpy(bufferFLASH[teller] + countBufferFLASH[teller], &ruweData, sizeof(ruweData));
+        countBufferFLASH[teller] += sizeof(ruweData);
+        if (countBufferFLASH[teller] + sizeof(ruweData) > sizeBufferFLASH[teller]) FlushBufferFLASH(this, teller);
         continue;
       }
   #endif
@@ -440,9 +440,9 @@ int Data::StreamingRead(SensorQueueOrStack& channel) {
   struct DataFLASHviaSPI* kanaal = FLASHviaSPI[0];
   #if FLASH_BUFFER_ACTIEF
   // De laatste meting kan nog in de buffer wachten.
-  if ((this->typesActief & DATA_TYPE_FLASH_SPI) && bufferFLASH[0] != nullptr && gevuldBufferFLASH[0] >= sizeof(int)) {
+  if ((this->typesActief & DATA_TYPE_FLASH_SPI) && bufferFLASH[0] != nullptr && countBufferFLASH[0] >= sizeof(int)) {
     int gelezen;
-    memcpy(&gelezen, bufferFLASH[0] + gevuldBufferFLASH[0] - sizeof(gelezen), sizeof(gelezen));
+    memcpy(&gelezen, bufferFLASH[0] + countBufferFLASH[0] - sizeof(gelezen), sizeof(gelezen));
     return gelezen;
   }
   #endif
@@ -456,7 +456,7 @@ int Data::StreamingRead(SensorQueueOrStack& channel) {
 
 void Data::StreamingStop() {
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI) && FLASH_BUFFER_ACTIEF
-  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) LegenBufferFLASH(this, teller);   // wat nog wacht, naar FLASH
+  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) FlushBufferFLASH(this, teller);   // wat nog wacht, naar FLASH
 #endif
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
   if (this->typesActief & DATA_TYPE_MICROSD_SPI) RecordingStop();

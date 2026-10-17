@@ -144,7 +144,7 @@ SCK, MISO en MOSI komen uit de boardconfiguratie. De chips staan in `Data->FLASH
 ### FLASH-buffer
 
 ```cpp
-#define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0     // naam voorlopig; zo ook _2_
+#define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0     // zo ook _2_
 ```
 
 - `0` (standaard): elke `StreamingWrite()` schrijft meteen naar FLASH. Er wordt geen buffer gecompileerd.
@@ -198,7 +198,7 @@ SCK, MISO en MOSI komen uit de boardconfiguratie. De kaarten staan in `Data->MIC
 
 ### CS via een Extender
 
-FLASH en microSD kunnen CS op een Extender hebben (PCF8574, PCF8575 of MCP23017), met SCK, MISO en MOSI op het board. Per chip drie instellingen (namen voorlopig):
+FLASH en microSD kunnen CS op een Extender hebben (PCF8574, PCF8575 of MCP23017), met SCK, MISO en MOSI op het board. Per chip drie instellingen:
 
 ```cpp
 #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender
@@ -206,7 +206,7 @@ FLASH en microSD kunnen CS op een Extender hebben (PCF8574, PCF8575 of MCP23017)
 #define DATA_LAYER_FLASH_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 ```
 
-Zo ook `_2_` en `MICROSD_SPI`. Data zoekt de Extender in de boom op component en adres; de Extender moet dus vóór `Data` aangemaakt en geactiveerd zijn. Niet gevonden: GB108 (CS ontbreekt). `GEDEELDE_BUS_GEMENGDE_PINNEN` wordt dan automatisch `1`.
+Zo ook `_2_` en `MICROSD_SPI`. Data zoekt de Extender in de boom op component en adres; de Extender moet dus vóór `Data` aangemaakt en geactiveerd zijn. Niet gevonden: GB108 (CS ontbreekt). `GEDEELDE_BUS_MIXED_PINS` wordt dan automatisch `1`.
 
 - FLASH: het transport schakelt CS via de Extender.
 - microSD: SdFat schakelt CS zelf met `sdCsInit()`/`sdCsWrite()`. Die functies kan de library alleen vervangen wanneer in `SdFatConfig.h` van "SdFat - Adafruit Fork" `SD_CHIP_SELECT_MODE` op `1` of `2` staat (standaard `0`). Staat het op `0`, dan geeft de compilatie een duidelijke `#error`. Pas die ene regel in `SdFatConfig.h` aan, of geef `-DSD_CHIP_SELECT_MODE=1` mee als compileerflag.
@@ -327,6 +327,13 @@ Alle seriële frameworkuitvoer loopt via `GA_SERIAL`.
 REDIRECT_SERIAL_NONE
 REDIRECT_SERIAL_TO_MICROSD
 REDIRECT_SERIAL_FILE "serial.log"
+```
+
+`REDIRECT_SERIAL_CONNECT_TIMEOUT_MS` is verplicht bij `REDIRECT_SERIAL_TO_MICROSD` (anders `#error`). Het is een schakelaar zonder waarde: `SerialOutput::Activeren()` wacht dan maximaal `SERIAL_CONNECT_TIMEOUT_MS` op Serial in plaats van eindeloos.
+
+```cpp
+#define REDIRECT_SERIAL REDIRECT_SERIAL_TO_MICROSD
+#define REDIRECT_SERIAL_CONNECT_TIMEOUT_MS
 ```
 
 `REDIRECT_SERIAL_NONE` betekent geen redirect. `GA_SERIAL` blijft de bestaande `Serial` of `Serial0` gebruiken.

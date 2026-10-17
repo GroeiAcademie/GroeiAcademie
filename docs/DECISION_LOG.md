@@ -203,3 +203,27 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 **Besluit:** `DATA_FRAM` wordt als afzonderlijk Data-component opgenomen naast EEPROM, FLASH en microSD. De eerste concrete route is `FRAM_I2C` via Rob Tillaart `FRAM_I2C`; Fujitsu MB85RC256V gebruikt de libraryclass `FRAM`. Aanmelden, controleren, inpluggen en activeren blijven volledig binnen de bestaande GedeeldeBus-lifecycle. `FRAM_SPI` blijft optioneel voor later en wordt in deze stap niet geïmplementeerd.
 
 **Context:** beta v2.0.0. FRAM biedt niet-vluchtige opslag met zeer veel schrijfcycli en vormt daarom een afzonderlijke opslagoptie; de bestaande STREAMING- en RECORDING-routes worden in deze stap niet gewijzigd.
+
+## D038 v2.0.0: Data-media, één bit per medium en aansluiting
+
+**Besluit:** elk Data-medium krijgt per aansluiting een eigen bit: `DATA_TYPE_EEPROM_NATIVE`, `DATA_TYPE_EEPROM_I2C`, `DATA_TYPE_FLASH_SPI`, `DATA_TYPE_FRAM_I2C`, `DATA_TYPE_MICROSD_SPI` (`DATA_TYPE_EEPROM_SPI` en `DATA_TYPE_FRAM_SPI` gereserveerd); `typesActief` wordt 16 bits. Eén bestand per medium met alle aansluitingen (`EEPROM`, `FLASH`, `FRAM`, `microSD`). Data houdt per medium een lijst van zijn chips bij; elke chip wist zijn plaats in zijn destructor. DIRECT is een kind van Data (`DataDIRECT`). De componentcodes volgen de volgorde van de bits: `GC_DATA` 0x14, `DATA_DIRECT` 0x15, `DATA_EEPROM` 0x16, `DATA_FLASH` 0x17, `DATA_FRAM` 0x18, `DATA_MICROSD` 0x19. FLASH gebruikt `Adafruit SPIFlash` (zonder cache, eigen transport), microSD `SdFat` via de "SdFat - Adafruit Fork".
+
+**Context:** beta v2.0.0, uitgewerkt in de reuzetabel Data-media (16-10-2026) en de zips van 17-10-2026.
+
+## D039 v2.0.0: gemengde pinnen en CS via een Extender
+
+**Besluit:** met `GEDEELDE_BUS_MIXED_PINS` (standaard 0) mag een component per exclusieve pin een eigen gebied hebben, het board of een Extender (`ownerClaim`, `GetOwnerClaim()`). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. FLASH en microSD kunnen CS op zo'n Extender hebben (O8); microSD vraagt daarvoor `SD_CHIP_SELECT_MODE` 1 of 2 in `SdFatConfig.h`. Met 0 wordt niets hiervan gecompileerd.
+
+**Context:** de architectuur kende tot dan één resourcegebied per component; een sensor of SPI-chip met lijnen op het board én op Extenders is gewone praktijk.
+
+## D040 v2.0.0: QueueOrStack alleen per sensor-channel
+
+**Besluit:** de QueueOrStack bestaat alleen per sensor-channel. De nooit gebruikte `DATA_LAYER_<MEDIUM>_<NR>_QUEUE_OR_STACK_SIZE` zijn verwijderd. Voor FLASH bestaat een aparte schrijfbuffer `DATA_LAYER_FLASH_SPI_<NR>_BUFFER_SIZE` (standaard 0; anders minstens `sizeof(int)` en maximaal 256).
+
+**Context:** een tweede QueueOrStack per medium zou dezelfde waarden opnieuw in RAM bewaren; de FLASH-buffer dient alleen om sneller per pagina te schrijven.
+
+## D041 v2.0.0: bewust niet gedaan
+
+**Besluit:** (1) de namen van GedeeldeBus niet naar PROGMEM verplaatsen: dat helpt alleen de UNO R3; (2) zonder Data blijft de naam `DATA_DIRECT` in de namenlijst (12 bytes op de UNO R3, 8 tot 16 bytes flash op de 32-bit boards); (3) geen `TransferFrame`: er is geen gebruiker; (4) config per sensor-pin om de Extender te kiezen pas wanneer een sensor het nodig heeft.
+
+**Context:** maximale snelheid en minimaal geheugen blijven de maatstaf; de UNO R3 is alleen een testboard.

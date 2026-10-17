@@ -55,13 +55,13 @@ void setup() {
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE)
   Data->WriteNativeEEPROM(0, geschrevenWaarde);
-  const uint8_t gelezenNative = Data->ReadNativeEEPROM(0);   // NAAM VOORLOPIG: gelezen waarde uit de native EEPROM
+  const uint8_t readNative = Data->ReadNativeEEPROM(0);   // gelezen waarde uit de native EEPROM
 
   GA_SERIAL.print(F("EEPROM NATIVE geschreven: "));
   GA_SERIAL.println(geschrevenWaarde);
   GA_SERIAL.print(F("EEPROM NATIVE gelezen: "));
-  GA_SERIAL.println(gelezenNative);
-  GA_SERIAL.println(gelezenNative == geschrevenWaarde ? F("RESULTAAT EEPROM NATIVE: OK") : F("RESULTAAT EEPROM NATIVE: FOUT"));
+  GA_SERIAL.println(readNative);
+  GA_SERIAL.println(readNative == geschrevenWaarde ? F("RESULTAAT EEPROM NATIVE: OK") : F("RESULTAAT EEPROM NATIVE: FOUT"));
 #endif
 }
 

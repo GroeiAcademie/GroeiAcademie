@@ -16,7 +16,7 @@
 
 #ifdef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
 // CS via een Extender: die Extender moet bestaan en werken vóór Data. Deze test gebruikt PCF8574 #1 (EXTENDER_PCF8574_AANTAL >= 1).
-ExtenderPCF8574 extenderCS(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);   // NAAM VOORLOPIG: de Extender met CS
+ExtenderPCF8574 extenderCS(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);   // de Extender met CS
 #endif
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {

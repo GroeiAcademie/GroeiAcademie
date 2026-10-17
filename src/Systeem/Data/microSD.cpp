@@ -7,27 +7,27 @@
 // SdFat schakelt CS zelf met sdCsInit()/sdCsWrite() en kent alleen een pinnummer. Die functies mag een programma alleen
 // vervangen wanneer SD_CHIP_SELECT_MODE in SdFatConfig.h van "SdFat - Adafruit Fork" op 1 of 2 staat.
 // ============================================================================
-#if GEDEELDE_BUS_GEMENGDE_PINNEN && (defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER))
-  #define MICROSD_CS_VIA_EXTENDER 1   // NAAM VOORLOPIG: alleen in dit bestand
+#if GEDEELDE_BUS_MIXED_PINS && (defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER))
+  #define MICROSD_CS_VIA_EXTENDER 1   // alleen in dit bestand
   #if SD_CHIP_SELECT_MODE == 0
     #error microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 of 2 in SdFatConfig.h van de library "SdFat - Adafruit Fork".
   #endif
 
 namespace {
-  // NAAM VOORLOPIG: vanaf dit nummer betekent het pinnummer voor SdFat "kaart met CS via een Extender", met de plaats in csViaExtender[].
-  const SdCsPin_t csViaExtenderBasis = 0xF0;
-  struct DataMICROSDviaSPI* csViaExtender[DATA_LAYER_MICROSD_SPI_AANTAL] = {};   // NAAM VOORLOPIG
+  // vanaf dit nummer betekent het pinnummer voor SdFat "kaart met CS via een Extender", met de plaats in linkCSviaExtender[].
+  const SdCsPin_t startValueCSviaExtender = 0xF0;
+  struct DataMICROSDviaSPI* linkCSviaExtender[DATA_LAYER_MICROSD_SPI_AANTAL] = {};
 }
 
 void sdCsInit(SdCsPin_t pin) {
-  if (pin >= csViaExtenderBasis) return;   // via een Extender: al als uitgang en HIGH gezet in HardwareResourceTypeSPI::inpluggen()
+  if (pin >= startValueCSviaExtender) return;   // via een Extender: al als uitgang en HIGH gezet in HardwareResourceTypeSPI::inpluggen()
   pinMode(pin, OUTPUT);
 }
 
 void sdCsWrite(SdCsPin_t pin, bool level) {
-  if (pin >= csViaExtenderBasis) {
-    struct DataMICROSDviaSPI* kaart = csViaExtender[pin - csViaExtenderBasis];   // NAAM VOORLOPIG: de kaart met dit pinnummer
-    if (kaart != nullptr) kaart->SchrijvenCS(level ? HIGH : LOW);
+  if (pin >= startValueCSviaExtender) {
+    struct DataMICROSDviaSPI* card = linkCSviaExtender[pin - startValueCSviaExtender];   // de kaart met dit pinnummer
+    if (card != nullptr) card->WriteCS(level ? HIGH : LOW);
     return;
   }
   digitalWrite(pin, level ? HIGH : LOW);
@@ -35,31 +35,31 @@ void sdCsWrite(SdCsPin_t pin, bool level) {
 #endif
 
 DataMICROSDviaSPI::~DataMICROSDviaSPI() {
-  struct Data* data = static_cast<struct Data*>(parent);   // NAAM VOORLOPIG: de ouder (Data) van deze chip
+  struct Data* data = static_cast<struct Data*>(parent);   // de ouder (Data) van deze chip
   if (data == nullptr) return;
   for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
     if (data->MICROSDviaSPI[teller] == this) data->MICROSDviaSPI[teller] = nullptr;
 #if MICROSD_CS_VIA_EXTENDER
-    if (csViaExtender[teller] == this) csViaExtender[teller] = nullptr;
+    if (linkCSviaExtender[teller] == this) linkCSviaExtender[teller] = nullptr;
 #endif
   }
 }
 
 bool DataMICROSDviaSPI::Activeren() {
-  SdCsPin_t cs = NativeArduinoPinVan(np_CS);   // NAAM VOORLOPIG: het pinnummer dat SdFat krijgt
+  SdCsPin_t pinCS = NativeArduinoPinVan(np_CS);   // het pinnummer dat SdFat krijgt
 #if MICROSD_CS_VIA_EXTENDER
-  if (csGebied_[0] != nullptr) {
+  if (extenderCS[0] != nullptr) {
     for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
-      if (csViaExtender[teller] == nullptr || csViaExtender[teller] == this) {
-        csViaExtender[teller] = this;
-        cs = csViaExtenderBasis + teller;
+      if (linkCSviaExtender[teller] == nullptr || linkCSviaExtender[teller] == this) {
+        linkCSviaExtender[teller] = this;
+        pinCS = startValueCSviaExtender + teller;
         break;
       }
     }
   }
 #endif
   // SdFat geeft een foutcode terug (sdErrorCode()), 0 = geen fout. Gedeelde SPI-bus, 4 MHz zoals voorheen.
-  const bool gelukt = SdFat32::begin(SdSpiConfig(cs, SHARED_SPI, SD_SCK_MHZ(4)));
+  const bool gelukt = SdFat32::begin(SdSpiConfig(pinCS, SHARED_SPI, SD_SCK_MHZ(4)));
   return FoutDiagnoseSPI(gelukt, SdFat32::sdErrorCode(), gelukt);
 }
 

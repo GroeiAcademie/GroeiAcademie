@@ -146,7 +146,7 @@
   #elif defined(ARDUINO_D1_UNO32)
     #define BOARD_VERSION BOARD_ESP32_D1_UNO_R32
   #elif defined(ARDUINO_ARDI32)
-    #define BOARD_VERSION BOARD_ESP32S3_ARDI32 
+    #define BOARD_VERSION BOARD_ESP32S3_ARDI32
   #elif defined(ARDUINO_ESP32S3_DEV)
     #define BOARD_VERSION BOARD_ESP32S3_DEV // TODO: ARDUINO_ESP32S3_UNO | ARDUINO_ESP32S3_WROOM_1
   #elif defined(ARDUINO_CYTRON_MAKER_UNO_RP2040)
@@ -157,9 +157,9 @@
     #error Dit board wordt momenteel (nog) niet ondersteund.
   #endif
 #endif
-// UserConfig.h heeft voorrang op automatische boarddetectie. 
-// Wanneer de gebruiker in UserConfig.h zelf BOARD_VERSION definieert (bijvoorbeeld #define BOARD_VERSION BOARD_ESP32S3_ARDI32), 
-// gebruikt de library die keuze en wordt bovenstaande automatische detectie niet uitgevoerd (de #ifndef hierboven slaat dan over). 
+// UserConfig.h heeft voorrang op automatische boarddetectie.
+// Wanneer de gebruiker in UserConfig.h zelf BOARD_VERSION definieert (bijvoorbeeld #define BOARD_VERSION BOARD_ESP32S3_ARDI32),
+// gebruikt de library die keuze en wordt bovenstaande automatische detectie niet uitgevoerd (de #ifndef hierboven slaat dan over).
 // Enkel wanneer BOARD_VERSION nergens vooraf gedefinieerd is, bepaalt dit bestand het board automatisch op basis van de compiler-/boardmacro's van de Arduino IDE.
 
 #ifndef REDIRECT_SERIAL
@@ -189,8 +189,8 @@
 
 
 // ============================================================================
-// BOARD_ID: generieke, per-fysiek-bord-identiteit, bewust hier in SystemConfig.h en niet in een subsysteem-specifiek configuratiebestand, want "welk fysiek bord is dit" is geen eigenschap van één subsysteem. 
-// (FURURE) Heeft nog geen functioneel effect; dient als voorbereiding op scenario's waarbij meerdere borden met elkaar communiceren en elkaar moeten kunnen onderscheiden. 
+// BOARD_ID: generieke, per-fysiek-bord-identiteit, bewust hier in SystemConfig.h en niet in een subsysteem-specifiek configuratiebestand, want "welk fysiek bord is dit" is geen eigenschap van één subsysteem.
+// (FURURE) Heeft nog geen functioneel effect; dient als voorbereiding op scenario's waarbij meerdere borden met elkaar communiceren en elkaar moeten kunnen onderscheiden.
 // Wijzig per fysiek bord via UserConfig.h.
 // ============================================================================
 #ifndef BOARD_ID
@@ -291,14 +291,14 @@
 
 
 // INPUT_TYPE_HX1838 ----------------------------------------------------------
-// D8 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was. 
+// D8 is de standaard HX1838-ontvangerpin; getest met zowel TinyIRReceiver als IRremote terwijl het PixelScreen aangesloten was.
 #ifndef HX1838_ONTVANGER_PIN
   #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D8
 #endif
 
 // HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE: Standaard 1.
-// 1 = TinyIRReceiver.hpp (pin-change-interrupt, geen timerkanaal nodig, kleinere flash/RAM-voetafdruk), 
-// 0 = klassieke IRremote.hpp/IrReceiver (polling, timer-gebaseerd). 
+// 1 = TinyIRReceiver.hpp (pin-change-interrupt, geen timerkanaal nodig, kleinere flash/RAM-voetafdruk),
+// 0 = klassieke IRremote.hpp/IrReceiver (polling, timer-gebaseerd).
 #ifndef HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE
   #define HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
 #endif
@@ -818,7 +818,7 @@
   #endif
   #ifndef ARDUINO_UNO_SHIELD_PIN_SCK
     #define ARDUINO_UNO_SHIELD_PIN_SCK  GPIO12  // ARDUINO_UNO_SHIELD_PIN_D13
-  #endif  
+  #endif
 
   /* TODO: UIT TE WERKEN OPTIE?
   #if BOARD_VERSION == BOARD_ESP32S3_ARDI32
@@ -909,10 +909,10 @@
     #define ARDUINO_UNO_SHIELD_PIN_MOSI GPIO11  // ARDUINO_UNO_SHIELD_PIN_D11
   #endif
   #ifndef ARDUINO_UNO_SHIELD_PIN_MISO
-    #define ARDUINO_UNO_SHIELD_PIN_MISO GPIO13  // ARDUINO_UNO_SHIELD_PIN_D12 
+    #define ARDUINO_UNO_SHIELD_PIN_MISO GPIO13  // ARDUINO_UNO_SHIELD_PIN_D12
   #endif
   #ifndef ARDUINO_UNO_SHIELD_PIN_SCK
-    #define ARDUINO_UNO_SHIELD_PIN_SCK  GPIO12  // ARDUINO_UNO_SHIELD_PIN_D13 
+    #define ARDUINO_UNO_SHIELD_PIN_SCK  GPIO12  // ARDUINO_UNO_SHIELD_PIN_D13
   #endif
 
 #elif BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO // CYTRON MAKER UNO RP2040: pinmapping bevestigd tegen officiële Zephyr-boarddocumentatie (https://docs.zephyrproject.org/latest/boards/cytron/maker_uno_rp2040/doc/index.html), bevestigd tegen eigen meting op het board
@@ -1138,7 +1138,7 @@
   #ifndef DATA_LAYER_FLASH_SPI_1_CS_PIN
     #define DATA_LAYER_FLASH_SPI_1_CS_PIN HardwareResourcePin::NONE
   #endif
-  #ifndef DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE   // NAAM VOORLOPIG
+  #ifndef DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE
     #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0
   #endif
 #endif
@@ -1150,7 +1150,7 @@
   #ifndef DATA_LAYER_FLASH_SPI_2_CS_PIN
     #define DATA_LAYER_FLASH_SPI_2_CS_PIN HardwareResourcePin::NONE
   #endif
-  #ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE   // NAAM VOORLOPIG
+  #ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
     #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0
   #endif
 #endif
@@ -1246,16 +1246,16 @@
 // ============================================================================
 // GEDEELDEBUS: GEMENGDE PINNEN
 // ============================================================================
-// GEDEELDE_BUS_GEMENGDE_PINNEN (NAAM VOORLOPIG): 1 = een component mag per exclusieve pin een eigen gebied hebben (het board of een Extender),
+// GEDEELDE_BUS_MIXED_PINS: 1 = een component mag per exclusieve pin een eigen gebied hebben (het board of een Extender),
 // bv. een SPI-chip met SCK/MISO/MOSI op het board en CS op een PCF8574. 0 = elk component heeft één gebied (zoals voorheen), zonder extra geheugen.
 // Wordt automatisch 1 wanneer een Data-chip CS via een Extender gebruikt.
 #if defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER) || \
     defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER)
-  #undef GEDEELDE_BUS_GEMENGDE_PINNEN
-  #define GEDEELDE_BUS_GEMENGDE_PINNEN 1
+  #undef GEDEELDE_BUS_MIXED_PINS
+  #define GEDEELDE_BUS_MIXED_PINS 1
 #endif
-#ifndef GEDEELDE_BUS_GEMENGDE_PINNEN
-  #define GEDEELDE_BUS_GEMENGDE_PINNEN 0
+#ifndef GEDEELDE_BUS_MIXED_PINS
+  #define GEDEELDE_BUS_MIXED_PINS 0
 #endif
 
 #if defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER) && !defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS)
@@ -1356,7 +1356,7 @@
 // ============================================================================
 // EXTENDERS ==================================================================
 // ============================================================================
-// Elke EXTENDER_<NAAM>_AANTAL bepaalt hoeveel instanties er zijn; elke adres-/CS-macro staat achter zijn eigen if op dat aantal, 
+// Elke EXTENDER_<NAAM>_AANTAL bepaalt hoeveel instanties er zijn; elke adres-/CS-macro staat achter zijn eigen if op dat aantal,
 // zodat er nooit een macro bestaat voor een instantie die niet actief is.
 // DEFAULT: EXTENDER_<NAAM>_AANTAL = 0 of 1.
 // EXPERIMENTEEL: EXTENDER_<NAAM>_AANTAL >= 2.
@@ -2214,7 +2214,7 @@
       #if !defined(INPUT_KEYPAD_PIN_1) || !defined(INPUT_KEYPAD_PIN_2) || !defined(INPUT_KEYPAD_PIN_3) || !defined(INPUT_KEYPAD_PIN_4)
         #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
       #endif
-    #else    
+    #else
       #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::NP_D3
       #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::NP_D2
       #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::NP_D5
@@ -2654,7 +2654,7 @@
   #endif
   #ifndef HX1838_CODE_17
     #define HX1838_CODE_17 0x5AUL // = RIGHT
-  #endif  
+  #endif
 
 #elif HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3
   #ifndef HX1838_CODE_1
@@ -2726,7 +2726,7 @@
 // ============================================================================
 // DEBUG INSTELLINGEN =========================================================
 // ============================================================================
-#ifdef TRACE 
+#ifdef TRACE
   #ifndef DEBUG
     #define DEBUG
   #endif

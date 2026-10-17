@@ -84,11 +84,11 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
     return FoutDiagnoseI2C(gelukt, MCP23017::lastError(), terugGelezen);
   }
 
-#if GEDEELDE_BUS_GEMENGDE_PINNEN
+#if GEDEELDE_BUS_MIXED_PINS
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
-  void ModusPin(uint8_t pin, uint8_t modus) override { MCP23017::pinMode1(pin, modus); }
-  void SchrijvenPin(uint8_t pin, uint8_t niveau) override { MCP23017::write1(pin, niveau); }
-  uint8_t LezenPin(uint8_t pin) override { return MCP23017::read1(pin); }
+  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override { MCP23017::pinMode1(pin, modus); }
+  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override { MCP23017::write1(pin, niveau); }
+  uint8_t ReadExtenderPin(uint8_t pin) override { return MCP23017::read1(pin); }
 #endif
 };
 
