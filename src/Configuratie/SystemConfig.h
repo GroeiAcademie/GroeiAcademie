@@ -24,12 +24,18 @@
 #define BOARD_STM32F4_NUCLEO64_F401RE      6
 
 // DATA: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
-#define DATA_TYPE_NONE                     0x01
-#define DATA_TYPE_DIRECT                   0x02
-#define DATA_TYPE_EEPROM                   0x04
-#define DATA_TYPE_FLASH                    0x08
-#define DATA_TYPE_FRAM                     0x10
-#define DATA_TYPE_MICROSD                  0x20
+// Per medium een vaste volgorde: NATIVE, I2C, SPI. Een combinatie die niet bestaat, krijgt geen naam: het nummer blijft vrij.
+#define DATA_TYPE_NONE                     0x0001
+#define DATA_TYPE_DIRECT                   0x0002
+#define DATA_TYPE_EEPROM_NATIVE            0x0004
+#define DATA_TYPE_EEPROM_I2C               0x0008
+#define DATA_TYPE_EEPROM_SPI               0x0010   // nog niet ondersteund in v2.0.0
+// 0x0020 vrij: FLASH via I2C bestaat niet als gangbare chip
+#define DATA_TYPE_FLASH_SPI                0x0040
+#define DATA_TYPE_FRAM_I2C                 0x0080
+#define DATA_TYPE_FRAM_SPI                 0x0100   // nog niet ondersteund in v2.0.0
+// 0x0200 vrij: microSD via I2C bestaat niet (de SD-specificatie kent geen I2C)
+#define DATA_TYPE_MICROSD_SPI              0x0400
 
 // GPIO: General Purpose Input/Output, programmeerbare pin op een computerchip of printplaat waarvan de functie via software kan worden ingesteld.
 #define GPIO0    0
@@ -455,21 +461,21 @@
 // ============================================================================
 // RFP602 DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-  #define RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE 0
+#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE 0
 #endif
 
-#ifndef RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
 #endif
-#ifndef RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
 #endif
-#ifndef RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
 #endif
-#ifndef RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE
@@ -1077,37 +1083,39 @@
 // ============================================================================
 
 // ============================================================================
+// DATA: EEPROM NATIVE
+// ============================================================================
+// Ruimte in bytes die Data krijgt in de native EEPROM van het board. Ze begint na het blok van HX1838 (HX1838_EEPROM_NATIVE_SIZE).
+#ifndef DATA_LAYER_EEPROM_NATIVE_SIZE
+  #define DATA_LAYER_EEPROM_NATIVE_SIZE 0
+#endif
+
+// ============================================================================
 // DATA: EEPROM
 // ============================================================================
-#ifndef DATA_LAYER_EEPROM_AANTAL
-  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM)
-    #define DATA_LAYER_EEPROM_AANTAL 1
+#ifndef DATA_LAYER_EEPROM_I2C_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_I2C)
+    #define DATA_LAYER_EEPROM_I2C_AANTAL 1
   #else
-    #define DATA_LAYER_EEPROM_AANTAL 0
+    #define DATA_LAYER_EEPROM_I2C_AANTAL 0
   #endif
 #endif
 
 // ============================================================================
 // DEFAULT: EEPROM #1
 // ============================================================================
-#if DATA_LAYER_EEPROM_AANTAL >= 1
-  #ifndef DATA_LAYER_EEPROM_1_I2C_ADDRESS
-    #define DATA_LAYER_EEPROM_1_I2C_ADDRESS I2C_ADDRESS_NONE
-  #endif
-  #ifndef DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE 0
+#if DATA_LAYER_EEPROM_I2C_AANTAL >= 1
+  #ifndef DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS
+    #define DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS I2C_ADDRESS_NONE
   #endif
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: EEPROM #2
 // ============================================================================
-#if DATA_LAYER_EEPROM_AANTAL >= 2
-  #ifndef DATA_LAYER_EEPROM_2_I2C_ADDRESS
-    #define DATA_LAYER_EEPROM_2_I2C_ADDRESS I2C_ADDRESS_NONE
-  #endif
-  #ifndef DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE 0
+#if DATA_LAYER_EEPROM_I2C_AANTAL >= 2
+  #ifndef DATA_LAYER_EEPROM_I2C_2_I2C_ADDRESS
+    #define DATA_LAYER_EEPROM_I2C_2_I2C_ADDRESS I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1115,35 +1123,35 @@
 // ============================================================================
 // DATA: FLASH
 // ============================================================================
-#ifndef DATA_LAYER_FLASH_AANTAL
-  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
-    #define DATA_LAYER_FLASH_AANTAL 1
+#ifndef DATA_LAYER_FLASH_SPI_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+    #define DATA_LAYER_FLASH_SPI_AANTAL 1
   #else
-    #define DATA_LAYER_FLASH_AANTAL 0
+    #define DATA_LAYER_FLASH_SPI_AANTAL 0
   #endif
 #endif
 
 // ============================================================================
 // DEFAULT: FLASH #1
 // ============================================================================
-#if DATA_LAYER_FLASH_AANTAL >= 1
-  #ifndef DATA_LAYER_FLASH_1_CS_PIN
-    #define DATA_LAYER_FLASH_1_CS_PIN HardwareResourcePin::NONE
+#if DATA_LAYER_FLASH_SPI_AANTAL >= 1
+  #ifndef DATA_LAYER_FLASH_SPI_1_CS_PIN
+    #define DATA_LAYER_FLASH_SPI_1_CS_PIN HardwareResourcePin::NONE
   #endif
-  #ifndef DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE 0
+  #ifndef DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE   // NAAM VOORLOPIG
+    #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0
   #endif
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: FLASH #2
 // ============================================================================
-#if DATA_LAYER_FLASH_AANTAL >= 2
-  #ifndef DATA_LAYER_FLASH_2_CS_PIN
-    #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE
+#if DATA_LAYER_FLASH_SPI_AANTAL >= 2
+  #ifndef DATA_LAYER_FLASH_SPI_2_CS_PIN
+    #define DATA_LAYER_FLASH_SPI_2_CS_PIN HardwareResourcePin::NONE
   #endif
-  #ifndef DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE 0
+  #ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE   // NAAM VOORLOPIG
+    #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0
   #endif
 #endif
 
@@ -1151,35 +1159,29 @@
 // ============================================================================
 // DATA: FRAM
 // ============================================================================
-#ifndef DATA_LAYER_FRAM_AANTAL
-  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM)
-    #define DATA_LAYER_FRAM_AANTAL 1
+#ifndef DATA_LAYER_FRAM_I2C_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM_I2C)
+    #define DATA_LAYER_FRAM_I2C_AANTAL 1
   #else
-    #define DATA_LAYER_FRAM_AANTAL 0
+    #define DATA_LAYER_FRAM_I2C_AANTAL 0
   #endif
 #endif
 
 // ============================================================================
 // DEFAULT: FRAM #1
 // ============================================================================
-#if DATA_LAYER_FRAM_AANTAL >= 1
-  #ifndef DATA_LAYER_FRAM_1_I2C_ADDRESS
-    #define DATA_LAYER_FRAM_1_I2C_ADDRESS I2C_ADDRESS_NONE
-  #endif
-  #ifndef DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE 0
+#if DATA_LAYER_FRAM_I2C_AANTAL >= 1
+  #ifndef DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS
+    #define DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS I2C_ADDRESS_NONE
   #endif
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: FRAM #2
 // ============================================================================
-#if DATA_LAYER_FRAM_AANTAL >= 2
-  #ifndef DATA_LAYER_FRAM_2_I2C_ADDRESS
-    #define DATA_LAYER_FRAM_2_I2C_ADDRESS I2C_ADDRESS_NONE
-  #endif
-  #ifndef DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE 0
+#if DATA_LAYER_FRAM_I2C_AANTAL >= 2
+  #ifndef DATA_LAYER_FRAM_I2C_2_I2C_ADDRESS
+    #define DATA_LAYER_FRAM_I2C_2_I2C_ADDRESS I2C_ADDRESS_NONE
   #endif
 #endif
 
@@ -1187,45 +1189,39 @@
 // ============================================================================
 // DATA: microSD
 // ============================================================================
-#ifndef DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL
-  #define DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL 50
+#ifndef DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL
+  #define DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL 50
 #endif
-#if DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL < 1 || DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL > 255
-  #error DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL moet tussen 1 en 255 liggen.
+#if DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL < 1 || DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL > 255
+  #error DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL moet tussen 1 en 255 liggen.
 #endif
-#ifndef DATA_LAYER_MICROSD_FLUSH_NA_MS
-  #define DATA_LAYER_MICROSD_FLUSH_NA_MS 5000UL
+#ifndef DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS
+  #define DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS 5000UL
 #endif
 
-#ifndef DATA_LAYER_MICROSD_AANTAL
-  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-    #define DATA_LAYER_MICROSD_AANTAL 1
+#ifndef DATA_LAYER_MICROSD_SPI_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+    #define DATA_LAYER_MICROSD_SPI_AANTAL 1
   #else
-    #define DATA_LAYER_MICROSD_AANTAL 0
+    #define DATA_LAYER_MICROSD_SPI_AANTAL 0
   #endif
 #endif
 
 // ============================================================================
 // DEFAULT: microSD #1
 // ============================================================================
-#if DATA_LAYER_MICROSD_AANTAL >= 1
-  #ifndef DATA_LAYER_MICROSD_1_CS_PIN
-    #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NONE
-  #endif
-  #ifndef DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE 0
+#if DATA_LAYER_MICROSD_SPI_AANTAL >= 1
+  #ifndef DATA_LAYER_MICROSD_SPI_1_CS_PIN
+    #define DATA_LAYER_MICROSD_SPI_1_CS_PIN HardwareResourcePin::NONE
   #endif
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: microSD #2
 // ============================================================================
-#if DATA_LAYER_MICROSD_AANTAL >= 2
-  #ifndef DATA_LAYER_MICROSD_2_CS_PIN
-    #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE
-  #endif
-  #ifndef DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE
-    #define DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE 0
+#if DATA_LAYER_MICROSD_SPI_AANTAL >= 2
+  #ifndef DATA_LAYER_MICROSD_SPI_2_CS_PIN
+    #define DATA_LAYER_MICROSD_SPI_2_CS_PIN HardwareResourcePin::NONE
   #endif
 #endif
 
@@ -1237,26 +1233,50 @@
   #undef DATA_QUEUE_OR_STACK_ACTIEF
 #endif
 
-#if (defined(RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE) && RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE) && DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE) && DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE) && DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE) && DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE) && DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE) && DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE) && DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE > 0) || \
-    (defined(DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE) && DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE > 0)
+#if (defined(RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE) && RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
+    (RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
+    (RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
+    (RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
+    (RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0)
   #define DATA_QUEUE_OR_STACK_ACTIEF 1
 #else
   #define DATA_QUEUE_OR_STACK_ACTIEF 0
 #endif
 
+// ============================================================================
+// GEDEELDEBUS: GEMENGDE PINNEN
+// ============================================================================
+// GEDEELDE_BUS_GEMENGDE_PINNEN (NAAM VOORLOPIG): 1 = een component mag per exclusieve pin een eigen gebied hebben (het board of een Extender),
+// bv. een SPI-chip met SCK/MISO/MOSI op het board en CS op een PCF8574. 0 = elk component heeft één gebied (zoals voorheen), zonder extra geheugen.
+// Wordt automatisch 1 wanneer een Data-chip CS via een Extender gebruikt.
+#if defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER) || \
+    defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER)
+  #undef GEDEELDE_BUS_GEMENGDE_PINNEN
+  #define GEDEELDE_BUS_GEMENGDE_PINNEN 1
+#endif
+#ifndef GEDEELDE_BUS_GEMENGDE_PINNEN
+  #define GEDEELDE_BUS_GEMENGDE_PINNEN 0
+#endif
 
-#if ((DATA_LAYER_CONFIG) & ~(DATA_TYPE_NONE | DATA_TYPE_DIRECT | DATA_TYPE_EEPROM | DATA_TYPE_FLASH | DATA_TYPE_FRAM | DATA_TYPE_MICROSD))
+#if defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER) && !defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS)
+  #error DATA_LAYER_FLASH_SPI_1_CS_EXTENDER vereist DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS.
+#endif
+#if defined(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER) && !defined(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER_I2C_ADDRESS)
+  #error DATA_LAYER_FLASH_SPI_2_CS_EXTENDER vereist DATA_LAYER_FLASH_SPI_2_CS_EXTENDER_I2C_ADDRESS.
+#endif
+#if defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) && !defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS)
+  #error DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER vereist DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS.
+#endif
+#if defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER) && !defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER_I2C_ADDRESS)
+  #error DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER vereist DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER_I2C_ADDRESS.
+#endif
+
+
+#if ((DATA_LAYER_CONFIG) & (DATA_TYPE_EEPROM_SPI | DATA_TYPE_FRAM_SPI))
+  #error DATA_TYPE_EEPROM_SPI en DATA_TYPE_FRAM_SPI worden nog niet ondersteund in v2.0.0.
+#endif
+
+#if ((DATA_LAYER_CONFIG) & ~(DATA_TYPE_NONE | DATA_TYPE_DIRECT | DATA_TYPE_EEPROM_NATIVE | DATA_TYPE_EEPROM_I2C | DATA_TYPE_FLASH_SPI | DATA_TYPE_FRAM_I2C | DATA_TYPE_MICROSD_SPI))
   #error DATA_LAYER_CONFIG bevat een onbekend datatype.
 #endif
 
@@ -1269,55 +1289,67 @@
 #endif
 
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM) && DATA_LAYER_EEPROM_AANTAL < 1
-  #error DATA_TYPE_EEPROM vereist DATA_LAYER_EEPROM_AANTAL >= 1.
-#endif
-
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM) && DATA_LAYER_EEPROM_AANTAL > 0
-  #error DATA_LAYER_EEPROM_AANTAL > 0 vereist DATA_TYPE_EEPROM in DATA_LAYER_CONFIG.
-#endif
-
-#if DATA_LAYER_EEPROM_AANTAL > 2
-  #error DATA_LAYER_EEPROM_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE) && DATA_LAYER_EEPROM_NATIVE_SIZE == 0
+  #error DATA_TYPE_EEPROM_NATIVE vereist DATA_LAYER_EEPROM_NATIVE_SIZE > 0.
 #endif
 
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH) && DATA_LAYER_FLASH_AANTAL < 1
-  #error DATA_TYPE_FLASH vereist DATA_LAYER_FLASH_AANTAL >= 1.
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_I2C) && DATA_LAYER_EEPROM_I2C_AANTAL < 1
+  #error DATA_TYPE_EEPROM_I2C vereist DATA_LAYER_EEPROM_I2C_AANTAL >= 1.
 #endif
 
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH) && DATA_LAYER_FLASH_AANTAL > 0
-  #error DATA_LAYER_FLASH_AANTAL > 0 vereist DATA_TYPE_FLASH in DATA_LAYER_CONFIG.
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_I2C) && DATA_LAYER_EEPROM_I2C_AANTAL > 0
+  #error DATA_LAYER_EEPROM_I2C_AANTAL > 0 vereist DATA_TYPE_EEPROM_I2C in DATA_LAYER_CONFIG.
 #endif
 
-#if DATA_LAYER_FLASH_AANTAL > 2
-  #error DATA_LAYER_FLASH_AANTAL ondersteunt momenteel maximaal 2 instanties.
-#endif
-
-
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM) && DATA_LAYER_FRAM_AANTAL < 1
-  #error DATA_TYPE_FRAM vereist DATA_LAYER_FRAM_AANTAL >= 1.
-#endif
-
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM) && DATA_LAYER_FRAM_AANTAL > 0
-  #error DATA_LAYER_FRAM_AANTAL > 0 vereist DATA_TYPE_FRAM in DATA_LAYER_CONFIG.
-#endif
-
-#if DATA_LAYER_FRAM_AANTAL > 2
-  #error DATA_LAYER_FRAM_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#if DATA_LAYER_EEPROM_I2C_AANTAL > 2
+  #error DATA_LAYER_EEPROM_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) && DATA_LAYER_MICROSD_AANTAL < 1
-  #error DATA_TYPE_MICROSD vereist DATA_LAYER_MICROSD_AANTAL >= 1.
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI) && DATA_LAYER_FLASH_SPI_AANTAL < 1
+  #error DATA_TYPE_FLASH_SPI vereist DATA_LAYER_FLASH_SPI_AANTAL >= 1.
 #endif
 
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) && REDIRECT_SERIAL != REDIRECT_SERIAL_TO_MICROSD && DATA_LAYER_MICROSD_AANTAL > 0
-  #error DATA_LAYER_MICROSD_AANTAL > 0 vereist DATA_TYPE_MICROSD in DATA_LAYER_CONFIG of REDIRECT_SERIAL_TO_MICROSD.
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI) && DATA_LAYER_FLASH_SPI_AANTAL > 0
+  #error DATA_LAYER_FLASH_SPI_AANTAL > 0 vereist DATA_TYPE_FLASH_SPI in DATA_LAYER_CONFIG.
 #endif
 
-#if DATA_LAYER_MICROSD_AANTAL > 2
-  #error DATA_LAYER_MICROSD_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#if DATA_LAYER_FLASH_SPI_AANTAL >= 1 && (DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE < 0 || DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 256)
+  #error DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE mag maximaal 256 zijn (één pagina).
+#endif
+#if DATA_LAYER_FLASH_SPI_AANTAL >= 2 && (DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE < 0 || DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE > 256)
+  #error DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE mag maximaal 256 zijn (één pagina).
+#endif
+
+#if DATA_LAYER_FLASH_SPI_AANTAL > 2
+  #error DATA_LAYER_FLASH_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM_I2C) && DATA_LAYER_FRAM_I2C_AANTAL < 1
+  #error DATA_TYPE_FRAM_I2C vereist DATA_LAYER_FRAM_I2C_AANTAL >= 1.
+#endif
+
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM_I2C) && DATA_LAYER_FRAM_I2C_AANTAL > 0
+  #error DATA_LAYER_FRAM_I2C_AANTAL > 0 vereist DATA_TYPE_FRAM_I2C in DATA_LAYER_CONFIG.
+#endif
+
+#if DATA_LAYER_FRAM_I2C_AANTAL > 2
+  #error DATA_LAYER_FRAM_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties.
+#endif
+
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI) && DATA_LAYER_MICROSD_SPI_AANTAL < 1
+  #error DATA_TYPE_MICROSD_SPI vereist DATA_LAYER_MICROSD_SPI_AANTAL >= 1.
+#endif
+
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI) && REDIRECT_SERIAL != REDIRECT_SERIAL_TO_MICROSD && DATA_LAYER_MICROSD_SPI_AANTAL > 0
+  #error DATA_LAYER_MICROSD_SPI_AANTAL > 0 vereist DATA_TYPE_MICROSD_SPI in DATA_LAYER_CONFIG of REDIRECT_SERIAL_TO_MICROSD.
+#endif
+
+#if DATA_LAYER_MICROSD_SPI_AANTAL > 2
+  #error DATA_LAYER_MICROSD_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
 
 
@@ -2490,6 +2522,16 @@
     #undef HX1838_BRON_CODES
     #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_ALTIJD
   #endif
+#endif
+
+// HX1838_EEPROM_NATIVE_SIZE: het blok vooraan in de native EEPROM dat HX1838 gebruikt voor zijn IR-codes.
+// Vaste maximale grootte, zodat Data daarna altijd op hetzelfde adres begint, welke toetsenindeling ook gekozen is:
+// 3 bytes (magic, versie, toetsenindeling) + 21 codes (de grootste indeling die met EEPROM mag: 21 toetsen).
+// 0 wanneer HX1838 de native EEPROM niet gebruikt.
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && (HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD)
+  #define HX1838_EEPROM_NATIVE_SIZE (3 + 21)
+#else
+  #define HX1838_EEPROM_NATIVE_SIZE 0
 #endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && HX1838_TOETSENINDELING == HX1838_TOETSENINDELING_REMOTE_USER_DEFINED

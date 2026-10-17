@@ -101,13 +101,15 @@
 // DATA_LAYER_CONFIG bepaalt welke datatypes in deze build aanwezig zijn.
 // Combineer meerdere datatypes met de bitwise OR-operator |.
 //
-// Mogelijke waarden:
-// 1  = geen Data-class                             (DATA_TYPE_NONE)
-// 2  = direct via Data-class                       (DATA_TYPE_DIRECT)
-// 4  = EEPROM                                      (DATA_TYPE_EEPROM)
-// 8  = FLASH                                       (DATA_TYPE_FLASH)
-// 16 = FRAM                                        (DATA_TYPE_FRAM)
-// 32 = microSD                                     (DATA_TYPE_MICROSD)
+// Mogelijke waarden (gebruik altijd de naam, nooit het getal):
+// DATA_TYPE_NONE          geen Data-class
+// DATA_TYPE_DIRECT        direct via Data-class (laatste waarde en QueueOrStack per channel)
+// DATA_TYPE_EEPROM_NATIVE de native EEPROM van het board (niet op de UNO Q)
+// DATA_TYPE_EEPROM_I2C    EEPROM-chip via I2C
+// DATA_TYPE_FLASH_SPI     FLASH-chip via SPI
+// DATA_TYPE_FRAM_I2C      FRAM-chip via I2C
+// DATA_TYPE_MICROSD_SPI   microSD-kaart via SPI
+// DATA_TYPE_EEPROM_SPI en DATA_TYPE_FRAM_SPI bestaan, maar worden nog niet ondersteund in v2.0.0.
 // Combineer meerdere datatypes met |.
 //
 // Wat hier niet geselecteerd wordt, wordt niet gecompileerd.
@@ -347,21 +349,21 @@
 // ============================================================================
 // RFP602 DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM QueueOrStack (FIFO of LIFO)
+#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM QueueOrStack (FIFO of LIFO)
 #endif
 
-#ifndef RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 1 (RFP602-sensor 1)
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 1 (RFP602-sensor 1)
 #endif
-#ifndef RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 2 (RFP602-sensor 2)
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 2 (RFP602-sensor 2)
 #endif
-#ifndef RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 3 (RFP602-sensor 3)
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 3 (RFP602-sensor 3)
 #endif
-#ifndef RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 4 (RFP602-sensor 4)
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 4 (RFP602-sensor 4)
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE
@@ -623,130 +625,129 @@
 // ============================================================================
 
 // ============================================================================
+// DATA: EEPROM NATIVE
+// ============================================================================
+#ifndef DATA_LAYER_EEPROM_NATIVE_SIZE
+// #define DATA_LAYER_EEPROM_NATIVE_SIZE 0  // standaard waarde: 0; bytes voor Data in de native EEPROM, na het blok van HX1838; verplicht > 0 bij DATA_TYPE_EEPROM_NATIVE
+#endif
+
+// ============================================================================
 // DATA: EEPROM
 // ============================================================================
-#ifndef DATA_LAYER_EEPROM_AANTAL
-// #define DATA_LAYER_EEPROM_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_EEPROM actief is, anders 0
+#ifndef DATA_LAYER_EEPROM_I2C_AANTAL
+// #define DATA_LAYER_EEPROM_I2C_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_EEPROM_I2C actief is, anders 0
 #endif
 
 // ============================================================================
 // DEFAULT: EEPROM #1
 // ============================================================================
-#ifndef DATA_LAYER_EEPROM_1_I2C_ADDRESS
-// #define DATA_LAYER_EEPROM_1_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
-#endif
-
-#ifndef DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS
+// #define DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: EEPROM #2
 // ============================================================================
-#ifndef DATA_LAYER_EEPROM_2_I2C_ADDRESS
-// #define DATA_LAYER_EEPROM_2_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
-#endif
-
-#ifndef DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_EEPROM_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_EEPROM_I2C_2_I2C_ADDRESS
+// #define DATA_LAYER_EEPROM_I2C_2_I2C_ADDRESS I2C_ADDRESS_NONE  // standaard waarde: I2C_ADDRESS_NONE  // EXCLUSIEF
 #endif
 
 
 // ============================================================================
 // DATA: FLASH
 // ============================================================================
-#ifndef DATA_LAYER_FLASH_AANTAL
-// #define DATA_LAYER_FLASH_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_FLASH actief is, anders 0
+#ifndef DATA_LAYER_FLASH_SPI_AANTAL
+// #define DATA_LAYER_FLASH_SPI_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_FLASH_SPI actief is, anders 0
 #endif
 
 // ============================================================================
 // DEFAULT: FLASH #1
 // ============================================================================
-#ifndef DATA_LAYER_FLASH_1_CS_PIN
-// #define DATA_LAYER_FLASH_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef DATA_LAYER_FLASH_SPI_1_CS_PIN
+// #define DATA_LAYER_FLASH_SPI_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE
+// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0  // NAAM VOORLOPIG. standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: FLASH #2
 // ============================================================================
-#ifndef DATA_LAYER_FLASH_2_CS_PIN
-// #define DATA_LAYER_FLASH_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef DATA_LAYER_FLASH_SPI_2_CS_PIN
+// #define DATA_LAYER_FLASH_SPI_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_FLASH_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
+// #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0  // NAAM VOORLOPIG. standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
+#endif
+
+// CS via een Extender (NAAM VOORLOPIG): zet de drie instellingen samen. DATA_LAYER_FLASH_SPI_1_CS_PIN wordt dan de pin op de Extender.
+// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board.
+#ifndef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
+// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // NAAM VOORLOPIG: welke Extender CS schakelt
+// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // NAAM VOORLOPIG: I2C-adres van die Extender
+// #define DATA_LAYER_FLASH_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 #endif
 
 
 // ============================================================================
 // DATA: FRAM
 // ============================================================================
-#ifndef DATA_LAYER_FRAM_AANTAL
-// #define DATA_LAYER_FRAM_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_FRAM actief is, anders 0
+#ifndef DATA_LAYER_FRAM_I2C_AANTAL
+// #define DATA_LAYER_FRAM_I2C_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_FRAM_I2C actief is, anders 0
 #endif
 
 // ============================================================================
 // DEFAULT: FRAM #1
 // ============================================================================
-#ifndef DATA_LAYER_FRAM_1_I2C_ADDRESS
-// #define DATA_LAYER_FRAM_1_I2C_ADDRESS 0x50  // MB85RC256V standaardadres 0x50
-#endif
-
-#ifndef DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS
+// #define DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS 0x50  // MB85RC256V standaardadres 0x50
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: FRAM #2
 // ============================================================================
-#ifndef DATA_LAYER_FRAM_2_I2C_ADDRESS
-// #define DATA_LAYER_FRAM_2_I2C_ADDRESS 0x51
-#endif
-
-#ifndef DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_FRAM_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_FRAM_I2C_2_I2C_ADDRESS
+// #define DATA_LAYER_FRAM_I2C_2_I2C_ADDRESS 0x51
 #endif
 
 
 // ============================================================================
 // DATA: microSD
 // ============================================================================
-#ifndef DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL
-// #define DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL 50  // standaard waarde: 50; geldig bereik: 1 t/m 255 regels
+#ifndef DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL
+// #define DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL 50  // standaard waarde: 50; geldig bereik: 1 t/m 255 regels
 #endif
 
-#ifndef DATA_LAYER_MICROSD_FLUSH_NA_MS
-// #define DATA_LAYER_MICROSD_FLUSH_NA_MS 5000UL  // standaard waarde: 5000UL; maximale tijd in ms tussen twee flushes naar de kaart
+#ifndef DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS
+// #define DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS 5000UL  // standaard waarde: 5000UL; maximale tijd in ms tussen twee flushes naar de kaart
 #endif
 
-#ifndef DATA_LAYER_MICROSD_AANTAL
-// #define DATA_LAYER_MICROSD_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_MICROSD actief is, anders 0
+#ifndef DATA_LAYER_MICROSD_SPI_AANTAL
+// #define DATA_LAYER_MICROSD_SPI_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_MICROSD_SPI actief is, anders 0
 #endif
 
 // ============================================================================
 // DEFAULT: microSD #1
 // ============================================================================
-#ifndef DATA_LAYER_MICROSD_1_CS_PIN
-// #define DATA_LAYER_MICROSD_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
-#endif
-
-#ifndef DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+#ifndef DATA_LAYER_MICROSD_SPI_1_CS_PIN
+// #define DATA_LAYER_MICROSD_SPI_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
 // ============================================================================
 // EXPERIMENTEEL: microSD #2
 // ============================================================================
-#ifndef DATA_LAYER_MICROSD_2_CS_PIN
-// #define DATA_LAYER_MICROSD_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#ifndef DATA_LAYER_MICROSD_SPI_2_CS_PIN
+// #define DATA_LAYER_MICROSD_SPI_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-#ifndef DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE
-// #define DATA_LAYER_MICROSD_2_QUEUE_OR_STACK_SIZE 0  // 0 = direct; > 0 = RAM QueueOrStack (nog niet in gebruik)
+// CS via een Extender (NAAM VOORLOPIG): zet de drie instellingen samen. DATA_LAYER_MICROSD_SPI_1_CS_PIN wordt dan de pin op de Extender.
+// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board. Vereist SD_CHIP_SELECT_MODE 1 of 2 in SdFatConfig.h van SdFat - Adafruit Fork.
+#ifndef DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER
+// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // NAAM VOORLOPIG: welke Extender CS schakelt
+// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // NAAM VOORLOPIG: I2C-adres van die Extender
+// #define DATA_LAYER_MICROSD_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 #endif
 
 
@@ -760,6 +761,13 @@
 // - I2C-adressen, SPI-CS en de extra native extenderaansluitingen hieronder zijn EXCLUSIEF.
 // - HardwareResourcePin::NONE betekent dat die extra aansluiting niet gebruikt/aangesloten is.
 // - Kies voor een EXCLUSIEVE HardwareResourcePin nooit een pin die al exclusief geclaimd is.
+
+// ============================================================================
+// GEDEELDEBUS: GEMENGDE PINNEN
+// ============================================================================
+#ifndef GEDEELDE_BUS_GEMENGDE_PINNEN
+// #define GEDEELDE_BUS_GEMENGDE_PINNEN 0  // NAAM VOORLOPIG. standaard waarde: 0; 1 = per exclusieve pin het board of een Extender (bv. CS van een SPI-chip op een PCF8574). Wordt automatisch 1 bij een Data-chip met CS via een Extender.
+#endif
 
 // ============================================================================
 // EXTENDER: ADS1115
@@ -1320,21 +1328,21 @@
 // ============================================================================
 // RFP602 DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM QueueOrStack (FIFO of LIFO)
+#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE 0  // 0 = laatste gemeten waarde; > 0 = RAM QueueOrStack (FIFO of LIFO)
 #endif
 
-#ifndef RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 1 (RFP602-sensor 1)
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 1 (RFP602-sensor 1)
 #endif
-#ifndef RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 2 (RFP602-sensor 2)
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 2 (RFP602-sensor 2)
 #endif
-#ifndef RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 3 (RFP602-sensor 3)
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 3 (RFP602-sensor 3)
 #endif
-#ifndef RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE
-// #define RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 4 (RFP602-sensor 4)
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE
+// #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE  // standaard waarde: RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE; QueueOrStack-grootte voor channel 4 (RFP602-sensor 4)
 #endif
 
 #ifndef RFP602_DATA_RECORD_FILE

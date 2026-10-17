@@ -33,20 +33,20 @@ struct RFP602 : Sensor {
 #endif
   };
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
-  // Voorlopig hier om te testen; verhuist daarna naar Data.
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  // Voorlopig hier om te testen; verhuist daarna naar Data. Ook zonder DIRECT: lastValue per channel (V3).
 #if DATA_QUEUE_OR_STACK_ACTIEF
   // Een array van grootte 0 is geen geldige C++: dan 1 plaats, die niet gebruikt wordt (sizeQueueOrStack = 0).
-  int ruweDataQueueOrStackchannel1[RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE : 1];
-  int ruweDataQueueOrStackchannel2[RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE : 1];
-  int ruweDataQueueOrStackchannel3[RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE : 1];
-  int ruweDataQueueOrStackchannel4[RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE : 1];
+  int ruweDataQueueOrStackchannel1[RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE : 1];
+  int ruweDataQueueOrStackchannel2[RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE : 1];
+  int ruweDataQueueOrStackchannel3[RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE : 1];
+  int ruweDataQueueOrStackchannel4[RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0 ? RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE : 1];
   // De sensor kiest per channel: false = FIFO (oudste eerst), true = LIFO (nieuwste eerst).
   SensorQueueOrStack RFP602toQueueOrStack[4] = {
-    { 0, ruweDataQueueOrStackchannel1, RFP602_CHANNEL_1_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE, false, 0, 0 },
-    { 0, ruweDataQueueOrStackchannel2, RFP602_CHANNEL_2_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE, false, 0, 0 },
-    { 0, ruweDataQueueOrStackchannel3, RFP602_CHANNEL_3_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE, false, 0, 0 },
-    { 0, ruweDataQueueOrStackchannel4, RFP602_CHANNEL_4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE, false, 0, 0 }
+    { 0, ruweDataQueueOrStackchannel1, RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE, false, 0, 0 },
+    { 0, ruweDataQueueOrStackchannel2, RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE, false, 0, 0 },
+    { 0, ruweDataQueueOrStackchannel3, RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE, false, 0, 0 },
+    { 0, ruweDataQueueOrStackchannel4, RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE, false, 0, 0 }
   };
 #else
   SensorQueueOrStack RFP602toQueueOrStack[4] = { { 0 }, { 0 }, { 0 }, { 0 } };   // alleen lastValue per channel
@@ -79,7 +79,7 @@ struct RFP602 : Sensor {
     exclusief_[1] = static_cast<uint8_t>(ADC_PIN_SENSOR_2);
     exclusief_[2] = static_cast<uint8_t>(ADC_PIN_SENSOR_3);
     exclusief_[3] = static_cast<uint8_t>(ADC_PIN_SENSOR_4);
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
     QueueOrStack = RFP602toQueueOrStack;
     numberOfChannels = AANTAL_SENSOREN_AANWEZIG;
 #endif

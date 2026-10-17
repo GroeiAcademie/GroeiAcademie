@@ -6,8 +6,8 @@
 
 #include <GroeiAcademie.h>
 
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
-  #error Voeg DATA_TYPE_FLASH toe aan DATA_LAYER_CONFIG voor deze test.
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  #error Voeg DATA_TYPE_FLASH_SPI toe aan DATA_LAYER_CONFIG voor deze test.
 #endif
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
@@ -25,7 +25,7 @@ void setup() {
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 
-  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_TYPE_FLASH);
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_TYPE_FLASH_SPI);
   ToonResultaat(F("Data aanmelden/controleren/inpluggen/activeren"), Data != nullptr);
 
   if (Data == nullptr) {
@@ -54,7 +54,7 @@ void loop() {
     GA_SERIAL.print(F("Sensor "));
     GA_SERIAL.print(sensorNummer + 1);
     GA_SERIAL.print(F(": "));
-    GA_SERIAL.println(Data->StreamingRead());
+    GA_SERIAL.println(sensorRFP602->StreamingRead(sensorNummer + 1));
   }
 
   GA_SERIAL.println();

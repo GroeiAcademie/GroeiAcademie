@@ -7,7 +7,7 @@
 #include "microSD.h"
 
 namespace {
-  File FileSerial;
+  File32 FileSerial;
   bool initialiseren = false;
 }
 
@@ -34,20 +34,9 @@ void RedirectSerial::begin(unsigned long) {
     }
   }
 
-  if (::Data != nullptr) {
-    for (GedeeldeBusNode* sameParent = ::Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-      if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
-
-      struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
-      if (kanaal->np_CS != DATA_LAYER_MICROSD_1_CS_PIN) continue;
-
-#if defined(ARDUINO_ARCH_ESP32)
-      FileSerial = kanaal->open(REDIRECT_SERIAL_FILE, FILE_APPEND);
-#else
-      FileSerial = kanaal->open(REDIRECT_SERIAL_FILE, FILE_WRITE);
-#endif
-      break;
-    }
+  // Rechtstreeks de eerste microSD uit de lijst van Data (N7), zonder zoeken op component.
+  if (::Data != nullptr && ::Data->MICROSDviaSPI[0] != nullptr && ::Data->MICROSDviaSPI[0]->actief) {
+    FileSerial = ::Data->MICROSDviaSPI[0]->open(REDIRECT_SERIAL_FILE, O_RDWR | O_CREAT | O_AT_END);   // achteraan bijschrijven
   }
 
   initialiseren = false;

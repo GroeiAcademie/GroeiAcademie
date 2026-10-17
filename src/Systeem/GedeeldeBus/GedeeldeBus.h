@@ -81,26 +81,27 @@ void ResettenGedeeldeBus();
 // Bij wijziging van deze nummering moet alle code die deze bereiken controleert mee worden aangepast.
 #define GEDEELDE_BUS_ELKE_COMPONENT(X) \
   /* INPUT ------------------------ */ \
-  X(GC_INPUT,                        0x00) /* GedeeldeBusComponent::GC_INPUT */ \
+  X(GC_INPUT,                     0x00) /* GedeeldeBusComponent::GC_INPUT */ \
   X(INPUT_DIGITAL,                0x01) /* GedeeldeBusComponent::INPUT_DIGITAL */ \
   X(INPUT_HX1838,                 0x02) /* GedeeldeBusComponent::INPUT_HX1838 */ \
   X(INPUT_PCF8574,                0x03) /* GedeeldeBusComponent::INPUT_PCF8574 */ \
   /*                                */ \
   /* OUTPUT ----------------------- */ \
-  X(GC_SCREEN,                       0x10) /* GedeeldeBusComponent::GC_SCREEN */ \
+  X(GC_SCREEN,                    0x10) /* GedeeldeBusComponent::GC_SCREEN */ \
   X(CHARACTER_SCREEN,             0x11) /* GedeeldeBusComponent::CHARACTER_SCREEN */ \
   X(PIXEL_SCREEN,                 0x12) /* GedeeldeBusComponent::PIXEL_SCREEN */ \
   X(SERIAL_OUTPUT,                0x13) /* GedeeldeBusComponent::SERIAL_OUTPUT */ \
   /*                                */ \
   /* DATA ------------------------- */ \
-  X(GC_DATA,                       0x14) /* GedeeldeBusComponent::GC_DATA */ \
-  X(DATA_EEPROM,                   0x15) /* GedeeldeBusComponent::DATA_EEPROM */ \
-  X(DATA_FLASH,                    0x16) /* GedeeldeBusComponent::DATA_FLASH */ \
-  X(DATA_FRAM,                     0x17) /* GedeeldeBusComponent::DATA_FRAM */ \
-  X(DATA_MICROSD,                  0x18) /* GedeeldeBusComponent::DATA_MICROSD */ \
-   /*                                */ \
+  X(GC_DATA,                      0x14) /* GedeeldeBusComponent::GC_DATA */ \
+  X(DATA_DIRECT,                  0x15) /* GedeeldeBusComponent::DATA_DIRECT */ \
+  X(DATA_EEPROM,                  0x16) /* GedeeldeBusComponent::DATA_EEPROM */ \
+  X(DATA_FLASH,                   0x17) /* GedeeldeBusComponent::DATA_FLASH */ \
+  X(DATA_FRAM,                    0x18) /* GedeeldeBusComponent::DATA_FRAM */ \
+  X(DATA_MICROSD,                 0x19) /* GedeeldeBusComponent::DATA_MICROSD */ \
+  /*                                */ \
   /* EXTENDER --------------------- */ \
-  X(GC_EXTENDER,                     0x20) /* GedeeldeBusComponent::GC_EXTENDER */ \
+  X(GC_EXTENDER,                  0x20) /* GedeeldeBusComponent::GC_EXTENDER */ \
   /* ADC */ \
   X(ADC_ADS1115,                  0x21) /* GedeeldeBusComponent::ADC_ADS1115 */ \
   X(ADC_ADS1158,                  0x22) /* GedeeldeBusComponent::ADC_ADS1158 */ \
@@ -131,7 +132,7 @@ void ResettenGedeeldeBus();
   X(UART_SC16IS752,               0x56) /* GedeeldeBusComponent::UART_SC16IS752 */ \
   /*                                */ \
   /* SENSOR ----------------------- */ \
-  X(GC_SENSOR,                       0xA0) /* GedeeldeBusComponent::GC_SENSOR */ \
+  X(GC_SENSOR,                    0xA0) /* GedeeldeBusComponent::GC_SENSOR */ \
   X(RFP602,                       0xA1) /* GedeeldeBusComponent::RFP602 */ \
   /*                                */ \
   /* ROOT-node -------------------- */ \
@@ -294,6 +295,10 @@ struct GedeeldeBusNode {
   bool activerenBezig = false;  // true zolang de hook Activeren() van deze node loopt
   bool conflictGevonden = false;
   const HardwareResourceIdentiteit* gedeeldeIdentiteiten = nullptr;
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+  // NAAM VOORLOPIG: per exclusieve claim het gebied van die pin (index zoals in exclusievePinnen). nullptr (lijst of plaats) = het gewone gebied van deze node.
+  GedeeldeBusNode** gebiedPerClaim = nullptr;
+#endif
 
   // true wanneer dit object met new werd aangemaakt door GedeeldeBusNewComponent().
   // Bepaalt of afmelden() dit object na ontkoppelen ook met delete this verwijdert.
@@ -400,6 +405,19 @@ struct GedeeldeBusNode {
 
     return nullptr;
   }
+
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+  // GebiedVanClaim (NAAM VOORLOPIG): het gebied van één claim. Een exclusieve claim kan een eigen Extender hebben; anders geldt firstExtenderNode().
+  const GedeeldeBusNode* GebiedVanClaim(uint8_t index) const {
+    if (gebiedPerClaim != nullptr && index < aangemeldePinnen.aantalExclusief && gebiedPerClaim[index] != nullptr) return gebiedPerClaim[index];
+    return firstExtenderNode();
+  }
+
+  // Een pin van deze node gebruiken wanneer ze een Extender is (NAAM VOORLOPIG). Standaard niets; ingevuld door de Extenders met digitale pinnen.
+  virtual void ModusPin(uint8_t pin, uint8_t modus) { (void)pin; (void)modus; }
+  virtual void SchrijvenPin(uint8_t pin, uint8_t niveau) { (void)pin; (void)niveau; }
+  virtual uint8_t LezenPin(uint8_t pin) { (void)pin; return 0; }
+#endif
 
   bool IsVoorouderVan(const GedeeldeBusNode* ander) const {
     for (const GedeeldeBusNode* n = ander->parent; n != nullptr; n = n->parent) {
@@ -538,6 +556,13 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
   HardwareResourcePin np_MOSI;
   uint8_t gedeeld_[3];
   uint8_t exclusief_[1];
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+  GedeeldeBusNode* csGebied_[1] = { nullptr };   // NAAM VOORLOPIG: de Extender waarop CS zit; nullptr = CS op het board. np_CS is dan de pin op die Extender.
+
+  // VerbindenCSExtender (NAAM VOORLOPIG): CS op een Extender zetten, vóór aanmelden(). Zoekt de Extender in de boom op component en I2C-adres.
+  // Niet gevonden: np_CS wordt NONE, zodat controleren() GB108 meldt (CS ontbreekt).
+  bool VerbindenCSExtender(GedeeldeBusComponent extender, uint8_t extenderAdres);
+#endif
 
   HardwareResourceTypeSPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : GedeeldeBusNode(parent, { gedeeld_, 3, exclusief_, 1 }, component, Extender), np_CS(np_CS), np_SCK(np_SCK), np_MISO(np_MISO), np_MOSI(np_MOSI) {
@@ -558,17 +583,46 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
   bool inpluggen() override {
     if (ingeplugd) return true;
     if (np_CS == HardwareResourcePin::NONE) return false;
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+    if (csGebied_[0] != nullptr && !csGebied_[0]->actief) return false;   // de Extender van CS moet al werken
+#endif
     if (!GedeeldeBusNode::inpluggen()) return false;
-    pinMode(NativeArduinoPinVan(np_CS), OUTPUT);
-    digitalWrite(NativeArduinoPinVan(np_CS), HIGH);
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+    if (csGebied_[0] != nullptr) {
+      csGebied_[0]->SchrijvenPin(static_cast<uint8_t>(np_CS), HIGH);   // eerst HIGH, dan uitgang: geen korte LOW op CS
+      csGebied_[0]->ModusPin(static_cast<uint8_t>(np_CS), OUTPUT);
+    } else
+#endif
+    {
+      pinMode(NativeArduinoPinVan(np_CS), OUTPUT);
+      digitalWrite(NativeArduinoPinVan(np_CS), HIGH);
+    }
     InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
     return true;
   }
 
+  // SchrijvenCS (NAAM VOORLOPIG): CS schrijven, op het board of via de Extender van CS.
+  void SchrijvenCS(uint8_t niveau) {
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+    if (csGebied_[0] != nullptr) { csGebied_[0]->SchrijvenPin(static_cast<uint8_t>(np_CS), niveau); return; }
+#endif
+    digitalWrite(NativeArduinoPinVan(np_CS), niveau);
+  }
+
   // Over te erven basisfunctie - kale SPI-wrapper, generiek voor elk SPI-Extender.
   // Met SPISettings, zodat elke SPI-component zijn eigen snelheid en modus krijgt op de gedeelde bus.
-  // Let op: NativeArduinoPinVan(np_CS) is alleen juist voor CS op een pin van het board, niet voor CS op een Extender.
+  // Let op: NativeArduinoPinVan(np_CS) is alleen juist voor CS op een pin van het board; CS op een Extender gaat via SchrijvenCS().
   uint8_t Transfer(uint8_t data, SPISettings instellingen) {
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+    if (csGebied_[0] != nullptr) {
+      SPI.beginTransaction(instellingen);
+      SchrijvenCS(LOW);
+      const uint8_t resultaat = SPI.transfer(data);
+      SchrijvenCS(HIGH);
+      SPI.endTransaction();
+      return resultaat;
+    }
+#endif
     const uint8_t csPin = NativeArduinoPinVan(np_CS);
     SPI.beginTransaction(instellingen);
     digitalWrite(csPin, LOW);
@@ -818,13 +872,16 @@ struct SensorQueueOrStack;   // staat in Data.h
 
 struct Sensor : GedeeldeBusNode {
   using GedeeldeBusNode::GedeeldeBusNode;
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+#if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE
   // QueueOrStack per channel: elke sensor erft deze functies; de FIFO/LIFO-logica staat in Data.
+  // Ook zonder DATA_TYPE_DIRECT: lastValue per channel is de terugval van StreamingRead() en RecordRead().
   SensorQueueOrStack* QueueOrStack = nullptr;      // tabel van de sensor, één per channel
   uint8_t numberOfChannels = 0;
   void WriteQueueOrStack(uint8_t numberChannel, int value);
   int8_t ReadQueueOrStackStatus(uint8_t numberChannel);   // 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
   int ReadQueueOrStackValue(uint8_t numberChannel);       // volgende waarde; leeg = lastValue; sensor bestaat niet = 0
+  int StreamingRead(uint8_t numberChannel);               // laatste waarde uit FLASH; anders lastValue van dit channel; sensor bestaat niet = 0
+  int RecordRead(uint8_t numberChannel);                  // eerste waarde uit het logbestand; anders lastValue van dit channel; sensor bestaat niet = 0
 #endif
 };
 
@@ -835,6 +892,11 @@ struct Sensor : GedeeldeBusNode {
 // of RFP602 en SerialOutput die toevallig dezelfde D-pin claimen).
 // ============================================================================
 extern GedeeldeBusNode Native;
+
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+// GedeeldeBusZoekExtender (NAAM VOORLOPIG): zoekt in de boom een I2C-Extender op component en adres. nullptr = niet gevonden.
+GedeeldeBusNode* GedeeldeBusZoekExtender(GedeeldeBusComponent extender, uint8_t extenderAdres);
+#endif
 
 #if ADC_BACKEND == ADC_BACKEND_NATIVE
 extern struct ADC_NATIVE ADC_NATIVE;

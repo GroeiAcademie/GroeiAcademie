@@ -36,7 +36,7 @@ GroeiAcademie/
 │   │   │   ├── Data.h/.cpp
 │   │   │   ├── EEPROM.h/.cpp
 │   │   │   ├── FLASH.h/.cpp
-│   │   │   ├── FRAM_I2C.h/.cpp
+│   │   │   ├── FRAM.h/.cpp
 │   │   │   └── microSD.h/.cpp
 │   │   ├── GedeeldeBus/
 │   │   │   ├── GedeeldeBus.h
@@ -131,7 +131,7 @@ De code gebruikt geen centrale array met een vast maximum. Elke node bevat `pare
 
 ## Data
 
-Data is een top-level GedeeldeBus-component onder `Native`. De Data-componentcodes staan vóór het Extender-bereik: `GC_DATA` t/m `DATA_MICROSD` gebruiken `0x14` t/m `0x18`; `0x20` t/m `0x7F` blijft het functionele Extender-bereik. De gewone toepassing maakt `Data` aan; `Data` maakt zelf de geselecteerde concrete media aan en voert hun lifecycle uit.
+Data is een top-level GedeeldeBus-component onder `Native`. De Data-componentcodes staan vóór het Extender-bereik: `GC_DATA` (`0x14`), `DATA_DIRECT` (`0x15`), `DATA_EEPROM` (`0x16`), `DATA_FLASH` (`0x17`), `DATA_FRAM` (`0x18`) en `DATA_MICROSD` (`0x19`), in de volgorde van de Data-bits; `0x1A` t/m `0x1F` zijn vrij; `0x20` t/m `0x7F` blijft het functionele Extender-bereik. De gewone toepassing maakt `Data` aan; `Data` maakt zelf de geselecteerde concrete media aan en voert hun lifecycle uit.
 
 ```text
 DATA_TYPE_NONE
@@ -148,7 +148,7 @@ Native
 
 `DATA_LAYER_CONFIG` bepaalt welke types gecompileerd zijn. `DATA_TYPE_NONE` behoudt de oude route zonder Data-class. Net als bij Input kan bij `GedeeldeBusNewComponent<struct Data>(...)` een subset als objectfilter worden meegegeven. `DIRECT` is geen opslagmedium. Zonder QueueOrStack bewaart DIRECT per channel de laatst gemeten waarde; met de sensor-specifieke QueueOrStack (FIFO of LIFO) loopt de real-time gegevensstroom via eigen code in Data. EEPROM, FRAM_I2C, FLASH en microSD zijn concrete children van Data.
 
-Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `Data->SensorWrite(...)`. Lezen gebeurt via `Data->SensorRead(...)`; per channel via `ReadQueueOrStackStatus(...)` en `ReadQueueOrStackValue(...)`, die elke sensor van `Sensor` erft. STREAMING, RECORDING, mediumkeuze, QueueOrStack en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
+Sensoren maken geen media aan. Een sensor krijgt bij creatie een pointer naar `Data` mee en levert alleen ruwe data aan via `WriteQueueOrStack(...)`, die elke sensor van `Sensor` erft: de waarde komt in `lastValue` (en eventueel de QueueOrStack) van het juiste channel. Lezen gebeurt per channel via `ReadQueueOrStackStatus(...)`, `ReadQueueOrStackValue(...)`, `StreamingRead(...)` en `RecordRead(...)`, die elke sensor eveneens van `Sensor` erft. Elk medium staat in één bestand met al zijn aansluitingen (`EEPROM`, `FLASH`, `FRAM`, `microSD`); DIRECT is een kind van Data (`DataDIRECT`). STREAMING, RECORDING, mediumkeuze, QueueOrStack en eventuele metadata blijven verantwoordelijkheid van `Data` en de applicatie.
 
 De publieke Data-interface voor STREAMING en RECORDING gebruikt de vastgelegde namen `StreamingStart(...)`, `StreamingWrite(...)`, `StreamingRead(...)`, `StreamingStop(...)`, `RecordingStart(...)`, `RecordingWrite(...)`, `RecordRead(...)` en `RecordingStop(...)`. Deze functies horen bij `Data`; ze horen niet bij de sensor. Concrete media behouden daarnaast de volledige API die zij van hun gebruikte library erven.
 
@@ -206,6 +206,8 @@ I2C-adressen worden intern als exclusieve claim in hetzelfde mechanisme behandel
 ### Resourcegebied per Extender
 
 `firstExtenderNode()` bepaalt in welk resourcegebied een node zit. Claims worden alleen rechtstreeks vergeleken wanneer ze tot hetzelfde resourcegebied behoren. Native claims vergelijken dus met Native claims; children van dezelfde Extender vergelijken binnen die Extender.
+
+**Gemengde pinnen** (`GEDEELDE_BUS_GEMENGDE_PINNEN`, naam voorlopig; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `gebiedPerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GebiedVanClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `ModusPin()`, `SchrijvenPin()` en `LezenPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `gebiedPerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GemengdePinnen/Sensor_GemengdePinnen.ino` (2 pinnen op het board, 2 op een PCF8574). RFP602 doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
 
 ## I2C en SPI
 

@@ -61,6 +61,14 @@ struct ExtenderPCF8574 : HardwareResourceTypeI2C, PCF8574 {
   void pinMode(ExtenderPins pin, uint8_t modus) {
     PCF8574::write(static_cast<uint8_t>(pin), (modus == INPUT) ? HIGH : LOW);
   }
+
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+  // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
+  // ModusPin: geen richtingsregister. INPUT schrijft HIGH; OUTPUT laat de laatst geschreven waarde staan (geen korte LOW op CS).
+  void ModusPin(uint8_t pin, uint8_t modus) override { if (modus == INPUT) PCF8574::write(pin, HIGH); }
+  void SchrijvenPin(uint8_t pin, uint8_t niveau) override { PCF8574::write(pin, niveau); }
+  uint8_t LezenPin(uint8_t pin) override { return PCF8574::read(pin); }
+#endif
 };
 
 #endif

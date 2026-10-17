@@ -246,7 +246,7 @@ Generieke elektronica-bouwstenen, niet gebonden aan één specifiek toepassingsg
 | Bouwsteen | Status |
 |---|---|
 | PCF8574 Remote 8-Bit I/O Expander for I2C Bus | softwarematig opgenomen in Input v1.1.0; OTRONIC OT8980 is referentie-/testmodule |
-| Fujitsu MB85RC256V FRAM | softwarematig opgenomen als `DATA_TYPE_FRAM` via `FRAM_I2C`; hardware-stresstest beschikbaar |
+| Fujitsu MB85RC256V FRAM | softwarematig opgenomen als `DATA_TYPE_FRAM_I2C` via `FRAM_I2C`; hardware-stresstest beschikbaar |
 | AT41 (quad logic level shifter) | ter-discussie |
 | CD74HC4067 (16 kanaals multiplexor) | ter-discussie |
 

@@ -19,9 +19,28 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke controles. De st
 
 Voor de dependencycontrole delen WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) de technische aanduiding `ESP32-WROOM-32U` en dezelfde FQBN `esp32:esp32:d1_uno32`. Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) en SB Components Ardi-32 (ESP32-S3-WROOM-1) delen in diezelfde dependencycontrole `ESP32-S3-WROOM-1`, FQBN `esp32:esp32:esp32s3` en het package `esp32 by Espressif Systems`.
 
-### Data FRAM_I2C
+### Data-media
 
-De Data-laag ondersteunt `DATA_TYPE_FRAM` via Rob Tillaart `FRAM_I2C`. De eerste concrete ondersteunde chip is Fujitsu `MB85RC256V` (32 KB), standaard I2C-adres `0x50`. `examples/Systeem/Data/FRAM/FRAM.ino` controleert de Data/GedeeldeBus-lifecycle, capaciteit en byte-toegang. `extras/stress/Test_FRAM/Test_FRAM.ino` voert de 1000 write/read/verify-cycli uit. Dit is een beschikbare hardwaretest; een bord/chipcombinatie wordt pas als hardwarematig bevestigd beschouwd nadat deze test op echte hardware is uitgevoerd.
+| Medium en aansluiting | Library | Opmerking |
+|---|---|---|
+| `DATA_TYPE_EEPROM_NATIVE` | `EEPROM.h` van de core | Niet op de UNO Q: daar heeft de core geen `EEPROM.h`; het medium wordt niet aangemaakt. Op ESP32 en RP2040 met `begin()` en `commit()`. |
+| `DATA_TYPE_EEPROM_I2C` | Rob Tillaart `I2C_EEPROM` | |
+| `DATA_TYPE_FLASH_SPI` | `Adafruit SPIFlash` | Zonder cache, eigen transport. |
+| `DATA_TYPE_FRAM_I2C` | Rob Tillaart `FRAM_I2C` | Zie hieronder. |
+| `DATA_TYPE_MICROSD_SPI` | `SdFat - Adafruit Fork` | FAT16/FAT32. |
+| `DATA_TYPE_EEPROM_SPI`, `DATA_TYPE_FRAM_SPI` | | Nog niet ondersteund in v2.0.0. |
+
+Een combinatie die op een board niet compileert, krijgt een van drie statussen:
+
+1. platform of library incompatibel;
+2. build overschrijdt RAM (bijvoorbeeld op de UNO R3: FLASH + microSD samen, EEPROM NATIVE + HX1838 samen);
+3. libraryselectie of configuratie nog op te lossen.
+
+Waarschuwing microSD-modules: sommige modules laten de MISO-lijn nooit los, ook niet wanneer hun CS hoog staat. Een tweede microSD of een ander SPI-apparaat (FLASH, FRAM SPI) op dezelfde bus werkt dan niet. Voorbeeld: de HW-125, waarop de OE-pin van de MISO-buffer (74LVC125, pin 13) volgens het Arduino-forum vast aan GND hangt. Gebruik dan één microSD alleen op de bus, of een module die MISO loslaat (bijvoorbeeld Adafruit 254, nog te testen).
+
+### Data FRAM I2C
+
+De Data-laag ondersteunt `DATA_TYPE_FRAM_I2C` via Rob Tillaart `FRAM_I2C`. De eerste concrete ondersteunde chip is Fujitsu `MB85RC256V` (32 KB), standaard I2C-adres `0x50`. `examples/Systeem/Data/FRAM/FRAM.ino` controleert de Data/GedeeldeBus-lifecycle, capaciteit en byte-toegang. `extras/stress/Test_FRAM/Test_FRAM.ino` voert de 1000 write/read/verify-cycli uit. Dit is een beschikbare hardwaretest; een bord/chipcombinatie wordt pas als hardwarematig bevestigd beschouwd nadat deze test op echte hardware is uitgevoerd.
 
 ### HX1838-validatie
 

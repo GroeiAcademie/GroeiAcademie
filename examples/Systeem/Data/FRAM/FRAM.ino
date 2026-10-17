@@ -1,20 +1,18 @@
 // ============================================================================
 // Data: FRAM
 // ============================================================================
-// Basis-lifecycletest voor Data FRAM met MB85RC256V.
+// Basis-lifecycletest voor Data FRAM I2C met MB85RC256V.
 // ============================================================================
 
 #include <GroeiAcademie.h>
 
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM)
-  #error Voeg DATA_TYPE_FRAM toe aan DATA_LAYER_CONFIG voor deze test.
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM_I2C)
+  #error Voeg DATA_TYPE_FRAM_I2C toe aan DATA_LAYER_CONFIG voor deze test.
 #endif
 
-#if DATA_LAYER_FRAM_AANTAL < 1
-  #error Zet DATA_LAYER_FRAM_AANTAL op minstens 1 voor deze test.
+#if DATA_LAYER_FRAM_I2C_AANTAL < 1
+  #error Zet DATA_LAYER_FRAM_I2C_AANTAL op minstens 1 voor deze test.
 #endif
-
-struct FRAM_I2C* FRAM_I2C = nullptr;
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
   GA_SERIAL.print(stap);
@@ -34,29 +32,22 @@ void setup() {
     return;
   }
 
-  for (GedeeldeBusNode* sameParent = Data->firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-    if (sameParent->component == GedeeldeBusComponent::DATA_FRAM) {
-      FRAM_I2C = static_cast<struct FRAM_I2C*>(sameParent);
-      break;
-    }
-  }
-
-  if (FRAM_I2C == nullptr) {
-    GA_SERIAL.println(F("FRAM_I2C: FOUT"));
+  if (Data->FRAMviaI2C[0] == nullptr) {
+    GA_SERIAL.println(F("FRAM I2C: FOUT"));
     return;
   }
 
   GA_SERIAL.print(F("Grootte bytes: "));
-  GA_SERIAL.println(FRAM_I2C->getSizeBytes());
+  GA_SERIAL.println(Data->FRAMviaI2C[0]->getSizeBytes());
 
-  if (FRAM_I2C->getSizeBytes() != FRAM_MB85RC256V) {
+  if (Data->FRAMviaI2C[0]->getSizeBytes() != FRAM_MB85RC256V) {
     GA_SERIAL.println(F("Grootte: FOUT"));
     return;
   }
 
   const uint8_t geschrevenWaarde = 123;
-  FRAM_I2C->write8(0, geschrevenWaarde);
-  const int schrijfStatus = FRAM_I2C->lastError();
+  Data->FRAMviaI2C[0]->write8(0, geschrevenWaarde);
+  const int schrijfStatus = Data->FRAMviaI2C[0]->lastError();
 
   if (schrijfStatus != FRAM_OK) {
     GA_SERIAL.print(F("Schrijven: FOUT "));
@@ -64,8 +55,8 @@ void setup() {
     return;
   }
 
-  const uint8_t gelezenWaarde = FRAM_I2C->read8(0);
-  const int leesStatus = FRAM_I2C->lastError();
+  const uint8_t gelezenWaarde = Data->FRAMviaI2C[0]->read8(0);
+  const int leesStatus = Data->FRAMviaI2C[0]->lastError();
 
   if (leesStatus != FRAM_OK) {
     GA_SERIAL.print(F("Lezen: FOUT "));

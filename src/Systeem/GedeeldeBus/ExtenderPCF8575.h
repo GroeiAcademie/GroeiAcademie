@@ -65,6 +65,13 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
     return FoutDiagnoseI2C(gelukt, PCF8575::lastError(), gelukt);
   }
 
+#if GEDEELDE_BUS_GEMENGDE_PINNEN
+  // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
+  // ModusPin: geen richtingsregister. INPUT schrijft HIGH; OUTPUT laat de laatst geschreven waarde staan.
+  void ModusPin(uint8_t pin, uint8_t modus) override { if (modus == INPUT) PCF8575::write(pin, HIGH); }
+  void SchrijvenPin(uint8_t pin, uint8_t niveau) override { PCF8575::write(pin, niveau); }
+  uint8_t LezenPin(uint8_t pin) override { return PCF8575::read(pin); }
+#endif
 };
 
 #endif

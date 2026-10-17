@@ -7,8 +7,8 @@
 
 #include <GroeiAcademie.h>
 
-#if !((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  #error Voeg DATA_TYPE_MICROSD toe aan DATA_LAYER_CONFIG voor deze test.
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  #error Voeg DATA_TYPE_MICROSD_SPI toe aan DATA_LAYER_CONFIG voor deze test.
 #endif
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
@@ -26,7 +26,7 @@ void setup() {
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 
-  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_TYPE_MICROSD);
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_TYPE_MICROSD_SPI);
   ToonResultaat(F("Data aanmelden/controleren/inpluggen/activeren"), Data != nullptr);
 
   if (Data == nullptr) {

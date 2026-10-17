@@ -2,26 +2,90 @@
 
 #if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
 namespace {
-  File FileRecording[2];
-  uint8_t aantalRegelsSindsFlush[2] = { 0, 0 };
-  unsigned long timeLastFlush[2] = { 0, 0 };
+  File32 FileRecording[DATA_LAYER_MICROSD_SPI_AANTAL];
+  uint8_t aantalRegelsSindsFlush[DATA_LAYER_MICROSD_SPI_AANTAL] = {};
+  unsigned long timeLastFlush[DATA_LAYER_MICROSD_SPI_AANTAL] = {};
 }
 #endif
 
+// ============================================================================
+// FLASH-buffer (DATA_LAYER_FLASH_SPI_x_BUFFER_SIZE > 0): metingen in RAM verzamelen en in één keer naar FLASH schrijven.
+// Bij 0 wordt hier niets gecompileerd en schrijft StreamingWrite() elke meting meteen weg.
+// ============================================================================
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  #if (DATA_LAYER_FLASH_SPI_AANTAL >= 1 && DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0) || (DATA_LAYER_FLASH_SPI_AANTAL >= 2 && DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE > 0)
+    #define FLASH_BUFFER_ACTIEF 1   // NAAM VOORLOPIG: alleen in dit bestand
+  #else
+    #define FLASH_BUFFER_ACTIEF 0
+  #endif
+
+  #if FLASH_BUFFER_ACTIEF
+    // Een meting is één int: een buffer > 0 moet er minstens één kunnen bevatten, anders schrijft memcpy() buiten de buffer.
+    static_assert(DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE == 0 || DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE >= sizeof(int),
+                  "DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE moet 0 zijn, of minstens sizeof(int): 2 op de UNO R3, 4 op de 32-bit boards.");
+    #if DATA_LAYER_FLASH_SPI_AANTAL >= 2
+    static_assert(DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE == 0 || DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE >= sizeof(int),
+                  "DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE moet 0 zijn, of minstens sizeof(int): 2 op de UNO R3, 4 op de 32-bit boards.");
+    #endif
+namespace {
+  #if DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0
+  uint8_t bufferFLASH1[DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE];   // NAAM VOORLOPIG
+  #endif
+  #if DATA_LAYER_FLASH_SPI_AANTAL >= 2 && DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE > 0
+  uint8_t bufferFLASH2[DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE];   // NAAM VOORLOPIG
+  #endif
+
+  // Per FLASH-chip: de buffer (nullptr = geen buffer), zijn grootte en hoeveel bytes erin wachten (NAAM VOORLOPIG).
+  uint8_t* const bufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {
+  #if DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0
+    bufferFLASH1
+  #else
+    nullptr
+  #endif
+  #if DATA_LAYER_FLASH_SPI_AANTAL >= 2
+    ,
+    #if DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE > 0
+    bufferFLASH2
+    #else
+    nullptr
+    #endif
+  #endif
+  };
+  const uint16_t grootteBufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {
+    DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE
+  #if DATA_LAYER_FLASH_SPI_AANTAL >= 2
+    , DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
+  #endif
+  };
+  uint16_t gevuldBufferFLASH[DATA_LAYER_FLASH_SPI_AANTAL] = {};
+
+  // De wachtende bytes van één chip naar FLASH schrijven, achter de vorige (NAAM VOORLOPIG).
+  void LegenBufferFLASH(struct Data* data, uint8_t teller) {
+    struct DataFLASHviaSPI* kanaal = data->FLASHviaSPI[teller];
+    const uint16_t gevuld = gevuldBufferFLASH[teller];
+    gevuldBufferFLASH[teller] = 0;
+    if (gevuld == 0 || kanaal == nullptr || !kanaal->actief) return;
+    if (kanaal->writeBuffer(data->adres[teller], bufferFLASH[teller], gevuld) == gevuld) data->adres[teller] += gevuld;
+  }
+}
+  #endif
+#endif
+
+
 Data::Data()
 #if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-  : Data(((DATA_LAYER_CONFIG) & ~DATA_TYPE_NONE) | DATA_TYPE_MICROSD)
+  : Data(((DATA_LAYER_CONFIG) & ~DATA_TYPE_NONE) | DATA_TYPE_MICROSD_SPI)
 #else
   : Data(DATA_LAYER_CONFIG)
 #endif
 {}
 
-Data::Data(uint8_t typesActief)
+Data::Data(uint16_t typesActief)
   : GedeeldeBusNode(&Native, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::GC_DATA, HardwareResourceToegang::GEDEELD),
 #if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-    typesActief((typesActief & ~DATA_TYPE_NONE) | DATA_TYPE_MICROSD)
+    typesActief((typesActief & ~DATA_TYPE_NONE) | DATA_TYPE_MICROSD_SPI)
 #else
     typesActief(typesActief)
 #endif
@@ -35,94 +99,154 @@ bool Data::aanmelden() {
 #endif
   if (aangemeld) return true;
 #if REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-  if ((this->typesActief & (((DATA_LAYER_CONFIG) & ~DATA_TYPE_NONE) | DATA_TYPE_MICROSD)) != this->typesActief) return false;
+  if ((this->typesActief & (((DATA_LAYER_CONFIG) & ~DATA_TYPE_NONE) | DATA_TYPE_MICROSD_SPI)) != this->typesActief) return false;
 #else
   if ((this->typesActief & DATA_LAYER_CONFIG) != this->typesActief) return false;
 #endif
   if (!GedeeldeBusNode::aanmelden()) return false;
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM)
-  if (this->typesActief & DATA_TYPE_EEPROM) {
-    #if DATA_LAYER_EEPROM_AANTAL >= 1
+  // Elk kind komt bij een geslaagde aanmelding in de lijst van zijn medium (N7); bij een mislukte wordt het verwijderd.
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+  if (this->typesActief & DATA_TYPE_DIRECT) {
+    struct DataDIRECT* kanaal = new struct DataDIRECT(this);
+    kanaal->componentCreated = true;
+    if (!kanaal->aanmelden()) delete kanaal;
+  }
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE) && BOARD_VERSION != BOARD_UNO_Q
+  if (this->typesActief & DATA_TYPE_EEPROM_NATIVE) {
+    struct DataEEPROMviaNative* kanaal = new struct DataEEPROMviaNative(this);
+    kanaal->componentCreated = true;
+    if (kanaal->aanmelden()) EEPROMviaNative = kanaal;
+    else delete kanaal;
+  }
+#endif
+
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_I2C)
+  if (this->typesActief & DATA_TYPE_EEPROM_I2C) {
+    #if DATA_LAYER_EEPROM_I2C_AANTAL >= 1
       {
-        struct DataEEPROM* kanaal = new struct DataEEPROM(this, DATA_LAYER_EEPROM_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        struct DataEEPROMviaI2C* kanaal = new struct DataEEPROMviaI2C(this, DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
+        if (kanaal->aanmelden()) EEPROMviaI2C[0] = kanaal;
+        else delete kanaal;
       }
     #endif
-    #if DATA_LAYER_EEPROM_AANTAL >= 2
+    #if DATA_LAYER_EEPROM_I2C_AANTAL >= 2
       {
-        struct DataEEPROM* kanaal = new struct DataEEPROM(this, DATA_LAYER_EEPROM_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        struct DataEEPROMviaI2C* kanaal = new struct DataEEPROMviaI2C(this, DATA_LAYER_EEPROM_I2C_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
+        if (kanaal->aanmelden()) EEPROMviaI2C[1] = kanaal;
+        else delete kanaal;
       }
     #endif
   }
 #endif
 
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
-  if (this->typesActief & DATA_TYPE_FLASH) {
-    #if DATA_LAYER_FLASH_AANTAL >= 1
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  if (this->typesActief & DATA_TYPE_FLASH_SPI) {
+    #if DATA_LAYER_FLASH_SPI_AANTAL >= 1
       {
-        struct DataFLASH* kanaal = new struct DataFLASH(this, DATA_LAYER_FLASH_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        struct DataFLASHviaSPI* kanaal = new struct DataFLASHviaSPI(this, static_cast<HardwareResourcePin>(DATA_LAYER_FLASH_SPI_1_CS_PIN), HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
+  #ifdef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
+        // CS op een Extender: DATA_LAYER_FLASH_SPI_1_CS_PIN is de pin op die Extender.
+        static_assert(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 ||
+                      DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
+                      DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
+                      "DATA_LAYER_FLASH_SPI_1_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
+        if (kanaal->VerbindenCSExtender(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER, DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS)) {
+          kanaal->transport.csExtender = kanaal->csGebied_[0];
+          kanaal->transport.csPin = static_cast<uint8_t>(kanaal->np_CS);
+        }
+  #endif
+        if (kanaal->aanmelden()) FLASHviaSPI[0] = kanaal;
+        else delete kanaal;
       }
     #endif
-    #if DATA_LAYER_FLASH_AANTAL >= 2
+    #if DATA_LAYER_FLASH_SPI_AANTAL >= 2
       {
-        struct DataFLASH* kanaal = new struct DataFLASH(this, DATA_LAYER_FLASH_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        struct DataFLASHviaSPI* kanaal = new struct DataFLASHviaSPI(this, static_cast<HardwareResourcePin>(DATA_LAYER_FLASH_SPI_2_CS_PIN), HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
         kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
-      }
-    #endif
-  }
-#endif
-
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM)
-  if (this->typesActief & DATA_TYPE_FRAM) {
-    #if DATA_LAYER_FRAM_AANTAL >= 1
-      {
-        struct FRAM_I2C* kanaal = new struct FRAM_I2C(this, DATA_LAYER_FRAM_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
-        kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
-      }
-    #endif
-    #if DATA_LAYER_FRAM_AANTAL >= 2
-      {
-        struct FRAM_I2C* kanaal = new struct FRAM_I2C(this, DATA_LAYER_FRAM_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
-        kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
-      }
-    #endif
-  }
-#endif
-
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
-  if (this->typesActief & DATA_TYPE_MICROSD) {
-    #if DATA_LAYER_MICROSD_AANTAL >= 1
-      {
-        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
-        kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
-      }
-    #endif
-    #if DATA_LAYER_MICROSD_AANTAL >= 2
-      {
-        struct DataMicroSD* kanaal = new struct DataMicroSD(this, DATA_LAYER_MICROSD_2_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
-        kanaal->componentCreated = true;
-        if (!kanaal->aanmelden()) delete kanaal;
+  #ifdef DATA_LAYER_FLASH_SPI_2_CS_EXTENDER
+        // CS op een Extender: DATA_LAYER_FLASH_SPI_2_CS_PIN is de pin op die Extender.
+        static_assert(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 ||
+                      DATA_LAYER_FLASH_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
+                      DATA_LAYER_FLASH_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
+                      "DATA_LAYER_FLASH_SPI_2_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
+        if (kanaal->VerbindenCSExtender(DATA_LAYER_FLASH_SPI_2_CS_EXTENDER, DATA_LAYER_FLASH_SPI_2_CS_EXTENDER_I2C_ADDRESS)) {
+          kanaal->transport.csExtender = kanaal->csGebied_[0];
+          kanaal->transport.csPin = static_cast<uint8_t>(kanaal->np_CS);
+        }
+  #endif
+        if (kanaal->aanmelden()) FLASHviaSPI[1] = kanaal;
+        else delete kanaal;
       }
     #endif
   }
 #endif
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
-  uint8_t teller = 0;
-  for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
-  if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM_I2C)
+  if (this->typesActief & DATA_TYPE_FRAM_I2C) {
+    #if DATA_LAYER_FRAM_I2C_AANTAL >= 1
+      {
+        struct DataFRAMviaI2C* kanaal = new struct DataFRAMviaI2C(this, DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+        if (kanaal->aanmelden()) FRAMviaI2C[0] = kanaal;
+        else delete kanaal;
+      }
+    #endif
+    #if DATA_LAYER_FRAM_I2C_AANTAL >= 2
+      {
+        struct DataFRAMviaI2C* kanaal = new struct DataFRAMviaI2C(this, DATA_LAYER_FRAM_I2C_2_I2C_ADDRESS, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+        if (kanaal->aanmelden()) FRAMviaI2C[1] = kanaal;
+        else delete kanaal;
+      }
+    #endif
+  }
+#endif
 
-  return true;
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
+  if (this->typesActief & DATA_TYPE_MICROSD_SPI) {
+    #if DATA_LAYER_MICROSD_SPI_AANTAL >= 1
+      {
+        struct DataMICROSDviaSPI* kanaal = new struct DataMICROSDviaSPI(this, static_cast<HardwareResourcePin>(DATA_LAYER_MICROSD_SPI_1_CS_PIN), HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+  #ifdef DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER
+        // CS op een Extender: DATA_LAYER_MICROSD_SPI_1_CS_PIN is de pin op die Extender.
+        static_assert(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 ||
+                      DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
+                      DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
+                      "DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
+        kanaal->VerbindenCSExtender(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER, DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS);
+  #endif
+        if (kanaal->aanmelden()) MICROSDviaSPI[0] = kanaal;
+        else delete kanaal;
+      }
+    #endif
+    #if DATA_LAYER_MICROSD_SPI_AANTAL >= 2
+      {
+        struct DataMICROSDviaSPI* kanaal = new struct DataMICROSDviaSPI(this, static_cast<HardwareResourcePin>(DATA_LAYER_MICROSD_SPI_2_CS_PIN), HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, HardwareResourceToegang::GEDEELD);
+        kanaal->componentCreated = true;
+  #ifdef DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER
+        // CS op een Extender: DATA_LAYER_MICROSD_SPI_2_CS_PIN is de pin op die Extender.
+        static_assert(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 ||
+                      DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 ||
+                      DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017,
+                      "DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER: alleen DIGITAL_PINS_PCF8574, DIGITAL_PINS_PCF8575 of DIGITAL_PINS_MCP23017.");
+        kanaal->VerbindenCSExtender(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER, DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER_I2C_ADDRESS);
+  #endif
+        if (kanaal->aanmelden()) MICROSDviaSPI[1] = kanaal;
+        else delete kanaal;
+      }
+    #endif
+  }
+#endif
+
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft (DIRECT is ook een kind).
+  return firstChild != nullptr;
 }
 
 bool Data::controleren() {
@@ -139,12 +263,8 @@ bool Data::controleren() {
     sameParent = object;
   }
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
-  uint8_t teller = 0;
-  for (sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
-  if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
-
-  return true;
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft (DIRECT is ook een kind).
+  return firstChild != nullptr;
 }
 
 bool Data::inpluggen() {
@@ -161,12 +281,8 @@ bool Data::inpluggen() {
     sameParent = object;
   }
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
-  uint8_t teller = 0;
-  for (sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
-  if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
-
-  return true;
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft (DIRECT is ook een kind).
+  return firstChild != nullptr;
 }
 
 bool Data::Activeren() {
@@ -180,20 +296,19 @@ bool Data::Activeren() {
     sameParent = object;
   }
 
-  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft. DIRECT (RAM-QueueOrStack) is geen kind en blijft altijd over.
-  uint8_t teller = 0;
-  for (sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) teller++;
-  if (teller == 0 && !(this->typesActief & DATA_TYPE_DIRECT)) return false;
-
-  return true;
+  // Data faalt alleen wanneer geen enkel gevraagd medium overblijft (DIRECT is ook een kind).
+  return firstChild != nullptr;
 }
 
 bool Data::afmelden() {
 #ifdef TRACE
   GA_SERIAL.println("TRACE: Data::afmelden()");
 #endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
   RecordingStop();
+#endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI) && FLASH_BUFFER_ACTIEF
+  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) LegenBufferFLASH(this, teller);   // vóór de chips verdwijnen
 #endif
   GedeeldeBusNode* sameParent = firstChild;
   while (sameParent != nullptr) {
@@ -205,19 +320,13 @@ bool Data::afmelden() {
   return GedeeldeBusNode::afmelden();
 }
 
-void Data::SensorWrite(int ruweData) {
-  this->ruweData = ruweData;
-}
-
-int Data::SensorRead() {
-  return ruweData;
-}
-
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
+// ============================================================================
+// QueueOrStack: los van DIRECT (A8). Werkt zodra de sensor een grootte > 0 opgeeft.
+// ============================================================================
 void Data::WriteQueueOrStack(SensorQueueOrStack& channel, int value) {
   channel.lastValue = value;
 #if DATA_QUEUE_OR_STACK_ACTIEF
-  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.sizeQueueOrStack == 0) return;
+  if (channel.sizeQueueOrStack == 0) return;
   channel.buffer[(channel.firstIndex + channel.countNumber) % channel.sizeQueueOrStack] = value;
   if (channel.countNumber < channel.sizeQueueOrStack) channel.countNumber++;
   else channel.firstIndex = (channel.firstIndex + 1) % channel.sizeQueueOrStack;   // vol: de oudste waarde wordt overschreven
@@ -226,7 +335,7 @@ void Data::WriteQueueOrStack(SensorQueueOrStack& channel, int value) {
 
 int8_t Data::ReadQueueOrStackStatus(SensorQueueOrStack& channel) {
 #if DATA_QUEUE_OR_STACK_ACTIEF
-  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.countNumber == 0) return -1;   // leeg
+  if (channel.countNumber == 0) return -1;   // leeg
   return 0;   // waarde klaar
 #else
   (void)channel;
@@ -236,7 +345,7 @@ int8_t Data::ReadQueueOrStackStatus(SensorQueueOrStack& channel) {
 
 int Data::ReadQueueOrStackValue(SensorQueueOrStack& channel) {
 #if DATA_QUEUE_OR_STACK_ACTIEF
-  if (!(this->typesActief & DATA_TYPE_DIRECT) || channel.countNumber == 0) return channel.lastValue;   // leeg: laatst gemeten waarde van dit channel
+  if (channel.countNumber == 0) return channel.lastValue;   // leeg: laatst gemeten waarde van dit channel
   int value;
   if (channel.LIFO) value = channel.buffer[(channel.firstIndex + channel.countNumber - 1) % channel.sizeQueueOrStack];   // nieuwste eerst
   else {
@@ -250,6 +359,7 @@ int Data::ReadQueueOrStackValue(SensorQueueOrStack& channel) {
 #endif
 }
 
+#if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE
 // Overgeërfd door elke sensor: geeft het channel van de sensor door aan Data.
 void Sensor::WriteQueueOrStack(uint8_t numberChannel, int value) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return;
@@ -265,108 +375,116 @@ int Sensor::ReadQueueOrStackValue(uint8_t numberChannel) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return 0;   // sensor bestaat niet
   return ::Data->ReadQueueOrStackValue(QueueOrStack[numberChannel - 1]);
 }
+
+int Sensor::StreamingRead(uint8_t numberChannel) {
+  if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return 0;   // sensor bestaat niet
+  return ::Data->StreamingRead(QueueOrStack[numberChannel - 1]);
+}
+
+int Sensor::RecordRead(uint8_t numberChannel) {
+  if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return 0;   // sensor bestaat niet
+  return ::Data->RecordRead(QueueOrStack[numberChannel - 1]);
+}
 #endif
 
+// ============================================================================
+// STREAMING (FLASH) en RECORDING (microSD): rechtstreeks via de lijsten (N7), zonder zoeken op component.
+// ============================================================================
 void Data::StreamingStart() {
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
-  if (this->typesActief & DATA_TYPE_FLASH) {
-    for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-      if (sameParent->component != GedeeldeBusComponent::DATA_FLASH || !sameParent->actief) continue;
-
-      struct DataFLASH* kanaal = static_cast<struct DataFLASH*>(sameParent);
-      uint8_t teller = 0;
-#if DATA_LAYER_FLASH_AANTAL >= 2
-      if (kanaal->np_CS == DATA_LAYER_FLASH_2_CS_PIN) teller = 1;
-#endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  if (this->typesActief & DATA_TYPE_FLASH_SPI) {
+    for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) {
+      struct DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
+      if (kanaal == nullptr || !kanaal->actief) continue;
+  #if FLASH_BUFFER_ACTIEF
+      gevuldBufferFLASH[teller] = 0;   // nieuwe stroom: wat nog in de buffer zat, vervalt
+  #endif
       adres[teller] = 0;
       kanaal->eraseSector(0);
     }
   }
 #endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  if (this->typesActief & DATA_TYPE_MICROSD) RecordingStart();
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  if (this->typesActief & DATA_TYPE_MICROSD_SPI) RecordingStart();
 #endif
 }
 
 void Data::StreamingWrite(int ruweData) {
-  this->ruweData = ruweData;
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
-  if (this->typesActief & DATA_TYPE_FLASH) {
-    for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-      if (sameParent->component != GedeeldeBusComponent::DATA_FLASH || !sameParent->actief) continue;
-
-      struct DataFLASH* kanaal = static_cast<struct DataFLASH*>(sameParent);
-      uint8_t teller = 0;
-#if DATA_LAYER_FLASH_AANTAL >= 2
-      if (kanaal->np_CS == DATA_LAYER_FLASH_2_CS_PIN) teller = 1;
-#endif
-      if (kanaal->writeAnything(adres[teller], ruweData)) adres[teller] += sizeof(ruweData);
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  if (this->typesActief & DATA_TYPE_FLASH_SPI) {
+    for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) {
+      struct DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
+      if (kanaal == nullptr || !kanaal->actief) continue;
+  #if FLASH_BUFFER_ACTIEF
+      if (bufferFLASH[teller] != nullptr) {
+        // In de buffer; vol = in één keer naar FLASH.
+        if (gevuldBufferFLASH[teller] + sizeof(ruweData) > grootteBufferFLASH[teller]) LegenBufferFLASH(this, teller);
+        memcpy(bufferFLASH[teller] + gevuldBufferFLASH[teller], &ruweData, sizeof(ruweData));
+        gevuldBufferFLASH[teller] += sizeof(ruweData);
+        if (gevuldBufferFLASH[teller] + sizeof(ruweData) > grootteBufferFLASH[teller]) LegenBufferFLASH(this, teller);
+        continue;
+      }
+  #endif
+      if (kanaal->writeBuffer(adres[teller], reinterpret_cast<const uint8_t*>(&ruweData), sizeof(ruweData)) == sizeof(ruweData)) adres[teller] += sizeof(ruweData);
     }
   }
 #endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  if (this->typesActief & DATA_TYPE_MICROSD) RecordingWrite(ruweData);
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  if (this->typesActief & DATA_TYPE_MICROSD_SPI) RecordingWrite(ruweData);
 #endif
+  (void)ruweData;
 }
 
-int Data::StreamingRead() {
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH)
-  if ((this->typesActief & DATA_TYPE_FLASH) && adres[0] >= sizeof(ruweData)) {
-    for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-      if (sameParent->component != GedeeldeBusComponent::DATA_FLASH || !sameParent->actief) continue;
-
-      struct DataFLASH* kanaal = static_cast<struct DataFLASH*>(sameParent);
-      if (kanaal->np_CS != DATA_LAYER_FLASH_1_CS_PIN) continue;
-
-      int gelezen = ruweData;
-      if (kanaal->readAnything(adres[0] - sizeof(ruweData), gelezen)) ruweData = gelezen;
-      return ruweData;
-    }
+int Data::StreamingRead(SensorQueueOrStack& channel) {
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  struct DataFLASHviaSPI* kanaal = FLASHviaSPI[0];
+  #if FLASH_BUFFER_ACTIEF
+  // De laatste meting kan nog in de buffer wachten.
+  if ((this->typesActief & DATA_TYPE_FLASH_SPI) && bufferFLASH[0] != nullptr && gevuldBufferFLASH[0] >= sizeof(int)) {
+    int gelezen;
+    memcpy(&gelezen, bufferFLASH[0] + gevuldBufferFLASH[0] - sizeof(gelezen), sizeof(gelezen));
+    return gelezen;
+  }
+  #endif
+  if ((this->typesActief & DATA_TYPE_FLASH_SPI) && kanaal != nullptr && kanaal->actief && adres[0] >= sizeof(int)) {
+    int gelezen;
+    if (kanaal->readBuffer(adres[0] - sizeof(gelezen), reinterpret_cast<uint8_t*>(&gelezen), sizeof(gelezen)) == sizeof(gelezen)) return gelezen;
   }
 #endif
-  return SensorRead();
+  return channel.lastValue;   // terugval: laatst gemeten waarde van dit channel (V3)
 }
 
 void Data::StreamingStop() {
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  if (this->typesActief & DATA_TYPE_MICROSD) RecordingStop();
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI) && FLASH_BUFFER_ACTIEF
+  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) LegenBufferFLASH(this, teller);   // wat nog wacht, naar FLASH
+#endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  if (this->typesActief & DATA_TYPE_MICROSD_SPI) RecordingStop();
 #endif
 }
 
 void Data::RecordingStart() {
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  if (!(this->typesActief & DATA_TYPE_MICROSD)) return;
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  if (!(this->typesActief & DATA_TYPE_MICROSD_SPI)) return;
 
-  for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-    if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
-
-    struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
-    uint8_t teller = 0;
-#if DATA_LAYER_MICROSD_AANTAL >= 2
-    if (kanaal->np_CS == DATA_LAYER_MICROSD_2_CS_PIN) teller = 1;
-#endif
-    if (!FileRecording[teller]) {
-#if defined(ARDUINO_ARCH_ESP32)
-      FileRecording[teller] = kanaal->open(RFP602_DATA_RECORD_FILE, FILE_APPEND);
-#else
-      FileRecording[teller] = kanaal->open(RFP602_DATA_RECORD_FILE, FILE_WRITE);
-#endif
-    }
+  for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
+    struct DataMICROSDviaSPI* kanaal = MICROSDviaSPI[teller];
+    if (kanaal == nullptr || !kanaal->actief) continue;
+    if (!FileRecording[teller]) FileRecording[teller] = kanaal->open(RFP602_DATA_RECORD_FILE, O_RDWR | O_CREAT | O_AT_END);   // achteraan bijschrijven
   }
 #endif
 }
 
 void Data::RecordingWrite(int ruweData) {
-  this->ruweData = ruweData;
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  if (!(this->typesActief & DATA_TYPE_MICROSD)) return;
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  if (!(this->typesActief & DATA_TYPE_MICROSD_SPI)) return;
 
   RecordingStart();
-  for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_AANTAL && teller < 2; teller++) {
+  for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
     if (FileRecording[teller]) {
       FileRecording[teller].println(ruweData);
-      if (++aantalRegelsSindsFlush[teller] >= DATA_LAYER_MICROSD_FLUSH_NA_AANTAL_REGEL ||
-          millis() - timeLastFlush[teller] >= DATA_LAYER_MICROSD_FLUSH_NA_MS) {
+      if (++aantalRegelsSindsFlush[teller] >= DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL ||
+          millis() - timeLastFlush[teller] >= DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS) {
         FileRecording[teller].flush();
         aantalRegelsSindsFlush[teller] = 0;
         timeLastFlush[teller] = millis();
@@ -374,34 +492,28 @@ void Data::RecordingWrite(int ruweData) {
     }
   }
 #endif
+  (void)ruweData;
 }
 
-int Data::RecordRead() {
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  if (this->typesActief & DATA_TYPE_MICROSD) {
+int Data::RecordRead(SensorQueueOrStack& channel) {
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  struct DataMICROSDviaSPI* kanaal = MICROSDviaSPI[0];
+  if ((this->typesActief & DATA_TYPE_MICROSD_SPI) && kanaal != nullptr && kanaal->actief) {
     RecordingStop();
-
-    for (GedeeldeBusNode* sameParent = firstChild; sameParent != nullptr; sameParent = sameParent->nextChild) {
-      if (sameParent->component != GedeeldeBusComponent::DATA_MICROSD || !sameParent->actief) continue;
-
-      struct DataMicroSD* kanaal = static_cast<struct DataMicroSD*>(sameParent);
-      if (kanaal->np_CS != DATA_LAYER_MICROSD_1_CS_PIN) continue;
-
-      FileRecording[0] = kanaal->open(RFP602_DATA_RECORD_FILE);
-      if (!FileRecording[0]) return SensorRead();
+    FileRecording[0] = kanaal->open(RFP602_DATA_RECORD_FILE, O_RDONLY);
+    if (FileRecording[0]) {
       const int gelezen = FileRecording[0].parseInt();
       FileRecording[0].close();
-      ruweData = gelezen;
-      return ruweData;
+      return gelezen;
     }
   }
 #endif
-  return SensorRead();
+  return channel.lastValue;   // terugval: laatst gemeten waarde van dit channel (V3)
 }
 
 void Data::RecordingStop() {
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD)
-  for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_AANTAL && teller < 2; teller++) {
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
     if (FileRecording[teller]) {
       FileRecording[teller].flush();
       FileRecording[teller].close();

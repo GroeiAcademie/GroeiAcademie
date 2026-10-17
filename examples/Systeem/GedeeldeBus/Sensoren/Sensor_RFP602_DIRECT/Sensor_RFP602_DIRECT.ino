@@ -3,7 +3,7 @@
 // ============================================================================
 // RFP602 via de Data-class.
 // Zonder QueueOrStack geeft ReadQueueOrStackValue() de laatst gemeten waarde van die sensor terug.
-// Met RFP602_CHANNEL_x_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE > 0 leest ReadQueueOrStackValue() de QueueOrStack van dat channel.
+// Met RFP602_CHANNEL_x_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0 leest ReadQueueOrStackValue() de QueueOrStack van dat channel.
 // ============================================================================
 
 #include <GroeiAcademie.h>

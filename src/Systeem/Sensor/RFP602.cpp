@@ -54,10 +54,7 @@ int RFP602::RawAnalogRead(int sensorPin) {
 #endif
 
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
-  if (Data != nullptr) Data->SensorWrite(ruweData);
-#endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
-  // In de QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
+  // lastValue en QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
   for (uint8_t sensorNummer = 1; sensorNummer <= AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
     if (this->sensorPin[sensorNummer - 1] == sensorPin) { WriteQueueOrStack(sensorNummer, ruweData); break; }
   }
@@ -89,10 +86,7 @@ int RFP602::GetAnalogRead() {
   laatsteWaarde = ADC_ADS1115.getValue();
 #endif
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
-  if (Data != nullptr) Data->SensorWrite(laatsteWaarde);
-#endif
-#if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
-  // In de QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
+  // lastValue en QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
   for (uint8_t sensorNummer = 1; sensorNummer <= AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
     if (sensorPin[sensorNummer - 1] == laatstePin) { WriteQueueOrStack(sensorNummer, laatsteWaarde); break; }
   }

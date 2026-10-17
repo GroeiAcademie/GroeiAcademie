@@ -39,6 +39,23 @@ De versienummers volgen de versie in `library.properties`.
 
 - documentatie opnieuw uit de actuele v2.0.0-code afgeleid: filestructuur, GedeeldeBus-lifecycle, Extenders, `EP_`-resources, RFP602 en de huidige dummy `Diagnose()` zijn met de broncode gelijkgetrokken;
 
+### Data-media: medium en aansluiting (2026-10-17)
+
+- één bit per medium en aansluiting: `DATA_TYPE_EEPROM_NATIVE`, `DATA_TYPE_EEPROM_I2C`, `DATA_TYPE_FLASH_SPI`, `DATA_TYPE_FRAM_I2C`, `DATA_TYPE_MICROSD_SPI`; `DATA_TYPE_EEPROM_SPI` en `DATA_TYPE_FRAM_SPI` gereserveerd (nog `#error`); de oude namen `DATA_TYPE_EEPROM`, `DATA_TYPE_FLASH`, `DATA_TYPE_FRAM` en `DATA_TYPE_MICROSD` verdwijnen; `typesActief` wordt 16 bits;
+- alle instellingen krijgen de aansluiting in hun naam, bv. `DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS`, `DATA_LAYER_FLASH_SPI_1_CS_PIN`; `RFP602_..._DIRECT_QUEUE_OR_STACK_SIZE` wordt `RFP602_..._QUEUE_OR_STACK_SIZE`;
+- één bestand per medium met alle aansluitingen; `FRAM_I2C.h/.cpp` wordt `FRAM.h/.cpp`;
+- structs `DataEEPROMviaNative`, `DataEEPROMviaI2C`, `DataFLASHviaSPI`, `DataFRAMviaI2C`, `DataMICROSDviaSPI`, `DataDIRECT`; nieuwe component `DATA_DIRECT` (0x19);
+- nieuw medium EEPROM NATIVE met `ReadNativeEEPROM()`/`WriteNativeEEPROM()`, `DATA_LAYER_EEPROM_NATIVE_SIZE` en het vaste blok `HX1838_EEPROM_NATIVE_SIZE` (24 bytes);
+- Data houdt per medium een lijst van zijn chips bij (`Data->FLASHviaSPI[]` enz.); elke chip wist zijn plaats in zijn destructor;
+- DIRECT is een kind van Data; de QueueOrStack werkt los van DIRECT;
+- `SensorWrite()`/`SensorRead()` verdwijnen; `StreamingRead()` en `RecordRead()` krijgen het channel mee en vallen terug op `lastValue` van dat channel;
+- FLASH: `SPIMemory` vervangen door `Adafruit SPIFlash` (zonder cache, eigen transport `TransportFLASHviaSPI`); compileert nu ook op de UNO R4;
+- microSD: `SD` vervangen door `SdFat` (via de "SdFat - Adafruit Fork", zodat FLASH en microSD samen compileren);
+- `library.properties`: `SD` en `SPIMemory` weg, `Adafruit SPIFlash` en `SdFat - Adafruit Fork` erbij;
+- Data-componentcodes in de volgorde van de bits: `DATA_DIRECT` 0x15, `DATA_EEPROM` 0x16, `DATA_FLASH` 0x17, `DATA_FRAM` 0x18, `DATA_MICROSD` 0x19;
+- de nooit gebruikte `DATA_LAYER_<MEDIUM>_<NR>_QUEUE_OR_STACK_SIZE` zijn verwijderd; nieuw: FLASH-schrijfbuffer `DATA_LAYER_FLASH_SPI_<NR>_BUFFER_SIZE` (naam voorlopig, standaard 0);
+- GedeeldeBus: gemengde pinnen (`GEDEELDE_BUS_GEMENGDE_PINNEN`, naam voorlopig): per exclusieve pin het board of een Extender; FLASH en microSD kunnen CS op een PCF8574, PCF8575 of MCP23017 hebben (O8).
+
 ### Data
 
 - `DATA_TYPE_FRAM` toegevoegd als extra Data-type naast DIRECT, EEPROM, FLASH en microSD;

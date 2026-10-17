@@ -802,13 +802,14 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #define EEPROM_INPUT_VERSIE   3
   #define EEPROM_ADRES_TOETSENINDELING 2
   #define EEPROM_ADRES_CODES    3
-  #define EEPROM_BENODIGDE_GROOTTE (EEPROM_ADRES_CODES + (AANTAL_IR_TOETSEN * sizeof(uint8_t)))
+  static_assert(EEPROM_ADRES_CODES + (AANTAL_IR_TOETSEN * sizeof(uint8_t)) <= HX1838_EEPROM_NATIVE_SIZE, "HX1838_EEPROM_NATIVE_SIZE is te klein voor deze toetsenindeling.");
 
   bool Input::EEPROMopslagBeginnen() {
-    #if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_ARDI32
-      return EEPROM.begin(EEPROM_BENODIGDE_GROOTTE);
+    // Zelfde totale grootte als DataEEPROMviaNative: een tweede begin() met een andere grootte zou het blok van de andere verkleinen.
+    #if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
+      return EEPROM.begin(HX1838_EEPROM_NATIVE_SIZE + DATA_LAYER_EEPROM_NATIVE_SIZE);
     #elif BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
-      EEPROM.begin(EEPROM_BENODIGDE_GROOTTE);
+      EEPROM.begin(HX1838_EEPROM_NATIVE_SIZE + DATA_LAYER_EEPROM_NATIVE_SIZE);
       return true;
     #else
       return true;
@@ -816,7 +817,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   }
 
   void Input::EEPROMopslagBevestigen() {
-    #if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
+    #if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV || BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
       EEPROM.commit();
     #endif
   }

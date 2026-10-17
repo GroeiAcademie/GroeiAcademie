@@ -121,24 +121,37 @@ De huidige Screen-code gebruikt lifecyclegebonden codes in de reeksen `CS001/101
 De vaste Data-keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
 
 ```cpp
-#define DATA_TYPE_NONE     0x01
-#define DATA_TYPE_DIRECT   0x02
-#define DATA_TYPE_EEPROM   0x04
-#define DATA_TYPE_FLASH    0x08
-#define DATA_TYPE_FRAM     0x10
-#define DATA_TYPE_MICROSD  0x20
+#define DATA_TYPE_NONE          0x0001
+#define DATA_TYPE_DIRECT        0x0002
+#define DATA_TYPE_EEPROM_NATIVE 0x0004
+#define DATA_TYPE_EEPROM_I2C    0x0008
+#define DATA_TYPE_EEPROM_SPI    0x0010   // nog niet ondersteund in v2.0.0
+// 0x0020 vrij: FLASH via I2C
+#define DATA_TYPE_FLASH_SPI     0x0040
+#define DATA_TYPE_FRAM_I2C      0x0080
+#define DATA_TYPE_FRAM_SPI      0x0100   // nog niet ondersteund in v2.0.0
+// 0x0200 vrij: microSD via I2C
+#define DATA_TYPE_MICROSD_SPI   0x0400
 ```
 
-`DATA_LAYER_CONFIG` bepaalt welke Data-types in deze build aanwezig zijn. Meerdere types worden gecombineerd met `|`. De standaardwaarde is `DATA_TYPE_NONE`.
+`DATA_LAYER_CONFIG` bepaalt welke Data-types in deze build aanwezig zijn. Meerdere types worden gecombineerd met `|`. De standaardwaarde is `DATA_TYPE_NONE`. `DATA_TYPE_EEPROM_SPI` en `DATA_TYPE_FRAM_SPI` geven een `#error` zolang ze niet ondersteund zijn.
 
-Voor EEPROM geldt:
+Voor EEPROM NATIVE geldt:
+
+| Instelling | Betekenis |
+|---|---|
+| `DATA_LAYER_EEPROM_NATIVE_SIZE` | Bytes voor Data in de native EEPROM van het board, standaard `0`. Verplicht groter dan `0` bij `DATA_TYPE_EEPROM_NATIVE`, anders `#error`. |
+| `HX1838_EEPROM_NATIVE_SIZE` | Niet door de gebruiker ingesteld. Het blok vooraan dat HX1838 gebruikt: `3 + 21` = 24 bytes wanneer `HX1838_BRON_CODES_EEPROM_ALTIJD` actief is, anders `0`. Data begint na dit blok. |
+
+Op ESP32 en RP2040 roepen Input en Data `EEPROM.begin()` aan met de som van beide. Op de UNO Q bestaat EEPROM NATIVE niet.
+
+Voor EEPROM I2C geldt:
 
 | Define | Betekenis |
 |---|---|
-| `DATA_LAYER_EEPROM_AANTAL` | Aantal EEPROM-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_EEPROM` actief is, anders 0. |
-| `DATA_LAYER_EEPROM_1_I2C_ADDRESS` | I2C-adres van EEPROM #1, standaard `0x50`. |
-| `DATA_LAYER_EEPROM_2_I2C_ADDRESS` | I2C-adres van EEPROM #2, standaard `0x51`. |
-| `DATA_LAYER_EEPROM_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
+| `DATA_LAYER_EEPROM_I2C_AANTAL` | Aantal EEPROM-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_EEPROM_I2C` actief is, anders 0. |
+| `DATA_LAYER_EEPROM_I2C_1_I2C_ADDRESS` | I2C-adres van EEPROM #1, standaard `0x50`. |
+| `DATA_LAYER_EEPROM_I2C_2_I2C_ADDRESS` | I2C-adres van EEPROM #2, standaard `0x51`. |
 
 De huidige EEPROM-implementatie gebruikt uitsluitend I2C. SDA en SCL komen uit de bestaande boardconfiguratie.
 
@@ -146,21 +159,20 @@ Voor FLASH geldt:
 
 | Instelling | Betekenis |
 |---|---|
-| `DATA_LAYER_FLASH_AANTAL` | Aantal FLASH-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FLASH` actief is, anders 0. |
-| `DATA_LAYER_FLASH_1_CS_PIN` | Exclusieve CS-pin van FLASH #1, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_FLASH_2_CS_PIN` | Exclusieve CS-pin van FLASH #2, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_FLASH_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
+| `DATA_LAYER_FLASH_SPI_AANTAL` | Aantal FLASH-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FLASH_SPI` actief is, anders 0. |
+| `DATA_LAYER_FLASH_SPI_1_CS_PIN` | Exclusieve CS-pin van FLASH #1, standaard `HardwareResourcePin::NONE`. |
+| `DATA_LAYER_FLASH_SPI_2_CS_PIN` | Exclusieve CS-pin van FLASH #2, standaard `HardwareResourcePin::NONE`. |
+| `DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE` / `_2_` | Naam voorlopig. Schrijfbuffer in RAM: `0` (standaard, geen buffer), of minstens `sizeof(int)` (`2` op de UNO R3, `4` op de 32-bit boards) t/m `256` bytes. Zie `DATA.md`. |
 
-FLASH gebruikt uitsluitend SPI via `SPIMemory`. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
+FLASH gebruikt uitsluitend SPI via `Adafruit SPIFlash` (`Adafruit_SPIFlashBase`, zonder cache) met het eigen transport `TransportFLASHviaSPI`. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
 
 Voor FRAM geldt:
 
 | Define | Betekenis |
 |---|---|
-| `DATA_LAYER_FRAM_AANTAL` | Aantal FRAM-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FRAM` actief is, anders 0. |
-| `DATA_LAYER_FRAM_1_I2C_ADDRESS` | I2C-adres van FRAM #1. De fallback in `SystemConfig.h` is `I2C_ADDRESS_NONE`; voor de MB85RC256V wordt in de test `0x50` gebruikt. |
-| `DATA_LAYER_FRAM_2_I2C_ADDRESS` | I2C-adres van FRAM #2. De fallback in `SystemConfig.h` is `I2C_ADDRESS_NONE`. |
-| `DATA_LAYER_FRAM_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
+| `DATA_LAYER_FRAM_I2C_AANTAL` | Aantal FRAM-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FRAM_I2C` actief is, anders 0. |
+| `DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS` | I2C-adres van FRAM #1. De fallback in `SystemConfig.h` is `I2C_ADDRESS_NONE`; voor de MB85RC256V wordt in de test `0x50` gebruikt. |
+| `DATA_LAYER_FRAM_I2C_2_I2C_ADDRESS` | I2C-adres van FRAM #2. De fallback in `SystemConfig.h` is `I2C_ADDRESS_NONE`. |
 
 De huidige FRAM-implementatie gebruikt uitsluitend I2C via Rob Tillaart `FRAM_I2C` en class `FRAM`. SDA en SCL komen uit de bestaande boardconfiguratie.
 
@@ -168,18 +180,25 @@ Voor microSD geldt:
 
 | Define | Betekenis |
 |---|---|
-| `DATA_LAYER_MICROSD_AANTAL` | Aantal microSD-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_MICROSD` actief is, anders 0. |
-| `DATA_LAYER_MICROSD_1_CS_PIN` | Exclusieve CS-pin van microSD #1, standaard `HardwareResourcePin::NP_D8`. |
-| `DATA_LAYER_MICROSD_2_CS_PIN` | Exclusieve CS-pin van microSD #2, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_MICROSD_1_QUEUE_OR_STACK_SIZE` / `_2_` | Nog niet in gebruik: geen enkele code leest deze instelling. |
+| `DATA_LAYER_MICROSD_SPI_AANTAL` | Aantal microSD-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_MICROSD_SPI` actief is, anders 0. |
+| `DATA_LAYER_MICROSD_SPI_1_CS_PIN` | Exclusieve CS-pin van microSD #1, standaard `HardwareResourcePin::NP_D8`. |
+| `DATA_LAYER_MICROSD_SPI_2_CS_PIN` | Exclusieve CS-pin van microSD #2, standaard `HardwareResourcePin::NONE`. |
 
-De huidige microSD-implementatie gebruikt uitsluitend SPI via de officiële Arduino `SD` library. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
+De huidige microSD-implementatie gebruikt uitsluitend SPI via `SdFat` (`SdFat32`, de "SdFat - Adafruit Fork"). SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
+
+Voor CS via een Extender (namen voorlopig, zie `DATA.md`):
+
+| Instelling | Betekenis |
+|---|---|
+| `DATA_LAYER_FLASH_SPI_<NR>_CS_EXTENDER`, `DATA_LAYER_MICROSD_SPI_<NR>_CS_EXTENDER` | Component van de Extender met CS, bv. `GedeeldeBusComponent::DIGITAL_PINS_PCF8574`. Niet ingesteld = CS op het board. |
+| `..._CS_EXTENDER_I2C_ADDRESS` | I2C-adres van die Extender; verplicht samen met de vorige. |
+| `GEDEELDE_BUS_GEMENGDE_PINNEN` | `0` standaard; wordt automatisch `1` zodra een `_CS_EXTENDER` ingesteld is. |
 
 Voor RFP602 zijn daarnaast beschikbaar:
 
 | Define | Betekenis |
 |---|---|
-| `RFP602_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE` | `0` = DIRECT bewaart alleen de laatst gemeten waarde; groter dan `0` = RAM-QueueOrStack voor RFP602 (per channel aan te passen met `RFP602_CHANNEL_1..4_DATA_LAYER_DIRECT_QUEUE_OR_STACK_SIZE`). |
+| `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE` | `0` = alleen de laatst gemeten waarde per channel; groter dan `0` = RAM-QueueOrStack voor RFP602, los van DIRECT (per channel aan te passen met `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE`). |
 | `RFP602_DATA_RECORD_FILE` | Bestandsnaam voor RFP602-recording op microSD; standaard `"rfp602.log"`. |
 
 ## Sensoren
@@ -371,4 +390,4 @@ Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of cont
 
 ## Data QueueOrStack
 
-De instellingen `DATA_LAYER_<TYPE>_<NR>_QUEUE_OR_STACK_SIZE` per Data-instantie zijn nog niet in gebruik. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
+De oude instellingen `DATA_LAYER_<TYPE>_<NR>_QUEUE_OR_STACK_SIZE` per Data-instantie zijn verwijderd; de QueueOrStack bestaat alleen per sensor-channel. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
