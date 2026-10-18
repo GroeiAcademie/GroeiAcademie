@@ -327,16 +327,19 @@ void Data::WriteQueueOrStack(SensorQueueOrStack& channel, int value) {
   channel.lastValue = value;
 #if DATA_QUEUE_OR_STACK_ACTIEF
   if (channel.sizeQueueOrStack == 0) return;
-  channel.buffer[(channel.firstIndex + channel.countNumber) % channel.sizeQueueOrStack] = value;
+  unsigned int index = channel.firstIndex + channel.countNumber;
+  if (index >= channel.sizeQueueOrStack) index -= channel.sizeQueueOrStack;
+  channel.buffer[index] = value;
   if (channel.countNumber < channel.sizeQueueOrStack) channel.countNumber++;
-  else channel.firstIndex = (channel.firstIndex + 1) % channel.sizeQueueOrStack;   // vol: de oudste waarde wordt overschreven
+  else if (++channel.firstIndex >= channel.sizeQueueOrStack) channel.firstIndex = 0;   // vol: de oudste waarde wordt overschreven
 #endif
 }
 
 int8_t Data::ReadQueueOrStackStatus(SensorQueueOrStack& channel) {
 #if DATA_QUEUE_OR_STACK_ACTIEF
-  if (channel.countNumber == 0) return -1;   // leeg
-  return 0;   // waarde klaar
+  if (channel.countNumber == 0) return -1;                          // leeg
+  if (channel.countNumber == channel.sizeQueueOrStack) return 1;   // waarde klaar, en vol
+  return 0;                                                         // waarde klaar
 #else
   (void)channel;
   return -1;   // zonder QueueOrStack: altijd leeg
@@ -347,10 +350,14 @@ int Data::ReadQueueOrStackValue(SensorQueueOrStack& channel) {
 #if DATA_QUEUE_OR_STACK_ACTIEF
   if (channel.countNumber == 0) return channel.lastValue;   // leeg: laatst gemeten waarde van dit channel
   int value;
-  if (channel.LIFO) value = channel.buffer[(channel.firstIndex + channel.countNumber - 1) % channel.sizeQueueOrStack];   // nieuwste eerst
+  if (channel.LIFO) {
+    unsigned int index = channel.firstIndex + channel.countNumber - 1;
+    if (index >= channel.sizeQueueOrStack) index -= channel.sizeQueueOrStack;
+    value = channel.buffer[index];   // nieuwste eerst
+  }
   else {
     value = channel.buffer[channel.firstIndex];   // oudste eerst
-    channel.firstIndex = (channel.firstIndex + 1) % channel.sizeQueueOrStack;
+    if (++channel.firstIndex >= channel.sizeQueueOrStack) channel.firstIndex = 0;
   }
   channel.countNumber--;
   return value;

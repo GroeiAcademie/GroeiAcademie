@@ -59,7 +59,7 @@ struct Data : GedeeldeBusNode {
   bool afmelden() override;
 
   void WriteQueueOrStack(SensorQueueOrStack& channel, int value);
-  int8_t ReadQueueOrStackStatus(SensorQueueOrStack& channel);   // 0 = waarde klaar, -1 = leeg
+  int8_t ReadQueueOrStackStatus(SensorQueueOrStack& channel);   // 1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg (>= 0 = waarde klaar)
   int ReadQueueOrStackValue(SensorQueueOrStack& channel);       // volgende waarde; leeg = lastValue
 
   void StreamingStart();

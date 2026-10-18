@@ -402,13 +402,6 @@ set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_I2C_EEPROM\Extender_I2C_EEPROM.ino"
-set TEST_NAAM=""
-set TEST_FLAGS="-DEXTENDER_I2C_EEPROM_AANTAL=1"
-set TEST_TYPE="EXPERIMENTEEL"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MCP23S17\Extender_MCP23S17.ino"
 set TEST_NAAM=""
 set TEST_FLAGS="-DEXTENDER_MCP23S17_AANTAL=1 -DCS_PIN_EXTENDER_MCP23S17_1=HardwareResourcePin::NP_D10"

@@ -224,6 +224,6 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D041 v2.0.0: bewust niet gedaan
 
-**Besluit:** (1) de namen van GedeeldeBus niet naar PROGMEM verplaatsen: dat helpt alleen de UNO R3; (2) zonder Data blijft de naam `DATA_DIRECT` in de namenlijst (12 bytes op de UNO R3, 8 tot 16 bytes flash op de 32-bit boards); (3) geen `TransferFrame`: er is geen gebruiker; (4) config per sensor-pin om de Extender te kiezen pas wanneer een sensor het nodig heeft.
+**Besluit:** (1) de namen van GedeeldeBus niet naar PROGMEM verplaatsen: dat helpt alleen de UNO R3; (2) zonder Data blijft de naam `DATA_DIRECT` in de namenlijst (12 bytes op de UNO R3, 8 tot 16 bytes flash op de 32-bit boards); (3) geen `TransferFrame`: er is geen gebruiker; (4) config per sensor-pin om de Extender te kiezen pas wanneer een sensor het nodig heeft; (5) de QueueOrStack krijgt geen peek, geen leegmaken, geen andere types dan `int` en geen bewaren na een stroomonderbreking: het kan (bijvoorbeeld met `FRAM_RINGBUFFER` van FRAM_I2C), maar er is nu geen nood aan.
 
 **Context:** maximale snelheid en minimaal geheugen blijven de maatstaf; de UNO R3 is alleen een testboard.

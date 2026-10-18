@@ -71,7 +71,7 @@ RawAnalogRead(...)
 ```text
 RFP602
 -> WriteQueueOrStack(sensorNummer, ruweData)   (overgeërfd van Sensor, logica in Data)
--> ReadQueueOrStackStatus(sensorNummer)        0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
+-> ReadQueueOrStackStatus(sensorNummer)        1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
 -> ReadQueueOrStackValue(sensorNummer)         volgende waarde; leeg = lastValue van dat channel
 -> toepassing
 ```
@@ -90,6 +90,10 @@ en per channel `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE` (standaard g
 ```
 
 De QueueOrStack-grootte en de keuze FIFO of LIFO horen bij de sensor. Voor andere sensoren wordt hun eigen sensorconfiguratie gebruikt.
+
+Test op `ReadQueueOrStackStatus(...) >= 0` om te weten of er een waarde klaar is: `1` betekent dat de QueueOrStack vol is en dat de volgende `WriteQueueOrStack(...)` de oudste waarde overschrijft.
+
+Bewust niet voorzien, omdat er nu geen nood aan is: een waarde lezen zonder ze weg te nemen (peek), de QueueOrStack leegmaken, andere types dan `int`, en de waarden bewaren na een stroomonderbreking. Wie dat nodig heeft, kan bijvoorbeeld `FRAM_RINGBUFFER` van de FRAM_I2C-bibliotheek gebruiken op een FRAM-chip (alleen FIFO, weigert nieuwe waarden als hij vol is, schrijft byte per byte over I2C).
 
 ## EEPROM
 

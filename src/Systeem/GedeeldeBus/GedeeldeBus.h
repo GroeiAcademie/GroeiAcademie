@@ -878,7 +878,7 @@ struct Sensor : GedeeldeBusNode {
   SensorQueueOrStack* QueueOrStack = nullptr;      // tabel van de sensor, één per channel
   uint8_t numberOfChannels = 0;
   void WriteQueueOrStack(uint8_t numberChannel, int value);
-  int8_t ReadQueueOrStackStatus(uint8_t numberChannel);   // 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
+  int8_t ReadQueueOrStackStatus(uint8_t numberChannel);   // 1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
   int ReadQueueOrStackValue(uint8_t numberChannel);       // volgende waarde; leeg = lastValue; sensor bestaat niet = 0
   int StreamingRead(uint8_t numberChannel);               // laatste waarde uit FLASH; anders lastValue van dit channel; sensor bestaat niet = 0
   int RecordRead(uint8_t numberChannel);                  // eerste waarde uit het logbestand; anders lastValue van dit channel; sensor bestaat niet = 0
