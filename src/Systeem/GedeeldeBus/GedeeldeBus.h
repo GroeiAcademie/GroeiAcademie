@@ -71,6 +71,51 @@ bool IsGedeeldeBusGeinitialiseerd(GedeeldeBusType busType);
 // Reset de interne "al geïnitialiseerd"-vlaggen. Beïnvloedt de fysieke bus zelf niet; enkel bedoeld voor testscenario's.
 void ResettenGedeeldeBus();
 
+// Runtime-herstel (D042): maakt de I2C-bus vrij als SDA laag blijft hangen (bv. los contact midden in een overdracht).
+// Eerst SDA lezen terwijl Wire actief blijft. Alleen als SDA laag is: Wire.end(), tot 9 klokpulsen op SCL, een STOP-conditie
+// en opnieuw InitialiserenGedeeldeBus(). SDA hoog: de bus wordt niet aangeraakt.
+// Geeft true terug als SDA (daarna) vrij is. Zonder Wire.end() op het board (WIRE_HAS_END ontbreekt): niets te doen, true.
+bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType);
+
+// ScreenData staat in Screen.h, dat GedeeldeBus.h zelf includeert; hier alleen de declaratie (vast onderliggend type) voor de drempels hieronder.
+enum class ScreenData : uint8_t;
+
+// ============================================================================
+// Runtime-herstel (D042): toestand en drempels van de foutladder WARNING, ALERT, FAULT, CRITICAL, FATAL.
+// Twee assen: de code (GB400 tot GB410) zegt WAT er gebeurde, het foutniveau HOE ERNSTIG het nu is.
+// ============================================================================
+// Per I2C-component (en per Sensor of kanaal met een override): 11 bytes op AVR, 12 op 32-bit.
+// Twee aparte tijdvelden: ook uitgeschakeld klimt de ladder verder op tijd (bv. CRITICAL naar FATAL).
+struct ToestandTijdensRuntime {
+  uint8_t aantalOpeenvolgendeFouten = 0;               // 0 tot 255; terug op 0 bij succes. Ook mislukte herstelpogingen tellen mee.
+  uint8_t huidigFoutniveau = 0;                        // 0 = geen storing, 1 = WARNING, 2 = ALERT, 3 = FAULT, 4 = CRITICAL, 5 = FATAL
+  bool oorzaakHerstelGemeld = false;                   // de oorzaak van een mislukte herstelpoging (GB401 tot GB406) is al één keer getoond
+  unsigned long tijdstipEersteFout = 0;                // millis() van de eerste fout van deze storing
+  unsigned long tijdstipLaatsteHerstelpoging = 0;      // millis() van de laatste herstelpoging (pauze), alleen als uitgeschakeld
+};
+
+// Eén volledige set drempels. Staat in flash. Volgorde gelijk aan de waarde van een ..._RUNTIME_DREMPELS_FOUTNIVEAU-define:
+// { {5 aantallen}, {5 tijden in ms}, hoogst toegelaten foutniveau, uitschakelen vanaf foutniveau }
+struct DrempelsFoutniveauTijdensRuntime {
+  uint8_t opeenvolgendeFoutenNaAantal[5];   // WARNING tot FATAL: na zoveel opeenvolgende fouten
+  uint32_t sindsEersteFoutNaMs[5];          // WARNING tot FATAL: na zoveel ms sinds de eerste fout (0 = niet op tijd); OF met het aantal
+  ScreenData hoogstToegelatenFoutniveau;    // ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL
+  ScreenData uitschakelenVanafFoutniveau;   // vanaf dit foutniveau: actief = false en herstelpogingen met pauze
+};
+
+// De algemene set uit RUNTIME_..._NA_AANTAL, RUNTIME_..._NA_MS, RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU en RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU.
+extern const DrempelsFoutniveauTijdensRuntime drempelsFoutniveauAlgemeen;
+
+// Voor een Sensor of kanaal met eigen drempels (override): de enige ladder voor die meting (niet ook die van de Extender).
+// Meldt GB408 bij een hoger foutniveau, GB410 bij herstel van de meting; vanaf het uitschakelniveau gaat de Extender uit (alle kanalen mee,
+// toestand samengevoegd met die van de Extender).
+// Geeft het nieuwe foutniveau terug (1 tot 5), 255 bij herstel, anders 0. extender: de component waarop gemeten wordt (I2C-adres in de melding); kanaal 0 = geen kanaal.
+struct HardwareResourceTypeI2C;
+// De drempels die voor een I2C-component gelden: override per exemplaar, dan per type, anders drempelsFoutniveauAlgemeen.
+// Een Sensor zonder kanaal- of Sensor-override gebruikt gewoon de ladder van zijn Extender met deze drempels.
+const DrempelsFoutniveauTijdensRuntime& DrempelsFoutniveauVoorComponent(const HardwareResourceTypeI2C* c);
+uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bool gelukt, const DrempelsFoutniveauTijdensRuntime& drempels, HardwareResourceTypeI2C* extender, uint8_t kanaal);
+
 // ============================================================================
 // Centrale registratie van hardware-resources.
 // ============================================================================
@@ -355,6 +400,12 @@ struct GedeeldeBusNode {
   // Lichaam in GedeeldeBus.cpp: daar is ExtenderTCA9548A gekend, voor het kanaal van een component achter een TCA9548A.
   virtual bool activeren();
 
+  // Runtime-herstel (D042): alle nodes onder deze node (kinderen, kleinkinderen, ...).
+  // Uitschakelen: actief = false, zodat niemand nog leest van een component dat niet antwoordt.
+  // OpnieuwActiveren: activeren() van boven naar onder, zodat elk component zijn instellingen opnieuw zet (bv. de gain van RFP602).
+  void AlleOnderliggendeNodesUitschakelen();
+  void AlleOnderliggendeNodesOpnieuwActiveren();
+
   virtual bool afmelden() {
 #ifdef TRACE
     if (GA_SERIAL) {
@@ -520,6 +571,13 @@ struct HardwareResourceTypeI2C : GedeeldeBusNode {
   // Bij een fout: standaard GB301; met DEBUG GB302, GB303, GB305 of GB306 volgens de oorzaak.
   // GB303 bewaart de fout in 1 byte; een signed libraryfout zoals -102 verschijnt daardoor als 0x9A. TRACE toont de oorspronkelijke waarde -102.
   bool FoutDiagnoseI2C(bool gelukt, int fout, bool terugGelezen);
+
+  // Runtime-herstel (D042). Lichamen in GedeeldeBus.cpp.
+  ToestandTijdensRuntime toestandTijdensRuntime;
+  // Vóór elke toegang: true = mag nu gebruikt worden. Uitgeschakeld: na RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS de bus vrijmaken en opnieuw activeren().
+  bool ComponentBeschikbaarTijdensRuntime();
+  // Na elke toegang: gelukt uit de foutcode van de library. Telt, meldt bij een hoger foutniveau, schakelt uit vanaf het ingestelde foutniveau.
+  bool ResultaatComponentToegangTijdensRuntimeVerwerken(bool gelukt);
 
   // Over te erven basisfuncties - kale Wire-wrappers, generiek voor elk I2C-Extender.
   void WriteByte(uint8_t data) {

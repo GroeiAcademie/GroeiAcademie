@@ -223,9 +223,21 @@
 // OUTPUT: jouw instellingen ==================================================
 // ============================================================================
 
-// FATAL
-#ifndef FATAL_LEESTIJD_MS
-// #define FATAL_LEESTIJD_MS   30000UL // standaard waarde: 30000UL
+// MELDINGEN: LEESTIJD (GENERAL = opstart, RUNTIME = tijdens het draaien)
+#ifndef GENERAL_MELDING_CRITICAL_LEESTIJD_MS
+// #define GENERAL_MELDING_CRITICAL_LEESTIJD_MS 30000UL // standaard waarde: 30000UL
+#endif
+#ifndef GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
+// #define GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS 30000UL // standaard waarde: 30000UL
+#endif
+#ifndef RUNTIME_MELDING_CRITICAL_LEESTIJD_MS
+// #define RUNTIME_MELDING_CRITICAL_LEESTIJD_MS 0UL // standaard waarde: 0UL; een leestijd legt de hele lus stil
+#endif
+#ifndef RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
+// #define RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS 0UL // standaard waarde: 0UL; een leestijd legt de hele lus stil
+#endif
+#ifndef RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS
+// #define RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS 1000UL // standaard waarde: 1000UL; alleen met DEBUG of TRACE
 #endif
 
 // SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.
@@ -768,6 +780,18 @@
 #ifndef GEDEELDE_BUS_MIXED_PINS
 // #define GEDEELDE_BUS_MIXED_PINS 0  // standaard waarde: 0; 1 = per exclusieve pin het board of een Extender (bv. CS van een SPI-chip op een PCF8574). Wordt automatisch 1 bij een Data-chip met CS via een Extender.
 #endif
+
+// ============================================================================
+// GEDEELDEBUS: RUNTIME-HERSTEL (zie SystemConfig.h en docs/Systeem/GEDEELDEBUS.md)
+// ============================================================================
+// #define RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL 1    // standaard waarde: 1 (ALERT 3, FAULT 5, CRITICAL 10, FATAL 20)
+// #define RUNTIME_WARNING_SINDS_EERSTE_FOUT_NA_MS 0UL         // standaard waarde: 0UL (ALERT 100UL, FAULT 500UL, CRITICAL 2000UL, FATAL 10000UL)
+// #define RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU ScreenData::TYPE_FATAL              // standaard waarde
+// #define RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU ScreenData::TYPE_CRITICAL // standaard waarde
+// #define RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS 100UL       // standaard waarde: 100UL
+// #define I2C_TIMEOUT_PER_TRANSACTIE_US 25000UL               // standaard waarde: 25000UL (25 ms)
+// Override, bv. alle PCF8574 nooit hoger dan CRITICAL:
+// #define EXTENDER_PCF8574_RUNTIME_DREMPELS_FOUTNIVEAU { {1, 3, 5, 10, 20}, {0, 100, 500, 2000, 10000}, ScreenData::TYPE_CRITICAL, ScreenData::TYPE_CRITICAL }
 
 // ============================================================================
 // EXTENDER: ADS1115

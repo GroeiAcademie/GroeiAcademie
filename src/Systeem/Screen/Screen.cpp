@@ -149,12 +149,12 @@ void Screen::Pixel::FoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   if (::Screen->Character.actief) {
     if (::Screen->Character.callback) {
-      ::Screen->Character.callback(foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
+      ::Screen->Character.callback(foutmelding, FATAL_ZOEK_OP, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS, "", "", "", 0);
     } else {
       ::Screen->Character.display.clear();
       ::Screen->Character.display.setCursor(0, 0); ::Screen->Character.display.print(foutmelding);
       ::Screen->Character.display.setCursor(0, 1); ::Screen->Character.display.print(FATAL_ZOEK_OP);
-      delay(FATAL_LEESTIJD_MS);
+      delay(GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
     }
 
     return;
@@ -201,12 +201,12 @@ void Screen::Character::FoutmeldingWeergeven(const String& foutmelding) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   if (::Screen->Pixel.actief) {
     if (::Screen->Pixel.callback) {
-      ::Screen->Pixel.callback(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, FATAL_LEESTIJD_MS, "", "", "", 0);
+      ::Screen->Pixel.callback(ScreenData::TYPE_FATAL, foutmelding, FATAL_ZOEK_OP, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS, "", "", "", 0);
     } else {
       ::Screen->Pixel.Clear();
       ::Screen->Pixel.SetCursor(0, 0); ::Screen->Pixel.Print(foutmelding);
       ::Screen->Pixel.SetCursor(0, 1); ::Screen->Pixel.Print(FATAL_ZOEK_OP);
-      delay(FATAL_LEESTIJD_MS);
+      delay(GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
     }
     return;
   }
@@ -276,6 +276,24 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #endif
 
   if (lifecycleFoutWeergegeven) return;
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+  // Runtime-herstel van het LCD (D042): LiquidCrystal_I2C geeft geen foutcode terug, daarom vóór elke melding zelf testen.
+  // Weer bereikbaar na een storing: het LCD opnieuw instellen, want het kan zijn stroom kwijt geweest zijn.
+  if (this->actief && !this->Character.callback && this->Character.gedeeldeBus != nullptr) {
+    ::CharacterScreen* lcd = this->Character.gedeeldeBus;
+    bool lcdBereikbaar = false;
+    if (lcd->ComponentBeschikbaarTijdensRuntime()) {
+      Wire.beginTransmission(lcd->adres);
+      lcdBereikbaar = lcd->ResultaatComponentToegangTijdensRuntimeVerwerken(Wire.endTransmission() == 0);
+    }
+    if (lcdBereikbaar && !this->Character.actief) {
+      this->Character.display.init();
+      this->Character.display.backlight();
+    }
+    this->Character.actief = lcdBereikbaar;
+  }
+#endif
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   const bool pixelScreenGeselecteerd = !this->Pixel.callback && screenData != ScreenData::TYPE_DEBUG;

@@ -68,6 +68,23 @@
 #define _CRITICAL_GB305 "CRITICAL: GB305" // GedeeldeBus activeren() mislukt: I2C-busfout of timeout
 #define _CRITICAL_GB306 "CRITICAL: GB306" // GedeeldeBus activeren() mislukt: verkeerde chip, teruglezen klopt niet
 
+// GedeeldeBus tijdens runtime (D042): de code zegt WAT er gebeurde, zonder niveau; het foutniveau (HOE ERNSTIG) komt apart vooraan bij het tonen.
+#define _GB400 "GB400" // GedeeldeBus tijdens runtime: communicatie met component mislukt
+#define _GB401 "GB401" // GedeeldeBus heractiveren tijdens runtime mislukt
+#define _GB402 "GB402" // GedeeldeBus heractiveren tijdens runtime mislukt: geen antwoord op I2C-adres
+#define _GB403 "GB403" // GedeeldeBus heractiveren tijdens runtime mislukt: antwoord, maar initialisatie van de library mislukt
+#define _GB405 "GB405" // GedeeldeBus heractiveren tijdens runtime mislukt: I2C-busfout of timeout
+#define _GB406 "GB406" // GedeeldeBus heractiveren tijdens runtime mislukt: verkeerde chip, teruglezen klopt niet
+#define _GB407 "GB407" // GedeeldeBus tijdens runtime: component hersteld
+#define _GB408 "GB408" // Sensor of kanaal kan tijdens runtime niet meten: storing van zijn Extender
+#define _GB409 "GB409" // GedeeldeBus busherstel tijdens runtime mislukt: SDA blijft laag, de bus blijft vast
+#define _GB410 "GB410" // GedeeldeBus meting tijdens runtime hersteld (Sensor- of kanaalladder; niet: de Extender opnieuw geactiveerd, dat is GB407)
+#define _FOUTNIVEAU_WARNING  "WARNING"  // foutniveau 1
+#define _FOUTNIVEAU_ALERT    "ALERT"    // foutniveau 2
+#define _FOUTNIVEAU_FAULT    "FAULT"    // foutniveau 3
+#define _FOUTNIVEAU_CRITICAL "CRITICAL" // foutniveau 4
+#define _FOUTNIVEAU_FATAL    "FATAL"    // foutniveau 5
+
 // CharacterScreen
 #define _CRITICAL_CS201 "CRITICAL: CS201" // CharacterScreen inpluggen() mislukt
 #define _CRITICAL_CS301 "CRITICAL: CS301" // CharacterScreen activeren() mislukt

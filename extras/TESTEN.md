@@ -12,16 +12,41 @@ Een geslaagde Extender-lifecycletest bewijst dus niet dat alle fysieke chipfunct
 
 `GedeeldeBusNode` bevat onder `DEBUG` momenteel alleen een lege virtuele `Diagnose()`-hook. Er bestaan nog geen concrete Diagnose-overrides; elektronische functietests worden dus nog niet automatisch door `Diagnose()` uitgevoerd.
 
-De actuele voorbeelden onder `examples/Systeem/GedeeldeBus/Extenders/` bevatten per Extender een basisvoorbeeld en aparte `ExtenderPins`-tests voor toegelaten en geweigerde resources. `Sensor_RFP602.ino` is de eerste concrete Sensor-lifecycletest.
+## Testscripts v2.0.0
 
-## Testscripts
+De releasevalidatie bestaat uit acht domeinen. Elk domein heeft een gewoon testscript en een Ongeldig-testscript:
 
 ```text
-TestLibraryGereleased.cmd
-TestLibraryGereleasedOngeldig.cmd
-TestLibraryNieuw.cmd
-TestLibraryNieuwOngeldig.cmd
-TestLibraryGedeeldeBus.cmd
+TestLibraryADC-v2.0.0.cmd
+TestLibraryADCOngeldig-v2.0.0.cmd
+
+TestLibraryData-v2.0.0.cmd
+TestLibraryDataOngeldig-v2.0.0.cmd
+
+TestLibraryExtenders-v2.0.0.cmd
+TestLibraryExtendersOngeldig-v2.0.0.cmd
+
+TestLibraryGedeeldeBus-v2.0.0.cmd
+TestLibraryGedeeldeBusOngeldig-v2.0.0.cmd
+
+TestLibraryInput-v2.0.0.cmd
+TestLibraryInputOngeldig-v2.0.0.cmd
+
+TestLibraryScreen-v2.0.0.cmd
+TestLibraryScreenOngeldig-v2.0.0.cmd
+
+TestLibrarySensoren-v2.0.0.cmd
+TestLibrarySensorenOngeldig-v2.0.0.cmd
+
+TestLibraryTools-v2.0.0.cmd
+TestLibraryToolsOngeldig-v2.0.0.cmd
+```
+
+Daarnaast worden gebruikt:
+
+```text
+TestLibraryCommon.cmd
+TestLibraryCommonOngeldig.cmd
 TestLibraryDependency.cmd
 TestBoardplatformsDependency.cmd
 TestLibraryMappingControle.cmd
@@ -29,161 +54,87 @@ TestLibraryGenereerTESTRESULTATEN.cmd
 LokalePaden_template.cmd
 ```
 
-De vier releasecompilecycli worden afzonderlijk uitgevoerd: `TestLibraryGereleased.cmd`, `TestLibraryGereleasedOngeldig.cmd`, `TestLibraryNieuw.cmd` en `TestLibraryNieuwOngeldig.cmd`. Daarna voegt `TestLibraryGenereerTESTRESULTATEN.cmd` hun vier logbestanden samen tot `TestLibraryStatusReport.txt` en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit. De mappingcontrole is een verplichte releasevoorwaarde; een fout in die controle verhindert `RELEASEVALIDATIE GESLAAGD`.
+De zestien domeincycli worden afzonderlijk uitgevoerd. Daarna beoordeelt `TestLibraryGenereerTESTRESULTATEN.cmd` de zestien bijbehorende `.txt`-logs en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit.
 
-`TestLibraryGedeeldeBus.cmd` maakt geen deel uit van deze vier releasecompilelogs.
+Een releasevalidatie is alleen geslaagd wanneer alle zestien domeincycli volledig zijn afgerond, alle releasecriteria slagen en ook de mappingcontrole slaagt.
 
 ## Padkeuze van de Windows-tests
 
 De scripts zoeken `arduino-cli` eerst via Windows `PATH`. Wanneer dat niet lukt, wordt `extras/LokalePaden.cmd` geladen. Maak dat lokale bestand indien nodig door `extras/LokalePaden_template.cmd` naar `extras/LokalePaden.cmd` te kopiëren en daar de paden van de eigen machine in te vullen. Het lokale bestand staat in `.gitignore` en wordt niet gepubliceerd.
 
-`TestLibraryGereleased.cmd` zoekt `arduino-lint` eveneens via `PATH`. Wanneer `arduino-lint` daar niet gevonden wordt en `LINT_PATH` niet via `LokalePaden.cmd` is ingesteld, probeert het script `arduino-lint` in dezelfde map als `arduino-cli`.
+De gewone tests zoeken `arduino-lint` eveneens via `PATH`. Wanneer `arduino-lint` daar niet gevonden wordt en `LINT_PATH` niet via `LokalePaden.cmd` is ingesteld, probeert `TestLibraryCommon.cmd` `arduino-lint` in dezelfde map als `arduino-cli`.
 
 ## Schone testconfiguratie
 
-Alle echte `arduino-cli compile`-aanroepen in de vier compilecycli definiëren `GROEIACADEMIE_IGNORE_USER_CONFIG`. Een eventueel lokaal `src/Configuratie/UserConfig.h` wordt tijdens die compiletests dus bewust genegeerd. De testconfiguratie bestaat uit de expliciete compilerdefinities van het betrokken testgeval plus de fallbacks van `SystemConfig.h`.
+De compiletests definiëren `GROEIACADEMIE_IGNORE_USER_CONFIG`. Een eventueel lokaal `src/Configuratie/UserConfig.h` wordt tijdens de compiletests dus bewust genegeerd. De testconfiguratie bestaat uit de expliciete compilerdefinities van het betrokken testgeval plus de fallbacks van `SystemConfig.h`.
 
-Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en configureert geen apart gecompileerd librarybestand zoals `Input.cpp`, `Screen.cpp` of `Stimulus.cpp`. UserDefined-keypadtests geven de benodigde `KEYPAD_GENERIEK_...`-waarden daarom expliciet als compilerdefinities mee; in normaal gebruik horen die instellingen in `UserConfig.h`.
+Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en configureert geen apart gecompileerd librarybestand. Instellingen die ook voor librarybronbestanden moeten gelden, worden daarom via `TEST_FLAGS` als compilerdefinitie meegegeven.
 
-### Gemeenschappelijke testgroepen
+## Domeineigenaarschap
+
+`CONTROLE_PADEN` bepaalt welk domein eigenaar is van de voorbeelden en controles die door een testscript worden beheerd.
+
+De acht gewone domeinscripts gebruiken `TestLibraryCommon.cmd`.
+
+De acht negatieve domeinscripts gebruiken `TestLibraryCommonOngeldig.cmd` en verwijzen via `BRON_TEST_SCRIPT` naar het gewone testscript van hetzelfde domein.
+
+De testarchitectuur blijft daardoor per domein opgesplitst. Een test hoort in het domein dat door de betrokken `CONTROLE_PADEN` wordt beheerd.
+
+## TEST_TYPE
+
+Een gewoon testblok gebruikt één van deze waarden:
+
+- `NIEUW`
+- `REGRESSIE`
+- `GERELEASED`
+
+`TEST_TYPE` beschrijft de status van het testgeval. De domeinscripts mogen deze statussen naast elkaar bevatten.
+
+Met:
+
+```text
+REGRESSIETEST=TRUE
+```
+
+worden de aanvullende regressietests uitgevoerd.
+
+Voorbeeld:
+
+```text
+TestLibraryInput-v2.0.0.cmd REGRESSIETEST=TRUE
+```
+
+## Gemeenschappelijke FQBN-groepen
 
 `TestLibraryCommon.cmd` gebruikt drie FQBN-groepen:
 
-- `BASIC_FQBN`: Arduino UNO R4 Minima en Arduino UNO R4 WiFi;
-- `EXTENDED_FQBN`: Arduino UNO Q, ESP32 D1 UNO32, ESP32-S3 (`BOARD_ESP32S3_ARDI32` en `BOARD_ESP32S3_DEV`), Cytron Maker UNO RP2040 en STM32F4 Nucleo-F401RE;
-- `EXPERIMENTAL_FQBN`: Arduino UNO R3.
+- `BASIC_FQBN`
+- `EXTENDED_FQBN`
+- `EXPERIMENTAL_FQBN`
 
-Per testblok bepaalt `WELKE_FQBN_TESTEN` of de test op `BIJ_BASIC_FQBN`, `BIJ_EXTENDED_FQBN`, `BIJ_EXPERIMENTAL_FQBN` of `BIJ_ALLE_FQBN` wordt uitgevoerd. In het eindresultaat bepalen BASIC + EXTENDED de release-eindstatus. EXPERIMENTAL wordt afzonderlijk gerapporteerd en heeft geen release-impact.
+Per testblok bepaalt `WELKE_FQBN_TESTEN` op welke groep of groepen het testgeval wordt uitgevoerd.
 
-Optioneel kan een testblok daarnaast één of beide van deze lijsten bevatten:
+Voor de releasevalidatie geldt:
 
-```bat
-set WELKE_FQBN_INCOMPATIBLE="fqbn1,fqbn2"
-set WELKE_FQBN_SKIPPEN="fqbn1,fqbn2"
-```
+- BASIC + EXTENDED bepaalt de release-eindstatus van het gewone domein;
+- EXPERIMENTAL_FQBN wordt afzonderlijk beoordeeld en gerapporteerd;
+- EXPERIMENTAL_FQBN heeft geen release-impact.
 
-De regels worden alleen opgenomen wanneer er daadwerkelijk FQBN's voor die test moeten worden overgeslagen. Zowel `WELKE_FQBN_INCOMPATIBLE` als `WELKE_FQBN_SKIPPEN` zorgt ervoor dat de betrokken test/FQBN-combinatie niet wordt uitgevoerd en niet in de testtotalen of het testrapport terechtkomt. `INCOMPATIBLE` wordt gebruikt wanneer de combinatie technisch niet wordt ondersteund; `SKIPPEN` wanneer een combinatie om een andere gedocumenteerde reden bewust niet wordt getest.
+`WELKE_FQBN_INCOMPATIBLE` en `WELKE_FQBN_SKIPPEN` kunnen test/FQBN-combinaties bewust uitsluiten. Zulke combinaties worden niet in de testtotalen opgenomen.
 
-### Controlebestand `.ino`
+## Gewone controlebestanden `.ino`
 
-Voor elk gewoon testscript wordt naast het `.cmd`- en `.txt`-bestand een controlebestand met dezelfde basisnaam gebruikt, bijvoorbeeld `TestLibraryNieuw.ino`.
+Voor elk gewoon domeinscript gebruikt `TestLibraryCommon.cmd` een controlebestand met dezelfde basisnaam.
 
-- bestaat het controlebestand nog niet, dan maakt `TestLibraryCommon.cmd` het aan en schrijft het ontbrekende `TEST_INO`-vermeldingen erin;
-- bij `CONTROLE_MODUS=INCLUDE` krijgen gegenereerde blokken `TEST_TYPE="NIEUW"` en `WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"`;
-- bij `CONTROLE_MODUS=EXCLUDE` krijgen gegenereerde blokken `TEST_TYPE="REGRESSIE"`;
-- bestaat het controlebestand al en is het groter dan 0 byte, dan wordt de inhoud getoond en worden geen tests gestart;
-- bestaat het controlebestand al en is het 0 byte, dan wordt niets opnieuw gegenereerd en gaat de testcyclus verder.
+De controle vergelijkt de voorbeelden binnen `CONTROLE_PADEN` met de aanwezige `TEST_INO`-vermeldingen. Ontbrekende testblokken worden via het controlebestand gegenereerd.
 
-Hierdoor kan de gegenereerde inhoud gecontroleerd en desgewenst overgenomen worden in het betrokken `.cmd`-script. Zodra het controlebestand daarna bewust leeg is, wordt geen nieuwe generatie gestart.
+Wanneer het controlebestand aangeeft dat de testlijst moet worden bijgewerkt, worden de gewone tests niet gestart voordat die controle is afgehandeld.
 
-## Bekende inconsistentie in de huidige testscripts
+## Ongeldig-controlebestanden `.ino`
 
-`TestLibraryGereleasedOngeldig.cmd` bevat momenteel nog een historische ongeldige test voor `CHARACTERSCREEN_I2C_ADRES_MODUS=3`. Die configuratiemacro bestaat niet meer in de huidige Screen-code. Dit document vermeldt dat expliciet omdat de code onder `src/` de actuele architectuur bepaalt; het testscriptsbestand is op dit punt nog niet mee opgeschoond.
+`TestLibraryCommonOngeldig.cmd` zoekt de negatieve compilevalidaties die bij het domein horen en vergelijkt die met de bestaande `VERWACHTE_FOUT`-tests.
 
-## Teststappen
-
-### 1. Dependencies en boardplatforms
-
-`TestLibraryDependency.cmd` vergelijkt de vereiste libraries met de geïnstalleerde libraries en kan ontbrekende dependencies desgewenst via `arduino-cli lib install` installeren. De lijst wordt handmatig uit `library.properties` onderhouden.
-
-`TestBoardplatformsDependency.cmd` vergelijkt de vereiste boardplatforms met `arduino-cli core list`. Voor Cytron Maker UNO RP2040 en STM32F4 Nucleo-F401RE kan het script bij automatische installatie eerst de benodigde Additional Boards Manager URL toevoegen, daarna de package-index bijwerken en het platform installeren.
-
-Deze twee dependency-scripts zijn voorbereidende controles; zij maken geen deel uit van de vier compilelogs die `TestLibraryGenereerTESTRESULTATEN.cmd` samenvoegt.
-
-### 2. Gereleasede tests: `TestLibraryGereleased.cmd`
-
-`TestLibraryGereleased.cmd` gebruikt `CONTROLE_MODUS=EXCLUDE`. De gewone directorycontrole omvat `examples/`, met `examples\Systeem\Input\` en `examples\Systeem\GedeeldeBus\` uitgesloten.
-
-De testblokken gebruiken drie statussen:
-
-- `TEST_TYPE="GERELEASED"`: wordt bij een gewone uitvoering uitgevoerd;
-- `TEST_TYPE="REGRESSIE"`: wordt alleen aanvullend uitgevoerd wanneer het script met `REGRESSIETEST=TRUE` wordt gestart;
-- `TEST_TYPE="NIEUW"`: is in een EXCLUDE-script niet toegestaan als uitvoerbare released test. Wanneer zo'n blok wordt aangetroffen, stopt de testlijstcontrole voordat de tests starten.
-
-De huidige regressiepaden worden ingesteld met:
-
-```bat
-set REGRESSIE_PADEN="examples\"
-```
-
-Een gewone uitvoering is dus:
-
-```text
-TestLibraryGereleased.cmd
-```
-
-De aanvullende regressietests worden uitgevoerd met:
-
-```text
-TestLibraryGereleased.cmd REGRESSIETEST=TRUE
-```
-
-Alle compile-aanroepen lopen via `TestLibraryCommon.cmd` en gebruiken `--jobs 1`. De eindtabel rapporteert afzonderlijk `BASIC_FQBN`, `EXTENDED_FQBN` en `EXPERIMENTAL_FQBN`; de regel `Eindstatus BASIC + EXTENDED` is de releasegerichte eindstatus van deze testcyclus.
-
-### 3. Negatieve gereleasete configuraties: `TestLibraryGereleasedOngeldig.cmd`
-
-Deze test compileert bewust ongeldige configuraties. Een negatieve test is alleen geslaagd wanneer:
-
-1. de compilatie faalt; en
-2. de output de specifiek verwachte `#error`-tekst bevat.
-
-`TestLibraryGereleasedOngeldig.cmd` volgt dezelfde `EXCLUDE`-scope als `TestLibraryGereleased.cmd`: `examples\Systeem\Input\` en `examples\Systeem\GedeeldeBus\` vallen buiten deze negatieve released tests. De bestaande Screen- en SystemConfig-controles blijven hier staan.
-
-Een fout pad, ontbrekende dependency of andere toevallige compilerfout kan daardoor niet als vals-positieve `[OK]` doorgaan.
-
-### 4. Nieuwe tests: `TestLibraryNieuw.cmd`
-
-`TestLibraryNieuw.cmd` gebruikt `CONTROLE_MODUS=INCLUDE` met:
-
-```text
-examples\Systeem\Input\
-```
-
-Alle uitvoerbare testblokken in dit script hebben `TEST_TYPE="NIEUW"`. Een ander `TEST_TYPE` in een INCLUDE-script wordt door `TestLibraryCommon.cmd` als ongeldig beschouwd en stopt de testlijstcontrole voordat de tests starten.
-
-De huidige testlijst bevat de nieuwe Input-tests en de bijbehorende Input+Stimulus-integratietests. Per blok bepalen `TEST_FLAGS` de concrete configuratie en `WELKE_FQBN_TESTEN` op welke FQBN-groep de test wordt uitgevoerd.
-
-De HX1838-tests die `IRremote` gebruiken, bevatten momenteel:
-
-```bat
-set WELKE_FQBN_INCOMPATIBLE="arduino:zephyr:unoq"
-```
-
-Deze combinatie wordt overgeslagen omdat IRremote voor de UNO Q met Zephyr geen timerimplementatie levert. De HX1838-tests met TinyIRReceiver blijven op de UNO Q uitgevoerd worden.
-
-De eindtabel gebruikt dezelfde drie groepen als de gereleasete tests:
-
-```text
-[BASIC_FQBN]
-[EXTENDED_FQBN]
-Eindstatus BASIC + EXTENDED
-[EXPERIMENTAL_FQBN]
-Status EXPERIMENTAL_FQBN
-```
-
-BASIC + EXTENDED telt mee voor de releasevalidatie. EXPERIMENTAL wordt afzonderlijk gerapporteerd en heeft geen release-impact.
-
-### 5. Negatieve HX1838-configuraties: `TestLibraryNieuwOngeldig.cmd`
-
-`TestLibraryNieuwOngeldig.cmd` volgt dezelfde `INCLUDE`-scope als `TestLibraryNieuw.cmd`: `examples\Systeem\Input\`. Het script bevat de negatieve nieuwe Input-configuraties, waaronder:
-
-- niet-toegelaten combinaties met DIGITAL;
-- een ongeldige `HX1838_BRON_CODES`;
-- een ongeldige `HX1838_TOETSENINDELING`;
-- een ongeldige waarde voor `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`;
-- ongeldige nulwaarden in een vaste `HX1838_BRON_CODES_DEFINE`-mapping;
-- `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` met een EEPROM-codebron, ontbrekende verplichte UserDefined-configuratie (`HX1838_GENERIEK_AANTAL_TOETSEN` of `HX1838_GENERIEK_KEY_LAYOUT`), nulcodes in een expliciet opgegeven `HX1838_GENERIEK_CODES`-mapping of een afwijkend aantal codes/layoutentries.
-
-Ook hier is een test alleen `[OK]` wanneer de compilatie faalt én de specifiek verwachte fouttekst voorkomt.
-
-### Controlebestand voor Ongeldig
-
-De Ongeldig-scripts gebruiken eveneens een controlebestand met dezelfde basisnaam. De lijst met mogelijke `TEST_INO`-bestanden wordt daarbij uitsluitend gelezen uit het overeenkomstige gewone testscript:
-
-- `TestLibraryNieuwOngeldig.cmd` → `TestLibraryNieuw.cmd` (`INCLUDE`: `examples\Systeem\Input\`);
-- `TestLibraryGereleasedOngeldig.cmd` → `TestLibraryGereleased.cmd` (`EXCLUDE`: `examples\Systeem\Input\` en `examples\Systeem\GedeeldeBus\`).
-
-Ontbrekende `#error`-validaties waarvoor een relevante `TEST_INO` in die scope gevonden wordt, worden als invulblok geschreven in het controlebestand:
+Ontbrekende negatieve tests worden als invulblok in het controlebestand geschreven:
 
 ```bat
 set "TEST_INO=..."
@@ -193,51 +144,125 @@ set "VERWACHTE_FOUT=..."
 call :EXPECT_FAIL
 ```
 
-Bestaat het controlebestand niet, dan wordt het opgebouwd. Is het groter dan 0 byte, dan stoppen de tests zodat de gegenereerde blokken gecontroleerd en desgewenst overgenomen kunnen worden. Is het bestand 0 byte, dan wordt niet opnieuw gegenereerd en starten de bestaande Ongeldig-tests.
+De controle-`.ino` wordt opnieuw opgebouwd zodat een test uit het controlebestand verdwijnt zodra die correct in het betrokken `*Ongeldig-v2.0.0.cmd`-bestand aanwezig is.
 
-### 6. GedeeldeBus-tests: `TestLibraryGedeeldeBus.cmd`
+Een Ongeldig-test is alleen geslaagd wanneer:
 
-`TestLibraryGedeeldeBus.cmd` gebruikt `CONTROLE_MODUS=INCLUDE` voor:
+1. de compilatie mislukt;
+2. de verwachte fout wordt in de compile-uitvoer gevonden.
 
-```text
-examples\Systeem\GedeeldeBus\
-```
+Een toevallige andere compilefout is dus geen geslaagde negatieve test.
 
-De GedeeldeBus-tests gebruiken `TestLibraryCommon.cmd`. Er bestaat in de huidige codebasis geen afzonderlijk `TestLibraryGedeeldeBusOngeldig.cmd`. `TestLibraryGedeeldeBus.cmd` maakt momenteel geen deel uit van de vier logs die `TestLibraryGenereerTESTRESULTATEN.cmd` voor de officiële releasevalidatie verwerkt.
+## Uitvoering zonder pauze
 
-### 7. Data-tests: `TestLibraryData-v2.0.0.cmd`
+De domeinscripts ondersteunen `--no-pause` voor aanroepen vanuit andere testscripts of automatisering.
 
-`TestLibraryData-v2.0.0.cmd` gebruikt `CONTROLE_MODUS=INCLUDE` voor:
+De interne `--logged`-werking wordt door de testscripts zelf gebruikt om uitvoer naar het bijbehorende `.txt`-logbestand te sturen. `--logged` is geen normale handmatige testmodus.
 
-```text
-examples\Systeem\Data\
-```
+## Releaseprocedure
 
-De huidige testlijst compileert de EEPROM-, FLASH-, FRAM- en microSD-voorbeelden afzonderlijk. De EEPROM-test draait drie keer: `DATA_TYPE_EEPROM_I2C`, `DATA_TYPE_EEPROM_NATIVE` (met `DATA_LAYER_EEPROM_NATIVE_SIZE=16`) en beide samen. Een vierde test compileert `InputkanalenHX1838.ino` met EEPROM NATIVE en HX1838 in EEPROM-modus samen. De FLASH-test gebruikt `DATA_TYPE_FLASH_SPI`; de FRAM-test gebruikt `DATA_TYPE_FRAM_I2C` met `DATA_LAYER_FRAM_I2C_1_I2C_ADDRESS=0x50`; de microSD-test gebruikt `DATA_TYPE_MICROSD_SPI`. `Sensor_RFP602_FLASH.ino` wordt ook gecompileerd met FLASH en microSD samen, omdat beide een SdFat-versie meebrengen. Daarnaast wordt `Sensor_RFP602.ino` gecompileerd met `DATA_TYPE_NONE` en `REDIRECT_SERIAL_TO_MICROSD`. Daarmee wordt gecontroleerd dat Serial redirect de noodzakelijke Data/microSD-route zelf mee compileert en niet vereist dat `DATA_TYPE_MICROSD_SPI` in `DATA_LAYER_CONFIG` staat. Alle tests lopen via `TestLibraryCommon.cmd`. De FLASH-test gebruikt `Adafruit SPIFlash`, de microSD-test `SdFat`. Er worden in deze Data-test geen boards vooraf uitgesloten; de boardmatrix toont zelf welke combinaties compileren en welke niet. Op de UNO R3 (testboard) passen FLASH + microSD samen en EEPROM NATIVE + HX1838 samen niet in het RAM.
-
-### 8. Mapping-volledigheidscontrole: `TestLibraryMappingControle.cmd`
-
-`TestLibraryMappingControle.cmd` behoudt voor DIGITAL, PCF8574 en HX1838 een brede tekstuele aanwezigheidstest op `mappingTestMenu[]` in `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino`. De referentielijsten bevatten de volledige opschriftenset van de gecontroleerde types.
-
-Voor de drie ingebouwde HX1838-toetsenindelingen wordt aanvullend per `HX1838_TOETSENINDELING` de eigen `#if`/`#elif`-tak in `InputkanalenHX1838.ino` gecontroleerd. Binnen die tak controleert het script zowel de aanwezigheid als de verwachte volgorde van de opschriften. `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` is hiervan bewust uitgezonderd omdat de opschriften door de gebruiker worden bepaald; daarvoor wordt `InputkanalenHX1838UserDefined.ino` gecompileerd met een expliciete generieke testconfiguratie. De referentietabellen worden handmatig onderhouden en moeten bij nieuwe of gewijzigde ingebouwde keypadtypes/toetsenindelingen mee bijgewerkt worden.
-
-### 9. Testresultaten genereren: `TestLibraryGenereerTESTRESULTATEN.cmd`
-
-De vier compilecycli schrijven elk hun eigen logbestand:
+Voer de zestien domeinscripts uit:
 
 ```text
-TestLibraryGereleased.txt
-TestLibraryGereleasedOngeldig.txt
-TestLibraryNieuw.txt
-TestLibraryNieuwOngeldig.txt
+TestLibraryADC-v2.0.0.cmd
+TestLibraryADCOngeldig-v2.0.0.cmd
+TestLibraryData-v2.0.0.cmd
+TestLibraryDataOngeldig-v2.0.0.cmd
+TestLibraryExtenders-v2.0.0.cmd
+TestLibraryExtendersOngeldig-v2.0.0.cmd
+TestLibraryGedeeldeBus-v2.0.0.cmd
+TestLibraryGedeeldeBusOngeldig-v2.0.0.cmd
+TestLibraryInput-v2.0.0.cmd
+TestLibraryInputOngeldig-v2.0.0.cmd
+TestLibraryScreen-v2.0.0.cmd
+TestLibraryScreenOngeldig-v2.0.0.cmd
+TestLibrarySensoren-v2.0.0.cmd
+TestLibrarySensorenOngeldig-v2.0.0.cmd
+TestLibraryTools-v2.0.0.cmd
+TestLibraryToolsOngeldig-v2.0.0.cmd
 ```
 
-Nadat deze vier scripts afzonderlijk zijn uitgevoerd, voegt `TestLibraryGenereerTESTRESULTATEN.cmd` ze samen tot `TestLibraryStatusReport.txt`, leest het de nieuwe BASIC/EXTENDED/EXPERIMENTAL-eindtabellen uit, beoordeelt het de statische controles en geheugengegevens en voert het de verplichte `TestLibraryMappingControle.cmd` automatisch uit. Alleen wanneer de vier compilecycli, de releasegerichte BASIC + EXTENDED-resultaten, de statische controles, de geheugengegevens én de mappingcontrole voldoen, kan het statusrapport `RELEASEVALIDATIE GESLAAGD` melden. `EXPERIMENTAL_FQBN` wordt afzonderlijk gerapporteerd en heeft geen release-impact.
+Voer daarna uit:
+
+```text
+TestLibraryGenereerTESTRESULTATEN.cmd
+```
+
+## Beoordeling van een gewoon domein
+
+Voor elk van de acht gewone domeinlogs controleert `TestLibraryGenereerTESTRESULTATEN.cmd`:
+
+- de eindmarker, zodat alleen een volledig afgeronde run geldig is;
+- `BASIC_FQBN`;
+- `EXTENDED_FQBN`;
+- `Eindstatus BASIC + EXTENDED`;
+- `EXPERIMENTAL_FQBN`, zonder release-impact;
+- de statische configuratiecontroles;
+- de `[GEHEUGEN]`-records;
+- `Arduino LINT`.
+
+BASIC + EXTENDED, statische controles, geheugengegevens en Arduino LINT moeten slagen voor de release.
+
+EXPERIMENTAL_FQBN wordt wel in het rapport opgenomen maar blokkeert de release niet.
+
+## Beoordeling van een Ongeldig-domein
+
+Voor elk van de acht Ongeldig-logs moet de eindregel de vorm hebben:
+
+```text
+Totaal <aantal> - OK <aantal> - FOUT 0
+```
+
+`Totaal` en `OK` moeten gelijk zijn. Iedere negatieve test moet dus de bedoelde compilefout hebben veroorzaakt.
+
+## Mappingcontrole
+
+`TestLibraryGenereerTESTRESULTATEN.cmd` voert automatisch uit:
+
+```text
+TestLibraryMappingControle.cmd --no-pause
+```
+
+Ook deze controle moet slagen.
+
+De volledige releasevalidatie bestaat daardoor uit zestien domeincycli plus de verplichte mappingcontrole.
+
+## TestLibraryStatusReport.txt
+
+`TestLibraryGenereerTESTRESULTATEN.cmd` maakt `TestLibraryStatusReport.txt`.
+
+Het rapport bevat:
+
+- de totaalstatus van de releasevalidatie;
+- de status van alle zestien domeincycli;
+- per gewoon domein BASIC + EXTENDED, EXPERIMENTAL_FQBN, statische controles, Arduino LINT en geheugengegevens;
+- per Ongeldig-domein het negatieve testtotaal;
+- de mappingcontrole;
+- foutdetails wanneer de releasevalidatie niet slaagt;
+- de volledige inhoud van alle aanwezige domeinlogs.
+
+De libraryversie wordt gelezen uit `library.properties`.
+
+Na een volledig geslaagde releasevalidatie worden de zestien losse `.txt`-domeinlogs verwijderd. `TestLibraryStatusReport.txt` blijft behouden.
+
+Wanneer de releasevalidatie niet slaagt, blijven de losse logs behouden en toont de generator welke scripts opnieuw moeten worden uitgevoerd.
+
+## Status 18-10-2026
+
+De v2.0.0-domeinsplitsing is aanwezig voor ADC, Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools.
+
+De Ongeldig-infrastructuur is aangepast zodat de controlebestanden opnieuw worden opgebouwd en versiegebonden `*Ongeldig-v2.0.0.cmd`-bestanden worden meegenomen.
+
+De laatst getoonde Data-run eindigde op:
+
+```text
+Totaal 25 - OK 24 - FOUT 1
+```
+
+De resterende fout zat in de negatieve microSD-test met CS via `ExtenderPCF8574`: de testconfiguratie activeerde de extender niet volledig en faalde daardoor vóór de bedoelde `SD_CHIP_SELECT_MODE`-validatie. Die `TEST_FLAGS` zijn daarna aangepast aan de bestaande werkende microSD-via-PCF8574-configuratie, zonder `SD_CHIP_SELECT_MODE=1`, zodat de bedoelde negatieve validatie kan worden bereikt.
+
+Die laatste correctie moet nog met een nieuwe Data-run worden bevestigd. De overige zeven Ongeldig-domeinen moeten eveneens met de finale testset opnieuw worden uitgevoerd voordat de volledige releasevalidatie bewezen geslaagd is.
 
 ## Definitieve releaseresultaten
 
-De definitieve resultaten van een officiële release worden pas na de volledige testcyclus vastgelegd in:
-
-```text
-extras/TESTRESULTATEN.md
-```
+De definitieve releaseresultaten worden bijgehouden in `extras/TESTRESULTATEN.md`.

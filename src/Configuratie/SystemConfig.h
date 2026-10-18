@@ -333,9 +333,26 @@
 // OUTPUT =====================================================================
 // ============================================================================
 
-// FATAL
-#ifndef FATAL_LEESTIJD_MS
-  #define FATAL_LEESTIJD_MS   30000UL
+// MELDINGEN: LEESTIJD (D042)
+// GENERAL: meldingen bij de opstart (aanmelden, controleren, inpluggen, activeren). RUNTIME: meldingen tijdens het draaien.
+// Een leestijd legt de hele lus stil, dus ook alle andere sensoren: tijdens runtime standaard 0, ook voor FATAL.
+#ifndef GENERAL_MELDING_CRITICAL_LEESTIJD_MS
+  #define GENERAL_MELDING_CRITICAL_LEESTIJD_MS   30000UL
+#endif
+#ifndef GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
+  #define GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS   30000UL
+#endif
+#ifndef RUNTIME_MELDING_CRITICAL_LEESTIJD_MS
+  #define RUNTIME_MELDING_CRITICAL_LEESTIJD_MS   0UL
+#endif
+#ifndef RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
+  #define RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS   0UL
+#endif
+// Alleen met DEBUG of TRACE; in een normale build is de leestijd voor WARNING, ALERT en FAULT altijd 0.
+#if defined(DEBUG) || defined(TRACE)
+  #ifndef RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS
+    #define RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS   1000UL
+  #endif
 #endif
 
 // SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.
@@ -1256,6 +1273,61 @@
 #endif
 #ifndef GEDEELDE_BUS_MIXED_PINS
   #define GEDEELDE_BUS_MIXED_PINS 0
+#endif
+
+// ============================================================================
+// GEDEELDEBUS: RUNTIME-HERSTEL (D042)
+// ============================================================================
+// Elk I2C-component (Extenders, Input PCF8574, LCD) telt zijn opeenvolgende fouten tijdens het draaien en klimt de foutladder op:
+// WARNING, ALERT, FAULT, CRITICAL, FATAL. Een niveau komt er na het aantal fouten OF na de tijd sinds de eerste fout, wat eerst bereikt is.
+// Vanaf RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU: uitschakelen, elke RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS een herstelpoging.
+// Overrides (alleen wie ze zet, betaalt ze), waarde { {5 aantallen}, {5 tijden in ms}, hoogst toegelaten foutniveau, uitschakelen vanaf foutniveau }:
+//   EXTENDER_<TYPE>_RUNTIME_DREMPELS_FOUTNIVEAU, EXTENDER_<TYPE>_<N>_RUNTIME_DREMPELS_FOUTNIVEAU,
+//   <SENSOR>_RUNTIME_DREMPELS_FOUTNIVEAU, <SENSOR>_CHANNEL_<N>_RUNTIME_DREMPELS_FOUTNIVEAU.
+#ifndef RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL
+  #define RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL 1
+#endif
+#ifndef RUNTIME_ALERT_OPEENVOLGENDE_FOUTEN_NA_AANTAL
+  #define RUNTIME_ALERT_OPEENVOLGENDE_FOUTEN_NA_AANTAL 3
+#endif
+#ifndef RUNTIME_FAULT_OPEENVOLGENDE_FOUTEN_NA_AANTAL
+  #define RUNTIME_FAULT_OPEENVOLGENDE_FOUTEN_NA_AANTAL 5
+#endif
+#ifndef RUNTIME_CRITICAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL
+  #define RUNTIME_CRITICAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL 10
+#endif
+#ifndef RUNTIME_FATAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL
+  #define RUNTIME_FATAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL 20
+#endif
+
+#ifndef RUNTIME_WARNING_SINDS_EERSTE_FOUT_NA_MS
+  #define RUNTIME_WARNING_SINDS_EERSTE_FOUT_NA_MS 0UL   // 0 = dit foutniveau niet op tijd
+#endif
+#ifndef RUNTIME_ALERT_SINDS_EERSTE_FOUT_NA_MS
+  #define RUNTIME_ALERT_SINDS_EERSTE_FOUT_NA_MS 100UL
+#endif
+#ifndef RUNTIME_FAULT_SINDS_EERSTE_FOUT_NA_MS
+  #define RUNTIME_FAULT_SINDS_EERSTE_FOUT_NA_MS 500UL
+#endif
+#ifndef RUNTIME_CRITICAL_SINDS_EERSTE_FOUT_NA_MS
+  #define RUNTIME_CRITICAL_SINDS_EERSTE_FOUT_NA_MS 2000UL
+#endif
+#ifndef RUNTIME_FATAL_SINDS_EERSTE_FOUT_NA_MS
+  #define RUNTIME_FATAL_SINDS_EERSTE_FOUT_NA_MS 10000UL
+#endif
+
+#ifndef RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU
+  #define RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU ScreenData::TYPE_FATAL   // ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL
+#endif
+#ifndef RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU
+  #define RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU ScreenData::TYPE_CRITICAL   // ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL
+#endif
+#ifndef RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS
+  #define RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS 100UL
+#endif
+// Maximale duur van één I2C-transactie (setWireTimeout, AVR en UNO R4). Zonder timeout kan AVR blijven hangen.
+#ifndef I2C_TIMEOUT_PER_TRANSACTIE_US
+  #define I2C_TIMEOUT_PER_TRANSACTIE_US 25000UL
 #endif
 
 #if defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER) && !defined(DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS)

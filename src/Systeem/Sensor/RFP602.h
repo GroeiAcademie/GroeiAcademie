@@ -56,6 +56,20 @@ struct RFP602 : Sensor {
   unsigned long laatstePoging = 0;
   bool heraangemeldConflictGetoond = false;
 
+  // Runtime-herstel (D042): eigen foutladder alleen met een override (RFP602_CHANNEL_<N>_ of RFP602_RUNTIME_DREMPELS_FOUTNIVEAU),
+  // dan in plaats van die van de ADS1115 (één ladder per meting). Per kanaal gaat voor per sensor. Meldt GB408; vanaf het
+  // uitschakelniveau gaat de ADS1115 uit, en daarmee alle kanalen: een tolerant kanaal beschermt de chip niet tegen een strenger kanaal.
+#if ADC_BACKEND == ADC_BACKEND_ADS1115 && (defined(RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU) || defined(RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU) || defined(RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU) || defined(RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU))
+  ToestandTijdensRuntime toestandTijdensRuntimePerKanaal[4];
+#elif ADC_BACKEND == ADC_BACKEND_ADS1115 && defined(RFP602_RUNTIME_DREMPELS_FOUTNIVEAU)
+  ToestandTijdensRuntime toestandTijdensRuntime;
+#endif
+#if ADC_BACKEND == ADC_BACKEND_ADS1115
+  void MetingTijdensRuntimeVerwerken(int sensorPin, bool gelukt);
+  bool nietBlokkerendeMetingMislukt = false;   // een stap van StartAnalogRead()/IsAnalogReadKlaar() mislukte; GetAnalogRead() geeft het resultaat door
+#endif
+  bool OpnieuwAanmeldenNaPauze();
+
   RFP602();
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   RFP602(struct Data* Data);

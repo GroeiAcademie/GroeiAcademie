@@ -93,7 +93,11 @@ Voor SerialScreen gelden daarnaast:
 |---|---|
 | `I2C_ADDRESS_CHARACTER_SCREEN` | I2C-adres van het characterscherm. |
 | `ACTIEF_CHARACTER_SCREEN` | Concreet schermtype: `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` of `SCREEN_LCD4002`. |
-| `FATAL_LEESTIJD_MS` | Standaardleestijd voor een FATAL. |
+| `GENERAL_MELDING_CRITICAL_LEESTIJD_MS` | Leestijd van een CRITICAL-melding bij de opstart; standaard `30000UL`. Vervangt `FATAL_LEESTIJD_MS`. |
+| `GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS` | Leestijd van een FATAL-, ABORT- of PANIC-melding bij de opstart; standaard `30000UL`. Vervangt `FATAL_LEESTIJD_MS`. |
+| `RUNTIME_MELDING_CRITICAL_LEESTIJD_MS` | Leestijd van een CRITICAL-melding tijdens runtime; standaard `0UL` (een leestijd legt de hele lus stil). |
+| `RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS` | Leestijd van een FATAL-melding tijdens runtime; standaard `0UL` (de lus stopt nooit; wie wil lezen, zet zelf een waarde). |
+| `RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS` | Alleen met DEBUG of TRACE: leestijd van WARNING, ALERT en FAULT tijdens runtime; standaard `1000UL`. Zonder DEBUG of TRACE altijd 0. |
 
 ## PixelScreen
 
@@ -388,6 +392,18 @@ Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of cont
 
 `ADC_BACKEND` kiest tussen `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115`. De betekenis van `ADC_PIN_SENSOR_1..4` hangt daarvan af: bij ADS1115 zijn het kanaalnummers; bij Native zijn het `HardwareResourcePin`-waarden. De concrete Sensor `RFP602` gebruikt deze vier configuratiewaarden.
 
+
+### Runtime-herstel (D042)
+
+| Define | Betekenis |
+|---|---|
+| `RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL` (en `ALERT`, `FAULT`, `CRITICAL`, `FATAL`) | Na zoveel opeenvolgende fouten bereikt een component dat foutniveau; 1 tot 255; standaard 1, 3, 5, 10, 20. |
+| `RUNTIME_WARNING_SINDS_EERSTE_FOUT_NA_MS` (en `ALERT`, `FAULT`, `CRITICAL`, `FATAL`) | Na zoveel ms sinds de eerste fout (OF met het aantal); 0 = niet op tijd; standaard 0, 100, 500, 2000, 10000. |
+| `RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU` | Hoger kan een storing niet stijgen; `ScreenData::TYPE_WARNING` tot `ScreenData::TYPE_FATAL`; standaard `ScreenData::TYPE_FATAL`. |
+| `RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU` | Vanaf dit foutniveau: uitschakelen en herstelpogingen met pauze; standaard `ScreenData::TYPE_CRITICAL`. |
+| `RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS` | Wachttijd tussen twee herstelpogingen; standaard `100UL`. |
+| `I2C_TIMEOUT_PER_TRANSACTIE_US` | Maximale duur van één I2C-transactie (AVR en UNO R4); standaard `25000UL`. |
+| `EXTENDER_<TYPE>_RUNTIME_DREMPELS_FOUTNIVEAU`, `EXTENDER_<TYPE>_<N>_RUNTIME_DREMPELS_FOUTNIVEAU`, `<SENSOR>_RUNTIME_DREMPELS_FOUTNIVEAU`, `<SENSOR>_CHANNEL_<N>_RUNTIME_DREMPELS_FOUTNIVEAU` | Overrides; bestaan alleen als je ze zet. Waarde: `{ {5 aantallen}, {5 tijden in ms}, hoogst toegelaten foutniveau, uitschakelen vanaf foutniveau }`. Zie [GedeeldeBus](../Systeem/GEDEELDEBUS.md). |
 
 ## Data QueueOrStack
 

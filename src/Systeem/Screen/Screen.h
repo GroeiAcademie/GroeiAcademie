@@ -66,7 +66,9 @@
 #if (PIXEL_SCREEN_ROTATION > 3)
   #error PIXEL_SCREEN_ROTATION moet 0, 1, 2 of 3 zijn.
 #endif
+#endif // SCREEN_TYPE_PIXELS
 
+// Altijd beschikbaar (D042): de foutniveaus WARNING tot FATAL van het runtime-herstel gebruiken ScreenData, ook zonder pixelscherm.
 enum class ScreenData : uint8_t {
     TYPE_NONE,
     TYPE_INFO,
@@ -88,7 +90,30 @@ enum class ScreenData : uint8_t {
     TYPE_GRAPHICS,
     TYPE_VIDEO
 };
-#endif // SCREEN_TYPE_PIXELS
+
+// Runtime-herstel (D042): controle bij het compileren van een set drempels (hier omdat ScreenData hier staat).
+// Aantallen 1 of meer en oplopend; de tijden die niet 0 zijn, oplopend als één reeks, ook over een 0 heen (0 = niet op tijd);
+// daarom elk paar, niet alleen de buren. Beide foutniveaus WARNING tot FATAL.
+// Een uitschakelniveau boven het hoogst toegelaten foutniveau mag: dat betekent "wel melden, nooit automatisch uitschakelen".
+constexpr bool DrempelsFoutniveauGeldig(const DrempelsFoutniveauTijdensRuntime& d) {
+  return d.opeenvolgendeFoutenNaAantal[0] >= 1 &&
+         d.opeenvolgendeFoutenNaAantal[0] <= d.opeenvolgendeFoutenNaAantal[1] && d.opeenvolgendeFoutenNaAantal[1] <= d.opeenvolgendeFoutenNaAantal[2] &&
+         d.opeenvolgendeFoutenNaAantal[2] <= d.opeenvolgendeFoutenNaAantal[3] && d.opeenvolgendeFoutenNaAantal[3] <= d.opeenvolgendeFoutenNaAantal[4] &&
+         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[1]) &&
+         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[2]) &&
+         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[3]) &&
+         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[4]) &&
+         (d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[1] <= d.sindsEersteFoutNaMs[2]) &&
+         (d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[1] <= d.sindsEersteFoutNaMs[3]) &&
+         (d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[1] <= d.sindsEersteFoutNaMs[4]) &&
+         (d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[2] <= d.sindsEersteFoutNaMs[3]) &&
+         (d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[2] <= d.sindsEersteFoutNaMs[4]) &&
+         (d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[3] <= d.sindsEersteFoutNaMs[4]) &&
+         static_cast<uint8_t>(d.hoogstToegelatenFoutniveau) >= static_cast<uint8_t>(ScreenData::TYPE_WARNING) &&
+         static_cast<uint8_t>(d.hoogstToegelatenFoutniveau) <= static_cast<uint8_t>(ScreenData::TYPE_FATAL) &&
+         static_cast<uint8_t>(d.uitschakelenVanafFoutniveau) >= static_cast<uint8_t>(ScreenData::TYPE_WARNING) &&
+         static_cast<uint8_t>(d.uitschakelenVanafFoutniveau) <= static_cast<uint8_t>(ScreenData::TYPE_FATAL);
+}
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 typedef void (*CharacterScreenCallback)(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, const String& action, const String& derdeRegel, const String& vierdeRegel, unsigned long delayTussenPaginas);

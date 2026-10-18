@@ -104,6 +104,16 @@ De GedeeldeBus-codes staan in `src/Language/Library_*.h`. Het niveau volgt `SCRE
 | GB304 | CRITICAL | `activeren()` | SPI-component antwoordt niet geldig | CS-pin | DEBUG |
 | GB305 | CRITICAL | `activeren()` | I2C-busfout of timeout | I2C-adres | DEBUG |
 | GB306 | CRITICAL | `activeren()` | verkeerde chip, teruglezen klopt niet | I2C-adres | DEBUG |
+| GB400 | volgens de foutladder | runtime | communicatie met component mislukt | I2C-adres (+ kanaal achter een TCA9548A) | altijd |
+| GB401 | huidig foutniveau | runtime, herstelpoging | heractiveren mislukt | I2C-adres | standaard |
+| GB402 | huidig foutniveau | runtime, herstelpoging | geen antwoord op I2C-adres | I2C-adres | DEBUG |
+| GB403 | huidig foutniveau | runtime, herstelpoging | antwoord, maar initialisatie van de library mislukt | I2C-adres | DEBUG |
+| GB405 | huidig foutniveau | runtime, herstelpoging | I2C-busfout of timeout | I2C-adres | DEBUG |
+| GB406 | huidig foutniveau | runtime, herstelpoging | verkeerde chip, teruglezen klopt niet | I2C-adres | DEBUG |
+| GB407 | SUCCESS | runtime | dit component zelf is hersteld (niet: de hele tak eronder) | I2C-adres | altijd |
+| GB408 | volgens de foutladder van de sensor of het kanaal | runtime, meting | sensor of kanaal kan niet meten door een storing van zijn Extender (alleen met een Sensor- of kanaal-override; die ladder vervangt dan die van de Extender voor deze meting) | I2C-adres van de Extender (+ kanaal) | altijd |
+| GB409 | huidig foutniveau | runtime, herstelpoging | busherstel mislukt: SDA blijft laag, de bus blijft vast (geen `activeren()` in die poging) | I2C-adres | altijd |
+| GB410 | SUCCESS | runtime, meting | de functionele meting (Sensor- of kanaalladder) is hersteld; zegt niet dat de Extender net opnieuw geactiveerd is (dat is GB407) | I2C-adres van de Extender (+ kanaal) | altijd |
 
 Opmerkingen:
 
@@ -111,6 +121,48 @@ Opmerkingen:
 - GB202 kan alleen op ESP32 afgaan: daar geeft `Wire.begin()` een resultaat terug. Op de andere cores is `Wire.begin()` `void`.
 - GB303 bewaart de foutcode van de library in 1 byte. Een signed libraryfout zoals -102 (ADS1X15) verschijnt daardoor als 0x9A. TRACE toont de oorspronkelijke waarde -102.
 - Ontbreken bij een PixelScreen zowel CS als DC, dan komt GB108 twee keer: één keer voor CS en één keer voor DC.
+- Paren: GB400 (communicatie faalt) en GB407 (component hersteld); GB408 (meting faalt) en GB410 (meting hersteld).
+- GB400 tot GB408 hebben geen vast niveau: de code zegt WAT er gebeurde, het foutniveau (WARNING tot FATAL) HOE ERNSTIG het nu is. Zie "Runtime-herstel" hieronder. GB402 tot GB406 spiegelen GB302 tot GB306 (zelfde laatste cijfer) en komen alleen bij de eerste mislukte herstelpoging.
+
+## Runtime-herstel (D042)
+
+Een los contact tijdens het draaien maakt een I2C-component niet meer voor altijd onbruikbaar.
+
+| Stap | Wat er gebeurt |
+|---|---|
+| Elke handeling | `ComponentBeschikbaarTijdensRuntime()` vooraf, één `ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt)` achteraf. Eén functionele handeling = één resultaat: één keypadscan, één sensormeting (ook niet-blokkerend: start, klaar en waarde samen), één Extender-pinread of -pinwrite, één LCD-melding. Niet elke library-oproep apart: een geslaagde write mag een mislukte read niet wegpoetsen. |
+| Fout | `aantalOpeenvolgendeFouten` +1. Een foutniveau komt er na het aantal fouten (`RUNTIME_<NIVEAU>_OPEENVOLGENDE_FOUTEN_NA_AANTAL`) OF na de tijd sinds de eerste fout (`RUNTIME_<NIVEAU>_SINDS_EERSTE_FOUT_NA_MS`), wat eerst bereikt is, nooit hoger dan `RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU`. Alleen een hoger foutniveau geeft een melding (GB400). |
+| Vanaf `RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU` | `actief = false` voor het component en alle onderliggende nodes. Lager: het component blijft actief en elke toegang probeert opnieuw. |
+| Uitgeschakeld | Bij de volgende toegang, maar nooit vaker dan elke `RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS`, een herstelpoging (er is geen herstel op eigen initiatief): de bus vrijmaken, alleen als SDA laag hangt (`VastgelopenGedeeldeBusVrijmaken()`; SDA hoog = de bus wordt niet aangeraakt). Blijft SDA laag: GB409, geen `activeren()` in die poging. Anders de bestaande `activeren()`. Een mislukte poging telt als fout: de ladder klimt verder op aantal en tijd, tot het hoogst toegelaten foutniveau. Melding de eerste keer en bij elk hoger foutniveau, met de oorzaak als code (GB401, DEBUG GB402 tot GB406, of GB409). |
+| Hersteld | Melding GB407 (dit component zelf), daarna alle onderliggende nodes opnieuw `activeren()` (bv. RFP602 zet opnieuw de gain), daarna toestand terug op 0, altijd, ook als een onderliggende node faalt. Is de parent van een node niet actief: geen eigen melding (de parent meldde al). Mislukt zijn eigen `Activeren()`: een I2C-node zet een stap op zijn eigen ladder; een node zonder eigen toestand meldt GB401 met het foutniveau en het I2C-adres van de I2C-node erboven die herstelt (de fout hoort bij de parent; nagekeken: geen `Activeren()` raakt de resultaatfunctie van de parent). Zo'n node blijft uit; alleen een node met een eigen herstelpad (I2C, of een sensor zoals RFP602) probeert later opnieuw. |
+
+**Wat vanzelf werkt:** alles wat via het framework loopt: `ReadExtenderPin()`, `WriteExtenderPin()` en `SetExtenderPinMode()` van PCF8574, PCF8575 en MCP23017 (met `GEDEELDE_BUS_MIXED_PINS`), de ADS1115 via RFP602, Input PCF8574 en het LCD (vóór elke melding één test, omdat `LiquidCrystal_I2C` geen foutcode teruggeeft).
+
+**Eigen oproepen in een sketch** (bv. `setPWM()` van de PCA9685): roep zelf `ComponentBeschikbaarTijdensRuntime()` vooraf en `ResultaatComponentToegangTijdensRuntimeVerwerken()` achteraf op. Voorbeeld: `examples/Systeem/GedeeldeBus/Extenders/Extender_PCA9685`.
+
+**Niet in v2.0.0:** FRAM en EEPROM via I2C (Data leest of schrijft ze tijdens runtime nog niet), ADS7828, ADS1158, ADS7953, MAX14830 en SC16IS752 (nog geen runtime-functies), SPI-componenten (een ontbrekende chip is via SPI niet te zien).
+
+**Overrides** (alleen wie ze zet, betaalt ze; volgorde: exemplaar, type, algemeen):
+
+```cpp
+// waarde: { {5 aantallen}, {5 tijden in ms}, hoogst toegelaten foutniveau, uitschakelen vanaf foutniveau }
+#define EXTENDER_PCF8574_RUNTIME_DREMPELS_FOUTNIVEAU   { {1, 3, 5, 10, 20}, {0, 100, 500, 2000, 10000}, ScreenData::TYPE_CRITICAL, ScreenData::TYPE_CRITICAL }
+#define EXTENDER_ADS1115_2_RUNTIME_DREMPELS_FOUTNIVEAU { {1, 5, 10, 15, 20}, {0, 100, 500, 2000, 10000}, ScreenData::TYPE_CRITICAL, ScreenData::TYPE_CRITICAL }
+#define RFP602_RUNTIME_DREMPELS_FOUTNIVEAU             { {2, 4, 6, 8, 10},   {0, 0, 0, 0, 0},             ScreenData::TYPE_FAULT,    ScreenData::TYPE_FAULT }
+#define RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU   { {1, 1, 2, 2, 3},    {0, 0, 0, 0, 0},             ScreenData::TYPE_FATAL,    ScreenData::TYPE_FATAL }
+```
+
+- Per type: ADS1115, MCP23017, PCF8574 (ook die van Input), PCF8575, TCA9548A. Per exemplaar (`_1_`, `_2_`, op het I2C-adres `I2C_ADDRESS_EXTENDER_<TYPE>_<N>`): ADS1115, MCP23017, PCF8574, PCF8575.
+- Eén effectieve ladder per meting: kanaal-override, anders Sensor-override, anders de ladder van de Extender zelf (exemplaar, type, algemeen). Met een Sensor- of kanaal-override telt de meting alleen op die ladder (GB408), niet ook op die van de Extender.
+- Bereikt die ladder het uitschakelniveau, dan gaat de Extender zelf uit (herstel gebeurt op chipniveau), en daarmee alle kanalen en sensoren op die Extender. De toestand gaat over naar de Extender en wordt samengevoegd met wat die zelf al opbouwde (bv. door een kanaal zonder override): hoogste foutniveau, hoogste aantal fouten (niet opgeteld: zelfde storing), oudste eerste fout. Had de Extender nog geen fout, dan neemt hij de toestand gewoon over. Daarna wordt het foutniveau begrensd op het maximum van de Extender (aantal en oudste eerste fout blijven); de Extender herstelt vanaf dan volgens zijn eigen drempels. Na dat chipherstel komt alleen GB407, geen GB410: de Sensorladder ging op in de herstelpogingen van de Extender.
+- Staat de Extender op "nooit automatisch uitschakelen" (zijn uitschakelniveau boven zijn maximum), dan kan geen Sensor- of kanaalladder hem uitschakelen of zijn herstelpad starten: alleen GB408. Gevolg: zolang de storing duurt, kost elke toegang de Wire-timeout en is er geen busherstel. Let op: een tolerant ingesteld kanaal beschermt de chip niet tegen een strenger ander kanaal op dezelfde chip.
+- Een leestijd legt de hele lus stil: tijdens runtime is die standaard 0, ook voor FATAL (`RUNTIME_MELDING_..._LEESTIJD_MS`).
+- Bij het compileren gecontroleerd (`static_assert`, ook voor elke override): aantallen 1 tot 255 en oplopend, de tijden die niet 0 zijn oplopend als één reeks, ook over een 0 heen (0 = niet op tijd; `0, 100, 0, 500, 1000` ✔, `100, 0, 50, 500, 1000` ✖), beide foutniveaus `ScreenData::TYPE_WARNING` tot `ScreenData::TYPE_FATAL`.
+- Uitschakelniveau hoger dan het hoogst toegelaten foutniveau mag en betekent: wel melden, nooit automatisch uitschakelen (bv. voor een optioneel component).
+- Het runtime-herstel veronderstelt sequentiële toegang: niet vanuit interrupts of callbacks (de herstelcontext is gedeeld).
+- Elke sensor die tijdens runtime uitgeschakeld kan worden, heeft een eigen herstelpad nodig (RFP602: `OpnieuwAanmeldenNaPauze()`, voor blokkerend en niet-blokkerend lezen).
+- De Wire-timeout (`I2C_TIMEOUT_PER_TRANSACTIE_US`, standaard 25 ms) wordt gezet op AVR en UNO R4 (nagekeken in hun Wire.h). Andere cores houden hun eigen standaard.
+- Geheugen per I2C-component: 11 bytes op AVR, 12 op 32-bit (twee aparte tijdvelden, zodat ook een uitgeschakeld component verder klimt).
 
 ## Native resources
 

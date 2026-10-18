@@ -86,9 +86,23 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
 
 #if GEDEELDE_BUS_MIXED_PINS
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
-  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override { MCP23017::pinMode1(pin, modus); }
-  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override { MCP23017::write1(pin, niveau); }
-  uint8_t ReadExtenderPin(uint8_t pin) override { return MCP23017::read1(pin); }
+  // Runtime-herstel (D042): eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
+  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (!ComponentBeschikbaarTijdensRuntime()) return;
+    MCP23017::pinMode1(pin, modus);
+    ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
+  }
+  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (!ComponentBeschikbaarTijdensRuntime()) return;
+    MCP23017::write1(pin, niveau);
+    ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
+  }
+  uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (!ComponentBeschikbaarTijdensRuntime()) return 0;
+    const uint8_t waarde = MCP23017::read1(pin);
+    ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
+    return waarde;
+  }
 #endif
 };
 

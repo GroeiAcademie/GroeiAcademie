@@ -57,6 +57,10 @@ RegelStap	KEYWORD2
 RegistreerCallback	KEYWORD2
 SetCursor	KEYWORD2
 
+# GedeeldeBus: runtime-herstel
+ComponentBeschikbaarTijdensRuntime	KEYWORD2
+ResultaatComponentToegangTijdensRuntimeVerwerken	KEYWORD2
+
 # Data
 ReadNativeEEPROM	KEYWORD2
 WriteNativeEEPROM	KEYWORD2

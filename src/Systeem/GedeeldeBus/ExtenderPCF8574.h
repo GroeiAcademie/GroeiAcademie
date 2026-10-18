@@ -65,9 +65,23 @@ struct ExtenderPCF8574 : HardwareResourceTypeI2C, PCF8574 {
 #if GEDEELDE_BUS_MIXED_PINS
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
   // SetExtenderPinMode: geen richtingsregister. INPUT schrijft HIGH; OUTPUT laat de laatst geschreven waarde staan (geen korte LOW op CS).
-  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override { if (modus == INPUT) PCF8574::write(pin, HIGH); }
-  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override { PCF8574::write(pin, niveau); }
-  uint8_t ReadExtenderPin(uint8_t pin) override { return PCF8574::read(pin); }
+  // Runtime-herstel (D042): eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
+  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (modus != INPUT || !ComponentBeschikbaarTijdensRuntime()) return;
+    PCF8574::write(pin, HIGH);
+    ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == 0);
+  }
+  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (!ComponentBeschikbaarTijdensRuntime()) return;
+    PCF8574::write(pin, niveau);
+    ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == 0);
+  }
+  uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (!ComponentBeschikbaarTijdensRuntime()) return 0;
+    const uint8_t waarde = PCF8574::read(pin);
+    ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == 0);
+    return waarde;
+  }
 #endif
 };
 

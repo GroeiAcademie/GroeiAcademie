@@ -430,54 +430,50 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #endif
 
 
-  // Blijvende status: eenmaal onbereikbaar, blijft de melding staan en wordt geen
-  // verdere I2C-communicatie meer geprobeerd, i.p.v. stil "geen toets" te blijven melden.
-  // Zelfde patroon als characterScreenStatus.foutmeldingWeergegeven in Screen.cpp.
+  // Bij het activeren (opstart): IN402. Tijdens runtime regelt GedeeldeBus het herstel (D042):
+  // ComponentBeschikbaarTijdensRuntime() en ResultaatComponentToegangTijdensRuntimeVerwerken(), met GB400 tot GB407.
 
   void Input::PCF8574OnbereikbaarMelden() {
 #ifdef DEBUG
     GA_DEBUG_PRINT("DEBUG: IN402 PCF8574 adres=0x");
     GA_DEBUG_PRINTLN2(I2C_ADDRESS_PCF8574, HEX);
 #endif
-    pcf8574Bereikbaar = false;
-    if (pcf8574FoutmeldingWeergegeven) return;
-    char pcf8574AdresBuffer[17];
-    snprintf(pcf8574AdresBuffer, sizeof(pcf8574AdresBuffer), _INPUT_PCF8574_ADRES_LABEL ": 0x%02X", I2C_ADDRESS_PCF8574);
+    // Zonder snprintf: die trekt de printf-familie mee (±13 KB op UNO R4) in een schets die zelf geen printf gebruikt.
+    static const char hex[] = "0123456789ABCDEF";
+    char pcf8574AdresBuffer[] = _INPUT_PCF8574_ADRES_LABEL ": 0x00";
+    pcf8574AdresBuffer[sizeof(pcf8574AdresBuffer) - 3] = hex[(I2C_ADDRESS_PCF8574 >> 4) & 0x0F];
+    pcf8574AdresBuffer[sizeof(pcf8574AdresBuffer) - 2] = hex[I2C_ADDRESS_PCF8574 & 0x0F];
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    Screen->Print(ScreenData::TYPE_FATAL, _FATAL_IN402, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
+    Screen->Print(ScreenData::TYPE_FATAL, _FATAL_IN402, pcf8574AdresBuffer, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
 #else
-    Screen->Print(_FATAL_IN402, pcf8574AdresBuffer, FATAL_LEESTIJD_MS);
+    Screen->Print(_FATAL_IN402, pcf8574AdresBuffer, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
 #endif
-    pcf8574FoutmeldingWeergegeven = true;
   }
 
   bool Input::PCF8574poortPatroonMatrixUitlezenInstellen(byte waarde) {
 #ifdef TRACE
     GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonMatrixUitlezenInstellen()");
 #endif
-    if (!pcf8574Bereikbaar) return false;
+    // Eén operatie van een keypadscan; de scan zelf geeft het resultaat door aan het runtime-herstel (D042: één keypadscan = één resultaat).
     gedeeldeBusInputPCF8574->write8(waarde);
-    if (gedeeldeBusInputPCF8574->lastError() == 0) return true;
-    PCF8574OnbereikbaarMelden();
-    return false;
+    return gedeeldeBusInputPCF8574->lastError() == PCF8574_OK;
   }
 
   bool Input::PCF8574poortPatroonUitlezen(byte& waarde) {
 #ifdef TRACE
     GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonUitlezen()");
 #endif
-    if (!pcf8574Bereikbaar) return false;
+    // Eén operatie van een keypadscan; de scan zelf geeft het resultaat door aan het runtime-herstel (D042: één keypadscan = één resultaat).
     waarde = gedeeldeBusInputPCF8574->read8();
-    if (gedeeldeBusInputPCF8574->lastError() == 0) return true;
-    PCF8574OnbereikbaarMelden();
-    return false;
+    return gedeeldeBusInputPCF8574->lastError() == PCF8574_OK;
   }
 
   #if defined(KEYPAD_IS_DIRECT)
     int Input::PCF8574uitLezenPoortenP0totP7DirectAansluiting() {
-      if (!pcf8574Bereikbaar) return 0;
+      // Runtime-herstel (D042): één keypadscan = één resultaat.
+      if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return 0;
       byte status = 0xFF;
-      if (!PCF8574poortPatroonUitlezen(status)) return 0;
+      if (!gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574poortPatroonUitlezen(status))) return 0;
 
       for (byte i = 0; i < AANTAL_DIRECT_PINNEN; i++) {
         #if KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
@@ -505,30 +501,38 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 
   #if defined(KEYPAD_IS_MATRIX)
     int Input::PCF8574uitLezenPoortenP0totP7MatrixAansluiting() {
-      if (!pcf8574Bereikbaar) return 0;
+      // Runtime-herstel (D042): één keypadscan = één resultaat. Een geslaagde write mag een mislukte read niet wegpoetsen.
+      if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return 0;
+      bool gelukt = true;
+      int toets = 0;
 
-      for (byte rij = 0; rij < AANTAL_RIJEN; rij++) {
+      for (byte rij = 0; rij < AANTAL_RIJEN && toets == 0; rij++) {
         byte uitgang = 0xFF;
         bitClear(uitgang, RIJ_PINNEN[rij]);
-        if (!PCF8574poortPatroonMatrixUitlezenInstellen(uitgang)) return 0;
+        if (!PCF8574poortPatroonMatrixUitlezenInstellen(uitgang)) {
+          // Zoals voorheen: na een mislukte write niet terugzetten.
+          gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(false);
+          return 0;
+        }
         delayMicroseconds(50);
         byte ingangen = 0xFF;
 
         if (!PCF8574poortPatroonUitlezen(ingangen)) {
-          PCF8574poortPatroonMatrixUitlezenInstellen(0xFF);
-          return 0;
+          gelukt = false;
+          break;
         }
 
         for (byte kolom = 0; kolom < AANTAL_KOLOMMEN; kolom++) {
           if (!bitRead(ingangen, KOLOM_PINNEN[kolom])) {
-            PCF8574poortPatroonMatrixUitlezenInstellen(0xFF);
-            return (rij * AANTAL_KOLOMMEN) + kolom + 1;
+            toets = (rij * AANTAL_KOLOMMEN) + kolom + 1;
+            break;
           }
         }
       }
 
-      PCF8574poortPatroonMatrixUitlezenInstellen(0xFF);
-      return 0;
+      if (!PCF8574poortPatroonMatrixUitlezenInstellen(0xFF)) gelukt = false;
+      gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt);
+      return gelukt ? toets : 0;
     }
   #endif
 #endif
@@ -1299,9 +1303,6 @@ bool Input::Activeren() {
       PCF8574OnbereikbaarMelden();
       gedeeldeBusInputPCF8574->afmelden();
       gedeeldeBusInputPCF8574 = nullptr;
-    } else {
-      pcf8574Bereikbaar = true;
-      pcf8574FoutmeldingWeergegeven = false;
     }
   }
 #endif

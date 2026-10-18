@@ -38,6 +38,12 @@
 static bool i2cGeinitialiseerd = false;
 static bool spiGeinitialiseerd = false;
 
+// Runtime-herstel (D042): true tijdens een herstelpoging, zodat FoutDiagnoseI2C() GB401 tot GB406 meldt in plaats van GB301 tot GB306.
+static bool herstelTijdensRuntimeBezig = false;
+// De oorzaak van de laatst mislukte herstelpoging (GB401, met DEBUG GB402 tot GB406), ingevuld door FoutDiagnoseI2C().
+static const char* oorzaakHerstelTijdensRuntime = nullptr;
+static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, HardwareResourceTypeI2C* component, uint8_t kanaal = 0);
+
 void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
 #ifdef TRACE
   if (GA_SERIAL) {
@@ -56,6 +62,11 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
       #else
         Wire.begin();
         i2cGeinitialiseerd = true;
+      #endif
+      // Runtime-herstel (D042): een transactie wacht nooit langer dan I2C_TIMEOUT_PER_TRANSACTIE_US; true = de I2C-hardware resetten na een timeout.
+      // Nagekeken: AVR (Wire.h, setWireTimeout) en UNO R4 (Wire.h, setWireTimeout). Andere cores houden hun eigen standaard.
+      #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_RENESAS)
+        Wire.setWireTimeout(I2C_TIMEOUT_PER_TRANSACTIE_US, true);
       #endif
 
 #ifdef DEBUG
@@ -420,6 +431,11 @@ bool HardwareResourceTypeI2C::FoutDiagnoseI2C(bool gelukt, int fout, bool terugG
 #endif
 
 #ifdef DEBUG
+  // Tijdens een herstelpoging (runtime): alleen de oorzaak onthouden (GB402 tot GB406); ComponentBeschikbaarTijdensRuntime() meldt.
+  if (herstelTijdensRuntimeBezig) {
+    oorzaakHerstelTijdensRuntime = gelukt ? _GB406 : (i2cStatus == 2 ? _GB402 : ((i2cStatus == 4 || i2cStatus == 5) ? _GB405 : _GB403));
+    return false;
+  }
   if (gelukt) {
     GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB306, component, component, adres, true);
   } else if (i2cStatus == 2) {
@@ -431,6 +447,8 @@ bool HardwareResourceTypeI2C::FoutDiagnoseI2C(bool gelukt, int fout, bool terugG
   }
 #else
   (void)fout;
+  // Tijdens een herstelpoging (runtime): ComponentBeschikbaarTijdensRuntime() meldt GB401.
+  if (herstelTijdensRuntimeBezig) return false;
   GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB301, component, component, adres, true);
 #endif
 
@@ -512,6 +530,364 @@ static struct Screen* GedeeldeBusVindHardwareResourceComponentScreen(const Gedee
   }
 
   return nullptr;
+}
+
+// ============================================================================
+// Runtime-herstel (D042)
+// Een los contact maakt een component niet meer voor altijd onbruikbaar: fouten tellen, foutniveau WARNING tot FATAL,
+// vanaf het ingestelde foutniveau uitschakelen, met pauze opnieuw activeren(), bij succes herstelmelding GB407.
+// Twee assen: de code (GB400 tot GB410) zegt WAT er gebeurde, het foutniveau HOE ERNSTIG het nu is.
+// ============================================================================
+static_assert(RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL >= 1 && RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL <= 255, "RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL moet 1 tot 255 zijn.");
+static_assert(RUNTIME_ALERT_OPEENVOLGENDE_FOUTEN_NA_AANTAL >= 1 && RUNTIME_ALERT_OPEENVOLGENDE_FOUTEN_NA_AANTAL <= 255, "RUNTIME_ALERT_OPEENVOLGENDE_FOUTEN_NA_AANTAL moet 1 tot 255 zijn.");
+static_assert(RUNTIME_FAULT_OPEENVOLGENDE_FOUTEN_NA_AANTAL >= 1 && RUNTIME_FAULT_OPEENVOLGENDE_FOUTEN_NA_AANTAL <= 255, "RUNTIME_FAULT_OPEENVOLGENDE_FOUTEN_NA_AANTAL moet 1 tot 255 zijn.");
+static_assert(RUNTIME_CRITICAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL >= 1 && RUNTIME_CRITICAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL <= 255, "RUNTIME_CRITICAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL moet 1 tot 255 zijn.");
+static_assert(RUNTIME_FATAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL >= 1 && RUNTIME_FATAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL <= 255, "RUNTIME_FATAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL moet 1 tot 255 zijn.");
+
+constexpr DrempelsFoutniveauTijdensRuntime drempelsFoutniveauAlgemeen = {
+  { RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL, RUNTIME_ALERT_OPEENVOLGENDE_FOUTEN_NA_AANTAL, RUNTIME_FAULT_OPEENVOLGENDE_FOUTEN_NA_AANTAL,
+    RUNTIME_CRITICAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL, RUNTIME_FATAL_OPEENVOLGENDE_FOUTEN_NA_AANTAL },
+  { RUNTIME_WARNING_SINDS_EERSTE_FOUT_NA_MS, RUNTIME_ALERT_SINDS_EERSTE_FOUT_NA_MS, RUNTIME_FAULT_SINDS_EERSTE_FOUT_NA_MS,
+    RUNTIME_CRITICAL_SINDS_EERSTE_FOUT_NA_MS, RUNTIME_FATAL_SINDS_EERSTE_FOUT_NA_MS },
+  RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU,
+  RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU
+};
+static_assert(DrempelsFoutniveauGeldig(drempelsFoutniveauAlgemeen), "RUNTIME_..._OPEENVOLGENDE_FOUTEN_NA_AANTAL en RUNTIME_..._SINDS_EERSTE_FOUT_NA_MS moeten oplopen van WARNING naar FATAL; RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU en RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU moeten ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL zijn.");
+
+// Foutniveau 1 tot 5 uit een ScreenData-waarde (TYPE_WARNING = 1 ... TYPE_FATAL = 5).
+static uint8_t FoutniveauVanScreenData(ScreenData screenData) {
+  return static_cast<uint8_t>(static_cast<uint8_t>(screenData) - static_cast<uint8_t>(ScreenData::TYPE_WARNING) + 1);
+}
+
+// Overrides per type (alle exemplaren) of per exemplaar (op I2C-adres). Alleen gecompileerd als de gebruiker de define zet.
+// Volgorde: exemplaar, dan type, dan algemeen.
+const DrempelsFoutniveauTijdensRuntime& DrempelsFoutniveauVoorComponent(const HardwareResourceTypeI2C* c) {
+  (void)c;
+#if defined(EXTENDER_ADS1115_1_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime ads1115nr1 = EXTENDER_ADS1115_1_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(ads1115nr1), "EXTENDER_ADS1115_1_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::ADC_ADS1115 && c->adres == I2C_ADDRESS_EXTENDER_ADS1115_1) return ads1115nr1;
+#endif
+#if defined(EXTENDER_ADS1115_2_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime ads1115nr2 = EXTENDER_ADS1115_2_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(ads1115nr2), "EXTENDER_ADS1115_2_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::ADC_ADS1115 && c->adres == I2C_ADDRESS_EXTENDER_ADS1115_2) return ads1115nr2;
+#endif
+#if defined(EXTENDER_ADS1115_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime ads1115 = EXTENDER_ADS1115_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(ads1115), "EXTENDER_ADS1115_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::ADC_ADS1115) return ads1115;
+#endif
+#if defined(EXTENDER_MCP23017_1_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime mcp23017nr1 = EXTENDER_MCP23017_1_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(mcp23017nr1), "EXTENDER_MCP23017_1_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_MCP23017 && c->adres == I2C_ADDRESS_EXTENDER_MCP23017_1) return mcp23017nr1;
+#endif
+#if defined(EXTENDER_MCP23017_2_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime mcp23017nr2 = EXTENDER_MCP23017_2_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(mcp23017nr2), "EXTENDER_MCP23017_2_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_MCP23017 && c->adres == I2C_ADDRESS_EXTENDER_MCP23017_2) return mcp23017nr2;
+#endif
+#if defined(EXTENDER_MCP23017_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime mcp23017 = EXTENDER_MCP23017_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(mcp23017), "EXTENDER_MCP23017_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_MCP23017) return mcp23017;
+#endif
+#if defined(EXTENDER_PCF8574_1_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime pcf8574nr1 = EXTENDER_PCF8574_1_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(pcf8574nr1), "EXTENDER_PCF8574_1_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 && c->adres == I2C_ADDRESS_EXTENDER_PCF8574_1) return pcf8574nr1;
+#endif
+#if defined(EXTENDER_PCF8574_2_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime pcf8574nr2 = EXTENDER_PCF8574_2_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(pcf8574nr2), "EXTENDER_PCF8574_2_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 && c->adres == I2C_ADDRESS_EXTENDER_PCF8574_2) return pcf8574nr2;
+#endif
+#if defined(EXTENDER_PCF8574_RUNTIME_DREMPELS_FOUTNIVEAU)
+  // Ook de PCF8574 van Input (zelfde chip).
+  static constexpr DrempelsFoutniveauTijdensRuntime pcf8574 = EXTENDER_PCF8574_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(pcf8574), "EXTENDER_PCF8574_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_PCF8574 || c->component == GedeeldeBusComponent::INPUT_PCF8574) return pcf8574;
+#endif
+#if defined(EXTENDER_PCF8575_1_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime pcf8575nr1 = EXTENDER_PCF8575_1_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(pcf8575nr1), "EXTENDER_PCF8575_1_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 && c->adres == I2C_ADDRESS_EXTENDER_PCF8575_1) return pcf8575nr1;
+#endif
+#if defined(EXTENDER_PCF8575_2_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime pcf8575nr2 = EXTENDER_PCF8575_2_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(pcf8575nr2), "EXTENDER_PCF8575_2_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_PCF8575 && c->adres == I2C_ADDRESS_EXTENDER_PCF8575_2) return pcf8575nr2;
+#endif
+#if defined(EXTENDER_PCF8575_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime pcf8575 = EXTENDER_PCF8575_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(pcf8575), "EXTENDER_PCF8575_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::DIGITAL_PINS_PCF8575) return pcf8575;
+#endif
+#if defined(EXTENDER_TCA9548A_RUNTIME_DREMPELS_FOUTNIVEAU)
+  static constexpr DrempelsFoutniveauTijdensRuntime tca9548a = EXTENDER_TCA9548A_RUNTIME_DREMPELS_FOUTNIVEAU;
+  static_assert(DrempelsFoutniveauGeldig(tca9548a), "EXTENDER_TCA9548A_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL.");
+  if (c->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) return tca9548a;
+#endif
+  return drempelsFoutniveauAlgemeen;
+}
+
+// Eén ladderstap. Geeft terug: 0 = geen verandering, 1 tot 5 = nieuw (hoger) foutniveau, 255 = hersteld.
+static uint8_t FoutniveauTijdensRuntimeBerekenen(ToestandTijdensRuntime& toestand, bool gelukt, const DrempelsFoutniveauTijdensRuntime& drempels) {
+  if (gelukt) {
+    if (toestand.aantalOpeenvolgendeFouten == 0 && toestand.huidigFoutniveau == 0) return 0;   // snelste pad: geen storing
+    const bool wasInStoring = toestand.huidigFoutniveau != 0;
+    toestand = ToestandTijdensRuntime();
+    return wasInStoring ? 255 : 0;
+  }
+
+  const unsigned long nu = millis();
+  if (toestand.aantalOpeenvolgendeFouten == 0) toestand.tijdstipEersteFout = nu;
+  if (toestand.aantalOpeenvolgendeFouten < 255) toestand.aantalOpeenvolgendeFouten++;
+  const unsigned long duur = nu - toestand.tijdstipEersteFout;
+
+  uint8_t nieuwFoutniveau = 0;
+  for (uint8_t foutniveau = 5; foutniveau > 0; foutniveau--) {
+    if (toestand.aantalOpeenvolgendeFouten >= drempels.opeenvolgendeFoutenNaAantal[foutniveau - 1] ||
+        (drempels.sindsEersteFoutNaMs[foutniveau - 1] > 0 && duur >= drempels.sindsEersteFoutNaMs[foutniveau - 1])) {
+      nieuwFoutniveau = foutniveau;
+      break;
+    }
+  }
+  const uint8_t hoogste = FoutniveauVanScreenData(drempels.hoogstToegelatenFoutniveau);
+  if (nieuwFoutniveau > hoogste) nieuwFoutniveau = hoogste;
+  if (nieuwFoutniveau <= toestand.huidigFoutniveau) return 0;   // alleen melden als het foutniveau hoger wordt
+  toestand.huidigFoutniveau = nieuwFoutniveau;
+  return nieuwFoutniveau;
+}
+
+// Eén melding: regel 1 = foutniveau en code (bv. ALERT: GB400), regel 2 = I2C-adres, regel 3 = kanaal (achter een TCA9548A of per sensorkanaal).
+// Zonder snprintf (D042: ±13 KB op UNO R4). Leestijd per foutniveau volgens de RUNTIME_MELDING_..._LEESTIJD_MS-defines.
+// Een melding over het LCD zelf gaat alleen naar Serial: het LCD kan ze niet tonen.
+static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, HardwareResourceTypeI2C* component, uint8_t kanaal) {
+  static const char* const foutniveauTekst[5] = { _FOUTNIVEAU_WARNING, _FOUTNIVEAU_ALERT, _FOUTNIVEAU_FAULT, _FOUTNIVEAU_CRITICAL, _FOUTNIVEAU_FATAL };
+  static const char hex[] = "0123456789ABCDEF";
+
+  // Zelf kopiëren in plaats van strcpy/strcat/strncat: ±340 bytes flash minder op UNO R4 (gemeten).
+  char regel1[24];
+  uint8_t positie = 0;
+  if (foutniveau >= 1 && foutniveau <= 5) {
+    for (const char* teken = foutniveauTekst[foutniveau - 1]; *teken != '\0' && positie < 12; teken++) regel1[positie++] = *teken;
+    regel1[positie++] = ':';
+    regel1[positie++] = ' ';
+  }
+  for (const char* teken = code; *teken != '\0' && positie < sizeof(regel1) - 1; teken++) regel1[positie++] = *teken;
+  regel1[positie] = '\0';
+
+  char regel2[] = "I2C-ADRES: 0x00";
+  regel2[13] = hex[component->adres >> 4];
+  regel2[14] = hex[component->adres & 0x0F];
+
+#if EXTENDER_TCA9548A_AANTAL > 0
+  // Achter een TCA9548A: het kanaal uit de claim EP_CH0 tot EP_CH7 (zoals SelectChannel()).
+  if (kanaal == 0 && component->parent != nullptr && component->parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) {
+    for (uint8_t i = 0; i < component->AantalClaims(); i++) {
+      bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
+      const uint8_t waarde = component->ClaimWaarde(i, exclusief, identiteit);
+      if (waarde <= static_cast<uint8_t>(ExtenderTCA9548A::ExtenderPins::EP_CH7)) { kanaal = waarde + 1; break; }
+    }
+  }
+#endif
+  char regel3[] = "KANAAL: 0";
+  if (kanaal > 0 && kanaal <= 9) regel3[8] = static_cast<char>('0' + kanaal);
+
+  unsigned long leestijd = 0;
+  if (foutniveau == 4) leestijd = RUNTIME_MELDING_CRITICAL_LEESTIJD_MS;
+  else if (foutniveau == 5) leestijd = RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS;
+#if defined(DEBUG) || defined(TRACE)
+  else if (foutniveau >= 1) leestijd = RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS;
+#endif
+
+  struct Screen* scherm = (::Screen != nullptr) ? ::Screen : GedeeldeBusVindHardwareResourceComponentScreen(component);
+  if (scherm == nullptr || component->component == GedeeldeBusComponent::CHARACTER_SCREEN) {
+    ::GA_SERIAL.println(regel1);
+    ::GA_SERIAL.println(regel2);
+    if (kanaal > 0) ::GA_SERIAL.println(regel3);
+    return;
+  }
+#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
+  const ScreenData screenData = (foutniveau == 0) ? ScreenData::TYPE_SUCCESS : static_cast<ScreenData>(static_cast<uint8_t>(ScreenData::TYPE_WARNING) + foutniveau - 1);
+  scherm->Print(screenData, regel1, regel2, leestijd, "", kanaal > 0 ? regel3 : "", "", leestijd);
+#else
+  scherm->Print(regel1, regel2, leestijd, "", kanaal > 0 ? regel3 : "", "", leestijd);
+#endif
+}
+
+bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType) {
+  if (busType != GedeeldeBusType::I2C) return true;
+#if defined(WIRE_HAS_END)
+  #if BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
+    const uint8_t pinSDA = ARDUINO_UNO_SHIELD_PIN_SDA;
+    const uint8_t pinSCL = ARDUINO_UNO_SHIELD_PIN_SCL;
+  #else
+    const uint8_t pinSDA = SDA;
+    const uint8_t pinSCL = SCL;
+  #endif
+  // Eerst lezen met Wire actief: SDA hoog = de bus is vrij, dan niets aanraken (geen herstart van LCD, PCF8574, ...).
+  if (digitalRead(pinSDA) == HIGH) return true;
+  Wire.end();
+  pinMode(pinSDA, INPUT_PULLUP);
+  pinMode(pinSCL, INPUT_PULLUP);
+  // Open-drain nabootsen: LOW = uitgang laag, HIGH = loslaten (INPUT_PULLUP). Nooit actief hoog sturen.
+  for (uint8_t puls = 0; puls < 9 && digitalRead(pinSDA) == LOW; puls++) {
+    digitalWrite(pinSCL, LOW); pinMode(pinSCL, OUTPUT); delayMicroseconds(5);
+    pinMode(pinSCL, INPUT_PULLUP); delayMicroseconds(5);
+  }
+  // STOP-conditie: SDA van laag naar hoog terwijl SCL hoog is.
+  digitalWrite(pinSDA, LOW); pinMode(pinSDA, OUTPUT); delayMicroseconds(5);
+  pinMode(pinSDA, INPUT_PULLUP); delayMicroseconds(5);
+  const bool vrij = digitalRead(pinSDA) == HIGH;
+  i2cGeinitialiseerd = false;
+  InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
+  return vrij;
+#else
+  return true;
+#endif
+}
+
+void GedeeldeBusNode::AlleOnderliggendeNodesUitschakelen() {
+  for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
+    const_cast<GedeeldeBusNode*>(n)->actief = false;
+  }
+}
+
+// Een I2C-node? Op de inhoud getest: GedeeldeBusIdentiteitI2C is static constexpr in de header, dus elk .cpp-bestand heeft zijn eigen kopie (ander adres).
+static bool IsI2CNode(const GedeeldeBusNode* node) {
+  return node->gedeeldeIdentiteiten != nullptr && node->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA;
+}
+
+void GedeeldeBusNode::AlleOnderliggendeNodesOpnieuwActiveren() {
+  // Van boven naar onder: een parent is altijd eerst opnieuw actief.
+  // Een node die niet herstelt, blijft uitgeschakeld. Een eigen herstelpad van die node (I2C: ComponentBeschikbaarTijdensRuntime(),
+  // een sensor: zijn eigen pad, zoals RFP602::OpnieuwAanmeldenNaPauze()) probeert later opnieuw; een node zonder zo'n pad niet.
+  for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
+    GedeeldeBusNode* node = const_cast<GedeeldeBusNode*>(n);
+    // Parent niet actief: de fout komt van de parent, die zelf al meldde. Geen eigen melding.
+    if (node->parent != nullptr && !node->parent->actief) continue;
+
+    const bool i2c = IsI2CNode(node);
+    oorzaakHerstelTijdensRuntime = _GB401;
+    herstelTijdensRuntimeBezig = i2c;
+    const bool gelukt = node->activeren();
+    herstelTijdensRuntimeBezig = false;
+    if (gelukt) continue;
+
+    if (i2c) {
+      // Eigen fout van een I2C-node: een stap op zijn eigen ladder, met zijn eigen drempels; zijn eigen pauze begint nu.
+      HardwareResourceTypeI2C* component = static_cast<HardwareResourceTypeI2C*>(node);
+      ToestandTijdensRuntime& toestand = component->toestandTijdensRuntime;
+      FoutniveauTijdensRuntimeBerekenen(toestand, false, DrempelsFoutniveauVoorComponent(component));
+      toestand.tijdstipLaatsteHerstelpoging = millis();
+      toestand.oorzaakHerstelGemeld = true;
+      if (toestand.huidigFoutniveau != 0) MeldingTijdensRuntimeTonen(toestand.huidigFoutniveau, oorzaakHerstelTijdensRuntime, component);
+    } else {
+      // Geen eigen toestand (bv. een sensor): de fout hoort bij de parent. Het foutniveau van de dichtstbijzijnde I2C-node erboven die
+      // nog een foutniveau heeft, overnemen (al begrensd door diens maximum); dat is minstens de node die nu herstelt, want
+      // ComponentBeschikbaarTijdensRuntime() reset zijn toestand pas na deze functie. Met het I2C-adres van die node.
+      GedeeldeBusNode* boven = node->parent;
+      while (boven != nullptr && !(IsI2CNode(boven) && static_cast<HardwareResourceTypeI2C*>(boven)->toestandTijdensRuntime.huidigFoutniveau != 0)) boven = boven->parent;
+      if (boven != nullptr) MeldingTijdensRuntimeTonen(static_cast<HardwareResourceTypeI2C*>(boven)->toestandTijdensRuntime.huidigFoutniveau, _GB401, static_cast<HardwareResourceTypeI2C*>(boven));
+    }
+  }
+}
+
+bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
+  if (actief) return true;
+  if (!ingeplugd) return false;
+
+  const unsigned long nu = millis();
+  if (nu - toestandTijdensRuntime.tijdstipLaatsteHerstelpoging < RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS) return false;
+  toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = nu;
+
+  oorzaakHerstelTijdensRuntime = _GB401;   // FoutDiagnoseI2C() vult met DEBUG de echte oorzaak in
+  bool gelukt = false;
+  if (VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType::I2C)) {
+    herstelTijdensRuntimeBezig = true;
+    gelukt = activeren();
+    herstelTijdensRuntimeBezig = false;
+  } else {
+    oorzaakHerstelTijdensRuntime = _GB409;   // SDA blijft laag na het busherstel: geen activeren() in deze poging (spaart een timeout)
+  }
+
+  if (!gelukt) {
+    // Een mislukte herstelpoging telt als fout: de ladder klimt verder op aantal en tijd (bv. CRITICAL naar FATAL).
+    // Melden: de eerste keer met het huidige foutniveau, daarna alleen bij een hoger foutniveau. De code zegt de oorzaak.
+    const uint8_t resultaat = FoutniveauTijdensRuntimeBerekenen(toestandTijdensRuntime, false, DrempelsFoutniveauVoorComponent(this));
+    if (resultaat != 0 || !toestandTijdensRuntime.oorzaakHerstelGemeld) {
+      MeldingTijdensRuntimeTonen(toestandTijdensRuntime.huidigFoutniveau, oorzaakHerstelTijdensRuntime, this);
+      toestandTijdensRuntime.oorzaakHerstelGemeld = true;
+    }
+    return false;
+  }
+
+  // Volgorde: eerst melden en de onderliggende nodes heractiveren (die lezen nog het foutniveau van deze node),
+  // daarna altijd resetten, ook als een onderliggende node faalt: deze node zelf is hersteld.
+  MeldingTijdensRuntimeTonen(0, _GB407, this);
+  AlleOnderliggendeNodesOpnieuwActiveren();
+  toestandTijdensRuntime = ToestandTijdensRuntime();
+  return true;
+}
+
+bool HardwareResourceTypeI2C::ResultaatComponentToegangTijdensRuntimeVerwerken(bool gelukt) {
+  const DrempelsFoutniveauTijdensRuntime& drempels = DrempelsFoutniveauVoorComponent(this);
+  const uint8_t resultaat = FoutniveauTijdensRuntimeBerekenen(toestandTijdensRuntime, gelukt, drempels);
+  if (resultaat == 255) { MeldingTijdensRuntimeTonen(0, _GB407, this); return true; }
+  if (gelukt) return true;
+  if (resultaat == 0) return false;
+
+  MeldingTijdensRuntimeTonen(resultaat, _GB400, this);
+  if (actief && resultaat >= FoutniveauVanScreenData(drempels.uitschakelenVanafFoutniveau)) {
+    actief = false;
+    AlleOnderliggendeNodesUitschakelen();
+    toestandTijdensRuntime.oorzaakHerstelGemeld = false;
+    toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze; aantal en tijd lopen door
+  }
+  return false;
+}
+
+uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bool gelukt, const DrempelsFoutniveauTijdensRuntime& drempels, HardwareResourceTypeI2C* extender, uint8_t kanaal) {
+  const uint8_t resultaat = FoutniveauTijdensRuntimeBerekenen(toestand, gelukt, drempels);
+  // GB410 = de meting (Sensor- of kanaalladder) is hersteld; niet: de Extender opnieuw geactiveerd (dat is GB407).
+  if (resultaat == 255) { MeldingTijdensRuntimeTonen(0, _GB410, extender, kanaal); return resultaat; }
+  if (resultaat == 0) return resultaat;
+
+  MeldingTijdensRuntimeTonen(resultaat, _GB408, extender, kanaal);
+  // Eén effectieve ladder per meting: vanaf het uitschakelniveau gaat de Extender zelf uit, want herstel gebeurt op chipniveau.
+  // Daarmee vallen alle kanalen en sensoren op die Extender mee uit. De ladder gaat over naar de Extender en loopt daar verder
+  // in de herstelpogingen; deze ladder begint na het herstel opnieuw.
+  if (extender->actief && resultaat >= FoutniveauVanScreenData(drempels.uitschakelenVanafFoutniveau)) {
+    // Staat de Extender op "nooit automatisch uitschakelen" (zijn uitschakelniveau boven zijn maximum): ook deze ladder schakelt
+    // hem niet uit en start dus ook zijn herstelpad niet. Alleen GB408 hierboven.
+    const DrempelsFoutniveauTijdensRuntime& extenderDrempels = DrempelsFoutniveauVoorComponent(extender);
+    const uint8_t extenderHoogste = FoutniveauVanScreenData(extenderDrempels.hoogstToegelatenFoutniveau);
+    if (FoutniveauVanScreenData(extenderDrempels.uitschakelenVanafFoutniveau) > extenderHoogste) return resultaat;
+
+    // Samenvoegen met wat de Extender zelf al opbouwde (bv. door een kanaal zonder override): hoogste foutniveau, hoogste aantal
+    // (niet optellen: zelfde storing) en oudste eerste fout (als duur vergeleken, ook juist na de overloop van millis()).
+    ToestandTijdensRuntime& extenderToestand = extender->toestandTijdensRuntime;
+    if (extenderToestand.aantalOpeenvolgendeFouten == 0) {
+      extenderToestand = toestand;
+    } else {
+      const unsigned long nu = millis();
+      if (toestand.huidigFoutniveau > extenderToestand.huidigFoutniveau) extenderToestand.huidigFoutniveau = toestand.huidigFoutniveau;
+      if (toestand.aantalOpeenvolgendeFouten > extenderToestand.aantalOpeenvolgendeFouten) extenderToestand.aantalOpeenvolgendeFouten = toestand.aantalOpeenvolgendeFouten;
+      if (nu - toestand.tijdstipEersteFout > nu - extenderToestand.tijdstipEersteFout) extenderToestand.tijdstipEersteFout = toestand.tijdstipEersteFout;
+    }
+    // Pas na het samenvoegen: het foutniveau begrenzen op het maximum van de Extender (in beide takken).
+    // Aantal en oudste eerste fout blijven: de Extender herstelt vanaf nu volgens zijn eigen drempels.
+    if (extenderToestand.huidigFoutniveau > extenderHoogste) extenderToestand.huidigFoutniveau = extenderHoogste;
+    toestand = ToestandTijdensRuntime();
+    extender->actief = false;
+    extender->AlleOnderliggendeNodesUitschakelen();
+    extender->toestandTijdensRuntime.oorzaakHerstelGemeld = false;
+    extender->toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze
+  }
+  return resultaat;
 }
 
 bool GedeeldeBusNode::aanmelden() {
@@ -829,13 +1205,16 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
     }
 
     if (scherm != nullptr) {
+      // Leestijd volgens het niveau van de code: CRITICAL apart, ABORT en FATAL samen (D042).
+      const bool critical = strncmp(r->code, "CRITICAL", 8) == 0;
+      const unsigned long leestijd = critical ? GENERAL_MELDING_CRITICAL_LEESTIJD_MS : GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS;
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      scherm->Print(strncmp(r->code, "CRITICAL", 8) == 0 ? ScreenData::TYPE_CRITICAL : ScreenData::TYPE_FATAL, r->code, GedeeldeBusComponentNaam(r->A), FATAL_LEESTIJD_MS, "", GedeeldeBusComponentNaam(r->B), regel4, FATAL_LEESTIJD_MS);
+      scherm->Print(critical ? ScreenData::TYPE_CRITICAL : ScreenData::TYPE_FATAL, r->code, GedeeldeBusComponentNaam(r->A), leestijd, "", GedeeldeBusComponentNaam(r->B), regel4, leestijd);
 #else
-      scherm->Print(r->code, GedeeldeBusComponentNaam(r->A), FATAL_LEESTIJD_MS, "", GedeeldeBusComponentNaam(r->B), regel4, FATAL_LEESTIJD_MS);
+      scherm->Print(r->code, GedeeldeBusComponentNaam(r->A), leestijd, "", GedeeldeBusComponentNaam(r->B), regel4, leestijd);
 #endif
       // Print() wacht enkel TUSSEN regel 1-2 en regel 3-4, niet erna. Zonder deze wacht zou de volgende melding in deze lus pagina 2 van de huidige meteen overschrijven, onleesbaar.
-      if (r->volgende != nullptr) delay(FATAL_LEESTIJD_MS);
+      if (r->volgende != nullptr) delay(leestijd);
     } else {
       ::GA_SERIAL.println(r->code);
       ::GA_SERIAL.println(GedeeldeBusComponentNaam(r->A));

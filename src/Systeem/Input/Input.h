@@ -324,8 +324,6 @@ private:
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   InputPCF8574* gedeeldeBusInputPCF8574 = nullptr;
-  bool pcf8574Bereikbaar = true;
-  bool pcf8574FoutmeldingWeergegeven = false;
   void PCF8574OnbereikbaarMelden();
   bool PCF8574poortPatroonMatrixUitlezenInstellen(byte waarde);
   bool PCF8574poortPatroonUitlezen(byte& waarde);

@@ -81,7 +81,8 @@ if "!COMPILE_RESULT!"=="0" (
     echo [FOUT] !TEST_NAAM! compileerde onverwacht.
     set /A FAIL+=1
 ) else (
-    powershell -NoProfile -Command "if ([IO.File]::ReadAllText('%TEMP%\GA_Ongeldig.txt').Contains($env:VERWACHTE_FOUT)) { exit 0 } else { exit 1 }"
+    >"%TEMP%\GA_VerwachteFout.txt" echo(!VERWACHTE_FOUT!
+    powershell -NoProfile -Command "$log=[IO.File]::ReadAllText('%TEMP%\GA_Ongeldig.txt'); $verwacht=[IO.File]::ReadAllText('%TEMP%\GA_VerwachteFout.txt').TrimEnd([char]13,[char]10); if ($log.Contains($verwacht)) { exit 0 } else { exit 1 }"
     if errorlevel 1 (
         echo [FOUT] !TEST_NAAM! faalde om een andere reden dan verwacht.
         type "%TEMP%\GA_Ongeldig.txt"
@@ -92,6 +93,6 @@ if "!COMPILE_RESULT!"=="0" (
     )
 )
 
-del "%TEMP%\GA_Ongeldig.txt" >nul 2>&1
+del "%TEMP%\GA_Ongeldig.txt" "%TEMP%\GA_VerwachteFout.txt" >nul 2>&1
 exit /b 0
 

@@ -42,12 +42,6 @@ set "VERWACHTE_FOUT=PIXEL_SCREEN_ROTATION moet 0, 1, 2 of 3 zijn."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=ONGELDIGE CHARACTER I2C-MODUS"
-set "TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=SCREEN_TYPE_CHARACTER -DCHARACTERSCREEN_I2C_ADRES_MODUS=3"
-set "VERWACHTE_FOUT=CHARACTERSCREEN_I2C_ADRES_MODUS moet 0, 1 of 2 zijn."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
 set "TEST_NAAM=ONGELDIGE BOARD_VERSION"
 set "TEST_FLAGS=-DBOARD_VERSION=99"
 set "VERWACHTE_FOUT=Selecteer een geldige BOARD_VERSION."
@@ -152,13 +146,13 @@ call :EXPECT_FAIL
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
 set "TEST_NAAM=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_PCF8574"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=99"
-set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_PCF8574."
+set "VERWACHTE_FOUT=INPUT_TYPE_PCF8574 ondersteunt alleen de gedefinieerde keypads die maximaal acht signaallijnen nodig hebben."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
 set "TEST_NAAM=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=99"
-set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL."
+set "VERWACHTE_FOUT=Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik\Scenario1_EnkelTik.ino"
@@ -195,12 +189,6 @@ set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_
 set "TEST_NAAM=Ongeldige KEYPAD_TYPE voor AANTAL_KEYPAD_TOETSEN"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=99"
 set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor AANTAL_KEYPAD_TOETSEN."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd"
-set "TEST_FLAGS=-USCREEN_OUTPUT_CONFIG"
-set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
