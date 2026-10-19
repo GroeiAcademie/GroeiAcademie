@@ -95,9 +95,7 @@ Voor SerialScreen gelden daarnaast:
 | `ACTIEF_CHARACTER_SCREEN` | Concreet schermtype: `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` of `SCREEN_LCD4002`. |
 | `GENERAL_MELDING_CRITICAL_LEESTIJD_MS` | Leestijd van een CRITICAL-melding bij de opstart; standaard `30000UL`. Vervangt `FATAL_LEESTIJD_MS`. |
 | `GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS` | Leestijd van een FATAL-, ABORT- of PANIC-melding bij de opstart; standaard `30000UL`. Vervangt `FATAL_LEESTIJD_MS`. |
-| `RUNTIME_MELDING_CRITICAL_LEESTIJD_MS` | Leestijd van een CRITICAL-melding tijdens runtime; standaard `0UL` (een leestijd legt de hele lus stil). |
-| `RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS` | Leestijd van een FATAL-melding tijdens runtime; standaard `0UL` (de lus stopt nooit; wie wil lezen, zet zelf een waarde). |
-| `RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS` | Alleen met DEBUG of TRACE: leestijd van WARNING, ALERT en FAULT tijdens runtime; standaard `1000UL`. Zonder DEBUG of TRACE altijd 0. |
+Runtime-meldingen (GB400 tot GB410) gaan alleen naar Serial en hebben geen leestijd; de vroegere `RUNTIME_MELDING_..._LEESTIJD_MS`-defines zijn geschrapt (D042).
 
 ## PixelScreen
 

@@ -8,7 +8,7 @@ set "TEST_SCRIPT_BESTAND=%~dp0!BESTANDSNAAM!.cmd"
 if /I "%~1"=="--logged" goto :MAIN_SCRIPT
 
 if exist "!LOG_BESTAND!" del /q "!LOG_BESTAND!" >nul 2>&1
-powershell -NoProfile -Command "& { & '!TEST_SCRIPT_BESTAND!' --logged %* 2>&1 | Tee-Object -FilePath '!LOG_BESTAND!'; exit $LASTEXITCODE }"
+powershell -NoProfile -Command "& { & $env:ComSpec /D /C '""!TEST_SCRIPT_BESTAND!" --logged %* 2>&1"' | Tee-Object -FilePath '!LOG_BESTAND!'; exit $LASTEXITCODE }"
 set "SCRIPT_RESULT=!errorlevel!"
 exit /b !SCRIPT_RESULT!
 

@@ -1441,7 +1441,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
   #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
   if (gedeeldeBusInputDigital != nullptr && gedeeldeBusInputDigital->actief && wachten) {
   #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-  if (gedeeldeBusInputPCF8574 != nullptr && gedeeldeBusInputPCF8574->actief && wachten) {
+  if (gedeeldeBusInputPCF8574 != nullptr && wachten) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime() (D042)
   #endif
     while (KeypadUitLezenRuweData() != 0) delay(1);
     vorigeRauweKeypadPositie = 0;
@@ -1501,7 +1501,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
       }
       
     #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-      if (gedeeldeBusInputPCF8574 != nullptr && gedeeldeBusInputPCF8574->actief) {
+      if (gedeeldeBusInputPCF8574 != nullptr) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime() (D042)
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();
       #else

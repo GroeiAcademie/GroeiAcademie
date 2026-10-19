@@ -230,15 +230,6 @@
 #ifndef GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
 // #define GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS 30000UL // standaard waarde: 30000UL
 #endif
-#ifndef RUNTIME_MELDING_CRITICAL_LEESTIJD_MS
-// #define RUNTIME_MELDING_CRITICAL_LEESTIJD_MS 0UL // standaard waarde: 0UL; een leestijd legt de hele lus stil
-#endif
-#ifndef RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
-// #define RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS 0UL // standaard waarde: 0UL; een leestijd legt de hele lus stil
-#endif
-#ifndef RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS
-// #define RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS 1000UL // standaard waarde: 1000UL; alleen met DEBUG of TRACE
-#endif
 
 // SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.
 // Combineer meerdere uitvoertypes met de bitwise OR-operator |.

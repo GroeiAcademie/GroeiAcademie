@@ -662,8 +662,8 @@ static uint8_t FoutniveauTijdensRuntimeBerekenen(ToestandTijdensRuntime& toestan
 }
 
 // Eén melding: regel 1 = foutniveau en code (bv. ALERT: GB400), regel 2 = I2C-adres, regel 3 = kanaal (achter een TCA9548A of per sensorkanaal).
-// Zonder snprintf (D042: ±13 KB op UNO R4). Leestijd per foutniveau volgens de RUNTIME_MELDING_..._LEESTIJD_MS-defines.
-// Een melding over het LCD zelf gaat alleen naar Serial: het LCD kan ze niet tonen.
+// Zonder snprintf (D042: ±13 KB op UNO R4). Alleen naar Serial, nooit via Screen::Print(): dat zou de opdracht op het scherm
+// overschrijven (niets tekent ze terug) en het LCD via I2C testen, midden in de afhandeling van een I2C-fout (cascade).
 static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, HardwareResourceTypeI2C* component, uint8_t kanaal) {
   static const char* const foutniveauTekst[5] = { _FOUTNIVEAU_WARNING, _FOUTNIVEAU_ALERT, _FOUTNIVEAU_FAULT, _FOUTNIVEAU_CRITICAL, _FOUTNIVEAU_FATAL };
   static const char hex[] = "0123456789ABCDEF";
@@ -696,26 +696,9 @@ static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, Har
   char regel3[] = "KANAAL: 0";
   if (kanaal > 0 && kanaal <= 9) regel3[8] = static_cast<char>('0' + kanaal);
 
-  unsigned long leestijd = 0;
-  if (foutniveau == 4) leestijd = RUNTIME_MELDING_CRITICAL_LEESTIJD_MS;
-  else if (foutniveau == 5) leestijd = RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS;
-#if defined(DEBUG) || defined(TRACE)
-  else if (foutniveau >= 1) leestijd = RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS;
-#endif
-
-  struct Screen* scherm = (::Screen != nullptr) ? ::Screen : GedeeldeBusVindHardwareResourceComponentScreen(component);
-  if (scherm == nullptr || component->component == GedeeldeBusComponent::CHARACTER_SCREEN) {
-    ::GA_SERIAL.println(regel1);
-    ::GA_SERIAL.println(regel2);
-    if (kanaal > 0) ::GA_SERIAL.println(regel3);
-    return;
-  }
-#if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-  const ScreenData screenData = (foutniveau == 0) ? ScreenData::TYPE_SUCCESS : static_cast<ScreenData>(static_cast<uint8_t>(ScreenData::TYPE_WARNING) + foutniveau - 1);
-  scherm->Print(screenData, regel1, regel2, leestijd, "", kanaal > 0 ? regel3 : "", "", leestijd);
-#else
-  scherm->Print(regel1, regel2, leestijd, "", kanaal > 0 ? regel3 : "", "", leestijd);
-#endif
+  ::GA_SERIAL.println(regel1);
+  ::GA_SERIAL.println(regel2);
+  if (kanaal > 0) ::GA_SERIAL.println(regel3);
 }
 
 bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType) {
@@ -729,7 +712,16 @@ bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType) {
     const uint8_t pinSCL = SCL;
   #endif
   // Eerst lezen met Wire actief: SDA hoog = de bus is vrij, dan niets aanraken (geen herstart van LCD, PCF8574, ...).
-  if (digitalRead(pinSDA) == HIGH) return true;
+  // TRACE alleen in de tweede trap van ComponentBeschikbaarTijdensRuntime(): enkel daar is herstelTijdensRuntimeBezig hier true.
+  if (digitalRead(pinSDA) == HIGH) {
+#ifdef TRACE
+    if (herstelTijdensRuntimeBezig && GA_SERIAL) GA_SERIAL.println("TRACE: herstel trap 2, SDA hoog: Wire opnieuw");
+#endif
+    return true;
+  }
+#ifdef TRACE
+  if (herstelTijdensRuntimeBezig && GA_SERIAL) GA_SERIAL.println("TRACE: herstel trap 2, SDA laag: busherstel");
+#endif
   Wire.end();
   pinMode(pinSDA, INPUT_PULLUP);
   pinMode(pinSCL, INPUT_PULLUP);
@@ -809,6 +801,23 @@ bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
   if (VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType::I2C)) {
     herstelTijdensRuntimeBezig = true;
     gelukt = activeren();
+#if defined(WIRE_HAS_END)
+    // Tweede trap: na een timeout breekt de Wire van de UNO R4 de lopende transactie niet af (setWireTimeout() negeert de reset,
+    // nagekeken in Wire.cpp), dan faalt elke volgende transactie naar elk adres, ook met SDA hoog.
+    // Eerst SDA opnieuw beoordelen (de eerste activeren() kan de bus zelf laten vastlopen): blijft SDA laag, GB409 en geen
+    // tweede activeren(). Anders Wire opnieuw initialiseren (na een busherstel dus dubbel, bewust) en nog één keer activeren().
+    // Samen telt dit als één herstelpoging.
+    if (!gelukt) {
+      if (VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType::I2C)) {
+        Wire.end();
+        i2cGeinitialiseerd = false;
+        InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
+        gelukt = activeren();
+      } else {
+        oorzaakHerstelTijdensRuntime = _GB409;
+      }
+    }
+#endif
     herstelTijdensRuntimeBezig = false;
   } else {
     oorzaakHerstelTijdensRuntime = _GB409;   // SDA blijft laag na het busherstel: geen activeren() in deze poging (spaart een timeout)

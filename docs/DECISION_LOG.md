@@ -237,7 +237,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 - (4) Busherstel nu: SDA bleef hangen in de test. Eerst SDA lezen met Wire actief; alleen als SDA laag is: `Wire.end()`, tot 9 klokpulsen, STOP-conditie, opnieuw initialiseren.
 - (5) Wire-timeout 25 ms op AVR en UNO R4.
 - (6) Melding met vaste tekst (code + I2C-adres, eventueel kanaal), zonder componentnaam (die kost tot +2660 bytes flash op R4) en zonder `snprintf` (±13 KB op R4); ook IN402 bij de opstart gebruikt geen `snprintf` meer.
-- (7) Leestijd per niveau, apart voor opstart (GENERAL) en runtime (RUNTIME); `FATAL_LEESTIJD_MS` verdwijnt. Tijdens runtime standaard 0, ook voor FATAL; WARNING tot FAULT alleen met DEBUG of TRACE.
+- (7) Leestijd per niveau bij de opstart (GENERAL); `FATAL_LEESTIJD_MS` verdwijnt. Tijdens runtime geen leestijd: de `RUNTIME_MELDING_..._LEESTIJD_MS`-defines zijn na de hardwaretest van 19-10-2026 geschrapt (zie 17).
 - (8) Overrides per type, per exemplaar, per Sensor en per kanaal, elk als één define met de hele set (K1 keuze 2). Eén effectieve ladder per meting: kanaal, anders Sensor, anders de ladder van de Extender (exemplaar, type, algemeen); nooit twee ladders voor dezelfde meting. Vanaf het uitschakelniveau gaat de Extender uit, met alle kanalen erop (herstel gebeurt op chipniveau); een tolerant kanaal beschermt de chip dus niet tegen een strenger kanaal.
 - (9) Het LCD test zelf vóór elke melding, omdat `LiquidCrystal_I2C` geen foutcode teruggeeft.
 - (10) `ScreenData` is altijd beschikbaar, ook zonder pixelscherm.
@@ -250,5 +250,9 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 - (14) Drempels worden bij het compileren gecontroleerd (aantallen oplopend; tijden die niet 0 zijn oplopend als één reeks, ook over een 0 heen; foutniveaus WARNING tot FATAL). Uitschakelniveau boven het hoogst toegelaten foutniveau = wel melden, nooit automatisch uitschakelen.
 - (15) Het runtime-herstel veronderstelt sequentiële toegang (geen interrupts of callbacks).
 - (16) Niet in v2.0.0: FRAM en EEPROM via I2C (Data gebruikt ze tijdens runtime nog niet), Extenders zonder runtime-functies, SPI.
+- (17) Hardwaretest 19-10-2026: GB400 tot GB410 alleen naar Serial, niet via `Screen::Print()`: die overschreef de opdracht op het scherm (niets tekent ze terug) en testte het LCD via I2C midden in een I2C-fout (een fout van de PCF8574 liet het LCD mee falen, zichtbaar als gelijk klimmende 0x27 en 0x20).
+- (18) Tweetrapsherstel: mislukt `activeren()`, dan SDA opnieuw beoordelen (`VastgelopenGedeeldeBusVrijmaken()`, blijft SDA laag: GB409), daarna `Wire.end()`, Wire opnieuw en nog één `activeren()`; samen één herstelpoging. Reden: de Wire van de UNO R4 breekt een getimede transactie niet af (`setWireTimeout()` negeert de reset, nagekeken in Wire.cpp), waarna elke transactie faalt, ook met SDA hoog. Dat de chip met `Wire.end()` echt vrijkomt, bewijst de hardwaretest; een tweede controle met SDA laag wordt als "niet geobserveerd" genoteerd als ze niet voorkomt.
+- (19) Code boven een component met runtime-herstel mag niet op `actief` blokkeren; alleen `ComponentBeschikbaarTijdensRuntime()` beslist (Input testte `->actief`, waardoor een uitgeschakelde PCF8574 nooit meer herstelde).
+- (20) Runtime-herstel en herstel na een afwezige opstart zijn twee modellen: afwezig bij de opstart herstelt niet voor Input, LCD en Serial (bestaande beperking), wel voor RFP602 (`OpnieuwAanmeldenNaPauze()` doorloopt de volledige levenscyclus).
 
 **Context:** hardwaretest 18-10-2026: een los contact zette de PCF8574 van Input meteen en voor altijd in FATAL; SDA bleef hangen. De maatstaf blijft maximale snelheid en minimaal geheugen: in normaal gebruik kost het één vergelijking per toegang.

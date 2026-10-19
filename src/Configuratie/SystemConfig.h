@@ -334,25 +334,13 @@
 // ============================================================================
 
 // MELDINGEN: LEESTIJD (D042)
-// GENERAL: meldingen bij de opstart (aanmelden, controleren, inpluggen, activeren). RUNTIME: meldingen tijdens het draaien.
-// Een leestijd legt de hele lus stil, dus ook alle andere sensoren: tijdens runtime standaard 0, ook voor FATAL.
+// GENERAL: meldingen bij de opstart (aanmelden, controleren, inpluggen, activeren).
+// Runtime-meldingen (GB400 tot GB410) gaan alleen naar Serial en hebben geen leestijd.
 #ifndef GENERAL_MELDING_CRITICAL_LEESTIJD_MS
   #define GENERAL_MELDING_CRITICAL_LEESTIJD_MS   30000UL
 #endif
 #ifndef GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
   #define GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS   30000UL
-#endif
-#ifndef RUNTIME_MELDING_CRITICAL_LEESTIJD_MS
-  #define RUNTIME_MELDING_CRITICAL_LEESTIJD_MS   0UL
-#endif
-#ifndef RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS
-  #define RUNTIME_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS   0UL
-#endif
-// Alleen met DEBUG of TRACE; in een normale build is de leestijd voor WARNING, ALERT en FAULT altijd 0.
-#if defined(DEBUG) || defined(TRACE)
-  #ifndef RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS
-    #define RUNTIME_MELDING_WARNING_ALERT_FAULT_LEESTIJD_MS   1000UL
-  #endif
 #endif
 
 // SCREEN_OUTPUT_CONFIG bepaalt welke schermuitvoertypes in deze build aanwezig zijn.
