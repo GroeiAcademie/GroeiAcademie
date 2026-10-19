@@ -40,6 +40,9 @@ static bool spiGeinitialiseerd = false;
 
 // Runtime-herstel (D042): true tijdens een herstelpoging, zodat FoutDiagnoseI2C() GB401 tot GB406 meldt in plaats van GB301 tot GB306.
 static bool herstelTijdensRuntimeBezig = false;
+// Telt het begin en het herstel van elke I2C-storing tijdens runtime (niet GB408: dat is een functionele meetfout).
+// Generiek: GedeeldeBus weet niet wie de teller leest (Screen gebruikt hem om het LCD na een storing opnieuw te initialiseren).
+uint16_t aantalI2CStoringenTijdensRuntime = 0;
 // De oorzaak van de laatst mislukte herstelpoging (GB401, met DEBUG GB402 tot GB406), ingevuld door FoutDiagnoseI2C().
 static const char* oorzaakHerstelTijdensRuntime = nullptr;
 static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, HardwareResourceTypeI2C* component, uint8_t kanaal = 0);
@@ -712,15 +715,16 @@ bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType) {
     const uint8_t pinSCL = SCL;
   #endif
   // Eerst lezen met Wire actief: SDA hoog = de bus is vrij, dan niets aanraken (geen herstart van LCD, PCF8574, ...).
-  // TRACE alleen in de tweede trap van ComponentBeschikbaarTijdensRuntime(): enkel daar is herstelTijdensRuntimeBezig hier true.
+  // Melding alleen in de tweede trap van ComponentBeschikbaarTijdensRuntime(): enkel daar is herstelTijdensRuntimeBezig hier true.
+  // Onder DEBUG (ook met TRACE): DEBUG is stil tijdens het draaien, zodat deze regels in een test zichtbaar blijven.
   if (digitalRead(pinSDA) == HIGH) {
-#ifdef TRACE
-    if (herstelTijdensRuntimeBezig && GA_SERIAL) GA_SERIAL.println("TRACE: herstel trap 2, SDA hoog: Wire opnieuw");
+#if defined(DEBUG) || defined(TRACE)
+    if (herstelTijdensRuntimeBezig && GA_SERIAL) GA_SERIAL.println("DEBUG: herstel trap 2, SDA hoog: Wire opnieuw");
 #endif
     return true;
   }
-#ifdef TRACE
-  if (herstelTijdensRuntimeBezig && GA_SERIAL) GA_SERIAL.println("TRACE: herstel trap 2, SDA laag: busherstel");
+#if defined(DEBUG) || defined(TRACE)
+  if (herstelTijdensRuntimeBezig && GA_SERIAL) GA_SERIAL.println("DEBUG: herstel trap 2, SDA laag: busherstel");
 #endif
   Wire.end();
   pinMode(pinSDA, INPUT_PULLUP);
@@ -839,13 +843,15 @@ bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
   MeldingTijdensRuntimeTonen(0, _GB407, this);
   AlleOnderliggendeNodesOpnieuwActiveren();
   toestandTijdensRuntime = ToestandTijdensRuntime();
+  aantalI2CStoringenTijdensRuntime++;   // herstel van een I2C-storing (S6)
   return true;
 }
 
 bool HardwareResourceTypeI2C::ResultaatComponentToegangTijdensRuntimeVerwerken(bool gelukt) {
+  if (!gelukt && toestandTijdensRuntime.aantalOpeenvolgendeFouten == 0) aantalI2CStoringenTijdensRuntime++;   // begin van een I2C-storing (S6)
   const DrempelsFoutniveauTijdensRuntime& drempels = DrempelsFoutniveauVoorComponent(this);
   const uint8_t resultaat = FoutniveauTijdensRuntimeBerekenen(toestandTijdensRuntime, gelukt, drempels);
-  if (resultaat == 255) { MeldingTijdensRuntimeTonen(0, _GB407, this); return true; }
+  if (resultaat == 255) { aantalI2CStoringenTijdensRuntime++; MeldingTijdensRuntimeTonen(0, _GB407, this); return true; }   // herstel (S6)
   if (gelukt) return true;
   if (resultaat == 0) return false;
 

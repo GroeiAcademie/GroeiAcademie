@@ -106,6 +106,9 @@ struct DrempelsFoutniveauTijdensRuntime {
 // De algemene set uit RUNTIME_..._NA_AANTAL, RUNTIME_..._NA_MS, RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU en RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU.
 extern const DrempelsFoutniveauTijdensRuntime drempelsFoutniveauAlgemeen;
 
+// Telt het begin en het herstel van elke I2C-storing tijdens runtime (+1 per gebeurtenis; niet GB408). Gezet in GedeeldeBus.cpp.
+extern uint16_t aantalI2CStoringenTijdensRuntime;
+
 // Voor een Sensor of kanaal met eigen drempels (override): de enige ladder voor die meting (niet ook die van de Extender).
 // Meldt GB408 bij een hoger foutniveau, GB410 bij herstel van de meting; vanaf het uitschakelniveau gaat de Extender uit (alle kanalen mee,
 // toestand samengevoegd met die van de Extender).

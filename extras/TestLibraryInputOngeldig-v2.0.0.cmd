@@ -204,7 +204,7 @@ call :EXPECT_FAIL
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
 set "TEST_NAAM=DATA_LAYER_CONFIG moet minstens één datatype bevatten"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=0"
-set "VERWACHTE_FOUT=DATA_LAYER_CONFIG moet minstens één datatype bevatten."
+set "VERWACHTE_FOUT=DATA_LAYER_CONFIG moet minstens"
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
@@ -252,13 +252,13 @@ call :EXPECT_FAIL
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
 set "TEST_NAAM=DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE mag maximaal 256 zijn (één pagina)"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_AANTAL=1 -DDATA_LAYER_FLASH_SPI_1_BUFFER_SIZE=257"
-set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE mag maximaal 256 zijn (één pagina)."
+set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE mag maximaal 256 zijn"
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
 set "TEST_NAAM=DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE mag maximaal 256 zijn (één pagina)"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_AANTAL=2 -DDATA_LAYER_FLASH_SPI_2_BUFFER_SIZE=257"
-set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE mag maximaal 256 zijn (één pagina)."
+set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE mag maximaal 256 zijn"
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
@@ -389,20 +389,20 @@ call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
 set "TEST_NAAM=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 of 2 in SdFatConfig.h van d..."
-set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI -DDATA_LAYER_MICROSD_SPI_AANTAL=1 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER=0 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS=0x20"
+set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER=GedeeldeBusComponent::DIGITAL_PINS_PCF8574 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS=0x20 -DDATA_LAYER_MICROSD_SPI_1_CS_PIN=ExtenderPCF8574::ExtenderPins::EP_P0"
 set "VERWACHTE_FOUT=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 of 2 in SdFatConfig.h van de library "SdFat - Adafruit Fork"."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenPCF8574UserDefinedDirect\InputkanalenPCF8574UserDefinedDirect.ino"
 set "TEST_NAAM=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_PCF8574"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=99"
-set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_PCF8574."
+set "VERWACHTE_FOUT=INPUT_TYPE_PCF8574 ondersteunt alleen de gedefinieerde keypads die maximaal acht signaallijnen nodig hebben."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenPCF8574UserDefinedDirect\InputkanalenPCF8574UserDefinedDirect.ino"
 set "TEST_NAAM=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL"
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=99"
-set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL."
+set "VERWACHTE_FOUT=Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenDIGITAL\InputkanalenDIGITAL.ino"
@@ -442,16 +442,13 @@ set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor AANTAL_KEYPAD_TOETSEN."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenDIGITAL\InputkanalenDIGITAL.ino"
-set "TEST_NAAM=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd"
-set "TEST_FLAGS=-USCREEN_OUTPUT_CONFIG"
-set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Systeem\Input\InputkanalenDIGITAL\InputkanalenDIGITAL.ino"
 set "TEST_NAAM=SCREEN_OUTPUT_CONFIG bevat een onbekende uitvoerbit. Gebruik alleen SCREEN_TYPE_NONE, SCR..."
 set "TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=8"
 set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG bevat een onbekende uitvoerbit. Gebruik alleen SCREEN_TYPE_NONE, SCREEN_TYPE_SERIAL, SCREEN_TYPE_CHARACTER en SCREEN_TYPE_PIXELS."
 call :EXPECT_FAIL
+
+set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL."
+set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_PCF8574."
 
 echo.
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!

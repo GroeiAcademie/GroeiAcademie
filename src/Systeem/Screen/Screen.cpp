@@ -79,6 +79,13 @@ Screen::Screen(uint8_t typesActief, CharacterScreenCallback characterCallback, P
 struct Screen* Screen = nullptr;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
+// Runtime-herstel (S6): de stand van aantalI2CStoringenTijdensRuntime (GedeeldeBus) bij de laatste init() van het LCD.
+// Verschilt die stand, dan was er sinds die init() een I2C-storing (begin of herstel): een verloren nibble kan het LCD in
+// 4-bit-modus uit de pas laten lopen, en LiquidCrystal_I2C geeft de waarde van endTransmission() niet door.
+static uint16_t aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie = 0;
+#endif
+
+#if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
 void Screen::Character::RegistreerCallback(CharacterScreenCallback callback) { this->callback = callback; }
 #endif
 
@@ -287,9 +294,12 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
       Wire.beginTransmission(lcd->adres);
       lcdBereikbaar = lcd->ResultaatComponentToegangTijdensRuntimeVerwerken(Wire.endTransmission() == 0);
     }
-    if (lcdBereikbaar && !this->Character.actief) {
+    // Ook na een I2C-storing op eender welk onderdeel sinds de vorige init(): één keer opnieuw instellen (S6).
+    // Vlak vóór deze Print(): de inhoud volgt meteen.
+    if (lcdBereikbaar && (!this->Character.actief || aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie != aantalI2CStoringenTijdensRuntime)) {
       this->Character.display.init();
       this->Character.display.backlight();
+      aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie = aantalI2CStoringenTijdensRuntime;
     }
     this->Character.actief = lcdBereikbaar;
   }
@@ -674,6 +684,7 @@ bool Screen::Activeren() {
     if (this->Character.gedeeldeBus->activeren()) {
       this->Character.display.init();
       this->Character.display.backlight();
+      aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie = aantalI2CStoringenTijdensRuntime;   // verse init(): stand meenemen (S6)
       this->Character.actief = true;
     } else {
       this->Character.foutmelding = _CRITICAL_CS301;

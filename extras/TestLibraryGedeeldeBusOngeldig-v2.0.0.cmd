@@ -197,6 +197,9 @@ set "TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=8"
 set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG bevat een onbekende uitvoerbit. Gebruik alleen SCREEN_TYPE_NONE, SCREEN_TYPE_SERIAL, SCREEN_TYPE_CHARACTER en SCREEN_TYPE_PIXELS."
 call :EXPECT_FAIL
 
+set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL."
+set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
+
 echo.
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!
 if !FAIL!==0 (exit /b 0) else exit /b 1
