@@ -2,8 +2,7 @@
 // Inputkanalen PCF8574 met Argumenten
 // ============================================================================
 // ILLUSTRATIEF VOORBEELD van de void*-argumentenaanpak voor InputFunctie, toegepast op
-// INPUT_TYPE_PCF8574. Zet in UserConfig.h:
-// #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
+// INPUT_TYPE_PCF8574. Zet in UserConfig.h: #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
 //
 // In tegenstelling tot InputkanalenPCF8574.ino (één functie per opschrift, geen gedeelde
 // toestand) demonstreert dit bestand twee technieken:

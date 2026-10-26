@@ -44,8 +44,8 @@ Na een mislukte cardBegin() of volumeBegin() wordt end() aangeroepen voordat de 
 #error Test_microSD wordt niet uitgevoerd op Arduino UNO R3.
 #endif
 
-#if SD_CHIP_SELECT_MODE != 2
-#error SD_CHIP_SELECT_MODE moet in SdFatConfig.h op 2 staan voor deze test.
+#if SD_CHIP_SELECT_MODE != 1
+#error SD_CHIP_SELECT_MODE moet in SdFatConfig.h op 1 staan voor deze test.
 #endif
 
 const uint8_t SD_CS_NATIVE_1 = 10;

@@ -23,8 +23,7 @@
 #endif
 
 // De Extender: zoals altijd een gewoon component onder Native.
-ExtenderPCF8574 extenderA(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1,
-                          HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
+ExtenderPCF8574 extenderA(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
 
 // De sensor: hangt onder Native (niet onder de Extender), want hij heeft ook pinnen op het board.
 struct MixedSensor : Sensor {
@@ -55,9 +54,11 @@ struct MixedSensor : Sensor {
   // Inpluggen: de Extender moet al werken; daarna de richting van elke pin zetten.
   bool inpluggen() override {
     if (ingeplugd) return true;
+
     for (uint8_t index = 0; index < 4; index++) {
       if (ownerClaims[index] != nullptr && !ownerClaims[index]->actief) return false;
     }
+
     if (!Sensor::inpluggen()) return false;
 
     // D2 en EP_P0 als uitgang, D3 en EP_P1 als ingang.

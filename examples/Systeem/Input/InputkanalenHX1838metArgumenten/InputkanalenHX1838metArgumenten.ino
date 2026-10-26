@@ -1,11 +1,9 @@
 // ============================================================================
 // Inputkanalen HX1838 met Argumenten
 // ============================================================================
-// ILLUSTRATIEF VOORBEELD van de void*-argumentenaanpak voor InputFunctie, toegepast op INPUT_TYPE_HX1838. Zet in UserConfig.h:
-// #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
+// ILLUSTRATIEF VOORBEELD van de void*-argumentenaanpak voor InputFunctie, toegepast op INPUT_TYPE_HX1838. Zet in UserConfig.h: #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
 //
-// In tegenstelling tot InputkanalenHX1838.ino (één functie per opschrift, 
-// geen gedeelde toestand) demonstreert dit bestand twee technieken:
+// In tegenstelling tot InputkanalenHX1838.ino (één functie per opschrift, geen gedeelde toestand) demonstreert dit bestand twee technieken:
 // - HX1838_TOETSENINDELING_REMOTE_OK_BOVENAAN_17_TOETSEN en HX1838_TOETSENINDELING_REMOTE_OK_ONDERAAN_17_TOETSEN: 
 //   een PIN-code wordt opgebouwd via de cijfertoetsen (gedeelde, globale buffer), * bevestigt, # wist.
 // - HX1838_TOETSENINDELING_REMOTE_21_TOETSEN_MP3: een gedeelde struct (kanaal + volume)

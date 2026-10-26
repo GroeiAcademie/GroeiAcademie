@@ -10,12 +10,10 @@
 // #define KEYPAD_TYPE KEYPAD_TYPE_USER_DEFINED_MATRIX
 //
 // De KEYPAD_GENERIEK_...-instellingen moeten in UserConfig.h staan. Bij
-// KEYPAD_TYPE_USER_DEFINED_MATRIX staat daar een uitgecommentarieerd voorbeeld: haal in
-// UserConfig.h de // voor de benodigde #define-regels weg en pas de waarden aan je matrix aan.
-// Het onderstaande 4x3-configuratiefragment is uitsluitend een referentie en wordt vanuit
-// deze .ino niet meegecompileerd; het komt exact overeen met het voorbeeld in
-// UserConfig_template.h en met de mappingTestMenu[] hieronder (12 toetsen). Generieke
-// matrix-keypads zijn active-low.
+// KEYPAD_TYPE_USER_DEFINED_MATRIX staat daar een uitgecommentarieerd voorbeeld: haal in UserConfig.h de // voor de benodigde #define-regels weg en pas de waarden aan je matrix aan.
+// Het onderstaande 4x3-configuratiefragment is uitsluitend een referentie en wordt vanuit deze .ino niet meegecompileerd; 
+// het komt exact overeen met het voorbeeld in UserConfig_template.h en met de mappingTestMenu[] hieronder (12 toetsen). 
+// Generieke matrix-keypads zijn active-low.
 
 /*
 #if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)

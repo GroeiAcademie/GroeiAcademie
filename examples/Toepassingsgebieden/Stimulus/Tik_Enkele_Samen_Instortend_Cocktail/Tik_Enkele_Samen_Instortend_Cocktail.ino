@@ -1,8 +1,7 @@
 // ============================================================================
-// Tik — Enkel, samen, instortend en cocktail
+// Tik: Enkel, samen, instortend en cocktail
 // ============================================================================
-// Dit example dwingt SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan een .ino structureel niet: 
-// Stimulus.cpp/Screen.cpp worden als aparte bestanden gecompileerd en zien een #define hier nooit. 
+// Dit example dwingt SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan een .ino structureel niet: Stimulus.cpp/Screen.cpp worden als aparte bestanden gecompileerd en zien een #define hier nooit. 
 // Deze sketch werkt met welk schermtype dan ook actief is via UserConfig.h (kopieer van UserConfig_template.h) of SystemConfig.h, 
 // en past haar gedrag/ aan via de #if-controles hieronder — vandaar geen #error voor het schermtype.
 // ============================================================================

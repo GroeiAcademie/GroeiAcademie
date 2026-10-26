@@ -1,8 +1,7 @@
 // ============================================================================
 // Inputkanalen PCF8574 User Defined Direct
 // ============================================================================
-// Testtoepassing voor de Input-laag (InputTypes.h/Input.h/Input.cpp), specifiek voor
-// KEYPAD_TYPE_USER_DEFINED_DIRECT. Enkel bij INPUT_TYPE_PCF8574 beschikbaar.
+// Testtoepassing voor de Input-laag (InputTypes.h/Input.h/Input.cpp), specifiek voor KEYPAD_TYPE_USER_DEFINED_DIRECT. Enkel bij INPUT_TYPE_PCF8574 beschikbaar.
 
 // INPUT TESTEN:
 // Dit voorbeeld test uitsluitend KEYPAD_TYPE_USER_DEFINED_DIRECT. Zet in UserConfig.h:
@@ -10,10 +9,8 @@
 // #define KEYPAD_TYPE KEYPAD_TYPE_USER_DEFINED_DIRECT
 //
 // De KEYPAD_GENERIEK_...-instellingen moeten in UserConfig.h staan. Bij
-// KEYPAD_TYPE_USER_DEFINED_DIRECT staat daar een uitgecommentarieerd voorbeeld: haal in
-// UserConfig.h de // voor de benodigde #define-regels weg en pas de waarden aan je keypad aan.
-// Het onderstaande oude configuratiefragment is uitsluitend een referentie en wordt vanuit
-// deze .ino niet meegecompileerd.
+// KEYPAD_TYPE_USER_DEFINED_DIRECT staat daar een uitgecommentarieerd voorbeeld: haal in UserConfig.h de // voor de benodigde #define-regels weg en pas de waarden aan je keypad aan.
+// Het onderstaande oude configuratiefragment is uitsluitend een referentie en wordt vanuit deze .ino niet meegecompileerd.
 
 /*
 #if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)

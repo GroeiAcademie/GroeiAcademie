@@ -27,9 +27,8 @@
 //
 // * KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4  VCC, GND, (SCL, SDO), OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8 (HW-136) [1, 2, 3, 4, 5, 6, 7, 8] - fysiek 4x4 touch keypad: via de 8 parallelle uitgangen op PCF8574 P0-P7 kunnen enkel de eerste 8 toetsen uitgelezen worden via OUTn
 //
-// mappingTestMenu[] hieronder bevat, per KEYPAD_TYPE, de volledige set opschriften die dat
-// type kan opleveren, elk gekoppeld aan zijn eigen, herkenbare functie. Zo toont het display
-// precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
+// mappingTestMenu[] hieronder bevat, per KEYPAD_TYPE, de volledige set opschriften die dat type kan opleveren, elk gekoppeld aan zijn eigen, herkenbare functie. 
+// Zo toont het display precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
 // Voor INPUT_TYPE_HX1838, zie InputkanalenHX1838.ino.
 
 #include <GroeiAcademie.h>

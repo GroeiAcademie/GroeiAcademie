@@ -1,11 +1,10 @@
 // ============================================================================
-// Tool: I2C_TotaleDiagnoseAlleDevices
+// Tool: 
 // ============================================================================
 // Combineert GedeeldeBus-status met een fysieke scan van de I2C-bus.
 // Toont aangemelde, ontbrekende, niet aangemelde en conflicterende devices.
 // Testconfiguratie: I2C-shield met CharacterScreen, PCF8574 en ADS1115.
-// De shieldcomponenten worden voor de diagnose aangemeld via Screen, RFP602 en Input,
-// op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
+// De shieldcomponenten worden voor de diagnose aangemeld via Screen, RFP602 en Input, op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
 // ============================================================================
 
 #include <GroeiAcademie.h>

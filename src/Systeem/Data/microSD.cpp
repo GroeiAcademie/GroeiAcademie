@@ -10,7 +10,7 @@
 #if GEDEELDE_BUS_MIXED_PINS && (defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER))
   #define MICROSD_CS_VIA_EXTENDER 1   // alleen in dit bestand
   #if SD_CHIP_SELECT_MODE == 0
-    #error microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 of 2 in SdFatConfig.h van de library "SdFat - Adafruit Fork".
+    #error microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 in SdFatConfig.h van de library "SdFat - Adafruit Fork".
   #endif
 
 namespace {

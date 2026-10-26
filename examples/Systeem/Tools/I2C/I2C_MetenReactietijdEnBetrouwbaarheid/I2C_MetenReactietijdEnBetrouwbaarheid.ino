@@ -4,8 +4,7 @@
 // Meet de reactietijd en betrouwbaarheid van op de GedeeldeBus aangemelde I2C-devices.
 // Voert herhaalde pings uit en rapporteert geslaagde en mislukte metingen.
 // Testconfiguratie: I2C-shield met CharacterScreen, PCF8574 en ADS1115.
-// De shieldcomponenten worden voor de diagnose aangemeld via Screen, RFP602 en Input,
-// op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
+// De shieldcomponenten worden voor de diagnose aangemeld via Screen, RFP602 en Input, op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
 // ============================================================================
 
 #include <GroeiAcademie.h>
