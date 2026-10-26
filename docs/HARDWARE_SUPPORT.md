@@ -9,7 +9,7 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke controles. De st
 | Arduino UNO R3 | `avr` | opgenomen in de compilatiematrix | geïmplementeerd en getest |
 | Arduino UNO R4 Minima | `renesas_uno` | opgenomen in de compilatiematrix | geïmplementeerd en getest |
 | Arduino UNO R4 WiFi | `renesas_uno` | opgenomen in de compilatiematrix | geïmplementeerd en getest |
-| Arduino UNO Q | `zephyr` | acceptatiecompilaties via `arduino:zephyr:unoq` | geïmplementeerd en getest |
+| Arduino UNO Q | `zephyr` | experimentele compilaties via `arduino:zephyr:unoq` | EXPERIMENTAL: tests blijven lopen; bekende Screen- en Tools-fouten |
 | Cytron Maker UNO RP2040 | `rp2040` | acceptatiecompilaties via `rp2040:rp2040:cytron_maker_uno_rp2040` | geïmplementeerd en getest |
 | Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) | `esp32` | acceptatiecompilaties via `esp32:esp32:esp32s3` met `BOARD_ESP32S3_DEV` | geïmplementeerd en getest |
 | SB Components Ardi-32 (ESP32-S3-WROOM-1) | `esp32` | acceptatiecompilaties via `esp32:esp32:esp32s3` met `BOARD_ESP32S3_ARDI32` | geïmplementeerd en getest |
@@ -209,11 +209,19 @@ Het volledige blok wordt dan:
 
 De wijziging bestaat dus uitsluitend uit het achteraan toevoegen van `&& !defined(ARDUINO_ARCH_STM32)` aan de eerste `#if`-regel. Dit is een wijziging in een **externe library**, niet in de GroeiAcademie FrameWork-broncode; na een update van de Adafruit-library moet gecontroleerd worden of deze lokale patch nog nodig is of opnieuw moet worden toegepast.
 
+Getest met Adafruit ST7735 and ST7789 Library 1.12.0: de patch is nog nodig voor de geconstateerde STM32-compilatiefout; de zes Screen-tests moeten na herinstallatie opnieuw worden gecompileerd.
+
+Upstream is de correctie voorgesteld in [PR #226](https://github.com/adafruit/Adafruit-ST7735-Library/pull/226) ([issue #225](https://github.com/adafruit/Adafruit-ST7735-Library/issues/225)). De lokale patch vervalt pas wanneer de geïnstalleerde versie de correctie bevat en de zes Nucleo Screen-compilaties zonder lokale patch slagen.
+
+Zie ook [`COMPILE_ISSUES.md`](../COMPILE_ISSUES.md) voor de exacte correctie in de externe Adafruit-library.
+
 Het pakket bevat daarnaast de gebruikte Nucleo-F401RE-referentie onder `docs/ArduinoUnoVormfactorBoards/`.
 
-## ADC-resolutie per Arduino Uno R3-vormfactorbord
+## Interne ADC per Arduino Uno R3-vormfactorbord (informatief)
 
-| Arduino Uno R3-vormfactorbord | Interne ADC-resolutie volgens `SystemConfig.h` |
+Het FrameWork gebruikt de interne ADC niet: analoge metingen lopen via een ADC-Extender. De tabel blijft ter informatie.
+
+| Arduino Uno R3-vormfactorbord | Interne ADC-resolutie van het bord |
 |---|---:|
 | Arduino UNO R3 | 10-bit |
 | Arduino UNO R4 Minima | 14-bit |
@@ -226,7 +234,7 @@ Het pakket bevat daarnaast de gebruikte Nucleo-F401RE-referentie onder `docs/Ard
 | TTGO D1 R32 (ESP32-WROOM-32U) | 12-bit |
 | WeMos D1 R32 (ESP32-WROOM-32U) | 12-bit |
 
-Voor precisiemetingen kan de externe **ADS1115** worden gebruikt. `SystemConfig.h` gebruikt daarvoor `ADC_BITS 15` voor het single-ended bereik. Zie `examples/Systeem/ADC_Backend/ADC_Backend_ADS1115/`.
+Analoge metingen lopen via de externe **ADS1115** als Extender. `SystemConfig.h` gebruikt daarvoor `ADC_BITS 15` voor het single-ended bereik. Zie `examples/Systeem/GedeeldeBus/Extenders/Extender_ADS1115_Meetkwaliteit/`.
 
 ## Configuratie
 
@@ -286,7 +294,7 @@ Controleer de voeding en logicaniveaus van de concrete displaymodule. Bij de uni
 
 ### Stimulus-sensoren
 
-`AANTAL_SENSOREN_AANWEZIG` ondersteunt uitsluitend twee of vier aangesloten sensoren. Iedere andere configuratiewaarde veroorzaakt een compilerfout.
+`RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` ondersteunt uitsluitend twee of vier aangesloten sensoren. Iedere andere configuratiewaarde veroorzaakt een compilerfout.
 
 De huidige standaardpinnen zijn:
 
@@ -299,9 +307,9 @@ De huidige standaardpinnen zijn:
 
 De volledige aansluiting staat in [Toepassingsgebieden/Stimulus/README.md](Toepassingsgebieden/Stimulus/README.md).
 
-### GroeiAcademie Stimulus Shield v1.1.2
+### GroeiAcademie Stimulus Shield v2.0.0
 
-Stimulus Shield v1.1.2 is de actuele en enige geldige hardwareversie in deze release. De HX1838 DATA-lijn gebruikt Arduino Uno-shieldpin `D8` en de PixelScreen-resetlijn gebruikt `D7`. De volledige v1.1.2-tekeningset staat in de map Stimulus Shield v1.1.2. Gebruik de [beschrijving van Stimulus Shield v1.1.2](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) samen met de [hardwarevalidatie v1.1.2](Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md).
+Stimulus Shield v2.0.0 is de actuele en enige geldige hardwareversie in deze release. De sensoren lopen via de ADS1115 op H5, het keypad via de PCF8574. De HX1838 DATA-lijn gebruikt Arduino Uno-shieldpin `D8` en de PixelScreen-resetlijn gebruikt `D7`. De volledige v2.0.0-tekeningset staat in de map Stimulus Shield v2.0.0. Gebruik de [beschrijving van Stimulus Shield v2.0.0](Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md) samen met de [hardwarevalidatie v2.0.0](Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md).
 
 De TFT-route gebruikt ofwel de Quad Logic Level Shifters, ofwel zeven draadbruggen: zes tussen H9 en H10 en één tussen H3 pin 1 en H4 pin 1. Plaats nooit beide tegelijk.
 

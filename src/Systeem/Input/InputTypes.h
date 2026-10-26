@@ -3,7 +3,6 @@
 
 // INPUT TYPES
 #define INPUT_TYPE_NONE       0x00 // geen input
-#define INPUT_TYPE_DIGITAL    0x01 // rechtstreekse aansluiting op de digitale pinnen
 #define INPUT_TYPE_PCF8574    0x02 // indirecte aansluiting via de PCF8574
 #define INPUT_TYPE_HX1838     0x04 // afstanndbediening
 
@@ -47,13 +46,13 @@
 #define KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4       31   // R1,R2,C1,C2,C3,C4 
 #define KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3       32   // R1,R2,R3,R4,C1,C2,C3
 #define KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4       33   // R1,R2,R3,R4,C1,C2,C3,C4
-// #define KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5       34   // R1,R2,R3,R4,C1,C2,C3,C4,C5      TODO: nog te implementeren
+// #define KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5       34   // R1,R2,R3,R4,C1,C2,C3,C4,C5      MOGELIJKE UITBREIDING NA v2.0.0
 
 #define KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4   40   // OUT1, OUT2, OUT3, OUT4, GND, VCC
 
 #define KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4   50   // VCC, GND, (SCL, SDO), OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8 (HW-136) - fysiek 4x4 touch keypad: via de 8 parallelle uitgangen op PCF8574 P0-P7 kunnen enkel de eerste 8 toetsen uitgelezen worden via OUTn
 
-// #define KEYPAD_TYPE_TOUCH_TTP229_SERIAL_4x4   60   // via SCL/SDO; dit is geen I2C.   TODO: nog te implementeren
+// #define KEYPAD_TYPE_TOUCH_TTP229_SERIAL_4x4   60   // via SCL/SDO; dit is geen I2C.   MOGELIJKE UITBREIDING NA v2.0.0
 
 // Experimenteel: enkel bij INPUT_TYPE_PCF8574.
 // Pinnen, KEYPAD_GENERIEK_OUTPUT_LEVEL_WHEN_KEY_PRESSED en de opschriftkoppeling worden volledig in UserConfig.h ingesteld, niet hier in de bibliotheek. 

@@ -6,7 +6,7 @@
 //
 // Werking:
 // - elke I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS één toegang per aanwezige bron:
-//   RFP602 via de ADS1115 (alleen met ADC_BACKEND_ADS1115) en een keypadscan van Input PCF8574 (alleen met INPUT_TYPE_PCF8574);
+//   RFP602 via de gekozen ADS1115-Extender en een keypadscan van Input PCF8574 (alleen met INPUT_TYPE_PCF8574);
 // - rond elke toegang meet micros() de duur;
 // - elke I2C_HERSTELTEST_RAPPORT_ELKE_MS op Serial per bron: langste duur, gemiddelde duur en aantal toegangen;
 // - tegelijk een teller op het scherm via Screen->Print(): zo volgt na een hotplug altijd een "volgende Print()" (S6).
@@ -17,6 +17,19 @@
 // ============================================================================
 
 #include <GroeiAcademie.h>
+
+#if EXTENDER_ADS1115_AANTAL == 0
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+#endif
+
+ExtenderADS1115 extenderADS1115(
+  &Native, GedeeldeBusComponent::ADC_ADS1115,
+  I2C_ADDRESS_EXTENDER_ADS1115_1,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL,
+  EXTENDER_ADS1115_1_ALERT_RDY,
+  HardwareResourceToegang::GEDEELD
+);
+
 
 #ifndef I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS
   #define I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS 200UL
@@ -32,9 +45,7 @@ struct BlokkeertijdPerBron {
   uint16_t aantalToegangen = 0;
 };
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
 BlokkeertijdPerBron blokkeertijdMetingADS1115;
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
 BlokkeertijdPerBron blokkeertijdKeypadscanPCF8574;
 #endif
@@ -69,10 +80,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
-  if (sensorRFP602 == nullptr) GA_SERIAL.println(F("FOUT: RFP602 (ADS1115 wordt niet gemeten)"));
-#endif
+  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+  if (sensorRFP602set1 == nullptr) GA_SERIAL.println(F("FOUT: RFP602 (ADS1115 wordt niet gemeten)"));
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   Input = GedeeldeBusNewComponent<struct Input>();
@@ -92,13 +101,11 @@ void loop() {
   if (nu - tijdstipVorigeToegang >= I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS) {
     tijdstipVorigeToegang = nu;
 
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-    if (sensorRFP602 != nullptr) {
+    if (sensorRFP602set1 != nullptr) {
       const unsigned long startMicros = micros();
-      sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[0]);
+      sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[0]);
       DuurVanToegangBijhouden(blokkeertijdMetingADS1115, startMicros);
     }
-#endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     if (Input != nullptr) {
@@ -114,9 +121,7 @@ void loop() {
     aantalRapporten++;
 
     GA_SERIAL.print(F("Rapport ")); GA_SERIAL.println(aantalRapporten);
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
     RapportRegelTonen(F("  ADS1115 (RFP602-meting)"), blokkeertijdMetingADS1115);
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     RapportRegelTonen(F("  PCF8574 (keypadscan)"), blokkeertijdKeypadscanPCF8574);
 #endif

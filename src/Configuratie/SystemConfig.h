@@ -4,14 +4,6 @@
 #include "../Systeem/Input/InputTypes.h"
 #include "../Systeem/Screen/ScreenTypes.h"
 
-// ADC BACKEND: vaste keuzewaarden die vóór UserConfig.h beschikbaar moeten zijn.
-#ifndef ADC_BACKEND_NATIVE
-  #define ADC_BACKEND_NATIVE               0  // ingebouwde ADC van de Arduino
-#endif
-#ifndef ADC_BACKEND_ADS1115
-  #define ADC_BACKEND_ADS1115              1  // externe 16-bit ADC via I2C
-#endif
-
 // BOARD_VERSIONs: ondersteunde ARDUINO UNO-vormfactor boards die vóór UserConfig.h beschikbaar moeten zijn.
 #define BOARD_UNO_R3                       0
 #define BOARD_UNO_R4_MINIMA                1
@@ -107,6 +99,90 @@
       #include "UserConfig.h"
       #define GROEIACADEMIE_USER_CONFIG_GELADEN
     #endif
+
+    // Extenders: Persoonlijke configuratie (optioneel), na UserConfig.h en vóór de standaardwaarden hieronder.
+    #if __has_include("Extenders/ConfigADS1115.h")
+      #include "Extenders/ConfigADS1115.h"
+    #endif
+    #if __has_include("Extenders/ConfigADS1158.h")
+      #include "Extenders/ConfigADS1158.h"
+    #endif
+    #if __has_include("Extenders/ConfigADS7828.h")
+      #include "Extenders/ConfigADS7828.h"
+    #endif
+    #if __has_include("Extenders/ConfigADS7953.h")
+      #include "Extenders/ConfigADS7953.h"
+    #endif
+    #if __has_include("Extenders/ConfigCD74HC4067.h")
+      #include "Extenders/ConfigCD74HC4067.h"
+    #endif
+    #if __has_include("Extenders/ConfigDS2482v800.h")
+      #include "Extenders/ConfigDS2482v800.h"
+    #endif
+    #if __has_include("Extenders/ConfigMAX14830I2C.h")
+      #include "Extenders/ConfigMAX14830I2C.h"
+    #endif
+    #if __has_include("Extenders/ConfigMAX14830SPI.h")
+      #include "Extenders/ConfigMAX14830SPI.h"
+    #endif
+    #if __has_include("Extenders/ConfigMCP23017.h")
+      #include "Extenders/ConfigMCP23017.h"
+    #endif
+    #if __has_include("Extenders/ConfigMCP23S17.h")
+      #include "Extenders/ConfigMCP23S17.h"
+    #endif
+    #if __has_include("Extenders/ConfigPCA9685.h")
+      #include "Extenders/ConfigPCA9685.h"
+    #endif
+    #if __has_include("Extenders/ConfigPCF8574.h")
+      #include "Extenders/ConfigPCF8574.h"
+    #endif
+    #if __has_include("Extenders/ConfigPCF8575.h")
+      #include "Extenders/ConfigPCF8575.h"
+    #endif
+    #if __has_include("Extenders/ConfigSC16IS752I2C.h")
+      #include "Extenders/ConfigSC16IS752I2C.h"
+    #endif
+    #if __has_include("Extenders/ConfigSC16IS752SPI.h")
+      #include "Extenders/ConfigSC16IS752SPI.h"
+    #endif
+    #if __has_include("Extenders/ConfigTCA9548A.h")
+      #include "Extenders/ConfigTCA9548A.h"
+    #endif
+
+    // Sensoren: Persoonlijke configuratie (optioneel)  
+    #if __has_include("Sensoren/ConfigRFP602.h")
+      #include "Sensoren/ConfigRFP602.h"
+    #endif
+   
+    // Sturingen: Persoonlijke configuratie (optioneel)  
+    #if __has_include("Sturingen/ConfigSG90.h")
+      #include "Sturingen/ConfigSG90.h"
+    #endif
+    #if __has_include("Sturingen/ConfigMG996R.h")
+      #include "Sturingen/ConfigMG996R.h"
+    #endif
+    #if __has_include("Sturingen/ConfigDCmotorL293D.h")
+      #include "Sturingen/ConfigDCmotorL293D.h"
+    #endif
+    #if __has_include("Sturingen/ConfigDCmotorL298N.h")
+      #include "Sturingen/ConfigDCmotorL298N.h"
+    #endif
+    #if __has_include("Sturingen/ConfigRelais.h")
+      #include "Sturingen/ConfigRelais.h"
+    #endif
+    #if __has_include("Sturingen/ConfigRGBLED.h")
+      #include "Sturingen/ConfigRGBLED.h"
+    #endif
+    #if __has_include("Sturingen/ConfigWS2812.h")
+      #include "Sturingen/ConfigWS2812.h"
+    #endif
+    #if __has_include("Sturingen/ConfigULN2003.h")
+      #include "Sturingen/ConfigULN2003.h"
+    #endif
+    #if __has_include("Sturingen/ConfigA4988.h")
+      #include "Sturingen/ConfigA4988.h"
+    #endif
   #endif
 #endif
 
@@ -141,14 +217,14 @@
     #define BOARD_VERSION BOARD_UNO_R4_MINIMA
   #elif defined(ARDUINO_UNOR4_WIFI)
     #define BOARD_VERSION BOARD_UNO_R4_WIFI
-  #elif defined(ARDUINO_UNO_Q)              // TODO: ARDUINO_ZEPHIR | ARDUINO_ESP32S3_WROOM_1
+  #elif defined(ARDUINO_UNO_Q)              // MOGELIJKE ALTERNATIEVE NAMEN: ARDUINO_ZEPHIR | ARDUINO_ESP32S3_WROOM_1
     #define BOARD_VERSION BOARD_UNO_Q
   #elif defined(ARDUINO_D1_UNO32)
     #define BOARD_VERSION BOARD_ESP32_D1_UNO_R32
   #elif defined(ARDUINO_ARDI32)
     #define BOARD_VERSION BOARD_ESP32S3_ARDI32
   #elif defined(ARDUINO_ESP32S3_DEV)
-    #define BOARD_VERSION BOARD_ESP32S3_DEV // TODO: ARDUINO_ESP32S3_UNO | ARDUINO_ESP32S3_WROOM_1
+    #define BOARD_VERSION BOARD_ESP32S3_DEV // MOGELIJKE ALTERNATIEVE NAMEN: ARDUINO_ESP32S3_UNO | ARDUINO_ESP32S3_WROOM_1
   #elif defined(ARDUINO_CYTRON_MAKER_UNO_RP2040)
     #define BOARD_VERSION BOARD_RP2040_CYTRON_MAKER_UNO
   #elif defined(ARDUINO_NUCLEO_F401RE)
@@ -199,43 +275,6 @@
 
 
 // ============================================================================
-// ADC BACKEND ================================================================
-// ----------------------------------------------------------------------------
-// LET OP: Wanneer je ADC_BACKEND op ADC_BACKEND_ADS1115 zet, moet de gekozen ADS1115-library geïnstalleerd zijn via de Arduino Library Manager.
-// ============================================================================
-
-#ifndef AANTAL_SENSOREN_AANWEZIG
-  #define AANTAL_SENSOREN_AANWEZIG  2
-#endif
-
-#if AANTAL_SENSOREN_AANWEZIG != 2 && AANTAL_SENSOREN_AANWEZIG != 4
-  #error AANTAL_SENSOREN_AANWEZIG moet 2 of 4 zijn.
-#endif
-
-#ifndef ADC_BACKEND
-  #define ADC_BACKEND ADC_BACKEND_NATIVE  // wissel dit om van backend te wisselen
-#endif
-
-#ifndef I2C_ADDRESS_ADS1115
-  #define I2C_ADDRESS_ADS1115 0x48
-#endif
-
-#if ADC_BACKEND != ADC_BACKEND_NATIVE && ADC_BACKEND != ADC_BACKEND_ADS1115
-  #error Selecteer een geldige ADC_BACKEND.
-#endif
-
-// Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
-// Bij ADC_BACKEND_NATIVE blijft dit 0. Bij ADC_BACKEND_ADS1115 voorkomt dit dat de I2C-bus zonder onderbreking bevraagd wordt.
-#ifndef WACHT_LOSLATEN_DELAY_MS
-  #if ADC_BACKEND == ADC_BACKEND_ADS1115
-    #define WACHT_LOSLATEN_DELAY_MS 5UL
-  #else
-    #define WACHT_LOSLATEN_DELAY_MS 0UL // standaard waarde
-  #endif
-#endif
-
-
-// ============================================================================
 // DATA =======================================================================
 // ============================================================================
 #ifndef DATA_LAYER_CONFIG
@@ -268,12 +307,12 @@
 // Enkel van toepassing bij OpvragenHuidigeToetsAanslag(false), niet bij wachten=true.
 // #define INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
 
-// INPUT_KANAAL_CONFIG standaard INPUT_TYPE_DIGITAL
+// INPUT_KANAAL_CONFIG standaard INPUT_TYPE_PCF8574
 #ifndef INPUT_KANAAL_CONFIG
-  #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
+  #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
 #endif
 
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
   #ifndef KEYPAD_TYPE
     #define KEYPAD_TYPE KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 // standaard waarde
   #endif
@@ -462,29 +501,129 @@
   #define SENSOR_HERAANMELDEN_NA_PAUZE_MS 100UL // minimale wachttijd tussen twee pogingen om een mislukte sensor opnieuw aan te melden
 #endif
 
+// ============================================================================
+// RFP602 =====================================================================
+// ----------------------------------------------------------------------------
+// LET OP: RFP602 meet via een ADC-Extender (nu: ADS1115). Daarvoor moet de ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
+// ============================================================================
+
+// Oude namen (voor v2.0.0 zonder set): melden welke naam nu geldt.
+#ifdef RFP602_AANTAL_SENSOREN_BESCHIKBAAR
+  #error "RFP602_AANTAL_SENSOREN_BESCHIKBAAR heet nu RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1"
+#endif
+#ifdef RFP602_ADC_PIN_SENSOR_1
+  #error "RFP602_ADC_PIN_SENSOR_1 heet nu RFP602_ADC_PIN_SENSOR_1_SET_1"
+#endif
+#ifdef RFP602_ADC_PIN_SENSOR_2
+  #error "RFP602_ADC_PIN_SENSOR_2 heet nu RFP602_ADC_PIN_SENSOR_2_SET_1"
+#endif
+#ifdef RFP602_ADC_PIN_SENSOR_3
+  #error "RFP602_ADC_PIN_SENSOR_3 heet nu RFP602_ADC_PIN_SENSOR_3_SET_1"
+#endif
+#ifdef RFP602_ADC_PIN_SENSOR_4
+  #error "RFP602_ADC_PIN_SENSOR_4 heet nu RFP602_ADC_PIN_SENSOR_4_SET_1"
+#endif
+#ifdef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #error "RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #error "RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #error "RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #error "RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE
+  #error "RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
+#endif
+#ifdef RFP602_DATA_RECORD_FILE
+  #error "RFP602_DATA_RECORD_FILE heet nu RFP602_DATA_RECORD_FILE_SET_1"
+#endif
+#ifdef RFP602_RUNTIME_DREMPELS_FOUTNIVEAU
+  #error "RFP602_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU
+  #error "RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU
+  #error "RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU
+  #error "RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
+#endif
+#ifdef RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU
+  #error "RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
+#endif
+
+#ifndef RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1
+  #define RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1  2
+#endif
+
+#if RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 != 2 && RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 != 4
+  #error RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn.
+#endif
+
+// Set 2 (1b): bestaat alleen als RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 gedefinieerd is. Geen standaardwaarde: zonder set 2 geen extra geheugen of code.
+#if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
+  #if RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 != 2 && RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 != 4
+    #error RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 moet 2 of 4 zijn.
+  #endif
+#endif
+
+// Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
+// Voorkomt dat de I2C-bus via de ADC-Extender zonder onderbreking bevraagd wordt.
+#ifndef WACHT_LOSLATEN_DELAY_MS
+  #define WACHT_LOSLATEN_DELAY_MS 5UL
+#endif
 
 // ============================================================================
 // RFP602 DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE 0
+#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 0
 #endif
 
-#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
-#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
-#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
-#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
 
-#ifndef RFP602_DATA_RECORD_FILE
-  #define RFP602_DATA_RECORD_FILE "RFP602.log"
+#ifndef RFP602_DATA_RECORD_FILE_SET_1
+  #define RFP602_DATA_RECORD_FILE_SET_1 "RFP602.log"
+#endif
+
+// Set 2 (1b): alleen als set 2 bestaat.
+#if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
+#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 0
+#endif
+#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#endif
+#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#endif
+#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#endif
+#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#endif
+#endif
+
+// Een eigen opnamebestand per set kan de Data-laag nog niet: ze schrijft één bestand (RFP602_DATA_RECORD_FILE_SET_1).
+#ifdef RFP602_DATA_RECORD_FILE_SET_2
+  #error RFP602_DATA_RECORD_FILE_SET_2 wordt nog niet ondersteund: de Data-laag schrijft één opnamebestand, RFP602_DATA_RECORD_FILE_SET_1.
 #endif
 
 
@@ -825,7 +964,7 @@
     #define ARDUINO_UNO_SHIELD_PIN_SCK  GPIO12  // ARDUINO_UNO_SHIELD_PIN_D13
   #endif
 
-  /* TODO: UIT TE WERKEN OPTIE?
+  /* MOGELIJKE UITBREIDING NA v2.0.0?
   #if BOARD_VERSION == BOARD_ESP32S3_ARDI32
   // #define ARDI32_ONBOARD_SD_CS        GPIO1   // SD Card Chip Select
   // #define ARDI32_ONBOARD_SD_MOSI      GPIO2   // SD Card MOSI
@@ -1238,19 +1377,70 @@
   #undef DATA_QUEUE_OR_STACK_ACTIEF
 #endif
 
-#if (defined(RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE) && RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0) || \
-    (RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0)
+#if (defined(RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1) && RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
+    (RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
+    (RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
+    (RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
+    (RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
+    (defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && \
+     ((RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0) || (RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0) || \
+      (RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0) || (RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0)))
   #define DATA_QUEUE_OR_STACK_ACTIEF 1
 #else
   #define DATA_QUEUE_OR_STACK_ACTIEF 0
 #endif
 
+
 // ============================================================================
-// GEDEELDEBUS: GEMENGDE PINNEN
+// GEDEELDEBUS: MIXED PINS
 // ============================================================================
+// STURINGEN: Defaults per component; persoonlijke Config*.h is eerder ingelezen.
+#ifndef STURING_A4988_AANTAL
+  #define STURING_A4988_AANTAL 0
+#endif
+#ifndef STURING_DCMOTORL293D_AANTAL
+  #define STURING_DCMOTORL293D_AANTAL 0
+#endif
+#ifndef STURING_DCMOTORL298N_AANTAL
+  #define STURING_DCMOTORL298N_AANTAL 0
+#endif
+#ifndef STURING_MG996R_AANTAL
+  #define STURING_MG996R_AANTAL 0
+#endif
+#ifndef STURING_RELAIS_AANTAL
+  #define STURING_RELAIS_AANTAL 0
+#endif
+#ifndef STURING_RGBLED_AANTAL
+  #define STURING_RGBLED_AANTAL 0
+#endif
+#ifndef STURING_SG90_AANTAL
+  #define STURING_SG90_AANTAL 0
+#endif
+#ifndef STURING_ULN2003_AANTAL
+  #define STURING_ULN2003_AANTAL 0
+#endif
+#ifndef STURING_WS2812_AANTAL
+  #define STURING_WS2812_AANTAL 0
+#endif
+#ifndef STURING_SG90_MIN_PWM
+  #define STURING_SG90_MIN_PWM 205
+#endif
+#ifndef STURING_SG90_MAX_PWM
+  #define STURING_SG90_MAX_PWM 410
+#endif
+#ifndef STURING_MG996R_MIN_PWM
+  #define STURING_MG996R_MIN_PWM 205
+#endif
+#ifndef STURING_MG996R_MAX_PWM
+  #define STURING_MG996R_MAX_PWM 410
+#endif
+#ifndef STURING_WS2812_WIDTH
+  #define STURING_WS2812_WIDTH 8
+#endif
+#ifndef STURING_WS2812_HEIGHT
+  #define STURING_WS2812_HEIGHT 8
+#endif
+
 // GEDEELDE_BUS_MIXED_PINS: 1 = een component mag per exclusieve pin een eigen gebied hebben (het board of een Extender),
 // bv. een SPI-chip met SCK/MISO/MOSI op het board en CS op een PCF8574. 0 = elk component heeft één gebied (zoals voorheen), zonder extra geheugen.
 // Wordt automatisch 1 wanneer een Data-chip CS via een Extender gebruikt.
@@ -1262,6 +1452,7 @@
 #ifndef GEDEELDE_BUS_MIXED_PINS
   #define GEDEELDE_BUS_MIXED_PINS 0
 #endif
+
 
 // ============================================================================
 // GEDEELDEBUS: RUNTIME-HERSTEL (D042)
@@ -1426,7 +1617,7 @@
 // EXTENDER: ADS1115
 // ============================================================================
 #ifndef EXTENDER_ADS1115_AANTAL
-  #define EXTENDER_ADS1115_AANTAL 0
+  #define EXTENDER_ADS1115_AANTAL 1
 #endif
 
 #if EXTENDER_ADS1115_AANTAL > 2
@@ -1439,7 +1630,7 @@
 #if EXTENDER_ADS1115_AANTAL >= 1
   // EXCLUSIEF: I2C-adres van deze extender-instance op dezelfde I2C-bus.
   #ifndef I2C_ADDRESS_EXTENDER_ADS1115_1
-    #define I2C_ADDRESS_EXTENDER_ADS1115_1 I2C_ADDRESS_NONE
+    #define I2C_ADDRESS_EXTENDER_ADS1115_1 0x48
   #endif
   // EXCLUSIEF: native aansluiting van deze extender-instance; NONE = niet gebruikt/aangesloten.
   #ifndef EXTENDER_ADS1115_1_ALERT_RDY
@@ -1894,6 +2085,11 @@
 #if EXTENDER_PCA9685_AANTAL > 2
   #error EXTENDER_PCA9685_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
+// EXTENDER_PCA9685_1_PWM_FREQUENTIE en EXTENDER_PCA9685_2_PWM_FREQUENTIE (Hz): optioneel, één frequentie per chip voor alle 16 kanalen.
+// Niet ingesteld: de frequentie van de chip blijft. Servo's en LED's daarom op aparte modules.
+// EXTENDER_PCA9685_1_OE_PIN en EXTENDER_PCA9685_2_OE_PIN: optioneel, een pin van het board naar de OE-pin van de chip.
+// Bij uitval gaan via die pin alle 16 uitgangen in één keer uit, ook als de I2C-bus hangt. Niet ingesteld: er verandert niets.
+// De OE-pin wordt niet gereserveerd in de GedeeldeBus: kies een pin die geen ander component gebruikt.
 
 // ============================================================================
 // DEFAULT: PCA9685 #1
@@ -2131,80 +2327,51 @@
 
 
 // ============================================================================
-// ADC BACKEND ================================================================
+// RFP602: standaard ADC-kanalen per sensorset ================================
 // ============================================================================
 
-// Definieer de pinnen voor de sensoren op jouw sensorboard
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-  #ifndef ADC_PIN_SENSOR_1
-    #define ADC_PIN_SENSOR_1 0   // ADS1115-kanaal 0
+// Een .ino kan per RFP602-instantie een eigen ADC-Extender (parent) en vier eigen kanalen opgeven.
+// Zonder opgave gelden deze standaardkanalen. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor RFP602.
+// G2: elke set heeft een eigen ADS1115. Set 2 vraagt dus minstens 2 ADS1115's.
+#if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && EXTENDER_ADS1115_AANTAL < 2
+  #error RFP602 set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2.
+#endif
+#if EXTENDER_ADS1115_AANTAL > 0
+  #ifndef RFP602_ADC_PIN_SENSOR_1_SET_1
+    #define RFP602_ADC_PIN_SENSOR_1_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)
   #endif
-  #ifndef ADC_PIN_SENSOR_2
-    #define ADC_PIN_SENSOR_2 1   // ADS1115-kanaal 1
+  #ifndef RFP602_ADC_PIN_SENSOR_2_SET_1
+    #define RFP602_ADC_PIN_SENSOR_2_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN1)
   #endif
-  #ifndef ADC_PIN_SENSOR_3
-    #define ADC_PIN_SENSOR_3 2   // ADS1115-kanaal 2
+  #ifndef RFP602_ADC_PIN_SENSOR_3_SET_1
+    #define RFP602_ADC_PIN_SENSOR_3_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN2)
   #endif
-  #ifndef ADC_PIN_SENSOR_4
-    #define ADC_PIN_SENSOR_4 3   // ADS1115-kanaal 3
+  #ifndef RFP602_ADC_PIN_SENSOR_4_SET_1
+    #define RFP602_ADC_PIN_SENSOR_4_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3)
   #endif
-#else
-  #ifndef ADC_PIN_SENSOR_1
-    #define ADC_PIN_SENSOR_1 HardwareResourcePin::NP_A0  // standaard waarde: HardwareResourcePin::NP_A0, Analoge pin voor de 1ste test-sensor
-  #endif
-  #ifndef ADC_PIN_SENSOR_2
-    #define ADC_PIN_SENSOR_2 HardwareResourcePin::NP_A1  // standaard waarde: HardwareResourcePin::NP_A1, Analoge pin voor de 2de test-sensor
-  #endif
-  #ifndef ADC_PIN_SENSOR_3
-    #define ADC_PIN_SENSOR_3 HardwareResourcePin::NP_A2  // standaard waarde: HardwareResourcePin::NP_A2, Analoge pin voor de 3de test-sensor
-  #endif
-  #ifndef ADC_PIN_SENSOR_4
-    #define ADC_PIN_SENSOR_4 HardwareResourcePin::NP_A3  // standaard waarde: HardwareResourcePin::NP_A3, Analoge pin voor de 4de test-sensor
+  // Set 2 (1b): standaard dezelfde ingangen, op de ADS1115 die de .ino als parent van set 2 opgeeft.
+  #if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
+    #ifndef RFP602_ADC_PIN_SENSOR_1_SET_2
+      #define RFP602_ADC_PIN_SENSOR_1_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)
+    #endif
+    #ifndef RFP602_ADC_PIN_SENSOR_2_SET_2
+      #define RFP602_ADC_PIN_SENSOR_2_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN1)
+    #endif
+    #ifndef RFP602_ADC_PIN_SENSOR_3_SET_2
+      #define RFP602_ADC_PIN_SENSOR_3_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN2)
+    #endif
+    #ifndef RFP602_ADC_PIN_SENSOR_4_SET_2
+      #define RFP602_ADC_PIN_SENSOR_4_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3)
+    #endif
   #endif
 #endif
 
 #ifndef ADC_BITS
-  #if ADC_BACKEND == ADC_BACKEND_ADS1115
-    #define ADC_BITS 15      // ADS1115 single-ended: 0-32767 bruikbaar bereik
-  #elif BOARD_VERSION == BOARD_UNO_R3
-    #define ADC_BITS 10      // R3 = 10
-  #elif (BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI)
-    #define ADC_BITS 14      // R4 = 10 of 14
-  #elif BOARD_VERSION == BOARD_UNO_Q
-    #define ADC_BITS 10      // Arduino Zephyr core: analogReadResolution() standaard 10-bit
-  #elif BOARD_VERSION == BOARD_ESP32S3_ARDI32
-    #define ADC_BITS 12      // ESP32-S3 Arduino core: analogRead() standaard 12-bit
-  #elif BOARD_VERSION == BOARD_ESP32S3_DEV
-    #define ADC_BITS 12      // ESP32-S3 Arduino core: analogRead() standaard 12-bit
-  #elif BOARD_VERSION == BOARD_ESP32_D1_UNO_R32
-    #define ADC_BITS 12      // zie kanttekening in docs/Configuratie/SystemConfig.md
-  #elif BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
-    #define ADC_BITS 10      // Earle Philhower RP2040 core: analogReadResolution() standaard 10-bit
-  #elif BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE
-    #define ADC_BITS 10      // STM32duino: analogRead() standaard 10-bit voor Arduino-compatibiliteit
-  #endif
+  #define ADC_BITS 15      // ADS1115 single-ended: 0-32767 bruikbaar bereik
 #endif
 
 #ifndef DELAY_US
-  #if ADC_BACKEND == ADC_BACKEND_ADS1115
-    #define DELAY_US 0     // niet van toepassing; I2C-conversietijd zit in de leesfunctie zelf
-  #elif BOARD_VERSION == BOARD_UNO_R3
-    #define DELAY_US 100   // Vertraging tussen samples in de meetlussen
-  #elif (BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI)
-    #define DELAY_US 200   // Vertraging tussen samples in de meetlussen
-  #elif BOARD_VERSION == BOARD_UNO_Q
-    #define DELAY_US 0     // Arduino Zephyr core: analogRead() voert de ADC-conversie synchroon uit
-  #elif BOARD_VERSION == BOARD_ESP32S3_ARDI32
-    #define DELAY_US 0
-  #elif BOARD_VERSION == BOARD_ESP32S3_DEV
-    #define DELAY_US 0
-  #elif BOARD_VERSION == BOARD_ESP32_D1_UNO_R32
-    #define DELAY_US 0     // zie kanttekening in docs/Configuratie/SystemConfig.md
-  #elif BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO
-    #define DELAY_US 0
-  #elif BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE
-    #define DELAY_US 0
-  #endif
+  #define DELAY_US 0       // niet van toepassing; de ADS1115 wacht zelf op de conversie
 #endif
 
 #define ADC_MAX ((1UL << ADC_BITS) - 1UL)
@@ -2222,82 +2389,8 @@
 // INPUT ======================================================================
 // ============================================================================
 
-// INPUT_TYPE_DIGITAL ---------------------------------------------------------
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  // DIGITAL: mapping van keypadlabels naar Arduino Uno-shieldheaderpinnen.
-  // De Arduino Uno-shieldpinnen blijven ARDUINO_UNO_SHIELD_PIN_D2..D5.
-  // De INPUT_KEYPAD_PIN_*-namen volgen het gekozen keypadtype:
-  // - drukknoppen direct: K1..K4
-  // - drukknoppen matrix: L/R- of R/C-lijnen
-  // - membraan direct: 1..4
-  // - touch direct: OUT1..OUT4
-  // Wanneer de gebruiker één INPUT_KEYPAD_PIN_* definieert, moeten alle vier pinnen van dat keypadtype gedefinieerd zijn.
-  #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-    #if defined(INPUT_KEYPAD_PIN_K1) || defined(INPUT_KEYPAD_PIN_K2) || defined(INPUT_KEYPAD_PIN_K3) || defined(INPUT_KEYPAD_PIN_K4)
-      #if !defined(INPUT_KEYPAD_PIN_K1) || !defined(INPUT_KEYPAD_PIN_K2) || !defined(INPUT_KEYPAD_PIN_K3) || !defined(INPUT_KEYPAD_PIN_K4)
-        #error "INPUT_KEYPAD_PIN_K1 t/m INPUT_KEYPAD_PIN_K4 moeten samen gedefinieerd worden."
-      #endif
-    #else
-      #define INPUT_KEYPAD_PIN_K1 HardwareResourcePin::NP_D2
-      #define INPUT_KEYPAD_PIN_K2 HardwareResourcePin::NP_D3
-      #define INPUT_KEYPAD_PIN_K3 HardwareResourcePin::NP_D4
-      #define INPUT_KEYPAD_PIN_K4 HardwareResourcePin::NP_D5
-    #endif
-  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-    #if defined(INPUT_KEYPAD_PIN_L1) || defined(INPUT_KEYPAD_PIN_L2) || defined(INPUT_KEYPAD_PIN_R1) || defined(INPUT_KEYPAD_PIN_R2)
-      #if !defined(INPUT_KEYPAD_PIN_L1) || !defined(INPUT_KEYPAD_PIN_L2) || !defined(INPUT_KEYPAD_PIN_R1) || !defined(INPUT_KEYPAD_PIN_R2)
-        #error "INPUT_KEYPAD_PIN_L1, INPUT_KEYPAD_PIN_L2, INPUT_KEYPAD_PIN_R1 en INPUT_KEYPAD_PIN_R2 moeten samen gedefinieerd worden."
-      #endif
-    #else
-      #define INPUT_KEYPAD_PIN_L1 HardwareResourcePin::NP_D2
-      #define INPUT_KEYPAD_PIN_L2 HardwareResourcePin::NP_D3
-      #define INPUT_KEYPAD_PIN_R1 HardwareResourcePin::NP_D4
-      #define INPUT_KEYPAD_PIN_R2 HardwareResourcePin::NP_D5
-    #endif
-  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4
-    // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
-    // Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld moeten worden.
-    #if defined(INPUT_KEYPAD_PIN_1) || defined(INPUT_KEYPAD_PIN_2) || defined(INPUT_KEYPAD_PIN_3) || defined(INPUT_KEYPAD_PIN_4)
-      #if !defined(INPUT_KEYPAD_PIN_1) || !defined(INPUT_KEYPAD_PIN_2) || !defined(INPUT_KEYPAD_PIN_3) || !defined(INPUT_KEYPAD_PIN_4)
-        #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
-      #endif
-    #else
-      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::NP_D3
-      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::NP_D2
-      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::NP_D5
-      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::NP_D4
-    #endif
-  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-    // De gedraaide D3/D2/D5/D4-volgorde hoort bij het membraan-directtype dat ik ter beschikking had om te testen.
-    // Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld moeten worden.
-    #if defined(INPUT_KEYPAD_PIN_1) || defined(INPUT_KEYPAD_PIN_2) || defined(INPUT_KEYPAD_PIN_3) || defined(INPUT_KEYPAD_PIN_4)
-      #if !defined(INPUT_KEYPAD_PIN_1) || !defined(INPUT_KEYPAD_PIN_2) || !defined(INPUT_KEYPAD_PIN_3) || !defined(INPUT_KEYPAD_PIN_4)
-        #error "INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
-      #endif
-    #else
-      #define INPUT_KEYPAD_PIN_1 HardwareResourcePin::NP_D3
-      #define INPUT_KEYPAD_PIN_2 HardwareResourcePin::NP_D2
-      #define INPUT_KEYPAD_PIN_3 HardwareResourcePin::NP_D5
-      #define INPUT_KEYPAD_PIN_4 HardwareResourcePin::NP_D4
-    #endif
-  #elif defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-    #if defined(INPUT_KEYPAD_PIN_OUT1) || defined(INPUT_KEYPAD_PIN_OUT2) || defined(INPUT_KEYPAD_PIN_OUT3) || defined(INPUT_KEYPAD_PIN_OUT4)
-      #if !defined(INPUT_KEYPAD_PIN_OUT1) || !defined(INPUT_KEYPAD_PIN_OUT2) || !defined(INPUT_KEYPAD_PIN_OUT3) || !defined(INPUT_KEYPAD_PIN_OUT4)
-        #error "INPUT_KEYPAD_PIN_OUT1 t/m INPUT_KEYPAD_PIN_OUT4 moeten samen gedefinieerd worden."
-      #endif
-    #else
-      #define INPUT_KEYPAD_PIN_OUT1 HardwareResourcePin::NP_D2
-      #define INPUT_KEYPAD_PIN_OUT2 HardwareResourcePin::NP_D3
-      #define INPUT_KEYPAD_PIN_OUT3 HardwareResourcePin::NP_D4
-      #define INPUT_KEYPAD_PIN_OUT4 HardwareResourcePin::NP_D5
-    #endif
-  #else
-    #error "Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
-  #endif
-
-
 // INPUT_TYPE_PCF8574 ---------------------------------------------------------
-#elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
 #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT
   #ifndef KEYPAD_GENERIEK_AANTAL_PINNEN
     #error "KEYPAD_GENERIEK_AANTAL_PINNEN moet ingesteld worden in UserConfig.h bij KEYPAD_TYPE_USER_DEFINED_DIRECT."

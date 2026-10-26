@@ -9,6 +9,7 @@ De laadvolgorde voor de systeemconfiguratie is:
 ```text
 vaste keuzewaarden
 -> eventueel UserConfig.h
+-> eventueel de persoonlijke componentbestanden (Extenders/Config<NAAM>.h, Sensoren/Config<NAAM>.h)
 -> officiële fallbackwaarden uit SystemConfig.h
 ```
 
@@ -26,7 +27,7 @@ voorbeeldprogramma's
 
 Iedere gebruikersinstelling uit `UserConfig.h` krijgt voorrang op de fallback uit `SystemConfig.h`. Iedere ontbrekende instelling valt terug op `SystemConfig.h`. De actieve gebruikersbestanden staan in `.gitignore`.
 
-Gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in. Een globale compilerdefinitie kan een configuratiewaarde vóór `UserConfig.h` vastleggen. Zonder zo'n compilerdefinitie geldt steeds: eventueel `UserConfig.h`, daarna de fallback uit `SystemConfig.h`. `GROEIACADEMIE_IGNORE_USER_CONFIG` kan worden gebruikt voor een gecontroleerde build die het persoonlijke gebruikersbestand bewust overslaat.
+Gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in. Een globale compilerdefinitie kan een configuratiewaarde vóór `UserConfig.h` vastleggen. Zonder zo'n compilerdefinitie geldt steeds: eventueel `UserConfig.h`, daarna de fallback uit `SystemConfig.h`. `GROEIACADEMIE_IGNORE_USER_CONFIG` kan worden gebruikt voor een gecontroleerde build die het persoonlijke gebruikersbestand en alle persoonlijke componentbestanden bewust overslaat.
 
 ## Taalkeuze
 
@@ -201,38 +202,22 @@ Voor RFP602 zijn daarnaast beschikbaar:
 
 | Define | Betekenis |
 |---|---|
-| `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE` | `0` = alleen de laatst gemeten waarde per channel; groter dan `0` = RAM-QueueOrStack voor RFP602, los van DIRECT (per channel aan te passen met `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE`). |
-| `RFP602_DATA_RECORD_FILE` | Bestandsnaam voor RFP602-recording op microSD; standaard `"rfp602.log"`. |
+| `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` | `0` = alleen de laatst gemeten waarde per channel; groter dan `0` = RAM-QueueOrStack voor RFP602, los van DIRECT (per channel aan te passen met `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1`). |
+| `RFP602_DATA_RECORD_FILE_SET_1` | Bestandsnaam voor RFP602-recording op microSD; standaard `"rfp602.log"`. |
 
 ## Sensoren
 
 | Define | Betekenis |
 |---|---|
-| `AANTAL_SENSOREN_AANWEZIG` | Aantal fysiek aangesloten sensoren: uitsluitend `2` of `4`; een andere waarde veroorzaakt een compilerfout. |
-| `ADC_PIN_SENSOR_1` .. `ADC_PIN_SENSOR_4` | Sensorpin of ADS1115-kanaal, afhankelijk van `ADC_BACKEND`. |
+| `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` | Aantal fysiek aangesloten RFP602-sensoren: uitsluitend `2` of `4`; een andere waarde veroorzaakt een compilerfout. |
+| `RFP602_ADC_PIN_SENSOR_1_SET_1` .. `RFP602_ADC_PIN_SENSOR_4_SET_1` | Standaardkanalen van de vier RFP602-sensoren op de ADC-Extender. Bij ADS1115: `static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)` tot `EP_AIN3`. Alleen gedefinieerd wanneer `EXTENDER_ADS1115_AANTAL > 0`. |
+| `WACHT_LOSLATEN_DELAY_MS` | Pauze in de wachtlus van `WachtTotAlleSensorsLosgelatenVoorTest()`, zodat de I2C-bus naar de ADC-Extender niet onafgebroken bevraagd wordt; standaard `5`. |
 
-## ADC_BACKEND
-
-De vaste keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
-
-```cpp
-#define ADC_BACKEND_NATIVE  0
-#define ADC_BACKEND_ADS1115 1
-```
-
-De gebruiker kiest:
-
-```cpp
-#define ADC_BACKEND ADC_BACKEND_NATIVE
-```
-
-`ADC_BACKEND_NATIVE` gebruikt de ingebouwde Arduino-ADC. `ADC_BACKEND_ADS1115` gebruikt een externe ADS1115 via I2C en vereist de optionele library ADS1X15 van Rob Tillaart.
-
-`I2C_ADDRESS_ADS1115` bepaalt het adres. `WACHT_LOSLATEN_DELAY_MS` voorkomt bij ADS1115 dat de I2C-bus onafgebroken bevraagd wordt.
+RFP602 meet via een ADC-Extender, net zoals elke andere Sensor op een Extender wordt ingeplugd. De `.ino` maakt de Extender aan en geeft hem als parent door; per RFP602-instantie kunnen ook vier eigen kanalen worden opgegeven. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor RFP602 en vereist de optionele library ADS1X15 van Rob Tillaart. Het I2C-adres staat bij de Extender: `I2C_ADDRESS_EXTENDER_ADS1115_1` (standaard `0x48`).
 
 ## BOARD_VERSION en ADC-resolutie
 
-`BOARD_VERSION` vervangt `UNO_VERSION`, is onafhankelijk van de backendkeuze en staat vóór de berekening van de backendafhankelijke resolutie. De vaste keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
+`BOARD_VERSION` vervangt `UNO_VERSION`. De vaste keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
 
 ```cpp
 #define BOARD_UNO_R3                       0
@@ -252,22 +237,9 @@ De gebruiker kiest:
 #define BOARD_VERSION BOARD_UNO_R3
 ```
 
-| Combinatie | `ADC_BITS` | `DELAY_US` | Betekenis |
-|---|---:|---:|---|
-| `ADC_BACKEND_ADS1115` | 15 | 0 | ADS1115 single-ended: 0-32767 bruikbaar bereik. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_UNO_R3` | 10 | 100 | Arduino UNO R3. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_UNO_R4_MINIMA` | 14 | 200 | Arduino UNO R4 Minima. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_UNO_R4_WIFI` | 14 | 200 | Arduino UNO R4 WiFi. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_UNO_Q` | 10 | 0 | Arduino UNO Q. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_ESP32_D1_UNO_R32` | 12 | 0 | WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U), dependency-aanduiding `ESP32-WROOM-32U`. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_ESP32S3_ARDI32` | 12 | 0 | SB Components Ardi-32 (ESP32-S3-WROOM-1). |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_ESP32S3_DEV` | 12 | 0 | Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1). |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_RP2040_CYTRON_MAKER_UNO` | 10 | 0 | Cytron Maker UNO RP2040. |
-| `ADC_BACKEND_NATIVE` en `BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE` | 10 | 0 | STM32F4 Nucleo-F401RE. |
+`ADC_BITS` is standaard `15` (ADS1115 single-ended: 0-32767 bruikbaar bereik) en `DELAY_US` standaard `0`: de ADS1115 wacht zelf op de conversie, er komt geen extra wachttijd tussen samples. Beide blijven via `UserConfig.h` aanpasbaar.
 
-Voor `BOARD_ESP32_D1_UNO_R32` betekent `DELAY_US 0` dat de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toevoegt. De conversietijd van de boardcore blijft bestaan. WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest. Controleer de werkelijke samplefrequentie, stabiliteit en sensorrespons afzonderlijk wanneer de concrete toepassing dat vereist.
-
-`ADC_MAX` en `ADC(x)` worden door `SystemConfig.h` uit `ADC_BITS` afgeleid. `ADC(x)` ondersteunt 10, 12, 14 en 15 bits. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan.
+`ADC_MAX` en `ADC(x)` worden door `SystemConfig.h` uit `ADC_BITS` afgeleid. `ADC(x)` ondersteunt 10, 12, 14 en 15 bits.
 
 ### STM32F4 Nucleo-F401RE: Arduino Uno-shieldheader
 
@@ -336,7 +308,7 @@ Bron voor de board- en pinmapping: de officiële `boards.txt` en `variants/d1_un
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
-`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. Bij `INPUT_TYPE_DIGITAL` wordt per `KEYPAD_TYPE` vastgelegd welk keypadlabel op welke Arduino Uno-shieldpin aangesloten is. De `INPUT_KEYPAD_PIN_...`-namen volgen het gekozen keypadtype: drukknoppen direct gebruiken `K1..K4`, matrixvarianten gebruiken hun rij-/kolomlabels, membraan-directtypes gebruiken `1..4` en touch-directtypes gebruiken `OUT1..OUT4`. Drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden D3,D2,D5,D4 omdat die softwaremapping de vaste flatkabelvolgorde volgt, zodat er geen draden fysiek gewisseld moeten worden. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
+`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
 
 
 ## GedeeldeBus en Extenders (v2.0.0)
@@ -359,7 +331,7 @@ In de GedeeldeBus-API gebruiken `HardwareResourceType`-waarden de prefix `RT_`. 
 
 Voor iedere concrete Extender bestaat een `EXTENDER_<NAAM>_AANTAL`. De standaardwaarde is 0. De commentaar in de code markeert 0 of 1 als de standaardroute en `>= 2` als experimenteel.
 
-Een Extender met `EXTENDER_<NAAM>_AANTAL == 0` wordt niet mee gecompileerd. Twee gedeelde codebasissen vormen een uitzondering wanneer ze elders effectief nodig zijn: `ExtenderADS1115` bij `ADC_BACKEND == ADC_BACKEND_ADS1115` en `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat. Zo blijven niet gebruikte Extenders buiten de build.
+Een Extender met `EXTENDER_<NAAM>_AANTAL == 0` wordt niet mee gecompileerd. Eén gedeelde codebasis vormt een uitzondering wanneer ze elders effectief nodig is: `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat RFP602 via de ADS1115 meet. Zo blijven niet gebruikte Extenders buiten de build.
 
 De huidige aantalmacro's zijn:
 
@@ -388,7 +360,7 @@ Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of cont
 
 ### ADC en RFP602
 
-`ADC_BACKEND` kiest tussen `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115`. De betekenis van `ADC_PIN_SENSOR_1..4` hangt daarvan af: bij ADS1115 zijn het kanaalnummers; bij Native zijn het `HardwareResourcePin`-waarden. De concrete Sensor `RFP602` gebruikt deze vier configuratiewaarden.
+RFP602 kiest zijn ADC niet via een globale instelling, maar via zijn parent: de ADC-Extender die de `.ino` meegeeft. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`. In RFP602 staat per ondersteunde ADC een meettak onder `#if EXTENDER_<NAAM>_AANTAL > 0`; momenteel alleen ADS1115, via `ADS1115viaParent()`. Een andere ADC-Extender ondersteunen vraagt alleen een aanpassing in RFP602. De standaardkanalen zijn `RFP602_ADC_PIN_SENSOR_1_SET_1..4`.
 
 
 ### Runtime-herstel (D042)

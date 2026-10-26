@@ -31,6 +31,13 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+set TEST_INO="examples\Systeem\Tools\I2C\I2C_MetenHerstelEnBlokkeertijd\I2C_MetenHerstelEnBlokkeertijd.ino"
+set TEST_NAAM="I2C Meten Herstel En Blokkeertijd"
+set TEST_FLAGS="-DEXTENDER_ADS1115_AANTAL=1"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\Tools\I2C\I2C_MetenReactietijdEnBetrouwbaarheid\I2C_MetenReactietijdEnBetrouwbaarheid.ino"
 set TEST_NAAM="I2C Meten Reactietijd En Betrouwbaarheid"
 set TEST_FLAGS=""

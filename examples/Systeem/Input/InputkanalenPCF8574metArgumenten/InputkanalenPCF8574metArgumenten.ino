@@ -10,7 +10,6 @@
 // - KEYPAD_TYPE_MEMBRAAN_MATRIX_4x3 en KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4: een PIN-code wordt
 //   opgebouwd via de cijfer-/lettertoetsen (gedeelde, globale buffer), * bevestigt, # wist.
 // - Alle overige KEYPAD_TYPE-waarden: de eenvoudige, rechtstreekse (void*)-cast, zonder
-//   gedeelde toestand, zoals bij InputkanalenDIGITALmetArgumenten.ino.
 //
 // Ondersteunde KEYPAD_TYPE-waarden bij INPUT_TYPE_PCF8574, elk met hun volledige opschrift:
 // * KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4      K1, K2, K3, K4, GND [S1, S2, S3, S4]
@@ -35,7 +34,6 @@
 // mappingTestMenu[] hieronder bevat, per KEYPAD_TYPE, de volledige set opschriften die dat
 // type kan opleveren, elk gekoppeld aan een functie met het argumenten-veld. Zo toont het
 // display precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
-// Voor INPUT_TYPE_DIGITAL, zie InputkanalenDIGITALmetArgumenten.ino.
 // Voor INPUT_TYPE_HX1838, zie InputkanalenHX1838metArgumenten.ino.
 
 #include <GroeiAcademie.h>

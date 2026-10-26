@@ -22,14 +22,22 @@ of:
 
 ## v2.0.0 Sensorroute
 
-De huidige Stimuluscode neemt `src/Systeem/Sensor/RFP602.h` op en leest de analoge kanalen via de globale pointer `sensorRFP602`. De Stimulusvoorbeelden maken deze Sensor vóór gebruik aan met:
+De huidige Stimuluscode neemt `src/Systeem/Sensor/RFP602.h` op en leest de analoge kanalen via de globale pointer `sensorRFP602set1`. RFP602 meet via een ADC-Extender (nu: ADS1115), zoals elke Sensor op een Extender wordt ingeplugd. De Stimulusvoorbeelden maken eerst de Extender aan en daarna de Sensor met die Extender als parent:
 
 ```cpp
-sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
-if (sensorRFP602 == nullptr) exit(0);
+ExtenderADS1115 extenderADS1115(
+  &Native, GedeeldeBusComponent::ADC_ADS1115,
+  I2C_ADDRESS_EXTENDER_ADS1115_1,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL,
+  EXTENDER_ADS1115_1_ALERT_RDY,
+  HardwareResourceToegang::GEDEELD
+);
+
+sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+if (sensorRFP602set1 == nullptr) exit(0);
 ```
 
-`RFP602` hangt compile-time onder `ADC_NATIVE` of `ADC_ADS1115`, afhankelijk van `ADC_BACKEND`. `RawAnalogRead()` gebruikt overeenkomstig `analogRead()` of `ADS1115.readADC_SingleEnded()`.
+Zonder kanaalargumenten gebruikt RFP602 de standaardkanalen `RFP602_ADC_PIN_SENSOR_1_SET_1` tot `RFP602_ADC_PIN_SENSOR_4_SET_1` (ADS1115: `EP_AIN0` tot `EP_AIN3`). Een `.ino` kan ook vier eigen kanalen meegeven. `RawAnalogRead()` leest via `ExtenderADS1115::readADC()`.
 
 ## Doel
 
@@ -65,14 +73,16 @@ De benaming `TikKracht` in de API verwijst in de huidige implementatie naar een 
 
 De standaardwaarden uit `src/Configuratie/SystemConfig.h` zijn:
 
-| Sensor | Analoge ingang |
+| Sensor | Ingang van de ADS1115 |
 |---|---|
-| sensor 1 | `A0` |
-| sensor 2 | `A1` |
-| sensor 3 | `A2` |
-| sensor 4 | `A3` |
+| sensor 1 | `AIN0` |
+| sensor 2 | `AIN1` |
+| sensor 3 | `AIN2` |
+| sensor 4 | `AIN3` |
 
-`AANTAL_SENSOREN_AANWEZIG` bepaalt of de opstelling twee of vier sensoren gebruikt. `SystemConfig.h` weigert iedere andere waarde tijdens het compileren.
+De ADS1115 zelf hangt op de I2C-bus (SDA/SCL), standaard op adres `0x48`.
+
+`RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` bepaalt of de opstelling twee of vier sensoren gebruikt. `SystemConfig.h` weigert iedere andere waarde tijdens het compileren.
 
 ### Aansluiting per resistieve druksensor
 
@@ -83,26 +93,27 @@ VCC
  |
 [ druksensor ]
  |
- +--------------------> analoge ingang Ax
+ +--------------------> ADS1115-ingang AINx
  |
 [ vaste weerstand ]
  |
 GND
 ```
 
-Voor sensor 1 wordt `Ax` bijvoorbeeld `A0`, voor sensor 2 `A1`.
+Voor sensor 1 wordt `AINx` bijvoorbeeld `AIN0`, voor sensor 2 `AIN1`.
 
 De vaste weerstand moet passen bij het weerstandsbereik van de werkelijk gebruikte sensor. De repository legt in versie `1.0.0` nog geen universele weerstandswaarde vast, omdat die afhangt van sensorvariant, gewenste gevoeligheid en voedingsspanning. Noteer de gekozen waarde bij iedere meetopstelling.
 
-Alle sensoren en de Arduino moeten een gemeenschappelijke massa gebruiken.
+Alle sensoren, de ADS1115 en de Arduino moeten een gemeenschappelijke massa gebruiken.
 
 ### Volledige logische aansluiting
 
 ```text
-Sensorcircuit 1 uitgang  -> A0
-Sensorcircuit 2 uitgang  -> A1
-Sensorcircuit 3 uitgang  -> A2  (alleen bij 4 sensoren)
-Sensorcircuit 4 uitgang  -> A3  (alleen bij 4 sensoren)
+Sensorcircuit 1 uitgang  -> ADS1115 AIN0
+Sensorcircuit 2 uitgang  -> ADS1115 AIN1
+Sensorcircuit 3 uitgang  -> ADS1115 AIN2  (alleen bij 4 sensoren)
+Sensorcircuit 4 uitgang  -> ADS1115 AIN3  (alleen bij 4 sensoren)
+ADS1115 SDA/SCL          -> Arduino SDA/SCL
 Alle GND-punten          -> Arduino GND
 Voeding sensorcircuits   -> geschikte VCC volgens Arduino Uno R3-vormfactorbord en sensor
 ```
@@ -111,39 +122,15 @@ Sluit een kale resistieve sensor niet aan alsof zij zelf een analoge spanning ge
 
 ## Boardconfiguratie
 
-Voor UNO R3:
-
-```cpp
-#define BOARD_VERSION BOARD_UNO_R3
-```
-
-De huidige configuratie gebruikt dan 10-bit ADC-schaal en `DELAY_US 100`.
-
-Voor UNO R4 Minima:
+Het bord kies je met `BOARD_VERSION`, bijvoorbeeld:
 
 ```cpp
 #define BOARD_VERSION BOARD_UNO_R4_MINIMA
 ```
 
-Voor UNO R4 WiFi:
+De meting zelf loopt op elk bord via de ADS1115: 15-bit schaal (`ADC_BITS 15`) en geen extra wachttijd tussen samples (`DELAY_US 0`), want de ADS1115 wacht zelf op de conversie. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar deze schaal.
 
-```cpp
-#define BOARD_VERSION BOARD_UNO_R4_WIFI
-```
-
-Beide UNO R4-keuzes gebruiken 14-bit ADC-schaal en `DELAY_US 200`.
-
-Voor ESP32-borden met boardprofiel `esp32:esp32:d1_uno32`, waaronder WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U):
-
-```cpp
-#define BOARD_VERSION BOARD_ESP32_D1_UNO_R32
-```
-
-De configuratie gebruikt dan 12-bit ADC-schaal en `DELAY_US 0`. Dit voegt vanuit de GroeiAcademie FrameWork-library geen extra wachttijd tussen samples toe. WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest. Controleer bij andere compatibele borden de werkelijke samplefrequentie, stabiliteit, 3,3 V-ingangsniveaus en sensorrespons afzonderlijk.
-
-Controleer dat de gekozen ADC-resolutie ook werkelijk door de boardcore en initialisatie wordt toegepast. De voorbeeldprogramma's roepen bij 12 en 14 bits `analogReadResolution(ADC_BITS)` aan. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar de gekozen ADC-schaal.
-
-`ADC_Backend_Native.ino` is een zelfstandig hardwarevalidatiescript en gebruikt daarom een eigen `BOARD_VERSION`-keuze in het script zelf. De gewone Stimulusvoorbeelden gebruiken de centrale configuratie uit `UserConfig.h` en `SystemConfig.h`.
+`Extender_ADS1115_Meetkwaliteit.ino` is een zelfstandig hardwarevalidatiescript voor de ADS1115-Extender. De gewone Stimulusvoorbeelden gebruiken de centrale configuratie uit `UserConfig.h` en `SystemConfig.h`.
 
 ## Configuratiegrenzen
 
@@ -175,15 +162,14 @@ Voor reproduceerbare resultaten:
 
 ## Scenario's en voorbeelden
 
-- `examples/Systeem/ADC_Backend/ADC_Backend_Native/ADC_Backend_Native.ino`
-- `examples/Systeem/ADC_Backend/ADC_Backend_ADS1115/ADC_Backend_ADS1115.ino`
+- `examples/Systeem/GedeeldeBus/Extenders/Extender_ADS1115_Meetkwaliteit/Extender_ADS1115_Meetkwaliteit.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario1_EnkelTik/Scenario1_EnkelTik.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario2_Simultaan/Scenario2_Simultaan.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario3_Ineenstortend/Scenario3_Ineenstortend.ino`
 - `examples/Toepassingsgebieden/Stimulus/Scenario4_Cocktail/Scenario4_Cocktail.ino`
 - `examples/Toepassingsgebieden/Stimulus/Tik_Enkele_Samen_Instortend_Cocktail/Tik_Enkele_Samen_Instortend_Cocktail.ino`
 
-De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke backends: directe Arduino-ADC en ADS1115. De volledige fysieke shieldopbouw en de bijbehorende validatiestappen staan in de hardwarebeschrijving en de afzonderlijke handleiding.
+Het validatiescript `Extender_ADS1115_Meetkwaliteit.ino` meet 10 s lang de vier ingangen van de ADS1115-Extender en toont per kanaal gemiddelde, standaardafwijking, minimum en maximum. De volledige fysieke shieldopbouw en de bijbehorende validatiestappen staan in de hardwarebeschrijving en de afzonderlijke handleiding.
 
 ## Veiligheid en interpretatie
 
@@ -196,7 +182,7 @@ De twee ADC-validatiescripts testen dezelfde meetlijn via twee afzonderlijke bac
 
 ## Afzonderlijke schemabestanden
 
-De hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De actuele versie is [Stimulus Shield v1.1.2](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md): de actuele v1.1.2-hardware met H5, H6, H7 en H8, directe Arduino-ADC/ADS1115, TFT-SPI en HX1838. De aanvullende validatiestappen staan in [Handleiding Stimulus Shield v1.1.2](../../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md).
+De hardwarelijn staat onder [Uitbreidingskaarten](../../Uitbreidingskaarten/). De actuele versie is [Stimulus Shield v2.0.0](../../Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md): ADS1115 op H5, voedingskeuze H7, TFT-SPI op H8, PCF8574 en HX1838. De aanvullende validatiestappen staan in [Handleiding Stimulus Shield v2.0.0](../../Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md).
 
 
 ### BOARD_ESP32_D1_UNO_R32

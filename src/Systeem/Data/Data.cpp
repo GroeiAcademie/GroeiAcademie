@@ -477,7 +477,7 @@ void Data::RecordingStart() {
   for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
     struct DataMICROSDviaSPI* kanaal = MICROSDviaSPI[teller];
     if (kanaal == nullptr || !kanaal->actief) continue;
-    if (!FileRecording[teller]) FileRecording[teller] = kanaal->open(RFP602_DATA_RECORD_FILE, O_RDWR | O_CREAT | O_AT_END);   // achteraan bijschrijven
+    if (!FileRecording[teller]) FileRecording[teller] = kanaal->open(RFP602_DATA_RECORD_FILE_SET_1, O_RDWR | O_CREAT | O_AT_END);   // achteraan bijschrijven
   }
 #endif
 }
@@ -507,7 +507,7 @@ int Data::RecordRead(SensorQueueOrStack& channel) {
   struct DataMICROSDviaSPI* kanaal = MICROSDviaSPI[0];
   if ((this->typesActief & DATA_TYPE_MICROSD_SPI) && kanaal != nullptr && kanaal->actief) {
     RecordingStop();
-    FileRecording[0] = kanaal->open(RFP602_DATA_RECORD_FILE, O_RDONLY);
+    FileRecording[0] = kanaal->open(RFP602_DATA_RECORD_FILE_SET_1, O_RDONLY);
     if (FileRecording[0]) {
       const int gelezen = FileRecording[0].parseInt();
       FileRecording[0].close();

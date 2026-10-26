@@ -134,32 +134,6 @@ bool HardwareResourceTypeSPI::ConnectCStoExtender(GedeeldeBusComponent extender,
 }
 #endif
 
-#if ADC_BACKEND == ADC_BACKEND_NATIVE
-struct ADC_NATIVE ADC_NATIVE(
-  &Native,
-  GedeeldeBusComponent::ADC_NATIVE,
-  ADC_PIN_SENSOR_1,
-  ADC_PIN_SENSOR_2,
-#if AANTAL_SENSOREN_AANWEZIG == 4
-  ADC_PIN_SENSOR_3,
-  ADC_PIN_SENSOR_4,
-#else
-  HardwareResourcePin::NONE,   // enkel de pinnen van de aanwezige sensoren claimen
-  HardwareResourcePin::NONE,
-#endif
-  HardwareResourceToegang::GEDEELD
-);
-#elif ADC_BACKEND == ADC_BACKEND_ADS1115
-struct ADC_ADS1115 ADC_ADS1115(
-  &Native,
-  GedeeldeBusComponent::ADC_ADS1115,
-  I2C_ADDRESS_ADS1115,
-  HardwareResourcePin::NP_SDA,
-  HardwareResourcePin::NP_SCL,
-  HardwareResourcePin::NONE,
-  HardwareResourceToegang::GEDEELD
-);
-#endif
 
 // Vertaalt een native HardwareResourcePin naar het echte, board-specifieke Arduino-pinnummer. Enkel geldig voor native boardresources (D0-D13, A0-A5,
 // SDA, SCL, MISO, MOSI, SCK, SS). Extenderpins (ExtenderPins per Extender) gaan hier NOOIT doorheen - die blijven resources van hun eigen Extender.
@@ -370,7 +344,7 @@ bool GedeeldeBusNode::activeren() {
   if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->disableAllChannels();
 #endif
   activerenBezig = false;
-  if (!gelukt) return false;
+  if (!gelukt) { StopSturing(); return false; }   // V11
 
   actief = true;
 
@@ -747,6 +721,10 @@ bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType) {
 }
 
 void GedeeldeBusNode::AlleOnderliggendeNodesUitschakelen() {
+  // V11: eerst alle Sturingen veilig, terwijl ze nog actief zijn; daarna alles uit.
+  for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
+    const_cast<GedeeldeBusNode*>(n)->StopSturing();
+  }
   for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
     const_cast<GedeeldeBusNode*>(n)->actief = false;
   }
@@ -859,6 +837,7 @@ bool HardwareResourceTypeI2C::ResultaatComponentToegangTijdensRuntimeVerwerken(b
   if (actief && resultaat >= FoutniveauVanScreenData(drempels.uitschakelenVanafFoutniveau)) {
     actief = false;
     AlleOnderliggendeNodesUitschakelen();
+    StopSturing();   // G3: daarna ook de node zelf, bv. de OE-pin van een PCA9685 die niet meer antwoordt
     toestandTijdensRuntime.oorzaakHerstelGemeld = false;
     toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze; aantal en tijd lopen door
   }
@@ -899,6 +878,7 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
     toestand = ToestandTijdensRuntime();
     extender->actief = false;
     extender->AlleOnderliggendeNodesUitschakelen();
+    extender->StopSturing();   // G3: daarna ook de Extender zelf, bv. de OE-pin van een PCA9685 die niet meer antwoordt
     extender->toestandTijdensRuntime.oorzaakHerstelGemeld = false;
     extender->toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze
   }
@@ -1012,7 +992,7 @@ bool GedeeldeBusNode::controleren() {
 #if EXTENDER_DS2482_800_AANTAL > 0
           case GedeeldeBusComponent::ONE_WIRE_DS2482v800: geldig = waarde <= static_cast<uint8_t>(ExtenderDS2482v800::ExtenderPins::EP_IO7); break;
 #endif
-#if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
+#if EXTENDER_ADS1115_AANTAL > 0
           case GedeeldeBusComponent::ADC_ADS1115: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3); break;
 #endif
 #if EXTENDER_ADS1158_AANTAL > 0

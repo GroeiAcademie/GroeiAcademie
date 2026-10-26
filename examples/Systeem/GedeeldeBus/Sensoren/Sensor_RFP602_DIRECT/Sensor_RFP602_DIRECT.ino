@@ -3,10 +3,23 @@
 // ============================================================================
 // RFP602 via de Data-class.
 // Zonder QueueOrStack geeft ReadQueueOrStackValue() de laatst gemeten waarde van die sensor terug.
-// Met RFP602_CHANNEL_x_DATA_LAYER_QUEUE_OR_STACK_SIZE > 0 leest ReadQueueOrStackValue() de QueueOrStack van dat channel.
+// Met RFP602_CHANNEL_x_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0 leest ReadQueueOrStackValue() de QueueOrStack van dat channel.
 // ============================================================================
 
 #include <GroeiAcademie.h>
+
+#if EXTENDER_ADS1115_AANTAL == 0
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+#endif
+
+ExtenderADS1115 extenderADS1115(
+  &Native, GedeeldeBusComponent::ADC_ADS1115,
+  I2C_ADDRESS_EXTENDER_ADS1115_1,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL,
+  EXTENDER_ADS1115_1_ALERT_RDY,
+  HardwareResourceToegang::GEDEELD
+);
+
 
 #if !((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
   #error Voeg DATA_TYPE_DIRECT toe aan DATA_LAYER_CONFIG voor deze test.
@@ -19,10 +32,6 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 }
 
 void setup() {
-#if ADC_BITS == 12 || ADC_BITS == 14
-  analogReadResolution(ADC_BITS);
-#endif
-
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
@@ -35,8 +44,8 @@ void setup() {
     return;
   }
 
-  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>(Data);
-  const bool gelukt = sensorRFP602 != nullptr;
+  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602, Data);
+  const bool gelukt = sensorRFP602set1 != nullptr;
   ToonResultaat(F("Sensor aanmelden/controleren/inpluggen/activeren"), gelukt);
 
   if (!gelukt) {
@@ -48,13 +57,13 @@ void setup() {
 }
 
 void loop() {
-  if (sensorRFP602 == nullptr || Data == nullptr) return;
-  for (uint8_t sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_AANWEZIG; sensorNummer++) {
-    sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
+  if (sensorRFP602set1 == nullptr || Data == nullptr) return;
+  for (uint8_t sensorNummer = 0; sensorNummer < RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1; sensorNummer++) {
+    sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[sensorNummer]);
     GA_SERIAL.print(F("Sensor "));
     GA_SERIAL.print(sensorNummer + 1);
     GA_SERIAL.print(F(": "));
-    GA_SERIAL.println(sensorRFP602->ReadQueueOrStackValue(sensorNummer + 1));
+    GA_SERIAL.println(sensorRFP602set1->ReadQueueOrStackValue(sensorNummer + 1));
   }
 
   GA_SERIAL.println();

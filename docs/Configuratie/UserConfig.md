@@ -12,6 +12,22 @@ Alle aanpasbare instellingen staan in het template standaard als uitgecommentari
 
 Je mag na het kopiëren dus instellingen verwijderen die je niet persoonlijk wilt vastleggen. Alleen de overblijvende instellingen wijken dan blijvend af van de officiële standaardconfiguratie.
 
+## Instellingen per Extender en per Sensor
+
+Instellingen per Extender en per Sensor staan niet in `UserConfig.h`, maar in een eigen bestand per component:
+
+```text
+src/Configuratie/Extenders/Config<NAAM>_template.h   (meegeleverd)
+src/Configuratie/Extenders/Config<NAAM>.h            (persoonlijk, optioneel)
+src/Configuratie/Sensoren/Config<NAAM>_template.h            (meegeleverd)
+src/Configuratie/Sensoren/Config<NAAM>.h                     (persoonlijk, optioneel)
+src/Configuratie/Sturingen/                                  (voor later)
+```
+
+Kopieer `Config<NAAM>_template.h` naar `Config<NAAM>.h` in dezelfde map en zet alleen wat je wil afwijken. Eén bestand per componenttype: `ConfigADS1115.h` bevat zowel ADS1115 #1 als #2. Een template wordt nooit ingelezen, alleen de persoonlijke versie, en alleen als ze bestaat.
+
+Voorrang: `UserConfig.h`, dan de persoonlijke componentbestanden, dan `SystemConfig.h` (vult de rest aan met de standaardwaarden). Elke instelling staat onder `#ifndef`, dus een eerder gedefinieerde waarde blijft behouden. Persoonlijke bestanden (zonder `_template`) staan in `.gitignore` en dus niet op GitHub. `GROEIACADEMIE_IGNORE_USER_CONFIG` slaat ook de persoonlijke componentbestanden over.
+
 ## Taal
 
 Activeer desgewenst exact één taal:
@@ -70,7 +86,7 @@ De Input-laag wordt via `UserConfig.h` geconfigureerd met dezelfde voorrangsrege
 Belangrijkste instellingen:
 
 ```cpp
-// #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
+// #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
 // #define KEYPAD_TYPE KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
 // #define I2C_ADDRESS_PCF8574 0x20
 // #define HX1838_ONTVANGER_PIN ARDUINO_UNO_SHIELD_PIN_D8
@@ -82,7 +98,7 @@ Belangrijkste instellingen:
 // #define HX1838_BRON_CODES HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE
 ```
 
-Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_DIGITAL`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`.
+Geldige huidige `INPUT_KANAAL_CONFIG`-keuzes zijn `INPUT_TYPE_NONE`, `INPUT_TYPE_PCF8574`, `INPUT_TYPE_HX1838` en `INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838`.
 
 `HX1838_BRON_CODES_DEFINE` is released en is hardwarematig bevestigd voor zowel TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) als IRremote (`= 0`); beide routes werken. De standaard `HX1838_ONTVANGER_PIN` is D8. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 
@@ -90,7 +106,7 @@ Voor de drie ingebouwde HX1838-toetsenindelingen kunnen `HX1838_CODE_1` tot en m
 
 Voor de ingebouwde indelingen geldt verder: `HX1838_BRON_CODES_DEFINE` gebruikt de vaste mapping; codes die niet in `UserConfig.h` zijn gedefinieerd, worden door `SystemConfig.h` met de standaardcodes aangevuld. `HX1838_BRON_CODES_EEPROM_ALTIJD` gebruikt EEPROM ongeacht aanwezige code-defines. Bij `HX1838_BRON_CODES_EEPROM_WANNEER_GEEN_DEFINE` wordt de vaste mapping gebruikt zodra minstens één `HX1838_CODE_x` in `UserConfig.h` is gedefinieerd; wanneer geen enkele code is gedefinieerd, wordt EEPROM gebruikt. Een expliciet gedefinieerde code met waarde `0` is ongeldig wanneer de vaste mapping wordt gebruikt.
 
-De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken. Voor `INPUT_TYPE_DIGITAL` gebeurt dit per `KEYPAD_TYPE`: drukknop-direct, drukknop-matrix en TTP224 gebruiken standaard D2,D3,D4,D5; de twee membraan-directtypes behouden standaard D3,D2,D5,D4. Deze pinnen worden als `HardwareResourcePin`-waarden opgegeven.
+De logische keypadpinnen en de Arduino Uno-shieldpin-overrides staan eveneens in `UserConfig_template.h`; activeer alleen de regels die bewust van de standaardconfiguratie moeten afwijken.
 
 ## Serial redirect
 
@@ -171,26 +187,31 @@ SDA/SCL voor EEPROM en FRAM en SCK/MISO/MOSI voor microSD en FLASH komen uit de 
 Voor RFP602:
 
 ```cpp
-// #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE 0
-// #define RFP602_DATA_RECORD_FILE "rfp602.log"
+// #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 0
+// #define RFP602_DATA_RECORD_FILE_SET_1 "rfp602.log"
 ```
 
-`RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE` is `0` voor geen QueueOrStack (alleen de laatst gemeten waarde per channel); een waarde groter dan `0` activeert de RAM-QueueOrStack voor RFP602. `RFP602_DATA_RECORD_FILE` bepaalt het microSD-bestand voor RFP602-recording.
+`RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` is `0` voor geen QueueOrStack (alleen de laatst gemeten waarde per channel); een waarde groter dan `0` activeert de RAM-QueueOrStack voor RFP602. `RFP602_DATA_RECORD_FILE_SET_1` bepaalt het microSD-bestand voor RFP602-recording.
 
-## ADC-backend
+## RFP602
 
-De vaste keuzewaarden `ADC_BACKEND_NATIVE` en `ADC_BACKEND_ADS1115` worden door `SystemConfig.h` beschikbaar gemaakt vóór `UserConfig.h` wordt geladen. Daardoor kunnen de gewone en backendafhankelijke instellingen in `UserConfig.h` deze namen veilig gebruiken.
+RFP602 meet via een ADC-Extender (nu: ADS1115). De `.ino` maakt die Extender aan en geeft hem als parent aan RFP602 door. De instellingen van RFP602 staan in `src/Configuratie/Sensoren/ConfigRFP602_template.h`:
 
-Het template bevat de huidige instelbare waarden voor:
+- `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1`, uitsluitend `2` of `4`;
+- `RFP602_ADC_PIN_SENSOR_1_SET_1` tot en met `RFP602_ADC_PIN_SENSOR_4_SET_1`, standaard `static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)` tot `EP_AIN3`;
+- de Data-instellingen `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1`, `RFP602_CHANNEL_<N>_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` en `RFP602_DATA_RECORD_FILE_SET_1`.
 
-- `AANTAL_SENSOREN_AANWEZIG`, uitsluitend `2` of `4`;
-- `ADC_BACKEND` en `I2C_ADDRESS_ADS1115`;
-- `WACHT_LOSLATEN_DELAY_MS`;
-- `ADC_PIN_SENSOR_1` tot en met `ADC_PIN_SENSOR_4`;
-- `BOARD_VERSION`;
-- `DELAY_US`.
+De oude namen zonder `_SET_1` (bv. `RFP602_AANTAL_SENSOREN_BESCHIKBAAR`) geven een `#error` met de nieuwe naam.
 
-`BOARD_VERSION` blijft een algemene boardkeuze en staat buiten de keuze tussen de Native ADC en ADS1115. De beschikbare waarden zijn:
+**Een tweede set (optioneel).** Zet `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2` op `2` of `4`; zonder die regel bestaat set 2 niet en kost ze geen geheugen. Dezelfde instellingen bestaan dan op `_SET_2`, behalve `RFP602_DATA_RECORD_FILE_SET_2`: de Data-laag schrijft één opnamebestand. Elke set heeft een eigen ADS1115, dus set 2 vraagt `EXTENDER_ADS1115_AANTAL` `2` en `I2C_ADDRESS_EXTENDER_ADS1115_2`. In de `.ino` krijgt set 2 die tweede ADS1115 als parent en `set = 2` als laatste argument; het globale object heet `sensorRFP602set2` (set 1: `sensorRFP602set1`). Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_RFP602_TweeSetsOpTweeADS1115/`.
+
+In `UserConfig.h` blijven onder "STIMULUS" `WACHT_LOSLATEN_DELAY_MS` (standaard `5`) en `DELAY_US` (standaard `0`): die gebruikt Stimulus, niet RFP602.
+
+Het I2C-adres van de ADS1115 staat in `src/Configuratie/Extenders/ConfigADS1115_template.h`: `I2C_ADDRESS_EXTENDER_ADS1115_1` (standaard `0x48`).
+
+## BOARD_VERSION
+
+`BOARD_VERSION` is de algemene boardkeuze. De beschikbare waarden zijn:
 
 ```cpp
 #define BOARD_UNO_R3                       0
@@ -210,7 +231,7 @@ Selecteer het bord met één regel:
 #define BOARD_VERSION BOARD_UNO_R3
 ```
 
-`SystemConfig.h` leidt `ADC_BITS` automatisch af uit `ADC_BACKEND` en `BOARD_VERSION`. `DELAY_US` blijft via `UserConfig.h` aanpasbaar en krijgt anders de van het Arduino Uno R3-vormfactorbord en de backend afhankelijke fallback uit `SystemConfig.h`. Voor `BOARD_ESP32_D1_UNO_R32` blijft `DELAY_US 0` een te valideren keuze voor de concrete meetopstelling; zie `SystemConfig.md`.
+`ADC_BITS` is standaard `15` (ADS1115) en `DELAY_US` standaard `0`; beide blijven via `UserConfig.h` aanpasbaar.
 
 ## Actief gebruikersbestand
 
@@ -228,7 +249,7 @@ Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel 
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
-`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. De keypad-specifieke `INPUT_KEYPAD_PIN_...`-mapping voor `INPUT_TYPE_DIGITAL` gebruikt deze shieldnamen; `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven. Dit geldt ook voor de actieve `BOARD_STM32F4_NUCLEO64_F401RE`-mapping: D0-D13, A0-A5, SDA/SCL en SS/MOSI/MISO/SCK zijn elk afzonderlijk met `#ifndef` beschermd.
+`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven. Dit geldt ook voor de actieve `BOARD_STM32F4_NUCLEO64_F401RE`-mapping: D0-D13, A0-A5, SDA/SCL en SS/MOSI/MISO/SCK zijn elk afzonderlijk met `#ifndef` beschermd.
 
 
 Beschikbare HX1838-toetsenindelingen:
@@ -249,7 +270,7 @@ Native pinnamen in deze configuratie gebruiken `HardwareResourcePin::NP_...`. `H
 
 `UserConfig.h` kan vóór de fallbackwaarden van `SystemConfig.h` de GedeeldeBus-/Extenderconfiguratie vastleggen. Gebruik daarvoor exact de macro's die in `SystemConfig.h` als `#ifndef`-defaults bestaan, zoals `EXTENDER_<NAAM>_AANTAL`, de bijbehorende I2C-adressen, CS-pinnen en controlpinnen.
 
-`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. `ExtenderADS1115` blijft ook nodig wanneer ADS1115 als `ADC_BACKEND` actief is en `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
+`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat RFP602 via de ADS1115 meet. `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
 
 De logische resources van een Extender worden niet hier hernoemd of gemapt: die staan als `ExtenderPins::EP_<pinnaam>` in de concrete `Extender*.h`.
 
@@ -258,4 +279,4 @@ Voor lokale compiletests kan `GROEIACADEMIE_IGNORE_USER_CONFIG` worden gedefinie
 
 ## Data QueueOrStack
 
-De QueueOrStack-grootte wordt per sensor ingesteld. Voor RFP602 bepaalt `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE` de buffer, los van DIRECT: `0` bewaart alleen de laatst gemeten waarde per channel; een waarde groter dan `0` activeert de RAM-QueueOrStack. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
+De QueueOrStack-grootte wordt per sensor ingesteld. Voor RFP602 bepaalt `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` de buffer, los van DIRECT: `0` bewaart alleen de laatst gemeten waarde per channel; een waarde groter dan `0` activeert de RAM-QueueOrStack. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.

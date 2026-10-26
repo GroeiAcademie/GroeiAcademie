@@ -114,14 +114,6 @@
 //=========================================================
 // PrintToScreen
 //=========================================================
-// ADS1115
-#ifndef _LCD_ADS1115_FOUT
-  #define _LCD_ADS1115_FOUT                "ADS1115"
-#endif
-#ifndef _LCD_ADS1115_NIET_GEVONDEN
-  #define _LCD_ADS1115_NIET_GEVONDEN       "NIET GEVONDEN"
-#endif
-
 // Input Type: HX1838
 #ifndef _INPUT_HX1838_CONTROLE
   #define _INPUT_HX1838_CONTROLE                                   "CONTROLE IR"

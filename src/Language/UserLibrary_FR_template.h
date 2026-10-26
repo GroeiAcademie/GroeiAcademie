@@ -20,10 +20,6 @@
 //=========================================================
 // PrintToScreen
 //=========================================================
-// ADS1115
-  #define _LCD_ADS1115_FOUT                "ADS1115"
-  #define _LCD_ADS1115_NIET_GEVONDEN       "NON TROUVE"
-
 // Input Type: HX1838
   #define _INPUT_HX1838_CONTROLE                                   "CONTROLE IR"
   #define _INPUT_HX1838_DRUK_OP_ELKE_TOETS_VOOR_CONTROLE           "CHAQUE TOUCHE"

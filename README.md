@@ -1,6 +1,12 @@
 # GroeiAcademie FrameWork
 
+**Exacte lokale correcties in externe libraries:** zie [`COMPILE_ISSUES.md`](COMPILE_ISSUES.md).
+
 > Waar subjectieve ervaringen en objectief meetbare vaardigheden elkaar ontmoeten.
+
+![GROEI ACADEMIE FrameWork - v2.0.0](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20v2.0.0.jpg)
+
+*Eén library, de ondersteunde Arduino Uno-vormfactorborden, en alle schermen, keypads, afstandsbedieningen, Extenders en sensoren die v2.0.0 ondersteunt.*
 
 Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. Beta v2.0.0 bouwt de gedeelde basis rond **GedeeldeBus**, **Screen**, **Input**, **Extenders**, **Sensoren** en de toepassing **Stimulus**.
 
@@ -65,13 +71,13 @@ De volledige functionele ROADMAP staat in [de roadmap](docs/ROADMAP.md).
 
 ![GROEI ACADEMIE FrameWork - Prototype Stimulus](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Protottype.jpg)
 
-Op deze foto zie je het prototype op **breadboard van het Stimulus v1.1.2 shield**.
+Op deze foto zie je het eerdere prototype op **breadboard van het Stimulus v1.1.2-shield**, de voorganger van het huidige Stimulus Shield v2.0.0.
 
-## Stimulus Shield v1.1.2
+## Stimulus Shield v2.0.0
 
-![Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v1.1.2_2026-09-05.png)
+![Stimulus Shield v2.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Schematic_Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0_2026-10-22.png)
 
-Op deze afbeelding zie je het schema van het Stimulus Shield v1.1.2, het **elektronische schema** van het eerder getoonde breadboardprototype, dat de aansluitingen voor de Stimulus-toepassing samenbrengt op één uitbreidingskaart.
+Op deze afbeelding zie je het **elektronische schema** van het Stimulus Shield v2.0.0. Het brengt de aansluitingen voor de Stimulus-toepassing samen op één uitbreidingskaart: vier FSR402/RFP602-sensoren via een ADS1115, keypad via een PCF8574, HX1838 IR Receiver, CharacterScreen via I2C en PixelScreen via SPI.
 
 ## Ondersteunde boards
 
@@ -149,7 +155,7 @@ De validatie omvat:
 
 - Arduino LINT (Library Manager)
 - volledige gereleasete regressie op Arduino UNO R4 Minima en een minimale gerichte regressie op de overige boards;
-- `extras/TestLibraryGereleased.cmd` voor de huidige gereleasete regressieset; daarnaast bestaan gerichte v2-testscripts `TestLibraryADC-v2.0.0.cmd`, `TestLibraryInput-v2.0.0.cmd`, `TestLibraryScreen-v2.0.0.cmd` en `TestLibraryGedeeldeBus.cmd`;
+- `extras/TestLibraryGereleased.cmd` voor de huidige gereleasete regressieset; daarnaast bestaan gerichte v2-testscripts `TestLibraryExtenders-v2.0.0.cmd`, `TestLibraryInput-v2.0.0.cmd`, `TestLibraryScreen-v2.0.0.cmd` en `TestLibraryGedeeldeBus.cmd`;
 - afzonderlijke HX1838-validatie met geldige en bewust ongeldige configuraties;
 - menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
 - Arduino UNO R3;
@@ -180,7 +186,7 @@ FRAM_I2C van Rob Tillaart
 IRremote
 ```
 
-Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `ADC_BACKEND`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderADS1115` blijft beschikbaar wanneer de ADS1115-ADC-backend actief is en `ExtenderPCF8574` wanneer Input via PCF8574 actief is.
+Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderPCF8574` blijft beschikbaar wanneer Input via PCF8574 actief is. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat RFP602 via de ADS1115-Extender meet.
 
 ## Configuratie
 
@@ -189,6 +195,8 @@ De configuratie- en taalbestanden zijn:
 ```text
 src/Configuratie/SystemConfig.h
 src/Configuratie/UserConfig_template.h
+src/Configuratie/Extenders/Config<NAAM>_template.h
+src/Configuratie/Sensoren/ConfigRFP602_template.h
 src/Configuratie/Examples.h
 src/Configuratie/StimulusConfig.h
 
@@ -213,10 +221,10 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 - `ACTIEF_PIXEL_SCREEN`;
 - `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`;
 - `PIXEL_SCREEN_ROTATION`;
-- `AANTAL_SENSOREN_AANWEZIG`;
-- `ADC_PIN_SENSOR_1` tot en met `ADC_PIN_SENSOR_4`;
-- `BOARD_VERSION`;
-- `ADC_BACKEND` (`ADC_BACKEND_NATIVE` of `ADC_BACKEND_ADS1115`): zie hierboven bij Afhankelijkheid.
+- `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1`;
+- `RFP602_ADC_PIN_SENSOR_1_SET_1` tot en met `RFP602_ADC_PIN_SENSOR_4_SET_1`;
+- `EXTENDER_ADS1115_AANTAL` en `I2C_ADDRESS_EXTENDER_ADS1115_1`;
+- `BOARD_VERSION`.
 
 Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
 
@@ -235,9 +243,6 @@ Beschikbare voorbeelden:
 ```text
 examples/
 ├── Systeem/
-│   ├── ADC_Backend/
-│   │   ├── ADC_Backend_ADS1115/
-│   │   └── ADC_Backend_Native/
 │   ├── Data/
 │   │   ├── EEPROM/
 │   │   ├── FLASH/
@@ -246,6 +251,7 @@ examples/
 │   ├── GedeeldeBus/
 │   │   ├── Extenders/
 │   │   │   ├── Extender_ADS1115/ + 2 ExtenderPins-tests
+│   │   │   ├── Extender_ADS1115_Meetkwaliteit/
 │   │   │   ├── Extender_ADS1158/ + 2 ExtenderPins-tests
 │   │   │   ├── Extender_ADS7828/ + 2 ExtenderPins-tests
 │   │   │   ├── Extender_ADS7953/ + 2 ExtenderPins-tests
@@ -262,8 +268,6 @@ examples/
 │   │   └── Sensoren/
 │   │       └── Sensor_RFP602/
 │   ├── Input/
-│   │   ├── InputkanalenDIGITAL/
-│   │   ├── InputkanalenDIGITALmetArgumenten/
 │   │   ├── InputkanalenHX1838/
 │   │   ├── InputkanalenHX1838UserDefined/
 │   │   ├── InputkanalenHX1838metArgumenten/
@@ -286,7 +290,7 @@ examples/
         └── Tik_Enkele_Samen_Instortend_Cocktail/
 ```
 
-`ADC_Backend_Native` en `ADC_Backend_ADS1115` zijn bewust zelfstandig gehouden en gebruiken niet de volledige Stimulus-librarylogica. Ze dienen om de Arduino-ADC-route en de ADS1115-route afzonderlijk te valideren, niet als gewone gebruikersvoorbeelden. Zie [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) en [Handleiding Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
+`Extender_ADS1115_Meetkwaliteit` is bewust zelfstandig gehouden en gebruikt niet de volledige Stimulus-librarylogica. Het meet de vier ingangen van de ADS1115-Extender (gemiddelde, standaardafwijking, minimum, maximum) en dient als hardwarevalidatie, niet als gewoon gebruikersvoorbeeld. Zie [Stimulus Shield v2.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md) en [Handleiding Stimulus Shield v2.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md). De overige voorbeelden (`Scenario*`, `Tik_Enkele_Samen_Instortend_Cocktail`) volgen wel de normale Stimulus-library-aanpak.
 
 ## Librarystructuur
 
@@ -301,7 +305,7 @@ GroeiAcademie/
 │   ├── Configuratie/
 │   ├── Language/
 │   ├── Systeem/
-│   │   ├── GedeeldeBus/       # GedeeldeBus.h/.cpp + 14 Extender .h/.cpp-paren
+│   │   ├── GedeeldeBus/       # GedeeldeBus.h/.cpp + 16 Extender .h/.cpp-paren
 │   │   ├── Input/             # Input.h, Input.cpp, InputTypes.h
 │   │   ├── Screen/            # Screen.h, Screen.cpp, ScreenTypes.h
 │   │   └── Sensor/            # RFP602.h/.cpp
@@ -309,7 +313,6 @@ GroeiAcademie/
 │       └── Stimulus/          # Stimulus.h/.cpp
 ├── examples/
 │   ├── Systeem/
-│   │   ├── ADC_Backend/
 │   │   ├── GedeeldeBus/
 │   │   │   ├── Extenders/
 │   │   │   └── Sensoren/
@@ -331,7 +334,7 @@ Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregist
 
 ## Elektronische schema's
 
-De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release is [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md): actuele v1.1.2-hardware met HX1838 DATA op D8 en PixelScreen RST op D7.
+De centrale schema-index staat in [docs/Toepassingsgebieden/MODULES.md](docs/Toepassingsgebieden/MODULES.md). Het actuele Stimulus Shield voor deze release is [Stimulus Shield v2.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md): sensoren via ADS1115, keypad via PCF8574, HX1838 DATA op D8 en PixelScreen RST op D7.
 
 Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.md](docs/Toepassingsgebieden/Stimulus/README.md):
 
@@ -341,7 +344,7 @@ Voor de huidige Stimulusmodule bevat [docs/Toepassingsgebieden/Stimulus/README.m
 - aandachtspunten voor druksensoren;
 - de relatie met `SystemConfig.h`.
 
-De volledige hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten staan onder Stimulus Shield v1.1.2. [Stimulus Shield v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) bevat de actuele v1.1.2-hardware inclusief de HX1838 IR Receiver; de [hardwarevalidatie v1.1.2](docs/Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) hoort daarbij.
+De volledige hardwarebasis en de bijbehorende JSON-, PDF-, PNG- en SVG-schema-exporten staan onder Stimulus Shield v2.0.0. [Stimulus Shield v2.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md) beschrijft de hardware; de [hardwarevalidatie v2.0.0](docs/Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md) hoort daarbij.
 
 ## Geplande uitbreidingen
 

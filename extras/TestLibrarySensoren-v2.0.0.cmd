@@ -10,58 +10,94 @@ call "%~dp0TestLibraryCommon.cmd" %*
 exit /b %errorlevel%
 
 :TESTLIJST
+
 set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602\Sensor_RFP602.ino"
-set TEST_NAAM="Sensor RFP602 | ADC_BACKEND_NATIVE"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set TEST_NAAM="Sensor RFP602 | ExtenderADS1115"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602\Sensor_RFP602.ino"
-set TEST_NAAM="Sensor RFP602 | ADC_BACKEND_ADS1115"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_ADS1115 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602\Sensor_RFP602.ino"
-set TEST_NAAM="Sensor RFP602 | ADC_BACKEND_NATIVE | 4 sensoren"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DAANTAL_SENSOREN_AANWEZIG=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602\Sensor_RFP602.ino"
-set TEST_NAAM="Sensor RFP602 | ADC_BACKEND_ADS1115 | 4 sensoren"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_ADS1115 -DAANTAL_SENSOREN_AANWEZIG=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set TEST_NAAM="Sensor RFP602 | ExtenderADS1115 | 4 sensoren"
+set TEST_FLAGS="-DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_DIRECT\Sensor_RFP602_DIRECT.ino"
-set TEST_NAAM="Sensor RFP602 DIRECT | zonder QueueOrStack"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_DIRECT -DRFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE=0"
-set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_DIRECT\Sensor_RFP602_DIRECT.ino"
-set TEST_NAAM="Sensor RFP602 DIRECT | QueueOrStack"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_DIRECT -DRFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE=8"
+set TEST_NAAM="Sensor RFP602 | DIRECT"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_DIRECT"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_FLASH\Sensor_RFP602_FLASH.ino"
-set TEST_NAAM="Sensor RFP602 FLASH"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI"
+set TEST_NAAM="Sensor RFP602 | FLASH"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_MICROSD\Sensor_RFP602_MICROSD.ino"
-set TEST_NAAM="Sensor RFP602 microSD"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI"
+set TEST_NAAM="Sensor RFP602 | MICROSD"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_TweeSetsOpTweeADS1115\Sensor_RFP602_TweeSetsOpTweeADS1115.ino"
+set TEST_NAAM="Sensor RFP602 | twee sets op twee ExtenderADS1115"
+set TEST_FLAGS="-DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2=4 -DEXTENDER_ADS1115_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_OngeldigePin\Sensor_RFP602_Test_OngeldigePin.ino"
+set TEST_NAAM="Sensor RFP602 | test ongeldige pin (T2-2)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_ADC_Bezet\Sensor_RFP602_Test_ADC_Bezet.ino"
+set TEST_NAAM="Sensor RFP602 | test ADC bezet (T2-3)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=2"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_Hardwarefout\Sensor_RFP602_Test_Hardwarefout.ino"
+set TEST_NAAM="Sensor RFP602 | test hardwarefout (T2-4)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_Timeout_Conversie\Sensor_RFP602_Test_Timeout_Conversie.ino"
+set TEST_NAAM="Sensor RFP602 | test ophalen na verlies van de ADC (T2-5)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_ZonderGet\Sensor_RFP602_Test_ZonderGet.ino"
+set TEST_NAAM="Sensor RFP602 | test start zonder ophalen (T2-6)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=2"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_VerkeerdeParent\Sensor_RFP602_Test_VerkeerdeParent.ino"
+set TEST_NAAM="Sensor RFP602 | test verkeerde parent (T2-7)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_Test_EigenBuffers\Sensor_RFP602_Test_EigenBuffers.ino"
+set TEST_NAAM="Sensor RFP602 | test eigen buffers per object (T2-9)"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_DIRECT -DRFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1=8 -DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=2"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
@@ -69,28 +105,6 @@ call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_MixedPins\Sensor_MixedPins.ino"
 set TEST_NAAM="Sensor Mixed Pins | 2 board + 2 PCF8574"
 set TEST_FLAGS="-DGEDEELDE_BUS_MIXED_PINS=1 -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20"
-set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_FLASH\Sensor_RFP602_FLASH.ino"
-set TEST_NAAM="Sensor RFP602 FLASH | buffer 256"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_1_BUFFER_SIZE=256"
-set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602_FLASH\Sensor_RFP602_FLASH.ino"
-set TEST_NAAM="Data FLASH SPI + microSD SPI samen"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=(DATA_TYPE_FLASH_SPI|DATA_TYPE_MICROSD_SPI)"
-set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-set WELKE_FQBN_SKIPPEN="arduino:avr:uno"
-call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
-
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_RFP602\Sensor_RFP602.ino"
-set TEST_NAAM="Data Serial redirect | DATA_TYPE_NONE | REDIRECT_SERIAL_TO_MICROSD"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DREDIRECT_SERIAL=REDIRECT_SERIAL_TO_MICROSD -DREDIRECT_SERIAL_CONNECT_TIMEOUT_MS"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT

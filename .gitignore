@@ -20,6 +20,10 @@ UserConfig.h
 
 build/
 src/Configuratie/UserConfig.h
+src/Configuratie/Extenders/Config*.h
+src/Configuratie/Sensoren/Config*.h
+src/Configuratie/Sturingen/Config*.h
+!src/Configuratie/**/*_template.h
 
 # Eigen taalbestanden gebruikers niet meenemen
 src/Language/UserExample_*.h*

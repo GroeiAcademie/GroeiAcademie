@@ -15,7 +15,6 @@
 // mappingTestMenu[] hieronder bevat, per HX1838_TOETSENINDELING, 
 // de volledige set opschriften die die indeling kan opleveren, elk gekoppeld aan zijn eigen, herkenbare functie. 
 // Zo toont het display precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
-// Voor INPUT_TYPE_DIGITAL, zie InputkanalenDIGITAL.ino.
 // Voor INPUT_TYPE_PCF8574, zie InputkanalenPCF8574.ino.
 
 #include <GroeiAcademie.h>

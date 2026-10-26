@@ -9,16 +9,16 @@
 
 #include "../GedeeldeBus/GedeeldeBus.h"
 
-#if ((INPUT_KANAAL_CONFIG) & ~(INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838))
+#if ((INPUT_KANAAL_CONFIG) & ~(INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838))
   #error INPUT_KANAAL_CONFIG bevat een onbekend invoertype.
 #endif
 
-#if (INPUT_KANAAL_CONFIG) != INPUT_TYPE_NONE && (INPUT_KANAAL_CONFIG) != INPUT_TYPE_DIGITAL && (INPUT_KANAAL_CONFIG) != INPUT_TYPE_PCF8574 && (INPUT_KANAAL_CONFIG) != INPUT_TYPE_HX1838 && (INPUT_KANAAL_CONFIG) != (INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838)
-  #error Geldige INPUT_KANAAL_CONFIG: INPUT_TYPE_NONE, INPUT_TYPE_DIGITAL, INPUT_TYPE_PCF8574, INPUT_TYPE_HX1838 of INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838.
+#if (INPUT_KANAAL_CONFIG) != INPUT_TYPE_NONE && (INPUT_KANAAL_CONFIG) != INPUT_TYPE_PCF8574 && (INPUT_KANAAL_CONFIG) != INPUT_TYPE_HX1838 && (INPUT_KANAAL_CONFIG) != (INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838)
+  #error Geldige INPUT_KANAAL_CONFIG: INPUT_TYPE_NONE, INPUT_TYPE_PCF8574, INPUT_TYPE_HX1838 of INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838.
 #endif
 
 #if defined(KEYPAD_TYPE) && KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5
-  #error KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen en past niet op INPUT_TYPE_DIGITAL of INPUT_TYPE_PCF8574.
+  #error KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen en past niet op INPUT_TYPE_PCF8574.
 #endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838) && (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
@@ -33,11 +33,6 @@
   #endif
 #endif
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  #if KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 && KEYPAD_TYPE != KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 && KEYPAD_TYPE != KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-    #error INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4, KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2, KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4, KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 en KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4.
-  #endif
-#endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   #if ((SCREEN_OUTPUT_CONFIG) & SCREEN_TYPE_CHARACTER) && (I2C_ADDRESS_PCF8574 == I2C_ADDRESS_CHARACTER_SCREEN)
@@ -83,7 +78,7 @@ struct MappingTussenOpschriftEnWeergavetekst {
 // TOETSENINDELING: Input.cpp bevat de scanlogica en de vaste indelingen waarmee een positie aan opschrift/weergavetekst wordt gekoppeld. 
 // Bij de twee KEYPAD_TYPE_USER_DEFINED_...-types komt KEY_LAYOUT uit de KEYPAD_GENERIEK_... configuratie in UserConfig.h; een .ino kan de apart gecompileerde Input.cpp niet configureren.
 // ============================================================================
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
   #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
     #define AANTAL_KEYPAD_TOETSEN 4
   #elif KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_2x4 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_MATRIX_2x4 || KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4
@@ -121,7 +116,6 @@ struct MappingTussenOpschriftEnWeergavetekst {
 
 enum class InputKanaal : byte {
   NONE    = 0,
-  DIGITAL = 1,
   PCF8574 = 2,
   HX1838  = 3
 };
@@ -201,7 +195,7 @@ struct Input : GedeeldeBusNode {
   Input();
   Input(uint8_t typesActief);
 
-  // Input stuurt elke stap door naar zijn kanalen (InputDigital, InputPCF8574, InputHX1838); kanaalspecifieke inplug- en activeringscontroles blijven binnen deze lifecycle.
+  // Input stuurt elke stap door naar zijn kanalen (InputPCF8574, InputHX1838); kanaalspecifieke inplug- en activeringscontroles blijven binnen deze lifecycle.
   bool aanmelden() override;
   bool controleren() override;
   bool inpluggen() override;
@@ -316,11 +310,6 @@ private:
   void ControleerMappingVolledigheidIntern(const char* const opschriftToetsAanslag[], byte aantalEntries);
 #endif
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  uint8_t gedeeldeBusInputDigitalPinnen[4] = {};
-  InputDigital* gedeeldeBusInputDigital = nullptr;
-  int DigitaalUitLezenRuweData();
-#endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   InputPCF8574* gedeeldeBusInputPCF8574 = nullptr;
@@ -331,7 +320,7 @@ private:
   int PCF8574uitLezenPoortenP0totP7MatrixAansluiting();
 #endif
 
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
   int vorigeRauweKeypadPositie = 0;
   int stabieleKeypadPositie = 0;
   unsigned long keypadWijzigingSinds = 0;

@@ -1,12 +1,12 @@
 // ============================================================================
 // Scenario 4 — Cocktail
 // ============================================================================
-// Dit example dwingt ADC_BACKEND/SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan
+// Dit example dwingt SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan
 // een .ino structureel niet: Stimulus.cpp/Screen.cpp worden als aparte
 // bestanden gecompileerd en zien een #define hier nooit. Deze sketch werkt
-// met welke ADC-backend en welk schermtype dan ook actief is via UserConfig.h
+// met welk schermtype dan ook actief is via UserConfig.h
 // (kopieer van UserConfig_template.h) of SystemConfig.h, en past haar gedrag
-// aan via de #if-controles hieronder — vandaar geen #error nodig hier.
+// aan via de #if-controles hieronder — vandaar geen #error voor het schermtype.
 // ============================================================================
 
 #include <Wire.h>
@@ -15,7 +15,6 @@
 // Standaard wordt KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 gebruikt.
 //
 // Kies in UserConfig.h het te testen invoerkanaal via INPUT_KANAAL_CONFIG:
-// #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
 // #define INPUT_KANAAL_CONFIG (INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838)
@@ -23,6 +22,19 @@
 // Alleen de toetsen met opschrift 1 t.e.m. 4, of S1 t.e.m. S4, worden in deze test gebruikt.
 // Dit geldt ook wanneer het gekozen keypad of de HX1838-remote meer toetsen heeft.
 #include <GroeiAcademie.h>
+
+#if EXTENDER_ADS1115_AANTAL == 0
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+#endif
+
+ExtenderADS1115 extenderADS1115(
+  &Native, GedeeldeBusComponent::ADC_ADS1115,
+  I2C_ADDRESS_EXTENDER_ADS1115_1,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL,
+  EXTENDER_ADS1115_1_ALERT_RDY,
+  HardwareResourceToegang::GEDEELD
+);
+
 #include <Configuratie/Examples.h>
 #include <Configuratie/ExamplesConfig.h>
 
@@ -51,7 +63,7 @@ void UitvoerenAlgoritmeCocktailTik();
 
 // ============================================================================
 
-StimulusProfiel nulmetingStimulus[AANTAL_SENSOREN_AANWEZIG], gemetenStimulus[AANTAL_SENSOREN_AANWEZIG];
+StimulusProfiel nulmetingStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1], gemetenStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1];
 
 SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 
@@ -60,10 +72,6 @@ SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 int TEST_AANTAL_KEER_HERHALEN  = 5;
 
 void setup() {
-#if ADC_BITS == 12 || ADC_BITS == 14
-  analogReadResolution(ADC_BITS);
-#endif  
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
@@ -72,8 +80,8 @@ void setup() {
 #endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
-  if (sensorRFP602 == nullptr) exit(0);
+  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+  if (sensorRFP602set1 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -104,11 +112,11 @@ void UitvoerenAlgoritmeCocktailTik() {
   Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
   Screen->Print(LCD_S4_TITEL, "", MINIMALE_WACHTTIJD_MS);
-  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
   Screen->Print("", "", 0, LCD_S0_NU);
   int aantalSensorenSimultaanTeMeten;
 
-#if AANTAL_SENSOREN_AANWEZIG == 2
+#if RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 == 2
   aantalSensorenSimultaanTeMeten = 2;
 #else
   Screen->Print(LCD_S4_SENSORS_TEXT, LCD_S4_SENSORS_KEUZE);
@@ -136,11 +144,11 @@ void UitvoerenAlgoritmeCocktailTik() {
 #endif
 
   Screen->Print(LCD_S4_TITEL, String(aantalSensorenSimultaanTeMeten) + LCD_S4_SENSOREN, MINIMALE_WACHTTIJD_MS);
-  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
   Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot alle te meten sensoren ingedrukt zijn geweest.
   int aantalGestarteSensoren = 0;
@@ -148,7 +156,7 @@ void UitvoerenAlgoritmeCocktailTik() {
 
   while (aantalGestarteSensoren < aantalSensorenSimultaanTeMeten) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
+      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602set1->sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
         sensorGekozen[sensorNummer] = true;
         aantalGestarteSensoren++;
       }
@@ -173,7 +181,7 @@ void UitvoerenAlgoritmeCocktailTik() {
       Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
     Screen->Print("", "", 0, LCD_S0_NU);
 
     // Meet alle gebruikte sensoren en hun gezamenlijke synchronisatie.

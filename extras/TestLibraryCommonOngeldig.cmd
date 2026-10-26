@@ -2,11 +2,13 @@
 if /I "%~1"=="--VOER_DEZE_ONGELDIGE_TEST_UIT" goto :VOER_DEZE_ONGELDIGE_TEST_UIT
 
 setlocal enabledelayedexpansion
+for /f %%I in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString('N')"') do set "GA_RUN_ID=%%I"
 set "LOG_BESTAND=%~dp0!BESTANDSNAAM!.txt"
 set "TEST_SCRIPT_BESTAND=%~dp0!BESTANDSNAAM!.cmd"
 
 if /I "%~1"=="--logged" goto :MAIN_SCRIPT
 
+cls
 if exist "!LOG_BESTAND!" del /q "!LOG_BESTAND!" >nul 2>&1
 powershell -NoProfile -Command "& { & $env:ComSpec /D /C '""!TEST_SCRIPT_BESTAND!" --logged %* 2>&1"' | Tee-Object -FilePath '!LOG_BESTAND!'; exit $LASTEXITCODE }"
 set "SCRIPT_RESULT=!errorlevel!"
@@ -74,18 +76,18 @@ set "TEST_DIR=!TEST_DIR:~0,-1!"
 set "EXTRA_FLAGS=!TEST_FLAGS!"
 if defined TEST_BOARD_VERSION set "EXTRA_FLAGS=!EXTRA_FLAGS! -DBOARD_VERSION=!TEST_BOARD_VERSION!"
 
-"%CLI_PATH%" compile --jobs 1 --fqbn "!TEST_FQBN!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !EXTRA_FLAGS!" "!TEST_DIR!" >"%TEMP%\GA_Ongeldig.txt" 2>&1
+"%CLI_PATH%" compile --jobs 2 --fqbn "!TEST_FQBN!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !EXTRA_FLAGS!" "!TEST_DIR!" >"%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt" 2>&1
 set "COMPILE_RESULT=!errorlevel!"
 
 if "!COMPILE_RESULT!"=="0" (
     echo [FOUT] !TEST_NAAM! compileerde onverwacht.
     set /A FAIL+=1
 ) else (
-    >"%TEMP%\GA_VerwachteFout.txt" echo(!VERWACHTE_FOUT!
-    powershell -NoProfile -Command "$log=[IO.File]::ReadAllText('%TEMP%\GA_Ongeldig.txt'); $verwacht=[IO.File]::ReadAllText('%TEMP%\GA_VerwachteFout.txt').TrimEnd([char]13,[char]10); if ($log.Contains($verwacht)) { exit 0 } else { exit 1 }"
+    >"%TEMP%\GA_VerwachteFout_!GA_RUN_ID!.txt" echo(!VERWACHTE_FOUT!
+    powershell -NoProfile -Command "$log=[IO.File]::ReadAllText('%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt'); $verwacht=[IO.File]::ReadAllText('%TEMP%\GA_VerwachteFout_!GA_RUN_ID!.txt').TrimEnd([char]13,[char]10); if ($log.Contains($verwacht)) { exit 0 } else { exit 1 }"
     if errorlevel 1 (
         echo [FOUT] !TEST_NAAM! faalde om een andere reden dan verwacht.
-        type "%TEMP%\GA_Ongeldig.txt"
+        type "%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt"
         set /A FAIL+=1
     ) else (
         echo [OK] !TEST_NAAM! correct geweigerd: !VERWACHTE_FOUT!
@@ -93,6 +95,6 @@ if "!COMPILE_RESULT!"=="0" (
     )
 )
 
-del "%TEMP%\GA_Ongeldig.txt" "%TEMP%\GA_VerwachteFout.txt" >nul 2>&1
+del "%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt" "%TEMP%\GA_VerwachteFout_!GA_RUN_ID!.txt" >nul 2>&1
 exit /b 0
 

@@ -31,7 +31,7 @@ Open werk voor beta v2.0.0:
 - per component DEBUG-only `Diagnose()` later invullen met echte elektronische functietesten;
 - de elektrische werking van Extenders per kanaal/pin testen;
 - daarna praktijktesten uitvoeren met echte sensoren en randapparatuur;
-- `RFP602` als eerste Sensor op Native ADC en ADS1115 blijven valideren;
+- `RFP602` als eerste Sensor op de ADS1115-Extender blijven valideren;
 - SensorKernel pas verder uitbouwen nadat deze v2-basis stabiel is.
 - Data-media (D038 tot D040) compileren op ESP32, ESP32-S3, RP2040, Nucleo F401RE en UNO Q; vooral de native EEPROM (ESP32/RP2040: `begin()` en `commit()`), SdFat op ESP32 en de UNO Q zonder native EEPROM;
 - Data-media hardwarematig testen, in deze volgorde: FLASH met buffer 0 en 256 (snelheid en teruglezen), native EEPROM samen met HX1838, CS via PCF8574 voor FLASH, microSD alleen en daarna met CS via PCF8574 (`SD_CHIP_SELECT_MODE` 1);
@@ -42,7 +42,7 @@ Een onderdeel is voor v2 pas klaar wanneer architectuur, code, voorbeelden, docu
 ## 2. Functionele ROADMAP
 
 1. **Aanraking, capacitieve bediening en gebruikersinput**
-   Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem met de per `KEYPAD_TYPE` bepaalde `INPUT_KEYPAD_PIN_...`-resources.
+   Toepasbaar voor stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking. Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem dat het keypad via de PCF8574 leest (keuze met `KEYPAD_TYPE`).
 
 2. **Aanwezigheid, afstand en locatie**
    Toepasbaar voor aanwezigheid, afstand, beweging, lichaamshouding en locatie in een ruimte.
@@ -180,7 +180,7 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 
 ## 4. Hardware ROADMAP
 
-- Native ADC en ADS1115 op de bedoelde hardware valideren;
+- RFP602 via de ADS1115-Extender op de bedoelde hardware valideren;
 - WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest; andere compatibele D1-R32-borden blijven afzonderlijk te valideren;
 - Cytron Maker UNO RP2040 is geïmplementeerd en getest;
 - hardwareprofielen per ondersteund Arduino Uno R3-vormfactorbord vastleggen;
@@ -350,7 +350,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 - Arduino Lint uitvoeren en het definitieve resultaat vastleggen;
 - geheugenrapport voor UNO R3 vastleggen;
 - Screen-regressietests uitvoeren voor standaarduitvoer, callbacks, twee en vier regels, `action`, `delayTime` en `delayTussenPaginas`;
-- Native ADC en ADS1115 hardwarematig valideren;
+- RFP602 via de ADS1115-Extender hardwarematig valideren;
 - schone installatie vanuit ZIP controleren;
 - interne documentatie en voorbeeldpaden controleren;
 - testresultaten per Arduino Uno R3-vormfactorbord, backend, schermconfiguratie en hardwareprofiel bewaren;

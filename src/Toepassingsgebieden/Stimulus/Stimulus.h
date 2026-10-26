@@ -83,9 +83,6 @@
 //— MOVED #define _LCD_TIJD_METEN_STOPT       "WE STOPPEN ERMEE"
 //— MOVED #define _LCD_TIJD_TEVEEL_FOUT       "SLECHTE START :)"
 
-//— MOVED #define _LCD_ADS1115_FOUT           "ADS1115"
-//— MOVED #define _LCD_ADS1115_NIET_GEVONDEN  "NIET GEVONDEN"
-
 // ============================================================================
 // CONSTANTEN VOOR DE PAUZETIJDEN (Delays)
 // ============================================================================
@@ -142,7 +139,7 @@ struct SynchronisatieProfiel {
 // ============================================================================
 // v2.0.0: Stimulus is het object.
 // De bestaande Stimulus-algoritmes en Stimulus-status behoren tot dit object.
-// De directe sensoruitlezing verloopt via sensorRFP602.
+// De directe sensoruitlezing verloopt via sensorRFP602set1.
 // ============================================================================
 struct Stimulus {
   int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offset);

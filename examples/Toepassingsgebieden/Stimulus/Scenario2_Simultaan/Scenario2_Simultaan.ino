@@ -1,12 +1,12 @@
 // ============================================================================
 // Scenario 2 — Simultaan
 // ============================================================================
-// Dit example dwingt ADC_BACKEND/SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan
+// Dit example dwingt SCREEN_OUTPUT_CONFIG NIET zelf af — dat kan
 // een .ino structureel niet: Stimulus.cpp/Screen.cpp worden als aparte
 // bestanden gecompileerd en zien een #define hier nooit. Deze sketch werkt
-// met welke ADC-backend en welk schermtype dan ook actief is via UserConfig.h
+// met welk schermtype dan ook actief is via UserConfig.h
 // (kopieer van UserConfig_template.h) of SystemConfig.h, en past haar gedrag
-// aan via de #if-controles hieronder — vandaar geen #error nodig hier.
+// aan via de #if-controles hieronder — vandaar geen #error voor het schermtype.
 // ============================================================================
 
 #include <Wire.h>
@@ -15,7 +15,6 @@
 // Standaard wordt KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 gebruikt.
 //
 // Kies in UserConfig.h het te testen invoerkanaal via INPUT_KANAAL_CONFIG:
-// #define INPUT_KANAAL_CONFIG INPUT_TYPE_DIGITAL
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_PCF8574
 // #define INPUT_KANAAL_CONFIG INPUT_TYPE_HX1838
 // #define INPUT_KANAAL_CONFIG (INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838)
@@ -23,6 +22,19 @@
 // Alleen de toetsen met opschrift 1 t.e.m. 4, of S1 t.e.m. S4, worden in deze test gebruikt.
 // Dit geldt ook wanneer het gekozen keypad of de HX1838-remote meer toetsen heeft.
 #include <GroeiAcademie.h>
+
+#if EXTENDER_ADS1115_AANTAL == 0
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+#endif
+
+ExtenderADS1115 extenderADS1115(
+  &Native, GedeeldeBusComponent::ADC_ADS1115,
+  I2C_ADDRESS_EXTENDER_ADS1115_1,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL,
+  EXTENDER_ADS1115_1_ALERT_RDY,
+  HardwareResourceToegang::GEDEELD
+);
+
 #include <Configuratie/Examples.h>
 #include <Configuratie/ExamplesConfig.h>
 
@@ -51,7 +63,7 @@ void UitvoerenAlgoritmeSimultaneTik();
 
 // ============================================================================
 
-StimulusProfiel nulmetingStimulus[AANTAL_SENSOREN_AANWEZIG], gemetenStimulus[AANTAL_SENSOREN_AANWEZIG];
+StimulusProfiel nulmetingStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1], gemetenStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1];
 
 SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 
@@ -60,10 +72,6 @@ SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 int TEST_AANTAL_KEER_HERHALEN  = 5;
 
 void setup() {
-#if ADC_BITS == 12 || ADC_BITS == 14
-  analogReadResolution(ADC_BITS);
-#endif  
-
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 
@@ -72,8 +80,8 @@ void setup() {
 #endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
-  if (sensorRFP602 == nullptr) exit(0);
+  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+  if (sensorRFP602set1 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -106,18 +114,18 @@ void UitvoerenAlgoritmeSimultaneTik () {
   Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
   Screen->Print(LCD_S2_TITEL, LCD_S2_KIES_SENSOREN, MINIMALE_WACHTTIJD_MS);
-  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
   Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) sensorRFP602->RawAnalogRead(sensorRFP602->sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot twee sensoren ingedrukt zijn geweest.
   int eersteGekozenSensorNummer = -1, tweedeGekozenSensorNummer = -1;
 
   while (eersteGekozenSensorNummer == -1 || tweedeGekozenSensorNummer == -1) {
     for (int sensorNummer = 0; sensorNummer < AANTAL_SENSOREN_ALGORITME2; sensorNummer++) {
-      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602set1->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
         if (eersteGekozenSensorNummer == -1) {
           eersteGekozenSensorNummer = sensorNummer;
         } else if (tweedeGekozenSensorNummer == -1 && eersteGekozenSensorNummer != sensorNummer) {
@@ -128,8 +136,8 @@ void UitvoerenAlgoritmeSimultaneTik () {
   }
 
   // STAP 2: Blijf wachten zolang minstens één van de twee gekozen sensoren nog ingedrukt blijft.
-  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[eersteGekozenSensorNummer], offsetSensor[eersteGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE ||
-         Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602->sensorPin[tweedeGekozenSensorNummer], offsetSensor[tweedeGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602set1->sensorPin[eersteGekozenSensorNummer], offsetSensor[eersteGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE ||
+         Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602set1->sensorPin[tweedeGekozenSensorNummer], offsetSensor[tweedeGekozenSensorNummer]) > TIK_MINIMALE_DRUKWAARDE);
 
   // --- EENMALIGE NULMETING ---
   int aantalNulmetingPogingen = 0;
@@ -146,7 +154,7 @@ void UitvoerenAlgoritmeSimultaneTik () {
       Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(AANTAL_SENSOREN_AANWEZIG);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
     Screen->Print("", "", 0, LCD_S0_NU);
 
     // Meet de twee gekozen sensoren en hun onderlinge synchronisatie.

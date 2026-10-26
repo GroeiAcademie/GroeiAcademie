@@ -13,13 +13,53 @@ GroeiAcademie FrameWork wordt als één samenwerkende Arduino-library ontwikkeld
 ```text
 GroeiAcademie/
 ├── src/
-│   ├── GroeiAcademie.h
-│   ├── Data.h
-│   ├── Input.h
-│   ├── Screen.h
-│   ├── Stimulus.h
-│   ├── SystemConfig.h
 │   ├── Configuratie/
+│   │   ├── Extenders/
+│   │   │   ├── ConfigADS1115.h
+│   │   │   ├── ConfigADS1115_template.h
+│   │   │   ├── ConfigADS1158.h
+│   │   │   ├── ConfigADS1158_template.h
+│   │   │   ├── ConfigADS7828.h
+│   │   │   ├── ConfigADS7828_template.h
+│   │   │   ├── ConfigADS7953.h
+│   │   │   ├── ConfigADS7953_template.h
+│   │   │   ├── ConfigCD74HC4067.h
+│   │   │   ├── ConfigCD74HC4067_template.h
+│   │   │   ├── ConfigDS2482v800.h
+│   │   │   ├── ConfigDS2482v800_template.h
+│   │   │   ├── ConfigMAX14830I2C.h
+│   │   │   ├── ConfigMAX14830I2C_template.h
+│   │   │   ├── ConfigMAX14830SPI.h
+│   │   │   ├── ConfigMAX14830SPI_template.h
+│   │   │   ├── ConfigMCP23017.h
+│   │   │   ├── ConfigMCP23017_template.h
+│   │   │   ├── ConfigMCP23S17.h
+│   │   │   ├── ConfigMCP23S17_template.h
+│   │   │   ├── ConfigPCA9685.h
+│   │   │   ├── ConfigPCA9685_template.h
+│   │   │   ├── ConfigPCF8574.h
+│   │   │   ├── ConfigPCF8574_template.h
+│   │   │   ├── ConfigPCF8575.h
+│   │   │   ├── ConfigPCF8575_template.h
+│   │   │   ├── ConfigSC16IS752I2C.h
+│   │   │   ├── ConfigSC16IS752I2C_template.h
+│   │   │   ├── ConfigSC16IS752SPI.h
+│   │   │   ├── ConfigSC16IS752SPI_template.h
+│   │   │   ├── ConfigTCA9548A.h
+│   │   │   └── ConfigTCA9548A_template.h
+│   │   ├── Sensoren/
+│   │   │   ├── ConfigRFP602.h
+│   │   │   └── ConfigRFP602_template.h
+│   │   ├── Sturingen/
+│   │   │   ├── ConfigA4988_template.h
+│   │   │   ├── ConfigDCmotorL293D_template.h
+│   │   │   ├── ConfigDCmotorL298N_template.h
+│   │   │   ├── ConfigMG996R_template.h
+│   │   │   ├── ConfigRelais_template.h
+│   │   │   ├── ConfigRGBLED_template.h
+│   │   │   ├── ConfigSG90_template.h
+│   │   │   ├── ConfigULN2003_template.h
+│   │   │   └── ConfigWS2812_template.h
 │   │   ├── Examples.h
 │   │   ├── ExamplesConfig.h
 │   │   ├── StimulusConfig.h
@@ -27,76 +67,303 @@ GroeiAcademie/
 │   │   ├── UserConfig.h
 │   │   └── UserConfig_template.h
 │   ├── Language/
-│   │   ├── Examples_DE.h / Examples_EN.h / Examples_FR.h / Examples_NL.h
-│   │   ├── Library_DE.h / Library_EN.h / Library_FR.h / Library_NL.h
-│   │   ├── UserExample_*_template.h
-│   │   └── UserLibrary_*_template.h
+│   │   ├── Examples_DE.h
+│   │   ├── Examples_EN.h
+│   │   ├── Examples_FR.h
+│   │   ├── Examples_NL.h
+│   │   ├── Library_DE.h
+│   │   ├── Library_EN.h
+│   │   ├── Library_FR.h
+│   │   ├── Library_NL.h
+│   │   ├── UserExample_DE_template.h
+│   │   ├── UserExample_EN_template.h
+│   │   ├── UserExample_FR_template.h
+│   │   ├── UserExample_NL_template.h
+│   │   ├── UserLibrary_DE_template.h
+│   │   ├── UserLibrary_EN_template.h
+│   │   ├── UserLibrary_FR_template.h
+│   │   └── UserLibrary_NL_template.h
 │   ├── Systeem/
 │   │   ├── Data/
-│   │   │   ├── Data.h/.cpp
-│   │   │   ├── EEPROM.h/.cpp
-│   │   │   ├── FLASH.h/.cpp
-│   │   │   ├── FRAM.h/.cpp
-│   │   │   └── microSD.h/.cpp
+│   │   │   ├── Data.cpp
+│   │   │   ├── Data.h
+│   │   │   ├── EEPROM.cpp
+│   │   │   ├── EEPROM.h
+│   │   │   ├── FLASH.cpp
+│   │   │   ├── FLASH.h
+│   │   │   ├── FRAM.cpp
+│   │   │   ├── FRAM.h
+│   │   │   ├── microSD.cpp
+│   │   │   ├── microSD.h
+│   │   │   ├── RedirectSerial.cpp
+│   │   │   └── RedirectSerial.h
 │   │   ├── GedeeldeBus/
-│   │   │   ├── GedeeldeBus.h
 │   │   │   ├── GedeeldeBus.cpp
-│   │   │   ├── ExtenderADS1115.h/.cpp
-│   │   │   ├── ExtenderADS1158.h/.cpp
-│   │   │   ├── ExtenderADS7828.h/.cpp
-│   │   │   ├── ExtenderADS7953.h/.cpp
-│   │   │   ├── ExtenderCD74HC4067.h/.cpp
-│   │   │   ├── ExtenderDS2482v800.h/.cpp
-│   │   │   ├── ExtenderMAX14830I2C.h/.cpp
-│   │   │   ├── ExtenderMAX14830SPI.h/.cpp
-│   │   │   ├── ExtenderMCP23017.h/.cpp
-│   │   │   ├── ExtenderPCF8574.h/.cpp
-│   │   │   ├── ExtenderPCF8575.h/.cpp
-│   │   │   ├── ExtenderSC16IS752I2C.h/.cpp
-│   │   │   ├── ExtenderSC16IS752SPI.h/.cpp
-│   │   │   └── ExtenderTCA9548A.h/.cpp
+│   │   │   └── GedeeldeBus.h
+│   │   ├── Extender/
+│   │   │   ├── ADS1115.cpp
+│   │   │   ├── ADS1115.h
+│   │   │   ├── ADS1158.cpp
+│   │   │   ├── ADS1158.h
+│   │   │   ├── ADS7828.cpp
+│   │   │   ├── ADS7828.h
+│   │   │   ├── ADS7953.cpp
+│   │   │   ├── ADS7953.h
+│   │   │   ├── CD74HC4067.cpp
+│   │   │   ├── CD74HC4067.h
+│   │   │   ├── DS2482v800.cpp
+│   │   │   ├── DS2482v800.h
+│   │   │   ├── MAX14830I2C.cpp
+│   │   │   ├── MAX14830I2C.h
+│   │   │   ├── MAX14830SPI.cpp
+│   │   │   ├── MAX14830SPI.h
+│   │   │   ├── MCP23017.cpp
+│   │   │   ├── MCP23017.h
+│   │   │   ├── MCP23S17.cpp
+│   │   │   ├── MCP23S17.h
+│   │   │   ├── PCA9685.cpp
+│   │   │   ├── PCA9685.h
+│   │   │   ├── PCF8574.cpp
+│   │   │   ├── PCF8574.h
+│   │   │   ├── PCF8575.cpp
+│   │   │   ├── PCF8575.h
+│   │   │   ├── SC16IS752I2C.cpp
+│   │   │   ├── SC16IS752I2C.h
+│   │   │   ├── SC16IS752SPI.cpp
+│   │   │   ├── SC16IS752SPI.h
+│   │   │   ├── TCA9548A.cpp
+│   │   │   └── TCA9548A.h
+│   │   ├── Sensor/
+│   │   │   ├── RFP602.cpp
+│   │   │   └── RFP602.h
+│   │   ├── Sturing/
+│   │   │   ├── A4988.h
+│   │   │   ├── DCmotorL293D.h
+│   │   │   ├── DCmotorL298N.h
+│   │   │   ├── MG996R.h
+│   │   │   ├── Relais.h
+│   │   │   ├── RGBLED.h
+│   │   │   ├── SG90.h
+│   │   │   ├── ULN2003.h
+│   │   │   └── WS2812.h
 │   │   ├── Input/
-│   │   │   ├── Input.h
 │   │   │   ├── Input.cpp
+│   │   │   ├── Input.h
 │   │   │   └── InputTypes.h
-│   │   ├── Screen/
-│   │   │   ├── Screen.h
-│   │   │   ├── Screen.cpp
-│   │   │   └── ScreenTypes.h
-│   │   └── Sensor/
-│   │       ├── RFP602.h
-│   │       └── RFP602.cpp
+│   │   └── Screen/
+│   │       ├── Screen.cpp
+│   │       ├── Screen.h
+│   │       └── ScreenTypes.h
 │   ├── Toepassingsgebieden/
 │   │   └── Stimulus/
-│   │       ├── Stimulus.h
-│   │       └── Stimulus.cpp
-│   └── Uitbreidingskaarten/
+│   │       ├── Stimulus.cpp
+│   │       └── Stimulus.h
+│   ├── Uitbreidingskaarten/
+│   ├── Data.h
+│   ├── GroeiAcademie.h
+│   ├── Input.h
+│   ├── Screen.h
+│   ├── Stimulus.h
+│   └── SystemConfig.h
 ├── examples/
 │   ├── Systeem/
-│   │   ├── ADC_Backend/
 │   │   ├── Data/
+│   │   │   ├── EEPROM/
+│   │   │   ├── FLASH/
+│   │   │   ├── FRAM/
+│   │   │   └── microSD/
 │   │   ├── GedeeldeBus/
 │   │   │   ├── Extenders/
-│   │   │   └── Sensoren/
+│   │   │   │   ├── Extender_ADS1115/
+│   │   │   │   ├── Extender_ADS1115_Meetkwaliteit/
+│   │   │   │   ├── Extender_ADS1115_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_ADS1115_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_ADS1158/
+│   │   │   │   ├── Extender_ADS1158_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_ADS1158_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_ADS7828/
+│   │   │   │   ├── Extender_ADS7828_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_ADS7828_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_ADS7953/
+│   │   │   │   ├── Extender_ADS7953_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_ADS7953_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_CD74HC4067/
+│   │   │   │   ├── Extender_CD74HC4067_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_CD74HC4067_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_DS2482v800/
+│   │   │   │   ├── Extender_DS2482v800_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_DS2482v800_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_MAX14830_I2C/
+│   │   │   │   ├── Extender_MAX14830_I2C_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_MAX14830_I2C_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_MAX14830_SPI/
+│   │   │   │   ├── Extender_MAX14830_SPI_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_MAX14830_SPI_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_MCP23017/
+│   │   │   │   ├── Extender_MCP23017_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_MCP23017_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_MCP23S17/
+│   │   │   │   ├── Extender_PCA9685/
+│   │   │   │   ├── Extender_PCA9685_Test_OE_Pin/
+│   │   │   │   ├── Extender_PCF8574/
+│   │   │   │   ├── Extender_PCF8574_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_PCF8574_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_PCF8575/
+│   │   │   │   ├── Extender_PCF8575_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_PCF8575_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_SC16IS752_I2C/
+│   │   │   │   ├── Extender_SC16IS752_I2C_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_SC16IS752_I2C_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_SC16IS752_SPI/
+│   │   │   │   ├── Extender_SC16IS752_SPI_Test_ExtenderPins_Geweigerd/
+│   │   │   │   ├── Extender_SC16IS752_SPI_Test_ExtenderPins_Toegelaten/
+│   │   │   │   ├── Extender_TCA9548A/
+│   │   │   │   ├── Extender_TCA9548A_Test_ExtenderPins_Geweigerd/
+│   │   │   │   └── Extender_TCA9548A_Test_ExtenderPins_Toegelaten/
+│   │   │   ├── Sensoren/
+│   │   │   │   ├── Sensor_MixedPins/
+│   │   │   │   ├── Sensor_RFP602/
+│   │   │   │   ├── Sensor_RFP602_DIRECT/
+│   │   │   │   ├── Sensor_RFP602_FLASH/
+│   │   │   │   ├── Sensor_RFP602_MICROSD/
+│   │   │   │   ├── Sensor_RFP602_Test_ADC_Bezet/
+│   │   │   │   ├── Sensor_RFP602_Test_EigenBuffers/
+│   │   │   │   ├── Sensor_RFP602_Test_Hardwarefout/
+│   │   │   │   ├── Sensor_RFP602_Test_OngeldigePin/
+│   │   │   │   ├── Sensor_RFP602_Test_Timeout_Conversie/
+│   │   │   │   ├── Sensor_RFP602_Test_VerkeerdeParent/
+│   │   │   │   ├── Sensor_RFP602_Test_ZonderGet/
+│   │   │   │   └── Sensor_RFP602_TweeSetsOpTweeADS1115/
+│   │   │   └── Sturingen/
+│   │   │       ├── Sturing_A4988/
+│   │   │       ├── Sturing_DCmotorL293D/
+│   │   │       ├── Sturing_DCmotorL298N/
+│   │   │       ├── Sturing_MG996R/
+│   │   │       ├── Sturing_Relais/
+│   │   │       ├── Sturing_RGBLED/
+│   │   │       ├── Sturing_SG90/
+│   │   │       ├── Sturing_ULN2003/
+│   │   │       └── Sturing_WS2812/
 │   │   ├── Input/
-│   │   └── Screen/
+│   │   │   ├── InputkanalenHX1838/
+│   │   │   ├── InputkanalenHX1838metArgumenten/
+│   │   │   ├── InputkanalenHX1838UserDefined/
+│   │   │   ├── InputkanalenPCF8574/
+│   │   │   ├── InputkanalenPCF8574metArgumenten/
+│   │   │   ├── InputkanalenPCF8574UserDefinedDirect/
+│   │   │   └── InputkanalenPCF8574UserDefinedMatrix/
+│   │   ├── Screen/
+│   │   │   ├── Callback_CharacterScreen/
+│   │   │   ├── Callback_PixelScreen/
+│   │   │   ├── Default_CharacterScreen/
+│   │   │   ├── Default_CharacterScreen_PixelScreen/
+│   │   │   └── Default_PixelScreen/
+│   │   └── Tools/
+│   │       └── I2C/
+│   │           ├── I2C_DiagnoseAangemeldeDevices/
+│   │           ├── I2C_DiagnoseDS2482v800/
+│   │           ├── I2C_DiagnoseTCA9548A/
+│   │           ├── I2C_MetenHerstelEnBlokkeertijd/
+│   │           ├── I2C_MetenReactietijdEnBetrouwbaarheid/
+│   │           ├── I2C_OpsporenNietAangemeldeDevices/
+│   │           ├── I2C_Scan/
+│   │           ├── I2C_TestenKloksnelhedenAangemeldeDevices/
+│   │           └── I2C_TotaleDiagnoseAlleDevices/
 │   └── Toepassingsgebieden/
 │       └── Stimulus/
+│           ├── Scenario1_EnkelTik/
+│           ├── Scenario2_Simultaan/
+│           ├── Scenario3_Ineenstortend/
+│           ├── Scenario4_Cocktail/
+│           └── Tik_Enkele_Samen_Instortend_Cocktail/
 ├── docs/
 │   ├── Configuratie/
+│   │   ├── ExamplesConfig.md
+│   │   ├── README.md
+│   │   ├── StimulusConfig.md
+│   │   ├── SystemConfig.md
+│   │   ├── UserConfig.md
+│   │   └── UserLanguage.md
 │   ├── Systeem/
+│   │   ├── Extender/
+│   │   │   ├── ADS1115.md
+│   │   │   ├── ADS1158.md
+│   │   │   ├── ADS7828.md
+│   │   │   ├── ADS7953.md
+│   │   │   ├── CD74HC4067.md
+│   │   │   ├── DS2482v800.md
+│   │   │   ├── MAX14830I2C.md
+│   │   │   ├── MAX14830SPI.md
+│   │   │   ├── MCP23017.md
+│   │   │   ├── MCP23S17.md
+│   │   │   ├── PCA9685.md
+│   │   │   ├── PCF8574.md
+│   │   │   ├── PCF8575.md
+│   │   │   ├── SC16IS752I2C.md
+│   │   │   ├── SC16IS752SPI.md
+│   │   │   └── TCA9548A.md
+│   │   ├── Sensor/
+│   │   │   └── RFP602.md
+│   │   ├── Sturing/
+│   │   │   ├── A4988.md
+│   │   │   ├── DCmotorL293D.md
+│   │   │   ├── DCmotorL298N.md
+│   │   │   ├── MG996R.md
+│   │   │   ├── Relais.md
+│   │   │   ├── RGBLED.md
+│   │   │   ├── SG90.md
+│   │   │   ├── ULN2003.md
+│   │   │   └── WS2812.md
+│   │   ├── DATA.md
+│   │   ├── GEDEELDEBUS.md
+│   │   ├── INPUT.md
+│   │   ├── SCREEN.md
+│   │   └── SCREEN_FOUTCODES.md
 │   ├── Toepassingsgebieden/
+│   │   ├── Stimulus/
+│   │   │   └── README.md
+│   │   ├── MODULES.md
+│   │   ├── SENSOR_INVENTARIS.md
+│   │   └── VEILIGHEID.md
 │   ├── Uitbreidingskaarten/
+│   │   └── Stimulus Shield v2.0.0/
+│   │       ├── Handleiding-Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0.md
+│   │       └── Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0.md
+│   ├── Pilots/
+│   │   └── v1_2_0_sensoren_pilot.md
 │   ├── ARCHITECTURE.md
+│   ├── COMMUNITY_GUIDE.md
 │   ├── DECISION_LOG.md
+│   ├── DESIGN_PHILOSOPHY.md
 │   ├── HARDWARE_SUPPORT.md
-│   └── ROADMAP.md
+│   ├── PROJECT_VALUES.md
+│   ├── RESEARCH_PHILOSOPHY.md
+│   ├── ROADMAP.md
+│   ├── SCIENTIFIC_INTEGRITY.md
+│   └── TERMINOLOGY.md
 ├── extras/
 ├── .github/
+├── .gitattributes
+├── .gitignore
+├── AUTHORS.md
+├── CHANGELOG.md
+├── CITATION.cff
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── CONTRIBUTORS.md
+├── DISCLAIMER.md
+├── GOVERNANCE.md
 ├── keywords.txt
 ├── library.properties
-├── CITATION.cff
-└── README.md
+├── LICENSE
+├── LICENSE.md
+├── LICENSE_KEUZEGIDS.md
+├── oproep-sponsors-contributors.md
+├── PROJECT_CONSTITUTION.md
+├── README.md
+├── SECURITY.md
+├── SPONSORS.md
+└── TRADEMARKS.md
 ```
 
 `src/Uitbreidingskaarten/` is momenteel een gereserveerde broncodemap. De hardwaredocumentatie van de Stimulus Shield staat wel onder `docs/Uitbreidingskaarten/`.
@@ -119,11 +386,21 @@ Gebruikers kunnen de volledige library opnemen met:
 #include <SystemConfig.h>
 ```
 
-De headers direct onder `src/` leiden door naar de interne moduleheaders. GedeeldeBus en de concrete Sensor- en Extenderheaders zijn in de huidige code interne systeemheaders; voorbeelden die een concrete Sensor rechtstreeks testen nemen die interne header expliciet op.
+De headers direct onder `src/` leiden door naar de interne moduleheaders. GedeeldeBus en de concrete Sensor-, Extender- en Sturingheaders zijn in de huidige code interne systeemheaders; voorbeelden die een concrete Sensor rechtstreeks testen nemen die interne header expliciet op.
+
+## Documentatie van componenten
+
+De actuele componentdocumentatie is onderverdeeld volgens de broncode:
+
+- [Extenders](Systeem/Extender/): 16 componentdocumenten, met korte bestandsnamen zoals `ADS1115.md`.
+- [Sensoren](Systeem/Sensor/RFP602.md): `RFP602.md`.
+- [Sturingen](Systeem/Sturing/): negen componentdocumenten voor A4988, DCmotorL293D, DCmotorL298N, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
+
+De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.
 
 ## Architectuurgrens van GedeeldeBus
 
-GedeeldeBus is de gemeenschappelijke boom- en resourcebeheerlaag. De generieke kern staat in `src/Systeem/GedeeldeBus/GedeeldeBus.h/.cpp`. Concrete Extenders staan voor onderhoud en leesbaarheid in afzonderlijke bestanden, maar blijven architecturaal onderdeel van GedeeldeBus.
+GedeeldeBus is de gemeenschappelijke boom- en resourcebeheerlaag. De generieke kern staat in `src/Systeem/GedeeldeBus/GedeeldeBus.h/.cpp`. Concrete Extenders staan in `src/Systeem/Extender/`, Sensoren in `src/Systeem/Sensor/` en Sturingen in `src/Systeem/Sturing/`. Ze gebruiken de bestaande generieke GedeeldeBus-basis.
 
 De actuele boom gebruikt één `GedeeldeBusNode`-structuur voor root-, parent- en childnodes. `Native` is de root. Top-level componenten hangen aan `Native`; een Sensor kan als child van een ADC-extender hangen; Input en Screen maken zelf children aan voor hun concrete kanalen.
 
@@ -195,7 +472,7 @@ Er zijn in de huidige code nog geen concrete `Diagnose()`-overrides. Uitgebreide
 
 `NativeArduinoPinVan()` vertaalt zo'n logische resource naar het board-specifieke Arduino-pinnummer uit `SystemConfig.h`. ExtenderPins gaan nooit door deze functie.
 
-De waarden van `HardwareResourceType` gebruiken de prefix `RT_`, bijvoorbeeld `RT_I2C`, `RT_SPI`, `RT_GPIO` en `RT_INTERRUPT`. De groepswaarden binnen `GedeeldeBusComponent` zijn `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER`, `GC_SENSOR` en `GC_DATA`; concrete componentwaarden behouden hun eigen naam.
+De waarden van `HardwareResourceType` gebruiken de prefix `RT_`, bijvoorbeeld `RT_I2C`, `RT_SPI`, `RT_GPIO` en `RT_INTERRUPT`. De groepswaarden binnen `GedeeldeBusComponent` omvatten onder meer `GC_INPUT`, `GC_SCREEN`, `GC_EXTENDER`, `GC_SENSOR` en `GC_DATA`; concrete componentwaarden behouden hun eigen naam.
 
 ### Gedeelde en exclusieve claims
 
@@ -219,7 +496,7 @@ I2C-adressen worden intern als exclusieve claim in hetzelfde mechanisme behandel
 
 ## Concrete Extenders
 
-De huidige code bevat 14 concrete Extenders. Alleen een Extender die compile-time effectief nodig is, wordt mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender; daarnaast gebruikt de ADC-route `ExtenderADS1115` wanneer `ADC_BACKEND == ADC_BACKEND_ADS1115` en gebruikt Input `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat.
+De huidige code bevat 16 concrete Extenders. Alleen een Extender die compile-time effectief nodig is, wordt mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender; daarnaast gebruikt Input `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat.
 
 
 1. `ExtenderADS1115`
@@ -260,14 +537,9 @@ De fabrikant-/functiebenaming blijft in de comments naast elke enumwaarde staan.
 
 ## ADC-laag en Sensor
 
-De code bevat twee ADC-parentvarianten:
+Er is geen aparte ADC-laag meer: een ADC is een gewone Extender. De `.ino` maakt de ADC-Extender aan (nu: `ExtenderADS1115`, componentcode `ADC_ADS1115`) en geeft hem als parent aan de Sensor door, zoals bij elke Extender. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`.
 
-- `ADC_NATIVE : GedeeldeBusNode` voor de native analoge resources;
-- `ADC_ADS1115 : ExtenderADS1115` voor de externe ADS1115-route.
-
-Welke statische ADC-parent bestaat, wordt compile-time gekozen met `ADC_BACKEND`.
-
-`Sensor` is momenteel een lege tussenstruct boven `GedeeldeBusNode`. De eerste concrete Sensor is `RFP602` onder `src/Systeem/Sensor/`. Eén `RFP602`-object beheert maximaal vier kanalen en hangt, afhankelijk van `ADC_BACKEND`, onder `ADC_NATIVE` of `ADC_ADS1115`. `RFP602::Activeren()` stelt bij ADS1115 de gain in; `RawAnalogRead()` leest via ADS1115 of `analogRead()`.
+`Sensor` is momenteel een tussenstruct boven `GedeeldeBusNode`. `RFP602` staat onder `src/Systeem/Sensor/` en leest analoge waarden via het bestaande generieke ADC-parentcontract (`StartExtenderReadAnalog`, `IsExtenderReadAnalogReady`, `GetExtenderReadAnalogValue`). De concrete ADC-implementatie blijft bij de Extender. Eén `RFP602`-object beheert maximaal vier kanalen op één ADC-Extender; de kanalen komen uit de constructor of anders uit `RFP602_ADC_PIN_SENSOR_1_SET_1` tot en met `RFP602_ADC_PIN_SENSOR_4_SET_1`. Set 1 en set 2 worden onderscheiden via de parameter `set`, `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2`, `sensorRFP602set1` en `sensorRFP602set2`; elke set gebruikt een eigen ADS1115 en elk object eigen buffers.
 
 ## Screen
 
@@ -285,21 +557,20 @@ Zie [Systeem/SCREEN.md](Systeem/SCREEN.md).
 
 ```text
 INPUT_TYPE_NONE
-INPUT_TYPE_DIGITAL
 INPUT_TYPE_PCF8574
 INPUT_TYPE_HX1838
 INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838
 ```
 
-`INPUT_TYPE_DIGITAL` wordt dus niet gecombineerd met PCF8574 of HX1838. De runtime-subset moet volledig binnen `INPUT_KANAAL_CONFIG` vallen; dit wordt in `Input::aanmelden()` gecontroleerd.
+Rechtstreeks gelezen digitale pinnen bestaan in v2.0.0 niet meer: het keypad loopt via de PCF8574, zodat acht native pinnen vrij blijven. De runtime-subset moet volledig binnen `INPUT_KANAAL_CONFIG` vallen; dit wordt in `Input::aanmelden()` gecontroleerd.
 
-De concrete children zijn `InputDigital`, `InputPCF8574` en `InputHX1838`. De vroegere publieke `InputConfigureren()`-stap bestaat niet meer. `Input::inpluggen()` beslist eerst welke geselecteerde kanalen fysiek/minimaal bruikbaar zijn: PCF8574 moet zijn `begin(0xFF)`-I2C-transactie succesvol uitvoeren; TinyIRReceiver moet zijn interruptkoppeling kunnen initialiseren; IRremote wordt gestart en met de bestaande korte `isIdle()`-stabiliteitscontrole gecontroleerd. Een falend kanaal wordt vóór de overlevingscontrole afgemeld en op `nullptr` gezet. `Input::Activeren()` werkt daarna alleen met de overgebleven kanalen, configureert de digitale pinmodes en verwerkt de HX1838-mapping- of kalibratiebron.
+De concrete children zijn `InputPCF8574` en `InputHX1838`. De vroegere publieke `InputConfigureren()`-stap bestaat niet meer. `Input::inpluggen()` beslist eerst welke geselecteerde kanalen fysiek/minimaal bruikbaar zijn: PCF8574 moet zijn `begin(0xFF)`-I2C-transactie succesvol uitvoeren; TinyIRReceiver moet zijn interruptkoppeling kunnen initialiseren; IRremote wordt gestart en met de bestaande korte `isIdle()`-stabiliteitscontrole gecontroleerd. Een falend kanaal wordt vóór de overlevingscontrole afgemeld en op `nullptr` gezet. `Input::Activeren()` werkt daarna alleen met de overgebleven kanalen en verwerkt de HX1838-mapping- of kalibratiebron.
 
 Zie [Systeem/INPUT.md](Systeem/INPUT.md).
 
 ## Stimulus
 
-`Stimulus` blijft een toepassingsmodule onder `src/Toepassingsgebieden/Stimulus/`. De directe sensoruitlezing loopt in de huidige code via de globale pointer `sensorRFP602`; de voorbeelden maken `Screen`, `Input` en `sensorRFP602` via `GedeeldeBusNewComponent()` aan voordat de Stimuluslogica wordt gebruikt.
+`Stimulus` blijft een toepassingsmodule onder `src/Toepassingsgebieden/Stimulus/`. De directe sensoruitlezing loopt in de huidige code via de globale pointer `sensorRFP602set1`; de voorbeelden maken `Screen`, `Input` en `sensorRFP602set1` via `GedeeldeBusNewComponent()` aan voordat de Stimuluslogica wordt gebruikt.
 
 ## Configuratiemodel
 
@@ -333,7 +604,7 @@ vaste keuzewaarden die vóór UserConfig nodig zijn
 
 ### Gereserveerde domeinen
 
-`src/Uitbreidingskaarten/` is momenteel een gereserveerde broncodemap. `docs/Uitbreidingskaarten/` bevat wel hardwaredocumentatie, waaronder de Stimulus Shield v1.1.2.
+`src/Uitbreidingskaarten/` is momenteel een gereserveerde broncodemap. `docs/Uitbreidingskaarten/` bevat wel hardwaredocumentatie, waaronder de Stimulus Shield v2.0.0.
 
 ## Afhankelijkheden
 

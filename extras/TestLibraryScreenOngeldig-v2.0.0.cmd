@@ -39,6 +39,12 @@ set "TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=10"
 set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG bevat een onbekende uitvoerbit. Gebruik alleen SCREEN_TYPE_NONE, SCREEN_TYPE_SERIAL, SCREEN_TYPE_CHARACTER en SCREEN_TYPE_PIXELS."
 call :EXPECT_FAIL
 
+set "TEST_INO=examples\Systeem\Screen\Default_CharacterScreen\Default_CharacterScreen.ino"
+set "TEST_NAAM=Stel SCREEN_OUTPUT_CONFIG in UserConfig.h of SystemConfig.h in op (minstens) SCREEN_TY..."
+set "TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=1"
+set "VERWACHTE_FOUT=Stel SCREEN_OUTPUT_CONFIG in UserConfig.h of SystemConfig.h in op (minstens) SCREEN_TYPE_CHARACTER."
+call :EXPECT_FAIL
+
 set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
 
 echo.

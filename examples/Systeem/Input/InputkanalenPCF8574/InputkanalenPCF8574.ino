@@ -30,7 +30,6 @@
 // mappingTestMenu[] hieronder bevat, per KEYPAD_TYPE, de volledige set opschriften die dat
 // type kan opleveren, elk gekoppeld aan zijn eigen, herkenbare functie. Zo toont het display
 // precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
-// Voor INPUT_TYPE_DIGITAL, zie InputkanalenDIGITAL.ino.
 // Voor INPUT_TYPE_HX1838, zie InputkanalenHX1838.ino.
 
 #include <GroeiAcademie.h>

@@ -9,6 +9,19 @@
 // ============================================================================
 
 #include <GroeiAcademie.h>
+
+#if EXTENDER_ADS1115_AANTAL == 0
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+#endif
+
+ExtenderADS1115 extenderADS1115(
+  &Native, GedeeldeBusComponent::ADC_ADS1115,
+  I2C_ADDRESS_EXTENDER_ADS1115_1,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL,
+  EXTENDER_ADS1115_1_ALERT_RDY,
+  HardwareResourceToegang::GEDEELD
+);
+
 #include <I2C_SCANNER.h>
 
 I2C_SCANNER i2cScanner;
@@ -20,8 +33,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }
 
-  sensorRFP602 = GedeeldeBusNewComponent<struct RFP602>();
-  if (sensorRFP602 == nullptr) { GA_SERIAL.println(F("FOUT: RFP602")); while (true) { ; } }
+  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+  if (sensorRFP602set1 == nullptr) { GA_SERIAL.println(F("FOUT: RFP602")); while (true) { ; } }
 
   Input = GedeeldeBusNewComponent<struct Input>();
   if (Input == nullptr) { GA_SERIAL.println(F("FOUT: Input")); while (true) { ; } }

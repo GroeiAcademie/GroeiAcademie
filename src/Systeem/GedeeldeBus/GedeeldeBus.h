@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "../../Configuratie/SystemConfig.h"
 
-#if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
+#if EXTENDER_ADS1115_AANTAL > 0
   #include <ADS1X15.h>
 #endif
 
@@ -127,10 +127,11 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
 // OPGEPAST: de numerieke waarden hieronder zijn functioneel en mogen niet vrij worden hernummerd.
 // GedeeldeBus gebruikt de nummerbereiken om componentgroepen te herkennen.
 // Bij wijziging van deze nummering moet alle code die deze bereiken controleert mee worden aangepast.
+// Bereiken: 0x00-0x0F Input, 0x10-0x1F Output en Data, 0x20-0x7F Extender, 0x80-0xDF Sensor, 0xE0-0xFE Sturing, 0xFF ROOT.
+// Groepen binnen een bereik staan alfabetisch en beginnen op een waarde die eindigt op 0 of 5.
 #define GEDEELDE_BUS_ELKE_COMPONENT(X) \
   /* INPUT ------------------------ */ \
   X(GC_INPUT,                     0x00) /* GedeeldeBusComponent::GC_INPUT */ \
-  X(INPUT_DIGITAL,                0x01) /* GedeeldeBusComponent::INPUT_DIGITAL */ \
   X(INPUT_HX1838,                 0x02) /* GedeeldeBusComponent::INPUT_HX1838 */ \
   X(INPUT_PCF8574,                0x03) /* GedeeldeBusComponent::INPUT_PCF8574 */ \
   /*                                */ \
@@ -155,33 +156,44 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   X(ADC_ADS1158,                  0x22) /* GedeeldeBusComponent::ADC_ADS1158 */ \
   X(ADC_ADS7828,                  0x23) /* GedeeldeBusComponent::ADC_ADS7828 */ \
   X(ADC_ADS7953,                  0x24) /* GedeeldeBusComponent::ADC_ADS7953 */ \
-  X(ADC_NATIVE,                   0x25) /* GedeeldeBusComponent::ADC_NATIVE */ \
   /*                                */ \
   /* ADS-multiplexer                */ \
   X(ADS_MULTIPLEXER_CD74HC4067,   0x30) /* GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067 */ \
   /*                                */ \
   /* DigitalPins                    */ \
-  X(DIGITAL_PINS_MCP23017,        0x35) /* GedeeldeBusComponent::DIGITAL_PINS_MCP23017 */ \
-  X(DIGITAL_PINS_MCP23S17,        0x36) /* GedeeldeBusComponent::DIGITAL_PINS_MCP23S17 */ \
-  X(DIGITAL_PINS_PCF8574,         0x37) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8574 */ \
-  X(DIGITAL_PINS_PCF8575,         0x38) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8575 */ \
+  X(DIGITAL_PINS_MCP23017,        0x40) /* GedeeldeBusComponent::DIGITAL_PINS_MCP23017 */ \
+  X(DIGITAL_PINS_MCP23S17,        0x41) /* GedeeldeBusComponent::DIGITAL_PINS_MCP23S17 */ \
+  X(DIGITAL_PINS_PCF8574,         0x42) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8574 */ \
+  X(DIGITAL_PINS_PCF8575,         0x43) /* GedeeldeBusComponent::DIGITAL_PINS_PCF8575 */ \
   /*                                */ \
   /* I2C-multiplexer                */ \
-  X(I2C_MULTIPLEXER_TCA9548A,     0x40) /* GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A */ \
+  X(I2C_MULTIPLEXER_TCA9548A,     0x45) /* GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A */ \
   /*                                */ \
   /* One-Wire                       */ \
-  X(ONE_WIRE_DS2482v800,          0x45) /* GedeeldeBusComponent::ONE_WIRE_DS2482v800 */ \
+  X(ONE_WIRE_DS2482v800,          0x50) /* GedeeldeBusComponent::ONE_WIRE_DS2482v800 */ \
   /*                                */ \
   /* PWM                            */ \
-  X(PWM_PCA9685,                  0x50) /* GedeeldeBusComponent::PWM_PCA9685 */ \
+  X(PWM_PCA9685,                  0x55) /* GedeeldeBusComponent::PWM_PCA9685 */ \
   /*                                */ \
   /* UART                           */ \
-  X(UART_MAX14830,                0x55) /* GedeeldeBusComponent::UART_MAX14830 */ \
-  X(UART_SC16IS752,               0x56) /* GedeeldeBusComponent::UART_SC16IS752 */ \
+  X(UART_MAX14830,                0x65) /* GedeeldeBusComponent::UART_MAX14830 */ \
+  X(UART_SC16IS752,               0x66) /* GedeeldeBusComponent::UART_SC16IS752 */ \
   /*                                */ \
   /* SENSOR ----------------------- */ \
-  X(GC_SENSOR,                    0xA0) /* GedeeldeBusComponent::GC_SENSOR */ \
-  X(RFP602,                       0xA1) /* GedeeldeBusComponent::RFP602 */ \
+  X(GC_SENSOR,                    0x80) /* GedeeldeBusComponent::GC_SENSOR */ \
+  /* Druk en kracht                 */ \
+  X(RFP602,                       0xA4) /* GedeeldeBusComponent::RFP602 */ \
+  /*                                */ \
+  /* STURING ---------------------- */ \
+  X(A4988,                        0xE0) \
+  X(DCmotorL293D,                 0xE1) \
+  X(DCmotorL298N,                 0xE2) \
+  X(MG996R,                       0xE3) \
+  X(Relais,                       0xE4) \
+  X(RGBLED,                       0xE5) \
+  X(SG90,                         0xE6) \
+  X(ULN2003,                      0xE7) \
+  X(WS2812,                       0xE8) \
   /*                                */ \
   /* ROOT-node -------------------- */ \
   X(ROOT,                         0xFF) /* GedeeldeBusComponent::ROOT */
@@ -362,6 +374,31 @@ struct GedeeldeBusNode {
   // Standaard niets te doen. Dit is de opvolger van EffectiefInpluggen().
   virtual bool Activeren() { return true; }
 
+  // Een analoog kanaal van deze node meten wanneer ze een ADC-Extender is (V8). Standaard: niet ondersteund (-2).
+  // bereikMillivolt: het meetbereik dat de child nodig heeft; de Extender kiest zelf zijn passende versterking, per meting.
+  // StartExtenderReadAnalog() geeft (R1, nooit als bool gebruiken: -1 en -2 zijn in C++ true):
+  //    1 = meting gestart; 0 = ADC bezet door een andere child (geen fout, niet melden aan D042);
+  //   -1 = hardwarefout (wel melden aan D042); -2 = ongeldige pin of geen ADC-Extender (geen runtime-fout, niet melden).
+  // bereikMillivolt == 0: alleen nagaan of de meting ondersteund wordt (1 of -2). Garanties: geen I2C, geen wijziging van
+  //   gain, meetstatus of een lopende conversie. Bedoeld voor Activeren() van een Sensor.
+  // Contract (R2, R3): elke Start die 1 teruggaf, sluit dezelfde child af met GetExtenderReadAnalogValue(), ook na een fout of
+  //   een time-out; pas dan is de ADC weer vrij. Alleen de child die 1 kreeg, roept Get aan. Dit is een gebruikscontract,
+  //   geen technisch afgedwongen eigenaarschap.
+  // De waarde is geschaald naar ADC_BITS (SystemConfig.h), zodat een Sensor niet hoeft te weten welke ADC hij gebruikt.
+  // IsExtenderReadAnalogReady() geeft true bij een fout (niet blijven wachten) en verandert de meetstatus niet.
+  virtual int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) { (void)pin; (void)bereikMillivolt; return -2; }
+  virtual bool IsExtenderReadAnalogReady() { return true; }
+  virtual bool GetExtenderReadAnalogValue(int32_t& waarde) { waarde = 0; return false; }
+
+  // Een PWM-kanaal van deze node zetten wanneer ze een PWM-Extender is (V9). waarde: 0 tot 4095. Standaard: niet ondersteund (false).
+  // De PWM-frequentie hoort bij de Extender (configuratie), niet bij de child.
+  virtual bool WriteExtenderPWM(uint8_t pin, uint16_t waarde) { (void)pin; (void)waarde; return false; }
+
+  // Een Sturing zet haar uitgangen in een veilige toestand (V11). Standaard niets (Sensoren, Extenders, Input, Screen).
+  // Aangeroepen bij uitschakelen tijdens runtime-herstel, bij afmelden en wanneer activeren() mislukt.
+  // Is de parent onbereikbaar, dan lukt dit niet via de bus: een hardwarematige veiligheid (bv. OE-pin) blijft nodig.
+  virtual void StopSturing() {}
+
 #ifdef DEBUG
   virtual void Diagnose() {}
 #endif
@@ -404,7 +441,7 @@ struct GedeeldeBusNode {
   virtual bool activeren();
 
   // Runtime-herstel (D042): alle nodes onder deze node (kinderen, kleinkinderen, ...).
-  // Uitschakelen: actief = false, zodat niemand nog leest van een component dat niet antwoordt.
+  // Uitschakelen: eerst StopSturing() bij alle onderliggende nodes, daarna actief = false, zodat niemand nog leest van een component dat niet antwoordt.
   // OpnieuwActiveren: activeren() van boven naar onder, zodat elk component zijn instellingen opnieuw zet (bv. de gain van RFP602).
   void AlleOnderliggendeNodesUitschakelen();
   void AlleOnderliggendeNodesOpnieuwActiveren();
@@ -419,6 +456,7 @@ struct GedeeldeBusNode {
 
     if (!aangemeld) return true;
     if (firstChild != nullptr) return false;  // heeft nog eigen kinderen: eerst die afmelden
+    StopSturing();
     if (prevChild != nullptr) prevChild->nextChild = nextChild;
     else if (parent != nullptr) parent->firstChild = nextChild;
     if (nextChild != nullptr) nextChild->prevChild = prevChild;
@@ -447,11 +485,11 @@ struct GedeeldeBusNode {
   // IsExtenderComponent: de enige plaats die bepaalt welke componentcodes Extenders zijn.
   static bool IsExtenderComponent(GedeeldeBusComponent c) {
     const uint8_t code = static_cast<uint8_t>(c);
-    return code >= 0x20 && code <= 0x7F && c != GedeeldeBusComponent::ADC_NATIVE;
+    return code >= 0x20 && code <= 0x7F;
   }
 
   // firstExtenderNode: nullptr betekent de pinnen van het board zelf (Native).
-  // Een Extender (componentcode 0x20 t/m 0x7F, behalve ADC_NATIVE) biedt zijn children een eigen pinruimte.
+  // Een Extender (componentcode 0x20 t/m 0x7F) biedt zijn children een eigen pinruimte.
   const GedeeldeBusNode* firstExtenderNode() const {
     for (const GedeeldeBusNode* voorouder = parent; voorouder != nullptr; voorouder = voorouder->parent) {
       if (IsExtenderComponent(voorouder->component)) return voorouder;
@@ -698,75 +736,53 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 // CONCRETE EXTENDERS: blijven architecturaal onderdeel van GedeeldeBus,
 // maar staan voor onderhoud en leesbaarheid elk in een eigen bestand.
 // ============================================================================
-#if EXTENDER_ADS1115_AANTAL > 0 || ADC_BACKEND == ADC_BACKEND_ADS1115
-  #include "ExtenderADS1115.h"
+#if EXTENDER_ADS1115_AANTAL > 0
+  #include "../Extender/ADS1115.h"
 #endif
 #if EXTENDER_ADS1158_AANTAL > 0
-  #include "ExtenderADS1158.h"
+  #include "../Extender/ADS1158.h"
 #endif
 #if EXTENDER_ADS7828_AANTAL > 0
-  #include "ExtenderADS7828.h"
+  #include "../Extender/ADS7828.h"
 #endif
 #if EXTENDER_ADS7953_AANTAL > 0
-  #include "ExtenderADS7953.h"
+  #include "../Extender/ADS7953.h"
 #endif
 #if EXTENDER_CD74HC4067_AANTAL > 0
-  #include "ExtenderCD74HC4067.h"
+  #include "../Extender/CD74HC4067.h"
 #endif
 #if EXTENDER_DS2482_800_AANTAL > 0
-  #include "ExtenderDS2482v800.h"
+  #include "../Extender/DS2482v800.h"
 #endif
 #if EXTENDER_MAX14830_I2C_AANTAL > 0
-  #include "ExtenderMAX14830I2C.h"
+  #include "../Extender/MAX14830I2C.h"
 #endif
 #if EXTENDER_MAX14830_SPI_AANTAL > 0
-  #include "ExtenderMAX14830SPI.h"
+  #include "../Extender/MAX14830SPI.h"
 #endif
 #if EXTENDER_MCP23017_AANTAL > 0
-  #include "ExtenderMCP23017.h"
+  #include "../Extender/MCP23017.h"
 #endif
 #if EXTENDER_MCP23S17_AANTAL > 0
-  #include "ExtenderMCP23S17.h"
+  #include "../Extender/MCP23S17.h"
 #endif
 #if EXTENDER_PCA9685_AANTAL > 0
-  #include "ExtenderPCA9685.h"
+  #include "../Extender/PCA9685.h"
 #endif
 #if EXTENDER_PCF8574_AANTAL > 0 || ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-  #include "ExtenderPCF8574.h"
+  #include "../Extender/PCF8574.h"
 #endif
 #if EXTENDER_PCF8575_AANTAL > 0
-  #include "ExtenderPCF8575.h"
+  #include "../Extender/PCF8575.h"
 #endif
 #if EXTENDER_SC16IS752_I2C_AANTAL > 0
-  #include "ExtenderSC16IS752I2C.h"
+  #include "../Extender/SC16IS752I2C.h"
 #endif
 #if EXTENDER_SC16IS752_SPI_AANTAL > 0
-  #include "ExtenderSC16IS752SPI.h"
+  #include "../Extender/SC16IS752SPI.h"
 #endif
 #if EXTENDER_TCA9548A_AANTAL > 0
-  #include "ExtenderTCA9548A.h"
-#endif
-
-// ============================================================================
-// ADC-BASIS: ADC_NATIVE en ADC_ADS1115 worden als ADC-extender ingeplugd.
-// De sensorlaag wordt pas daarna op de gekozen ADC-extender ingeplugd.
-// ============================================================================
-struct ADC_NATIVE : GedeeldeBusNode {
-  uint8_t exclusief_[4];
-
-  ADC_NATIVE(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_A0, HardwareResourcePin np_A1, HardwareResourcePin np_A2, HardwareResourcePin np_A3, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 4 }, component, Extender) {
-    exclusief_[0] = static_cast<uint8_t>(np_A0);
-    exclusief_[1] = static_cast<uint8_t>(np_A1);
-    exclusief_[2] = static_cast<uint8_t>(np_A2);
-    exclusief_[3] = static_cast<uint8_t>(np_A3);
-  }
-};
-
-#if ADC_BACKEND == ADC_BACKEND_ADS1115
-struct ADC_ADS1115 : ExtenderADS1115 {
-  using ExtenderADS1115::ExtenderADS1115;
-};
+  #include "../Extender/TCA9548A.h"
 #endif
 
 // ============================================================================
@@ -910,10 +926,6 @@ struct SerialOutput : GedeeldeBusNode {
 // ============================================================================
 // INPUT - geen eigen velden: erven de constructor van GedeeldeBusNode rechtstreeks.
 // ============================================================================
-struct InputDigital : GedeeldeBusNode {
-  using GedeeldeBusNode::GedeeldeBusNode;
-};
-
 struct InputHX1838 : GedeeldeBusNode {
   using GedeeldeBusNode::GedeeldeBusNode;
 };
@@ -957,12 +969,6 @@ extern GedeeldeBusNode Native;
 #if GEDEELDE_BUS_MIXED_PINS
 // GedeeldeBusFindI2CExtender: zoekt in de boom een I2C-Extender op component en adres. nullptr = niet gevonden.
 GedeeldeBusNode* GedeeldeBusFindI2CExtender(GedeeldeBusComponent extender, uint8_t extenderAdres);
-#endif
-
-#if ADC_BACKEND == ADC_BACKEND_NATIVE
-extern struct ADC_NATIVE ADC_NATIVE;
-#elif ADC_BACKEND == ADC_BACKEND_ADS1115
-extern struct ADC_ADS1115 ADC_ADS1115;
 #endif
 
 #endif // GEDEELDE_BUS_H

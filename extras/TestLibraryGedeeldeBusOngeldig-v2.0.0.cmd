@@ -54,45 +54,15 @@ set "VERWACHTE_FOUT=Selecteer slechts een taal in UserConfig.h of SystemConfig.h
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=ONGELDIG AANTAL_SENSOREN_AANWEZIG"
-set "TEST_FLAGS=-DAANTAL_SENSOREN_AANWEZIG=3"
-set "VERWACHTE_FOUT=AANTAL_SENSOREN_AANWEZIG moet 2 of 4 zijn."
+set "TEST_NAAM=ONGELDIG RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1"
+set "TEST_FLAGS=-DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=3"
+set "VERWACHTE_FOUT=RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=ONGELDIGE ADC_BACKEND"
-set "TEST_FLAGS=-DADC_BACKEND=99"
-set "VERWACHTE_FOUT=Selecteer een geldige ADC_BACKEND."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=INPUT_KEYPAD_PIN_K1 t/m INPUT_KEYPAD_PIN_K4 moeten samen gedefinieerd worden"
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4 -DINPUT_KEYPAD_PIN_K1=2"
-set "VERWACHTE_FOUT=INPUT_KEYPAD_PIN_K1 t/m INPUT_KEYPAD_PIN_K4 moeten samen gedefinieerd worden."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=INPUT_KEYPAD_PIN_L1, INPUT_KEYPAD_PIN_L2, INPUT_KEYPAD_PIN_R1 en INPUT_KEYPAD_PIN_R2 moet..."
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2 -DINPUT_KEYPAD_PIN_L1=2"
-set "VERWACHTE_FOUT=INPUT_KEYPAD_PIN_L1, INPUT_KEYPAD_PIN_L2, INPUT_KEYPAD_PIN_R1 en INPUT_KEYPAD_PIN_R2 moeten samen gedefinieerd worden."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden"
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 -DINPUT_KEYPAD_PIN_1=2"
-set "VERWACHTE_FOUT=INPUT_KEYPAD_PIN_1 t/m INPUT_KEYPAD_PIN_4 moeten samen gedefinieerd worden."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=INPUT_KEYPAD_PIN_OUT1 t/m INPUT_KEYPAD_PIN_OUT4 moeten samen gedefinieerd worden"
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4 -DINPUT_KEYPAD_PIN_OUT1=2"
-set "VERWACHTE_FOUT=INPUT_KEYPAD_PIN_OUT1 t/m INPUT_KEYPAD_PIN_OUT4 moeten samen gedefinieerd worden."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL"
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_USER_DEFINED_DIRECT"
-set "VERWACHTE_FOUT=Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
+set "TEST_NAAM=RFP602 ZONDER ADS1115-EXTENDER"
+set "TEST_FLAGS=-DEXTENDER_ADS1115_AANTAL=0"
+set "VERWACHTE_FOUT=Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
@@ -150,30 +120,6 @@ set "VERWACHTE_FOUT=INPUT_TYPE_PCF8574 ondersteunt alleen de gedefinieerde keypa
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL"
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=99"
-set "VERWACHTE_FOUT=Deze KEYPAD_TYPE wordt niet ondersteund met INPUT_TYPE_DIGITAL."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik\Scenario1_EnkelTik.ino"
-set "TEST_NAAM=Geldige INPUT_KANAAL_CONFIG: INPUT_TYPE_NONE, INPUT_TYPE_DIGITAL, INPUT_TYPE_PCF8574, INP..."
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL|INPUT_TYPE_HX1838"
-set "VERWACHTE_FOUT=Geldige INPUT_KANAAL_CONFIG: INPUT_TYPE_NONE, INPUT_TYPE_DIGITAL, INPUT_TYPE_PCF8574, INPUT_TYPE_HX1838 of INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen en past niet op INPUT_TYPE_D..."
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE_MEMBRAAN_MATRIX_4x5=34 -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5"
-set "VERWACHTE_FOUT=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5 gebruikt negen signaallijnen en past niet op INPUT_TYPE_DIGITAL of INPUT_TYPE_PCF8574."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4, KEYPAD_TYPE_DRUKKN..."
-set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_MATRIX_4x4"
-set "VERWACHTE_FOUT=INPUT_TYPE_DIGITAL ondersteunt alleen KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4, KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2, KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4, KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1 en KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
 set "TEST_NAAM=TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED moet TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW of TTP..."
 set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=INPUT_TYPE_PCF8574 -DKEYPAD_TYPE=KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4 -DTTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED=99"
 set "VERWACHTE_FOUT=TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED moet TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW of TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH zijn."
@@ -197,9 +143,20 @@ set "TEST_FLAGS=-DSCREEN_OUTPUT_CONFIG=8"
 set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG bevat een onbekende uitvoerbit. Gebruik alleen SCREEN_TYPE_NONE, SCREEN_TYPE_SERIAL, SCREEN_TYPE_CHARACTER en SCREEN_TYPE_PIXELS."
 call :EXPECT_FAIL
 
-set "VERWACHTE_FOUT=Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL."
-set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
+set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik\Scenario1_EnkelTik.ino"
+set "TEST_NAAM=Input: onbekend invoertype"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=0x80"
+set "VERWACHTE_FOUT=INPUT_KANAAL_CONFIG bevat een onbekend invoertype."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Scenario1_EnkelTik\Scenario1_EnkelTik.ino"
+set "TEST_NAAM=Input: ongeldige invoertype-combinatie"
+set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=0x80"
+set "VERWACHTE_FOUT=Geldige INPUT_KANAAL_CONFIG: INPUT_TYPE_NONE, INPUT_TYPE_PCF8574, INPUT_TYPE_HX1838 of INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838."
+call :EXPECT_FAIL
 
 echo.
+set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
+
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!
 if !FAIL!==0 (exit /b 0) else exit /b 1

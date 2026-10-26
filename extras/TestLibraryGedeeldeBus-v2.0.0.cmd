@@ -18,8 +18,8 @@ set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set TEST_NAAM="Tik_Enkele_Samen_Instortend_Cocktail"
-set TEST_FLAGS="-DADC_BACKEND=ADC_BACKEND_NATIVE -DINPUT_KANAAL_CONFIG=INPUT_TYPE_DIGITAL -DKEYPAD_TYPE=KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 -DSCREEN_OUTPUT_CONFIG=SCREEN_TYPE_NONE"
+set TEST_NAAM="Tik Enkele Samen Instortend Cocktail"
+set TEST_FLAGS="-DINPUT_KANAAL_CONFIG=INPUT_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT

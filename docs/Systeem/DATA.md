@@ -79,10 +79,10 @@ RFP602
 Voor RFP602 bepaalt:
 
 ```cpp
-RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 ```
 
-en per channel `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE` (standaard gelijk aan de waarde hierboven) of een QueueOrStack gebruikt wordt. De QueueOrStack hangt niet af van DIRECT: hij werkt bij elk Data-type zodra de grootte groter is dan 0.
+en per channel `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` (standaard gelijk aan de waarde hierboven) of een QueueOrStack gebruikt wordt. De QueueOrStack hangt niet af van DIRECT: hij werkt bij elk Data-type zodra de grootte groter is dan 0.
 
 ```text
 0   = geen QueueOrStack; ReadQueueOrStackValue() geeft lastValue van dat channel terug
@@ -224,19 +224,19 @@ Op de UNO R4 definieert SdFat een eigen `F()`-macro wanneer er nog geen is. De c
 Voor RFP602 bepaalt:
 
 ```cpp
-RFP602_DATA_RECORD_FILE
+RFP602_DATA_RECORD_FILE_SET_1
 ```
 
 het bestand voor sensordata-recording.
 
 ## RAM-QueueOrStack
 
-De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (RFP602: `ruweDataQueueOrStackchannel1..4`). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
+De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (RFP602: `ruweDataQueueOrStackChannel1..4`, in elk object apart; met set 2 is de grootte per channel de grootste van set 1 en set 2). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
 
 De QueueOrStack-grootte wordt per sensor geconfigureerd, los van DIRECT. Voor RFP602:
 
 ```cpp
-RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
+RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 ```
 
 Gelijktijdige toegang vanuit twee taken of cores vraagt een aparte analyse en synchronisatie; ook FIFO is niet vanzelf veilig.
@@ -299,7 +299,7 @@ Sensor_RFP602_DIRECT.ino
 Sensor_RFP602_FLASH.ino
 -> DATA_TYPE_FLASH_SPI
 -> Data STREAMING naar FLASH
--> sensorRFP602->StreamingRead(sensorNummer)
+-> sensorRFP602set1->StreamingRead(sensorNummer)
 
 Sensor_RFP602_MICROSD.ino
 -> DATA_TYPE_MICROSD_SPI

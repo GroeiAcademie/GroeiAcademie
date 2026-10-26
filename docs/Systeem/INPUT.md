@@ -4,7 +4,6 @@
 
 De gecompileerde dependencies hangen af van `INPUT_KANAAL_CONFIG`:
 
-- `INPUT_TYPE_DIGITAL`: geen extra externe library.
 - `INPUT_TYPE_PCF8574`: gebruikt `Wire` en dezelfde interne `ExtenderPCF8574`-codebasis als `EXTENDER_PCF8574`; de Input-implementatie gebruikt de externe PCF8574-library niet meer. `library.properties` declareert `PCF8574 (>=0.4.0)` in de huidige codebasis wel nog als algemene dependency.
 - `INPUT_TYPE_HX1838`: gebruikt TinyIRReceiver of IRremote, afhankelijk van `HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE`. HX1838 met `HX1838_BRON_CODES_DEFINE` is released en hardwarematig bevestigd voor beide ontvangstbackends. De standaard ontvangerpin is D8. De EEPROM-gebaseerde HX1838-routes blijven experimenteel.
 - Niet geselecteerde invoerbackends worden via de preprocessor niet meegecompileerd.
@@ -17,13 +16,12 @@ De compile-time configuratie accepteert in `Input.h` exact:
 
 ```text
 INPUT_TYPE_NONE
-INPUT_TYPE_DIGITAL
 INPUT_TYPE_PCF8574
 INPUT_TYPE_HX1838
 INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838
 ```
 
-`INPUT_TYPE_DIGITAL` wordt dus niet gecombineerd met PCF8574 of HX1838. Een runtime-subset moet volledig binnen `INPUT_KANAAL_CONFIG` vallen; `Input::aanmelden()` controleert dit.
+Rechtstreeks gelezen digitale pinnen (`INPUT_TYPE_DIGITAL` uit v1.1.2) bestaan in v2.0.0 niet meer: het Stimulus Shield v2.0.0 leest het keypad via de PCF8574, zodat acht native pinnen vrij blijven. Een runtime-subset moet volledig binnen `INPUT_KANAAL_CONFIG` vallen; `Input::aanmelden()` controleert dit.
 
 Normaal aanmaken:
 
@@ -39,9 +37,9 @@ Input = GedeeldeBusNewComponent<struct Input>(INPUT_TYPE_HX1838);
 if (Input == nullptr) exit(0);
 ```
 
-De concrete GedeeldeBus-children zijn `InputDigital`, `InputPCF8574` en `InputHX1838`. `aanmelden()`, `controleren()`, `inpluggen()` en `Activeren()` sturen de lifecycle door. Wanneer één child faalt wordt dat child afgemeld; `Input` faalt pas volledig wanneer geen enkel geselecteerd kanaal overblijft (behalve bij `INPUT_TYPE_NONE`).
+De concrete GedeeldeBus-children zijn `InputPCF8574` en `InputHX1838`. `aanmelden()`, `controleren()`, `inpluggen()` en `Activeren()` sturen de lifecycle door. Wanneer één child faalt wordt dat child afgemeld; `Input` faalt pas volledig wanneer geen enkel geselecteerd kanaal overblijft (behalve bij `INPUT_TYPE_NONE`).
 
-De vroegere publieke `InputConfigureren()`-stap bestaat niet meer. In de huidige code voert `Input::inpluggen()` de minimale hardwarecontrole uit die nodig is om een kanaal als bruikbaar te behouden: de PCF8574 wordt met `begin(0xFF)` werkelijk via I2C aangesproken; TinyIRReceiver moet zijn interruptkoppeling kunnen initialiseren; bij IRremote wordt `begin()` gevolgd door de bestaande korte `isIdle()`-stabiliteitscontrole. Een kanaal dat daarbij faalt wordt afgemeld en op `nullptr` gezet vóór wordt gecontroleerd of minstens één geselecteerd kanaal overblijft. `Input::Activeren()` configureert daarna de digitale `pinMode()`-instellingen, activeert de overgebleven GedeeldeBus-kinderen en verwerkt voor HX1838 de gekozen mapping- of kalibratiebron.
+De vroegere publieke `InputConfigureren()`-stap bestaat niet meer. In de huidige code voert `Input::inpluggen()` de minimale hardwarecontrole uit die nodig is om een kanaal als bruikbaar te behouden: de PCF8574 wordt met `begin(0xFF)` werkelijk via I2C aangesproken; TinyIRReceiver moet zijn interruptkoppeling kunnen initialiseren; bij IRremote wordt `begin()` gevolgd door de bestaande korte `isIdle()`-stabiliteitscontrole. Een kanaal dat daarbij faalt wordt afgemeld en op `nullptr` gezet vóór wordt gecontroleerd of minstens één geselecteerd kanaal overblijft. `Input::Activeren()` activeert daarna de overgebleven GedeeldeBus-kinderen en verwerkt voor HX1838 de gekozen mapping- of kalibratiebron.
 
 `Diagnose()` is nog niet specifiek in `Input` geïmplementeerd; alleen de lege DEBUG-hook uit `GedeeldeBusNode` bestaat.
 
@@ -60,26 +58,9 @@ Platformafhankelijke EEPROM-initialisatie en commit horen niet verspreid op loss
 
 ## Configuratie
 
-De Input-laag gebruikt `INPUT_KANAAL_CONFIG` als bitmask. Het huidige elektronische schema valt standaard terug op `INPUT_TYPE_DIGITAL`. Wanneer `KEYPAD_TYPE` niet expliciet is ingesteld, wordt `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4` gebruikt. `KEYPAD_TYPE` kiest het fysieke keypad; de gekozen backend bepaalt hoe dat keypad wordt gelezen. DIGITAL wordt in deze fase beperkt tot keypads met maximaal vier digitale signaallijnen. PCF8574 kan de huidige keypadtypen lezen zolang maximaal acht expanderlijnen nodig zijn.
+De Input-laag gebruikt `INPUT_KANAAL_CONFIG` als bitmask. Zonder eigen instelling geldt `INPUT_TYPE_PCF8574`. Wanneer `KEYPAD_TYPE` niet expliciet is ingesteld, wordt `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4` gebruikt. `KEYPAD_TYPE` kiest het fysieke keypad; het invoerkanaal bepaalt hoe dat keypad wordt gelezen. PCF8574 kan de huidige keypadtypen lezen zolang maximaal acht expanderlijnen nodig zijn; `KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5` (negen lijnen) geeft daarom een compilerfout.
 
 Het PCF8574-adres voor `INPUT_PCF8574` heet canoniek `I2C_ADDRESS_PCF8574`. `INPUT_PCF8574` blijft als `GedeeldeBusComponent::INPUT_PCF8574` de exclusieve Input-rol en de pinindeling van het shield behouden, maar gebruikt technisch dezelfde `ExtenderPCF8574`-codebasis als een gewone extender. Fysiek telt `INPUT_PCF8574` als de eerste gebruikte PCF8574 in de adresreeks. Wanneer `I2C_ADDRESS_PCF8574` standaard `0x20` gebruikt, krijgt `EXTENDER_PCF8574_1` daarom standaard het volgende vrije adres `0x21`. Vaste HX1838-codes kunnen via `HX1838_CODE_1` tot en met `HX1838_CODE_21` in `UserConfig.h` worden ingevuld. De instelling `HX1838_BRON_CODES` in `UserConfig.h` bepaalt expliciet welke codebron voorrang krijgt.
-
-### DIGITAL-pinmapping per keypadtype
-
-Bij `INPUT_TYPE_DIGITAL` wordt de fysieke Arduino Uno-shieldpinmapping per `KEYPAD_TYPE` vastgelegd. De niet-membraantypes volgen de natuurlijke volgorde D2,D3,D4,D5. Alleen de twee membraan-directtypes behouden de bestaande gedraaide volgorde D3,D2,D5,D4.
-
-Die gedraaide D3,D2,D5,D4-volgorde hoort bij het membraan-directtype dat beschikbaar was om te testen. Deze softwaremapping volgt de vaste flatkabelvolgorde, zodat er geen draden fysiek gewisseld of gekruist moeten worden.
-
-| `KEYPAD_TYPE` | Keypadlabel / aansluiting | Arduino Uno-shieldpin |
-|---|---|---|
-| `KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4` | K1, K2, K3, K4 | D2, D3, D4, D5 |
-| `KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2` | L1, L2, R1, R2 | D2, D3, D4, D5 |
-| `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4` | 1, 2, 3, 4 | D3, D2, D5, D4 |
-| `KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1` | 1, 2, 3, 4 | D3, D2, D5, D4 |
-| `KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4` | OUT1, OUT2, OUT3, OUT4 | D2, D3, D4, D5 |
-
-`INPUT_TYPE_DIGITAL` gebruikt vanaf v2.0.0 de `INPUT_KEYPAD_PIN_...`-namen van het gekozen `KEYPAD_TYPE` (`K1..K4`, `L1/L2/R1/R2`, `1..4` of `OUT1..OUT4`) als `HardwareResourcePin`-configuratie. `SystemConfig.h` kiest daarvoor per ondersteund `KEYPAD_TYPE` de standaardresources. `PIN_TOETS_1` tot en met `PIN_TOETS_4` bestaan niet meer; `Input` vertaalt de resources naar Arduino-pinnen met `NativeArduinoPinVan(...)`.
-
 
 ## Referentiehardware PCF8574
 
@@ -100,7 +81,7 @@ De referentie-/testmodule voor de I2C-naar-IO-uitbreiding is de OTRONIC OT8980. 
 
 ## Tik-compatibele Input-API
 
-`INPUT_KANAAL_CONFIG` bepaalt welke invoerkanalen gecompileerd zijn. `InputKanaal` meldt via welk kanaal een concrete aanslag werkelijk binnenkwam: `DIGITAL`, `PCF8574` of `HX1838`.
+`INPUT_KANAAL_CONFIG` bepaalt welke invoerkanalen gecompileerd zijn. `InputKanaal` meldt via welk kanaal een concrete aanslag werkelijk binnenkwam: `PCF8574` of `HX1838`.
 
 `InputResultaat` bevat altijd `inputKanaal`, `positieToetsAanslag` en `opschriftToetsAanslag`. Met `INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID` aan bevat het daarnaast `gebeurtenis`. `positieToetsAanslag` is het volgnummer `1..N` binnen de gekozen indeling. `gebeurtenis` is bij een gewone druk `InputGebeurtenis::TOETSAANSLAG` en kan daarnaast `LOSGELATEN`, `LANG_INDRUKKEN` of `TIMEOUT_GEEN_INVOER` zijn.
 
@@ -116,9 +97,9 @@ Wanneer simultane aanslagen later worden uitgewerkt, blijft hetzelfde publieke p
 
 `Input.OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag()` zoekt het ontvangen opschrift in een mapping en retourneert een pointer naar de volledige koppeling met de functiepointer. De eenvoudige overload gebruikt de vaste `mappingTussenToetsaanslagEnUitTeVoerenFunctie`; de overload met een mapping-array zoekt uitsluitend in de expliciet doorgegeven mapping.
 
-`Input.UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true)` leest een toetsaanslag, zoekt die in de vaste mapping en voert de gekoppelde functie uit. Voor meerdere menu's kan dezelfde functienaam gebruikt worden met een expliciete mapping-array, bijvoorbeeld `Input.UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingInstellingenMenu)`. Het aantal elementen hoeft niet afzonderlijk te worden doorgegeven: dit wordt compile-time uit de array afgeleid. `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino` testen deze volledige keten, elk met parameterloze functies (`InputFunctie`/`MappingTussenToetsaanslagEnUitTeVoerenFunctie`) die hun eigen opschrift via `Screen.Print()` tonen.
+`Input.UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten = true)` leest een toetsaanslag, zoekt die in de vaste mapping en voert de gekoppelde functie uit. Voor meerdere menu's kan dezelfde functienaam gebruikt worden met een expliciete mapping-array, bijvoorbeeld `Input.UitVoerenFunctieVolgensMappingMetToetsAanslag(true, mappingInstellingenMenu)`. Het aantal elementen hoeft niet afzonderlijk te worden doorgegeven: dit wordt compile-time uit de array afgeleid. `InputkanalenPCF8574.ino` en `InputkanalenHX1838.ino` testen deze volledige keten, elk met parameterloze functies (`InputFunctie`/`MappingTussenToetsaanslagEnUitTeVoerenFunctie`) die hun eigen opschrift via `Screen.Print()` tonen.
 
-Daarnaast bestaat een volledig apart, tweede type, `InputFunctieMetArgumenten`/`MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, met een `argumenten`-veld (`void*`) dat aan de functie wordt doorgegeven. Dit tweede type raakt het eerste op geen enkele manier: bestaande mappings met parameterloze functies blijven ongewijzigd werken. `InputkanalenDIGITALmetArgumenten.ino`, `InputkanalenPCF8574metArgumenten.ino` en `InputkanalenHX1838metArgumenten.ino` demonstreren dit tweede type, inclusief gedeelde toestand tussen meerdere functies via hetzelfde `argumenten`-adres.
+Daarnaast bestaat een volledig apart, tweede type, `InputFunctieMetArgumenten`/`MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, met een `argumenten`-veld (`void*`) dat aan de functie wordt doorgegeven. Dit tweede type raakt het eerste op geen enkele manier: bestaande mappings met parameterloze functies blijven ongewijzigd werken. `InputkanalenPCF8574metArgumenten.ino` en `InputkanalenHX1838metArgumenten.ino` demonstreren dit tweede type, inclusief gedeelde toestand tussen meerdere functies via hetzelfde `argumenten`-adres.
 
 ## Uitgebreide gebeurtenissen (loslaten, lang indrukken, timeout)
 
@@ -138,14 +119,6 @@ Nieuwe boards mogen al meegecompileerd en getest worden vóór ze officieel onde
 ## Ondersteunde keypadtypen
 
 De fysieke keypadkeuze gebeurt met `KEYPAD_TYPE`.
-
-DIGITAL ondersteunt in deze fase uitsluitend keypadtypen die maximaal vier digitale signaallijnen nodig hebben:
-
-- `KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4`;
-- `KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2`;
-- `KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4`;
-- `KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1`;
-- `KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4`.
 
 PCF8574 ondersteunt de gedefinieerde keypadtypen die maximaal acht expanderlijnen nodig hebben, waaronder de directe 1x4/2x4-varianten en de ondersteunde 2x2-, 4x3- en 4x4-matrixvarianten. `KEYPAD_TYPE_MEMBRAAN_MATRIX_4x5` is bewust geweigerd omdat negen signaallijnen nodig zijn. `KEYPAD_TYPE_TOUCH_TTP229_MATRIX_4x4` gebruikt de acht parallelle uitgangen via PCF8574 P0-P7; daarmee kunnen de eerste acht toetsen uitgelezen worden. Het actieve uitgangsniveau is configureerbaar met `TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH` of `TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_LOW`; standaard is `TTP229_OUTPUT_LEVEL_WHEN_KEY_PRESSED_HIGH`. De toekomstige `KEYPAD_TYPE_TOUCH_TTP229_SERIAL_4x4` via SCL/SDO is een aparte, nog niet geïmplementeerde 16-toetsenvariant.
 
@@ -169,7 +142,7 @@ PCF8574 ondersteunt de gedefinieerde keypadtypen die maximaal acht expanderlijne
 
 ## Input-testvoorbeelden
 
-Onder `examples/Systeem/Input/` staan `InputkanalenDIGITAL.ino`, `InputkanalenPCF8574.ino`, `InputkanalenHX1838.ino`, hun `metArgumenten`-tegenhangers (`InputkanalenDIGITALmetArgumenten.ino`, `InputkanalenPCF8574metArgumenten.ino`, `InputkanalenHX1838metArgumenten.ino`), `InputkanalenHX1838UserDefined.ino`, `InputkanalenPCF8574UserDefinedDirect.ino` en `InputkanalenPCF8574UserDefinedMatrix.ino`. De vijf actuele Stimulus-scenario's staan uitsluitend onder `examples/Toepassingsgebieden/Stimulus/` en gebruiken de Input-laag.
+Onder `examples/Systeem/Input/` staan `InputkanalenPCF8574.ino`, `InputkanalenHX1838.ino`, hun `metArgumenten`-tegenhangers (`InputkanalenPCF8574metArgumenten.ino`, `InputkanalenHX1838metArgumenten.ino`), `InputkanalenHX1838UserDefined.ino`, `InputkanalenPCF8574UserDefinedDirect.ino` en `InputkanalenPCF8574UserDefinedMatrix.ino`. De vijf actuele Stimulus-scenario's staan uitsluitend onder `examples/Toepassingsgebieden/Stimulus/` en gebruiken de Input-laag.
 
 
 Beschikbare HX1838-toetsenindelingen:

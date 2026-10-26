@@ -14,12 +14,9 @@ Een geslaagde Extender-lifecycletest bewijst dus niet dat alle fysieke chipfunct
 
 ## Testscripts v2.0.0
 
-De releasevalidatie bestaat uit acht domeinen. Elk domein heeft een gewoon testscript en een Ongeldig-testscript:
+De releasevalidatie bestaat uit zeven domeinen. Elk domein heeft een gewoon testscript en een Ongeldig-testscript:
 
 ```text
-TestLibraryADC-v2.0.0.cmd
-TestLibraryADCOngeldig-v2.0.0.cmd
-
 TestLibraryData-v2.0.0.cmd
 TestLibraryDataOngeldig-v2.0.0.cmd
 
@@ -54,9 +51,9 @@ TestLibraryGenereerTESTRESULTATEN.cmd
 LokalePaden_template.cmd
 ```
 
-De zestien domeincycli worden afzonderlijk uitgevoerd. Daarna beoordeelt `TestLibraryGenereerTESTRESULTATEN.cmd` de zestien bijbehorende `.txt`-logs en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit.
+De veertien domeincycli worden afzonderlijk uitgevoerd. Daarna beoordeelt `TestLibraryGenereerTESTRESULTATEN.cmd` de veertien bijbehorende `.txt`-logs en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit.
 
-Een releasevalidatie is alleen geslaagd wanneer alle zestien domeincycli volledig zijn afgerond, alle releasecriteria slagen en ook de mappingcontrole slaagt.
+Een releasevalidatie is alleen geslaagd wanneer alle veertien domeincycli volledig zijn afgerond, alle releasecriteria slagen en ook de mappingcontrole slaagt.
 
 ## Padkeuze van de Windows-tests
 
@@ -74,9 +71,9 @@ Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en c
 
 `CONTROLE_PADEN` bepaalt welk domein eigenaar is van de voorbeelden en controles die door een testscript worden beheerd.
 
-De acht gewone domeinscripts gebruiken `TestLibraryCommon.cmd`.
+De zeven gewone domeinscripts gebruiken `TestLibraryCommon.cmd`.
 
-De acht negatieve domeinscripts gebruiken `TestLibraryCommonOngeldig.cmd` en verwijzen via `BRON_TEST_SCRIPT` naar het gewone testscript van hetzelfde domein.
+De zeven negatieve domeinscripts gebruiken `TestLibraryCommonOngeldig.cmd` en verwijzen via `BRON_TEST_SCRIPT` naar het gewone testscript van hetzelfde domein.
 
 De testarchitectuur blijft daardoor per domein opgesplitst. Een test hoort in het domein dat door de betrokken `CONTROLE_PADEN` wordt beheerd.
 
@@ -161,11 +158,9 @@ De interne `--logged`-werking wordt door de testscripts zelf gebruikt om uitvoer
 
 ## Releaseprocedure
 
-Voer de zestien domeinscripts uit:
+Voer de veertien domeinscripts uit:
 
 ```text
-TestLibraryADC-v2.0.0.cmd
-TestLibraryADCOngeldig-v2.0.0.cmd
 TestLibraryData-v2.0.0.cmd
 TestLibraryDataOngeldig-v2.0.0.cmd
 TestLibraryExtenders-v2.0.0.cmd
@@ -190,7 +185,7 @@ TestLibraryGenereerTESTRESULTATEN.cmd
 
 ## Beoordeling van een gewoon domein
 
-Voor elk van de acht gewone domeinlogs controleert `TestLibraryGenereerTESTRESULTATEN.cmd`:
+Voor elk van de zeven gewone domeinlogs controleert `TestLibraryGenereerTESTRESULTATEN.cmd`:
 
 - de eindmarker, zodat alleen een volledig afgeronde run geldig is;
 - `BASIC_FQBN`;
@@ -207,7 +202,7 @@ EXPERIMENTAL_FQBN wordt wel in het rapport opgenomen maar blokkeert de release n
 
 ## Beoordeling van een Ongeldig-domein
 
-Voor elk van de acht Ongeldig-logs moet de eindregel de vorm hebben:
+Voor elk van de zeven Ongeldig-logs moet de eindregel de vorm hebben:
 
 ```text
 Totaal <aantal> - OK <aantal> - FOUT 0
@@ -225,7 +220,7 @@ TestLibraryMappingControle.cmd --no-pause
 
 Ook deze controle moet slagen.
 
-De volledige releasevalidatie bestaat daardoor uit zestien domeincycli plus de verplichte mappingcontrole.
+De volledige releasevalidatie bestaat daardoor uit veertien domeincycli plus de verplichte mappingcontrole.
 
 ## TestLibraryStatusReport.txt
 
@@ -234,7 +229,7 @@ De volledige releasevalidatie bestaat daardoor uit zestien domeincycli plus de v
 Het rapport bevat:
 
 - de totaalstatus van de releasevalidatie;
-- de status van alle zestien domeincycli;
+- de status van alle veertien domeincycli;
 - per gewoon domein BASIC + EXTENDED, EXPERIMENTAL_FQBN, statische controles, Arduino LINT en geheugengegevens;
 - per Ongeldig-domein het negatieve testtotaal;
 - de mappingcontrole;
@@ -243,13 +238,13 @@ Het rapport bevat:
 
 De libraryversie wordt gelezen uit `library.properties`.
 
-Na een volledig geslaagde releasevalidatie worden de zestien losse `.txt`-domeinlogs verwijderd. `TestLibraryStatusReport.txt` blijft behouden.
+Na een volledig geslaagde releasevalidatie worden de veertien losse `.txt`-domeinlogs verwijderd. `TestLibraryStatusReport.txt` blijft behouden.
 
 Wanneer de releasevalidatie niet slaagt, blijven de losse logs behouden en toont de generator welke scripts opnieuw moeten worden uitgevoerd.
 
 ## Status 18-10-2026
 
-De v2.0.0-domeinsplitsing is aanwezig voor ADC, Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools.
+De v2.0.0-domeinsplitsing is aanwezig voor Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools.
 
 De Ongeldig-infrastructuur is aangepast zodat de controlebestanden opnieuw worden opgebouwd en versiegebonden `*Ongeldig-v2.0.0.cmd`-bestanden worden meegenomen.
 

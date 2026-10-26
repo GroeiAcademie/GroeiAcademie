@@ -43,7 +43,7 @@ struct Input* Input = nullptr;
 
 #include <string.h>
 
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
 
   #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
     const MappingTussenOpschriftEnWeergavetekst KEY_LAYOUT[] = {
@@ -122,10 +122,10 @@ struct Input* Input = nullptr;
     #elif KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_DIRECT || KEYPAD_TYPE == KEYPAD_TYPE_USER_DEFINED_MATRIX
       const MappingTussenOpschriftEnWeergavetekst KEY_LAYOUT[] = KEYPAD_GENERIEK_KEY_LAYOUT;
     #else
-      #error Ongeldige KEYPAD_TYPE voor INPUT_TYPE_PCF8574.
+      #error INPUT_TYPE_PCF8574 ondersteunt alleen de gedefinieerde keypads die maximaal acht signaallijnen nodig hebben.
     #endif
   #else
-    #error Ongeldige KEYPAD_TYPE voor INPUT_TYPE_DIGITAL.
+    #error INPUT_TYPE_PCF8574 ondersteunt alleen de gedefinieerde keypads die maximaal acht signaallijnen nodig hebben.
   #endif
 #endif
 
@@ -258,7 +258,7 @@ void Input::ControleerMappingVolledigheidIntern(const char* const opschriftToets
   (void)opschriftToetsAanslag;
   (void)aantalEntries;
   byte aantalOntbrekend = 0;
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
   for (byte i = 0; i < (sizeof(KEY_LAYOUT) / sizeof(KEY_LAYOUT[0])); i++) {
     bool gevonden = false;
 
@@ -538,66 +538,15 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #endif
 
 // ============================================================================
-// DIGITALE DIRECTE UITLEZING (INPUT_TYPE_DIGITAL)
-// ============================================================================
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  int Input::DigitaalUitLezenRuweData() {
-    #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-      const byte rijPinnen[2] = {NativeArduinoPinVan(INPUT_KEYPAD_PIN_L1), NativeArduinoPinVan(INPUT_KEYPAD_PIN_L2)};
-      const byte kolomPinnen[2] = {NativeArduinoPinVan(INPUT_KEYPAD_PIN_R1), NativeArduinoPinVan(INPUT_KEYPAD_PIN_R2)};
-
-      for (byte rij = 0; rij < 2; rij++) {
-        digitalWrite(rijPinnen[rij], LOW);
-        delayMicroseconds(50);
-
-        for (byte kolom = 0; kolom < 2; kolom++) {
-          if (digitalRead(kolomPinnen[kolom]) == LOW) {
-            digitalWrite(rijPinnen[rij], HIGH);
-            return (rij * 2) + kolom + 1;
-          }
-        }
-
-        digitalWrite(rijPinnen[rij], HIGH);
-      }
-
-      return 0;
-    #elif KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT1)) == HIGH) return 1;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT2)) == HIGH) return 2;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT3)) == HIGH) return 3;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT4)) == HIGH) return 4;
-      return 0;
-    #elif KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K1)) == LOW) return 1;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K2)) == LOW) return 2;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K3)) == LOW) return 3;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K4)) == LOW) return 4;
-      return 0;
-    #else
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_1)) == LOW) return 1;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_2)) == LOW) return 2;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_3)) == LOW) return 3;
-      if (digitalRead(NativeArduinoPinVan(INPUT_KEYPAD_PIN_4)) == LOW) return 4;
-      return 0;
-    #endif
-  }
-#endif
-
-#ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-#endif
-
-// ============================================================================
 // DEBOUNCE + NIEUWE-TOETSAANSLAGDETECTIE VOOR FYSIEKE KEYPADS
 // ============================================================================
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
 
   #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
   #endif
 
   int Input::KeypadUitLezenRuweData() {
-    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      return DigitaalUitLezenRuweData();
-    #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       #if defined(KEYPAD_IS_MATRIX)
         return PCF8574uitLezenPoortenP0totP7MatrixAansluiting();
       #else
@@ -1043,40 +992,6 @@ bool Input::aanmelden() {
   if ((this->typesActief & (INPUT_KANAAL_CONFIG)) != this->typesActief) return false;
   if (!GedeeldeBusNode::aanmelden()) return false;
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  if ((this->typesActief & INPUT_TYPE_DIGITAL) && gedeeldeBusInputDigital == nullptr) {
-  #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-    gedeeldeBusInputDigitalPinnen[0] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_K1);
-    gedeeldeBusInputDigitalPinnen[1] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_K2);
-    gedeeldeBusInputDigitalPinnen[2] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_K3);
-    gedeeldeBusInputDigitalPinnen[3] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_K4);
-  #elif KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-    gedeeldeBusInputDigitalPinnen[0] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_L1);
-    gedeeldeBusInputDigitalPinnen[1] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_L2);
-    gedeeldeBusInputDigitalPinnen[2] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_R1);
-    gedeeldeBusInputDigitalPinnen[3] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_R2);
-  #elif KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4 || KEYPAD_TYPE == KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1
-    gedeeldeBusInputDigitalPinnen[0] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_1);
-    gedeeldeBusInputDigitalPinnen[1] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_2);
-    gedeeldeBusInputDigitalPinnen[2] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_3);
-    gedeeldeBusInputDigitalPinnen[3] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_4);
-  #elif KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-    gedeeldeBusInputDigitalPinnen[0] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_OUT1);
-    gedeeldeBusInputDigitalPinnen[1] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_OUT2);
-    gedeeldeBusInputDigitalPinnen[2] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_OUT3);
-    gedeeldeBusInputDigitalPinnen[3] = static_cast<uint8_t>(INPUT_KEYPAD_PIN_OUT4);
-  #endif
-
-    InputDigital* kanaal = new InputDigital(this, BezettingPinnen{ nullptr, 0, gedeeldeBusInputDigitalPinnen, 4 }, GedeeldeBusComponent::INPUT_DIGITAL, HardwareResourceToegang::GEDEELD);
-    kanaal->componentCreated = true;
-
-    if (kanaal->aanmelden()) {
-      gedeeldeBusInputDigital = kanaal;
-    } else {
-      delete kanaal;
-    }
-  }
-#endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   if ((this->typesActief & INPUT_TYPE_PCF8574) && gedeeldeBusInputPCF8574 == nullptr) {
@@ -1107,9 +1022,6 @@ bool Input::aanmelden() {
 #endif
 
   if (this->typesActief != INPUT_TYPE_NONE
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      && gedeeldeBusInputDigital == nullptr
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       && gedeeldeBusInputPCF8574 == nullptr
 #endif
@@ -1128,15 +1040,6 @@ bool Input::controleren() {
   if (gecontroleerd) return true;
   if (!GedeeldeBusNode::controleren()) return false;
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-#ifdef TRACE
-  GA_SERIAL.println("TRACE: Input::controleren(): DIGITAL");
-#endif
-  if (gedeeldeBusInputDigital != nullptr && !gedeeldeBusInputDigital->controleren()) {
-    gedeeldeBusInputDigital->afmelden();
-    gedeeldeBusInputDigital = nullptr;
-  }
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
 #ifdef TRACE
   GA_SERIAL.println("TRACE: Input::controleren(): PCF8574 I2C");
@@ -1157,9 +1060,6 @@ bool Input::controleren() {
 #endif
 
   if (this->typesActief != INPUT_TYPE_NONE
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      && gedeeldeBusInputDigital == nullptr
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       && gedeeldeBusInputPCF8574 == nullptr
 #endif
@@ -1178,15 +1078,6 @@ bool Input::inpluggen() {
   if (ingeplugd) return true;
   if (!GedeeldeBusNode::inpluggen()) return false;
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-#ifdef TRACE
-  GA_SERIAL.println("TRACE: Input::inpluggen(): DIGITAL");
-#endif
-  if (gedeeldeBusInputDigital != nullptr && !gedeeldeBusInputDigital->inpluggen()) {
-    gedeeldeBusInputDigital->afmelden();
-    gedeeldeBusInputDigital = nullptr;
-  }
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
 #ifdef TRACE
   GA_SERIAL.println("TRACE: Input::inpluggen(): PCF8574 I2C");
@@ -1208,7 +1099,7 @@ bool Input::inpluggen() {
     gedeeldeBusInputHX1838 = nullptr;
   }
 
-  /* TODO: Alex - IN302 pas opnieuw activeren nadat getest is of digitalRead() vóór de IR-initialisatie
+  /* Na v2.0.0: IN302 pas opnieuw activeren nadat getest is of digitalRead() vóór de IR-initialisatie
      op alle 11 boards betrouwbaar dezelfde betekenis heeft. De plaats in inpluggen() blijft behouden.
   // Zit de ontvanger vast (blijft laag)? Dubbel gecontroleerd om een kortstondige overgang niet te laten
   // meetellen. Bevestigt enkel dat de pin niet blijvend laag hangt, geen bewijs van echte IR-werking.
@@ -1267,9 +1158,6 @@ bool Input::inpluggen() {
 #endif
 
   if (this->typesActief != INPUT_TYPE_NONE
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      && gedeeldeBusInputDigital == nullptr
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       && gedeeldeBusInputPCF8574 == nullptr
 #endif
@@ -1284,15 +1172,6 @@ bool Input::inpluggen() {
 bool Input::Activeren() {
 #ifdef TRACE
   GA_SERIAL.println("TRACE: Input::Activeren()");
-#endif
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-#ifdef TRACE
-  GA_SERIAL.println("TRACE: Input::Activeren(): DIGITAL");
-#endif
-  if (gedeeldeBusInputDigital != nullptr && !gedeeldeBusInputDigital->activeren()) {
-    gedeeldeBusInputDigital->afmelden();
-    gedeeldeBusInputDigital = nullptr;
-  }
 #endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
 #ifdef TRACE
@@ -1318,9 +1197,6 @@ bool Input::Activeren() {
 #endif
 
   if (this->typesActief != INPUT_TYPE_NONE
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      && gedeeldeBusInputDigital == nullptr
-#endif
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       && gedeeldeBusInputPCF8574 == nullptr
 #endif
@@ -1329,33 +1205,6 @@ bool Input::Activeren() {
 #endif
   ) return false;
 
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  if (gedeeldeBusInputDigital != nullptr) {
-    #if KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_L1), OUTPUT);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_L2), OUTPUT);
-      digitalWrite(NativeArduinoPinVan(INPUT_KEYPAD_PIN_L1), HIGH);
-      digitalWrite(NativeArduinoPinVan(INPUT_KEYPAD_PIN_L2), HIGH);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_R1), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_R2), INPUT_PULLUP);
-    #elif KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT1), INPUT);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT2), INPUT);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT3), INPUT);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_OUT4), INPUT);
-    #elif KEYPAD_TYPE == KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K1), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K2), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K3), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_K4), INPUT_PULLUP);
-    #else
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_1), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_2), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_3), INPUT_PULLUP);
-      pinMode(NativeArduinoPinVan(INPUT_KEYPAD_PIN_4), INPUT_PULLUP);
-    #endif
-  }
-#endif
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   if (gedeeldeBusInputHX1838 != nullptr) {
@@ -1387,7 +1236,7 @@ bool Input::Activeren() {
 
 #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
   laatsteInvoerTijdstipVoorTimeout = millis();
-  #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
+  #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
     vorigeRauweKeypadPositie = 0;
     stabieleKeypadPositie = 0;
     keypadWijzigingSinds = millis();
@@ -1416,12 +1265,6 @@ bool Input::afmelden() {
     gedeeldeBusInputPCF8574 = nullptr;
   }
 #endif
-#if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  if (gedeeldeBusInputDigital != nullptr) {
-    if (!gedeeldeBusInputDigital->afmelden()) return false;
-    gedeeldeBusInputDigital = nullptr;
-  }
-#endif
   if (::Input == this) ::Input = nullptr;
   return GedeeldeBusNode::afmelden();
 }
@@ -1437,10 +1280,8 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
   return resultaat;
 #endif
 
-#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_DIGITAL | INPUT_TYPE_PCF8574))
-  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-  if (gedeeldeBusInputDigital != nullptr && gedeeldeBusInputDigital->actief && wachten) {
-  #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+#if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
+  #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   if (gedeeldeBusInputPCF8574 != nullptr && wachten) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime() (D042)
   #endif
     while (KeypadUitLezenRuweData() != 0) delay(1);
@@ -1451,56 +1292,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
 #endif
 
   while (true) {
-    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_DIGITAL)
-      if (gedeeldeBusInputDigital != nullptr && gedeeldeBusInputDigital->actief) {
-      #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-        int positieKeypad = KeypadUitLezenToetsAanslag();
-      #else
-        int positieKeypad = wachten ? KeypadUitLezenToetsAanslag() : KeypadUitLezenRuweData();
-      #endif
-
-      if (positieKeypad > 0 && positieKeypad <= AANTAL_KEYPAD_TOETSEN) {
-        #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-          laatsteInvoerTijdstipVoorTimeout = millis();
-        #endif
-
-        if (wachten) {
-          while (KeypadUitLezenRuweData() != 0) delay(1);
-          vorigeRauweKeypadPositie = 0;
-          stabieleKeypadPositie = 0;
-          keypadWijzigingSinds = millis();
-        }
-
-        return {InputKanaal::DIGITAL, positieKeypad, KEY_LAYOUT[positieKeypad - 1].opschrift};
-      }
-
-      #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
-      if (!wachten) {
-        int losgelatenPositie = KeypadUitLezenLosgelatenPositie();
-
-        if (losgelatenPositie > 0 && losgelatenPositie <= AANTAL_KEYPAD_TOETSEN) {
-          laatsteInvoerTijdstipVoorTimeout = millis();
-          return {InputKanaal::DIGITAL, losgelatenPositie, KEY_LAYOUT[losgelatenPositie - 1].opschrift, InputGebeurtenis::LOSGELATEN};
-        }
-
-        const char* opschriftVoorDrempel = (stabieleKeypadPositie > 0 && stabieleKeypadPositie <= AANTAL_KEYPAD_TOETSEN) ? KEY_LAYOUT[stabieleKeypadPositie - 1].opschrift : nullptr;
-        if (opschriftVoorDrempel != nullptr) {
-          unsigned long langIndrukkenDrempelMs = drempelOpzoeker(opschriftVoorDrempel);
-
-          if (langIndrukkenDrempelMs > 0) {
-            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMs);
-
-            if (langIndrukkenPositie > 0) {
-              laatsteInvoerTijdstipVoorTimeout = millis();
-              return {InputKanaal::DIGITAL, langIndrukkenPositie, KEY_LAYOUT[langIndrukkenPositie - 1].opschrift, InputGebeurtenis::LANG_INDRUKKEN};
-            }
-          }
-        }
-      }
-      #endif
-      }
-      
-    #elif ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
+    #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
       if (gedeeldeBusInputPCF8574 != nullptr) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime() (D042)
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();

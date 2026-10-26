@@ -21,17 +21,6 @@ set /A FOUT=0
 set /A GECONTROLEERD=0
 
 :: ============================================================
-:: InputkanalenDIGITAL.ino
-:: ============================================================
-set "DIGITAL_INO=examples\Systeem\Input\InputkanalenDIGITAL\InputkanalenDIGITAL.ino"
-
-call :ControleerOpschriften "%DIGITAL_INO%" "KEYPAD_TYPE_DRUKKNOP_DIRECT_1x4" "S1 S2 S3 S4"
-call :ControleerOpschriften "%DIGITAL_INO%" "KEYPAD_TYPE_DRUKKNOP_MATRIX_2x2" "S1 S2 S3 S4"
-call :ControleerOpschriften "%DIGITAL_INO%" "KEYPAD_TYPE_MEMBRAAN_DIRECT_1x4" "1 2 3 4"
-call :ControleerOpschriften "%DIGITAL_INO%" "KEYPAD_TYPE_MEMBRAAN_DIRECT_4x1" "1 2 3 4"
-call :ControleerOpschriften "%DIGITAL_INO%" "KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4" "1 2 3 4"
-
-:: ============================================================
 :: InputkanalenPCF8574.ino
 :: ============================================================
 set "PCF8574_INO=examples\Systeem\Input\InputkanalenPCF8574\InputkanalenPCF8574.ino"

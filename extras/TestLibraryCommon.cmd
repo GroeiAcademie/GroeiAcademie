@@ -4,11 +4,11 @@ if /I "%~1"=="--VOER_DEZE_TEST_UIT" goto :VOER_DEZE_TEST_UIT
 set BASIC_FQBN="arduino:renesas_uno:minima" "arduino:renesas_uno:unor4wifi"
 set BASIC_FQBN_MAPPING_BOARDS="BOARD_UNO_R4_MINIMA" "BOARD_UNO_R4_WIFI"
 
-set EXTENDED_FQBN="arduino:zephyr:unoq" "esp32:esp32:d1_uno32" "esp32:esp32:esp32s3" "rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE"
-set EXTENDED_FQBN_MAPPING_BOARDS="BOARD_UNO_Q" "BOARD_ESP32_D1_UNO_R32" "BOARD_ESP32S3_ARDI32|BOARD_ESP32S3_DEV" "BOARD_RP2040_CYTRON_MAKER_UNO" "BOARD_STM32F4_NUCLEO64_F401RE"
+set EXTENDED_FQBN="esp32:esp32:d1_uno32" "esp32:esp32:esp32s3" "rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE"
+set EXTENDED_FQBN_MAPPING_BOARDS="BOARD_ESP32_D1_UNO_R32" "BOARD_ESP32S3_ARDI32|BOARD_ESP32S3_DEV" "BOARD_RP2040_CYTRON_MAKER_UNO" "BOARD_STM32F4_NUCLEO64_F401RE"
 
-set EXPERIMENTAL_FQBN="arduino:avr:uno"
-set EXPERIMENTAL_FQBN_MAPPING_BOARDS="BOARD_UNO_R3"
+set EXPERIMENTAL_FQBN="arduino:avr:uno" "arduino:zephyr:unoq"
+set EXPERIMENTAL_FQBN_MAPPING_BOARDS="BOARD_UNO_R3" "BOARD_UNO_Q"
 
 set "REGRESSIETEST=FALSE"
 set "NO_PAUSE=FALSE"
@@ -108,7 +108,7 @@ findstr /B /C:"INPUT_TYPE_HX1838	" keywords.txt >nul || (
     set /A STATIC_FAIL+=1
 )
 
-for %%K in (InputConfigureren OpvragenHuidigeToetsAanslag OpvragenHuidigeToetsAanslagen OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag InputResultaat InputResultaten InputKanaal StatusOpvragenToetsAanslagen MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN INPUT_TYPE_DIGITAL INPUT_TYPE_PCF8574) do (
+for %%K in (InputConfigureren OpvragenHuidigeToetsAanslag OpvragenHuidigeToetsAanslagen OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag InputResultaat InputResultaten InputKanaal StatusOpvragenToetsAanslagen MAX_AANTAL_SIMULTANE_TOETSAANSLAGEN INPUT_TYPE_PCF8574) do (
     findstr /B /C:"%%K	" keywords.txt >nul || (
         echo FOUT: keywords.txt mist %%K
         set /A STATIC_FAIL+=1
@@ -339,7 +339,7 @@ echo TEST_TYPE: !TEST_TYPE_ACTIEF!
 echo FQBN: !FQBN_ACTIEF!
 echo BOARD_VERSION: !BOARD_VERSION_ACTIEF!
 echo !TEST_NAAM_ACTIEF!
-"%CLI_PATH%" compile --jobs 1 --fqbn "!FQBN_ACTIEF!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS_ACTIEF! -DBOARD_VERSION=!BOARD_VERSION_ACTIEF!" "!TEST_DIR!" >"!COMPILE_LOG!" 2>&1
+"%CLI_PATH%" compile --jobs 2 --fqbn "!FQBN_ACTIEF!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS_ACTIEF! -DBOARD_VERSION=!BOARD_VERSION_ACTIEF!" "!TEST_DIR!" >"!COMPILE_LOG!" 2>&1
 set "COMPILE_RESULT=!errorlevel!"
 type "!COMPILE_LOG!"
 
@@ -373,6 +373,10 @@ if "!COMPILE_RESULT!"=="0" (
                 findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
                 if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
             )
+        )
+        if "!FQBN_ACTIEF!"=="arduino:avr:uno" (
+            findstr /C:"data section exceeds available space in board" "!COMPILE_LOG!" >nul
+            if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
         )
         if "!EXPECTED_MEMORY_LIMIT!"=="1" (
             set "GEHEUGEN_FQBN=!FQBN_ACTIEF!"

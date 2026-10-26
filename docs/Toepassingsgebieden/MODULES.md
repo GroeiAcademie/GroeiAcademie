@@ -23,7 +23,7 @@ Zie [Governance](../../GOVERNANCE.md) voor hoe een nieuw voorstel deze statussen
 
 | Toepassingsgebied | Softwarestatus | Elektronische documentatie |
 |---|---|---|
-| Stimulus en conditionering | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [Stimulus Shield v1.1.2](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) |
+| Stimulus en conditionering | geïmplementeerd | [Stimulus/README.md](Stimulus/README.md) + [Stimulus Shield v2.0.0](../Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md) |
 | Screen | gedeelde systeemlaag | [../Systeem/SCREEN.md](../Systeem/SCREEN.md) |
 | Ademhaling | kandidaat-idee | nog geen gevalideerd schema |
 | Hartslag, HRV en hartcoherentie | kandidaat-idee | nog geen gevalideerd schema |
@@ -48,7 +48,7 @@ Een gepland toepassingsgebied mag niet als werkende libraryfunctionaliteit worde
 
 ## 1. Stimulus en conditionering
 
-In beta v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `RFP602`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op `ADC_NATIVE` of `ADC_ADS1115`.
+In beta v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `RFP602`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft.
 
 
 ### Leerdoel
@@ -83,7 +83,7 @@ De repository bevat afzonderlijke voorbeelden voor:
 4. cocktail;
 5. een samengesteld demonstratievoorbeeld.
 
-Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [Stimulus Shield v1.1.2](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md) voor de actuele hardwareversie v1.1.2. Het validatieprotocol staat in [Handleiding hardwarevalidatie v1.1.2](../Uitbreidingskaarten/Stimulus%20Shield%20v1.1.2/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v1.1.2.md).
+Zie [Stimulus/README.md](Stimulus/README.md) voor aansluiting, configuratie en interpretatiegrenzen. Zie [Stimulus Shield v2.0.0](../Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md) voor de actuele hardwareversie v2.0.0. Het validatieprotocol staat in [Handleiding hardwarevalidatie v2.0.0](../Uitbreidingskaarten/Stimulus%20Shield%20v2.0.0/Handleiding-Stimulus-Shield-%28GroeiAcademie-FrameWork%29-v2.0.0.md).
 
 ## 2. Ademhaling
 
@@ -150,7 +150,7 @@ Geplande meetdoelen zijn borst- en buikbeweging, lichaamshouding, beweging, trem
 
 ## 11. Aanraking, capacitieve bediening en gebruikersinput
 
-Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem met de per `KEYPAD_TYPE` bepaalde `INPUT_KEYPAD_PIN_...`-resources: stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking.
+Geen fysiologische meting, maar een alternatieve inputmethode naast het bestaande Input-systeem dat het keypad via de PCF8574 leest (keuze met `KEYPAD_TYPE`): stimuli, gebruikersinput, keuzes, bevestigingen en het registreren van aanraking.
 
 ## 12. Aanwezigheid, afstand en locatie
 

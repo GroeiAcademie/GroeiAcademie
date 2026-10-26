@@ -162,7 +162,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 **Context:** alle code, testscripts, voorbeelden en Markdowndocumentatie zijn naar deze vier namen bijgewerkt.
 
-## D031 Stimulus Shield v1.1.2 als enige geldige hardwarebron
+## D031 Stimulus Shield v1.1.2 als enige geldige hardwarebron (vervangen door D044)
 
 **Besluit:** de foutieve voorgangers van de Stimulus Shield zijn uit de actuele release verwijderd. Uitsluitend de tekeningset en documentatie onder `docs/Uitbreidingskaarten/Stimulus Shield v1.1.2/` gelden als hardwarebron.
 
@@ -254,5 +254,22 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 - (18) Tweetrapsherstel: mislukt `activeren()`, dan SDA opnieuw beoordelen (`VastgelopenGedeeldeBusVrijmaken()`, blijft SDA laag: GB409), daarna `Wire.end()`, Wire opnieuw en nog één `activeren()`; samen één herstelpoging. Reden: de Wire van de UNO R4 breekt een getimede transactie niet af (`setWireTimeout()` negeert de reset, nagekeken in Wire.cpp), waarna elke transactie faalt, ook met SDA hoog. Dat de chip met `Wire.end()` echt vrijkomt, bewijst de hardwaretest; een tweede controle met SDA laag wordt als "niet geobserveerd" genoteerd als ze niet voorkomt.
 - (19) Code boven een component met runtime-herstel mag niet op `actief` blokkeren; alleen `ComponentBeschikbaarTijdensRuntime()` beslist (Input testte `->actief`, waardoor een uitgeschakelde PCF8574 nooit meer herstelde).
 - (20) Runtime-herstel en herstel na een afwezige opstart zijn twee modellen: afwezig bij de opstart herstelt niet voor Input, LCD en Serial (bestaande beperking), wel voor RFP602 (`OpnieuwAanmeldenNaPauze()` doorloopt de volledige levenscyclus).
+- (21) LCD na een I2C-storing (S6): een generieke teller in GedeeldeBus (`aantalI2CStoringenTijdensRuntime`, `uint16_t`, +1 bij de eerste fout en bij het herstel van een I2C-storing, niet bij GB408) en een eigen stand in Screen (`aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie`, ook gelijkgezet bij de `init()` in `Screen::Activeren()`). Verschil vóór een fysieke LCD-`Print()` → één `init()`. Herstel telt mee, omdat het terugsteken een tweede glitchmoment is; `uint16_t` om een wrap bij veel korte storingen tussen twee `Print()`s te vermijden. Eerst een bool in de algemene ladder overwogen: verworpen, want die koppelde GedeeldeBus aan het scherm en reageerde ook op functionele meetfouten.
+- (22) Waarnemer-effect gedocumenteerd: een busstoring verschijnt op naam van het onderdeel dat de bus op dat moment gebruikt. Een aparte melding zonder adres komt niet in v2.0.0: het waarnemer-effect blijft gedocumenteerd, het herstel werkt correct (besluit 23-10-2026).
+- (23) Zolang een onderdeel ontbreekt, start de tweede trap Wire elke `RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS` opnieuw (standaard 100 ms). De pauze blijft 100 ms. Tijdens de hardwaretest voor de RC wordt nagekeken of het programma merkbaar hapert terwijl een onderdeel uitgetrokken is; alleen dan volgt een grotere pauze vanaf FATAL (besluit 23-10-2026).
+- (24) De meldingen van de tweede trap staan onder DEBUG (`DEBUG: herstel trap 2, SDA hoog: Wire opnieuw` en `... SDA laag: busherstel`), niet onder TRACE: TRACE gaf in de test te veel uitvoer om ze te zien.
+- (25) Hardwaretest R4, 19-10-2026: beide takken van de tweede trap waargenomen (SDA hoog en SDA laag), de ladder klimt door tot FATAL tijdens de herstelpogingen, elke uitval van ADS1115, PCF8574 en LCD herstelde met GB407. GB409 (SDA blijft laag na de klokpulsen) nog niet waargenomen.
 
 **Context:** hardwaretest 18-10-2026: een los contact zette de PCF8574 van Input meteen en voor altijd in FATAL; SDA bleef hangen. De maatstaf blijft maximale snelheid en minimaal geheugen: in normaal gebruik kost het één vergelijking per toegang.
+
+## D043 v2.0.0: ADC als gewone Extender; ADC_NATIVE en INPUT_TYPE_DIGITAL vervallen
+
+**Besluit:** de ADS1115 is een gewone Extender. De sketch maakt een `ExtenderADS1115` aan en geeft die als parent aan RFP602 door; RFP602 kiest zijn ADC via `ADS1115viaParent()`. `ADC_NATIVE` (componentcode `0x25`), het begrip ADC-backend (`ADC_BACKEND`, `ADC_BACKEND_NATIVE`, `ADC_BACKEND_ADS1115`, `I2C_ADDRESS_ADS1115`), het globale object `ADC_ADS1115`, `INPUT_TYPE_DIGITAL` en `InputKanaal::DIGITAL` vervallen. De RFP602-configuratie staat onder RFP602 (`RFP602_AANTAL_SENSOREN_BESCHIKBAAR`, `RFP602_ADC_PIN_SENSOR_1..4`); het adres staat bij de Extender (`I2C_ADDRESS_EXTENDER_ADS1115_1`). Alleen de gebruikte Extender compileert mee via `#if EXTENDER_ADS1115_AANTAL > 0`.
+
+**Context:** het Stimulus Shield v2.0.0 leest het keypad via de PCF8574, zodat acht native pinnen vrij blijven. RFP602 kan later op een andere ADC-Extender meten door alleen een extra meettak in RFP602 toe te voegen. Het testdomein ADC vervalt; de gevallen zitten in het domein Extenders (`Extender_ADS1115_Meetkwaliteit`).
+
+## D044 Stimulus Shield v2.0.0 als enige geldige hardwarebron
+
+**Besluit:** uitsluitend de tekeningset en documentatie onder `docs/Uitbreidingskaarten/Stimulus Shield v2.0.0/` gelden als hardwarebron. De map `docs/Uitbreidingskaarten/Stimulus Shield v1.1.2/` is uit de actuele release verwijderd (blijft beschikbaar in de git-geschiedenis).
+
+**Context:** vervangt D031. Volgens het schema v2.0.0 (2026-10-22): ADS1115 op H5 rechtstreeks op SDA/SCL van de Arduino, samen met de PCF8574 U9; adreskeuze met SW1 (1 = VCC `0x49`, 2 = GND `0x48`, standaard, 3 = SCL `0x4B`, 4 = SDA `0x4A`); H7 voedt H5, de FSR-delers en de PCF8574.
