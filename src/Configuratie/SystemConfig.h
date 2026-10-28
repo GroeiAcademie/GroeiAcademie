@@ -2895,4 +2895,15 @@
   #define GA_DEBUG_PRINTLN2(x, f)
 #endif
 
+// GEDEELDE_BUS_FOUTINJECTIE: 1 = testingang voor de foutinjectietests (examples/Systeem/GedeeldeBus/Foutinjecties).
+// Een sketch kiest via foutinjectieComponent en foutinjectieStap welk kind in welke stap faalt. 0 = niets meegecompileerd.
+// Standaard aan bij DEBUG (TRACE zet hierboven al DEBUG aan).
+#ifndef GEDEELDE_BUS_FOUTINJECTIE
+  #if defined(DEBUG)
+    #define GEDEELDE_BUS_FOUTINJECTIE 1
+  #else
+    #define GEDEELDE_BUS_FOUTINJECTIE 0
+  #endif
+#endif
+
 #endif

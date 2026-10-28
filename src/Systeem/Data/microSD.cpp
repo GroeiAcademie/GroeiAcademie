@@ -5,7 +5,7 @@
 // ============================================================================
 // microSD met CS via een Extender
 // SdFat schakelt CS zelf met sdCsInit()/sdCsWrite() en kent alleen een pinnummer. Die functies mag een programma alleen
-// vervangen wanneer SD_CHIP_SELECT_MODE in SdFatConfig.h van "SdFat - Adafruit Fork" op 1 of 2 staat.
+// vervangen wanneer SD_CHIP_SELECT_MODE in SdFatConfig.h van "SdFat - Adafruit Fork" op 1 staat.
 // ============================================================================
 #if GEDEELDE_BUS_MIXED_PINS && (defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER))
   #define MICROSD_CS_VIA_EXTENDER 1   // alleen in dit bestand

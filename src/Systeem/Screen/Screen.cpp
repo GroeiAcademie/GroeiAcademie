@@ -705,18 +705,26 @@ bool Screen::Activeren() {
       this->Pixel.display.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
       this->Pixel.display.setRotation(PIXEL_SCREEN_ROTATION);
       this->Pixel.gfx = &this->Pixel.display;
+#if GEDEELDE_BUS_FOUTINJECTIE
+      if (FoutinjectieActief(GedeeldeBusComponent::PIXEL_SCREEN, FoutinjectieStap::KOPPELEN)) this->Pixel.gfx = nullptr;
+#endif
 
       if (this->Pixel.gfx == nullptr) {
         this->Pixel.foutmelding = _CRITICAL_PS302;
         pixelOk = false;
       } else {
+#if GEDEELDE_BUS_FOUTINJECTIE
+        const bool foutAfmetingen = FoutinjectieActief(GedeeldeBusComponent::PIXEL_SCREEN, FoutinjectieStap::AFMETINGEN);
+#else
+        const bool foutAfmetingen = false;
+#endif
 #if (PIXEL_SCREEN_ROTATION == 1 || PIXEL_SCREEN_ROTATION == 3)
-        if (this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) {
+        if (foutAfmetingen || this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) {
           this->Pixel.foutmelding = _CRITICAL_PS303;
           pixelOk = false;
         }
 #else
-        if (this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) {
+        if (foutAfmetingen || this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_BREEDTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_HOOGTE) {
           this->Pixel.foutmelding = _CRITICAL_PS304;
           pixelOk = false;
         }

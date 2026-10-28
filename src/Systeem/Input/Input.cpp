@@ -1002,6 +1002,7 @@ bool Input::aanmelden() {
       gedeeldeBusInputPCF8574 = kanaal;
     } else {
       delete kanaal;
+      if (Screen != nullptr) Screen->Print(_ABORT_IN001, "", GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
     }
   }
 #endif
@@ -1017,6 +1018,7 @@ bool Input::aanmelden() {
       gedeeldeBusInputHX1838 = kanaal;
     } else {
       delete kanaal;
+      if (Screen != nullptr) Screen->Print(_ABORT_IN001, "", GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
     }
   }
 #endif
@@ -1045,6 +1047,7 @@ bool Input::controleren() {
   GA_SERIAL.println("TRACE: Input::controleren(): PCF8574 I2C");
 #endif
   if (gedeeldeBusInputPCF8574 != nullptr && !gedeeldeBusInputPCF8574->controleren()) {
+    if (!gedeeldeBusInputPCF8574->conflictGevonden && Screen != nullptr) Screen->Print(_FATAL_IN101, "", GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
     gedeeldeBusInputPCF8574->afmelden();
     gedeeldeBusInputPCF8574 = nullptr;
   }
@@ -1054,6 +1057,7 @@ bool Input::controleren() {
   GA_SERIAL.println("TRACE: Input::controleren(): HX1838");
 #endif
   if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->controleren()) {
+    if (!gedeeldeBusInputHX1838->conflictGevonden && Screen != nullptr) Screen->Print(_FATAL_IN101, "", GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   }
@@ -1083,6 +1087,7 @@ bool Input::inpluggen() {
   GA_SERIAL.println("TRACE: Input::inpluggen(): PCF8574 I2C");
 #endif
   if (gedeeldeBusInputPCF8574 != nullptr && !gedeeldeBusInputPCF8574->inpluggen()) {
+    if (Screen != nullptr) Screen->Print(_CRITICAL_IN201, "", GENERAL_MELDING_CRITICAL_LEESTIJD_MS);
     gedeeldeBusInputPCF8574->afmelden();
     gedeeldeBusInputPCF8574 = nullptr;
   }
@@ -1095,12 +1100,13 @@ bool Input::inpluggen() {
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   } else if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->inpluggen()) {
+    if (Screen != nullptr) Screen->Print(_CRITICAL_IN201, "", GENERAL_MELDING_CRITICAL_LEESTIJD_MS);
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   }
 
-  /* Na v2.0.0: IN302 pas opnieuw activeren nadat getest is of digitalRead() vóór de IR-initialisatie
-     op alle 11 boards betrouwbaar dezelfde betekenis heeft. De plaats in inpluggen() blijft behouden.
+  // IN302: opnieuw actief voor de foutinjectietests. TODO: Alex - op de 11 boards testen of digitalRead() vóór de IR-initialisatie
+  // overal betrouwbaar dezelfde betekenis heeft.
   // Zit de ontvanger vast (blijft laag)? Dubbel gecontroleerd om een kortstondige overgang niet te laten
   // meetellen. Bevestigt enkel dat de pin niet blijvend laag hangt, geen bewijs van echte IR-werking.
   if (gedeeldeBusInputHX1838 != nullptr && digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
@@ -1112,7 +1118,6 @@ bool Input::inpluggen() {
       gedeeldeBusInputHX1838 = nullptr;
     }
   }
-  */
 
   if (gedeeldeBusInputHX1838 != nullptr) {
 #ifdef DEBUG
@@ -1179,6 +1184,7 @@ bool Input::Activeren() {
 #endif
   if (gedeeldeBusInputPCF8574 != nullptr) {
     if (!gedeeldeBusInputPCF8574->activeren()) {
+      if (Screen != nullptr) Screen->Print(_CRITICAL_IN301, "", GENERAL_MELDING_CRITICAL_LEESTIJD_MS);
       PCF8574OnbereikbaarMelden();
       gedeeldeBusInputPCF8574->afmelden();
       gedeeldeBusInputPCF8574 = nullptr;
@@ -1191,6 +1197,7 @@ bool Input::Activeren() {
 #endif
 
   if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->activeren()) {
+    if (Screen != nullptr) Screen->Print(_CRITICAL_IN301, "", GENERAL_MELDING_CRITICAL_LEESTIJD_MS);
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   }
@@ -1279,6 +1286,13 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
 #if (INPUT_KANAAL_CONFIG) == INPUT_TYPE_NONE
   return resultaat;
 #endif
+
+  // IN401: Input is niet actief (lifecycle niet doorlopen of mislukt). Eén keer melden, daarna stil geen invoer. Tijdens Activeren() (kalibratie) niet.
+  if (!actief && !activerenBezig) {
+    if (!foutmeldingWeergegeven && Screen != nullptr) Screen->Print(_FATAL_IN401, "", GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
+    foutmeldingWeergegeven = true;
+    return resultaat;
+  }
 
 #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
   #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)

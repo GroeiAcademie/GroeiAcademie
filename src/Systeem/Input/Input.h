@@ -276,6 +276,7 @@ struct Input : GedeeldeBusNode {
 
 private:
   uint8_t typesActief = INPUT_KANAAL_CONFIG;
+  bool foutmeldingWeergegeven = false;   // IN401 maar één keer tonen
   template <size_t N>
   const MappingTussenToetsaanslagEnUitTeVoerenFunctie* OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(const char* opschriftToetsAanslag, const MappingTussenToetsaanslagEnUitTeVoerenFunctie (&mapping)[N]) {
     if (opschriftToetsAanslag == nullptr) return nullptr;

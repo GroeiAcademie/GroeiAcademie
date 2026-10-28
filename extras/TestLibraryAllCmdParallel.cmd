@@ -1,8 +1,8 @@
 @echo off
 cd /d "%~dp0"
 
-rem Opent alle acht testdomeinen als tabs in een nieuw Windows Terminal-venster.
-rem Per tab eerst het Ongeldig-script, daarna het gewone script. Vereist Windows Terminal (wt.exe).
+rem Opent alle negen testdomeinen als tabs in een nieuw Windows Terminal-venster.
+rem Per tab eerst het Ongeldig-script, daarna het gewone script; het tabblad Foutinjecties heeft geen Ongeldig-script. Vereist Windows Terminal (wt.exe).
 rem In de -Command-tekst staat \; omdat Windows Terminal een gewone ; als scheiding tussen tabs leest.
 
 wt -w new ^
@@ -13,6 +13,7 @@ wt -w new ^
  ; new-tab --title "Screen" -d "%~dp0." powershell.exe -NoLogo -NoProfile -NoExit -Command "& '.\TestLibraryScreenOngeldig-v2.0.0.cmd'\; & '.\TestLibraryScreen-v2.0.0.cmd'" ^
  ; new-tab --title "Sensoren" -d "%~dp0." powershell.exe -NoLogo -NoProfile -NoExit -Command "& '.\TestLibrarySensorenOngeldig-v2.0.0.cmd'\; & '.\TestLibrarySensoren-v2.0.0.cmd'" ^
  ; new-tab --title "Sturingen" -d "%~dp0." powershell.exe -NoLogo -NoProfile -NoExit -Command "& '.\TestLibrarySturingenOngeldig-v2.0.0.cmd'\; & '.\TestLibrarySturingen-v2.0.0.cmd'" ^
- ; new-tab --title "Tools" -d "%~dp0." powershell.exe -NoLogo -NoProfile -NoExit -Command "& '.\TestLibraryToolsOngeldig-v2.0.0.cmd'\; & '.\TestLibraryTools-v2.0.0.cmd'"
+ ; new-tab --title "Tools" -d "%~dp0." powershell.exe -NoLogo -NoProfile -NoExit -Command "& '.\TestLibraryToolsOngeldig-v2.0.0.cmd'\; & '.\TestLibraryTools-v2.0.0.cmd'" ^
+ ; new-tab --title "Foutinjecties" -d "%~dp0." powershell.exe -NoLogo -NoProfile -NoExit -Command "& '.\TestLibraryFoutinjecties-v2.0.0.cmd'"
 
 exit /b 0

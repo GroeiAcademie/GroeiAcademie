@@ -108,6 +108,15 @@ void ResettenGedeeldeBus() {
 }
 
 uint8_t volgendeGedeeldeBusId = 0;
+
+#if GEDEELDE_BUS_FOUTINJECTIE
+GedeeldeBusComponent foutinjectieComponent = GedeeldeBusComponent::ROOT;
+FoutinjectieStap foutinjectieStap = FoutinjectieStap::GEEN;
+
+bool FoutinjectieActief(GedeeldeBusComponent component, FoutinjectieStap stap) {
+  return foutinjectieStap == stap && foutinjectieComponent == component;
+}
+#endif
 GedeeldeBusNode Native(nullptr, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::ROOT, HardwareResourceToegang::GEDEELD);
 
 #if GEDEELDE_BUS_MIXED_PINS
@@ -319,8 +328,42 @@ bool HardwareResourceTypeI2C::controleren() {
     return false;
   }
 
+#if GEDEELDE_BUS_FOUTINJECTIE
+  // GB109: het adres is een geldig 7-bit adres, maar niet een adres dat dit hardwaretype kan aannemen.
+  if (!I2CadresToegelaten(component, adres)) {
+    GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB109, component, component, adres, true);
+    GedeeldeBusNode::controleren();
+    gecontroleerd = false;
+    conflictGevonden = true;
+    return false;
+  }
+#endif
+
   return GedeeldeBusNode::controleren();
 }
+
+#if GEDEELDE_BUS_FOUTINJECTIE
+// Toegelaten I2C-adressen per hardwaretype, volgens de adrespinnen van de chip. Een onbekend type: elk geldig adres.
+bool I2CadresToegelaten(GedeeldeBusComponent component, uint8_t adres) {
+  switch (component) {
+    case GedeeldeBusComponent::ADC_ADS1115:
+    case GedeeldeBusComponent::ADC_ADS7828:              return adres >= 0x48 && adres <= 0x4B;
+    case GedeeldeBusComponent::DIGITAL_PINS_MCP23017:
+    case GedeeldeBusComponent::DIGITAL_PINS_PCF8575:     return adres >= 0x20 && adres <= 0x27;
+    case GedeeldeBusComponent::DIGITAL_PINS_PCF8574:
+    case GedeeldeBusComponent::INPUT_PCF8574:
+    case GedeeldeBusComponent::CHARACTER_SCREEN:         return (adres >= 0x20 && adres <= 0x27) || (adres >= 0x38 && adres <= 0x3F);   // PCF8574 en PCF8574A
+    case GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A: return adres >= 0x70 && adres <= 0x77;
+    case GedeeldeBusComponent::ONE_WIRE_DS2482v800:      return adres >= 0x18 && adres <= 0x1F;
+    case GedeeldeBusComponent::PWM_PCA9685:              return adres >= 0x40 && adres <= 0x77;
+    case GedeeldeBusComponent::UART_MAX14830:            return adres >= 0x60 && adres <= 0x6F;
+    case GedeeldeBusComponent::UART_SC16IS752:           return adres >= 0x48 && adres <= 0x57;
+    case GedeeldeBusComponent::DATA_EEPROM:
+    case GedeeldeBusComponent::DATA_FRAM:                return adres >= 0x50 && adres <= 0x57;
+    default:                                             return true;
+  }
+}
+#endif
 
 bool GedeeldeBusNode::activeren() {
 #ifdef TRACE
@@ -339,7 +382,12 @@ bool GedeeldeBusNode::activeren() {
   // Achter een TCA9548A: eerst het kanaal van dit component openen, na Activeren() alle kanalen sluiten.
   if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->SelectChannel(this);
 #endif
+#if GEDEELDE_BUS_FOUTINJECTIE
+  // Test de foutafhandeling na activeren; verhindert de activering van de hardware niet.
+  const bool gelukt = Activeren() && !FoutinjectieActief(component, FoutinjectieStap::ACTIVEREN);
+#else
   const bool gelukt = Activeren();
+#endif
 #if EXTENDER_TCA9548A_AANTAL > 0
   if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->disableAllChannels();
 #endif
@@ -364,7 +412,11 @@ bool HardwareResourceTypeI2C::inpluggen() {
   InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
 
   // Kan enkel op ESP32 mislukken: daar geeft Wire.begin() een bool terug.
+#if GEDEELDE_BUS_FOUTINJECTIE
+  if (!IsGedeeldeBusGeinitialiseerd(GedeeldeBusType::I2C) || FoutinjectieActief(component, FoutinjectieStap::BUSSTART)) {
+#else
   if (!IsGedeeldeBusGeinitialiseerd(GedeeldeBusType::I2C)) {
+#endif
 #ifdef DEBUG
     GedeeldeBusAanmakenTijdelijkConflict(_CRITICAL_GB202, component, component, adres, true);
 #else
@@ -378,6 +430,9 @@ bool HardwareResourceTypeI2C::inpluggen() {
 }
 
 bool HardwareResourceTypeI2C::FoutDiagnoseI2C(bool gelukt, int fout, bool terugGelezen) {
+#if GEDEELDE_BUS_FOUTINJECTIE
+  if (FoutinjectieActief(component, FoutinjectieStap::ACTIVEREN)) gelukt = false;   // begin() mislukt terwijl de chip antwoordt: GB303 (DEBUG)
+#endif
   if (gelukt && terugGelezen) return true;
 
   // Enkel bij een mislukte begin() het adres zelf testen, om de oorzaak te vinden.
@@ -448,6 +503,9 @@ bool HardwareResourceTypeSPI::controleren() {
 }
 
 bool HardwareResourceTypeSPI::FoutDiagnoseSPI(bool gelukt, int fout, bool terugGelezen) {
+#if GEDEELDE_BUS_FOUTINJECTIE
+  if (FoutinjectieActief(component, FoutinjectieStap::ACTIVEREN)) gelukt = false;
+#endif
   if (gelukt && terugGelezen) return true;
 
 #if GEDEELDE_BUS_MIXED_PINS
@@ -895,7 +953,7 @@ bool GedeeldeBusNode::aanmelden() {
   if (aangemeld) return true;
 
   // Structurele wacht: een GEDEELD-claim zonder geldige identiteit is een fout in het component zelf.
-  // Blijft stil, geen melding, geen record, want het component wordt sowieso nooit gekoppeld.
+  // Meldt GB001 (alleen met GEDEELDE_BUS_FOUTINJECTIE); het component wordt nooit gekoppeld.
   if (aangemeldePinnen.aantalGedeeld > 0) {
     bool geldig = (gedeeldeIdentiteiten != nullptr);
     if (geldig) {
@@ -904,8 +962,17 @@ bool GedeeldeBusNode::aanmelden() {
       }
     }
 
-    if (!geldig) return false;
+    if (!geldig) {
+#if GEDEELDE_BUS_FOUTINJECTIE
+      const uint8_t pinVoorMelding = (aangemeldePinnen.gedeeldePinnen != nullptr) ? aangemeldePinnen.gedeeldePinnen[0] : static_cast<uint8_t>(HardwareResourcePin::NONE);
+      GedeeldeBusAanmakenTijdelijkConflict(_ABORT_GB001, component, component, pinVoorMelding, false, true);
+#endif
+      return false;
+    }
   }
+#if GEDEELDE_BUS_FOUTINJECTIE
+  if (FoutinjectieActief(component, FoutinjectieStap::AANMELDEN)) return false;
+#endif
 
   if (parent != nullptr && !parent->aanmelden()) return false;
 
@@ -935,6 +1002,9 @@ bool GedeeldeBusNode::controleren() {
   if (gecontroleerd) return true;
   if (!aangemeld) return false;
   if (parent != nullptr && !parent->controleren()) return false;
+#if GEDEELDE_BUS_FOUTINJECTIE
+  if (FoutinjectieActief(component, FoutinjectieStap::CONTROLEREN)) { conflictGevonden = false; return false; }
+#endif
 
   conflictGevonden = false;
   const uint8_t geen = static_cast<uint8_t>(HardwareResourcePin::NONE);

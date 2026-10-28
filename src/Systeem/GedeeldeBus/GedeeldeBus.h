@@ -332,6 +332,18 @@ struct GedeeldeBusConflictInfo {
 // Statisch aangemaakte objecten worden door afmelden() niet verwijderd.
 extern uint8_t volgendeGedeeldeBusId;
 
+#if GEDEELDE_BUS_FOUTINJECTIE
+// GB109: true wanneer het hardwaretype dit I2C-adres kan aannemen. Lichaam in GedeeldeBus.cpp.
+bool I2CadresToegelaten(GedeeldeBusComponent component, uint8_t adres);
+
+// Testingang voor de foutinjectietests: het kind met component foutinjectieComponent faalt in stap foutinjectieStap.
+// GEEN = uit. Alleen bedoeld voor de sketches onder examples/Systeem/GedeeldeBus/Foutinjecties.
+enum class FoutinjectieStap : uint8_t { GEEN, AANMELDEN, CONTROLEREN, INPLUGGEN, BUSSTART, ACTIVEREN, KOPPELEN, AFMETINGEN };
+extern GedeeldeBusComponent foutinjectieComponent;
+extern FoutinjectieStap foutinjectieStap;
+bool FoutinjectieActief(GedeeldeBusComponent component, FoutinjectieStap stap);
+#endif
+
 struct GedeeldeBusNode {
   uint8_t id;
   GedeeldeBusNode* parent;
@@ -423,6 +435,9 @@ struct GedeeldeBusNode {
     if (ingeplugd) return true;
     if (!gecontroleerd) return false;
     if (parent != nullptr && !parent->inpluggen()) return false;
+#if GEDEELDE_BUS_FOUTINJECTIE
+    if (FoutinjectieActief(component, FoutinjectieStap::INPLUGGEN)) return false;
+#endif
 
     ingeplugd = true;
 #ifdef DEBUG

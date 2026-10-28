@@ -286,9 +286,9 @@ set "VERWACHTE_FOUT=KEYPAD_GENERIEK_KEY_LAYOUT moet ingesteld worden in UserConf
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenHX1838\InputkanalenHX1838.ino"
-set "TEST_NAAM=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 of 2 in SdFatConfig.h van d..."
-set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER=GedeeldeBusComponent::DIGITAL_PINS_PCF8574 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS=0x20 -DDATA_LAYER_MICROSD_SPI_1_CS_PIN=ExtenderPCF8574::ExtenderPins::EP_P0"
-set "VERWACHTE_FOUT=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 of 2 in SdFatConfig.h van de library "SdFat - Adafruit Fork"."
+set "TEST_NAAM=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 in SdFatConfig.h van de lib..."
+set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER=GedeeldeBusComponent::DIGITAL_PINS_PCF8574 -DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS=0x20 -DDATA_LAYER_MICROSD_SPI_1_CS_PIN=ExtenderPCF8574::ExtenderPins::EP_P0 -DSD_CHIP_SELECT_MODE=0"
+set "VERWACHTE_FOUT=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 1 in SdFatConfig.h van de library "SdFat - Adafruit Fork"."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\Input\InputkanalenPCF8574UserDefinedDirect\InputkanalenPCF8574UserDefinedDirect.ino"

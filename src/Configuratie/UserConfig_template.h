@@ -42,6 +42,9 @@
 // #define TRACE // ENKEL wanneer TRACE nodig, staan hier geen commentaar '//' tekens voor :)
 // GA_DEBUG_PRINT, GA_DEBUG_PRINTLN en GA_DEBUG_PRINTLN2 worden door SystemConfig.h afgeleid uit DEBUG.
 
+// FOUTINJECTIE: alleen voor de sketches in examples/Systeem/GedeeldeBus/Foutinjecties.
+// #define GEDEELDE_BUS_FOUTINJECTIE 1 // standaard waarde: 0 (testingang uit, niets meegecompileerd)
+
 
 // ============================================================================
 // BOARD_VERSION: jouw keuze ==================================================
@@ -67,6 +70,21 @@
 // (FUTURE) Wijzig per fysiek bord, bijvoorbeeld wanneer meerdere borden met elkaar moeten communiceren en elkaar moeten kunnen onderscheiden. Nog zonder functioneel effect zolang er geen bord-overschrijdende communicatie gebruikt wordt.
 #ifndef BOARD_ID
 // #define BOARD_ID 1   // standaard waarde: 1, wijzig dit per fysiek bord
+#endif
+
+
+// ============================================================================
+// STIMULUS: jouw instellingen ================================================
+// ============================================================================
+
+// Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
+#ifndef WACHT_LOSLATEN_DELAY_MS
+// #define WACHT_LOSLATEN_DELAY_MS 5UL // standaard waarde: 5UL
+#endif
+
+// Vertraging tussen samples in de meetlussen
+#ifndef DELAY_US
+// #define DELAY_US 0       // standaard waarde: 0 (de ADS1115 wacht zelf op de conversie)
 #endif
 
 
@@ -326,21 +344,6 @@
 
 #ifndef REDIRECT_SERIAL_FILE
 // #define REDIRECT_SERIAL_FILE "serial.log"
-#endif
-
-
-// ============================================================================
-// STIMULUS: jouw instellingen ================================================
-// ============================================================================
-
-// Instelbare vertraging in de busy-wait loop van WachtTotAlleSensorsLosgelatenVoorTest().
-#ifndef WACHT_LOSLATEN_DELAY_MS
-// #define WACHT_LOSLATEN_DELAY_MS 5UL // standaard waarde: 5UL
-#endif
-
-// Vertraging tussen samples in de meetlussen
-#ifndef DELAY_US
-// #define DELAY_US 0       // standaard waarde: 0 (de ADS1115 wacht zelf op de conversie)
 #endif
 
 
@@ -632,14 +635,6 @@
 // #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
 #endif
 
-// CS via een Extender: zet de drie instellingen samen. DATA_LAYER_FLASH_SPI_1_CS_PIN wordt dan de pin op de Extender.
-// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board.
-#ifndef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
-// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
-// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                             // I2C-adres van die Extender
-// #define DATA_LAYER_FLASH_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0              // CS-pin op die Extender
-#endif
-
 // ============================================================================
 // EXPERIMENTEEL: FLASH #2
 // ============================================================================
@@ -649,6 +644,14 @@
 
 #ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
 // #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
+#endif
+
+// CS via een Extender: zet de drie instellingen samen. DATA_LAYER_FLASH_SPI_1_CS_PIN wordt dan de pin op de Extender.
+// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board.
+#ifndef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
+// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
+// #define DATA_LAYER_FLASH_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // I2C-adres van die Extender
+// #define DATA_LAYER_FLASH_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 #endif
 
 
@@ -696,19 +699,19 @@
 // #define DATA_LAYER_MICROSD_SPI_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
 #endif
 
-// CS via een Extender: zet de drie instellingen samen. DATA_LAYER_MICROSD_SPI_1_CS_PIN wordt dan de pin op de Extender.
-// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board. Vereist SD_CHIP_SELECT_MODE 1 of 2 in SdFatConfig.h van SdFat - Adafruit Fork.
-#ifndef DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER
-// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
-// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                             // I2C-adres van die Extender
-// #define DATA_LAYER_MICROSD_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0              // CS-pin op die Extender
-#endif
-
 // ============================================================================
 // EXPERIMENTEEL: microSD #2
 // ============================================================================
 #ifndef DATA_LAYER_MICROSD_SPI_2_CS_PIN
 // #define DATA_LAYER_MICROSD_SPI_2_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF
+#endif
+
+// CS via een Extender: zet de drie instellingen samen. DATA_LAYER_MICROSD_SPI_1_CS_PIN wordt dan de pin op de Extender.
+// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board. Vereist SD_CHIP_SELECT_MODE 1 of 2 in SdFatConfig.h van SdFat - Adafruit Fork.
+#ifndef DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER
+// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
+// #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // I2C-adres van die Extender
+// #define DATA_LAYER_MICROSD_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
 #endif
 
 
@@ -753,6 +756,8 @@
 // ============================================================================
 // INPUT ======================================================================
 // ============================================================================
+
+
 
 // INPUT_TYPE_PCF8574: logische aansluitingen op PCF8574 P0-P7 ----------------
 // Pas alleen het blok aan dat bij het gekozen KEYPAD_TYPE hoort.
