@@ -56,7 +56,7 @@ void setup() {
       const HardwareResourceTypeI2C* i2c = static_cast<const HardwareResourceTypeI2C*>(node);
       const uint8_t adres = i2c->adres;
 
-      const uint16_t pogingen = 100;
+      const uint16_t pogingen = 10000;
       const uint16_t gelukt = i2cScanner.ping(adres, pogingen);
 
       int32_t minimum = 2147483647L;

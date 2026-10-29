@@ -375,7 +375,7 @@ if "!COMPILE_RESULT!"=="0" (
             )
         )
         if "!FQBN_ACTIEF!"=="arduino:avr:uno" (
-            for %%I in (IN001 IN101 IN201 IN202 IN301 IN302 IN303 IN304 IN305 IN401) do (
+            for %%I in (IN001 IN101 IN201 IN202 IN301 IN302 IN303 IN304 IN305 IN401 IN402 SS301) do (
                 if /I "!TEST_BESTAND!"=="Hardwaretest_Foutinjectie_%%I.ino" (
                     findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
                     if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"

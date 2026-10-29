@@ -319,6 +319,7 @@ set TEST_NAAM="Foutinjectie IN305 | HX1838-receiver niet correct gestart"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DSCREEN_OUTPUT_CONFIG=7 -DINPUT_KANAAL_CONFIG=INPUT_TYPE_HX1838 -DHX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE=0"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+set WELKE_FQBN_INCOMPATIBLE="arduino:zephyr:unoq"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_IN401\Hardwaretest_Foutinjectie_IN401.ino"
