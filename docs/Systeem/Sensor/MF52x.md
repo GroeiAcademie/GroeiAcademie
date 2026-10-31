@@ -13,6 +13,22 @@
 
 MF52A: NTC thermistor; spanning, niet omgerekende temperatuur. Eén component voor één fysiek apparaat, via de bestaande ADC-Extender. De meetcode zit in SensorAnaloog; deze klasse geeft alleen de pin en het bereik door. Het fysieke type behoudt zijn eigen componentcode en configuratie. De analoge ADC-meetfuncties zijn identiek aan die van MF52A.
 
+## Aansluiten
+
+**Aansluitwijze in de bestaande FrameWork-code:**
+
+- **Meetverbinding:** sensor-uitgang naar het toegewezen **ADC-Extender-kanaal**. Verbind de signaalreferentie/GND met de ADC-Extender volgens de vereisten van die Extender.
+- **Voeding:** controleer de benodigde spanning en toegestane OUT-spanning van de **specifieke sensor of module** vóór aansluiten; de FrameWork-code bepaalt de elektrische grenswaarden van het moduleboard niet.
+
+- NTC-thermistor → **spanningsdeler** met een passende bekende weerstand, spanning van de deler → analoge ingang van de ADC-Extender.
+- Een losse MF52A/MF52D is een weerstandssensor, geen module met rechtstreeks gestuurde OUT. Zonder spanningsdeler is de analoge waarde niet betrouwbaar interpreteerbaar.
+
+**Voor de hardwaretest:**
+
+- Gebruik de bestaande `.ino` uit **Testen** en de bestaande configuratiebestanden onder `src/Configuratie/`; een `*_template.h` wordt niet rechtstreeks ingelezen.
+- **Een vaste Arduino-pintoewijzing is niet algemeen geldig:** de gekozen constructor, configuratie en werkelijke bekabeling moeten overeenkomen. Waar hierboven geen exact spanningsniveau of pinheader is bevestigd, mag dat niet uit deze documentatie worden afgeleid.
+- De aanwezigheid van deze rubriek is **geen bewijs van een geslaagde hardwaretest**.
+
 ## Testen
 
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52A/`, `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52D/`.
