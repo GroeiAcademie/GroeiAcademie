@@ -1,25 +1,25 @@
 // ============================================================================
 // Tool: I2C_MetenHerstelEnBlokkeertijd
 // ============================================================================
-// Meet hoe lang een toegang via het framework blokkeert, ook tijdens een storing en tijdens het runtime-herstel (D042).
+// Meet hoe lang een toegang via het framework blokkeert, ook tijdens een storing en tijdens het runtime-herstel.
 // Hoort bij het testprotocol stabiliteit S4, S1 en S6 (kolom "Blokkeertijd").
 //
 // Werking:
 // - elke I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS één toegang per aanwezige bron:
-//   RFP602 via de gekozen ADS1115-Extender en een keypadscan van Input PCF8574 (alleen met INPUT_TYPE_PCF8574);
+//   FSR_RFP via de gekozen ADS1115-Extender en een keypadscan van Input PCF8574 (alleen met INPUT_TYPE_PCF8574);
 // - rond elke toegang meet micros() de duur;
 // - elke I2C_HERSTELTEST_RAPPORT_ELKE_MS op Serial per bron: langste duur, gemiddelde duur en aantal toegangen;
-// - tegelijk een teller op het scherm via Screen->Print(): zo volgt na een hotplug altijd een "volgende Print()" (S6).
+// - tegelijk een teller op het scherm via Screen->Print(): zo volgt na een hotplug altijd een "volgende Print()".
 //
 // Runtime-meldingen (GB400 tot GB410) staan tussen de rapportregels op Serial.
 // Testconfiguratie: I2C-shield met CharacterScreen, PCF8574 en ADS1115, zoals in Tik_Enkele_Samen_Instortend_Cocktail.
-// Voor de meldingen van het tweetrapsherstel (S4): bouwen met DEBUG (TRACE geeft te veel uitvoer om ze te zien).
+// Voor de meldingen van het tweetrapsherstel: bouwen met DEBUG (TRACE geeft te veel uitvoer om ze te zien).
 // ============================================================================
 
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -80,8 +80,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }
 
-  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
-  if (sensorRFP602set1 == nullptr) GA_SERIAL.println(F("FOUT: RFP602 (ADS1115 wordt niet gemeten)"));
+  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
+  if (sensorFSR_RFPset1 == nullptr) GA_SERIAL.println(F("FOUT: FSR_RFP (ADS1115 wordt niet gemeten)"));
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   Input = GedeeldeBusNewComponent<struct Input>();
@@ -101,9 +101,9 @@ void loop() {
   if (nu - tijdstipVorigeToegang >= I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS) {
     tijdstipVorigeToegang = nu;
 
-    if (sensorRFP602set1 != nullptr) {
+    if (sensorFSR_RFPset1 != nullptr) {
       const unsigned long startMicros = micros();
-      sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[0]);
+      sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[0]);
       DuurVanToegangBijhouden(blokkeertijdMetingADS1115, startMicros);
     }
 
@@ -121,7 +121,7 @@ void loop() {
     aantalRapporten++;
 
     GA_SERIAL.print(F("Rapport ")); GA_SERIAL.println(aantalRapporten);
-    RapportRegelTonen(F("  ADS1115 (RFP602-meting)"), blokkeertijdMetingADS1115);
+    RapportRegelTonen(F("  ADS1115 (FSR_RFP-meting)"), blokkeertijdMetingADS1115);
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     RapportRegelTonen(F("  PCF8574 (keypadscan)"), blokkeertijdKeypadscanPCF8574);
 #endif

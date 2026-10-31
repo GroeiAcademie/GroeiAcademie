@@ -79,7 +79,7 @@ Screen::Screen(uint8_t typesActief, CharacterScreenCallback characterCallback, P
 struct Screen* Screen = nullptr;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-// Runtime-herstel (S6): de stand van aantalI2CStoringenTijdensRuntime (GedeeldeBus) bij de laatste init() van het LCD.
+// Runtime-herstel: de stand van aantalI2CStoringenTijdensRuntime (GedeeldeBus) bij de laatste init() van het LCD.
 // Verschilt die stand, dan was er sinds die init() een I2C-storing (begin of herstel): een verloren nibble kan het LCD in
 // 4-bit-modus uit de pas laten lopen, en LiquidCrystal_I2C geeft de waarde van endTransmission() niet door.
 static uint16_t aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie = 0;
@@ -139,12 +139,15 @@ void Screen::Pixel::Print(const String& tekst) {
     this->gfx->print(tekst[index]);
   }
 
-  this->cursorKolom += tekst.length();
-
-  while (this->cursorKolom >= this->aantalKolommen) {
-    this->cursorKolom -= this->aantalKolommen;
-    this->cursorRegel++;
+  // Breder tussentype: cursorpositie plus tekstlengte kan boven 255 komen (cursorKolom en cursorRegel zijn uint8_t).
+  uint32_t nieuweKolom = static_cast<uint32_t>(this->cursorKolom) + tekst.length();
+  uint32_t nieuweRegel = this->cursorRegel;
+  if (this->aantalKolommen > 0) {
+    nieuweRegel += nieuweKolom / this->aantalKolommen;
+    nieuweKolom %= this->aantalKolommen;
   }
+  this->cursorKolom = static_cast<uint8_t>(nieuweKolom);
+  this->cursorRegel = nieuweRegel > 255 ? 255 : static_cast<uint8_t>(nieuweRegel);
 
   // Begrenzen zodat opeenvolgende te lange teksten nooit onder het grid belanden.
   if (this->cursorRegel >= this->aantalRegels) {
@@ -285,7 +288,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
   if (lifecycleFoutWeergegeven) return;
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
-  // Runtime-herstel van het LCD (D042): LiquidCrystal_I2C geeft geen foutcode terug, daarom vóór elke melding zelf testen.
+  // Runtime-herstel van het LCD: LiquidCrystal_I2C geeft geen foutcode terug, daarom vóór elke melding zelf testen.
   // Weer bereikbaar na een storing: het LCD opnieuw instellen, want het kan zijn stroom kwijt geweest zijn.
   if (this->actief && !this->Character.callback && this->Character.gedeeldeBus != nullptr) {
     ::CharacterScreen* lcd = this->Character.gedeeldeBus;
@@ -294,7 +297,7 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
       Wire.beginTransmission(lcd->adres);
       lcdBereikbaar = lcd->ResultaatComponentToegangTijdensRuntimeVerwerken(Wire.endTransmission() == 0);
     }
-    // Ook na een I2C-storing op eender welk onderdeel sinds de vorige init(): één keer opnieuw instellen (S6).
+ // Ook na een I2C-storing op eender welk onderdeel sinds de vorige init(): één keer opnieuw instellen.
     // Vlak vóór deze Print(): de inhoud volgt meteen.
     if (lcdBereikbaar && (!this->Character.actief || aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie != aantalI2CStoringenTijdensRuntime)) {
       this->Character.display.init();
@@ -702,7 +705,11 @@ bool Screen::Activeren() {
     if (!pixelOk) this->Pixel.foutmelding = _CRITICAL_PS301;
 
     if (pixelOk) {
+#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7735S)
+      this->Pixel.display.initR(INITR_BLACKTAB);   // gangbare 1,8" ST7735S-module, 128x160
+#else
       this->Pixel.display.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
+#endif
       this->Pixel.display.setRotation(PIXEL_SCREEN_ROTATION);
       this->Pixel.gfx = &this->Pixel.display;
 #if GEDEELDE_BUS_FOUTINJECTIE

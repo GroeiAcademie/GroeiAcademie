@@ -35,7 +35,8 @@ void RedirectSerial::begin(unsigned long) {
   }
 
   // Rechtstreeks de eerste microSD uit de lijst van Data (N7), zonder zoeken op component.
-  if (::Data != nullptr && ::Data->MICROSDviaSPI[0] != nullptr && ::Data->MICROSDviaSPI[0]->actief) {
+  if (::Data != nullptr && ::Data->MICROSDviaSPI[0] != nullptr &&
+      ::Data->MICROSDviaSPI[0]->actief && ::Data->MICROSDviaSPI[0]->RuntimeToegang(nullptr)) {
     FileSerial = ::Data->MICROSDviaSPI[0]->open(REDIRECT_SERIAL_FILE, O_RDWR | O_CREAT | O_AT_END);   // achteraan bijschrijven
   }
 
@@ -43,11 +44,15 @@ void RedirectSerial::begin(unsigned long) {
 }
 
 RedirectSerial::operator bool() {
-  return !initialiseren && static_cast<bool>(FileSerial);
+  return !initialiseren && static_cast<bool>(FileSerial) &&
+         ::Data != nullptr && ::Data->MICROSDviaSPI[0] != nullptr &&
+         ::Data->MICROSDviaSPI[0]->RuntimeToegang(nullptr);
 }
 
 size_t RedirectSerial::write(uint8_t byte) {
-  if (initialiseren) return 0;
+  if (initialiseren || ::Data == nullptr || ::Data->MICROSDviaSPI[0] == nullptr ||
+      !::Data->MICROSDviaSPI[0]->actief ||
+      !::Data->MICROSDviaSPI[0]->RuntimeToegang(nullptr)) return 0;
   if (!FileSerial) begin(0);
   if (!FileSerial) return 0;
   const size_t geschreven = FileSerial.write(byte);

@@ -13,10 +13,10 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
   uint8_t exclusiefMetAlert_[2];
 
   // ============================================================================
-  // ADS1115-BASIS: één ADS1115 als Extender (componentcode ADC_ADS1115); zijn sensoren, bv. RFP602, worden erop ingeplugd
+  // ADS1115-BASIS: één ADS1115 als Extender (componentcode ADC_ADS1115); zijn sensoren, bv. FSR_RFP, worden erop ingeplugd
   // ============================================================================
-  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_ALERT_RDY, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), ADS1115(adres, &Wire), np_ALERT_RDY(np_ALERT_RDY) {
+  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_ALERT_RDY, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender, tcaChannel), ADS1115(adres, &Wire), np_ALERT_RDY(np_ALERT_RDY) {
     exclusiefMetAlert_[0] = exclusief_[0];
     exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };
@@ -24,24 +24,28 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
 
 
   bool Activeren() override {
-    // R2: ook na runtime-herstel geen oude meetstatus laten hangen.
+    // ook na runtime-herstel geen oude meetstatus laten hangen.
     metingBezig = false;
     metingMislukt = false;
     InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
     // Geen teruglezen: het configregister behoudt na een reset van het board de waarde van de vorige schets, dus er is geen vaste waarde om mee te vergelijken.
     const bool gelukt = ADS1115::begin() && ADS1115::isConnected();
+    if (gelukt) ADS1115::setDataRate(EXTENDER_ADS1115_DATARATE);   // geldt voor elke volgende conversie
     return FoutDiagnoseI2C(gelukt, ADS1115::getError(), gelukt);
   }
 
-  // V8: analoge meting voor een child (bv. RFP602), zonder dat die de ADS1115 kent.
+  // analoge meting voor een child (bv. FSR_RFP), zonder dat die de ADS1115 kent.
   // De gain wordt per meting gekozen uit bereikMillivolt; ADS1X15 schrijft hem bij elke meting toch mee naar het configregister.
-  // Runtime-herstel (D042) blijft bij de child: die kiest de ladder (kanaal, sensor of deze ADS1115) en meldt het ene resultaat.
+  // Runtime-herstel blijft bij de child: die kiest de ladder (kanaal, sensor of deze ADS1115) en meldt het ene resultaat.
   bool metingMislukt = false;
-  bool metingBezig = false;   // R2: een gestarte meting is nog niet opgehaald; een andere child krijgt 0 (bezet)
+  bool metingBezig = false;   // een gestarte meting is nog niet opgehaald; een andere child krijgt 0 (bezet)
+  uint16_t effectiefBereikMillivolt = 0;
+  uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const override { return effectiefBereikMillivolt; }
 
   int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
     if (pin > static_cast<uint8_t>(ExtenderPins::EP_AIN3)) return -2;
     if (bereikMillivolt == 0) return 1;   // alleen controle: geen I2C, niets gewijzigd
+    if (bereikMillivolt > 6144) return -2; // gevraagd bereik is groter dan ADS1115 kan meten
     if (metingBezig) return 0;
     // Kleinste bereik dat bereikMillivolt nog omvat: 256, 512, 1024, 2048, 4096 of 6144 mV.
     uint8_t gain = 0;   // 6144 mV
@@ -50,9 +54,11 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
     else if (bereikMillivolt <= 1024) gain = 4;
     else if (bereikMillivolt <= 2048) gain = 2;
     else if (bereikMillivolt <= 4096) gain = 1;
+    if (!ComponentBeschikbaarTijdensRuntime()) return -1;
     ADS1115::setGain(gain);
     ADS1115::requestADC(pin);
     if (ADS1115::getError() != ADS1X15_OK) return -1;   // niet bezet: er loopt geen meting
+    effectiefBereikMillivolt = (gain == 16) ? 256 : (gain == 8) ? 512 : (gain == 4) ? 1024 : (gain == 2) ? 2048 : (gain == 1) ? 4096 : 6144;
     metingMislukt = false;
     metingBezig = true;
     return 1;
@@ -60,6 +66,8 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
 
   bool IsExtenderReadAnalogReady() override {
     if (!metingBezig || metingMislukt) return true;   // geen meting of een fout: niet blijven wachten
+    if (!ComponentBeschikbaarTijdensRuntime()) { metingMislukt = true; return true; }
+    if (!metingBezig) return true; // herstel heeft de lopende conversie geannuleerd
     const bool klaar = ADS1115::isReady();
     if (ADS1115::getError() != ADS1X15_OK) { metingMislukt = true; return true; }
     return klaar;
@@ -68,8 +76,9 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
   bool GetExtenderReadAnalogValue(int32_t& waarde) override {
     waarde = 0;
     if (!metingBezig) return false;
-    metingBezig = false;   // R2: Get geeft altijd vrij, ook vóór de meting klaar is (getValue() leest alleen het register)
-    if (metingMislukt) { metingMislukt = false; return false; }
+    if (metingMislukt) { metingBezig = false; metingMislukt = false; return false; }
+    if (!ComponentBeschikbaarTijdensRuntime() || !metingBezig) { metingBezig = false; return false; }
+    metingBezig = false;   // Get geeft de conversie vrij, ook wanneer ze nog niet klaar is.
     // Nooit een oude registerwaarde als nieuwe meting: is de conversie nog niet klaar, dan vrijgegeven en false.
     const bool klaar = ADS1115::isReady();
     if (ADS1115::getError() != ADS1X15_OK || !klaar) return false;
@@ -95,8 +104,8 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), ADS1115(ExtenderLijst[teller].adres, &Wire), np_ALERT_RDY(ExtenderLijst[teller].alertRdy) {
+  ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), ADS1115(ExtenderLijst[teller].adres, &Wire), np_ALERT_RDY(ExtenderLijst[teller].alertRdy) {
     exclusiefMetAlert_[0] = exclusief_[0];
     exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };

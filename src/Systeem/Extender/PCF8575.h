@@ -28,8 +28,8 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
   // DEFAULT — PCF8575 #1
   // ============================================================================
   #if EXTENDER_PCF8575_AANTAL == 1
-  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INT, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), PCF8575(adres, &Wire), np_INT(np_INT) {
+  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INT, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender, tcaChannel), PCF8575(adres, &Wire), np_INT(np_INT) {
     exclusiefMetInt_[0] = exclusief_[0];
     exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
@@ -51,8 +51,8 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), PCF8575(ExtenderLijst[teller].adres, &Wire), np_INT(ExtenderLijst[teller].intPin) {
+  ExtenderPCF8575(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), PCF8575(ExtenderLijst[teller].adres, &Wire), np_INT(ExtenderLijst[teller].intPin) {
     exclusiefMetInt_[0] = exclusief_[0];
     exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
@@ -65,21 +65,24 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
     return FoutDiagnoseI2C(gelukt, PCF8575::lastError(), gelukt);
   }
 
-#if GEDEELDE_BUS_MIXED_PINS
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
   // SetExtenderPinMode: geen richtingsregister. INPUT schrijft HIGH; OUTPUT laat de laatst geschreven waarde staan.
-  // Runtime-herstel (D042): eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
+  // Runtime-herstel: eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
   void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P17)) return;
     if (modus != INPUT || !ComponentBeschikbaarTijdensRuntime()) return;
     PCF8575::write(pin, HIGH);
     ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8575::lastError() == 0);
   }
   void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P17)) return;
     if (!ComponentBeschikbaarTijdensRuntime()) return;
     PCF8575::write(pin, niveau);
     ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8575::lastError() == 0);
   }
   uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P17)) return 0;
     if (!ComponentBeschikbaarTijdensRuntime()) return 0;
     const uint8_t waarde = PCF8575::read(pin);
     ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8575::lastError() == 0);

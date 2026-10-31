@@ -9,6 +9,10 @@
 
 #include <GroeiAcademie.h>
 
+#if EXTENDER_MAX14830_BRONKLOK_HZ == 0
+  #error Stel EXTENDER_MAX14830_BRONKLOK_HZ in op de werkelijke oscillatorfrequentie van jouw MAX14830-module voordat je deze test uitvoert.
+#endif
+
 #if EXTENDER_MAX14830_SPI_AANTAL == 0
   #error Zet EXTENDER_MAX14830_SPI_AANTAL in UserConfig.h op minstens 1 voor deze test.
 #endif

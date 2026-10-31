@@ -54,15 +54,15 @@ set "VERWACHTE_FOUT=Selecteer slechts een taal in UserConfig.h of SystemConfig.h
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=ONGELDIG RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1"
-set "TEST_FLAGS=-DRFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=3"
-set "VERWACHTE_FOUT=RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn."
+set "TEST_NAAM=ONGELDIG FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1"
+set "TEST_FLAGS=-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=3"
+set "VERWACHTE_FOUT=FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
-set "TEST_NAAM=RFP602 ZONDER ADS1115-EXTENDER"
+set "TEST_NAAM=FSR_RFP ZONDER ADS1115-EXTENDER"
 set "TEST_FLAGS=-DEXTENDER_ADS1115_AANTAL=0"
-set "VERWACHTE_FOUT=Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender."
+set "VERWACHTE_FOUT=Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"

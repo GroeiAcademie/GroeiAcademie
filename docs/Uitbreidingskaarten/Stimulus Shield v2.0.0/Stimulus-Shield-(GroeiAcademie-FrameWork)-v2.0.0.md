@@ -261,10 +261,10 @@ ADDR wordt via SW1 gekozen. Standaard is ADDR naar GND voor adres 0x48. De 3-pin
 | SDA | I2C SDA | Rechtstreeks naar Arduino SDA | Datalijn I2C, zelfde bus als de PCF8574 |
 | ADDR | SW1 ADDR-keuze | Geen Arduino-pin nodig | Bepaalt I2C-adres; standaard SW1-positie 2, ADDR naar GND = 0x48 |
 | ALRT | Voorzien / reserve | Eventueel later naar digitale interruptpin | Niet gebruikt in huidige Stimulus-code |
-| A0 | FSR402/RFP602 OUT1 | Arduino leest via I2C | `EP_AIN0`, standaard `RFP602_ADC_PIN_SENSOR_1_SET_1` |
-| A1 | FSR402/RFP602 OUT2 | Arduino leest via I2C | `EP_AIN1`, standaard `RFP602_ADC_PIN_SENSOR_2_SET_1` |
-| A2 | FSR402/RFP602 OUT3 | Arduino leest via I2C | `EP_AIN2`, standaard `RFP602_ADC_PIN_SENSOR_3_SET_1` |
-| A3 | FSR402/RFP602 OUT4 | Arduino leest via I2C | `EP_AIN3`, standaard `RFP602_ADC_PIN_SENSOR_4_SET_1` |
+| A0 | FSR402/RFP602 OUT1 | Arduino leest via I2C | `EP_AIN0`, standaard `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` |
+| A1 | FSR402/RFP602 OUT2 | Arduino leest via I2C | `EP_AIN1`, standaard `FSR_RFP_ADC_PIN_SENSOR_2_SET_1` |
+| A2 | FSR402/RFP602 OUT3 | Arduino leest via I2C | `EP_AIN2`, standaard `FSR_RFP_ADC_PIN_SENSOR_3_SET_1` |
+| A3 | FSR402/RFP602 OUT4 | Arduino leest via I2C | `EP_AIN3`, standaard `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` |
 
 ## 11. Character-LCD via I2C
 
@@ -409,8 +409,8 @@ ADS1115 is in de software een gewone Extender. Er bestaat geen globale ADC-keuze
 | `EXTENDER_ADS1115_AANTAL` | `1` | Aantal ADS1115-Extenders in de build |
 | `I2C_ADDRESS_EXTENDER_ADS1115_1` | `0x48` | Moet overeenkomen met SW1 |
 | `EXTENDER_ADS1115_1_ALERT_RDY` | `NONE` | ALRT van H5 wordt niet gebruikt |
-| `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` | `2` | `2` of `4` aangesloten sensoren |
-| `RFP602_ADC_PIN_SENSOR_1_SET_1` .. `_4` | `EP_AIN0` .. `EP_AIN3` | Standaardkanalen van de vier sensoren |
+| `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` | `2` | `2` of `4` aangesloten sensoren |
+| `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` .. `_4` | `EP_AIN0` .. `EP_AIN3` | Standaardkanalen van de vier sensoren |
 | `WACHT_LOSLATEN_DELAY_MS` | `5` | Pauze in de wachtlus, zodat de I2C-bus niet onafgebroken bevraagd wordt |
 | `ADC_BITS` / `DELAY_US` | `15` / `0` | ADS1115 single-ended; de ADS1115 wacht zelf op de conversie |
 
@@ -429,10 +429,10 @@ ExtenderADS1115 extenderADS1115(
   HardwareResourceToegang::GEDEELD
 );
 
-sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
 ```
 
-Zonder kanaalargumenten gebruikt RFP602 `RFP602_ADC_PIN_SENSOR_1_SET_1` tot `_4`. Per instantie kunnen ook vier eigen kanalen meegegeven worden.
+Zonder kanaalargumenten gebruikt RFP602 `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `_4`. Per instantie kunnen ook vier eigen kanalen meegegeven worden.
 
 ## 15. Lezen en activeren
 
@@ -446,10 +446,10 @@ Let op: de analoge ingang van de ADS1115 mag niet boven de voedingsspanning van 
 
 | Sensorlijn | Connector | ADS1115-ingang | Software |
 |---|---|---|---|
-| FSR402/RFP602 1 | U4 | A0 | `EP_AIN0` = `RFP602_ADC_PIN_SENSOR_1_SET_1` |
-| FSR402/RFP602 2 | U5 | A1 | `EP_AIN1` = `RFP602_ADC_PIN_SENSOR_2_SET_1` |
-| FSR402/RFP602 3 | U6 | A2 | `EP_AIN2` = `RFP602_ADC_PIN_SENSOR_3_SET_1` |
-| FSR402/RFP602 4 | U7 | A3 | `EP_AIN3` = `RFP602_ADC_PIN_SENSOR_4_SET_1` |
+| FSR402/RFP602 1 | U4 | A0 | `EP_AIN0` = `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` |
+| FSR402/RFP602 2 | U5 | A1 | `EP_AIN1` = `FSR_RFP_ADC_PIN_SENSOR_2_SET_1` |
+| FSR402/RFP602 3 | U6 | A2 | `EP_AIN2` = `FSR_RFP_ADC_PIN_SENSOR_3_SET_1` |
+| FSR402/RFP602 4 | U7 | A3 | `EP_AIN3` = `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` |
 
 ## Deel 5: Validatie
 

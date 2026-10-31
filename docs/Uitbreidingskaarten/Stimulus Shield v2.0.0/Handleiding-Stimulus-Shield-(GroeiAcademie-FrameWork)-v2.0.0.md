@@ -539,7 +539,7 @@ Deze informatie wordt later gebruikt tijdens:
 
 Doel
 
-De FSR402/RFP602-sensoren worden via de externe ADS1115-module op H5 uitgelezen. De ADS1115 hangt rechtstreeks op de I2C-bus van de Arduino (zelfde bus als de PCF8574) en gebruikt vier analoge ingangen A0-A3. In de software heten die ingangen `ExtenderADS1115::ExtenderPins::EP_AIN0` tot `EP_AIN3` (standaardkanalen `RFP602_ADC_PIN_SENSOR_1_SET_1` tot `_4`); het I2C-adres is `I2C_ADDRESS_EXTENDER_ADS1115_1`.
+De FSR402/RFP602-sensoren worden via de externe ADS1115-module op H5 uitgelezen. De ADS1115 hangt rechtstreeks op de I2C-bus van de Arduino (zelfde bus als de PCF8574) en gebruikt vier analoge ingangen A0-A3. In de software heten die ingangen `ExtenderADS1115::ExtenderPins::EP_AIN0` tot `EP_AIN3` (standaardkanalen `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `_4`); het I2C-adres is `I2C_ADDRESS_EXTENDER_ADS1115_1`.
 
 Visuele controle
 

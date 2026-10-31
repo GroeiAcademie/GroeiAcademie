@@ -2,6 +2,17 @@
 #define EXTENDERSC16IS752SPI_H
 
 struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
+  Appnostic_SC16IS752 channelA{SC16IS752_CHANNEL_A};
+  Appnostic_SC16IS752 channelB{SC16IS752_CHANNEL_B};
+  Stream& StreamChannelA() { return channelA; }
+  Stream& StreamChannelB() { return channelB; }
+  // UART-contract: channel 0 = A, 1 = B.
+  Stream* GetExtenderStream(uint8_t channel) override { return channel == 0 ? static_cast<Stream*>(&channelA) : channel == 1 ? static_cast<Stream*>(&channelB) : nullptr; }
+  bool StartExtenderUART(uint8_t channel, uint32_t baud) override {
+    if (!actief || channel > 1 || baud == 0) return false;
+    (channel == 0 ? channelA : channelB).setBaudrate(baud);
+    return true;
+  }
   enum class ExtenderPins : uint8_t {
     EP_CHANNEL_A = 0x00, // UART kanaal A: TXA/RXA/RTSA/CTSA
     EP_CHANNEL_B = 0x01, // UART kanaal B: TXB/RXB/RTSB/CTSB
@@ -55,6 +66,12 @@ struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrqReset_, 3 };
   }
   #endif
+
+  bool Activeren() override {
+    // Hergebruik de bestaande CS-claim; pschatzmann is geen Library Manager-library.
+    const uint8_t cs = static_cast<uint8_t>(NativeArduinoPinVan(np_CS));
+    return channelA.begin_spi(cs) && channelB.begin_spi(cs) && channelA.ping();
+  }
 };
 
 #endif

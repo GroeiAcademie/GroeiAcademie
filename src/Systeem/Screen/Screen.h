@@ -36,7 +36,16 @@
 
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
 #include <Adafruit_GFX.h>
+#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7789)
 #include <Adafruit_ST7789.h>
+#elif (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7735S)
+#include <Adafruit_ST7735.h>
+  #if (ACTIEF_PIXEL_SCREEN != SCREEN_128X160)
+    #error SCREEN_ST7735S vereist ACTIEF_PIXEL_SCREEN SCREEN_128X160.
+  #endif
+#else
+  #error ACTIEF_PIXEL_SCREEN_CONTROLLER moet SCREEN_ST7789 of SCREEN_ST7735S zijn.
+#endif
 
 #if (ACTIEF_PIXEL_SCREEN == SCREEN_128X32)
   #define ACTIEF_PIXEL_SCREEN_BREEDTE 128
@@ -68,7 +77,7 @@
 #endif
 #endif // SCREEN_TYPE_PIXELS
 
-// Altijd beschikbaar (D042): de foutniveaus WARNING tot FATAL van het runtime-herstel gebruiken ScreenData, ook zonder pixelscherm.
+// Altijd beschikbaar: de foutniveaus WARNING tot FATAL van het runtime-herstel gebruiken ScreenData, ook zonder pixelscherm.
 enum class ScreenData : uint8_t {
     TYPE_NONE,
     TYPE_INFO,
@@ -91,7 +100,7 @@ enum class ScreenData : uint8_t {
     TYPE_VIDEO
 };
 
-// Runtime-herstel (D042): controle bij het compileren van een set drempels (hier omdat ScreenData hier staat).
+// Runtime-herstel: controle bij het compileren van een set drempels (hier omdat ScreenData hier staat).
 // Aantallen 1 of meer en oplopend; de tijden die niet 0 zijn, oplopend als één reeks, ook over een 0 heen (0 = niet op tijd);
 // daarom elk paar, niet alleen de buren. Beide foutniveaus WARNING tot FATAL.
 // Een uitschakelniveau boven het hoogst toegelaten foutniveau mag: dat betekent "wel melden, nooit automatisch uitschakelen".
@@ -178,7 +187,11 @@ struct Screen : GedeeldeBusNode {
     int16_t offsetX        = 0;
     int16_t offsetY        = 0;
 
+#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7735S)
+    Adafruit_ST7735 display{ static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_CS)), static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_DC)), static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_RST))};
+#else
     Adafruit_ST7789 display{ static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_CS)), static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_DC)), static_cast<int8_t>(NativeArduinoPinVan(PIXEL_SCREEN_RST))};
+#endif
     Adafruit_GFX* gfx = nullptr;
 
     bool emulateLCDxxx4         = false;

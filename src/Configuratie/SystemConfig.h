@@ -28,6 +28,9 @@
 #define DATA_TYPE_FRAM_SPI                 0x0100   // nog niet ondersteund in v2.0.0
 // 0x0200 vrij: microSD via I2C bestaat niet (de SD-specificatie kent geen I2C)
 #define DATA_TYPE_MICROSD_SPI              0x0400
+// 0x0800 vrij: NRF24L01 native bestaat niet
+// 0x1000 vrij: NRF24L01 via I2C bestaat niet
+#define DATA_TYPE_NRF24L01_SPI             0x2000   // radiomodule: elk record ook draadloos doorsturen
 
 // GPIO: General Purpose Input/Output, programmeerbare pin op een computerchip of printplaat waarvan de functie via software kan worden ingesteld.
 #define GPIO0    0
@@ -151,8 +154,137 @@
     #endif
 
     // Sensoren: Persoonlijke configuratie (optioneel)  
-    #if __has_include("Sensoren/ConfigRFP602.h")
-      #include "Sensoren/ConfigRFP602.h"
+    #if __has_include("Sensoren/ConfigAD8232.h")
+      #include "Sensoren/ConfigAD8232.h"
+    #endif
+    #if __has_include("Sensoren/ConfigADXL345.h")
+      #include "Sensoren/ConfigADXL345.h"
+    #endif
+    #if __has_include("Sensoren/ConfigAHT10.h")
+      #include "Sensoren/ConfigAHT10.h"
+    #endif
+    #if __has_include("Sensoren/ConfigAS608.h")
+      #include "Sensoren/ConfigAS608.h"
+    #endif
+    #if __has_include("Sensoren/ConfigBioAmpEXGPill.h")
+      #include "Sensoren/ConfigBioAmpEXGPill.h"
+    #endif
+    #if __has_include("Sensoren/ConfigBME680.h")
+      #include "Sensoren/ConfigBME680.h"
+    #endif
+    #if __has_include("Sensoren/ConfigBME688.h")
+      #include "Sensoren/ConfigBME688.h"
+    #endif
+    #if __has_include("Sensoren/ConfigBMP280.h")
+      #include "Sensoren/ConfigBMP280.h"
+    #endif
+    #if __has_include("Sensoren/ConfigDHTxx.h")
+      #include "Sensoren/ConfigDHTxx.h"
+    #endif
+    #if __has_include("Sensoren/ConfigDS18B20.h")
+      #include "Sensoren/ConfigDS18B20.h"
+    #endif
+    #if __has_include("Sensoren/ConfigDS3231.h")
+      #include "Sensoren/ConfigDS3231.h"
+    #endif
+    #if __has_include("Sensoren/ConfigEGBOPulseSensor.h")
+      #include "Sensoren/ConfigEGBOPulseSensor.h"
+    #endif
+    #if __has_include("Sensoren/ConfigFSR_RFP.h")
+      #include "Sensoren/ConfigFSR_RFP.h"
+    #endif
+    #if __has_include("Sensoren/ConfigGSRGrove.h")
+      #include "Sensoren/ConfigGSRGrove.h"
+    #endif
+    #if __has_include("Sensoren/ConfigHCSR04.h")
+      #include "Sensoren/ConfigHCSR04.h"
+    #endif
+    #if __has_include("Sensoren/ConfigHCSR04P.h")
+      #include "Sensoren/ConfigHCSR04P.h"
+    #endif
+    #if __has_include("Sensoren/ConfigHCSR501.h")
+      #include "Sensoren/ConfigHCSR501.h"
+    #endif
+    #if __has_include("Sensoren/ConfigHW201.h")
+      #include "Sensoren/ConfigHW201.h"
+    #endif
+    #if __has_include("Sensoren/ConfigHX711.h")
+      #include "Sensoren/ConfigHX711.h"
+    #endif
+    #if __has_include("Sensoren/ConfigHYSRF05.h")
+      #include "Sensoren/ConfigHYSRF05.h"
+    #endif
+    #if __has_include("Sensoren/ConfigINMP441.h")
+      #include "Sensoren/ConfigINMP441.h"
+    #endif
+    #if __has_include("Sensoren/ConfigLD2410D.h")
+      #include "Sensoren/ConfigLD2410D.h"
+    #endif
+    #if __has_include("Sensoren/ConfigLD2450.h")
+      #include "Sensoren/ConfigLD2450.h"
+    #endif
+    #if __has_include("Sensoren/ConfigLM35DZ.h")
+      #include "Sensoren/ConfigLM35DZ.h"
+    #endif
+    #if __has_include("Sensoren/ConfigLM75A.h")
+      #include "Sensoren/ConfigLM75A.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMAX30102.h")
+      #include "Sensoren/ConfigMAX30102.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMAX4466.h")
+      #include "Sensoren/ConfigMAX4466.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMAX9814.h")
+      #include "Sensoren/ConfigMAX9814.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMCU6701.h")
+      #include "Sensoren/ConfigMCU6701.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMF52A.h")
+      #include "Sensoren/ConfigMF52A.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMF52D.h")
+      #include "Sensoren/ConfigMF52D.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMPU6050.h")
+      #include "Sensoren/ConfigMPU6050.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMPU6500.h")
+      #include "Sensoren/ConfigMPU6500.h"
+    #endif
+    #if __has_include("Sensoren/ConfigMR60BHA2.h")
+      #include "Sensoren/ConfigMR60BHA2.h"
+    #endif
+    #if __has_include("Sensoren/ConfigNeuroSkyTGAM.h")
+      #include "Sensoren/ConfigNeuroSkyTGAM.h"
+    #endif
+    #if __has_include("Sensoren/ConfigOT3686.h")
+      #include "Sensoren/ConfigOT3686.h"
+    #endif
+    #if __has_include("Sensoren/ConfigOV7670.h")
+      #include "Sensoren/ConfigOV7670.h"
+    #endif
+    #if __has_include("Sensoren/ConfigPIEZO.h")
+      #include "Sensoren/ConfigPIEZO.h"
+    #endif
+    #if __has_include("Sensoren/ConfigSCD41.h")
+      #include "Sensoren/ConfigSCD41.h"
+    #endif
+    #if __has_include("Sensoren/ConfigSDP810125PA.h")
+      #include "Sensoren/ConfigSDP810125PA.h"
+    #endif
+    #if __has_include("Sensoren/ConfigTTP223.h")
+      #include "Sensoren/ConfigTTP223.h"
+    #endif
+    #if __has_include("Sensoren/ConfigVL53L0X.h")
+      #include "Sensoren/ConfigVL53L0X.h"
+    #endif
+    #if __has_include("Sensoren/ConfigVL6180X.h")
+      #include "Sensoren/ConfigVL6180X.h"
+    #endif
+    #if __has_include("Sensoren/ConfigWATER.h")
+      #include "Sensoren/ConfigWATER.h"
     #endif
    
     // Sturingen: Persoonlijke configuratie (optioneel)  
@@ -233,6 +365,20 @@
     #error Dit board wordt momenteel (nog) niet ondersteund.
   #endif
 #endif
+
+// Native analogRead()-resolutie per bestaand board (standaardwaarde van de boardcore).
+// Als de sketch analogReadResolution() zelf wijzigt, moet deze instelling overeenkomen.
+#ifndef NATIVE_ADC_RESOLUTIE_BITS
+  #if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
+    #define NATIVE_ADC_RESOLUTIE_BITS 12
+  #else
+    #define NATIVE_ADC_RESOLUTIE_BITS 10
+  #endif
+#endif
+#if NATIVE_ADC_RESOLUTIE_BITS < 1 || NATIVE_ADC_RESOLUTIE_BITS > 16
+  #error NATIVE_ADC_RESOLUTIE_BITS moet tussen 1 en 16 liggen.
+#endif
+
 // UserConfig.h heeft voorrang op automatische boarddetectie.
 // Wanneer de gebruiker in UserConfig.h zelf BOARD_VERSION definieert (bijvoorbeeld #define BOARD_VERSION BOARD_ESP32S3_ARDI32),
 // gebruikt de library die keuze en wordt bovenstaande automatische detectie niet uitgevoerd (de #ifndef hierboven slaat dan over).
@@ -372,7 +518,7 @@
 // OUTPUT =====================================================================
 // ============================================================================
 
-// MELDINGEN: LEESTIJD (D042)
+// MELDINGEN: LEESTIJD
 // GENERAL: meldingen bij de opstart (aanmelden, controleren, inpluggen, activeren).
 // Runtime-meldingen (GB400 tot GB410) gaan alleen naar Serial en hebben geen leestijd.
 #ifndef GENERAL_MELDING_CRITICAL_LEESTIJD_MS
@@ -429,6 +575,10 @@
 
 #ifndef ACTIEF_PIXEL_SCREEN
   #define ACTIEF_PIXEL_SCREEN            SCREEN_240X320
+#endif
+
+#ifndef ACTIEF_PIXEL_SCREEN_CONTROLLER
+  #define ACTIEF_PIXEL_SCREEN_CONTROLLER SCREEN_ST7789
 #endif
 
 // Standaard rotatiewaarden (met de klok mee):
@@ -502,73 +652,179 @@
 #endif
 
 // ============================================================================
-// RFP602 =====================================================================
+// Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
+#ifndef SENSOR_AD8232_ADC_BEREIK_MILLIVOLT
+#define SENSOR_AD8232_ADC_BEREIK_MILLIVOLT 3300
+#endif
+
+#ifndef SENSOR_AD8232_AANTAL
+#define SENSOR_AD8232_AANTAL 0
+#endif
+#if SENSOR_AD8232_AANTAL != 0 && SENSOR_AD8232_AANTAL != 1
+#error SENSOR_AD8232_AANTAL moet 0 of 1 zijn.
+#endif
+
+// I2C-sensor-identiteitstest. Standaard uitgeschakeld.
+#ifndef I2C_ADDRESS_SENSOR_ADXL345_1
+#define I2C_ADDRESS_SENSOR_ADXL345_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_ADXL345_AANTAL
+#define SENSOR_ADXL345_AANTAL 0
+#endif
+#if SENSOR_ADXL345_AANTAL != 0 && SENSOR_ADXL345_AANTAL != 1
+#error SENSOR_ADXL345_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_AHT10_1
+#define I2C_ADDRESS_SENSOR_AHT10_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_AHT10_AANTAL
+#define SENSOR_AHT10_AANTAL 0
+#endif
+#if SENSOR_AHT10_AANTAL != 0 && SENSOR_AHT10_AANTAL != 1
+#error SENSOR_AHT10_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_AS608_AANTAL
+#define SENSOR_AS608_AANTAL 0
+#endif
+#if SENSOR_AS608_AANTAL != 0 && SENSOR_AS608_AANTAL != 1
+#error SENSOR_AS608_AANTAL moet 0 of 1 zijn.
+#endif
+
+// Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
+// BioAmp EXG Pill, officiële Upside Down Labs voorbeelden.
+// De vijfde keuze RAW is FixedSampling, geen vijfde biopotentiaalsoort.
+#define BIOAMPEXGPILL_MEETMETHODE_RAW 0
+#define BIOAMPEXGPILL_MEETMETHODE_ECG 1
+#define BIOAMPEXGPILL_MEETMETHODE_EMG 2
+#define BIOAMPEXGPILL_MEETMETHODE_EOG 3
+#define BIOAMPEXGPILL_MEETMETHODE_EEG 4
+#ifndef SENSOR_BIOAMPEXGPILL_MEETMETHODE
+#define SENSOR_BIOAMPEXGPILL_MEETMETHODE BIOAMPEXGPILL_MEETMETHODE_RAW
+#endif
+#ifndef SENSOR_BIOAMPEXGPILL_ENVELOP_VENSTER
+#define SENSOR_BIOAMPEXGPILL_ENVELOP_VENSTER 128   // aantal samples voor de EMG-envelop (alleen bij EMG)
+#endif
+#if SENSOR_BIOAMPEXGPILL_ENVELOP_VENSTER < 1 || SENSOR_BIOAMPEXGPILL_ENVELOP_VENSTER > 1024
+#error SENSOR_BIOAMPEXGPILL_ENVELOP_VENSTER moet tussen 1 en 1024 liggen.
+#endif
+#ifndef SENSOR_BIOAMPEXGPILL_ADC_BEREIK_MILLIVOLT
+#define SENSOR_BIOAMPEXGPILL_ADC_BEREIK_MILLIVOLT 5000
+#endif
+
+#ifndef SENSOR_BIOAMPEXGPILL_AANTAL
+#define SENSOR_BIOAMPEXGPILL_AANTAL 0
+#endif
+#if SENSOR_BIOAMPEXGPILL_AANTAL != 0 && SENSOR_BIOAMPEXGPILL_AANTAL != 1
+#error SENSOR_BIOAMPEXGPILL_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_BME680_1
+#define I2C_ADDRESS_SENSOR_BME680_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_BME680_AANTAL
+#define SENSOR_BME680_AANTAL 0
+#endif
+#if SENSOR_BME680_AANTAL != 0 && SENSOR_BME680_AANTAL != 1
+#error SENSOR_BME680_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_BME688_1
+#define I2C_ADDRESS_SENSOR_BME688_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_BME688_AANTAL
+#define SENSOR_BME688_AANTAL 0
+#endif
+#if SENSOR_BME688_AANTAL != 0 && SENSOR_BME688_AANTAL != 1
+#error SENSOR_BME688_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_BMP280_1
+#define I2C_ADDRESS_SENSOR_BMP280_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_BMP280_AANTAL
+#define SENSOR_BMP280_AANTAL 0
+#endif
+#if SENSOR_BMP280_AANTAL != 0 && SENSOR_BMP280_AANTAL != 1
+#error SENSOR_BMP280_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_DS18B20_AANTAL
+#define SENSOR_DS18B20_AANTAL 0
+#endif
+// Meerdere DS18B20-objecten per DS2482 channel zijn toegestaan met expliciete ROM.
+#if SENSOR_DS18B20_AANTAL < 0
+#error SENSOR_DS18B20_AANTAL mag niet negatief zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_DS3231_1
+#define I2C_ADDRESS_SENSOR_DS3231_1 0x68
+#endif
+#ifndef SENSOR_DS3231_AANTAL
+#define SENSOR_DS3231_AANTAL 0
+#endif
+#if SENSOR_DS3231_AANTAL != 0 && SENSOR_DS3231_AANTAL != 1
+#error SENSOR_DS3231_AANTAL moet 0 of 1 zijn.
+#endif
+#if SENSOR_DS3231_AANTAL > 0 && I2C_ADDRESS_SENSOR_DS3231_1 != 0x68
+#error I2C_ADDRESS_SENSOR_DS3231_1 moet 0x68 zijn: het adres van de DS3231 ligt vast in de chip.
+#endif
+
+// Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
+#ifndef SENSOR_EGBOPULSESENSOR_ADC_BEREIK_MILLIVOLT
+#define SENSOR_EGBOPULSESENSOR_ADC_BEREIK_MILLIVOLT 5000
+#endif
+
+#ifndef SENSOR_EGBOPULSESENSOR_AANTAL
+#define SENSOR_EGBOPULSESENSOR_AANTAL 0
+#endif
+#if SENSOR_EGBOPULSESENSOR_AANTAL != 0 && SENSOR_EGBOPULSESENSOR_AANTAL != 1
+#error SENSOR_EGBOPULSESENSOR_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef FSR_RFP_ADC_BEREIK_MILLIVOLT
+#define FSR_RFP_ADC_BEREIK_MILLIVOLT 5000
+#endif
+#if FSR_RFP_ADC_BEREIK_MILLIVOLT < 1
+#error FSR_RFP_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
+
+// FSR_RFP =====================================================================
 // ----------------------------------------------------------------------------
-// LET OP: RFP602 meet via een ADC-Extender (nu: ADS1115). Daarvoor moet de ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
+// LET OP: FSR_RFP meet via een ADC-Extender (nu: ADS1115). Daarvoor moet de ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
 
-// Oude namen (voor v2.0.0 zonder set): melden welke naam nu geldt.
-#ifdef RFP602_AANTAL_SENSOREN_BESCHIKBAAR
-  #error "RFP602_AANTAL_SENSOREN_BESCHIKBAAR heet nu RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1"
-#endif
-#ifdef RFP602_ADC_PIN_SENSOR_1
-  #error "RFP602_ADC_PIN_SENSOR_1 heet nu RFP602_ADC_PIN_SENSOR_1_SET_1"
-#endif
-#ifdef RFP602_ADC_PIN_SENSOR_2
-  #error "RFP602_ADC_PIN_SENSOR_2 heet nu RFP602_ADC_PIN_SENSOR_2_SET_1"
-#endif
-#ifdef RFP602_ADC_PIN_SENSOR_3
-  #error "RFP602_ADC_PIN_SENSOR_3 heet nu RFP602_ADC_PIN_SENSOR_3_SET_1"
-#endif
-#ifdef RFP602_ADC_PIN_SENSOR_4
-  #error "RFP602_ADC_PIN_SENSOR_4 heet nu RFP602_ADC_PIN_SENSOR_4_SET_1"
-#endif
-#ifdef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #error "RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #error "RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #error "RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #error "RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE
-  #error "RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE heet nu RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1"
-#endif
-#ifdef RFP602_DATA_RECORD_FILE
-  #error "RFP602_DATA_RECORD_FILE heet nu RFP602_DATA_RECORD_FILE_SET_1"
-#endif
-#ifdef RFP602_RUNTIME_DREMPELS_FOUTNIVEAU
-  #error "RFP602_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU
-  #error "RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU
-  #error "RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_2_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU
-  #error "RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_3_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
-#endif
-#ifdef RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU
-  #error "RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU heet nu RFP602_CHANNEL_4_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1"
+#ifndef FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1
+  #define FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1  2
 #endif
 
-#ifndef RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1
-  #define RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1  2
+#if FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 != 2 && FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 != 4
+  #error FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn.
 #endif
 
-#if RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 != 2 && RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 != 4
-  #error RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn.
+// FSR_RFP: het type probe per set. RFP602, FSR400 en FSR402 hebben dezelfde aansluiting (een weerstand in een spanningsdeler)
+// en dezelfde meetcode; de instelling bewaart welk type aangesloten is.
+#define FSR_RFP_PROBE_RFP602 1
+#define FSR_RFP_PROBE_FSR400 2
+#define FSR_RFP_PROBE_FSR402 3
+#ifndef FSR_RFP_PROBE_SET_1
+  #define FSR_RFP_PROBE_SET_1 FSR_RFP_PROBE_RFP602
+#endif
+#if FSR_RFP_PROBE_SET_1 != FSR_RFP_PROBE_RFP602 && FSR_RFP_PROBE_SET_1 != FSR_RFP_PROBE_FSR400 && FSR_RFP_PROBE_SET_1 != FSR_RFP_PROBE_FSR402
+  #error FSR_RFP_PROBE_SET_1 moet FSR_RFP_PROBE_RFP602, FSR_RFP_PROBE_FSR400 of FSR_RFP_PROBE_FSR402 zijn.
+#endif
+#ifndef FSR_RFP_PROBE_SET_2
+  #define FSR_RFP_PROBE_SET_2 FSR_RFP_PROBE_RFP602
+#endif
+#if FSR_RFP_PROBE_SET_2 != FSR_RFP_PROBE_RFP602 && FSR_RFP_PROBE_SET_2 != FSR_RFP_PROBE_FSR400 && FSR_RFP_PROBE_SET_2 != FSR_RFP_PROBE_FSR402
+  #error FSR_RFP_PROBE_SET_2 moet FSR_RFP_PROBE_RFP602, FSR_RFP_PROBE_FSR400 of FSR_RFP_PROBE_FSR402 zijn.
 #endif
 
-// Set 2 (1b): bestaat alleen als RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 gedefinieerd is. Geen standaardwaarde: zonder set 2 geen extra geheugen of code.
-#if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
-  #if RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 != 2 && RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 != 4
-    #error RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 moet 2 of 4 zijn.
+// Set 2 (1b): bestaat alleen als FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 gedefinieerd is. Geen standaardwaarde: zonder set 2 geen extra geheugen of code.
+#if defined(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
+  #if FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 != 2 && FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 != 4
+    #error FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 moet 2 of 4 zijn.
   #endif
 #endif
 
@@ -579,53 +835,385 @@
 #endif
 
 // ============================================================================
-// RFP602 DATA
+// FSR_RFP DATA
 // ============================================================================
-#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
-  #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 0
+#ifndef FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 0
 #endif
 
-#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
-  #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+#ifndef FSR_RFP_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define FSR_RFP_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
-#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
-  #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+#ifndef FSR_RFP_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define FSR_RFP_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
-#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
-  #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+#ifndef FSR_RFP_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define FSR_RFP_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
-#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
-  #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
-#endif
-
-#ifndef RFP602_DATA_RECORD_FILE_SET_1
-  #define RFP602_DATA_RECORD_FILE_SET_1 "RFP602.log"
+#ifndef FSR_RFP_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+  #define FSR_RFP_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 #endif
 
 // Set 2 (1b): alleen als set 2 bestaat.
-#if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
-#ifndef RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
-  #define RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 0
+#if defined(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
+#ifndef FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 0
 #endif
-#ifndef RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
-  #define RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#ifndef FSR_RFP_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define FSR_RFP_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
 #endif
-#ifndef RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
-  #define RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#ifndef FSR_RFP_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define FSR_RFP_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
 #endif
-#ifndef RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
-  #define RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#ifndef FSR_RFP_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define FSR_RFP_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
 #endif
-#ifndef RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
-  #define RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+#ifndef FSR_RFP_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
+  #define FSR_RFP_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2
 #endif
-#endif
-
-// Een eigen opnamebestand per set kan de Data-laag nog niet: ze schrijft één bestand (RFP602_DATA_RECORD_FILE_SET_1).
-#ifdef RFP602_DATA_RECORD_FILE_SET_2
-  #error RFP602_DATA_RECORD_FILE_SET_2 wordt nog niet ondersteund: de Data-laag schrijft één opnamebestand, RFP602_DATA_RECORD_FILE_SET_1.
 #endif
 
+#ifndef SENSOR_GSRGROVE_AANTAL
+  #define SENSOR_GSRGROVE_AANTAL 0
+#endif
+#if SENSOR_GSRGROVE_AANTAL != 0 && SENSOR_GSRGROVE_AANTAL != 1
+  #error SENSOR_GSRGROVE_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT
+#define SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT 5000
+#endif
+#if SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT < 1
+#error SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
+
+#ifndef SENSOR_HCSR04_AANTAL
+#define SENSOR_HCSR04_AANTAL 0
+#endif
+#if SENSOR_HCSR04_AANTAL != 0 && SENSOR_HCSR04_AANTAL != 1
+#error SENSOR_HCSR04_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_HCSR04P_AANTAL
+#define SENSOR_HCSR04P_AANTAL 0
+#endif
+#if SENSOR_HCSR04P_AANTAL != 0 && SENSOR_HCSR04P_AANTAL != 1
+#error SENSOR_HCSR04P_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_HCSR501_AANTAL
+#define SENSOR_HCSR501_AANTAL 0
+#endif
+#if SENSOR_HCSR501_AANTAL != 0 && SENSOR_HCSR501_AANTAL != 1
+#error SENSOR_HCSR501_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_HW201_AANTAL
+#define SENSOR_HW201_AANTAL 0
+#endif
+#if SENSOR_HW201_AANTAL != 0 && SENSOR_HW201_AANTAL != 1
+#error SENSOR_HW201_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_HX711_AANTAL
+#define SENSOR_HX711_AANTAL 0
+#endif
+#if SENSOR_HX711_AANTAL != 0 && SENSOR_HX711_AANTAL != 1
+#error SENSOR_HX711_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_HYSRF05_AANTAL
+#define SENSOR_HYSRF05_AANTAL 0
+#endif
+#if SENSOR_HYSRF05_AANTAL != 0 && SENSOR_HYSRF05_AANTAL != 1
+#error SENSOR_HYSRF05_AANTAL moet 0 of 1 zijn.
+#endif
+
+// ESP32-S3 native interfaces: standaard uit, geen boardpinnen aangenomen.
+#ifndef SENSOR_INMP441_AANTAL
+#define SENSOR_INMP441_AANTAL 0
+#endif
+#if SENSOR_INMP441_AANTAL != 0 && SENSOR_INMP441_AANTAL != 1
+#error SENSOR_INMP441_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_INMP441_SAMPLEFREQUENTIE_HZ
+#define SENSOR_INMP441_SAMPLEFREQUENTIE_HZ 16000
+#endif
+#if SENSOR_INMP441_SAMPLEFREQUENTIE_HZ < 8000 || SENSOR_INMP441_SAMPLEFREQUENTIE_HZ > 48000
+#error SENSOR_INMP441_SAMPLEFREQUENTIE_HZ moet tussen 8000 en 48000 Hz liggen.
+#endif
+
+#ifndef SENSOR_DHT11_AANTAL
+#define SENSOR_DHT11_AANTAL 0
+#endif
+#if SENSOR_DHT11_AANTAL != 0 && SENSOR_DHT11_AANTAL != 1
+#error SENSOR_DHT11_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_DHT22_AANTAL
+#define SENSOR_DHT22_AANTAL 0
+#endif
+#if SENSOR_DHT22_AANTAL != 0 && SENSOR_DHT22_AANTAL != 1
+#error SENSOR_DHT22_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_LD2410D_AANTAL
+#define SENSOR_LD2410D_AANTAL 0
+#endif
+#if SENSOR_LD2410D_AANTAL != 0 && SENSOR_LD2410D_AANTAL != 1
+#error SENSOR_LD2410D_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_LD2450_AANTAL
+#define SENSOR_LD2450_AANTAL 0
+#endif
+#if SENSOR_LD2450_AANTAL != 0 && SENSOR_LD2450_AANTAL != 1
+#error SENSOR_LD2450_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT
+#define SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT 1500
+#endif
+#if SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT < 1
+#error SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
+#ifndef SENSOR_LM35DZ_AANTAL
+  #define SENSOR_LM35DZ_AANTAL 0
+#endif
+#if SENSOR_LM35DZ_AANTAL != 0 && SENSOR_LM35DZ_AANTAL != 1
+  #error SENSOR_LM35DZ_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_LM75A_1
+#define I2C_ADDRESS_SENSOR_LM75A_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_LM75A_AANTAL
+#define SENSOR_LM75A_AANTAL 0
+#endif
+#if SENSOR_LM75A_AANTAL != 0 && SENSOR_LM75A_AANTAL != 1
+#error SENSOR_LM75A_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_MAX30102_1
+#define I2C_ADDRESS_SENSOR_MAX30102_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_MAX30102_AANTAL
+#define SENSOR_MAX30102_AANTAL 0
+#endif
+#if SENSOR_MAX30102_AANTAL != 0 && SENSOR_MAX30102_AANTAL != 1
+#error SENSOR_MAX30102_AANTAL moet 0 of 1 zijn.
+#endif
+
+// Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
+#ifndef SENSOR_MAX4466_ADC_BEREIK_MILLIVOLT
+#define SENSOR_MAX4466_ADC_BEREIK_MILLIVOLT 5000
+#endif
+
+#ifndef SENSOR_MAX4466_AANTAL
+#define SENSOR_MAX4466_AANTAL 0
+#endif
+#if SENSOR_MAX4466_AANTAL != 0 && SENSOR_MAX4466_AANTAL != 1
+#error SENSOR_MAX4466_AANTAL moet 0 of 1 zijn.
+#endif
+
+// Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
+#ifndef SENSOR_MAX9814_ADC_BEREIK_MILLIVOLT
+#define SENSOR_MAX9814_ADC_BEREIK_MILLIVOLT 3300
+#endif
+
+#ifndef SENSOR_MAX9814_AANTAL
+#define SENSOR_MAX9814_AANTAL 0
+#endif
+#if SENSOR_MAX9814_AANTAL != 0 && SENSOR_MAX9814_AANTAL != 1
+#error SENSOR_MAX9814_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_MCU6701_AANTAL
+#define SENSOR_MCU6701_AANTAL 0
+#endif
+#if SENSOR_MCU6701_AANTAL != 0 && SENSOR_MCU6701_AANTAL != 1
+#error SENSOR_MCU6701_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_MCU6701_ADC_BEREIK_MILLIVOLT
+#define SENSOR_MCU6701_ADC_BEREIK_MILLIVOLT 5000
+#endif
+
+#ifndef SENSOR_MF52A_AANTAL
+  #define SENSOR_MF52A_AANTAL 0
+#endif
+#if SENSOR_MF52A_AANTAL != 0 && SENSOR_MF52A_AANTAL != 1
+  #error SENSOR_MF52A_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_MF52A_ADC_BEREIK_MILLIVOLT
+#define SENSOR_MF52A_ADC_BEREIK_MILLIVOLT 5000
+#endif
+#if SENSOR_MF52A_ADC_BEREIK_MILLIVOLT < 1
+#error SENSOR_MF52A_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
+
+#ifndef SENSOR_MF52D_AANTAL
+  #define SENSOR_MF52D_AANTAL 0
+#endif
+#if SENSOR_MF52D_AANTAL != 0 && SENSOR_MF52D_AANTAL != 1
+  #error SENSOR_MF52D_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_MF52D_ADC_BEREIK_MILLIVOLT
+#define SENSOR_MF52D_ADC_BEREIK_MILLIVOLT 5000
+#endif
+#if SENSOR_MF52D_ADC_BEREIK_MILLIVOLT < 1
+#error SENSOR_MF52D_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_MPU6050_1
+#define I2C_ADDRESS_SENSOR_MPU6050_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_MPU6050_AANTAL
+#define SENSOR_MPU6050_AANTAL 0
+#endif
+#if SENSOR_MPU6050_AANTAL != 0 && SENSOR_MPU6050_AANTAL != 1
+#error SENSOR_MPU6050_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_MPU6500_1
+#define I2C_ADDRESS_SENSOR_MPU6500_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_MPU6500_AANTAL
+#define SENSOR_MPU6500_AANTAL 0
+#endif
+#if SENSOR_MPU6500_AANTAL != 0 && SENSOR_MPU6500_AANTAL != 1
+#error SENSOR_MPU6500_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_MR60BHA2_AANTAL
+#define SENSOR_MR60BHA2_AANTAL 0
+#endif
+#if SENSOR_MR60BHA2_AANTAL != 0 && SENSOR_MR60BHA2_AANTAL != 1
+#error SENSOR_MR60BHA2_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_NEUROSKYTGAM_AANTAL
+#define SENSOR_NEUROSKYTGAM_AANTAL 0
+#endif
+#if SENSOR_NEUROSKYTGAM_AANTAL != 0 && SENSOR_NEUROSKYTGAM_AANTAL != 1
+#error SENSOR_NEUROSKYTGAM_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_OT3686_AANTAL
+#define SENSOR_OT3686_AANTAL 0
+#endif
+#if SENSOR_OT3686_AANTAL != 0 && SENSOR_OT3686_AANTAL != 1
+#error SENSOR_OT3686_AANTAL moet 0 of 1 zijn (één native interrupt per Sensor).
+#endif
+#ifndef SENSOR_OT3686_AANTAL_SLEUVEN
+#define SENSOR_OT3686_AANTAL_SLEUVEN 20
+#endif
+#if SENSOR_OT3686_AANTAL_SLEUVEN < 1
+#error SENSOR_OT3686_AANTAL_SLEUVEN moet minstens 1 zijn.
+#endif
+#ifndef SENSOR_OT3686_MEETINTERVAL_MS
+#define SENSOR_OT3686_MEETINTERVAL_MS 100
+#endif
+#if SENSOR_OT3686_MEETINTERVAL_MS < 10
+#error SENSOR_OT3686_MEETINTERVAL_MS moet minstens 10 zijn.
+#endif
+#ifndef SENSOR_OT3686_STILSTAND_TIMEOUT_MS
+#define SENSOR_OT3686_STILSTAND_TIMEOUT_MS 1000
+#endif
+#ifndef SENSOR_OT3686_MINIMALE_PULSPERIODE_US
+#define SENSOR_OT3686_MINIMALE_PULSPERIODE_US 100
+#endif
+
+#ifndef SENSOR_OV7670_AANTAL
+#define SENSOR_OV7670_AANTAL 0
+#endif
+#if SENSOR_OV7670_AANTAL != 0 && SENSOR_OV7670_AANTAL != 1
+#error SENSOR_OV7670_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_PIEZO_AANTAL
+  #define SENSOR_PIEZO_AANTAL 0
+#endif
+#if SENSOR_PIEZO_AANTAL != 0 && SENSOR_PIEZO_AANTAL != 1
+  #error SENSOR_PIEZO_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT
+#define SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT 5000
+#endif
+#if SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT < 1
+#error SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_SCD41_1
+#define I2C_ADDRESS_SENSOR_SCD41_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_SCD41_AANTAL
+#define SENSOR_SCD41_AANTAL 0
+#endif
+#if SENSOR_SCD41_AANTAL != 0 && SENSOR_SCD41_AANTAL != 1
+#error SENSOR_SCD41_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_SDP810125PA_1
+#define I2C_ADDRESS_SENSOR_SDP810125PA_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_SDP810125PA_AANTAL
+#define SENSOR_SDP810125PA_AANTAL 0
+#endif
+#if SENSOR_SDP810125PA_AANTAL != 0 && SENSOR_SDP810125PA_AANTAL != 1
+#error SENSOR_SDP810125PA_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_TTP223_AANTAL
+#define SENSOR_TTP223_AANTAL 0
+#endif
+#if SENSOR_TTP223_AANTAL != 0 && SENSOR_TTP223_AANTAL != 1
+#error SENSOR_TTP223_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_TTP223_DIRECTE_MODUS
+#define SENSOR_TTP223_DIRECTE_MODUS 1
+#endif
+#if SENSOR_TTP223_DIRECTE_MODUS != 0 && SENSOR_TTP223_DIRECTE_MODUS != 1
+#error SENSOR_TTP223_DIRECTE_MODUS moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_TTP223_LANGE_AANRAKING_MS
+#define SENSOR_TTP223_LANGE_AANRAKING_MS 500
+#endif
+#ifndef SENSOR_TTP223_DUBBELE_AANRAKING_MS
+#define SENSOR_TTP223_DUBBELE_AANRAKING_MS 350
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_VL53L0X_1
+#define I2C_ADDRESS_SENSOR_VL53L0X_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_VL53L0X_AANTAL
+#define SENSOR_VL53L0X_AANTAL 0
+#endif
+#if SENSOR_VL53L0X_AANTAL != 0 && SENSOR_VL53L0X_AANTAL != 1
+#error SENSOR_VL53L0X_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef I2C_ADDRESS_SENSOR_VL6180X_1
+#define I2C_ADDRESS_SENSOR_VL6180X_1 I2C_ADDRESS_NONE
+#endif
+#ifndef SENSOR_VL6180X_AANTAL
+#define SENSOR_VL6180X_AANTAL 0
+#endif
+#if SENSOR_VL6180X_AANTAL != 0 && SENSOR_VL6180X_AANTAL != 1
+#error SENSOR_VL6180X_AANTAL moet 0 of 1 zijn.
+#endif
+
+#ifndef SENSOR_WATER_AANTAL
+  #define SENSOR_WATER_AANTAL 0
+#endif
+#if SENSOR_WATER_AANTAL != 0 && SENSOR_WATER_AANTAL != 1
+  #error SENSOR_WATER_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_WATER_ADC_BEREIK_MILLIVOLT
+#define SENSOR_WATER_ADC_BEREIK_MILLIVOLT 5000
+#endif
+#if SENSOR_WATER_ADC_BEREIK_MILLIVOLT < 1
+#error SENSOR_WATER_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
+#endif
 
 // ****************************************************************************
 // VALIDATIES
@@ -1371,25 +1959,76 @@
 
 
 // ============================================================================
+// DATA: NRF24L01 (radiomodule)
+// ============================================================================
+#ifndef DATA_LAYER_NRF24L01_SPI_AANTAL
+  #if ((DATA_LAYER_CONFIG) & DATA_TYPE_NRF24L01_SPI)
+    #define DATA_LAYER_NRF24L01_SPI_AANTAL 1
+  #else
+    #define DATA_LAYER_NRF24L01_SPI_AANTAL 0
+  #endif
+#endif
+
+// ============================================================================
+// DEFAULT: NRF24L01 #1
+// ============================================================================
+#if DATA_LAYER_NRF24L01_SPI_AANTAL >= 1
+  #ifndef DATA_LAYER_NRF24L01_SPI_1_CS_PIN
+    #define DATA_LAYER_NRF24L01_SPI_1_CS_PIN HardwareResourcePin::NONE
+  #endif
+  #ifndef DATA_LAYER_NRF24L01_SPI_1_CE_PIN
+    #define DATA_LAYER_NRF24L01_SPI_1_CE_PIN HardwareResourcePin::NONE
+  #endif
+  #ifndef DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL
+    #define DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL 76     // radiokanaal 0..125 (2400 MHz + kanaal)
+  #endif
+  #ifndef DATA_LAYER_NRF24L01_SPI_1_ADRES
+    #define DATA_LAYER_NRF24L01_SPI_1_ADRES "GROEI"     // precies 5 tekens; zender en ontvanger gebruiken hetzelfde adres
+  #endif
+#endif
+
+
+// ============================================================================
 // DATA: Validatie
 // ============================================================================
 #ifdef DATA_QUEUE_OR_STACK_ACTIEF
   #undef DATA_QUEUE_OR_STACK_ACTIEF
 #endif
 
-#if (defined(RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1) && RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
-    (RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
-    (RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
-    (RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
-    (RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0) || \
-    (defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && \
-     ((RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0) || (RFP602_CHANNEL_2_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0) || \
-      (RFP602_CHANNEL_3_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0) || (RFP602_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_2 > 0)))
+#if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE
   #define DATA_QUEUE_OR_STACK_ACTIEF 1
 #else
   #define DATA_QUEUE_OR_STACK_ACTIEF 0
 #endif
 
+// AFGELEID (niet zelf instellen): exclusieve runtimeclaim op een FLASH- of microSD-object.
+// Alleen nodig wanneer minstens twee schrijvers naar opslag samen gebruikt worden:
+// Data (FLASH/microSD), REDIRECT_SERIAL naar microSD en OV7670 (beeld naar microSD).
+#if ((((DATA_LAYER_CONFIG) & (DATA_TYPE_FLASH_SPI | DATA_TYPE_MICROSD_SPI)) != 0) + (REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD) + (SENSOR_OV7670_AANTAL > 0)) >= 2
+  #define DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF 1
+#else
+  #define DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF 0
+#endif
+
+
+// S-09: capaciteit voor automatische Sensor-QueueOrStack, exclusief de bestaande FSR_RFP-tabellen.
+// Met DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE_FOR(component, channel) kan per sensor en kanaal
+// een andere capaciteit worden gekozen. 0 = alleen lastValue, geen FIFO/LIFO.
+#ifndef DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE
+  #if BOARD_VERSION == BOARD_UNO_R3
+    #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE 4
+  #elif BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
+    #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE 32
+  #else
+    #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE 16
+  #endif
+#endif
+#if DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE < 0 || DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE > 65535
+  #error DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE moet tussen 0 en 65535 liggen.
+#endif
+#ifndef DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE_FOR
+  #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE_FOR(component, channel) DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE
+#endif
 
 // ============================================================================
 // GEDEELDEBUS: MIXED PINS
@@ -1455,7 +2094,7 @@
 
 
 // ============================================================================
-// GEDEELDEBUS: RUNTIME-HERSTEL (D042)
+// GEDEELDEBUS: RUNTIME-HERSTEL
 // ============================================================================
 // Elk I2C-component (Extenders, Input PCF8574, LCD) telt zijn opeenvolgende fouten tijdens het draaien en klimt de foutladder op:
 // WARNING, ALERT, FAULT, CRITICAL, FATAL. Een niveau komt er na het aantal fouten OF na de tijd sinds de eerste fout, wat eerst bereikt is.
@@ -1527,7 +2166,7 @@
   #error DATA_TYPE_EEPROM_SPI en DATA_TYPE_FRAM_SPI worden nog niet ondersteund in v2.0.0.
 #endif
 
-#if ((DATA_LAYER_CONFIG) & ~(DATA_TYPE_NONE | DATA_TYPE_DIRECT | DATA_TYPE_EEPROM_NATIVE | DATA_TYPE_EEPROM_I2C | DATA_TYPE_FLASH_SPI | DATA_TYPE_FRAM_I2C | DATA_TYPE_MICROSD_SPI))
+#if ((DATA_LAYER_CONFIG) & ~(DATA_TYPE_NONE | DATA_TYPE_DIRECT | DATA_TYPE_EEPROM_NATIVE | DATA_TYPE_EEPROM_I2C | DATA_TYPE_FLASH_SPI | DATA_TYPE_FRAM_I2C | DATA_TYPE_MICROSD_SPI | DATA_TYPE_NRF24L01_SPI))
   #error DATA_LAYER_CONFIG bevat een onbekend datatype.
 #endif
 
@@ -1604,6 +2243,23 @@
 #endif
 
 
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_NRF24L01_SPI) && DATA_LAYER_NRF24L01_SPI_AANTAL < 1
+  #error DATA_TYPE_NRF24L01_SPI vereist DATA_LAYER_NRF24L01_SPI_AANTAL >= 1.
+#endif
+
+#if !((DATA_LAYER_CONFIG) & DATA_TYPE_NRF24L01_SPI) && DATA_LAYER_NRF24L01_SPI_AANTAL > 0
+  #error DATA_LAYER_NRF24L01_SPI_AANTAL > 0 vereist DATA_TYPE_NRF24L01_SPI in DATA_LAYER_CONFIG.
+#endif
+
+#if DATA_LAYER_NRF24L01_SPI_AANTAL > 1
+  #error DATA_LAYER_NRF24L01_SPI_AANTAL ondersteunt momenteel maximaal 1 instantie.
+#endif
+
+#if DATA_LAYER_NRF24L01_SPI_AANTAL >= 1 && (DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL < 0 || DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL > 125)
+  #error DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL moet tussen 0 en 125 liggen.
+#endif
+
+
 // ============================================================================
 // EXTENDERS ==================================================================
 // ============================================================================
@@ -1618,6 +2274,14 @@
 // ============================================================================
 #ifndef EXTENDER_ADS1115_AANTAL
   #define EXTENDER_ADS1115_AANTAL 1
+#endif
+// ADS1115 data rate: 0 = 8, 1 = 16, 2 = 32, 3 = 64, 4 = 128, 5 = 250, 6 = 475, 7 = 860 samples per seconde.
+// Snellere biosignalen (bv. BioAmp EEG 256 Hz of EMG 500 Hz) vragen 7.
+#ifndef EXTENDER_ADS1115_DATARATE
+  #define EXTENDER_ADS1115_DATARATE 4
+#endif
+#if EXTENDER_ADS1115_DATARATE < 0 || EXTENDER_ADS1115_DATARATE > 7
+  #error EXTENDER_ADS1115_DATARATE moet tussen 0 en 7 liggen.
 #endif
 
 #if EXTENDER_ADS1115_AANTAL > 2
@@ -1654,6 +2318,11 @@
 
 
 // ============================================================================
+// Externe VREFP - VREFN van de ADS1158, in mV.
+#ifndef EXTENDER_ADS1158_REFERENTIE_MILLIVOLT
+  #define EXTENDER_ADS1158_REFERENTIE_MILLIVOLT 5000
+#endif
+
 // EXTENDER: ADS1158
 // ============================================================================
 #ifndef EXTENDER_ADS1158_AANTAL
@@ -1716,6 +2385,19 @@
   #define EXTENDER_ADS7828_AANTAL 0
 #endif
 
+#ifndef EXTENDER_ADS7828_EXTERNE_REFERENTIE
+#define EXTENDER_ADS7828_EXTERNE_REFERENTIE 0
+#endif
+#if EXTENDER_ADS7828_EXTERNE_REFERENTIE != 0 && EXTENDER_ADS7828_EXTERNE_REFERENTIE != 1
+#error EXTENDER_ADS7828_EXTERNE_REFERENTIE moet 0 (intern) of 1 (extern) zijn.
+#endif
+#ifndef EXTENDER_ADS7828_REFERENTIE_MILLIVOLT
+#define EXTENDER_ADS7828_REFERENTIE_MILLIVOLT 2500
+#endif
+#if EXTENDER_ADS7828_REFERENTIE_MILLIVOLT < 1 || EXTENDER_ADS7828_REFERENTIE_MILLIVOLT > 5250
+#error EXTENDER_ADS7828_REFERENTIE_MILLIVOLT moet binnen 1..5250 mV liggen.
+#endif
+
 #if EXTENDER_ADS7828_AANTAL > 2
   #error EXTENDER_ADS7828_AANTAL ondersteunt momenteel maximaal 2 instanties.
 #endif
@@ -1742,6 +2424,18 @@
 
 
 // ============================================================================
+// De ADS7953 heeft een EXTERNE analoge referentie op REF (typisch 2500 mV).
+#ifndef EXTENDER_ADS7953_REFERENTIE_MILLIVOLT
+  #define EXTENDER_ADS7953_REFERENTIE_MILLIVOLT 2500
+#endif
+// 0 = onbekend: 2xVREF-bereik wordt veilig geweigerd tot de echte +VA bekend is.
+#ifndef EXTENDER_ADS7953_VOEDING_MILLIVOLT
+  #define EXTENDER_ADS7953_VOEDING_MILLIVOLT 0
+#endif
+#if EXTENDER_ADS7953_VOEDING_MILLIVOLT != 0 && (EXTENDER_ADS7953_VOEDING_MILLIVOLT < 2700 || EXTENDER_ADS7953_VOEDING_MILLIVOLT > 5250)
+  #error EXTENDER_ADS7953_VOEDING_MILLIVOLT moet 0 of 2700..5250 mV zijn.
+#endif
+
 // EXTENDER: ADS7953
 // ============================================================================
 #ifndef EXTENDER_ADS7953_AANTAL
@@ -1808,6 +2502,15 @@
 // ============================================================================
 // EXTENDER: CD74HC4067
 // ============================================================================
+// Referentiespanning van de native ADC als CD74HC4067 direct op Native staat.
+// 0 = onbekend: native metingen worden afgewezen in plaats van verkeerd omgerekend.
+#ifndef EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT
+  #define EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT 0
+#endif
+#if EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT > 5500
+  #error EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT moet 0 of maximaal 5500 mV zijn.
+#endif
+
 #ifndef EXTENDER_CD74HC4067_AANTAL
   #define EXTENDER_CD74HC4067_AANTAL 0
 #endif
@@ -1910,6 +2613,48 @@
 
 
 // ============================================================================
+// MAX14830: werkelijke klok aan CLK/XIN, in Hz. 0 = onbekend: start van UART weigeren.
+#ifndef EXTENDER_MAX14830_BRONKLOK_HZ
+  #define EXTENDER_MAX14830_BRONKLOK_HZ 0
+#endif
+// MAX14830: 1 = kristal aan XIN/XOUT, 0 = externe klok aan XIN.
+#ifndef EXTENDER_MAX14830_BRONKLOK_KRISTAL
+  #define EXTENDER_MAX14830_BRONKLOK_KRISTAL 1
+#endif
+#if EXTENDER_MAX14830_BRONKLOK_KRISTAL != 0 && EXTENDER_MAX14830_BRONKLOK_KRISTAL != 1
+  #error EXTENDER_MAX14830_BRONKLOK_KRISTAL moet 0 (externe klok) of 1 (kristal) zijn.
+#endif
+// MAX14830 PLL: beide 0 = PLL uit. Anders voordeler 1 t/m 63 en vermenigvuldiger 6, 48, 96 of 144.
+#ifndef EXTENDER_MAX14830_PLL_VOORDELER
+  #define EXTENDER_MAX14830_PLL_VOORDELER 0
+#endif
+#ifndef EXTENDER_MAX14830_PLL_VERMENIGVULDIGER
+  #define EXTENDER_MAX14830_PLL_VERMENIGVULDIGER 0
+#endif
+#if (EXTENDER_MAX14830_PLL_VOORDELER == 0) != (EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 0)
+  #error EXTENDER_MAX14830_PLL_VOORDELER en EXTENDER_MAX14830_PLL_VERMENIGVULDIGER zijn samen 0 (PLL uit) of samen ingesteld.
+#endif
+#if EXTENDER_MAX14830_PLL_VOORDELER < 0 || EXTENDER_MAX14830_PLL_VOORDELER > 63
+  #error EXTENDER_MAX14830_PLL_VOORDELER moet tussen 0 en 63 liggen.
+#endif
+#if EXTENDER_MAX14830_PLL_VERMENIGVULDIGER != 0 && EXTENDER_MAX14830_PLL_VERMENIGVULDIGER != 6 && EXTENDER_MAX14830_PLL_VERMENIGVULDIGER != 48 && \
+    EXTENDER_MAX14830_PLL_VERMENIGVULDIGER != 96 && EXTENDER_MAX14830_PLL_VERMENIGVULDIGER != 144
+  #error EXTENDER_MAX14830_PLL_VERMENIGVULDIGER moet 0, 6, 48, 96 of 144 zijn.
+#endif
+#if EXTENDER_MAX14830_PLL_VOORDELER && EXTENDER_MAX14830_BRONKLOK_HZ && \
+    (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER) * EXTENDER_MAX14830_PLL_VERMENIGVULDIGER > 96000000UL
+  #error MAX14830: de klok na de PLL (EXTENDER_MAX14830_BRONKLOK_HZ / VOORDELER x VERMENIGVULDIGER) mag niet hoger zijn dan 96 MHz.
+#endif
+// PLL-ingang (EXTENDER_MAX14830_BRONKLOK_HZ / VOORDELER) per vermenigvuldiger; grenzen volgens de Linux-driver max310x.c
+// (x6: 500-800 kHz, x48: 850-1200 kHz, x96: 425-1000 kHz, x144: 390-667 kHz).
+#if EXTENDER_MAX14830_PLL_VOORDELER && EXTENDER_MAX14830_BRONKLOK_HZ && ( \
+    (EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 6   && (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER < 500000UL || EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER > 800000UL)) || \
+    (EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 48  && (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER < 850000UL || EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER > 1200000UL)) || \
+    (EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 96  && (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER < 425000UL || EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER > 1000000UL)) || \
+    (EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 144 && (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER < 390000UL || EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER > 667000UL)))
+  #error MAX14830: de PLL-ingang (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER) ligt buiten het bereik van de gekozen vermenigvuldiger.
+#endif
+
 // EXTENDER: MAX14830 I2C
 // ============================================================================
 #ifndef EXTENDER_MAX14830_I2C_AANTAL
@@ -2191,6 +2936,17 @@
 
 
 // ============================================================================
+// AFGELEID: GPIO via een Extender (niet zelf instellen)
+// ============================================================================
+// 1 = SetExtenderPinMode(), WriteExtenderPin() en ReadExtenderPin() worden meegecompileerd:
+// bij gemengde pinnen, of wanneer een digitale Sensor (HCSR501, HW201) samen met een GPIO-Extender gebruikt wordt.
+#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)))
+  #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 1
+#else
+  #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 0
+#endif
+
+// ============================================================================
 // EXTENDER: SC16IS752 I2C
 // ============================================================================
 #ifndef EXTENDER_SC16IS752_I2C_AANTAL
@@ -2327,41 +3083,41 @@
 
 
 // ============================================================================
-// RFP602: standaard ADC-kanalen per sensorset ================================
+// FSR_RFP: standaard ADC-kanalen per sensorset ================================
 // ============================================================================
 
-// Een .ino kan per RFP602-instantie een eigen ADC-Extender (parent) en vier eigen kanalen opgeven.
-// Zonder opgave gelden deze standaardkanalen. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor RFP602.
+// Een .ino kan per FSR_RFP-instantie een eigen ADC-Extender (parent) en vier eigen kanalen opgeven.
+// Zonder opgave gelden deze standaardkanalen. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor FSR_RFP.
 // G2: elke set heeft een eigen ADS1115. Set 2 vraagt dus minstens 2 ADS1115's.
-#if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && EXTENDER_ADS1115_AANTAL < 2
-  #error RFP602 set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2.
+#if defined(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && EXTENDER_ADS1115_AANTAL < 2
+  #error FSR_RFP set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2.
 #endif
 #if EXTENDER_ADS1115_AANTAL > 0
-  #ifndef RFP602_ADC_PIN_SENSOR_1_SET_1
-    #define RFP602_ADC_PIN_SENSOR_1_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)
+  #ifndef FSR_RFP_ADC_PIN_SENSOR_1_SET_1
+    #define FSR_RFP_ADC_PIN_SENSOR_1_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)
   #endif
-  #ifndef RFP602_ADC_PIN_SENSOR_2_SET_1
-    #define RFP602_ADC_PIN_SENSOR_2_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN1)
+  #ifndef FSR_RFP_ADC_PIN_SENSOR_2_SET_1
+    #define FSR_RFP_ADC_PIN_SENSOR_2_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN1)
   #endif
-  #ifndef RFP602_ADC_PIN_SENSOR_3_SET_1
-    #define RFP602_ADC_PIN_SENSOR_3_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN2)
+  #ifndef FSR_RFP_ADC_PIN_SENSOR_3_SET_1
+    #define FSR_RFP_ADC_PIN_SENSOR_3_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN2)
   #endif
-  #ifndef RFP602_ADC_PIN_SENSOR_4_SET_1
-    #define RFP602_ADC_PIN_SENSOR_4_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3)
+  #ifndef FSR_RFP_ADC_PIN_SENSOR_4_SET_1
+    #define FSR_RFP_ADC_PIN_SENSOR_4_SET_1 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3)
   #endif
   // Set 2 (1b): standaard dezelfde ingangen, op de ADS1115 die de .ino als parent van set 2 opgeeft.
-  #if defined(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
-    #ifndef RFP602_ADC_PIN_SENSOR_1_SET_2
-      #define RFP602_ADC_PIN_SENSOR_1_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)
+  #if defined(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2)
+    #ifndef FSR_RFP_ADC_PIN_SENSOR_1_SET_2
+      #define FSR_RFP_ADC_PIN_SENSOR_1_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)
     #endif
-    #ifndef RFP602_ADC_PIN_SENSOR_2_SET_2
-      #define RFP602_ADC_PIN_SENSOR_2_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN1)
+    #ifndef FSR_RFP_ADC_PIN_SENSOR_2_SET_2
+      #define FSR_RFP_ADC_PIN_SENSOR_2_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN1)
     #endif
-    #ifndef RFP602_ADC_PIN_SENSOR_3_SET_2
-      #define RFP602_ADC_PIN_SENSOR_3_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN2)
+    #ifndef FSR_RFP_ADC_PIN_SENSOR_3_SET_2
+      #define FSR_RFP_ADC_PIN_SENSOR_3_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN2)
     #endif
-    #ifndef RFP602_ADC_PIN_SENSOR_4_SET_2
-      #define RFP602_ADC_PIN_SENSOR_4_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3)
+    #ifndef FSR_RFP_ADC_PIN_SENSOR_4_SET_2
+      #define FSR_RFP_ADC_PIN_SENSOR_4_SET_2 static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3)
     #endif
   #endif
 #endif

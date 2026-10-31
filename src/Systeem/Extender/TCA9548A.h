@@ -20,8 +20,8 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C, TCA9548 {
   // DEFAULT — TCA9548A #1
   // ============================================================================
   #if EXTENDER_TCA9548A_AANTAL == 1
-  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), TCA9548(adres, &Wire), np_RESET(np_RESET) {
+  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender, tcaChannel), TCA9548(adres, &Wire), np_RESET(np_RESET) {
     exclusiefMetReset_[0] = exclusief_[0];
     exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };
@@ -43,21 +43,30 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C, TCA9548 {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), TCA9548(ExtenderLijst[teller].adres, &Wire), np_RESET(ExtenderLijst[teller].reset) {
+  ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), TCA9548(ExtenderLijst[teller].adres, &Wire), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetReset_[0] = exclusief_[0];
     exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };
   }
   #endif
 
-  // SelectChannel: opent alleen het kanaal waarop kind hangt (zijn claim EP_CH0 tot EP_CH7).
+  // SelectChannel: opent het gedeelde kanaal waarop dit I2C-kind hangt (EP_CH0 tot EP_CH7).
   // Niet te verwarren met selectChannel() van TCA9548 (kleine s): dat is de bibliotheekfunctie met een kanaalnummer.
-  bool SelectChannel(GedeeldeBusNode* kind) {
-    for (uint8_t i = 0; i < kind->AantalClaims(); i++) {
+  bool SelectAccessForChild(GedeeldeBusNode* child) override {
+    return actief && SelectChannel(child);
+  }
+
+  void ReleaseAccessForChild(GedeeldeBusNode* child) override {
+    (void)child;
+    TCA9548::disableAllChannels();
+  }
+
+  bool SelectChannel(GedeeldeBusNode* child) {
+    for (uint8_t i = 0; i < child->AantalClaims(); i++) {
       bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
-      const uint8_t waarde = kind->ClaimWaarde(i, exclusief, identiteit);
-      if (waarde <= static_cast<uint8_t>(ExtenderPins::EP_CH7)) return TCA9548::selectChannel(waarde);
+      const uint8_t waarde = child->ClaimWaarde(i, exclusief, identiteit);
+      if (!exclusief && identiteit == HardwareResourceIdentiteit::I2C_TCA_CHANNEL && waarde <= static_cast<uint8_t>(ExtenderPins::EP_CH7)) return TCA9548::selectChannel(waarde);
     }
     return false;
   }

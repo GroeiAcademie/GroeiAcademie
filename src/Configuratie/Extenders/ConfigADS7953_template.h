@@ -2,6 +2,18 @@
 #define CONFIG_ADS7953_H
 
 // ============================================================================
+// EXTERNE referentiespanning op REF, in mV.
+#ifndef EXTENDER_ADS7953_REFERENTIE_MILLIVOLT
+// #define EXTENDER_ADS7953_REFERENTIE_MILLIVOLT 2500  // standaard waarde: 2500
+#endif
+
+// +VA: werkelijke analoge voeding, bijvoorbeeld 3300 of 5000 mV.
+// TI: bereik 2xVREF is alleen geldig wanneer +VA >= 2xVREF.
+// Zonder ingestelde voeding (0) wordt 2xVREF veilig geweigerd.
+#ifndef EXTENDER_ADS7953_VOEDING_MILLIVOLT
+// #define EXTENDER_ADS7953_VOEDING_MILLIVOLT 0  // standaard waarde: 0 (onbekend)
+#endif
+
 // EXTENDER: ADS7953
 // ============================================================================
 #ifndef EXTENDER_ADS7953_AANTAL

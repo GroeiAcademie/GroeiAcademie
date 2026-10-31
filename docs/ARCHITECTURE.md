@@ -48,8 +48,8 @@ GroeiAcademie/
 │   │   │   ├── ConfigTCA9548A.h
 │   │   │   └── ConfigTCA9548A_template.h
 │   │   ├── Sensoren/
-│   │   │   ├── ConfigRFP602.h
-│   │   │   └── ConfigRFP602_template.h
+│   │   │   ├── ConfigFSR_RFP.h
+│   │   │   └── ConfigFSR_RFP_template.h
 │   │   ├── Sturingen/
 │   │   │   ├── ConfigA4988_template.h
 │   │   │   ├── ConfigDCmotorL293D_template.h
@@ -93,6 +93,8 @@ GroeiAcademie/
 │   │   │   ├── FLASH.h
 │   │   │   ├── FRAM.cpp
 │   │   │   ├── FRAM.h
+│   │   │   ├── NRF24L01.cpp
+│   │   │   ├── NRF24L01.h
 │   │   │   ├── microSD.cpp
 │   │   │   ├── microSD.h
 │   │   │   ├── RedirectSerial.cpp
@@ -134,8 +136,79 @@ GroeiAcademie/
 │   │   │   ├── TCA9548A.cpp
 │   │   │   └── TCA9548A.h
 │   │   ├── Sensor/
-│   │   │   ├── RFP602.cpp
-│   │   │   └── RFP602.h
+│   │   │   ├── AD8232.h
+│   │   │   ├── ADXL345.cpp
+│   │   │   ├── ADXL345.h
+│   │   │   ├── AHT10.cpp
+│   │   │   ├── AHT10.h
+│   │   │   ├── AS608.cpp
+│   │   │   ├── AS608.h
+│   │   │   ├── BioAmpEXGPill.cpp
+│   │   │   ├── BioAmpEXGPill.h
+│   │   │   ├── BME68x.cpp
+│   │   │   ├── BME68x.h
+│   │   │   ├── BMP280.cpp
+│   │   │   ├── BMP280.h
+│   │   │   ├── DHTxx.cpp
+│   │   │   ├── DHTxx.h
+│   │   │   ├── DS18B20.cpp
+│   │   │   ├── DS18B20.h
+│   │   │   ├── DS3231.cpp
+│   │   │   ├── DS3231.h
+│   │   │   ├── EGBOPulseSensor.h
+│   │   │   ├── FSR_RFP.cpp
+│   │   │   ├── FSR_RFP.h
+│   │   │   ├── GSRGrove.h
+│   │   │   ├── HCSR501.h
+│   │   │   ├── HSR0x.cpp
+│   │   │   ├── HSR0x.h
+│   │   │   ├── HW201.h
+│   │   │   ├── HX711.cpp
+│   │   │   ├── HX711.h
+│   │   │   ├── INMP441.cpp
+│   │   │   ├── INMP441.h
+│   │   │   ├── LD2410D.cpp
+│   │   │   ├── LD2410D.h
+│   │   │   ├── LD2450.cpp
+│   │   │   ├── LD2450.h
+│   │   │   ├── LM35DZ.cpp
+│   │   │   ├── LM35DZ.h
+│   │   │   ├── LM75A.cpp
+│   │   │   ├── LM75A.h
+│   │   │   ├── MAX30102.cpp
+│   │   │   ├── MAX30102.h
+│   │   │   ├── MAX4466_9814.h
+│   │   │   ├── MCU6701.cpp
+│   │   │   ├── MCU6701.h
+│   │   │   ├── MF52x.h
+│   │   │   ├── MPU6050.cpp
+│   │   │   ├── MPU6050.h
+│   │   │   ├── MPU6500.cpp
+│   │   │   ├── MPU6500.h
+│   │   │   ├── MR60BHA2.cpp
+│   │   │   ├── MR60BHA2.h
+│   │   │   ├── NeuroSkyTGAM.cpp
+│   │   │   ├── NeuroSkyTGAM.h
+│   │   │   ├── OT3686.cpp
+│   │   │   ├── OT3686.h
+│   │   │   ├── OV7670.cpp
+│   │   │   ├── OV7670.h
+│   │   │   ├── PIEZO.h
+│   │   │   ├── SCD41.cpp
+│   │   │   ├── SCD41.h
+│   │   │   ├── SDP810125PA.cpp
+│   │   │   ├── SDP810125PA.h
+│   │   │   ├── SensorAnaloog.cpp
+│   │   │   ├── SensorAnaloog.h
+│   │   │   ├── SensorDigitaal.cpp
+│   │   │   ├── SensorDigitaal.h
+│   │   │   ├── TTP223.cpp
+│   │   │   ├── TTP223.h
+│   │   │   ├── VL53L0X.cpp
+│   │   │   ├── VL53L0X.h
+│   │   │   ├── VL6180X.cpp
+│   │   │   ├── VL6180X.h
+│   │   │   └── WATER.h
 │   │   ├── Sturing/
 │   │   │   ├── A4988.h
 │   │   │   ├── DCmotorL293D.h
@@ -171,7 +244,10 @@ GroeiAcademie/
 │   │   │   ├── EEPROM/
 │   │   │   ├── FLASH/
 │   │   │   ├── FRAM/
-│   │   │   └── microSD/
+│   │   │   ├── HC05/
+│   │   │   ├── microSD/
+│   │   │   ├── NRF24L01/
+│   │   │   └── NRF24L01_Ontvanger/
 │   │   ├── GedeeldeBus/
 │   │   │   ├── Extenders/
 │   │   │   │   ├── Extender_ADS1115/
@@ -221,23 +297,72 @@ GroeiAcademie/
 │   │   │   │   ├── Extender_TCA9548A_Test_ExtenderPins_Geweigerd/
 │   │   │   │   └── Extender_TCA9548A_Test_ExtenderPins_Toegelaten/
 │   │   │   ├── Sensoren/
+│   │   │   │   ├── Sensor_AD8232/
+│   │   │   │   ├── Sensor_ADXL345/
+│   │   │   │   ├── Sensor_AHT10/
+│   │   │   │   ├── Sensor_AS608/
+│   │   │   │   ├── Sensor_BioAmpEXGPill/
+│   │   │   │   ├── Sensor_BioAmpEXGPill_ECG_Hartslag/
+│   │   │   │   ├── Sensor_BioAmpEXGPill_EMG_Envelop/
+│   │   │   │   ├── Sensor_BioAmpEXGPill_EOG_Knipperen/
+│   │   │   │   ├── Sensor_BME680/
+│   │   │   │   ├── Sensor_BME688/
+│   │   │   │   ├── Sensor_BMP280/
+│   │   │   │   ├── Sensor_DHTxx/
+│   │   │   │   ├── Sensor_DS18B20/
+│   │   │   │   ├── Sensor_DS3231/
+│   │   │   │   ├── Sensor_EGBOPulseSensor/
+│   │   │   │   ├── Sensor_FSR_RFP/
+│   │   │   │   ├── Sensor_FSR_RFP_DIRECT/
+│   │   │   │   ├── Sensor_FSR_RFP_FLASH/
+│   │   │   │   ├── Sensor_FSR_RFP_MICROSD/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_ADC_Bezet/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_EigenBuffers/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_Hardwarefout/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_OngeldigePin/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_Timeout_Conversie/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_VerkeerdeParent/
+│   │   │   │   ├── Sensor_FSR_RFP_Test_ZonderGet/
+│   │   │   │   ├── Sensor_FSR_RFP_TweeSetsOpTweeADS1115/
+│   │   │   │   ├── Sensor_GSRGrove/
+│   │   │   │   ├── Sensor_HCSR04/
+│   │   │   │   ├── Sensor_HCSR04P/
+│   │   │   │   ├── Sensor_HCSR501/
+│   │   │   │   ├── Sensor_HW201/
+│   │   │   │   ├── Sensor_HX711/
+│   │   │   │   ├── Sensor_HYSRF05/
+│   │   │   │   ├── Sensor_LD2410D/
+│   │   │   │   ├── Sensor_LD2450/
+│   │   │   │   ├── Sensor_LM35DZ/
+│   │   │   │   ├── Sensor_LM75A/
+│   │   │   │   ├── Sensor_MAX30102/
+│   │   │   │   ├── Sensor_MAX4466/
+│   │   │   │   ├── Sensor_MAX9814/
+│   │   │   │   ├── Sensor_MCU6701_Analoog/
+│   │   │   │   ├── Sensor_MCU6701_SPI/
+│   │   │   │   ├── Sensor_MF52A/
+│   │   │   │   ├── Sensor_MF52D/
 │   │   │   │   ├── Sensor_MixedPins/
-│   │   │   │   ├── Sensor_RFP602/
-│   │   │   │   ├── Sensor_RFP602_DIRECT/
-│   │   │   │   ├── Sensor_RFP602_FLASH/
-│   │   │   │   ├── Sensor_RFP602_MICROSD/
-│   │   │   │   ├── Sensor_RFP602_Test_ADC_Bezet/
-│   │   │   │   ├── Sensor_RFP602_Test_EigenBuffers/
-│   │   │   │   ├── Sensor_RFP602_Test_Hardwarefout/
-│   │   │   │   ├── Sensor_RFP602_Test_OngeldigePin/
-│   │   │   │   ├── Sensor_RFP602_Test_Timeout_Conversie/
-│   │   │   │   ├── Sensor_RFP602_Test_VerkeerdeParent/
-│   │   │   │   ├── Sensor_RFP602_Test_ZonderGet/
-│   │   │   │   └── Sensor_RFP602_TweeSetsOpTweeADS1115/
+│   │   │   │   ├── Sensor_MPU6050/
+│   │   │   │   ├── Sensor_MPU6500/
+│   │   │   │   ├── Sensor_MR60BHA2/
+│   │   │   │   ├── Sensor_MS3625/
+│   │   │   │   ├── Sensor_NeuroSkyTGAM/
+│   │   │   │   ├── Sensor_OT3686_Metingen/
+│   │   │   │   ├── Sensor_PIEZO/
+│   │   │   │   ├── Sensor_SCD41/
+│   │   │   │   ├── Sensor_SDP810125PA/
+│   │   │   │   ├── Sensor_TestOpDubbeleComponentcodes/
+│   │   │   │   ├── Sensor_TTP223_Metingen/
+│   │   │   │   ├── Sensor_VL53L0X/
+│   │   │   │   ├── Sensor_VL6180X/
+│   │   │   │   ├── Sensor_WATER/
+│   │   │   │   └── Sensor_XYSTICK/
 │   │   │   └── Sturingen/
 │   │   │       ├── Sturing_A4988/
 │   │   │       ├── Sturing_DCmotorL293D/
 │   │   │       ├── Sturing_DCmotorL298N/
+│   │   │       ├── Sturing_ISD1820/
 │   │   │       ├── Sturing_MG996R/
 │   │   │       ├── Sturing_Relais/
 │   │   │       ├── Sturing_RGBLED/
@@ -303,7 +428,47 @@ GroeiAcademie/
 │   │   │   ├── SC16IS752SPI.md
 │   │   │   └── TCA9548A.md
 │   │   ├── Sensor/
-│   │   │   └── RFP602.md
+│   │   │   ├── AD8232.md
+│   │   │   ├── ADXL345.md
+│   │   │   ├── AHT10.md
+│   │   │   ├── AS608.md
+│   │   │   ├── BioAmpEXGPill.md
+│   │   │   ├── BME68x.md
+│   │   │   ├── BMP280.md
+│   │   │   ├── DHTxx.md
+│   │   │   ├── DS18B20.md
+│   │   │   ├── DS3231.md
+│   │   │   ├── EGBOPulseSensor.md
+│   │   │   ├── FSR_RFP.md
+│   │   │   ├── GSRGrove.md
+│   │   │   ├── HCSR501.md
+│   │   │   ├── HSR0x.md
+│   │   │   ├── HW201.md
+│   │   │   ├── HX711.md
+│   │   │   ├── INMP441.md
+│   │   │   ├── LD2410D.md
+│   │   │   ├── LD2450.md
+│   │   │   ├── LM35DZ.md
+│   │   │   ├── LM75A.md
+│   │   │   ├── MAX30102.md
+│   │   │   ├── MAX4466_9814.md
+│   │   │   ├── MCU6701.md
+│   │   │   ├── MF52x.md
+│   │   │   ├── MPU6050.md
+│   │   │   ├── MPU6500.md
+│   │   │   ├── MR60BHA2.md
+│   │   │   ├── NeuroSkyTGAM.md
+│   │   │   ├── OT3686.md
+│   │   │   ├── OV7670.md
+│   │   │   ├── PIEZO.md
+│   │   │   ├── SCD41.md
+│   │   │   ├── SDP810125PA.md
+│   │   │   ├── SensorAnaloog.md
+│   │   │   ├── SensorDigitaal.md
+│   │   │   ├── TTP223.md
+│   │   │   ├── VL53L0X.md
+│   │   │   ├── VL6180X.md
+│   │   │   └── WATER.md
 │   │   ├── Sturing/
 │   │   │   ├── A4988.md
 │   │   │   ├── DCmotorL293D.md
@@ -393,7 +558,7 @@ De headers direct onder `src/` leiden door naar de interne moduleheaders. Gedeel
 De actuele componentdocumentatie is onderverdeeld volgens de broncode:
 
 - [Extenders](Systeem/Extender/): 16 componentdocumenten, met korte bestandsnamen zoals `ADS1115.md`.
-- [Sensoren](Systeem/Sensor/RFP602.md): `RFP602.md`.
+- [Sensoren](Systeem/Sensor/): 40 componentdocumenten, één per Sensorklasse, zoals `FSR_RFP.md`.
 - [Sturingen](Systeem/Sturing/): negen componentdocumenten voor A4988, DCmotorL293D, DCmotorL298N, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
 
 De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.
@@ -420,7 +585,8 @@ Native
    ├─ EEPROM   : I2C
    ├─ FRAM     : I2C
    ├─ FLASH    : SPI
-   └─ microSD  : SPI
+   ├─ microSD  : SPI
+   └─ NRF24L01 : SPI
 ```
 
 `DATA_LAYER_CONFIG` bepaalt welke types gecompileerd zijn. `DATA_TYPE_NONE` behoudt de oude route zonder Data-class. Net als bij Input kan bij `GedeeldeBusNewComponent<struct Data>(...)` een subset als objectfilter worden meegegeven. `DIRECT` is geen opslagmedium. Zonder QueueOrStack bewaart DIRECT per channel de laatst gemeten waarde; met de sensor-specifieke QueueOrStack (FIFO of LIFO) loopt de real-time gegevensstroom via eigen code in Data. EEPROM, FRAM_I2C, FLASH en microSD zijn concrete children van Data.
@@ -484,7 +650,7 @@ I2C-adressen worden intern als exclusieve claim in hetzelfde mechanisme behandel
 
 `firstExtenderNode()` bepaalt in welk resourcegebied een node zit. Claims worden alleen rechtstreeks vergeleken wanneer ze tot hetzelfde resourcegebied behoren. Native claims vergelijken dus met Native claims; children van dezelfde Extender vergelijken binnen die Extender.
 
-**Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). RFP602 doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
+**Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). FSR_RFP doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
 
 ## I2C en SPI
 
@@ -539,7 +705,7 @@ De fabrikant-/functiebenaming blijft in de comments naast elke enumwaarde staan.
 
 Er is geen aparte ADC-laag meer: een ADC is een gewone Extender. De `.ino` maakt de ADC-Extender aan (nu: `ExtenderADS1115`, componentcode `ADC_ADS1115`) en geeft hem als parent aan de Sensor door, zoals bij elke Extender. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`.
 
-`Sensor` is momenteel een tussenstruct boven `GedeeldeBusNode`. `RFP602` staat onder `src/Systeem/Sensor/` en leest analoge waarden via het bestaande generieke ADC-parentcontract (`StartExtenderReadAnalog`, `IsExtenderReadAnalogReady`, `GetExtenderReadAnalogValue`). De concrete ADC-implementatie blijft bij de Extender. Eén `RFP602`-object beheert maximaal vier kanalen op één ADC-Extender; de kanalen komen uit de constructor of anders uit `RFP602_ADC_PIN_SENSOR_1_SET_1` tot en met `RFP602_ADC_PIN_SENSOR_4_SET_1`. Set 1 en set 2 worden onderscheiden via de parameter `set`, `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2`, `sensorRFP602set1` en `sensorRFP602set2`; elke set gebruikt een eigen ADS1115 en elk object eigen buffers.
+`Sensor` is momenteel een tussenstruct boven `GedeeldeBusNode`. `FSR_RFP` staat onder `src/Systeem/Sensor/` en leest analoge waarden via het bestaande generieke ADC-parentcontract (`StartExtenderReadAnalog`, `IsExtenderReadAnalogReady`, `GetExtenderReadAnalogValue`). De concrete ADC-implementatie blijft bij de Extender. Eén `FSR_RFP`-object beheert maximaal vier kanalen op één ADC-Extender; de kanalen komen uit de constructor of anders uit `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot en met `FSR_RFP_ADC_PIN_SENSOR_4_SET_1`. Set 1 en set 2 worden onderscheiden via de parameter `set`, `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2`, `sensorFSR_RFPset1` en `sensorFSR_RFPset2`; elke set gebruikt een eigen ADS1115 en elk object eigen buffers.
 
 ## Screen
 
@@ -570,7 +736,7 @@ Zie [Systeem/INPUT.md](Systeem/INPUT.md).
 
 ## Stimulus
 
-`Stimulus` blijft een toepassingsmodule onder `src/Toepassingsgebieden/Stimulus/`. De directe sensoruitlezing loopt in de huidige code via de globale pointer `sensorRFP602set1`; de voorbeelden maken `Screen`, `Input` en `sensorRFP602set1` via `GedeeldeBusNewComponent()` aan voordat de Stimuluslogica wordt gebruikt.
+`Stimulus` blijft een toepassingsmodule onder `src/Toepassingsgebieden/Stimulus/`. De directe sensoruitlezing loopt in de huidige code via de globale pointer `sensorFSR_RFPset1`; de voorbeelden maken `Screen`, `Input` en `sensorFSR_RFPset1` via `GedeeldeBusNewComponent()` aan voordat de Stimuluslogica wordt gebruikt.
 
 ## Configuratiemodel
 
@@ -622,7 +788,7 @@ Niet iedere build gebruikt alle dependencycode. Preprocessorconfiguratie bepaalt
 
 ## Samenwerking tussen modules
 
-Screen en Input zijn frameworkbrede systeemlagen. GedeeldeBus verzorgt hun resourceboom en lifecycle, maar de concrete Screen- en Inputlogica blijft in de eigen module. Stimulus gebruikt de systeemlagen en `RFP602`, maar GedeeldeBus bevat geen Stimulus-algoritmen.
+Screen en Input zijn frameworkbrede systeemlagen. GedeeldeBus verzorgt hun resourceboom en lifecycle, maar de concrete Screen- en Inputlogica blijft in de eigen module. Stimulus gebruikt de systeemlagen en `FSR_RFP`, maar GedeeldeBus bevat geen Stimulus-algoritmen.
 
 ## Elektronische documentatie
 
@@ -632,7 +798,7 @@ Een geldig schema vermeldt ten minste boardvariant, pinbezetting, voeding/massa,
 
 ## Testarchitectuur
 
-De huidige examples onder `examples/Systeem/GedeeldeBus/Extenders/` bevatten per Extender een basisvoorbeeld en aparte `ExtenderPins`-tests voor toegelaten en geweigerde resources. `examples/Systeem/GedeeldeBus/Sensoren/Sensor_RFP602/` bevat de eerste Sensor-lifecycletest.
+De huidige examples onder `examples/Systeem/GedeeldeBus/Extenders/` bevatten per Extender een basisvoorbeeld en aparte `ExtenderPins`-tests voor toegelaten en geweigerde resources. `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FSR_RFP/` bevat de eerste Sensor-lifecycletest.
 
 Deze tests bewijzen niet automatisch de volledige elektronische werking van elk kanaal. Zie `extras/TESTEN.md` voor het onderscheid tussen lifecycle-/resourcecontrole, elektronische functietests en praktijktests.
 

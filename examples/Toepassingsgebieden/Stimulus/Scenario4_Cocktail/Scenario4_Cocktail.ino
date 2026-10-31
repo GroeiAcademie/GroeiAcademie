@@ -21,7 +21,7 @@
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -60,7 +60,7 @@ void UitvoerenAlgoritmeCocktailTik();
 
 // ============================================================================
 
-StimulusProfiel nulmetingStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1], gemetenStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1];
+StimulusProfiel nulmetingStimulus[FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1], gemetenStimulus[FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1];
 
 SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 
@@ -77,8 +77,8 @@ void setup() {
 #endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
-  if (sensorRFP602set1 == nullptr) exit(0);
+  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
+  if (sensorFSR_RFPset1 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -109,11 +109,11 @@ void UitvoerenAlgoritmeCocktailTik() {
   Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
   Screen->Print(LCD_S4_TITEL, "", MINIMALE_WACHTTIJD_MS);
-  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
   Screen->Print("", "", 0, LCD_S0_NU);
   int aantalSensorenSimultaanTeMeten;
 
-#if RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 == 2
+#if FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 == 2
   aantalSensorenSimultaanTeMeten = 2;
 #else
   Screen->Print(LCD_S4_SENSORS_TEXT, LCD_S4_SENSORS_KEUZE);
@@ -141,11 +141,11 @@ void UitvoerenAlgoritmeCocktailTik() {
 #endif
 
   Screen->Print(LCD_S4_TITEL, String(aantalSensorenSimultaanTeMeten) + LCD_S4_SENSOREN, MINIMALE_WACHTTIJD_MS);
-  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
   Screen->Print("", "", 0, LCD_S0_NU);
 
   // Eerste meting smijten we weg, geeft een valse waarde.
-  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[sensorNummer]);
+  for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[sensorNummer]);
 
   // STAP 1: Blijf wachten tot alle te meten sensoren ingedrukt zijn geweest.
   int aantalGestarteSensoren = 0;
@@ -153,7 +153,7 @@ void UitvoerenAlgoritmeCocktailTik() {
 
   while (aantalGestarteSensoren < aantalSensorenSimultaanTeMeten) {
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
-      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602set1->sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
+      if (!sensorGekozen[sensorNummer] && Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFSR_RFPset1->sensorPin[sensorNummer], sensorNummer == 0 ? Stimulus.offsetSensor1 : sensorNummer == 1 ? Stimulus.offsetSensor2 : sensorNummer == 2 ? Stimulus.offsetSensor3 : Stimulus.offsetSensor4) > TIK_MINIMALE_DRUKWAARDE) {
         sensorGekozen[sensorNummer] = true;
         aantalGestarteSensoren++;
       }
@@ -178,7 +178,7 @@ void UitvoerenAlgoritmeCocktailTik() {
       Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
     Screen->Print("", "", 0, LCD_S0_NU);
 
     // Meet alle gebruikte sensoren en hun gezamenlijke synchronisatie.

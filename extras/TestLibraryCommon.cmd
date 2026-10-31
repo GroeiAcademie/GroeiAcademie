@@ -369,10 +369,8 @@ if "!COMPILE_RESULT!"=="0" (
     ) else (
         set "EXPECTED_MEMORY_LIMIT=0"
         if "!FQBN_ACTIEF!"=="arduino:avr:uno" if /I "!TEST_BESTAND!"=="Tik_Enkele_Samen_Instortend_Cocktail.ino" (
-            for %%S in (4 5 6 7) do if not "!TEST_FLAGS_ACTIEF:-DSCREEN_OUTPUT_CONFIG=%%S=!"=="!TEST_FLAGS_ACTIEF!" (
-                findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
-                if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
-            )
+            findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
+            if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
         )
         if "!FQBN_ACTIEF!"=="arduino:avr:uno" (
             for %%I in (IN001 IN101 IN201 IN202 IN301 IN302 IN303 IN304 IN305 IN401 IN402 SS301) do (

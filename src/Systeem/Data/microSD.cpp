@@ -26,6 +26,7 @@ void sdCsInit(SdCsPin_t pin) {
 
 void sdCsWrite(SdCsPin_t pin, bool level) {
   if (pin >= startValueCSviaExtender) {
+    if (static_cast<uint32_t>(pin - startValueCSviaExtender) >= DATA_LAYER_MICROSD_SPI_AANTAL) return;
     struct DataMICROSDviaSPI* card = linkCSviaExtender[pin - startValueCSviaExtender];   // de kaart met dit pinnummer
     if (card != nullptr) card->WriteCS(level ? HIGH : LOW);
     return;

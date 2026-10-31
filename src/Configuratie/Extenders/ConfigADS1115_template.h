@@ -4,6 +4,10 @@
 // ============================================================================
 // EXTENDER: ADS1115
 // ============================================================================
+#ifndef EXTENDER_ADS1115_DATARATE
+// #define EXTENDER_ADS1115_DATARATE 4  // standaard waarde: 4 (128 SPS); 7 = 860 SPS voor snelle biosignalen (BioAmp EEG/EMG)
+#endif
+
 #ifndef EXTENDER_ADS1115_AANTAL
 // #define EXTENDER_ADS1115_AANTAL 1  // standaard waarde: 1
 #endif

@@ -4,13 +4,13 @@
 // Diagnoseert alle I2C-devices die op de GedeeldeBus zijn aangemeld.
 // Toont GedeeldeBus-status, ping, diagnosecode en reactietijd per device.
 // Testconfiguratie: I2C-shield met CharacterScreen, PCF8574 en ADS1115.
-// De shieldcomponenten worden voor de diagnose aangemeld via Screen, RFP602 en Input, op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
+// De shieldcomponenten worden voor de diagnose aangemeld via Screen, FSR_RFP en Input, op dezelfde manier als in Tik_Enkele_Samen_Instortend_Cocktail.
 // ============================================================================
 
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -32,8 +32,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }
 
-  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
-  if (sensorRFP602set1 == nullptr) { GA_SERIAL.println(F("FOUT: RFP602")); while (true) { ; } }
+  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
+  if (sensorFSR_RFPset1 == nullptr) { GA_SERIAL.println(F("FOUT: FSR_RFP")); while (true) { ; } }
 
   Input = GedeeldeBusNewComponent<struct Input>();
   if (Input == nullptr) { GA_SERIAL.println(F("FOUT: Input")); while (true) { ; } }

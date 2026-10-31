@@ -430,7 +430,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #endif
 
 
-  // Bij het activeren (opstart): IN402. Tijdens runtime regelt GedeeldeBus het herstel (D042):
+  // Bij het activeren (opstart): IN402. Tijdens runtime regelt GedeeldeBus het herstel:
   // ComponentBeschikbaarTijdensRuntime() en ResultaatComponentToegangTijdensRuntimeVerwerken(), met GB400 tot GB407.
 
   void Input::PCF8574OnbereikbaarMelden() {
@@ -454,7 +454,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #ifdef TRACE
     GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonMatrixUitlezenInstellen()");
 #endif
-    // Eén operatie van een keypadscan; de scan zelf geeft het resultaat door aan het runtime-herstel (D042: één keypadscan = één resultaat).
+    // Eén operatie van een keypadscan; de scan zelf geeft het resultaat door aan het runtime-herstel (één keypadscan = één resultaat).
     gedeeldeBusInputPCF8574->write8(waarde);
     return gedeeldeBusInputPCF8574->lastError() == PCF8574_OK;
   }
@@ -463,14 +463,14 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #ifdef TRACE
     GA_SERIAL.println("TRACE: Input::PCF8574poortPatroonUitlezen()");
 #endif
-    // Eén operatie van een keypadscan; de scan zelf geeft het resultaat door aan het runtime-herstel (D042: één keypadscan = één resultaat).
+    // Eén operatie van een keypadscan; de scan zelf geeft het resultaat door aan het runtime-herstel (één keypadscan = één resultaat).
     waarde = gedeeldeBusInputPCF8574->read8();
     return gedeeldeBusInputPCF8574->lastError() == PCF8574_OK;
   }
 
   #if defined(KEYPAD_IS_DIRECT)
     int Input::PCF8574uitLezenPoortenP0totP7DirectAansluiting() {
-      // Runtime-herstel (D042): één keypadscan = één resultaat.
+      // Runtime-herstel: één keypadscan = één resultaat.
       if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return 0;
       byte status = 0xFF;
       if (!gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574poortPatroonUitlezen(status))) return 0;
@@ -501,7 +501,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 
   #if defined(KEYPAD_IS_MATRIX)
     int Input::PCF8574uitLezenPoortenP0totP7MatrixAansluiting() {
-      // Runtime-herstel (D042): één keypadscan = één resultaat. Een geslaagde write mag een mislukte read niet wegpoetsen.
+      // Runtime-herstel: één keypadscan = één resultaat. Een geslaagde write mag een mislukte read niet wegpoetsen.
       if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return 0;
       bool gelukt = true;
       int toets = 0;
@@ -1296,7 +1296,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
 
 #if ((INPUT_KANAAL_CONFIG) & (INPUT_TYPE_PCF8574))
   #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-  if (gedeeldeBusInputPCF8574 != nullptr && wachten) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime() (D042)
+  if (gedeeldeBusInputPCF8574 != nullptr && wachten) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime()
   #endif
     while (KeypadUitLezenRuweData() != 0) delay(1);
     vorigeRauweKeypadPositie = 0;
@@ -1307,7 +1307,7 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
 
   while (true) {
     #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
-      if (gedeeldeBusInputPCF8574 != nullptr) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime() (D042)
+      if (gedeeldeBusInputPCF8574 != nullptr) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime()
       #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
         int positieKeypad = KeypadUitLezenToetsAanslag();
       #else

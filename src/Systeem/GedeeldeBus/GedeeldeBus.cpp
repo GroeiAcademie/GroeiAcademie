@@ -38,7 +38,7 @@
 static bool i2cGeinitialiseerd = false;
 static bool spiGeinitialiseerd = false;
 
-// Runtime-herstel (D042): true tijdens een herstelpoging, zodat FoutDiagnoseI2C() GB401 tot GB406 meldt in plaats van GB301 tot GB306.
+// Runtime-herstel: true tijdens een herstelpoging, zodat FoutDiagnoseI2C() GB401 tot GB406 meldt in plaats van GB301 tot GB306.
 static bool herstelTijdensRuntimeBezig = false;
 // Telt het begin en het herstel van elke I2C-storing tijdens runtime (niet GB408: dat is een functionele meetfout).
 // Generiek: GedeeldeBus weet niet wie de teller leest (Screen gebruikt hem om het LCD na een storing opnieuw te initialiseren).
@@ -66,7 +66,7 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
         Wire.begin();
         i2cGeinitialiseerd = true;
       #endif
-      // Runtime-herstel (D042): een transactie wacht nooit langer dan I2C_TIMEOUT_PER_TRANSACTIE_US; true = de I2C-hardware resetten na een timeout.
+      // Runtime-herstel: een transactie wacht nooit langer dan I2C_TIMEOUT_PER_TRANSACTIE_US; true = de I2C-hardware resetten na een timeout.
       // Nagekeken: AVR (Wire.h, setWireTimeout) en UNO R4 (Wire.h, setWireTimeout). Andere cores houden hun eigen standaard.
       #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_RENESAS)
         Wire.setWireTimeout(I2C_TIMEOUT_PER_TRANSACTIE_US, true);
@@ -288,6 +288,12 @@ void GedeeldeBusNode::HardwareResourceClaimsBetweenTwoNodes(GedeeldeBusNode* a, 
 #endif
 
       if (IsAdres(waardeA)) {
+#if EXTENDER_TCA9548A_AANTAL > 0
+        // Het adresgebied achter een TCA9548A is per kanaal gescheiden.
+        // De gedeelde kanaalclaim zelf veroorzaakt nooit een pinconflict.
+        if (a->parent != nullptr && a->parent == b->parent &&
+            a->tcaChannel <= 7 && b->tcaChannel <= 7 && a->tcaChannel != b->tcaChannel) continue;
+#endif
         if (exclusiefA && exclusiefB && waardeA == waardeB) {
           GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB102, a->component, b->component, waardeA, true);
           a->conflictGevonden = true;
@@ -378,19 +384,25 @@ bool GedeeldeBusNode::activeren() {
   if (parent != nullptr && !parent->actief && !parent->activerenBezig && !parent->activeren()) return false;
 
   activerenBezig = true;
-#if EXTENDER_TCA9548A_AANTAL > 0
-  // Achter een TCA9548A: eerst het kanaal van dit component openen, na Activeren() alle kanalen sluiten.
-  if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->SelectChannel(this);
-#endif
+  // Toegang openen: eerst de grootouder voor de parent (bv. een Sensor onder een I2C-resource achter een multiplexer),
+  // daarna de parent voor deze node. Standaard doen beide niets.
+  if (parent != nullptr && parent->parent != nullptr && !parent->parent->SelectAccessForChild(parent)) { activerenBezig = false; return false; }
+  if (parent != nullptr && !parent->SelectAccessForChild(this)) {
+    // De al geopende toegang van de grootouder weer sluiten, behalve wanneer de parent zelf nog activeert en die toegang nodig heeft.
+    if (parent->parent != nullptr && !parent->activerenBezig) parent->parent->ReleaseAccessForChild(parent);
+    activerenBezig = false;
+    return false;
+  }
 #if GEDEELDE_BUS_FOUTINJECTIE
   // Test de foutafhandeling na activeren; verhindert de activering van de hardware niet.
   const bool gelukt = Activeren() && !FoutinjectieActief(component, FoutinjectieStap::ACTIVEREN);
 #else
   const bool gelukt = Activeren();
 #endif
-#if EXTENDER_TCA9548A_AANTAL > 0
-  if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) static_cast<ExtenderTCA9548A*>(parent)->disableAllChannels();
-#endif
+  // Toegang na de initialisatie weer sluiten (bv. alle multiplexerkanalen).
+  if (parent != nullptr) parent->ReleaseAccessForChild(this);
+  // Daarna de toegang van de grootouder (omgekeerde volgorde), behalve wanneer de parent zelf nog activeert en die toegang nodig heeft.
+  if (parent != nullptr && parent->parent != nullptr && !parent->activerenBezig) parent->parent->ReleaseAccessForChild(parent);
   activerenBezig = false;
   if (!gelukt) { StopSturing(); return false; }   // V11
 
@@ -568,7 +580,7 @@ static struct Screen* GedeeldeBusVindHardwareResourceComponentScreen(const Gedee
 }
 
 // ============================================================================
-// Runtime-herstel (D042)
+// Runtime-herstel
 // Een los contact maakt een component niet meer voor altijd onbruikbaar: fouten tellen, foutniveau WARNING tot FATAL,
 // vanaf het ingestelde foutniveau uitschakelen, met pauze opnieuw activeren(), bij succes herstelmelding GB407.
 // Twee assen: de code (GB400 tot GB410) zegt WAT er gebeurde, het foutniveau HOE ERNSTIG het nu is.
@@ -697,7 +709,7 @@ static uint8_t FoutniveauTijdensRuntimeBerekenen(ToestandTijdensRuntime& toestan
 }
 
 // Eén melding: regel 1 = foutniveau en code (bv. ALERT: GB400), regel 2 = I2C-adres, regel 3 = kanaal (achter een TCA9548A of per sensorkanaal).
-// Zonder snprintf (D042: ±13 KB op UNO R4). Alleen naar Serial, nooit via Screen::Print(): dat zou de opdracht op het scherm
+// Zonder snprintf (±13 KB op UNO R4). Alleen naar Serial, nooit via Screen::Print(): dat zou de opdracht op het scherm
 // overschrijven (niets tekent ze terug) en het LCD via I2C testen, midden in de afhandeling van een I2C-fout (cascade).
 static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, HardwareResourceTypeI2C* component, uint8_t kanaal) {
   static const char* const foutniveauTekst[5] = { _FOUTNIVEAU_WARNING, _FOUTNIVEAU_ALERT, _FOUTNIVEAU_FAULT, _FOUTNIVEAU_CRITICAL, _FOUTNIVEAU_FATAL };
@@ -720,11 +732,11 @@ static void MeldingTijdensRuntimeTonen(uint8_t foutniveau, const char* code, Har
 
 #if EXTENDER_TCA9548A_AANTAL > 0
   // Achter een TCA9548A: het kanaal uit de claim EP_CH0 tot EP_CH7 (zoals SelectChannel()).
-  if (kanaal == 0 && component->parent != nullptr && component->parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) {
+  if (kanaal == 0 && component->parent != nullptr) {
     for (uint8_t i = 0; i < component->AantalClaims(); i++) {
       bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
       const uint8_t waarde = component->ClaimWaarde(i, exclusief, identiteit);
-      if (waarde <= static_cast<uint8_t>(ExtenderTCA9548A::ExtenderPins::EP_CH7)) { kanaal = waarde + 1; break; }
+      if (!exclusief && identiteit == HardwareResourceIdentiteit::I2C_TCA_CHANNEL && waarde <= 7) { kanaal = waarde + 1; break; }
     }
   }
 #endif
@@ -796,7 +808,7 @@ static bool IsI2CNode(const GedeeldeBusNode* node) {
 void GedeeldeBusNode::AlleOnderliggendeNodesOpnieuwActiveren() {
   // Van boven naar onder: een parent is altijd eerst opnieuw actief.
   // Een node die niet herstelt, blijft uitgeschakeld. Een eigen herstelpad van die node (I2C: ComponentBeschikbaarTijdensRuntime(),
-  // een sensor: zijn eigen pad, zoals RFP602::OpnieuwAanmeldenNaPauze()) probeert later opnieuw; een node zonder zo'n pad niet.
+  // een sensor: zijn eigen pad, zoals FSR_RFP::OpnieuwAanmeldenNaPauze()) probeert later opnieuw; een node zonder zo'n pad niet.
   for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
     GedeeldeBusNode* node = const_cast<GedeeldeBusNode*>(n);
     // Parent niet actief: de fout komt van de parent, die zelf al meldde. Geen eigen melding.
@@ -829,7 +841,14 @@ void GedeeldeBusNode::AlleOnderliggendeNodesOpnieuwActiveren() {
 }
 
 bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
-  if (actief) return true;
+  if (actief) {
+#if EXTENDER_TCA9548A_AANTAL > 0
+    // Bij runtime-I2C opnieuw het bestaande TCA9548A-kanaal selecteren.
+    // activeren() sluit het kanaal immers na de initialisatie.
+    if (parent != nullptr && !parent->SelectAccessForChild(this)) return false;
+#endif
+    return true;
+  }
   if (!ingeplugd) return false;
 
   const unsigned long nu = millis();
@@ -863,7 +882,18 @@ bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
     oorzaakHerstelTijdensRuntime = _GB409;   // SDA blijft laag na het busherstel: geen activeren() in deze poging (spaart een timeout)
   }
 
+  if (gelukt) {
+    AlleOnderliggendeNodesOpnieuwActiveren();
+#if EXTENDER_TCA9548A_AANTAL > 0
+    // Onderliggende nodes kunnen het TCA-kanaal hebben veranderd. Selecteer pas na hun herstel.
+    if (parent != nullptr) gelukt = parent->SelectAccessForChild(this);
+#endif
+  }
+
   if (!gelukt) {
+    // Ook na een geslaagde activering kan de TCA-kanaalselectie mislukken.
+    // Laat de node dan niet ten onrechte actief staan.
+    if (actief) { actief = false; AlleOnderliggendeNodesUitschakelen(); }
     // Een mislukte herstelpoging telt als fout: de ladder klimt verder op aantal en tijd (bv. CRITICAL naar FATAL).
     // Melden: de eerste keer met het huidige foutniveau, daarna alleen bij een hoger foutniveau. De code zegt de oorzaak.
     const uint8_t resultaat = FoutniveauTijdensRuntimeBerekenen(toestandTijdensRuntime, false, DrempelsFoutniveauVoorComponent(this));
@@ -874,10 +904,9 @@ bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
     return false;
   }
 
-  // Volgorde: eerst melden en de onderliggende nodes heractiveren (die lezen nog het foutniveau van deze node),
-  // daarna altijd resetten, ook als een onderliggende node faalt: deze node zelf is hersteld.
+  // Eerst kinderen herstellen, dan (waar nodig) het TCA-kanaal selecteren.
+  // Pas wanneer dit werkelijk is gelukt de herstelmelding en statusreset uitvoeren.
   MeldingTijdensRuntimeTonen(0, _GB407, this);
-  AlleOnderliggendeNodesOpnieuwActiveren();
   toestandTijdensRuntime = ToestandTijdensRuntime();
   aantalI2CStoringenTijdensRuntime++;   // herstel van een I2C-storing (S6)
   return true;
@@ -976,6 +1005,28 @@ bool GedeeldeBusNode::aanmelden() {
 
   if (parent != nullptr && !parent->aanmelden()) return false;
 
+  // Een exclusief Data-opslagobject wordt door precies één aangemeld child bezet,
+  // vanaf aanmelden tot afmelden. De gedeelde SPI-buspinnen blijven gedeeld.
+  // De bestaande exclusieve Extender-conflictcontrole voor andere typen blijft intact.
+  if (parent != nullptr && parent->Extender == HardwareResourceToegang::EXCLUSIEF &&
+      (parent->component == GedeeldeBusComponent::DATA_MICROSD ||
+       parent->component == GedeeldeBusComponent::DATA_FLASH)) {
+#if DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF
+    if (parent->firstChild != nullptr || parent->runtimeEigenaar != nullptr) {
+      GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB104,
+          parent->firstChild != nullptr ? parent->firstChild->component : parent->runtimeEigenaar->component,
+          component, 0, false);
+      return false;
+    }
+    parent->runtimeEigenaar = this;
+#else
+    if (parent->firstChild != nullptr) {
+      GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB104, parent->firstChild->component, component, 0, false);
+      return false;
+    }
+#endif
+  }
+
   if (parent != nullptr) {
     nextChild = parent->firstChild;
     if (nextChild != nullptr) nextChild->prevChild = this;
@@ -1007,6 +1058,13 @@ bool GedeeldeBusNode::controleren() {
 #endif
 
   conflictGevonden = false;
+  // Timinggevoelige native protocollen kunnen niet via een generieke GPIO-Extender.
+  // Bij een DS2482 gebruikt de DS18B20 de hardware 1-Wire bridge en is dit WEL geldig.
+  const GedeeldeBusNode* fysiekExtender = firstExtenderNode();
+  if (fysiekExtender != nullptr && !ExtenderFysiekGeschikt(fysiekExtender)) {
+    conflictGevonden = true;
+    GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB112, component, fysiekExtender->component, 0, false);
+  }
   const uint8_t geen = static_cast<uint8_t>(HardwareResourcePin::NONE);
 #if !GEDEELDE_BUS_MIXED_PINS
   const bool native = (firstExtenderNode() == nullptr);
@@ -1052,6 +1110,11 @@ bool GedeeldeBusNode::controleren() {
         bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
         const uint8_t waarde = ClaimWaarde(i, exclusief, identiteit);
         if (waarde == geen || IsAdres(waarde)) continue;
+#if EXTENDER_TCA9548A_AANTAL > 0
+        // SDA/SCL zijn de gedeelde I2C-buslijnen, geen TCA-kanaalpinnen.
+        if (parent->gedeeldeIdentiteiten != nullptr && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA &&
+            (identiteit == HardwareResourceIdentiteit::I2C_SDA || identiteit == HardwareResourceIdentiteit::I2C_SCL)) continue;
+#endif
 #if GEDEELDE_BUS_MIXED_PINS
         if (GetOwnerClaim(i) != parent) continue;   // claim met een eigen Extender: hieronder apart gecontroleerd
 #endif
@@ -1270,7 +1333,7 @@ void GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(GedeeldeBusNode* vanaf) {
     }
 
     if (scherm != nullptr) {
-      // Leestijd volgens het niveau van de code: CRITICAL apart, ABORT en FATAL samen (D042).
+      // Leestijd volgens het niveau van de code: CRITICAL apart, ABORT en FATAL samen.
       const bool critical = strncmp(r->code, "CRITICAL", 8) == 0;
       const unsigned long leestijd = critical ? GENERAL_MELDING_CRITICAL_LEESTIJD_MS : GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS;
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)

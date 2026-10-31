@@ -28,8 +28,8 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
   // DEFAULT — MCP23017 #1
   // ============================================================================
   #if EXTENDER_MCP23017_AANTAL == 1
-  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INTA, HardwareResourcePin np_INTB, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), MCP23017(adres, &Wire), np_INTA(np_INTA), np_INTB(np_INTB), np_RESET(np_RESET) {
+  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_INTA, HardwareResourcePin np_INTB, HardwareResourcePin np_RESET, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender, tcaChannel), MCP23017(adres, &Wire), np_INTA(np_INTA), np_INTB(np_INTB), np_RESET(np_RESET) {
     exclusiefMetIntReset_[0] = exclusief_[0];
     exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
     exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
@@ -53,8 +53,8 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), MCP23017(ExtenderLijst[teller].adres, &Wire), np_INTA(ExtenderLijst[teller].inta), np_INTB(ExtenderLijst[teller].intb), np_RESET(ExtenderLijst[teller].reset) {
+  ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), MCP23017(ExtenderLijst[teller].adres, &Wire), np_INTA(ExtenderLijst[teller].inta), np_INTB(ExtenderLijst[teller].intb), np_RESET(ExtenderLijst[teller].reset) {
     exclusiefMetIntReset_[0] = exclusief_[0];
     exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
     exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
@@ -84,20 +84,23 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
     return FoutDiagnoseI2C(gelukt, MCP23017::lastError(), terugGelezen);
   }
 
-#if GEDEELDE_BUS_MIXED_PINS
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
-  // Runtime-herstel (D042): eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
+  // Runtime-herstel: eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
   void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return;
     if (!ComponentBeschikbaarTijdensRuntime()) return;
     MCP23017::pinMode1(pin, modus);
     ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
   }
   void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return;
     if (!ComponentBeschikbaarTijdensRuntime()) return;
     MCP23017::write1(pin, niveau);
     ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
   }
   uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return 0;
     if (!ComponentBeschikbaarTijdensRuntime()) return 0;
     const uint8_t waarde = MCP23017::read1(pin);
     ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);

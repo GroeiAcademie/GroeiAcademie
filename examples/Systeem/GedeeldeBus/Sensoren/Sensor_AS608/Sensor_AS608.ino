@@ -1,0 +1,17 @@
+#include <GroeiAcademie.h>
+#if SENSOR_AS608_AANTAL != 1
+#error SENSOR_AS608_AANTAL moet 1 zijn.
+#endif
+#if !defined(HAVE_HWSERIAL1) && !defined(ARDUINO_ARCH_RENESAS)
+#error Hardwaretest AS608 vereist Serial1. Gebruik op andere boards een apart goedgekeurde seriele poortintegratie.
+#endif
+void setup() {
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  const unsigned long startTijd = millis();
+  while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  bool basis = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();
+  if (!basis) { GA_SERIAL.println(F("PARENT: FOUT")); return; }
+  AS608* sensor = GedeeldeBusNewComponent<AS608>(&Native, GedeeldeBusComponent::AS608, &Serial1, HardwareResourcePin::NP_D1, HardwareResourcePin::NP_D0);
+  GA_SERIAL.println(sensor ? F("INITIALISATIE: OK; SENSORRESPONS: niet bewezen") : F("LIFECYCLE: FOUT"));
+}
+void loop() {}

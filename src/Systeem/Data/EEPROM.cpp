@@ -42,7 +42,7 @@ void Data::WriteNativeEEPROM(uint16_t adres, uint8_t waarde) {
 
 #elif ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE) && BOARD_VERSION == BOARD_UNO_Q
 
-// UNO Q: geen EEPROM.h in de core, het medium bestaat niet (D8). Lezen geeft 0, schrijven doet niets.
+// UNO Q: geen EEPROM.h in de core, het medium bestaat niet. Lezen geeft 0, schrijven doet niets.
 uint8_t Data::ReadNativeEEPROM(uint16_t adres) { (void)adres; return 0; }
 void Data::WriteNativeEEPROM(uint16_t adres, uint8_t waarde) { (void)adres; (void)waarde; }
 

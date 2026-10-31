@@ -86,7 +86,7 @@ const unsigned long MAXIMALE_WACHTTIJD_FASE_MS = 30000UL;
 
 bool laatsteToegangGelukt = false;
 
-// Eén gewone toegang via de FrameWork-foutladder (D042). laatsteToegangGelukt = deze toegang zelf slaagde.
+// Eén gewone toegang via de FrameWork-foutladder. laatsteToegangGelukt = deze toegang zelf slaagde.
 void EenToegang() {
   laatsteToegangGelukt = false;
   if (extender == nullptr) return;

@@ -17,6 +17,10 @@ Relais. De huidige implementatie bevat de component als header-only codevoorstel
 
 De digitale parentfuncties zijn afhankelijk van `GEDEELDE_BUS_MIXED_PINS`; actief-laag/actief-hoog en foutveiligheid moeten overeenkomen met de module.
 
+## ISD1820
+
+De ISD1820 (geluidsfragment opnemen en afspelen) wordt bediend met twee keer `Relais`: REC (hoog zolang er opgenomen wordt) en PLAYE (een korte puls speelt het fragment af). Voorbeeld: `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820/`.
+
 ## Testen
 
 De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en het script `extras/TestLibrarySturingen-v2.0.0.cmd`. Compilatie en hardwaregedrag zijn **niet gevalideerd**.

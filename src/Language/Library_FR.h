@@ -41,6 +41,7 @@
 #define _FATAL_GB109 "FATAL: GB109" // GedeeldeBus controleren() mislukt: I2C-adres niet toegestaan voor dit hardwaretype
 #define _FATAL_GB110 "FATAL: GB110" // GedeeldeBus controleren() mislukt: ongeldig I2C-adres
 #define _FATAL_GB111 "FATAL: GB111" // GedeeldeBus controleren() mislukt: parent/extender biedt gevraagde resource niet aan
+#define _FATAL_GB112 "FATAL: GB112" // Sensorprotocol vereist native pinnen of een gespecialiseerde bridge; generieke GPIO-Extender fysiek ongeschikt
 
 // CharacterScreen
 #define _FATAL_CS101 "FATAL: CS101" // CharacterScreen controleren() mislukt
@@ -71,7 +72,7 @@
 #define _CRITICAL_GB305 "CRITICAL: GB305" // GedeeldeBus activeren() mislukt: I2C-busfout of timeout
 #define _CRITICAL_GB306 "CRITICAL: GB306" // GedeeldeBus activeren() mislukt: verkeerde chip, teruglezen klopt niet
 
-// GedeeldeBus tijdens runtime (D042): de code zegt WAT er gebeurde, zonder niveau; het foutniveau (HOE ERNSTIG) komt apart vooraan bij het tonen.
+// GedeeldeBus tijdens runtime: de code zegt WAT er gebeurde, zonder niveau; het foutniveau (HOE ERNSTIG) komt apart vooraan bij het tonen.
 #define _GB400 "GB400" // GedeeldeBus tijdens runtime: communicatie met component mislukt
 #define _GB401 "GB401" // GedeeldeBus heractiveren tijdens runtime mislukt
 #define _GB402 "GB402" // GedeeldeBus heractiveren tijdens runtime mislukt: geen antwoord op I2C-adres

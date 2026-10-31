@@ -21,7 +21,7 @@
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -60,7 +60,7 @@ void UitvoerenAlgoritmeEnkelTik();
 
 // ============================================================================
 
-StimulusProfiel nulmetingStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1], gemetenStimulus[RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1];
+StimulusProfiel nulmetingStimulus[FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1], gemetenStimulus[FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1];
 
 SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 
@@ -77,8 +77,8 @@ void setup() {
 #endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
-  if (sensorRFP602set1 == nullptr) exit(0);
+  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
+  if (sensorFSR_RFPset1 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -109,7 +109,7 @@ void UitvoerenAlgoritmeEnkelTik() {
   Stimulus.ResetAlleTellers();
   ToonMenuKiesEnStelLevelIn();
   Screen->Print(LCD_S1_TITEL, LCD_S0_GEEF_STARTTIK, MINIMALE_WACHTTIJD_MS);   
-  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
+  Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
   Screen->Print("", "", 0, LCD_S0_NU);
 
   while (Stimulus.TIK_TEST_ACTIEVE_VINGER == -1) {
@@ -119,13 +119,13 @@ void UitvoerenAlgoritmeEnkelTik() {
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
-    for (int sensorNummer = 0; sensorNummer < RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1; sensorNummer++) { sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[sensorNummer]); }
+    for (int sensorNummer = 0; sensorNummer < FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1; sensorNummer++) { sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[sensorNummer]); }
      const int offsetSensor[4] = { Stimulus.offsetSensor1, Stimulus.offsetSensor2, Stimulus.offsetSensor3, Stimulus.offsetSensor4 };
 
     // bepaal welke sensor als eerste actief is
-    for (int sensorNummer = RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 - 1; sensorNummer >= 0; sensorNummer--) {
-      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorRFP602set1->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
-        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorRFP602set1->sensorPin[sensorNummer];
+    for (int sensorNummer = FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 - 1; sensorNummer >= 0; sensorNummer--) {
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFSR_RFPset1->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorFSR_RFPset1->sensorPin[sensorNummer];
         Stimulus.offsetSensorActief = offsetSensor[sensorNummer];
         break;
       }
@@ -155,7 +155,7 @@ void UitvoerenAlgoritmeEnkelTik() {
       Screen->Print(LCD_S0_NULMETING, LCD_S0_EVEN_GEDULD, WACHTTIJD_MS);
     }
 
-    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
+    Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
     Screen->Print("", "", 0, LCD_S0_NU);
 
     // Dit vangt te vroeg drukken of te laat loslaten fysiologisch perfect op.

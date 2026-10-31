@@ -1,17 +1,17 @@
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie GB408: Sensor kan tijdens runtime niet meten: storing van zijn Extender
 // Verwachte build: normaal of DEBUG
-// Opstelling: RFP602 op een ADS1115, los te koppelen via een schakelaar of jumper in VCC
+// Opstelling: FSR_RFP op een ADS1115, los te koppelen via een schakelaar of jumper in VCC
 // Bewezen = de echte FrameWork-melding "<foutniveau>: GB408" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = fase 1 referentie, toets 3 = fase 2 storing, toets 4 = fase 3 herstel.
 
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
 #endif
-#if !defined(RFP602_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1)
-  #error Deze test vereist een eigen Sensor-ladder, bv. in UserConfig.h: #define RFP602_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1 { {1, 3, 5, 10, 20}, {0UL, 100UL, 500UL, 2000UL, 10000UL}, ScreenData::TYPE_FATAL, ScreenData::TYPE_CRITICAL }
+#if !defined(FSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1)
+  #error Deze test vereist een eigen Sensor-ladder, bv. in UserConfig.h: #define FSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1 { {1, 3, 5, 10, 20}, {0UL, 100UL, 500UL, 2000UL, 10000UL}, ScreenData::TYPE_FATAL, ScreenData::TYPE_CRITICAL }
 #endif
 
 const char* const VERWACHTE_CODE = _GB408;
@@ -73,7 +73,7 @@ void ToonUitleg() {
   GA_SERIAL.println(F("Build: DEBUG uit."));
 #endif
   GA_SERIAL.println(F("Verwachte build: normaal of DEBUG"));
-  GA_SERIAL.println(F("Opstelling: RFP602 op een ADS1115, los te koppelen via een schakelaar of jumper in VCC"));
+  GA_SERIAL.println(F("Opstelling: FSR_RFP op een ADS1115, los te koppelen via een schakelaar of jumper in VCC"));
   GA_SERIAL.println(F("1. Druk 2: FASE 1 REFERENTIE: het component start en wordt 10 keer gelezen."));
   GA_SERIAL.println(F("2. FASE 2: Koppel de ADS1115 los. Druk dan 3; de sketch wacht tot de FrameWork de storing vaststelt (maximaal 30 s)."));
   GA_SERIAL.println(F("3. FASE 3: Sluit de ADS1115 weer aan. Druk dan 4; de sketch wacht tot het component weer werkt (maximaal 30 s)."));
@@ -88,12 +88,12 @@ const unsigned long MAXIMALE_WACHTTIJD_FASE_MS = 30000UL;
 
 bool laatsteToegangGelukt = false;
 
-// Eén gewone toegang via de FrameWork-foutladder (D042). laatsteToegangGelukt = deze toegang zelf slaagde.
+// Eén gewone toegang via de FrameWork-foutladder. laatsteToegangGelukt = deze toegang zelf slaagde.
 void EenToegang() {
   laatsteToegangGelukt = false;
-  if (sensorRFP602set1 == nullptr) return;
-  sensorRFP602set1->RawAnalogRead(sensorRFP602set1->sensorPin[0]);
-  laatsteToegangGelukt = sensorRFP602set1->toestandTijdensRuntime.aantalOpeenvolgendeFouten == 0;
+  if (sensorFSR_RFPset1 == nullptr) return;
+  sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[0]);
+  laatsteToegangGelukt = sensorFSR_RFPset1->toestandTijdensRuntime.aantalOpeenvolgendeFouten == 0;
 }
 
 // Tijdens fase 2 tot 4: elke 200 ms een toegang.
@@ -106,12 +106,12 @@ void ToegangTijdensRuntime() {
 void Referentie() {
   if (fase != 0) { GA_SERIAL.println(F("Niet nu: volg de fasen of druk reset.")); return; }
   GA_SERIAL.println(F("--- FASE 1 REFERENTIE ---"));
-  sensorRFP602set1 = GedeeldeBusNewComponent<struct RFP602>(
-      &extenderADS1115, GedeeldeBusComponent::RFP602,
-      RFP602_ADC_PIN_SENSOR_1_SET_1, RFP602_ADC_PIN_SENSOR_2_SET_1, RFP602_ADC_PIN_SENSOR_3_SET_1, RFP602_ADC_PIN_SENSOR_4_SET_1,
+  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(
+      &extenderADS1115, GedeeldeBusComponent::FSR_RFP,
+      FSR_RFP_ADC_PIN_SENSOR_1_SET_1, FSR_RFP_ADC_PIN_SENSOR_2_SET_1, FSR_RFP_ADC_PIN_SENSOR_3_SET_1, FSR_RFP_ADC_PIN_SENSOR_4_SET_1,
       HardwareResourceToegang::GEDEELD);
-  if (sensorRFP602set1 == nullptr) {
-    MeldNietAangetoond(F("RFP602 of ADS1115 werkt niet bij de start: controleer de opstelling."));
+  if (sensorFSR_RFPset1 == nullptr) {
+    MeldNietAangetoond(F("FSR_RFP of ADS1115 werkt niet bij de start: controleer de opstelling."));
     GA_SERIAL.println(F("RESET NODIG."));
     ToonTestKlaar();
     fase = 5;
@@ -121,7 +121,7 @@ void Referentie() {
     EenToegang();
     delay(20);
   }
-  if (sensorRFP602set1->toestandTijdensRuntime.huidigFoutniveau != 0 || sensorRFP602set1->toestandTijdensRuntime.aantalOpeenvolgendeFouten != 0) {
+  if (sensorFSR_RFPset1->toestandTijdensRuntime.huidigFoutniveau != 0 || sensorFSR_RFPset1->toestandTijdensRuntime.aantalOpeenvolgendeFouten != 0) {
     MeldNietAangetoond(F("de referentie heeft fouten: controleer de opstelling."));
     GA_SERIAL.println(F("RESET NODIG."));
     ToonTestKlaar();
@@ -151,7 +151,7 @@ void Herstel() {
 
 void VolgFase() {
   if (fase == 2) {
-    if (sensorRFP602set1->toestandTijdensRuntime.huidigFoutniveau != 0) {
+    if (sensorFSR_RFPset1->toestandTijdensRuntime.huidigFoutniveau != 0) {
       GA_SERIAL.println(F("Storing vastgesteld door de FrameWork."));
       MeldHandmatig(VERWACHTE_CODE);
       GA_SERIAL.println(F("FASE 3: Sluit de ADS1115 weer aan. Druk dan 4."));
@@ -163,7 +163,7 @@ void VolgFase() {
       fase = 5;
     }
   } else if (fase == 4) {
-    if (sensorRFP602set1->toestandTijdensRuntime.huidigFoutniveau == 0 && sensorRFP602set1->toestandTijdensRuntime.aantalOpeenvolgendeFouten == 0 && laatsteToegangGelukt) {
+    if (sensorFSR_RFPset1->toestandTijdensRuntime.huidigFoutniveau == 0 && sensorFSR_RFPset1->toestandTijdensRuntime.aantalOpeenvolgendeFouten == 0 && laatsteToegangGelukt) {
       GA_SERIAL.println(F("HERSTEL BEVESTIGD: foutladder op 0 en de laatste toegang slaagde zelf."));
       ToonTestKlaar();
       fase = 5;

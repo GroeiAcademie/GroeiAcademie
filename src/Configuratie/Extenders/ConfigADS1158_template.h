@@ -2,6 +2,11 @@
 #define CONFIG_ADS1158_H
 
 // ============================================================================
+// Externe referentiespanning tussen VREFP en VREFN, in mV.
+#ifndef EXTENDER_ADS1158_REFERENTIE_MILLIVOLT
+// #define EXTENDER_ADS1158_REFERENTIE_MILLIVOLT 5000  // standaard waarde: 5000
+#endif
+
 // EXTENDER: ADS1158
 // ============================================================================
 #ifndef EXTENDER_ADS1158_AANTAL

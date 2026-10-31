@@ -734,7 +734,7 @@ Regel 1 en regel 2 worden eerst weergegeven. Daarna wordt `delayTime` één keer
 
 Screen-fouten worden gemeld met lifecyclegebonden codes zoals `CS001`, `CS301`, `PS001`, `PS305` of `SS302`. De actuele codes en hun betekenis staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Waar mogelijk wordt een fout van één uitvoer via een andere nog werkende Screen-uitvoer gemeld.
 
-Vanaf v2.0.0 bezit `Screen` zelf het concrete `Adafruit_ST7789`-object (`Screen.Pixel.display`) en de algemene `Adafruit_GFX*`-pointer (`Screen.Pixel.gfx`). De sketch maakt geen afzonderlijk `pixelScreen`-object buiten `Screen` meer aan. De normale setup is:
+Vanaf v2.0.0 bezit `Screen` zelf het concrete schermobject (`Screen.Pixel.display`): `Adafruit_ST7789` bij `ACTIEF_PIXEL_SCREEN_CONTROLLER` `SCREEN_ST7789`, of `Adafruit_ST7735` bij `SCREEN_ST7735S` (geïnitialiseerd met `initR(INITR_BLACKTAB)`, de gangbare 1,8″-module van 128x160) en de algemene `Adafruit_GFX*`-pointer (`Screen.Pixel.gfx`). De sketch maakt geen afzonderlijk `pixelScreen`-object buiten `Screen` meer aan. De normale setup is:
 
 ```cpp
 Screen.Aanmelden();

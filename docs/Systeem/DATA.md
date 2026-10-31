@@ -50,13 +50,16 @@ Eén bit staat voor een medium samen met zijn aansluiting. Gebruik altijd de naa
 #define DATA_TYPE_FRAM_SPI      0x0100   // nog niet ondersteund in v2.0.0
 // 0x0200 vrij: microSD via I2C
 #define DATA_TYPE_MICROSD_SPI   0x0400
+// 0x0800 vrij: NRF24L01 native
+// 0x1000 vrij: NRF24L01 via I2C
+#define DATA_TYPE_NRF24L01_SPI  0x2000
 ```
 
 `DATA_TYPE_NONE` kan niet met een ander Data-type worden gecombineerd. `DATA_TYPE_EEPROM_SPI` en `DATA_TYPE_FRAM_SPI` geven een compileerfout zolang ze niet ondersteund zijn. `typesActief` in Data is daarom 16 bits.
 
 ## NONE
 
-`DATA_TYPE_NONE` gebruikt geen Data-class. Voor RFP602 blijft de bestaande route behouden:
+`DATA_TYPE_NONE` gebruikt geen Data-class. Voor FSR_RFP blijft de bestaande route behouden:
 
 ```text
 RawAnalogRead(...)
@@ -69,20 +72,20 @@ RawAnalogRead(...)
 `DATA_TYPE_DIRECT` gebruikt de Data-class:
 
 ```text
-RFP602
+FSR_RFP
 -> WriteQueueOrStack(sensorNummer, ruweData)   (overgeërfd van Sensor, logica in Data)
 -> ReadQueueOrStackStatus(sensorNummer)        1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
 -> ReadQueueOrStackValue(sensorNummer)         volgende waarde; leeg = lastValue van dat channel
 -> toepassing
 ```
 
-Voor RFP602 bepaalt:
+Voor FSR_RFP bepaalt:
 
 ```cpp
-RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 ```
 
-en per channel `RFP602_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` (standaard gelijk aan de waarde hierboven) of een QueueOrStack gebruikt wordt. De QueueOrStack hangt niet af van DIRECT: hij werkt bij elk Data-type zodra de grootte groter is dan 0.
+en per channel `FSR_RFP_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` (standaard gelijk aan de waarde hierboven) of een QueueOrStack gebruikt wordt. De QueueOrStack hangt niet af van DIRECT: hij werkt bij elk Data-type zodra de grootte groter is dan 0.
 
 ```text
 0   = geen QueueOrStack; ReadQueueOrStackValue() geeft lastValue van dat channel terug
@@ -221,22 +224,42 @@ Alternatief (niet gekozen): de originele `SdFat` van Bill Greiman (`#include <Sd
 
 Op de UNO R4 definieert SdFat een eigen `F()`-macro wanneer er nog geen is. De core van de R4 heeft `F()` als functie (en doet zelf `#undef F` in `Arduino.h`). Daarom staat in `microSD.h` na de include van SdFat `#undef F`, alleen op `ARDUINO_ARCH_RENESAS`. Bij elke upgrade van SdFat of van de R4-core opnieuw testen.
 
-Voor RFP602 bepaalt:
+Sensordata-recording op microSD schrijft naar `SENSOR.DAT`. Het bestand wordt geopend met `O_APPEND`: SdFat gaat vóór elke schrijfactie naar het einde van de laatste geslaagde schrijfactie. Volgens de positielogica van SdFat blijven de records zo uitgelijnd na een mislukte `write()`. Dat beschermt niet tegen een defecte sector op de kaart, en het resultaat van `write()` en `sync()` wordt nog niet gemeld.
+
+Met een DS3231-klok (`SENSOR_DS3231_AANTAL 1`) krijgen `SENSOR.DAT` en elk ander bestand automatisch de echte datum en tijd als aanmaak- en wijzigingsdatum. Het recordformaat verandert niet. Zie `docs/Systeem/Sensor/DS3231.md`.
+
+## NRF24L01
+
+De NRF24L01 is een radiomodule (2,4 GHz) via SPI (struct `DataNRF24L01viaSPI`, erft van `RF24`). Hij is een streamingmedium: na `StreamingStart()` wordt elk GB-record dat naar FLASH of `SENSOR.DAT` gaat, ook als één pakket van 15 bytes draadloos verstuurd. Een tweede Arduino ontvangt de records (voorbeeld `NRF24L01_Ontvanger`).
 
 ```cpp
-RFP602_DATA_RECORD_FILE_SET_1
+#define DATA_LAYER_CONFIG DATA_TYPE_NRF24L01_SPI
+DATA_LAYER_NRF24L01_SPI_AANTAL          // 0 of 1
+DATA_LAYER_NRF24L01_SPI_1_CS_PIN        // CSN: selecteert de module
+DATA_LAYER_NRF24L01_SPI_1_CE_PIN        // CE: zet zenden en ontvangen aan of uit
+DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL    // radiokanaal 0..125 (standaard 76)
+DATA_LAYER_NRF24L01_SPI_1_ADRES         // precies 5 tekens (standaard "GROEI")
 ```
 
-het bestand voor sensordata-recording.
+- SCK, MISO en MOSI komen uit de boardconfiguratie. De module staat in `Data->NRF24L01viaSPI[]`.
+- CS kan niet via een Extender: de RF24-library schakelt CSN en CE zelf.
+- Best-effort: geen ontvangstbevestiging (auto-ack uit) en dus **geen ontvangstgarantie**. Een meting wacht nooit op een ontvanger; een verloren pakket wordt niet opnieuw verstuurd en de zender merkt het niet. De terugkeerwaarde van `RF24::write()` wordt niet gebruikt.
+- `RF24::write()` wacht tot het pakket verzonden is (berekend: minder dan 1 ms voor 15 bytes, niet gemeten). De hardwaretest meet de gemiddelde en de maximale duur bij langdurige belasting.
+- Voeding 3,3 V met een condensator van 10 µF tot 100 µF over de voeding: de module trekt korte stroompieken.
+- Externe library: `RF24`.
+
+## HC-05
+
+De HC-05 (Bluetooth) is voor de Arduino een gewone seriële poort en heeft geen eigen klasse. Gebruik `Serial1` (D0/D1 op de UNO R4) of een UART-Extender met `GetExtenderStream()` en `StartExtenderUART()`. Voorbeeld: `examples/Systeem/Data/HC05/`.
 
 ## RAM-QueueOrStack
 
-De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (RFP602: `ruweDataQueueOrStackChannel1..4`, in elk object apart; met set 2 is de grootte per channel de grootste van set 1 en set 2). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
+De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (FSR_RFP: `ruweDataQueueOrStackChannel1..4`, in elk object apart; met set 2 is de grootte per channel de grootste van set 1 en set 2). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
 
-De QueueOrStack-grootte wordt per sensor geconfigureerd, los van DIRECT. Voor RFP602:
+De QueueOrStack-grootte wordt per sensor geconfigureerd, los van DIRECT. Voor FSR_RFP:
 
 ```cpp
-RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
+FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
 ```
 
 Gelijktijdige toegang vanuit twee taken of cores vraagt een aparte analyse en synchronisatie; ook FIFO is niet vanzelf veilig.
@@ -249,7 +272,7 @@ De QueueOrStack bestaat alleen per sensor-channel. Een tweede QueueOrStack per m
 
 Een sensor maakt geen medium aan en hoeft niet te weten of zijn data via DIRECT, STREAMING of RECORDING wordt afgehandeld. Wanneer Data actief is, krijgt de sensor bij creatie een pointer naar `Data` mee.
 
-Voor RFP602 komt elke meting in `lastValue` (en, bij een grootte > 0, in de QueueOrStack) van het juiste channel:
+Voor FSR_RFP komt elke meting in `lastValue` (en, bij een grootte > 0, in de QueueOrStack) van het juiste channel:
 
 ```cpp
 WriteQueueOrStack(sensorNummer, ruweData);   // overgeërfd van Sensor
@@ -280,28 +303,28 @@ Per medium houdt Data een lijst van zijn chips bij: `Data->EEPROMviaNative`, `Da
 
 Data faalt alleen wanneer geen enkel kind overblijft. Een medium dat niet werkt, wordt afgemeld; de andere media blijven werken. DIRECT is ook een kind.
 
-microSD schrijft na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL` regels, of na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS` milliseconden sinds de vorige flush, weg naar de kaart. Roep `RecordingStop()` aan voor je de stroom onderbreekt.
+microSD schrijft na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL` records (één record per meting in `SENSOR.DAT`), of na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS` milliseconden sinds de vorige flush, weg naar de kaart. Roep `RecordingStop()` aan voor je de stroom onderbreekt.
 
 De sensor gebruikt STREAMING en RECORDING niet rechtstreeks. De toepassing kiest die werking. De concrete media behouden daarnaast hun volledige geërfde library-API.
 
 ## Sensorvoorbeelden
 
 ```text
-Sensor_RFP602.ino
+Sensor_FSR_RFP.ino
 -> DATA_TYPE_NONE
 -> oude werking zonder Data-class
 
-Sensor_RFP602_DIRECT.ino
+Sensor_FSR_RFP_DIRECT.ino
 -> DATA_TYPE_DIRECT
 -> ReadQueueOrStackValue(sensorNummer)
 -> optionele QueueOrStack per channel
 
-Sensor_RFP602_FLASH.ino
+Sensor_FSR_RFP_FLASH.ino
 -> DATA_TYPE_FLASH_SPI
 -> Data STREAMING naar FLASH
--> sensorRFP602set1->StreamingRead(sensorNummer)
+-> sensorFSR_RFPset1->StreamingRead(sensorNummer)
 
-Sensor_RFP602_MICROSD.ino
+Sensor_FSR_RFP_MICROSD.ino
 -> DATA_TYPE_MICROSD_SPI
 -> Data RECORDING naar microSD
 ```

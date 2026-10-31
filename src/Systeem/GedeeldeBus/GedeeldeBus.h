@@ -38,6 +38,10 @@
   #include <Adafruit_DS248x.h>
 #endif
 
+#if EXTENDER_SC16IS752_I2C_AANTAL > 0 || EXTENDER_SC16IS752_SPI_AANTAL > 0
+  #include <Appnostic_SC16IS752.h>
+#endif
+
 // ============================================================================
 // GedeeldeBus: neutrale, gedeelde Wire(I2C)/SPI-initialisatie.
 //
@@ -71,7 +75,7 @@ bool IsGedeeldeBusGeinitialiseerd(GedeeldeBusType busType);
 // Reset de interne "al geïnitialiseerd"-vlaggen. Beïnvloedt de fysieke bus zelf niet; enkel bedoeld voor testscenario's.
 void ResettenGedeeldeBus();
 
-// Runtime-herstel (D042): maakt de I2C-bus vrij als SDA laag blijft hangen (bv. los contact midden in een overdracht).
+// Runtime-herstel: maakt de I2C-bus vrij als SDA laag blijft hangen (bv. los contact midden in een overdracht).
 // Eerst SDA lezen terwijl Wire actief blijft. Alleen als SDA laag is: Wire.end(), tot 9 klokpulsen op SCL, een STOP-conditie
 // en opnieuw InitialiserenGedeeldeBus(). SDA hoog: de bus wordt niet aangeraakt.
 // Geeft true terug als SDA (daarna) vrij is. Zonder Wire.end() op het board (WIRE_HAS_END ontbreekt): niets te doen, true.
@@ -81,7 +85,7 @@ bool VastgelopenGedeeldeBusVrijmaken(GedeeldeBusType busType);
 enum class ScreenData : uint8_t;
 
 // ============================================================================
-// Runtime-herstel (D042): toestand en drempels van de foutladder WARNING, ALERT, FAULT, CRITICAL, FATAL.
+// Runtime-herstel: toestand en drempels van de foutladder WARNING, ALERT, FAULT, CRITICAL, FATAL.
 // Twee assen: de code (GB400 tot GB410) zegt WAT er gebeurde, het foutniveau HOE ERNSTIG het nu is.
 // ============================================================================
 // Per I2C-component (en per Sensor of kanaal met een override): 11 bytes op AVR, 12 op 32-bit.
@@ -148,6 +152,7 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   X(DATA_FLASH,                   0x17) /* GedeeldeBusComponent::DATA_FLASH */ \
   X(DATA_FRAM,                    0x18) /* GedeeldeBusComponent::DATA_FRAM */ \
   X(DATA_MICROSD,                 0x19) /* GedeeldeBusComponent::DATA_MICROSD */ \
+  X(DATA_NRF24L01,                0x1A) /* GedeeldeBusComponent::DATA_NRF24L01 */ \
   /*                                */ \
   /* EXTENDER --------------------- */ \
   X(GC_EXTENDER,                  0x20) /* GedeeldeBusComponent::GC_EXTENDER */ \
@@ -181,8 +186,71 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   /*                                */ \
   /* SENSOR ----------------------- */ \
   X(GC_SENSOR,                    0x80) /* GedeeldeBusComponent::GC_SENSOR */ \
+  /* Aanwezigheid                   */ \
+  X(HCSR501,                      0x81) /* GedeeldeBusComponent::HCSR501 */ \
+  X(HW201,                        0x82) /* GedeeldeBusComponent::HW201 */ \
+  X(LD2410D,                      0x83) /* GedeeldeBusComponent::LD2410D */ \
+  X(LD2450,                       0x84) /* GedeeldeBusComponent::LD2450 */ \
+  X(OT3686,                       0x85) /* GedeeldeBusComponent::OT3686 */ \
+  X(TTP223,                       0x86) /* GedeeldeBusComponent::TTP223 */ \
+  /*                                */ \
+  /* Afstand                        */ \
+  X(HCSR04,                       0x90) /* GedeeldeBusComponent::HCSR04 */ \
+  X(HCSR04P,                      0x91) /* GedeeldeBusComponent::HCSR04P */ \
+  X(HYSRF05,                      0x92) /* GedeeldeBusComponent::HYSRF05 */ \
+  X(VL53L0X,                      0x93) /* GedeeldeBusComponent::VL53L0X */ \
+  X(VL6180X,                      0x94) /* GedeeldeBusComponent::VL6180X */ \
+  /*                                */ \
+  /* Beweging                       */ \
+  X(ADXL345,                      0x95) /* GedeeldeBusComponent::ADXL345 */ \
+  X(MPU6050,                      0x96) /* GedeeldeBusComponent::MPU6050 */ \
+  X(MPU6500,                      0x97) /* GedeeldeBusComponent::MPU6500 */ \
+  /*                                */ \
+  /* Biosignalen                    */ \
+  X(AD8232,                       0xA0) /* GedeeldeBusComponent::AD8232 */ \
+  X(BioAmpEXGPill,                0xA1) /* GedeeldeBusComponent::BioAmpEXGPill */ \
+  X(EGBOPulseSensor,              0xA2) /* GedeeldeBusComponent::EGBOPulseSensor */ \
+  X(GSRGrove,                     0xA3) /* GedeeldeBusComponent::GSRGrove */ \
+  X(MAX30102,                     0xA4) /* GedeeldeBusComponent::MAX30102 */ \
+  X(MCU6701,                      0xA5) /* GedeeldeBusComponent::MCU6701 */ \
+  X(MR60BHA2,                     0xA6) /* GedeeldeBusComponent::MR60BHA2 */ \
+  X(NeuroSkyTGAM,                 0xA7) /* GedeeldeBusComponent::NeuroSkyTGAM */ \
+  /*                                */ \
   /* Druk en kracht                 */ \
-  X(RFP602,                       0xA4) /* GedeeldeBusComponent::RFP602 */ \
+  X(FSR_RFP,                      0xB0) /* GedeeldeBusComponent::FSR_RFP */ \
+  X(HX711,                        0xB1) /* GedeeldeBusComponent::HX711 */ \
+  X(SDP810125PA,                  0xB2) /* GedeeldeBusComponent::SDP810125PA */ \
+  /*                                */ \
+  /* Geluid en trilling             */ \
+  X(INMP441,                      0xB5) /* GedeeldeBusComponent::INMP441 */ \
+  X(MAX4466,                      0xB6) /* GedeeldeBusComponent::MAX4466 */ \
+  X(MAX9814,                      0xB7) /* GedeeldeBusComponent::MAX9814 */ \
+  X(MS3625,                       0xB8) /* GedeeldeBusComponent::MS3625 */ \
+  X(OV7670,                       0xB9) /* GedeeldeBusComponent::OV7670 */ \
+  X(PIEZO,                        0xBA) /* GedeeldeBusComponent::PIEZO */ \
+  /*                                */ \
+  /* Identificatie                  */ \
+  X(AS608,                        0xC0) /* GedeeldeBusComponent::AS608 */ \
+  /*                                */ \
+  /* Omgevingslucht                 */ \
+  X(BME680,                       0xC5) /* GedeeldeBusComponent::BME680 */ \
+  X(BME688,                       0xC6) /* GedeeldeBusComponent::BME688 */ \
+  X(BMP280,                       0xC7) /* GedeeldeBusComponent::BMP280 */ \
+  X(SCD41,                        0xC8) /* GedeeldeBusComponent::SCD41 */ \
+  /*                                */ \
+  /* Temperatuur en vochtigheid     */ \
+  X(AHT10,                        0xD0) /* GedeeldeBusComponent::AHT10 */ \
+  X(DHT11,                        0xD1) /* GedeeldeBusComponent::DHT11 */ \
+  X(DHT22,                        0xD2) /* GedeeldeBusComponent::DHT22 */ \
+  X(DS18B20,                      0xD3) /* GedeeldeBusComponent::DS18B20 */ \
+  X(DS3231,                       0xD4) /* GedeeldeBusComponent::DS3231 */ \
+  X(LM35DZ,                       0xD5) /* GedeeldeBusComponent::LM35DZ */ \
+  X(LM75A,                        0xD6) /* GedeeldeBusComponent::LM75A */ \
+  X(MF52A,                        0xD7) /* GedeeldeBusComponent::MF52A */ \
+  X(MF52D,                        0xD8) /* GedeeldeBusComponent::MF52D */ \
+  /*                                */ \
+  /* Vloeistof                      */ \
+  X(WATER,                        0xDA) /* GedeeldeBusComponent::WATER */ \
   /*                                */ \
   /* STURING ---------------------- */ \
   X(A4988,                        0xE0) \
@@ -234,7 +302,7 @@ enum class HardwareResourceType : uint8_t {
 
 // Identiteit van een GEDEELDE pin: welke rol, binnen welk protocol. EXCLUSIEF-claims hebben geen identiteit nodig (GEEN).
 // Twee GEDEELD-claims op dezelfde pin zijn enkel compatibel bij exact dezelfde identiteit.
-enum class HardwareResourceIdentiteit : uint8_t { GEEN, I2C_SDA, I2C_SCL, SPI_SCK, SPI_MISO, SPI_MOSI };
+enum class HardwareResourceIdentiteit : uint8_t { GEEN, I2C_SDA, I2C_SCL, SPI_SCK, SPI_MISO, SPI_MOSI, I2C_TCA_CHANNEL };
 
 // De NP_-waarden zijn de fysieke resources van de UNO-vormfactor.
 // CUSTOM en NONE zijn speciale waarden en zijn zelf geen pinnen.
@@ -366,6 +434,41 @@ struct GedeeldeBusNode {
   bool actief        = false;   // true na een geslaagde activeren()
   bool activerenBezig = false;  // true zolang de hook Activeren() van deze node loopt
   bool conflictGevonden = false;
+
+#if DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF
+  // Tijdelijke runtime-reservering van dit object; geen claim op gedeelde buspinnen.
+  GedeeldeBusNode* runtimeEigenaar = nullptr;
+
+  bool ReserveerRuntime(GedeeldeBusNode* eigenaar) {
+    if (eigenaar == nullptr || !actief || !eigenaar->actief ||
+        (runtimeEigenaar != nullptr && runtimeEigenaar != eigenaar)) return false;
+    runtimeEigenaar = eigenaar;
+    return true;
+  }
+  bool RuntimeToegang(const GedeeldeBusNode* aanvrager) const {
+    return runtimeEigenaar == nullptr || runtimeEigenaar == aanvrager;
+  }
+  bool IsRuntimeEigenaar(const GedeeldeBusNode* eigenaar) const { return runtimeEigenaar == eigenaar; }
+  bool VrijgevenRuntime(const GedeeldeBusNode* eigenaar) {
+    if (eigenaar == nullptr || runtimeEigenaar != eigenaar) return false;
+    // De EXCLUSIEF-claim bij aanmelden blijft van kracht tot afmelden().
+    if (Extender == HardwareResourceToegang::EXCLUSIEF && firstChild == eigenaar &&
+        (component == GedeeldeBusComponent::DATA_MICROSD ||
+         component == GedeeldeBusComponent::DATA_FLASH)) return false;
+    runtimeEigenaar = nullptr;
+    return true;
+  }
+#else
+  // Geen tweede schrijver naar opslag geconfigureerd: geen claim nodig, elke actieve aanvrager krijgt toegang.
+  bool ReserveerRuntime(GedeeldeBusNode* eigenaar) { return eigenaar != nullptr && actief && eigenaar->actief; }
+  bool RuntimeToegang(const GedeeldeBusNode* aanvrager) const { (void)aanvrager; return true; }
+  bool IsRuntimeEigenaar(const GedeeldeBusNode* eigenaar) const { (void)eigenaar; return true; }
+  bool VrijgevenRuntime(const GedeeldeBusNode* eigenaar) { return eigenaar != nullptr; }
+#endif
+#if EXTENDER_TCA9548A_AANTAL > 0
+  // Kanaal van de TCA9548A-parent (0..7). 0xFF betekent: niet geconfigureerd.
+  uint8_t tcaChannel = 0xFF;
+#endif
   const HardwareResourceIdentiteit* gedeeldeIdentiteiten = nullptr;
 #if GEDEELDE_BUS_MIXED_PINS
   // per exclusieve claim het gebied van die pin (index zoals in exclusievePinnen). nullptr (lijst of plaats) = het gewone gebied van deze node.
@@ -386,11 +489,11 @@ struct GedeeldeBusNode {
   // Standaard niets te doen. Dit is de opvolger van EffectiefInpluggen().
   virtual bool Activeren() { return true; }
 
-  // Een analoog kanaal van deze node meten wanneer ze een ADC-Extender is (V8). Standaard: niet ondersteund (-2).
+ // Een analoog kanaal van deze node meten wanneer ze een ADC-Extender is. Standaard: niet ondersteund (-2).
   // bereikMillivolt: het meetbereik dat de child nodig heeft; de Extender kiest zelf zijn passende versterking, per meting.
-  // StartExtenderReadAnalog() geeft (R1, nooit als bool gebruiken: -1 en -2 zijn in C++ true):
-  //    1 = meting gestart; 0 = ADC bezet door een andere child (geen fout, niet melden aan D042);
-  //   -1 = hardwarefout (wel melden aan D042); -2 = ongeldige pin of geen ADC-Extender (geen runtime-fout, niet melden).
+  // StartExtenderReadAnalog() geeft een int8_t: nooit als bool gebruiken (-1 en -2 zijn in C++ true).
+  // 1 = meting gestart; 0 = ADC bezet of referentie niet klaar (geen runtime-fout);
+  // -1 = hardwarefout (melden aan runtime-herstel); -2 = ongeldige pin of niet ondersteund (geen runtime-fout).
   // bereikMillivolt == 0: alleen nagaan of de meting ondersteund wordt (1 of -2). Garanties: geen I2C, geen wijziging van
   //   gain, meetstatus of een lopende conversie. Bedoeld voor Activeren() van een Sensor.
   // Contract (R2, R3): elke Start die 1 teruggaf, sluit dezelfde child af met GetExtenderReadAnalogValue(), ook na een fout of
@@ -401,12 +504,35 @@ struct GedeeldeBusNode {
   virtual int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) { (void)pin; (void)bereikMillivolt; return -2; }
   virtual bool IsExtenderReadAnalogReady() { return true; }
   virtual bool GetExtenderReadAnalogValue(int32_t& waarde) { waarde = 0; return false; }
+  // Effectief full-scale meetbereik van de laatst gestarte ADC-conversie.
+  // Een onbekende Extender geeft 0 terug: nooit een ongedocumenteerde schaal aannemen.
+  virtual uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const { return 0; }
 
-  // Een PWM-kanaal van deze node zetten wanneer ze een PWM-Extender is (V9). waarde: 0 tot 4095. Standaard: niet ondersteund (false).
+  // Toegang tot een child openen, bv. het juiste kanaal van een multiplexer. Standaard: niets te doen.
+  virtual bool SelectAccessForChild(GedeeldeBusNode* child) { (void)child; return true; }
+  // Toegang na Activeren() van een child weer sluiten. Standaard: niets te doen.
+  virtual void ReleaseAccessForChild(GedeeldeBusNode* child) { (void)child; }
+  // Kan deze node fysiek werken achter deze Extender? Standaard ja; timinggevoelige Sensoren overschrijven dit (GB112).
+  virtual bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const { (void)extender; return true; }
+
+  // UART-contract: de Stream van een UART-channel van deze node wanneer ze een UART-Extender is. Standaard: geen (nullptr).
+  virtual Stream* GetExtenderStream(uint8_t channel) { (void)channel; return nullptr; }
+  // UART-contract: de baud van een UART-channel instellen; de Sensor geeft zijn eigen baud door. Standaard: niet ondersteund (false).
+  virtual bool StartExtenderUART(uint8_t channel, uint32_t baud) { (void)channel; (void)baud; return false; }
+
+  // 1-Wire-contract: de 1-Wire-bus van een channel van deze node wanneer ze een 1-Wire-Extender is. Standaard: niet ondersteund (false).
+  virtual bool ExtenderOneWireSelectChannel(uint8_t channel) { (void)channel; return false; }
+  virtual bool ExtenderOneWireSearchReset() { return false; }
+  virtual bool ExtenderOneWireSearch(uint8_t* adres) { (void)adres; return false; }
+  virtual bool ExtenderOneWireReset() { return false; }
+  virtual bool ExtenderOneWireWriteByte(uint8_t waarde) { (void)waarde; return false; }
+  virtual bool ExtenderOneWireReadByte(uint8_t* waarde) { (void)waarde; return false; }
+
+ // Een PWM-kanaal van deze node zetten wanneer ze een PWM-Extender is. waarde: 0 tot 4095. Standaard: niet ondersteund (false).
   // De PWM-frequentie hoort bij de Extender (configuratie), niet bij de child.
   virtual bool WriteExtenderPWM(uint8_t pin, uint16_t waarde) { (void)pin; (void)waarde; return false; }
 
-  // Een Sturing zet haar uitgangen in een veilige toestand (V11). Standaard niets (Sensoren, Extenders, Input, Screen).
+ // Een Sturing zet haar uitgangen in een veilige toestand. Standaard niets (Sensoren, Extenders, Input, Screen).
   // Aangeroepen bij uitschakelen tijdens runtime-herstel, bij afmelden en wanneer activeren() mislukt.
   // Is de parent onbereikbaar, dan lukt dit niet via de bus: een hardwarematige veiligheid (bv. OE-pin) blijft nodig.
   virtual void StopSturing() {}
@@ -452,12 +578,12 @@ struct GedeeldeBusNode {
 
   // Activeren: de hook Activeren() uitvoeren, nadat de parent actief is.
   // Wanneer de parent net zijn children activeert (activerenBezig), wordt die niet opnieuw geactiveerd.
-  // Lichaam in GedeeldeBus.cpp: daar is ExtenderTCA9548A gekend, voor het kanaal van een component achter een TCA9548A.
+  // Lichaam in GedeeldeBus.cpp: de toegang tot een child loopt via SelectAccessForChild() en ReleaseAccessForChild() van de parent (bv. ExtenderTCA9548A).
   virtual bool activeren();
 
-  // Runtime-herstel (D042): alle nodes onder deze node (kinderen, kleinkinderen, ...).
+  // Runtime-herstel: alle nodes onder deze node (kinderen, kleinkinderen, ...).
   // Uitschakelen: eerst StopSturing() bij alle onderliggende nodes, daarna actief = false, zodat niemand nog leest van een component dat niet antwoordt.
-  // OpnieuwActiveren: activeren() van boven naar onder, zodat elk component zijn instellingen opnieuw zet (bv. de gain van RFP602).
+  // OpnieuwActiveren: activeren() van boven naar onder, zodat elk component zijn instellingen opnieuw zet (bv. de gain van FSR_RFP).
   void AlleOnderliggendeNodesUitschakelen();
   void AlleOnderliggendeNodesOpnieuwActiveren();
 
@@ -472,6 +598,15 @@ struct GedeeldeBusNode {
     if (!aangemeld) return true;
     if (firstChild != nullptr) return false;  // heeft nog eigen kinderen: eerst die afmelden
     StopSturing();
+#if DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF
+    // Ook claims op andere nodes die door dit object werden gereserveerd vrijgeven.
+    GedeeldeBusNode* wortel = this;
+    while (wortel->parent != nullptr) wortel = wortel->parent;
+    for (const GedeeldeBusNode* node = wortel; node != nullptr; node = VolgendeInBoom(node, wortel)) {
+      if (node->runtimeEigenaar == this) const_cast<GedeeldeBusNode*>(node)->runtimeEigenaar = nullptr;
+    }
+    runtimeEigenaar = nullptr;
+#endif
     if (prevChild != nullptr) prevChild->nextChild = nextChild;
     else if (parent != nullptr) parent->firstChild = nextChild;
     if (nextChild != nullptr) nextChild->prevChild = prevChild;
@@ -520,6 +655,9 @@ struct GedeeldeBusNode {
     return firstExtenderNode();
   }
 
+#endif
+
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // Een pin van deze node gebruiken wanneer ze een Extender is. Standaard niets; ingevuld door de Extenders met digitale pinnen.
   virtual void SetExtenderPinMode(uint8_t pin, uint8_t modus) { (void)pin; (void)modus; }
   virtual void WriteExtenderPin(uint8_t pin, uint8_t niveau) { (void)pin; (void)niveau; }
@@ -545,9 +683,23 @@ struct GedeeldeBusNode {
     return nullptr;
   }
 
-  uint8_t AantalClaims() const { return aangemeldePinnen.aantalExclusief + aangemeldePinnen.aantalGedeeld; }
+  uint8_t AantalClaims() const {
+    const uint8_t aantal = aangemeldePinnen.aantalExclusief + aangemeldePinnen.aantalGedeeld;
+#if EXTENDER_TCA9548A_AANTAL > 0
+    if (tcaChannel <= 7) return aantal + 1;
+#endif
+    return aantal;
+  }
 
   uint8_t ClaimWaarde(uint8_t index, bool& exclusief, HardwareResourceIdentiteit& identiteit) const {
+#if EXTENDER_TCA9548A_AANTAL > 0
+    // Virtuele gedeelde claim, achter de gewone I2C-adres/SDA/SCL-claims.
+    if (tcaChannel <= 7 && index == aangemeldePinnen.aantalExclusief + aangemeldePinnen.aantalGedeeld) {
+      exclusief = false;
+      identiteit = HardwareResourceIdentiteit::I2C_TCA_CHANNEL;
+      return tcaChannel;
+    }
+#endif
     if (index < aangemeldePinnen.aantalExclusief) {
       exclusief = true;
       identiteit = HardwareResourceIdentiteit::GEEN;
@@ -604,8 +756,13 @@ struct HardwareResourceTypeI2C : GedeeldeBusNode {
   uint8_t gedeeld_[2];
   uint8_t exclusief_[1];
 
-  HardwareResourceTypeI2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+  HardwareResourceTypeI2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
     : GedeeldeBusNode(parent, { gedeeld_, 2, exclusief_, 1 }, component, Extender), adres(adres), np_SDA(np_SDA), np_SCL(np_SCL) {
+#if EXTENDER_TCA9548A_AANTAL > 0
+    if (parent != nullptr && parent->component == GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) this->tcaChannel = tcaChannel;
+#else
+    (void)tcaChannel;
+#endif
     this->gedeeldeIdentiteiten = GedeeldeBusIdentiteitI2C;
     gedeeld_[0] = static_cast<uint8_t>(np_SDA);
     gedeeld_[1] = static_cast<uint8_t>(np_SCL);
@@ -628,7 +785,7 @@ struct HardwareResourceTypeI2C : GedeeldeBusNode {
   // GB303 bewaart de fout in 1 byte; een signed libraryfout zoals -102 verschijnt daardoor als 0x9A. TRACE toont de oorspronkelijke waarde -102.
   bool FoutDiagnoseI2C(bool gelukt, int fout, bool terugGelezen);
 
-  // Runtime-herstel (D042). Lichamen in GedeeldeBus.cpp.
+  // Runtime-herstel. Lichamen in GedeeldeBus.cpp.
   ToestandTijdensRuntime toestandTijdensRuntime;
   // Vóór elke toegang: true = mag nu gebruikt worden. Uitgeschakeld: na RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS de bus vrijmaken en opnieuw activeren().
   bool ComponentBeschikbaarTijdensRuntime();
@@ -746,6 +903,14 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
     return resultaat;
   }
 };
+
+// ============================================================================
+// Native-singleton (Deel V-fix): de echte, bestaande wortel van de boom.
+// Alle top-level nodes (Extenders, Screens, native Input/Output) wijzen hiernaar als parent, 
+// in plaats van nullptr - pas dan werkt de sibling-conflictcontrole in controleren() ook op dit niveau (bv. twee I2C-apparaten op hetzelfde adres, 
+// of FSR_RFP en SerialOutput die toevallig dezelfde D-pin claimen).
+// ============================================================================
+extern GedeeldeBusNode Native;
 
 // ============================================================================
 // CONCRETE EXTENDERS: blijven architecturaal onderdeel van GedeeldeBus,
@@ -960,26 +1125,34 @@ struct SensorQueueOrStack;   // staat in Data.h
 
 struct Sensor : GedeeldeBusNode {
   using GedeeldeBusNode::GedeeldeBusNode;
+  // Aantal meetkanalen van deze Sensor; Data wijst daarvoor bij activeren() één keer de kanaaltabel toe.
+  virtual uint8_t AantalChannels() const { return 0; }
 #if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE
   // QueueOrStack per channel: elke sensor erft deze functies; de FIFO/LIFO-logica staat in Data.
   // Ook zonder DATA_TYPE_DIRECT: lastValue per channel is de terugval van StreamingRead() en RecordRead().
   SensorQueueOrStack* QueueOrStack = nullptr;      // tabel van de sensor, één per channel
+  SensorQueueOrStack* QueueOrStackAutomatisch = nullptr;  // alleen eigenaar van automatisch toegewezen kanaaltabellen
+  ~Sensor() override;
+  // Vaste identiteit van de configuratieroute (component, pinclaims, ouderketen), één keer berekend in activeren().
+  uint32_t vasteRouteIdentiteit = 0;
+  bool activeren() override;   // eerst kanaaltabel, daarna GedeeldeBusNode::activeren() en vasteRouteIdentiteit (Data.cpp)
   uint8_t numberOfChannels = 0;
   void WriteQueueOrStack(uint8_t numberChannel, int value);
+  void WriteQueueOrStack(uint8_t numberChannel, float value);
+  void WriteQueueOrStack(uint8_t numberChannel, uint32_t value);
+  float ReadQueueOrStackFloat(uint8_t numberChannel);
+  uint32_t ReadQueueOrStackUInt32(uint8_t numberChannel);
   int8_t ReadQueueOrStackStatus(uint8_t numberChannel);   // 1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
   int ReadQueueOrStackValue(uint8_t numberChannel);       // volgende waarde; leeg = lastValue; sensor bestaat niet = 0
   int StreamingRead(uint8_t numberChannel);               // laatste waarde uit FLASH; anders lastValue van dit channel; sensor bestaat niet = 0
-  int RecordRead(uint8_t numberChannel);                  // eerste waarde uit het logbestand; anders lastValue van dit channel; sensor bestaat niet = 0
+  int RecordRead(uint8_t numberChannel);                  // eerste waarde uit SENSOR.DAT; anders lastValue van dit channel; sensor bestaat niet = 0
+  bool StreamingRead(uint8_t numberChannel, float& value);
+  bool StreamingRead(uint8_t numberChannel, uint32_t& value);
+  bool RecordRead(uint8_t numberChannel, float& value);
+  bool RecordRead(uint8_t numberChannel, uint32_t& value);
 #endif
 };
 
-// ============================================================================
-// Native-singleton (Deel V-fix): de echte, bestaande wortel van de boom.
-// Alle top-level nodes (Extenders, Screens, native Input/Output) wijzen hiernaar als parent, 
-// in plaats van nullptr - pas dan werkt de sibling-conflictcontrole in controleren() ook op dit niveau (bv. twee I2C-apparaten op hetzelfde adres, 
-// of RFP602 en SerialOutput die toevallig dezelfde D-pin claimen).
-// ============================================================================
-extern GedeeldeBusNode Native;
 
 #if GEDEELDE_BUS_MIXED_PINS
 // GedeeldeBusFindI2CExtender: zoekt in de boom een I2C-Extender op component en adres. nullptr = niet gevonden.

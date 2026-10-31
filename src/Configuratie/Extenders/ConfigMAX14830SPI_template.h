@@ -2,6 +2,20 @@
 #define CONFIG_MAX14830SPI_H
 
 // ============================================================================
+// Werkelijke externe/kristalbronfrequentie, zonder veronderstelde standaard.
+#ifndef EXTENDER_MAX14830_BRONKLOK_HZ
+// #define EXTENDER_MAX14830_BRONKLOK_HZ 0  // standaard waarde: 0 (onbekend)
+#endif
+#ifndef EXTENDER_MAX14830_BRONKLOK_KRISTAL
+// #define EXTENDER_MAX14830_BRONKLOK_KRISTAL 1  // standaard waarde: 1 (kristal); 0 = externe klok aan XIN
+#endif
+#ifndef EXTENDER_MAX14830_PLL_VOORDELER
+// #define EXTENDER_MAX14830_PLL_VOORDELER 0  // standaard waarde: 0 (PLL uit); anders 1 t/m 63
+#endif
+#ifndef EXTENDER_MAX14830_PLL_VERMENIGVULDIGER
+// #define EXTENDER_MAX14830_PLL_VERMENIGVULDIGER 0  // standaard waarde: 0 (PLL uit); anders 6, 48, 96 of 144
+#endif
+
 // EXTENDER: MAX14830 SPI
 // ============================================================================
 #ifndef EXTENDER_MAX14830_SPI_AANTAL

@@ -102,6 +102,7 @@
 // DATA_TYPE_FLASH_SPI     FLASH-chip via SPI
 // DATA_TYPE_FRAM_I2C      FRAM-chip via I2C
 // DATA_TYPE_MICROSD_SPI   microSD-kaart via SPI
+// DATA_TYPE_NRF24L01_SPI  NRF24L01-radiomodule via SPI (records draadloos doorsturen)
 // DATA_TYPE_EEPROM_SPI en DATA_TYPE_FRAM_SPI bestaan, maar worden nog niet ondersteund in v2.0.0.
 // Combineer meerdere datatypes met |.
 //
@@ -268,6 +269,11 @@
 
 #ifndef ACTIEF_PIXEL_SCREEN
 // #define ACTIEF_PIXEL_SCREEN            SCREEN_240X320           // standaard waarde: SCREEN_240X320
+#endif
+
+// Schermchip (controller) van het pixelscherm: SCREEN_ST7789 of SCREEN_ST7735S (1,8", alleen met SCREEN_128X160).
+#ifndef ACTIEF_PIXEL_SCREEN_CONTROLLER
+// #define ACTIEF_PIXEL_SCREEN_CONTROLLER SCREEN_ST7789            // standaard waarde: SCREEN_ST7789
 #endif
 
 // Standaard rotatiewaarden (met de klok mee):
@@ -712,6 +718,23 @@
 // #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
 // #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // I2C-adres van die Extender
 // #define DATA_LAYER_MICROSD_SPI_1_CS_PIN ExtenderPCF8574::ExtenderPins::EP_P0             // CS-pin op die Extender
+#endif
+
+// NRF24L01 (radiomodule): elk record dat naar Data gaat, wordt ook draadloos verstuurd. CS kan niet via een Extender.
+#ifndef DATA_LAYER_NRF24L01_SPI_AANTAL
+// #define DATA_LAYER_NRF24L01_SPI_AANTAL 0  // standaard waarde: 1 wanneer DATA_TYPE_NRF24L01_SPI actief is, anders 0; maximaal 1
+#endif
+#ifndef DATA_LAYER_NRF24L01_SPI_1_CS_PIN
+// #define DATA_LAYER_NRF24L01_SPI_1_CS_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF (CSN)
+#endif
+#ifndef DATA_LAYER_NRF24L01_SPI_1_CE_PIN
+// #define DATA_LAYER_NRF24L01_SPI_1_CE_PIN HardwareResourcePin::NONE  // standaard waarde: HardwareResourcePin::NONE  // EXCLUSIEF (Chip Enable)
+#endif
+#ifndef DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL
+// #define DATA_LAYER_NRF24L01_SPI_1_RF_CHANNEL 76  // standaard waarde: 76; radiokanaal 0 t/m 125
+#endif
+#ifndef DATA_LAYER_NRF24L01_SPI_1_ADRES
+// #define DATA_LAYER_NRF24L01_SPI_1_ADRES "GROEI"  // standaard waarde: "GROEI"; precies 5 tekens, gelijk aan de ontvanger
 #endif
 
 

@@ -25,8 +25,8 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
   // DEFAULT: PCA9685 #1
   // ============================================================================
   #if EXTENDER_PCA9685_AANTAL == 1
-  ExtenderPCA9685(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender), PCA9685(adres, &Wire) {}
+  ExtenderPCA9685(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender, tcaChannel), PCA9685(adres, &Wire) {}
   #endif
 
   // ============================================================================
@@ -44,8 +44,8 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
 
   #undef BUNDEL_EXTENDER
 
-  ExtenderPCA9685(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender), PCA9685(ExtenderLijst[teller].adres, &Wire) {}
+  ExtenderPCA9685(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
+    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), PCA9685(ExtenderLijst[teller].adres, &Wire) {}
   #endif
 
   bool Activeren() override {
@@ -83,16 +83,18 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
     return FoutDiagnoseI2C(gelukt, PCA9685::lastError(), terugGelezen);
   }
 
-#if defined(EXTENDER_PCA9685_1_OE_PIN) || defined(EXTENDER_PCA9685_2_OE_PIN)
   // Punt 3: bij uitval alle 16 uitgangen in één keer uit via de OE-pin, ook als de I2C-bus hangt.
-  // Zonder OE-pin voor deze chip doet setOutputEnable() niets.
+  // Zonder OE-pin voor deze chip doet setOutputEnable() niets; daarom ook een poging via I2C (alle kanalen uit).
+  // Die poging lukt alleen als de bus nog werkt; hangt de bus, dan wacht ze op de timeout van Wire.
   void StopSturing() override {
+#if defined(EXTENDER_PCA9685_1_OE_PIN) || defined(EXTENDER_PCA9685_2_OE_PIN)
     PCA9685::setOutputEnable(false);
-  }
 #endif
+    PCA9685::allOFF();
+  }
 
   // V9: een PWM-kanaal zetten voor een child (bv. later een servo), zonder dat die de PCA9685 kent. waarde: 0 tot 4095.
-  // Runtime-herstel (D042): eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
+  // Runtime-herstel: eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
   bool WriteExtenderPWM(uint8_t pin, uint16_t waarde) override {
     if (pin > static_cast<uint8_t>(ExtenderPins::EP_PWM15)) return false;
     if (!ComponentBeschikbaarTijdensRuntime()) return false;

@@ -34,7 +34,7 @@
   #include "../../Language/Library_FR.h"
 #endif
 #include "../../Systeem/Screen/Screen.h"
-#include "../../Systeem/Sensor/RFP602.h"
+#include "../../Systeem/Sensor/FSR_RFP.h"
 
 // ============================================================================
 // CONSTANTEN DIE NIET AANGEPAST MOGEN WORDEN
@@ -139,7 +139,7 @@ struct SynchronisatieProfiel {
 // ============================================================================
 // v2.0.0: Stimulus is het object.
 // De bestaande Stimulus-algoritmes en Stimulus-status behoren tot dit object.
-// De directe sensoruitlezing verloopt via sensorRFP602set1.
+// De directe sensoruitlezing verloopt via sensorFSR_RFPset1.
 // ============================================================================
 struct Stimulus {
   int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offset);
@@ -152,7 +152,7 @@ struct Stimulus {
                         int &aantalNulmetingPogingen);
 
   // Bewust publiek gehouden als voorbereide bouwsteen voor toekomstige paarsgewijze synchronisatie.
-  // Ze wordt momenteel nergens aangeroepen (D020).
+ // Ze wordt momenteel nergens aangeroepen.
   SynchronisatieProfiel MaakSynchronisatieProfiel(SensorMeetStatus sensor[], int sensorA,
                                                    int sensorB,
                                                    StimulusProfiel gemetenStimulus[]);

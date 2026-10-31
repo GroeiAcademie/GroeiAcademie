@@ -4,6 +4,12 @@
 // ============================================================================
 // EXTENDER: CD74HC4067
 // ============================================================================
+// Alleen bij een native analoge Z-pin: werkelijk gebruikt native ADC-referentiebereik.
+// 0 = onbekend; native ADC-metingen worden dan geweigerd.
+#ifndef EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT
+// #define EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT 0  // standaard waarde: 0 (onbekend)
+#endif
+
 #ifndef EXTENDER_CD74HC4067_AANTAL
 // #define EXTENDER_CD74HC4067_AANTAL 0  // standaard waarde: 0
 #endif

@@ -19,7 +19,7 @@ Actuele validatiefocus:
 - Screen via `GedeeldeBusNewComponent`;
 - Input via `GedeeldeBusNewComponent`, zonder publieke `InputConfigureren()`;
 - 14 concrete Extenders en hun `ExtenderPins::EP_<pinnaam>`-resourcebereiken;
-- RFP602 als eerste Sensor, via de ADS1115-Extender;
+- FSR_RFP als eerste Sensor, via de ADS1115-Extender;
 - DEBUG-only `Diagnose()` is als lege virtuele hook aanwezig; concrete Diagnose-tests zijn nog niet geïmplementeerd.
 
 Elektronische functietesten per Extender en volledige praktijktesten met de beschikbare sensoren zijn nog onderdeel van de beta-validatie en worden niet als voltooid voorgesteld.

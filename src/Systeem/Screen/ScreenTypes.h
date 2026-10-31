@@ -27,4 +27,8 @@
 #define SCREEN_320X480  0x0600 // 320x480 pixels
 #define SCREEN_480X320  0x0700 // 480x320 pixels
 
+// Pixelschermcontrollers: maximaal één keuze
+#define SCREEN_ST7789   0x1000 // ST7789 (Adafruit_ST7789)
+#define SCREEN_ST7735S  0x2000 // ST7735S 1,8" (Adafruit_ST7735), alleen 128x160
+
 #endif // SCREEN_TYPES_H

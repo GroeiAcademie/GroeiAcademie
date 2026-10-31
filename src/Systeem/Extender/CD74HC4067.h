@@ -23,6 +23,65 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
 
   HardwareResourcePin np_S0, np_S1, np_S2, np_S3, np_EN, np_Z;
   uint8_t exclusief_[6];
+  // CD74HC4067 is geen ADC: channel kiezen en het bestaande contract doorgeven
+  // aan de eigen ADC-parent, via Z = de ADC-ingang op die parent.
+  bool metingBezig = false;
+  uint8_t metingChannel = 0;
+  bool Activeren() override {
+    metingBezig = false;
+    return ingeplugd && parent != nullptr && parent->actief;
+  }
+  int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_Y15) || parent == nullptr || np_Z == HardwareResourcePin::NONE || np_Z == HardwareResourcePin::CUSTOM) return -2;
+    // Native is geen ADC-Extender: Z moet fysiek op een echte analoge pin zitten.
+    if (parent == &Native) {
+      const uint8_t z = static_cast<uint8_t>(np_Z);
+      if (z < static_cast<uint8_t>(HardwareResourcePin::NP_A0) ||
+          z > static_cast<uint8_t>(HardwareResourcePin::NP_A5) ||
+          NativeArduinoPinVan(np_Z) == static_cast<uint8_t>(HardwareResourcePin::NONE)) return -2;
+      if (bereikMillivolt == 0) return 1;
+      if (EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT == 0 ||
+          bereikMillivolt > EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT) return -2;
+    } else {
+      // Proef op bereik 0 verandert geen selectielijnen of parent-meetstatus.
+      if (bereikMillivolt == 0) return parent->StartExtenderReadAnalog(static_cast<uint8_t>(np_Z), 0);
+    }
+    if (metingBezig) return 0;
+    if (!actief) return -1;
+    selectChannel(static_cast<ExtenderPins>(pin));
+    enable();
+    // Voor de eerste conversie na een channelwisseling moet de analoge ingang
+    // fysiek voldoende settelen. De ADC-parent bepaalt zijn acquisitietijd.
+    const int8_t resultaat = parent == &Native ? 1 : parent->StartExtenderReadAnalog(static_cast<uint8_t>(np_Z), bereikMillivolt);
+    if (resultaat == 1) { metingBezig = true; metingChannel = pin; }
+    else disable();
+    return resultaat;
+  }
+  bool IsExtenderReadAnalogReady() override { return !metingBezig || parent == nullptr || parent == &Native || parent->IsExtenderReadAnalogReady(); }
+  bool GetExtenderReadAnalogValue(int32_t& waarde) override {
+    waarde = 0;
+    if (!metingBezig || parent == nullptr) return false;
+    // Bij concurrentie blijft de eerder gekozen channel op dezelfde Extender actief.
+    bool gelukt;
+    if (parent == &Native) {
+      // Native analogRead() heeft de board-afhankelijke resolutie uit SystemConfig.h.
+      // Omrekenen naar ADC_BITS zonder extra precisie aan de hardware toe te schrijven.
+      const int ruw = analogRead(NativeArduinoPinVan(np_Z));
+      gelukt = ruw >= 0 && static_cast<uint32_t>(ruw) <= ((1UL << NATIVE_ADC_RESOLUTIE_BITS) - 1UL);
+      if (gelukt) waarde = static_cast<int32_t>((static_cast<uint32_t>(ruw) * ADC_MAX) / ((1UL << NATIVE_ADC_RESOLUTIE_BITS) - 1UL));
+    } else {
+      gelukt = parent->GetExtenderReadAnalogValue(waarde);
+    }
+    metingBezig = false;
+    disable();
+    return gelukt;
+  }
+  uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const override {
+    return parent == nullptr ? 0 :
+      (parent == &Native ? EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT :
+        parent->GetExtenderReadAnalogEffectiefBereikMillivolt());
+  }
+
 
   // ============================================================================
   // DEFAULT — CD74HC4067 #1
@@ -73,7 +132,10 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
     pinMode(NativeArduinoPinVan(np_S1), OUTPUT);
     pinMode(NativeArduinoPinVan(np_S2), OUTPUT);
     pinMode(NativeArduinoPinVan(np_S3), OUTPUT);
-    if (np_EN != HardwareResourcePin::NONE) pinMode(NativeArduinoPinVan(np_EN), OUTPUT);
+    if (np_EN != HardwareResourcePin::NONE) {
+      digitalWrite(NativeArduinoPinVan(np_EN), HIGH);
+      pinMode(NativeArduinoPinVan(np_EN), OUTPUT);
+    }
     return true;
   }
 

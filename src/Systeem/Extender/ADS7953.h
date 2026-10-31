@@ -30,6 +30,73 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
 
   uint8_t exclusiefMetGpio_[5];
 
+  // TI ADS7953, manual-mode SPI: de geselecteerde CH verschijnt pas twee frames later.
+  bool metingBezig = false;
+  uint8_t metingChannel = 0;
+  uint16_t laatsteCommando = 0;
+  uint16_t effectiefBereikMillivolt = 0;
+  uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const override { return effectiefBereikMillivolt; }
+
+  bool Activeren() override { metingBezig = false; effectiefBereikMillivolt = 0; return ingeplugd && parent && parent->actief; }
+
+  // één SPI-frame: eigen CS gedurende de 16 klokslagen actief.
+  uint16_t ADCTransferFrame(uint16_t commando) {
+    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+    WriteCS(LOW);
+    const uint16_t antwoord = (static_cast<uint16_t>(SPI.transfer(static_cast<uint8_t>(commando >> 8))) << 8) |
+                             SPI.transfer(static_cast<uint8_t>(commando));
+    WriteCS(HIGH);
+    SPI.endTransaction();
+    return antwoord;
+  }
+
+  int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_CH15)) return -2;
+    // De chip heeft een externe REF. Bereik 0 blijft een zuivere capability-check.
+    if (bereikMillivolt == 0) return 1;
+    if (bereikMillivolt > EXTENDER_ADS7953_REFERENTIE_MILLIVOLT * 2UL) return -2;
+    // TI: 2xVREF is alleen geldig als de analoge voeding minstens 2xVREF is.
+    // Zonder expliciete voedingsspanning kan dit bereik niet veilig beloofd worden.
+    if (bereikMillivolt > EXTENDER_ADS7953_REFERENTIE_MILLIVOLT &&
+        (EXTENDER_ADS7953_VOEDING_MILLIVOLT == 0 ||
+         EXTENDER_ADS7953_VOEDING_MILLIVOLT < EXTENDER_ADS7953_REFERENTIE_MILLIVOLT * 2UL)) return -2;
+    if (EXTENDER_ADS7953_VOEDING_MILLIVOLT != 0 &&
+        EXTENDER_ADS7953_VOEDING_MILLIVOLT < EXTENDER_ADS7953_REFERENTIE_MILLIVOLT) return -2;
+    if (metingBezig) return 0;
+    if (!actief) return -1;
+    metingChannel = pin;
+    // DI15..12=0001: manual mode; DI11=1: range/programming geldig;
+    // DI10..07: channel; DI06: 0..REF of 0..2*REF.
+    const bool dubbelBereik = bereikMillivolt > EXTENDER_ADS7953_REFERENTIE_MILLIVOLT;
+    const uint16_t commando = static_cast<uint16_t>(0x1800 | (pin << 7) | (dubbelBereik ? 0x40 : 0));
+    laatsteCommando = commando;
+    (void)ADCTransferFrame(commando);
+    effectiefBereikMillivolt = static_cast<uint16_t>(EXTENDER_ADS7953_REFERENTIE_MILLIVOLT * (dubbelBereik ? 2UL : 1UL));
+    metingBezig = true;
+    return 1;
+  }
+
+  bool IsExtenderReadAnalogReady() override { return true; }
+  bool GetExtenderReadAnalogValue(int32_t& waarde) override {
+    waarde = 0;
+    if (!metingBezig) return false;
+    metingBezig = false;
+    if (!actief) return false;
+    // Frame N: channel aanvragen. Frame N+1: selectie; frame N+2: sample CHn.
+    // Handhaaf de manual-mode en channelkeuze tijdens beide vervolgframes.
+    (void)ADCTransferFrame(laatsteCommando);
+    const uint16_t antwoord = ADCTransferFrame(laatsteCommando);
+    if ((antwoord >> 12) != metingChannel) return false;
+    const uint16_t ruw = antwoord & 0x0FFF;
+#if ADC_BITS >= 12
+    waarde = static_cast<int32_t>(ruw) << (ADC_BITS - 12);
+#else
+    waarde = static_cast<int32_t>(ruw) >> (12 - ADC_BITS);
+#endif
+    return true;
+  }
+
+
   // ============================================================================
   // DEFAULT: ADS7953 #1
   // ============================================================================

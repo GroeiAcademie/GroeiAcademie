@@ -27,21 +27,35 @@ struct Data;
   #include "microSD.h"
 #endif
 
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_NRF24L01_SPI)
+  #include "NRF24L01.h"
+#endif
+
 // Eén per channel; het geheugen van de QueueOrStack geeft de sensor op.
 // Bestaat bij elk Data-type: lastValue is ook de terugval van StreamingRead() en RecordRead().
 struct SensorQueueOrStack {
-  int lastValue;          // laatst gemeten waarde van dit channel, ook zonder QueueOrStack
+  // Per channel één waarde en één buffer; valueType zegt welk type geldig is (0 = int, 1 = float, 2 = uint32_t).
+  union {
+    int lastValue;          // laatst gemeten waarde van dit channel, ook zonder QueueOrStack
+    float lastValueFloat;
+    uint32_t lastValueUInt32;
+  };
 #if DATA_QUEUE_OR_STACK_ACTIEF
-  int* buffer;
+  union {                   // één buffer van 4 bytes per plaats, voor elk van de drie types
+    int* buffer;
+    float* bufferFloat;
+    uint32_t* bufferUInt32;
+  };
   uint16_t sizeQueueOrStack;
   bool LIFO;              // false = oudste waarde eerst (FIFO), true = nieuwste waarde eerst (LIFO)
   uint16_t firstIndex;    // plaats van de oudste waarde
   uint16_t countNumber;   // aantal waarden in de QueueOrStack
 #endif
+  uint8_t valueType;
 };
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_DIRECT)
-// DIRECT: kind van Data, zonder claims (V1). De waarde wordt doorgegeven aan de lezer via lastValue en de QueueOrStack van het channel.
+// DIRECT: kind van Data, zonder claims. De waarde wordt doorgegeven aan de lezer via lastValue en de QueueOrStack van het channel.
 struct DataDIRECT : GedeeldeBusNode {
   DataDIRECT(GedeeldeBusNode* parent)
     : GedeeldeBusNode(parent, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent::DATA_DIRECT, HardwareResourceToegang::GEDEELD) {}
@@ -59,17 +73,23 @@ struct Data : GedeeldeBusNode {
   bool afmelden() override;
 
   void WriteQueueOrStack(SensorQueueOrStack& channel, int value);
+  void WriteQueueOrStack(SensorQueueOrStack& channel, float value);
+  void WriteQueueOrStack(SensorQueueOrStack& channel, uint32_t value);
+  float ReadQueueOrStackFloat(SensorQueueOrStack& channel);
+  uint32_t ReadQueueOrStackUInt32(SensorQueueOrStack& channel);
   int8_t ReadQueueOrStackStatus(SensorQueueOrStack& channel);   // 1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg (>= 0 = waarde klaar)
   int ReadQueueOrStackValue(SensorQueueOrStack& channel);       // volgende waarde; leeg = lastValue
 
   void StreamingStart();
-  void StreamingWrite(int ruweData);
-  int StreamingRead(SensorQueueOrStack& channel);               // laatste waarde uit FLASH; anders lastValue van dit channel
+  // Getypeerd record met sensor- en kanaalidentiteit.
+#if ((DATA_LAYER_CONFIG) & (DATA_TYPE_FLASH_SPI | DATA_TYPE_MICROSD_SPI | DATA_TYPE_NRF24L01_SPI))
+  void StreamingWrite(const Sensor& sensor, uint8_t numberChannel, const SensorQueueOrStack& channel);
+#endif
+  bool StreamingRead(const Sensor& sensor, uint8_t numberChannel, SensorQueueOrStack& channel);
   void StreamingStop();
 
   void RecordingStart();
-  void RecordingWrite(int ruweData);
-  int RecordRead(SensorQueueOrStack& channel);                  // eerste waarde uit het logbestand; anders lastValue van dit channel
+  bool RecordRead(const Sensor& sensor, uint8_t numberChannel, SensorQueueOrStack& channel);
   void RecordingStop();
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE)
@@ -79,6 +99,8 @@ struct Data : GedeeldeBusNode {
 #endif
 
   uint16_t typesActief;
+  bool streamingActief = false;
+  bool recordingActief = false;
 
   // Per medium de lijst van zijn chips (N7). nullptr = niet aangemaakt of afgemeld; de chip wist zijn plaats zelf in zijn destructor (N3 b).
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE) && BOARD_VERSION != BOARD_UNO_Q
@@ -96,6 +118,9 @@ struct Data : GedeeldeBusNode {
 #endif
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI) || REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD
   struct DataMICROSDviaSPI* MICROSDviaSPI[DATA_LAYER_MICROSD_SPI_AANTAL] = {};
+#endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_NRF24L01_SPI)
+  struct DataNRF24L01viaSPI* NRF24L01viaSPI[DATA_LAYER_NRF24L01_SPI_AANTAL] = {};
 #endif
 };
 

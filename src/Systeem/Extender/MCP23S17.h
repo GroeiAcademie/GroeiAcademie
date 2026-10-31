@@ -71,12 +71,15 @@ struct ExtenderMCP23S17 : HardwareResourceTypeSPI, MCP23S17 {
     return FoutDiagnoseSPI(gelukt, MCP23S17::lastError(), terugGelezen);
   }
 
-#if GEDEELDE_BUS_MIXED_PINS
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // V10: pin van deze Extender voor een component van een ander gebied, zoals bij MCP23017.
-  // Geen runtime-herstel (D042): dat bestaat alleen voor I2C.
-  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override { MCP23S17::pinMode1(pin, modus); }
-  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override { MCP23S17::write1(pin, niveau); }
-  uint8_t ReadExtenderPin(uint8_t pin) override { return MCP23S17::read1(pin); }
+  // Geen runtime-herstel: dat bestaat alleen voor I2C.
+  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return; MCP23S17::pinMode1(pin, modus); }
+  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return; MCP23S17::write1(pin, niveau); }
+  uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return 0; return MCP23S17::read1(pin); }
 #endif
 };
 

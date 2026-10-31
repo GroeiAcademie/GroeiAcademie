@@ -13,7 +13,7 @@ struct A4988 : GedeeldeBusNode {
   bool Activeren() override {if(stepPin==static_cast<uint8_t>(HardwareResourcePin::NONE)||dirPin==static_cast<uint8_t>(HardwareResourcePin::NONE)||stepPin==dirPin)return false;digitalWrite(stepPin,LOW);pinMode(stepPin,OUTPUT);pinMode(dirPin,OUTPUT);return true;}
   bool doOneStep(bool forward,uint16_t pulseMicroseconds=2){if(!actief||pulseMicroseconds<1)return false;
     digitalWrite(dirPin,forward?HIGH:LOW);digitalWrite(stepPin,HIGH);delayMicroseconds(pulseMicroseconds);digitalWrite(stepPin,LOW);return true;}
-  void StopSturing() override {digitalWrite(stepPin,LOW);}
+  void StopSturing() override {if(!actief)return;digitalWrite(stepPin,LOW);}   // niet actief: pin mogelijk NONE (255), niet schrijven
 };
 
 #endif

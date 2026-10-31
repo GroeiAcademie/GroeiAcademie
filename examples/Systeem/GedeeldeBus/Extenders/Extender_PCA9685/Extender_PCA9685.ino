@@ -26,7 +26,7 @@ void setup() {
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
-// Runtime-herstel (D042) bij een eigen oproep van de library: zelf ComponentBeschikbaarTijdensRuntime() en
+// Runtime-herstel bij een eigen oproep van de library: zelf ComponentBeschikbaarTijdensRuntime() en
 // ResultaatComponentToegangTijdensRuntimeVerwerken() oproepen. Dan herstelt de PCA9685 vanzelf na een los contact.
 void loop() {
   if (!extender.ComponentBeschikbaarTijdensRuntime()) return;

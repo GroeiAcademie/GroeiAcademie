@@ -3,14 +3,14 @@
 // ============================================================================
 // Meet 10 s lang de vier ingangen van de ADS1115-Extender en toont per kanaal
 // gemiddelde, standaardafwijking, minimum en maximum.
-// Druk onmiddellijk op de aangesloten RFP602-sensoren.
+// Druk onmiddellijk op de aangesloten FSR_RFP-sensoren.
 // ============================================================================
 
 #include <GroeiAcademie.h>
 
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: RFP602 meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -24,10 +24,10 @@ ExtenderADS1115 extenderADS1115(
 #define STIMULUS_AANTAL_KANALEN 4
 
 const uint8_t sensorPin[STIMULUS_AANTAL_KANALEN] = {
-  RFP602_ADC_PIN_SENSOR_1_SET_1,
-  RFP602_ADC_PIN_SENSOR_2_SET_1,
-  RFP602_ADC_PIN_SENSOR_3_SET_1,
-  RFP602_ADC_PIN_SENSOR_4_SET_1
+  FSR_RFP_ADC_PIN_SENSOR_1_SET_1,
+  FSR_RFP_ADC_PIN_SENSOR_2_SET_1,
+  FSR_RFP_ADC_PIN_SENSOR_3_SET_1,
+  FSR_RFP_ADC_PIN_SENSOR_4_SET_1
 };
 
 bool ads1115Aanwezig = false;

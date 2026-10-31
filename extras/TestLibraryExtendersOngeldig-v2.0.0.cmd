@@ -118,5 +118,23 @@ set "VERWACHTE_FOUT=EXTENDER_TCA9548A_AANTAL ondersteunt momenteel maximaal 2 in
 call :EXPECT_FAIL
 
 echo.
+set "TEST_INO=examples\Systeem\GedeeldeBus\Extenders\Extender_ADS7828\Extender_ADS7828.ino"
+set "TEST_NAAM=EXTENDER_ADS7828_EXTERNE_REFERENTIE: ongeldige configuratie"
+set "TEST_FLAGS=-DEXTENDER_ADS7828_EXTERNE_REFERENTIE=2"
+set "VERWACHTE_FOUT=EXTENDER_ADS7828_EXTERNE_REFERENTIE moet 0 (intern) of 1 (extern) zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_TweeSetsOpTweeADS1115\Sensor_FSR_RFP_TweeSetsOpTweeADS1115.ino"
+set "TEST_NAAM=FSR_RFP set 2 vereist tweede ADS1115 (Extenders)"
+set "TEST_FLAGS=-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2=2 -DEXTENDER_ADS1115_AANTAL=1"
+set "VERWACHTE_FOUT=FSR_RFP set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Extenders\Extender_ADS1115\Extender_ADS1115.ino"
+set "TEST_NAAM=EXTENDER_ADS1115_DATARATE: ongeldige configuratie"
+set "TEST_FLAGS=-DEXTENDER_ADS1115_DATARATE=8"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE moet tussen 0 en 7 liggen."
+call :EXPECT_FAIL
+
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!
 if !FAIL!==0 (exit /b 0) else exit /b 1

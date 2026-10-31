@@ -8,6 +8,8 @@
 
 *Eén library, de ondersteunde Arduino Uno-vormfactorborden, en alle schermen, keypads, afstandsbedieningen, Extenders en sensoren die v2.0.0 ondersteunt.*
 
+![GroeiAcademie FrameWork v2.0.0 - Sensoren (43)](docs/Systeem/Screenshots/GroeiAcademie%20FrameWork%20v2.0.0%20-%20Sensoren%20%2843%29.png)
+
 Het GroeiAcademie FrameWork is een modulaire Arduino-library voor het meten, oefenen en onderzoeken van menselijke vaardigheden. Beta v2.0.0 bouwt de gedeelde basis rond **GedeeldeBus**, **Screen**, **Input**, **Extenders**, **Sensoren** en de toepassing **Stimulus**.
 
 > **Meten is Weten, in plaats van Denken te Weten.**

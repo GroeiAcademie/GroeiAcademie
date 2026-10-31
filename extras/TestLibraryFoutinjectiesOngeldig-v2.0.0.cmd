@@ -34,5 +34,11 @@ set "VERWACHTE_FOUT=Stel EXTENDER_ADS7828_AANTAL op 1 voor deze negatieve contra
 call :EXPECT_FAIL
 
 echo.
+set "TEST_INO=examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_GB408\Hardwaretest_Foutinjectie_GB408.ino"
+set "TEST_NAAM=EXTENDER_ADS1115_DATARATE: ongeldige configuratie (foutinjecties)"
+set "TEST_FLAGS=-DEXTENDER_ADS1115_DATARATE=8"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE moet tussen 0 en 7 liggen."
+call :EXPECT_FAIL
+
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!
 if !FAIL!==0 (exit /b 0) else exit /b 1
