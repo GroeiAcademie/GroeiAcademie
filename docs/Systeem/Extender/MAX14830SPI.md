@@ -39,7 +39,75 @@ src/Systeem/Extender/MAX14830SPI.h
 src/Systeem/Extender/MAX14830SPI.cpp
 ```
 
+## Aansluiten
+
+- SPI: `SCLK`, `MOSI`, `MISO`, `CS`; de chip biedt vier UART-kanalen met TX/RX en 16 GPIO.
+- De bestaande Extender-constructor heeft een optionele interruptlijn `np_IRQ`.
+- Aansluitinstellingen: `EXTENDER_MAX14830_SPI_1_CS_PIN`, `EXTENDER_MAX14830_SPI_1_IRQ`, `EXTENDER_MAX14830_SPI_2_CS_PIN`, `EXTENDER_MAX14830_SPI_2_IRQ`.
+
+**Aansluit- en gebruiksgegevens uit de bestaande FrameWork-interface:**
+
+- **Host-SPI:** `SCK/SCLK` van de module → host `np_SCK`; host `np_MOSI` → module `MOSI/SDI/DIN`; module `MISO/SDO/DOUT` → host `np_MISO`; module `CS/SS` → de exclusieve `np_CS` van deze Extender. Verbind GND en de voeding met correcte logicaniveaus.
+- De gedeelde SPI-datalijnen kunnen gedeeld worden, **CS niet** met een gelijktijdig geclaimd ander apparaat. Kies een echte geschikte native CS-pin en controleer de fysieke modulebenaming.
+- Aan de seriële apparaatzijde: `TX0`–`TX3` van de Extender → `RX` van elk aangesloten UART-apparaat, en de bijbehorende `RX0`–`RX3` ← `TX` van dat apparaat. De bronklok en PLL-definities in de bestaande configuratie moeten overeenkomen met de fysieke oscillator.
+- Deze vierkanaals UART-Extender gebruikt SPI voor de host en afzonderlijke TX/RX-lijnen voor de aangesloten UART-apparaten. Elke host-SPI-instantie heeft een eigen CS nodig.
+- `MAX14830StartUART(channel, baud)` ondersteunt alleen UART-kanalen 0–3; de baudgenerator vereist de geconfigureerde `EXTENDER_MAX14830_BRONKLOK_HZ` en eventuele PLL-parameters.
+
+**Bestaande constructor (parameter-/pinvolgorde):**
+
+```cpp
+ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_IRQ, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+```
+
+```cpp
+ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+```
+
+**Configuratie voor deze hardware:**
+
+- Gebruik bij een eigen configuratie `src/Configuratie/Extenders/ConfigMAX14830SPI.h` (het aanwezige `src/Configuratie/Extenders/ConfigMAX14830SPI_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
+- Voor één aangesloten exemplaar: `EXTENDER_MAX14830_SPI_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
+- De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
+  - `EXTENDER_MAX14830_BRONKLOK_HZ`: sjabloonwaarde `0`.
+  - `EXTENDER_MAX14830_BRONKLOK_KRISTAL`: sjabloonwaarde `1`.
+  - `EXTENDER_MAX14830_PLL_VOORDELER`: sjabloonwaarde `0`.
+  - `EXTENDER_MAX14830_PLL_VERMENIGVULDIGER`: sjabloonwaarde `0`.
+  - `EXTENDER_MAX14830_SPI_AANTAL`: sjabloonwaarde `0`.
+  - `EXTENDER_MAX14830_SPI_1_CS_PIN`: sjabloonwaarde `HardwareResourcePin::NONE`.
+  - `EXTENDER_MAX14830_SPI_2_CS_PIN`: sjabloonwaarde `HardwareResourcePin::NONE`.
+
+**Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
+
+```cpp
+ExtenderMAX14830SPI extender(
+  &Native,
+  GedeeldeBusComponent::UART_MAX14830,
+  EXTENDER_MAX14830_SPI_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, EXTENDER_MAX14830_SPI_1_IRQ
+);
+```
+
+**Bestaande test-/voorbeeldsketches:**
+
+- `examples/Systeem/GedeeldeBus/Extenders/Extender_MAX14830_SPI/Extender_MAX14830_SPI.ino`
+- `examples/Systeem/GedeeldeBus/Extenders/Extender_MAX14830_SPI_Test_ExtenderPins_Toegelaten/Extender_MAX14830_SPI_Test_ExtenderPins_Toegelaten.ino`
+- `examples/Systeem/GedeeldeBus/Extenders/Extender_MAX14830_SPI_Test_ExtenderPins_Geweigerd/Extender_MAX14830_SPI_Test_ExtenderPins_Geweigerd.ino`
+
+
 ## Librarydocumentatie
 
 - Deze Extender erft in de huidige implementatie geen externe library-API.
 - Deze `.md` documenteert daarom de eigen FrameWork-/hardware-integratie die momenteel in de Extender aanwezig is.
+
+**Elektrische aansluiting en randvoorwaarden volgens Analog Devices:**
+
+- De MAX14830 zet SPI om in vier afzonderlijke UART-kanalen, met TX/RX per kanaal. SPI aan de hostzijde en asynchrone UART aan de apparaatkant mogen niet verwisseld worden; RS-232/RS-485 vereist een afzonderlijke niveau-/bustransceiver.
+- Gebruik een eigen chipselect en controleer de fysieke klokbron en de daaraan gekoppelde bestaande baudrate-/PLL-configuratie.
+
+**Technische handleiding:** https://www.analog.com/en/products/max14830.html
+
+
+**Voeding en logicaniveaus voor de losse MAX14830 (Analog Devices):** `VA` **2,35–3,6 V** (analoge voeding), `VL` **1,71–3,6 V** (host-SPI-interface) en `VEXT` **1,71–3,6 V** (UART-interface) zijn **afzonderlijke** spanningsdomeinen. Host-SCK/MOSI/CS en MISO moeten elektrisch compatibel zijn met `VL`; UART-TX/RX met `VEXT`. Verbind een 5V-host niet rechtstreeks omdat de module toevallig een SPI-header heeft. Sluit de oscillator en eventuele regelaar af volgens de concrete chip- of breakoutuitvoering. UART is niet hetzelfde als RS-232/RS-485: gebruik daarvoor transceivers.
+
+**Fabrikantdatasheet:** https://www.analog.com/media/en/technical-documentation/data-sheets/MAX14830.pdf
+
+**Bestaand bronbestand voor de component:** `src/Systeem/Extender/MAX14830SPI.h`

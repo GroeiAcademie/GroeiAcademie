@@ -433,16 +433,22 @@ GroeiAcademie/
 │   │   │   ├── AHT10.md
 │   │   │   ├── AS608.md
 │   │   │   ├── BioAmpEXGPill.md
-│   │   │   ├── BME68x.md
+│   │   │   ├── BME680.md
+│   │   │   ├── BME688.md
 │   │   │   ├── BMP280.md
-│   │   │   ├── DHTxx.md
+│   │   │   ├── DHT11.md
+│   │   │   ├── DHT22.md
 │   │   │   ├── DS18B20.md
 │   │   │   ├── DS3231.md
 │   │   │   ├── EGBOPulseSensor.md
-│   │   │   ├── FSR_RFP.md
+│   │   │   ├── FSR400.md
+│   │   │   ├── FSR402.md
+│   │   │   ├── RFP602.md
 │   │   │   ├── GSRGrove.md
 │   │   │   ├── HCSR501.md
-│   │   │   ├── HSR0x.md
+│   │   │   ├── HCSR04.md
+│   │   │   ├── HCSR04P.md
+│   │   │   ├── HYSRF05.md
 │   │   │   ├── HW201.md
 │   │   │   ├── HX711.md
 │   │   │   ├── INMP441.md
@@ -451,9 +457,11 @@ GroeiAcademie/
 │   │   │   ├── LM35DZ.md
 │   │   │   ├── LM75A.md
 │   │   │   ├── MAX30102.md
-│   │   │   ├── MAX4466_9814.md
+│   │   │   ├── MAX4466.md
+│   │   │   ├── MAX9814.md
 │   │   │   ├── MCU6701.md
-│   │   │   ├── MF52x.md
+│   │   │   ├── MF52A.md
+│   │   │   ├── MF52D.md
 │   │   │   ├── MPU6050.md
 │   │   │   ├── MPU6500.md
 │   │   │   ├── MR60BHA2.md
@@ -558,7 +566,7 @@ De headers direct onder `src/` leiden door naar de interne moduleheaders. Gedeel
 De actuele componentdocumentatie is onderverdeeld volgens de broncode:
 
 - [Extenders](Systeem/Extender/): 16 componentdocumenten, met korte bestandsnamen zoals `ADS1115.md`.
-- [Sensoren](Systeem/Sensor/): 40 componentdocumenten, één per Sensorklasse, zoals `FSR_RFP.md`.
+- [Sensoren](Systeem/Sensor/): 49 componentdocumenten voor afzonderlijke Sensoren en algemene Sensor-basisklassen, waaronder `FSR400.md`, `FSR402.md` en `RFP602.md`.
 - [Sturingen](Systeem/Sturing/): negen componentdocumenten voor A4988, DCmotorL293D, DCmotorL298N, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
 
 De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.

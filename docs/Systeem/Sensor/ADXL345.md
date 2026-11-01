@@ -12,7 +12,7 @@
 
 ## Uit de broncode
 
-Alleen identiteit/lifecycle: nog geen volledige sensorinitialisatie of meting. parent moet de voor dit apparaat geregistreerde HardwareResourceTypeI2C-node zijn.
+De huidige sensor initialiseert en leest via de gekoppelde `HardwareResourceTypeI2C`-parent; het werkelijke adres van die parent moet met de fysieke sensor overeenkomen.
 
 ## Aansluiten
 
@@ -26,10 +26,53 @@ Alleen identiteit/lifecycle: nog geen volledige sensorinitialisatie of meting. p
 
 - Gebruik de bestaande `.ino` uit **Testen** en de bestaande configuratiebestanden onder `src/Configuratie/`; een `*_template.h` wordt niet rechtstreeks ingelezen.
 - **Een vaste Arduino-pintoewijzing is niet algemeen geldig:** de gekozen constructor, configuratie en werkelijke bekabeling moeten overeenkomen. Waar hierboven geen exact spanningsniveau of pinheader is bevestigd, mag dat niet uit deze documentatie worden afgeleid.
-- De aanwezigheid van deze rubriek is **geen bewijs van een geslaagde hardwaretest**.
+
+
+**Aanvulling aansluitpinnen en elektrische voorwaarden:**
+
+- I²C: SDA→SDA, SCL→SCL; SDO bepaalt 0x53/0x1D, CS moet voor I²C correct hoog liggen. **Uitsluitend Adafruit ADXL345-breakout**: VIN→3,3V bij 3,3V-logica of VIN→5V bij 5V-logica, GND→GND; deze breakout heeft spanningsregelaar en levelshifters. Een kale ADXL345-chip mag niet zomaar op 5V.
+- **Officiële bron voor de hierboven benoemde chip of breakout:** https://learn.adafruit.com/adxl345-digital-accelerometer/pinouts
+
+**Aansluit- en gebruiksgegevens uit de bestaande FrameWork-interface:**
+
+- **I²C-bekabeling voor ADXL345:** `SDA` van de module → `SDA` van de I²C-parent; `SCL` → `SCL` van dezelfde parent; `GND` → gemeenschappelijke massa. De parent krijgt het werkelijk geselecteerde I²C-adres (of de juiste TCA9548A-tak).
+- De voedingspin van de module gaat naar een geschikte voedingsrail volgens de **concrete chip- of breakoutvariant**. Een 5V-controller maakt niet automatisch alle sensor-I/O 5V-tolerant; controleer de aanwezige pull-ups en eventuele levelshifters.
+- De huidige `SensorADXL345`-klasse heeft uitsluitend een `HardwareResourceTypeI2C*`-parent. Gebruik SDA/SCL en geen SPI voor deze klasse, ook al biedt de fysieke ADXL345-chip andere interfaces.
+- De huidige `Activeren()` initialiseert de Adafruit-driver op het adres van de I²C-parent. `LeesHoofdwaarde(float&)` geeft de X-versnelling in m/s²; bij Data-opslag worden X, Y en Z afzonderlijk bewaard.
+
+**Bestaande constructor (parameter-/pinvolgorde):**
+
+```cpp
+SensorADXL345(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
+```
+
+**Configuratie voor deze hardware:**
+
+- Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigADXL345.h` (het aanwezige `src/Configuratie/Sensoren/ConfigADXL345_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
+- Voor één aangesloten exemplaar: `SENSOR_ADXL345_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
+- De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
+  - `SENSOR_ADXL345_AANTAL`: sjabloonwaarde `1`.
+  - `I2C_ADDRESS_SENSOR_ADXL345_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
+
+**Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
+
+```cpp
+GedeeldeBusNewComponent<SensorADXL345>(&apparaat, GedeeldeBusComponent::ADXL345);
+```
+
+**Bestaande test-/voorbeeldsketches:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_ADXL345/Sensor_ADXL345.ino`
+
+**Elektrische aansluiting en randvoorwaarden volgens Analog Devices:**
+
+- De ADXL345-chip ondersteunt zowel SPI als I²C, maar **de huidige FrameWork-SensorADXL345 gebruikt uitsluitend I²C**. Verbind dus SDA/SCL met de opgegeven I²C-parent en pas de I²C-adresselectie op de module toe; geen SPI-constructie voor deze klasse.
+- Gebruik een passende laagspanningsvoeding of de regulator/levelshifter van de concrete breakout.
+
+**Technische handleiding:** https://www.analog.com/en/products/adxl345.html
 
 ## Testen
 
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_ADXL345/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
-Dit document bevestigt geen geslaagde hardwaretest.
+

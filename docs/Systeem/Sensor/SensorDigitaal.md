@@ -26,8 +26,28 @@ SensorDigitaal: gemeenschappelijke basis voor een digitale Sensor met één OUT-
 
 - Gebruik de bestaande `.ino` uit **Testen** en de bestaande configuratiebestanden onder `src/Configuratie/`; een `*_template.h` wordt niet rechtstreeks ingelezen.
 - **Een vaste Arduino-pintoewijzing is niet algemeen geldig:** de gekozen constructor, configuratie en werkelijke bekabeling moeten overeenkomen. Waar hierboven geen exact spanningsniveau of pinheader is bevestigd, mag dat niet uit deze documentatie worden afgeleid.
-- De aanwezigheid van deze rubriek is **geen bewijs van een geslaagde hardwaretest**.
+
+
+**Aanvulling aansluitpinnen en elektrische voorwaarden:**
+
+- Dit is een generieke digitale sensorinterface, geen afzonderlijk fabrikantproduct. OUT→geconfigureerde digitale ingang; GND→gemeenschappelijke GND. VCC, uitgangspolariteit, open-drain/push-pull en pull-up hangen af van de aangesloten sensor.
+- De concrete modulevariant bepaalt de **exacte voedingsgrenzen en fysieke pinvolgorde**. Neem die gegevens niet over van een andere module zonder de werkelijke print te controleren.
+
+**Aansluit- en gebruiksgegevens uit de bestaande FrameWork-interface:**
+
+- **Digitale bekabeling voor SensorDigitaal:** `OUT` van de module → de in de constructor toegewezen native ingang `np_OUT`; `GND` naar gemeenschappelijke massa, voeding volgens de fysieke module. De code verwacht een digitale HIGH/LOW-toestand, geen analoge ADC-waarde.
+- Controleer vóór de verbinding het **OUT-logicaniveau** en de ingangstolerantie van het Arduino-board; zo nodig een passende levelshifter of pull-up gebruiken.
+- De constructor krijgt een digitale `np_OUT`-pin. De klasse leest de ingang via `LeesHoofdwaarde(float&)`; de interpretatie `HIGH/LOW` hangt af van de aangesloten module.
+- Gebruik een geschikte native digitale pin en controleer spanningsniveau, eventuele pull-up en uitgangspolariteit.
+
+**Bestaande constructor (parameter-/pinvolgorde):**
+
+```cpp
+SensorDigitaal(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_OUT)
+```
+
+
 
 ## Testen
 
-Dit document bevestigt geen geslaagde hardwaretest.
+

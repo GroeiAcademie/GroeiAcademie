@@ -2,7 +2,7 @@
 
 ## Component
 
-Relais. De huidige implementatie bevat de component als header-only codevoorstel; dit document beschrijft die bestaande implementatie, niet een gevalideerde hardwarewerking.
+Relais. De component is header-only geïmplementeerd.
 
 ## Implementatie
 
@@ -37,11 +37,71 @@ De ISD1820 (geluidsfragment opnemen en afspelen) wordt bediend met twee keer `Re
 
 - Gebruik de bestaande `.ino` uit **Testen** en de bestaande configuratiebestanden onder `src/Configuratie/`; een `*_template.h` wordt niet rechtstreeks ingelezen.
 - **Een vaste Arduino-pintoewijzing is niet algemeen geldig:** de gekozen constructor, configuratie en werkelijke bekabeling moeten overeenkomen. Waar hierboven geen exact spanningsniveau of pinheader is bevestigd, mag dat niet uit deze documentatie worden afgeleid.
-- De aanwezigheid van deze rubriek is **geen bewijs van een geslaagde hardwaretest**.
+
+
+**Aanvulling aansluitpinnen en elektrische voorwaarden:**
+
+- IN→gekozen GPIO-Extender-uitgang; module-GND en voedingsrail conform module. Controleer of IN actief-laag of actief-hoog is en of JD-VCC/VCC galvanische scheiding mogelijk maakt. Gebruik voor netspanning uitsluitend veilig behuisde en geschikte hardware.
+- De concrete modulevariant bepaalt de **exacte voedingsgrenzen en fysieke pinvolgorde**. Neem die gegevens niet over van een andere module zonder de werkelijke print te controleren.
+
+**Aansluit- en gebruiksgegevens uit de bestaande FrameWork-interface:**
+
+- **Stuursignaal:** één GPIO-Extender-uitgang `pin` → relaismodule-`IN`. Gemeenschappelijke GND en een voedingsrail geschikt voor de relaismodule. Gebruik `relayValueOnAtCreation` conform de fysieke actieve HIGH-/LOW-polariteit.
+- De relaiscontacten (`COM`, `NO`, `NC` waar aanwezig) zijn **gescheiden lastcontacten**, geen GPIO-aansluitingen; belastingen uitsluitend binnen de concrete module-/contactwaardes aansluiten.
+- De constructor krijgt `relayValueOnAtCreation`: dit is het **actieve ingangsniveau** van de aangesloten relaismodule (`HIGH` of `LOW`). Bij activeren initialiseert de code het kanaal eerst op het tegenovergestelde niveau en daarna als `OUTPUT`.
+- `setRelayStatusOnOff(bool on)` schrijft het actieve niveau wanneer `on=true` en het tegenovergestelde niveau wanneer `on=false`. `StopSturing()` schrijft de uit-toestand.
+- `GEDEELDE_BUS_MIXED_PINS` moet actief zijn om deze klasse te compileren. Gebruik op de relaiscontacten uitsluitend lasten die binnen de specificaties van de exacte relaismodule vallen; het GPIO-signaal voedt de last niet.
+
+**Bestaande constructor (parameter-/pinvolgorde):**
+
+```cpp
+Relais(GedeeldeBusNode* parent,uint8_t pin,uint8_t relayValueOnAtCreation)
+```
+
+**Configuratie voor deze hardware:**
+
+- Gebruik bij een eigen configuratie `src/Configuratie/Sturingen/ConfigRelais.h` (het aanwezige `src/Configuratie/Sturingen/ConfigRelais_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
+- Voor één aangesloten exemplaar: `STURING_RELAIS_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
+- De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
+  - `STURING_RELAIS_AANTAL`: sjabloonwaarde `0`.
+
+**Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
+
+```cpp
+Relais sturing(&extender,0,LOW);
+```
+
+**Bestaande test-/voorbeeldsketches:**
+
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_HardwareTest/Sturing_Relais_HardwareTest.ino`
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais/Sturing_Relais.ino`
+
+
+### Praktische aansluiting en gebruik
+
+**Praktisch aansluiten via een GPIO-Extender:** verbind de **logische besturingsingang** `IN` van de relaismodule met de door de constructor gekozen `pin` van de GPIO-parent. Verbind module-voeding en stuur-GND alleen volgens het concrete moduleontwerp. Stel `relayValueOnAtCreation` in op `LOW` bij een **actief-laag** module of `HIGH` bij een **actief-hoog** module. De bestaande `Activeren()` zet de uitgang eerst op het tegengestelde niveau en configureert vervolgens `OUTPUT`; `StopSturing()` schrijft eveneens de uit-toestand.
+
+- Test met een **laagspanningslast**: contact `COM` en `NO` zijn in rust open; `COM` en `NC` zijn in rust gesloten, indien de module deze contacten aanbiedt. De contactzijde is **geen voedingspin voor de microcontroller**. Gebruik geen netspanning in deze software-/hardwaretest.
+- Bij PCF8574/PCF8575-uitgangen eerst de quasi-bidirectionele uitgangsstroom en de inputstroom/polariteit van `IN` toetsen. Een losse relaisspoel mag niet direct op een PCF8574-pin: gebruik een geschikte driver en vrijloopbeveiliging of een daarvoor ontworpen relaismodule. De code bepaalt **niet** of de gebruikte module echt galvanisch geïsoleerd is.
+
+
+**Let op bij een I²C-PCF8574-parent:** een PCF8574 heeft **quasi-bidirectionele** I/O; volgens de officiële chipdocumentatie zijn hoog en laag geen symmetrische vermogensuitgangen. De relaismodule moet dus een **eigen passende spoeldriver** en een stuuringang hebben die elektrisch compatibel is met de beschikbare uitgang. Een kale relaiswikkeling rechtstreeks tussen één PCF8574-pin en GND is geen toegelaten vervanging voor een relaismodule. Bij een optisch geïsoleerde module gelden de door de modulefabrikant opgegeven VCC/JD-VCC/GND-schakelingen; sluit die niet blind samen. Gebruik voor de eerste test een volledig laagspanningscircuit.
+
+**Chipdocumentatie parent (indien PCF8574):** https://www.ti.com/product/PCF8574
+
+### Aansluiting van de aanwezige relaisuitvoeringen
+
+De gebruikte hardware omvat **meerdere afzonderlijke relaismodules**. Het zijn **geen onderling uitwisselbare voedings- of ingangsschakelingen**:
+
+- Op het **16-kanaalsbord** staan relais met het opschrift **`SRD-12VDC-SL-C`**: dit beschrijft een **12V-relaisspoel**. Het bepaalt niet zonder het bordschema of de aansluiting voor de besturing 5 V, 12 V of een gescheiden voedingscircuit vereist.
+- Op andere modules staan **`SRD-05VDC-SL-C`** en een vierkanaalsbord met **5V-spoelrelais**. Ook hier blijft het actieve ingangs-`HIGH`/`LOW` en de eventuele jumper tussen logica- en spoelvoeding **per print** te controleren.
+- De bestaande FrameWork-`Relais`-klasse bestuurt **één relaisingang per object** via één GPIO-Extenderkanaal. Voor een bord met meerdere afzonderlijke ingangen moet elke gebruikt ingang een eigen kanaal en object krijgen, overeenkomstig de bestaande configuratie; de klasse heeft geen automatische 16-kanaalsborddetectie.
+- De `COM`/`NO`/`NC`-aansluitingen behoren tot de **geschakelde lastzijde** en zijn nooit de logische `IN`- of GND-aansluiting. Verifieer altijd de echte schroefklemopschriften en contactbelastbaarheid.
+- Schakel de eerste test uitsluitend met een **laagspanningslast**. Een I²C-Extenderpin mag geen losse relaiswikkeling rechtstreeks voeden; de module moet een compatibele ingangsdriver hebben.
 
 ## Testen
 
-De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en het script `extras/TestLibrarySturingen-v2.0.0.cmd`. Compilatie en hardwaregedrag zijn **niet gevalideerd**.
+De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en het script `extras/TestLibrarySturingen-v2.0.0.cmd`. 
 
 Configuratie: `STURING_RELAIS_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.
 

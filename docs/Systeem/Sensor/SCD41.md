@@ -22,10 +22,51 @@
 
 - Gebruik de bestaande `.ino` uit **Testen** en de bestaande configuratiebestanden onder `src/Configuratie/`; een `*_template.h` wordt niet rechtstreeks ingelezen.
 - **Een vaste Arduino-pintoewijzing is niet algemeen geldig:** de gekozen constructor, configuratie en werkelijke bekabeling moeten overeenkomen. Waar hierboven geen exact spanningsniveau of pinheader is bevestigd, mag dat niet uit deze documentatie worden afgeleid.
-- De aanwezigheid van deze rubriek is **geen bewijs van een geslaagde hardwaretest**.
+
+
+**Aanvulling aansluitpinnen en elektrische voorwaarden:**
+
+- SDA→SDA, SCL→SCL, GND→GND; I²C-adres 0x62. **Sensirion SCD41-chip**: toegestane voeding 2,4–5,5V volgens officiële productspecificatie; I²C-logicaniveaus/pull-ups en breakout-inrichting afzonderlijk controleren.
+- **Officiële bron voor de hierboven benoemde chip of breakout:** https://sensirion.com/products/catalog/SCD41
+
+**Aansluit- en gebruiksgegevens uit de bestaande FrameWork-interface:**
+
+- **I²C-bekabeling voor SCD41:** `SDA` van de module → `SDA` van de I²C-parent; `SCL` → `SCL` van dezelfde parent; `GND` → gemeenschappelijke massa. De parent krijgt het werkelijk geselecteerde I²C-adres (of de juiste TCA9548A-tak).
+- De voedingspin van de module gaat naar een geschikte voedingsrail volgens de **concrete chip- of breakoutvariant**. Een 5V-controller maakt niet automatisch alle sensor-I/O 5V-tolerant; controleer de aanwezige pull-ups en eventuele levelshifters.
+- Deze sensor gebruikt I²C en de hoofdwaarde via `LeesHoofdwaarde(float&)`. Controleer de correcte SDA/SCL-lijnen, modulevoeding en de voor de gebruikte SCD41-uitvoering vereiste meetopstarttijd.
+
+**Bestaande constructor (parameter-/pinvolgorde):**
+
+```cpp
+SCD41(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
+```
+
+**Configuratie voor deze hardware:**
+
+- Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigSCD41.h` (het aanwezige `src/Configuratie/Sensoren/ConfigSCD41_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
+- Voor één aangesloten exemplaar: `SENSOR_SCD41_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
+- De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
+  - `SENSOR_SCD41_AANTAL`: sjabloonwaarde `1`.
+  - `I2C_ADDRESS_SENSOR_SCD41_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
+
+**Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
+
+```cpp
+GedeeldeBusNewComponent<SCD41>(&apparaat,GedeeldeBusComponent::SCD41);
+```
+
+**Bestaande test-/voorbeeldsketches:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_SCD41/Sensor_SCD41.ino`
+
+**Elektrische aansluiting en randvoorwaarden volgens Sensirion:**
+
+- De SCD41 is een I²C-CO₂-sensor; de bestaande FrameWorkklasse gebruikt de I²C-parent, niet een analoog kanaal. Voor het losse Sensirion-element moeten de daadwerkelijke voedings- en logicaspanningen uit het bij de aangekochte behuizing passende datasheet worden toegepast.
+
+**Technische handleiding:** https://sensirion.com/products/catalog/SCD41
 
 ## Testen
 
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_SCD41/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
-Dit document bevestigt geen geslaagde hardwaretest.
+
