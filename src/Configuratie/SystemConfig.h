@@ -190,8 +190,8 @@
     #if __has_include("Sensoren/ConfigEGBOPulseSensor.h")
       #include "Sensoren/ConfigEGBOPulseSensor.h"
     #endif
-    #if __has_include("Sensoren/ConfigFSR_RFP.h")
-      #include "Sensoren/ConfigFSR_RFP.h"
+    #if __has_include("Sensoren/ConfigFsrRfp.h")
+      #include "Sensoren/ConfigFsrRfp.h"
     #endif
     #if __has_include("Sensoren/ConfigGSRGrove.h")
       #include "Sensoren/ConfigGSRGrove.h"
@@ -294,11 +294,11 @@
     #if __has_include("Sturingen/ConfigMG996R.h")
       #include "Sturingen/ConfigMG996R.h"
     #endif
-    #if __has_include("Sturingen/ConfigDCmotorL293D.h")
-      #include "Sturingen/ConfigDCmotorL293D.h"
+    #if __has_include("Sturingen/ConfigL293D.h")
+      #include "Sturingen/ConfigL293D.h"
     #endif
-    #if __has_include("Sturingen/ConfigDCmotorL298N.h")
-      #include "Sturingen/ConfigDCmotorL298N.h"
+    #if __has_include("Sturingen/ConfigL298N.h")
+      #include "Sturingen/ConfigL298N.h"
     #endif
     #if __has_include("Sturingen/ConfigRelais.h")
       #include "Sturingen/ConfigRelais.h"
@@ -790,9 +790,9 @@
 #error FSR_RFP_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
 #endif
 
-// FSR_RFP =====================================================================
+// FsrRfp =====================================================================
 // ----------------------------------------------------------------------------
-// LET OP: FSR_RFP meet via een ADC-Extender (nu: ADS1115). Daarvoor moet de ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
+// LET OP: FsrRfp meet via een ADC-Extender (nu: ADS1115). Daarvoor moet de ADS1X15-library geïnstalleerd zijn via de Arduino Library Manager.
 // ============================================================================
 
 #ifndef FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1
@@ -803,7 +803,7 @@
   #error FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 moet 2 of 4 zijn.
 #endif
 
-// FSR_RFP: het type probe per set. RFP602, FSR400 en FSR402 hebben dezelfde aansluiting (een weerstand in een spanningsdeler)
+// FsrRfp: het type probe per set. RFP602, FSR400 en FSR402 hebben dezelfde aansluiting (een weerstand in een spanningsdeler)
 // en dezelfde meetcode; de instelling bewaart welk type aangesloten is.
 #define FSR_RFP_PROBE_RFP602 1
 #define FSR_RFP_PROBE_FSR400 2
@@ -835,7 +835,7 @@
 #endif
 
 // ============================================================================
-// FSR_RFP DATA
+// FsrRfp DATA
 // ============================================================================
 #ifndef FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
   #define FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 0
@@ -2011,7 +2011,7 @@
 #endif
 
 
-// S-09: capaciteit voor automatische Sensor-QueueOrStack, exclusief de bestaande FSR_RFP-tabellen.
+// S-09: capaciteit voor automatische Sensor-QueueOrStack, exclusief de bestaande FsrRfp-tabellen.
 // Met DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE_FOR(component, channel) kan per sensor en kanaal
 // een andere capaciteit worden gekozen. 0 = alleen lastValue, geen FIFO/LIFO.
 #ifndef DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE
@@ -2037,11 +2037,11 @@
 #ifndef STURING_A4988_AANTAL
   #define STURING_A4988_AANTAL 0
 #endif
-#ifndef STURING_DCMOTORL293D_AANTAL
-  #define STURING_DCMOTORL293D_AANTAL 0
+#ifndef STURING_L293D_AANTAL
+  #define STURING_L293D_AANTAL 0
 #endif
-#ifndef STURING_DCMOTORL298N_AANTAL
-  #define STURING_DCMOTORL298N_AANTAL 0
+#ifndef STURING_L298N_AANTAL
+  #define STURING_L298N_AANTAL 0
 #endif
 #ifndef STURING_MG996R_AANTAL
   #define STURING_MG996R_AANTAL 0
@@ -3083,14 +3083,14 @@
 
 
 // ============================================================================
-// FSR_RFP: standaard ADC-kanalen per sensorset ================================
+// FsrRfp: standaard ADC-kanalen per sensorset ================================
 // ============================================================================
 
-// Een .ino kan per FSR_RFP-instantie een eigen ADC-Extender (parent) en vier eigen kanalen opgeven.
-// Zonder opgave gelden deze standaardkanalen. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor FSR_RFP.
+// Een .ino kan per FsrRfp-instantie een eigen ADC-Extender (parent) en vier eigen kanalen opgeven.
+// Zonder opgave gelden deze standaardkanalen. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor FsrRfp.
 // G2: elke set heeft een eigen ADS1115. Set 2 vraagt dus minstens 2 ADS1115's.
 #if defined(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && EXTENDER_ADS1115_AANTAL < 2
-  #error FSR_RFP set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2.
+  #error FsrRfp set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2.
 #endif
 #if EXTENDER_ADS1115_AANTAL > 0
   #ifndef FSR_RFP_ADC_PIN_SENSOR_1_SET_1

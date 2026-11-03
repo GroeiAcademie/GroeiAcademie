@@ -6,7 +6,7 @@
 //
 // Werking:
 // - elke I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS één toegang per aanwezige bron:
-//   FSR_RFP via de gekozen ADS1115-Extender en een keypadscan van Input PCF8574 (alleen met INPUT_TYPE_PCF8574);
+//   FsrRfp via de gekozen ADS1115-Extender en een keypadscan van Input PCF8574 (alleen met INPUT_TYPE_PCF8574);
 // - rond elke toegang meet micros() de duur;
 // - elke I2C_HERSTELTEST_RAPPORT_ELKE_MS op Serial per bron: langste duur, gemiddelde duur en aantal toegangen;
 // - tegelijk een teller op het scherm via Screen->Print(): zo volgt na een hotplug altijd een "volgende Print()" (S6).
@@ -19,7 +19,7 @@
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FsrRfp meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -80,8 +80,8 @@ void setup() {
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }
 
-  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
-  if (sensorFSR_RFPset1 == nullptr) GA_SERIAL.println(F("FOUT: FSR_RFP (ADS1115 wordt niet gemeten)"));
+  sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, GedeeldeBusComponent::FsrRfp);
+  if (sensorFsrRfpSet1 == nullptr) GA_SERIAL.println(F("FOUT: FsrRfp (ADS1115 wordt niet gemeten)"));
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   Input = GedeeldeBusNewComponent<struct Input>();
@@ -101,9 +101,9 @@ void loop() {
   if (nu - tijdstipVorigeToegang >= I2C_HERSTELTEST_TUSSENTIJD_TOEGANGEN_MS) {
     tijdstipVorigeToegang = nu;
 
-    if (sensorFSR_RFPset1 != nullptr) {
+    if (sensorFsrRfpSet1 != nullptr) {
       const unsigned long startMicros = micros();
-      sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[0]);
+      sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[0]);
       DuurVanToegangBijhouden(blokkeertijdMetingADS1115, startMicros);
     }
 
@@ -121,7 +121,7 @@ void loop() {
     aantalRapporten++;
 
     GA_SERIAL.print(F("Rapport ")); GA_SERIAL.println(aantalRapporten);
-    RapportRegelTonen(F("  ADS1115 (FSR_RFP-meting)"), blokkeertijdMetingADS1115);
+    RapportRegelTonen(F("  ADS1115 (FsrRfp-meting)"), blokkeertijdMetingADS1115);
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     RapportRegelTonen(F("  PCF8574 (keypadscan)"), blokkeertijdKeypadscanPCF8574);
 #endif

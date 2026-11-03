@@ -184,17 +184,17 @@ CS van FLASH of microSD kan ook op een Extender (PCF8574, PCF8575, MCP23017) met
 
 SDA/SCL voor EEPROM en FRAM en SCK/MISO/MOSI voor microSD en FLASH komen uit de bestaande boardconfiguratie. Alleen de instance-specifieke I2C-adressen en CS-pinnen worden hier ingesteld.
 
-Voor FSR_RFP:
+Voor FsrRfp:
 
 ```cpp
 // #define FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 0
 ```
 
-`FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` is `0` voor geen QueueOrStack (alleen de laatst gemeten waarde per channel); een waarde groter dan `0` activeert de RAM-QueueOrStack voor FSR_RFP. Recording op microSD schrijft naar `SENSOR.DAT`.
+`FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` is `0` voor geen QueueOrStack (alleen de laatst gemeten waarde per channel); een waarde groter dan `0` activeert de RAM-QueueOrStack voor FsrRfp. Recording op microSD schrijft naar `SENSOR.DAT`.
 
-## FSR_RFP
+## FsrRfp
 
-FSR_RFP meet via een ADC-Extender (nu: ADS1115). De `.ino` maakt die Extender aan en geeft hem als parent aan FSR_RFP door. De instellingen van FSR_RFP staan in `src/Configuratie/Sensoren/ConfigFSR_RFP_template.h`:
+FsrRfp meet via een ADC-Extender (nu: ADS1115). De `.ino` maakt die Extender aan en geeft hem als parent aan FsrRfp door. De instellingen van FsrRfp staan in `src/Configuratie/Sensoren/ConfigFsrRfp_template.h`:
 
 - `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1`, uitsluitend `2` of `4`;
 - `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot en met `FSR_RFP_ADC_PIN_SENSOR_4_SET_1`, standaard `static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)` tot `EP_AIN3`;
@@ -202,9 +202,9 @@ FSR_RFP meet via een ADC-Extender (nu: ADS1115). De `.ino` maakt die Extender aa
 
 De oude namen zonder `_SET_1` (bv. `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR`) geven een `#error` met de nieuwe naam.
 
-**Een tweede set (optioneel).** Zet `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2` op `2` of `4`; zonder die regel bestaat set 2 niet en kost ze geen geheugen. Dezelfde instellingen bestaan dan op `_SET_2`. Elke set heeft een eigen ADS1115, dus set 2 vraagt `EXTENDER_ADS1115_AANTAL` `2` en `I2C_ADDRESS_EXTENDER_ADS1115_2`. In de `.ino` krijgt set 2 die tweede ADS1115 als parent en `set = 2` als laatste argument; het globale object heet `sensorFSR_RFPset2` (set 1: `sensorFSR_RFPset1`). Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FSR_RFP_TweeSetsOpTweeADS1115/`.
+**Een tweede set (optioneel).** Zet `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2` op `2` of `4`; zonder die regel bestaat set 2 niet en kost ze geen geheugen. Dezelfde instellingen bestaan dan op `_SET_2`. Elke set heeft een eigen ADS1115, dus set 2 vraagt `EXTENDER_ADS1115_AANTAL` `2` en `I2C_ADDRESS_EXTENDER_ADS1115_2`. In de `.ino` krijgt set 2 die tweede ADS1115 als parent en `set = 2` als laatste argument; het globale object heet `sensorFsrRfpSet2` (set 1: `sensorFsrRfpSet1`). Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_TweeSetsOpTweeADS1115/`.
 
-In `UserConfig.h` blijven onder "STIMULUS" `WACHT_LOSLATEN_DELAY_MS` (standaard `5`) en `DELAY_US` (standaard `0`): die gebruikt Stimulus, niet FSR_RFP.
+In `UserConfig.h` blijven onder "STIMULUS" `WACHT_LOSLATEN_DELAY_MS` (standaard `5`) en `DELAY_US` (standaard `0`): die gebruikt Stimulus, niet FsrRfp.
 
 Het I2C-adres van de ADS1115 staat in `src/Configuratie/Extenders/ConfigADS1115_template.h`: `I2C_ADDRESS_EXTENDER_ADS1115_1` (standaard `0x48`).
 
@@ -269,7 +269,7 @@ Native pinnamen in deze configuratie gebruiken `HardwareResourcePin::NP_...`. `H
 
 `UserConfig.h` kan vóór de fallbackwaarden van `SystemConfig.h` de GedeeldeBus-/Extenderconfiguratie vastleggen. Gebruik daarvoor exact de macro's die in `SystemConfig.h` als `#ifndef`-defaults bestaan, zoals `EXTENDER_<NAAM>_AANTAL`, de bijbehorende I2C-adressen, CS-pinnen en controlpinnen.
 
-`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FSR_RFP via de ADS1115 meet. `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
+`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115 meet. `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
 
 De logische resources van een Extender worden niet hier hernoemd of gemapt: die staan als `ExtenderPins::EP_<pinnaam>` in de concrete `Extender*.h`.
 
@@ -278,4 +278,4 @@ Voor lokale compiletests kan `GROEIACADEMIE_IGNORE_USER_CONFIG` worden gedefinie
 
 ## Data QueueOrStack
 
-De QueueOrStack-grootte wordt per sensor ingesteld. Voor FSR_RFP bepaalt `FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` de buffer, los van DIRECT: `0` bewaart alleen de laatst gemeten waarde per channel; een waarde groter dan `0` activeert de RAM-QueueOrStack. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
+De QueueOrStack-grootte wordt per sensor ingesteld. Voor FsrRfp bepaalt `FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` de buffer, los van DIRECT: `0` bewaart alleen de laatst gemeten waarde per channel; een waarde groter dan `0` activeert de RAM-QueueOrStack. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.

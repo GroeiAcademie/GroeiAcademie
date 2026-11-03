@@ -48,7 +48,7 @@ Een gepland toepassingsgebied mag niet als werkende libraryfunctionaliteit worde
 
 ## 1. Stimulus en conditionering
 
-In beta v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `FSR_RFP`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft.
+In beta v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `FsrRfp`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft.
 
 
 ### Leerdoel

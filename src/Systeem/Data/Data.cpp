@@ -342,7 +342,7 @@ bool Data::afmelden() {
 // ============================================================================
 // QueueOrStack: los van DIRECT (A8). Werkt zodra de sensor een grootte > 0 opgeeft.
 // ============================================================================
-// Automatische kanaaltabellen zijn per Sensor-instantie. Externe tabellen, zoals FSR_RFP,
+// Automatische kanaaltabellen zijn per Sensor-instantie. Externe tabellen, zoals FsrRfp,
 // blijven volledig eigendom van de bestaande aanroeper.
 #if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE
 Sensor::~Sensor() {
@@ -486,7 +486,7 @@ int Data::ReadQueueOrStackValue(SensorQueueOrStack& channel) {
 bool Sensor::activeren() {
   const uint8_t aantal = AantalChannels();
   SensorQueueOrStack* tabel = nullptr;
-  if (QueueOrStack == nullptr && aantal != 0) {   // geen externe tabel (bv. FSR_RFP) en wel Data-kanalen
+  if (QueueOrStack == nullptr && aantal != 0) {   // geen externe tabel (bv. FsrRfp) en wel Data-kanalen
     tabel = static_cast<SensorQueueOrStack*>(calloc(aantal, sizeof(SensorQueueOrStack)));
     if (tabel == nullptr) return false;
 #if DATA_QUEUE_OR_STACK_ACTIEF
@@ -539,7 +539,7 @@ bool Sensor::activeren() {
     }
   }
   vasteRouteIdentiteit = id;
-  if (tabel == nullptr) return true;   // externe tabel (bv. FSR_RFP), geen Data-kanalen of al eerder toegewezen
+  if (tabel == nullptr) return true;   // externe tabel (bv. FsrRfp), geen Data-kanalen of al eerder toegewezen
   QueueOrStackAutomatisch = tabel;
   QueueOrStack = tabel;
   numberOfChannels = aantal;
@@ -714,7 +714,7 @@ void Data::StreamingStart() {
 // S-09: 15-byte GB-record: 2 magic, 2 component, 4 stabiele route-ID,
 // kanaal, valueType, 4 waardebytes, XOR. Oud GA-formaat blijft in SENSOR.DAT
 // herkenbaar zodat het overslaan van eerdere records geen uitlijning verbreekt.
-// Bestaande FSR_RFP-logbestanden blijven ongemoeid.
+// Bestaande FsrRfp-logbestanden blijven ongemoeid.
 #if ((DATA_LAYER_CONFIG) & (DATA_TYPE_FLASH_SPI | DATA_TYPE_MICROSD_SPI | DATA_TYPE_NRF24L01_SPI))
 void Data::StreamingWrite(const Sensor& sensor, uint8_t numberChannel, const SensorQueueOrStack& channel) {
   if ((!streamingActief && !recordingActief) || numberChannel == 0 || channel.valueType > 2) return;

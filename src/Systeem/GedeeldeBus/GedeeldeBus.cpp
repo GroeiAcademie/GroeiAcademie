@@ -808,7 +808,7 @@ static bool IsI2CNode(const GedeeldeBusNode* node) {
 void GedeeldeBusNode::AlleOnderliggendeNodesOpnieuwActiveren() {
   // Van boven naar onder: een parent is altijd eerst opnieuw actief.
   // Een node die niet herstelt, blijft uitgeschakeld. Een eigen herstelpad van die node (I2C: ComponentBeschikbaarTijdensRuntime(),
-  // een sensor: zijn eigen pad, zoals FSR_RFP::OpnieuwAanmeldenNaPauze()) probeert later opnieuw; een node zonder zo'n pad niet.
+  // een sensor: zijn eigen pad, zoals FsrRfp::OpnieuwAanmeldenNaPauze()) probeert later opnieuw; een node zonder zo'n pad niet.
   for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
     GedeeldeBusNode* node = const_cast<GedeeldeBusNode*>(n);
     // Parent niet actief: de fout komt van de parent, die zelf al meldde. Geen eigen melding.

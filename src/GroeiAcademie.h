@@ -10,11 +10,11 @@
 #if STURING_A4988_AANTAL > 0
   #include "Systeem/Sturing/A4988.h"
 #endif
-#if STURING_DCMOTORL293D_AANTAL > 0
-  #include "Systeem/Sturing/DCmotorL293D.h"
+#if STURING_L293D_AANTAL > 0
+  #include "Systeem/Sturing/L293D.h"
 #endif
-#if STURING_DCMOTORL298N_AANTAL > 0
-  #include "Systeem/Sturing/DCmotorL298N.h"
+#if STURING_L298N_AANTAL > 0
+  #include "Systeem/Sturing/L298N.h"
 #endif
 #if STURING_MG996R_AANTAL > 0
   #include "Systeem/Sturing/MG996R.h"

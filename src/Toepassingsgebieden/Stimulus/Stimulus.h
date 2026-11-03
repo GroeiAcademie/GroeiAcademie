@@ -34,7 +34,7 @@
   #include "../../Language/Library_FR.h"
 #endif
 #include "../../Systeem/Screen/Screen.h"
-#include "../../Systeem/Sensor/FSR_RFP.h"
+#include "../../Systeem/Sensor/FsrRfp.h"
 
 // ============================================================================
 // CONSTANTEN DIE NIET AANGEPAST MOGEN WORDEN
@@ -139,7 +139,7 @@ struct SynchronisatieProfiel {
 // ============================================================================
 // v2.0.0: Stimulus is het object.
 // De bestaande Stimulus-algoritmes en Stimulus-status behoren tot dit object.
-// De directe sensoruitlezing verloopt via sensorFSR_RFPset1.
+// De directe sensoruitlezing verloopt via sensorFsrRfpSet1.
 // ============================================================================
 struct Stimulus {
   int AnalogReadMetGekorigeerdeOffsets(int sensorPin, int offset);

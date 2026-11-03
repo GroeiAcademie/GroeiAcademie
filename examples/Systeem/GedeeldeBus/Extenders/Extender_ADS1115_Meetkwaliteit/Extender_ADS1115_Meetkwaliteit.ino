@@ -3,14 +3,14 @@
 // ============================================================================
 // Meet 10 s lang de vier ingangen van de ADS1115-Extender en toont per kanaal
 // gemiddelde, standaardafwijking, minimum en maximum.
-// Druk onmiddellijk op de aangesloten FSR_RFP-sensoren.
+// Druk onmiddellijk op de aangesloten FsrRfp-sensoren.
 // ============================================================================
 
 #include <GroeiAcademie.h>
 
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FsrRfp meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(

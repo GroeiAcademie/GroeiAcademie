@@ -21,7 +21,7 @@
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FsrRfp meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -77,8 +77,8 @@ void setup() {
 #endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
-  if (sensorFSR_RFPset1 == nullptr) exit(0);
+  sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, GedeeldeBusComponent::FsrRfp);
+  if (sensorFsrRfpSet1 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -119,13 +119,13 @@ void UitvoerenAlgoritmeEnkelTik() {
 #endif
 
     // eerste meting smijten we weg, geef valse waarde
-    for (int sensorNummer = 0; sensorNummer < FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1; sensorNummer++) { sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[sensorNummer]); }
+    for (int sensorNummer = 0; sensorNummer < FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1; sensorNummer++) { sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[sensorNummer]); }
      const int offsetSensor[4] = { Stimulus.offsetSensor1, Stimulus.offsetSensor2, Stimulus.offsetSensor3, Stimulus.offsetSensor4 };
 
     // bepaal welke sensor als eerste actief is
     for (int sensorNummer = FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1 - 1; sensorNummer >= 0; sensorNummer--) {
-      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFSR_RFPset1->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
-        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorFSR_RFPset1->sensorPin[sensorNummer];
+      if (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFsrRfpSet1->sensorPin[sensorNummer], offsetSensor[sensorNummer]) > TIK_MINIMALE_DRUKWAARDE) {
+        Stimulus.TIK_TEST_ACTIEVE_VINGER = sensorFsrRfpSet1->sensorPin[sensorNummer];
         Stimulus.offsetSensorActief = offsetSensor[sensorNummer];
         break;
       }

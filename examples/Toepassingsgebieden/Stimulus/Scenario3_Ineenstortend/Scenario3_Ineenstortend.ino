@@ -21,7 +21,7 @@
 #include <GroeiAcademie.h>
 
 #if EXTENDER_ADS1115_AANTAL == 0
-  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FSR_RFP meet via een ADS1115-Extender.
+  #error Zet EXTENDER_ADS1115_AANTAL in UserConfig.h op minstens 1: FsrRfp meet via een ADS1115-Extender.
 #endif
 
 ExtenderADS1115 extenderADS1115(
@@ -77,8 +77,8 @@ void setup() {
 #endif
   Screen->Print(LCD_SERIEEL_L1, LCD_SERIEEL_L2);
 
-  sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
-  if (sensorFSR_RFPset1 == nullptr) exit(0);
+  sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, GedeeldeBusComponent::FsrRfp);
+  if (sensorFsrRfpSet1 == nullptr) exit(0);
 
   // Activeer de interne pull-up weerstanden voor de 4 toetsen en zet deze pinnen as input
   //-- pinMode(PIN_TOETS_1, INPUT_PULLUP);
@@ -114,13 +114,13 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
   Screen->Print("", "", 0, LCD_S0_NU);
 
   // eerste meting smijten we weg, geeft een valse waarde
-  sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[0]); sensorFSR_RFPset1->RawAnalogRead(sensorFSR_RFPset1->sensorPin[1]);
+  sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[0]); sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[1]);
 
   // STAP A: Blijf wachten tot een vinger sensor 1 AANRAAKT
-  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFSR_RFPset1->sensorPin[0], Stimulus.offsetSensor1) <= TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFsrRfpSet1->sensorPin[0], Stimulus.offsetSensor1) <= TIK_MINIMALE_DRUKWAARDE);
 
   // STAP B: Blijf wachten tot een vinger sensor 1 LOSLAAT
-  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFSR_RFPset1->sensorPin[0], Stimulus.offsetSensor1) > TIK_MINIMALE_DRUKWAARDE);
+  while (Stimulus.AnalogReadMetGekorigeerdeOffsets(sensorFsrRfpSet1->sensorPin[0], Stimulus.offsetSensor1) > TIK_MINIMALE_DRUKWAARDE);
 
   // --- START VAN DE TRAININGSLUS ---
   for (int herhaling = 1; herhaling <= TEST_AANTAL_KEER_HERHALEN; herhaling++) {
@@ -137,7 +137,7 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
     Screen->Print(LCD_S3_STAP_1, LCD_S3_SENSOR_1, LCD_LEESTIJD_MEDEDELING_KORT_MS);
     Stimulus.WachtTotAlleSensorsLosgelatenVoorTest(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1);
     Screen->Print("", "", 0, LCD_S0_NU);
-    exitStatus = Stimulus.MeetStimulus(sensorFSR_RFPset1->sensorPin[0], Stimulus.offsetSensor1, gemetenStimulus[0], sensorFSR_RFPset1->sensorPin[1], Stimulus.offsetSensor2);
+    exitStatus = Stimulus.MeetStimulus(sensorFsrRfpSet1->sensorPin[0], Stimulus.offsetSensor1, gemetenStimulus[0], sensorFsrRfpSet1->sensorPin[1], Stimulus.offsetSensor2);
 
     // Alleen wanneer sensor 2 de exitsensor activeert, mag stap 2 starten.
     if (exitStatus != EXIT_VOORWAARDE_EXITSENSOR_INGEDRUKT) { return; }
@@ -198,7 +198,7 @@ void UitvoerenAlgoritmeIneenstortendeTik() {
 
     // STAP 3 TOT n: SENSOR 2, EEN DOORLOPENDE METING
     Screen->Print(LCD_S3_STAP_3_n, LCD_S3_SENSOR_2); // Geen wachttijd tussen stap 2 en stap 3.
-    exitStatus = Stimulus.MeetStimulus(sensorFSR_RFPset1->sensorPin[1], Stimulus.offsetSensor2, gemetenStimulus[1], -1, 0, INSTORTEND_MAXIMALE_FACTOR * MAXIMALE_TIKTIJD_MS + 1000UL);
+    exitStatus = Stimulus.MeetStimulus(sensorFsrRfpSet1->sensorPin[1], Stimulus.offsetSensor2, gemetenStimulus[1], -1, 0, INSTORTEND_MAXIMALE_FACTOR * MAXIMALE_TIKTIJD_MS + 1000UL);
     if (exitStatus == EXIT_VOORWAARDE_NO_ACTION_TIMEOUT || exitStatus == EXIT_VOORWAARDE_TIMEOUT) { return; }
 
     char instortendExtraTeken = '?';

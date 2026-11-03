@@ -429,7 +429,7 @@ ExtenderADS1115 extenderADS1115(
   HardwareResourceToegang::GEDEELD
 );
 
-sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
 ```
 
 Zonder kanaalargumenten gebruikt RFP602 `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `_4`. Per instantie kunnen ook vier eigen kanalen meegegeven worden.

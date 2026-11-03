@@ -199,21 +199,21 @@ Voor CS via een Extender (zie `DATA.md`):
 | `..._CS_EXTENDER_I2C_ADDRESS` | I2C-adres van die Extender; verplicht samen met de vorige. |
 | `GEDEELDE_BUS_MIXED_PINS` | `0` standaard; wordt automatisch `1` zodra een `_CS_EXTENDER` ingesteld is. |
 
-Voor FSR_RFP zijn daarnaast beschikbaar:
+Voor FsrRfp zijn daarnaast beschikbaar:
 
 | Define | Betekenis |
 |---|---|
-| `FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` | `0` = alleen de laatst gemeten waarde per channel; groter dan `0` = RAM-QueueOrStack voor FSR_RFP, los van DIRECT (per channel aan te passen met `FSR_RFP_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1`). |
+| `FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` | `0` = alleen de laatst gemeten waarde per channel; groter dan `0` = RAM-QueueOrStack voor FsrRfp, los van DIRECT (per channel aan te passen met `FSR_RFP_CHANNEL_1..4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1`). |
 
 ## Sensoren
 
 | Define | Betekenis |
 |---|---|
-| `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` | Aantal fysiek aangesloten FSR_RFP-sensoren: uitsluitend `2` of `4`; een andere waarde veroorzaakt een compilerfout. |
-| `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` .. `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` | Standaardkanalen van de vier FSR_RFP-sensoren op de ADC-Extender. Bij ADS1115: `static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)` tot `EP_AIN3`. Alleen gedefinieerd wanneer `EXTENDER_ADS1115_AANTAL > 0`. |
+| `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` | Aantal fysiek aangesloten FsrRfp-sensoren: uitsluitend `2` of `4`; een andere waarde veroorzaakt een compilerfout. |
+| `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` .. `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` | Standaardkanalen van de vier FsrRfp-sensoren op de ADC-Extender. Bij ADS1115: `static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)` tot `EP_AIN3`. Alleen gedefinieerd wanneer `EXTENDER_ADS1115_AANTAL > 0`. |
 | `WACHT_LOSLATEN_DELAY_MS` | Pauze in de wachtlus van `WachtTotAlleSensorsLosgelatenVoorTest()`, zodat de I2C-bus naar de ADC-Extender niet onafgebroken bevraagd wordt; standaard `5`. |
 
-FSR_RFP meet via een ADC-Extender, net zoals elke andere Sensor op een Extender wordt ingeplugd. De `.ino` maakt de Extender aan en geeft hem als parent door; per FSR_RFP-instantie kunnen ook vier eigen kanalen worden opgegeven. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor FSR_RFP en vereist de optionele library ADS1X15 van Rob Tillaart. Het I2C-adres staat bij de Extender: `I2C_ADDRESS_EXTENDER_ADS1115_1` (standaard `0x48`).
+FsrRfp meet via een ADC-Extender, net zoals elke andere Sensor op een Extender wordt ingeplugd. De `.ino` maakt de Extender aan en geeft hem als parent door; per FsrRfp-instantie kunnen ook vier eigen kanalen worden opgegeven. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor FsrRfp en vereist de optionele library ADS1X15 van Rob Tillaart. Het I2C-adres staat bij de Extender: `I2C_ADDRESS_EXTENDER_ADS1115_1` (standaard `0x48`).
 
 ## BOARD_VERSION en ADC-resolutie
 
@@ -331,7 +331,7 @@ In de GedeeldeBus-API gebruiken `HardwareResourceType`-waarden de prefix `RT_`. 
 
 Voor iedere concrete Extender bestaat een `EXTENDER_<NAAM>_AANTAL`. De standaardwaarde is 0. De commentaar in de code markeert 0 of 1 als de standaardroute en `>= 2` als experimenteel.
 
-Een Extender met `EXTENDER_<NAAM>_AANTAL == 0` wordt niet mee gecompileerd. Eén gedeelde codebasis vormt een uitzondering wanneer ze elders effectief nodig is: `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FSR_RFP via de ADS1115 meet. Zo blijven niet gebruikte Extenders buiten de build.
+Een Extender met `EXTENDER_<NAAM>_AANTAL == 0` wordt niet mee gecompileerd. Eén gedeelde codebasis vormt een uitzondering wanneer ze elders effectief nodig is: `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115 meet. Zo blijven niet gebruikte Extenders buiten de build.
 
 De huidige aantalmacro's zijn:
 
@@ -358,9 +358,9 @@ Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of cont
 
 `ExtenderPins` zelf worden niet in `SystemConfig.h` gedefinieerd. De geldige resources staan in de concrete `Extender*.h` en gebruiken overal `EP_<pinnaam>`. Zie [GedeeldeBus](../Systeem/GEDEELDEBUS.md).
 
-### ADC en FSR_RFP
+### ADC en FsrRfp
 
-FSR_RFP kiest zijn ADC niet via een globale instelling, maar via zijn parent: de ADC-Extender die de `.ino` meegeeft. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`. In FSR_RFP staat per ondersteunde ADC een meettak onder `#if EXTENDER_<NAAM>_AANTAL > 0`; momenteel alleen ADS1115, via `ADS1115viaParent()`. Een andere ADC-Extender ondersteunen vraagt alleen een aanpassing in FSR_RFP. De standaardkanalen zijn `FSR_RFP_ADC_PIN_SENSOR_1_SET_1..4`.
+FsrRfp kiest zijn ADC niet via een globale instelling, maar via zijn parent: de ADC-Extender die de `.ino` meegeeft. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`. In FsrRfp staat per ondersteunde ADC een meettak onder `#if EXTENDER_<NAAM>_AANTAL > 0`; momenteel alleen ADS1115, via `ADS1115viaParent()`. Een andere ADC-Extender ondersteunen vraagt alleen een aanpassing in FsrRfp. De standaardkanalen zijn `FSR_RFP_ADC_PIN_SENSOR_1_SET_1..4`.
 
 
 ### Runtime-herstel (D042)

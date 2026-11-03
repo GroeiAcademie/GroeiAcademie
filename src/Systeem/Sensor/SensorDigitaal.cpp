@@ -38,6 +38,7 @@ bool SensorDigitaal::LeesHoofdwaarde(float& waarde) {
   waarde = NAN;
   if (!parent || !actief) return false;
   if (firstExtenderNode() != nullptr) {
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
     if (parent != firstExtenderNode()) return false;
     if (parent->gedeeldeIdentiteiten && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA) {
       HardwareResourceTypeI2C* apparaat = static_cast<HardwareResourceTypeI2C*>(parent);
@@ -48,6 +49,9 @@ bool SensorDigitaal::LeesHoofdwaarde(float& waarde) {
     WriteQueueOrStack(1, waarde);
 #endif
     return true; // De bestaande GPIO-interface retourneert geen transportfoutstatus.
+#else
+    return false;  // Buiten de bestaande compile-time mixed-pininterface.
+#endif
   }
   waarde = static_cast<float>(digitalRead(NativeArduinoPinVan(np_OUT)));
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE

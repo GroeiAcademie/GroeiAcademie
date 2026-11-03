@@ -76,7 +76,7 @@ set "TEST_DIR=!TEST_DIR:~0,-1!"
 set "EXTRA_FLAGS=!TEST_FLAGS!"
 if defined TEST_BOARD_VERSION set "EXTRA_FLAGS=!EXTRA_FLAGS! -DBOARD_VERSION=!TEST_BOARD_VERSION!"
 
-"%CLI_PATH%" compile --jobs 2 --fqbn "!TEST_FQBN!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !EXTRA_FLAGS!" "!TEST_DIR!" >"%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt" 2>&1
+"%CLI_PATH%" compile --jobs 2 --fqbn "!TEST_FQBN!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !EXTRA_FLAGS!" --build-path "%TEMP%\GA_Build_!GA_RUN_ID!" "!TEST_DIR!" >"%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt" 2>&1
 set "COMPILE_RESULT=!errorlevel!"
 
 if "!COMPILE_RESULT!"=="0" (
@@ -96,5 +96,6 @@ if "!COMPILE_RESULT!"=="0" (
 )
 
 del "%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt" "%TEMP%\GA_VerwachteFout_!GA_RUN_ID!.txt" >nul 2>&1
+rmdir /s /q "%TEMP%\GA_Build_!GA_RUN_ID!" >nul 2>&1
 exit /b 0
 

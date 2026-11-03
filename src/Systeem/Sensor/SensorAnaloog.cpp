@@ -51,7 +51,7 @@ bool SensorAnaloog::afmelden() {
 bool SensorAnaloog::RawAnalogRead(int32_t& waarde) {
   waarde = 0;
   const unsigned long begin = millis();
-  // Zelfde blokkerende wachtpatroon als FSR_RFP: tijdelijk bezet of referentie nog niet klaar.
+  // Zelfde blokkerende wachtpatroon als FsrRfp: tijdelijk bezet of referentie nog niet klaar.
   bool gestart = StartAnalogRead();
   while (!gestart && laatsteStartresultaat == 0 && millis() - begin <= 150) {
     yield();

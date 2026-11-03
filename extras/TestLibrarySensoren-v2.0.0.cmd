@@ -18,92 +18,92 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
-set TEST_NAAM="Sensor FSR_RFP | ExtenderADS1115"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set TEST_NAAM="Sensor FsrRfp | ExtenderADS1115"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
-set TEST_NAAM="Sensor FSR_RFP | ExtenderADS1115 | 4 sensoren"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set TEST_NAAM="Sensor FsrRfp | ExtenderADS1115 | 4 sensoren"
 set TEST_FLAGS="-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_DIRECT\Sensor_FSR_RFP_DIRECT.ino"
-set TEST_NAAM="Sensor FSR_RFP | DIRECT"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_DIRECT\Sensor_FsrRfp_DIRECT.ino"
+set TEST_NAAM="Sensor FsrRfp | DIRECT"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_DIRECT"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_FLASH\Sensor_FSR_RFP_FLASH.ino"
-set TEST_NAAM="Sensor FSR_RFP | FLASH"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_FLASH\Sensor_FsrRfp_FLASH.ino"
+set TEST_NAAM="Sensor FsrRfp | FLASH"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_MICROSD\Sensor_FSR_RFP_MICROSD.ino"
-set TEST_NAAM="Sensor FSR_RFP | MICROSD"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_MICROSD\Sensor_FsrRfp_MICROSD.ino"
+set TEST_NAAM="Sensor FsrRfp | MICROSD"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_TweeSetsOpTweeADS1115\Sensor_FSR_RFP_TweeSetsOpTweeADS1115.ino"
-set TEST_NAAM="Sensor FSR_RFP | twee sets op twee ExtenderADS1115"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_TweeSetsOpTweeADS1115\Sensor_FsrRfp_TweeSetsOpTweeADS1115.ino"
+set TEST_NAAM="Sensor FsrRfp | twee sets op twee ExtenderADS1115"
 set TEST_FLAGS="-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2=4 -DEXTENDER_ADS1115_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_OngeldigePin\Sensor_FSR_RFP_Test_OngeldigePin.ino"
-set TEST_NAAM="Sensor FSR_RFP | test ongeldige pin (T2-2)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_OngeldigePin\Sensor_FsrRfp_Test_OngeldigePin.ino"
+set TEST_NAAM="Sensor FsrRfp | test ongeldige pin (T2-2)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_ADC_Bezet\Sensor_FSR_RFP_Test_ADC_Bezet.ino"
-set TEST_NAAM="Sensor FSR_RFP | test ADC bezet (T2-3)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_ADC_Bezet\Sensor_FsrRfp_Test_ADC_Bezet.ino"
+set TEST_NAAM="Sensor FsrRfp | test ADC bezet (T2-3)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=2"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_Hardwarefout\Sensor_FSR_RFP_Test_Hardwarefout.ino"
-set TEST_NAAM="Sensor FSR_RFP | test hardwarefout (T2-4)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_Hardwarefout\Sensor_FsrRfp_Test_Hardwarefout.ino"
+set TEST_NAAM="Sensor FsrRfp | test hardwarefout (T2-4)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_Timeout_Conversie\Sensor_FSR_RFP_Test_Timeout_Conversie.ino"
-set TEST_NAAM="Sensor FSR_RFP | test ophalen na verlies van de ADC (T2-5)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_Timeout_Conversie\Sensor_FsrRfp_Test_Timeout_Conversie.ino"
+set TEST_NAAM="Sensor FsrRfp | test ophalen na verlies van de ADC (T2-5)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_ZonderGet\Sensor_FSR_RFP_Test_ZonderGet.ino"
-set TEST_NAAM="Sensor FSR_RFP | test start zonder ophalen (T2-6)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_ZonderGet\Sensor_FsrRfp_Test_ZonderGet.ino"
+set TEST_NAAM="Sensor FsrRfp | test start zonder ophalen (T2-6)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=2"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_VerkeerdeParent\Sensor_FSR_RFP_Test_VerkeerdeParent.ino"
-set TEST_NAAM="Sensor FSR_RFP | test verkeerde parent (T2-7)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_VerkeerdeParent\Sensor_FsrRfp_Test_VerkeerdeParent.ino"
+set TEST_NAAM="Sensor FsrRfp | test verkeerde parent (T2-7)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
-set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_Test_EigenBuffers\Sensor_FSR_RFP_Test_EigenBuffers.ino"
-set TEST_NAAM="Sensor FSR_RFP | test eigen buffers per object (T2-9)"
+set TEST_INO="examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_Test_EigenBuffers\Sensor_FsrRfp_Test_EigenBuffers.ino"
+set TEST_NAAM="Sensor FsrRfp | test eigen buffers per object (T2-9)"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_DIRECT -DFSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1=8 -DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1=2"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"

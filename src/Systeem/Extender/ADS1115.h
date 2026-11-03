@@ -13,7 +13,7 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
   uint8_t exclusiefMetAlert_[2];
 
   // ============================================================================
-  // ADS1115-BASIS: één ADS1115 als Extender (componentcode ADC_ADS1115); zijn sensoren, bv. FSR_RFP, worden erop ingeplugd
+  // ADS1115-BASIS: één ADS1115 als Extender (componentcode ADC_ADS1115); zijn sensoren, bv. FsrRfp, worden erop ingeplugd
   // ============================================================================
   ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t adres, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, HardwareResourcePin np_ALERT_RDY, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
     : HardwareResourceTypeI2C(parent, component, adres, np_SDA, np_SCL, Extender, tcaChannel), ADS1115(adres, &Wire), np_ALERT_RDY(np_ALERT_RDY) {
@@ -34,7 +34,7 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
     return FoutDiagnoseI2C(gelukt, ADS1115::getError(), gelukt);
   }
 
-  // analoge meting voor een child (bv. FSR_RFP), zonder dat die de ADS1115 kent.
+  // analoge meting voor een child (bv. FsrRfp), zonder dat die de ADS1115 kent.
   // De gain wordt per meting gekozen uit bereikMillivolt; ADS1X15 schrijft hem bij elke meting toch mee naar het configregister.
   // Runtime-herstel blijft bij de child: die kiest de ladder (kanaal, sensor of deze ADS1115) en meldt het ene resultaat.
   bool metingMislukt = false;

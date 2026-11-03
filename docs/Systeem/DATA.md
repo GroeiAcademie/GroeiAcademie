@@ -59,7 +59,7 @@ Eén bit staat voor een medium samen met zijn aansluiting. Gebruik altijd de naa
 
 ## NONE
 
-`DATA_TYPE_NONE` gebruikt geen Data-class. Voor FSR_RFP blijft de bestaande route behouden:
+`DATA_TYPE_NONE` gebruikt geen Data-class. Voor FsrRfp blijft de bestaande route behouden:
 
 ```text
 RawAnalogRead(...)
@@ -72,14 +72,14 @@ RawAnalogRead(...)
 `DATA_TYPE_DIRECT` gebruikt de Data-class:
 
 ```text
-FSR_RFP
+FsrRfp
 -> WriteQueueOrStack(sensorNummer, ruweData)   (overgeërfd van Sensor, logica in Data)
 -> ReadQueueOrStackStatus(sensorNummer)        1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
 -> ReadQueueOrStackValue(sensorNummer)         volgende waarde; leeg = lastValue van dat channel
 -> toepassing
 ```
 
-Voor FSR_RFP bepaalt:
+Voor FsrRfp bepaalt:
 
 ```cpp
 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
@@ -254,9 +254,9 @@ De HC-05 (Bluetooth) is voor de Arduino een gewone seriële poort en heeft geen 
 
 ## RAM-QueueOrStack
 
-De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (FSR_RFP: `ruweDataQueueOrStackChannel1..4`, in elk object apart; met set 2 is de grootte per channel de grootste van set 1 en set 2). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
+De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (FsrRfp: `ruweDataQueueOrStackChannel1..4`, in elk object apart; met set 2 is de grootte per channel de grootste van set 1 en set 2). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
 
-De QueueOrStack-grootte wordt per sensor geconfigureerd, los van DIRECT. Voor FSR_RFP:
+De QueueOrStack-grootte wordt per sensor geconfigureerd, los van DIRECT. Voor FsrRfp:
 
 ```cpp
 FSR_RFP_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1
@@ -272,7 +272,7 @@ De QueueOrStack bestaat alleen per sensor-channel. Een tweede QueueOrStack per m
 
 Een sensor maakt geen medium aan en hoeft niet te weten of zijn data via DIRECT, STREAMING of RECORDING wordt afgehandeld. Wanneer Data actief is, krijgt de sensor bij creatie een pointer naar `Data` mee.
 
-Voor FSR_RFP komt elke meting in `lastValue` (en, bij een grootte > 0, in de QueueOrStack) van het juiste channel:
+Voor FsrRfp komt elke meting in `lastValue` (en, bij een grootte > 0, in de QueueOrStack) van het juiste channel:
 
 ```cpp
 WriteQueueOrStack(sensorNummer, ruweData);   // overgeërfd van Sensor
@@ -310,21 +310,21 @@ De sensor gebruikt STREAMING en RECORDING niet rechtstreeks. De toepassing kiest
 ## Sensorvoorbeelden
 
 ```text
-Sensor_FSR_RFP.ino
+Sensor_FsrRfp.ino
 -> DATA_TYPE_NONE
 -> oude werking zonder Data-class
 
-Sensor_FSR_RFP_DIRECT.ino
+Sensor_FsrRfp_DIRECT.ino
 -> DATA_TYPE_DIRECT
 -> ReadQueueOrStackValue(sensorNummer)
 -> optionele QueueOrStack per channel
 
-Sensor_FSR_RFP_FLASH.ino
+Sensor_FsrRfp_FLASH.ino
 -> DATA_TYPE_FLASH_SPI
 -> Data STREAMING naar FLASH
--> sensorFSR_RFPset1->StreamingRead(sensorNummer)
+-> sensorFsrRfpSet1->StreamingRead(sensorNummer)
 
-Sensor_FSR_RFP_MICROSD.ino
+Sensor_FsrRfp_MICROSD.ino
 -> DATA_TYPE_MICROSD_SPI
 -> Data RECORDING naar microSD
 ```

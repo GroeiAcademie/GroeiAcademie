@@ -35,6 +35,7 @@ goto :MAIN_SCRIPT
 
 :MAIN_SCRIPT
 setlocal enabledelayedexpansion
+for /f %%I in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString('N')"') do set "GA_RUN_ID=%%I"
 pushd "%~dp0.."
 
 :: Bepaal welk pad bestaat
@@ -339,7 +340,7 @@ echo TEST_TYPE: !TEST_TYPE_ACTIEF!
 echo FQBN: !FQBN_ACTIEF!
 echo BOARD_VERSION: !BOARD_VERSION_ACTIEF!
 echo !TEST_NAAM_ACTIEF!
-"%CLI_PATH%" compile --jobs 2 --fqbn "!FQBN_ACTIEF!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS_ACTIEF! -DBOARD_VERSION=!BOARD_VERSION_ACTIEF!" "!TEST_DIR!" >"!COMPILE_LOG!" 2>&1
+"%CLI_PATH%" compile --jobs 2 --fqbn "!FQBN_ACTIEF!" --build-property "compiler.cpp.extra_flags=-DGROEIACADEMIE_IGNORE_USER_CONFIG !TEST_FLAGS_ACTIEF! -DBOARD_VERSION=!BOARD_VERSION_ACTIEF!" --build-path "%TEMP%\GA_Build_!GA_RUN_ID!" "!TEST_DIR!" >"!COMPILE_LOG!" 2>&1
 set "COMPILE_RESULT=!errorlevel!"
 type "!COMPILE_LOG!"
 
@@ -400,6 +401,7 @@ if "!COMPILE_RESULT!"=="0" (
     )
 )
 del /Q "!COMPILE_LOG!" >nul 2>&1
+rmdir /s /q "%TEMP%\GA_Build_!GA_RUN_ID!" >nul 2>&1
 exit /b 0
 
 :TEL_TEST

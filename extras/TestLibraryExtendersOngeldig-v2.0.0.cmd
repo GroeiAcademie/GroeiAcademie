@@ -124,10 +124,10 @@ set "TEST_FLAGS=-DEXTENDER_ADS7828_EXTERNE_REFERENTIE=2"
 set "VERWACHTE_FOUT=EXTENDER_ADS7828_EXTERNE_REFERENTIE moet 0 (intern) of 1 (extern) zijn."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_TweeSetsOpTweeADS1115\Sensor_FSR_RFP_TweeSetsOpTweeADS1115.ino"
-set "TEST_NAAM=FSR_RFP set 2 vereist tweede ADS1115 (Extenders)"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_TweeSetsOpTweeADS1115\Sensor_FsrRfp_TweeSetsOpTweeADS1115.ino"
+set "TEST_NAAM=FsrRfp set 2 vereist tweede ADS1115 (Extenders)"
 set "TEST_FLAGS=-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2=2 -DEXTENDER_ADS1115_AANTAL=1"
-set "VERWACHTE_FOUT=FSR_RFP set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2."
+set "VERWACHTE_FOUT=FsrRfp set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Extenders\Extender_ADS1115\Extender_ADS1115.ino"

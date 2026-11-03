@@ -243,13 +243,13 @@ set "TEST_FLAGS=-DSENSOR_LM35DZ_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set "VERWACHTE_FOUT=SENSOR_LM35DZ_AANTAL moet 0 of 1 zijn."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=REDIRECT_SERIAL bevat een onbekende redirect"
 set "TEST_FLAGS=-DREDIRECT_SERIAL=0x80"
 set "VERWACHTE_FOUT=REDIRECT_SERIAL bevat een onbekende redirect."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=REDIRECT_SERIAL_TO_MICROSD vereist REDIRECT_SERIAL_CONNECT_TIMEOUT_MS"
 set "TEST_FLAGS=-DREDIRECT_SERIAL=REDIRECT_SERIAL_TO_MICROSD -UREDIRECT_SERIAL_CONNECT_TIMEOUT_MS -DDATA_LAYER_MICROSD_SPI_AANTAL=1"
 set "VERWACHTE_FOUT=REDIRECT_SERIAL_TO_MICROSD vereist REDIRECT_SERIAL_CONNECT_TIMEOUT_MS."
@@ -273,115 +273,115 @@ set "TEST_FLAGS=-DDATA_LAYER_MICROSD_SPI_1_CS_EXTENDER=0"
 set "VERWACHTE_FOUT=DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER vereist DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_TYPE_EEPROM_SPI en DATA_TYPE_FRAM_SPI worden nog niet ondersteund in v2.0.0"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_SPI"
 set "VERWACHTE_FOUT=DATA_TYPE_EEPROM_SPI en DATA_TYPE_FRAM_SPI worden nog niet ondersteund in v2.0.0."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_CONFIG bevat een onbekend datatype"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=0x0800"
 set "VERWACHTE_FOUT=DATA_LAYER_CONFIG bevat een onbekend datatype."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_CONFIG moet minstens één datatype bevatten"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=0"
 set "VERWACHTE_FOUT=DATA_LAYER_CONFIG moet minstens één datatype bevatten."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_TYPE_NONE kan niet met een ander datatype worden gecombineerd"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_NONE|DATA_TYPE_EEPROM_NATIVE"
 set "VERWACHTE_FOUT=DATA_TYPE_NONE kan niet met een ander datatype worden gecombineerd."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_TYPE_EEPROM_NATIVE vereist DATA_LAYER_EEPROM_NATIVE_SIZE > 0"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_NATIVE -DDATA_LAYER_EEPROM_NATIVE_SIZE=0"
 set "VERWACHTE_FOUT=DATA_TYPE_EEPROM_NATIVE vereist DATA_LAYER_EEPROM_NATIVE_SIZE > 0."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_TYPE_EEPROM_I2C vereist DATA_LAYER_EEPROM_I2C_AANTAL >= 1"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_I2C -DDATA_LAYER_EEPROM_I2C_AANTAL=0"
 set "VERWACHTE_FOUT=DATA_TYPE_EEPROM_I2C vereist DATA_LAYER_EEPROM_I2C_AANTAL >= 1."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_EEPROM_I2C_AANTAL > 0 vereist DATA_TYPE_EEPROM_I2C in DATA_LAYER_CONFIG"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_NATIVE -DDATA_LAYER_EEPROM_I2C_AANTAL=1"
 set "VERWACHTE_FOUT=DATA_LAYER_EEPROM_I2C_AANTAL > 0 vereist DATA_TYPE_EEPROM_I2C in DATA_LAYER_CONFIG."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_EEPROM_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_I2C -DDATA_LAYER_EEPROM_I2C_AANTAL=3"
 set "VERWACHTE_FOUT=DATA_LAYER_EEPROM_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_TYPE_FLASH_SPI vereist DATA_LAYER_FLASH_SPI_AANTAL >= 1"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_AANTAL=0"
 set "VERWACHTE_FOUT=DATA_TYPE_FLASH_SPI vereist DATA_LAYER_FLASH_SPI_AANTAL >= 1."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_FLASH_SPI_AANTAL > 0 vereist DATA_TYPE_FLASH_SPI in DATA_LAYER_CONFIG"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_NATIVE -DDATA_LAYER_FLASH_SPI_AANTAL=1"
 set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_AANTAL > 0 vereist DATA_TYPE_FLASH_SPI in DATA_LAYER_CONFIG."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_FLASH\Sensor_FSR_RFP_FLASH.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_FLASH\Sensor_FsrRfp_FLASH.ino"
 set "TEST_NAAM=DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE mag maximaal 256 zijn (één pagina)"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_AANTAL=1 -DDATA_LAYER_FLASH_SPI_1_BUFFER_SIZE=257"
 set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE mag maximaal 256 zijn (één pagina)."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_FLASH\Sensor_FSR_RFP_FLASH.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_FLASH\Sensor_FsrRfp_FLASH.ino"
 set "TEST_NAAM=DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE mag maximaal 256 zijn (één pagina)"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_AANTAL=2 -DDATA_LAYER_FLASH_SPI_2_BUFFER_SIZE=257"
 set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE mag maximaal 256 zijn (één pagina)."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_FLASH\Sensor_FSR_RFP_FLASH.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_FLASH\Sensor_FsrRfp_FLASH.ino"
 set "TEST_NAAM=DATA_LAYER_FLASH_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI -DDATA_LAYER_FLASH_SPI_AANTAL=3"
 set "VERWACHTE_FOUT=DATA_LAYER_FLASH_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP_FLASH\Sensor_FSR_RFP_FLASH.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_FLASH\Sensor_FsrRfp_FLASH.ino"
 set "TEST_NAAM=DATA_TYPE_FRAM_I2C vereist DATA_LAYER_FRAM_I2C_AANTAL >= 1"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FRAM_I2C -DDATA_LAYER_FRAM_I2C_AANTAL=0"
 set "VERWACHTE_FOUT=DATA_TYPE_FRAM_I2C vereist DATA_LAYER_FRAM_I2C_AANTAL >= 1."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_FRAM_I2C_AANTAL > 0 vereist DATA_TYPE_FRAM_I2C in DATA_LAYER_CONFIG"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_NATIVE -DDATA_LAYER_FRAM_I2C_AANTAL=1"
 set "VERWACHTE_FOUT=DATA_LAYER_FRAM_I2C_AANTAL > 0 vereist DATA_TYPE_FRAM_I2C in DATA_LAYER_CONFIG."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_FRAM_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_FRAM_I2C -DDATA_LAYER_FRAM_I2C_AANTAL=3"
 set "VERWACHTE_FOUT=DATA_LAYER_FRAM_I2C_AANTAL ondersteunt momenteel maximaal 2 instanties."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_TYPE_MICROSD_SPI vereist DATA_LAYER_MICROSD_SPI_AANTAL >= 1"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI -DDATA_LAYER_MICROSD_SPI_AANTAL=0"
 set "VERWACHTE_FOUT=DATA_TYPE_MICROSD_SPI vereist DATA_LAYER_MICROSD_SPI_AANTAL >= 1."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_MICROSD_SPI_AANTAL > 0 vereist DATA_TYPE_MICROSD_SPI in DATA_LAYER_CONFIG of R..."
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_EEPROM_NATIVE -DDATA_LAYER_MICROSD_SPI_AANTAL=1"
 set "VERWACHTE_FOUT=DATA_LAYER_MICROSD_SPI_AANTAL > 0 vereist DATA_TYPE_MICROSD_SPI in DATA_LAYER_CONFIG of REDIRECT_SERIAL_TO_MICROSD."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=DATA_LAYER_MICROSD_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties"
 set "TEST_FLAGS=-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI -DDATA_LAYER_MICROSD_SPI_AANTAL=3"
 set "VERWACHTE_FOUT=DATA_LAYER_MICROSD_SPI_AANTAL ondersteunt momenteel maximaal 2 instanties."
@@ -400,25 +400,25 @@ set "VERWACHTE_FOUT=microSD met CS via een Extender: zet SD_CHIP_SELECT_MODE op 
 call :EXPECT_FAIL
 
 echo.
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
-set "TEST_NAAM=FSR_RFP set 2: ongeldig aantal"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=FsrRfp set 2: ongeldig aantal"
 set "TEST_FLAGS=-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2=3"
 set "VERWACHTE_FOUT=FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 moet 2 of 4 zijn."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
-set "TEST_NAAM=FSR_RFP set 2 vereist tweede ADS1115"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=FsrRfp set 2 vereist tweede ADS1115"
 set "TEST_FLAGS=-DFSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2=2 -DEXTENDER_ADS1115_AANTAL=1"
-set "VERWACHTE_FOUT=FSR_RFP set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2."
+set "VERWACHTE_FOUT=FsrRfp set 2 vraagt een eigen ADS1115: zet EXTENDER_ADS1115_AANTAL op 2."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=microSD: ongeldig flushinterval"
 set "TEST_FLAGS=-DDATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL=0"
 set "VERWACHTE_FOUT=DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL moet tussen 1 en 255 liggen."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=ADC: ongeldige resolutie"
 set "TEST_FLAGS=-DADC_BITS=9"
 set "VERWACHTE_FOUT=ADC_BITS moet 10, 12, 14 of 15 zijn."
@@ -430,13 +430,13 @@ set "TEST_FLAGS=-DSENSOR_DS18B20_AANTAL=-1"
 set "VERWACHTE_FOUT=SENSOR_DS18B20_AANTAL mag niet negatief zijn."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=FSR_RFP_ADC_BEREIK_MILLIVOLT: ongeldige configuratie"
 set "TEST_FLAGS=-DFSR_RFP_ADC_BEREIK_MILLIVOLT=0"
 set "VERWACHTE_FOUT=FSR_RFP_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV)."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=FSR_RFP_PROBE_SET_1: ongeldige configuratie"
 set "TEST_FLAGS=-DFSR_RFP_PROBE_SET_1=999"
 set "VERWACHTE_FOUT=FSR_RFP_PROBE_SET_1 moet FSR_RFP_PROBE_RFP602, FSR_RFP_PROBE_FSR400 of FSR_RFP_PROBE_FSR402 zijn."
@@ -448,7 +448,7 @@ set "TEST_FLAGS=-DSENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT=0"
 set "VERWACHTE_FOUT=SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV)."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FSR_RFP\Sensor_FSR_RFP.ino"
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
 set "TEST_NAAM=SENSOR_INMP441_AANTAL: ongeldige configuratie"
 set "TEST_FLAGS=-DSENSOR_INMP441_AANTAL=2"
 set "VERWACHTE_FOUT=SENSOR_INMP441_AANTAL moet 0 of 1 zijn."

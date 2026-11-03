@@ -217,7 +217,7 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   X(NeuroSkyTGAM,                 0xA7) /* GedeeldeBusComponent::NeuroSkyTGAM */ \
   /*                                */ \
   /* Druk en kracht                 */ \
-  X(FSR_RFP,                      0xB0) /* GedeeldeBusComponent::FSR_RFP */ \
+  X(FsrRfp,                       0xB0) /* GedeeldeBusComponent::FsrRfp */ \
   X(HX711,                        0xB1) /* GedeeldeBusComponent::HX711 */ \
   X(SDP810125PA,                  0xB2) /* GedeeldeBusComponent::SDP810125PA */ \
   /*                                */ \
@@ -254,8 +254,8 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   /*                                */ \
   /* STURING ---------------------- */ \
   X(A4988,                        0xE0) \
-  X(DCmotorL293D,                 0xE1) \
-  X(DCmotorL298N,                 0xE2) \
+  X(L293D,                        0xE1) \
+  X(L298N,                        0xE2) \
   X(MG996R,                       0xE3) \
   X(Relais,                       0xE4) \
   X(RGBLED,                       0xE5) \
@@ -583,7 +583,7 @@ struct GedeeldeBusNode {
 
   // Runtime-herstel: alle nodes onder deze node (kinderen, kleinkinderen, ...).
   // Uitschakelen: eerst StopSturing() bij alle onderliggende nodes, daarna actief = false, zodat niemand nog leest van een component dat niet antwoordt.
-  // OpnieuwActiveren: activeren() van boven naar onder, zodat elk component zijn instellingen opnieuw zet (bv. de gain van FSR_RFP).
+  // OpnieuwActiveren: activeren() van boven naar onder, zodat elk component zijn instellingen opnieuw zet (bv. de gain van FsrRfp).
   void AlleOnderliggendeNodesUitschakelen();
   void AlleOnderliggendeNodesOpnieuwActiveren();
 
@@ -908,7 +908,7 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
 // Native-singleton (Deel V-fix): de echte, bestaande wortel van de boom.
 // Alle top-level nodes (Extenders, Screens, native Input/Output) wijzen hiernaar als parent, 
 // in plaats van nullptr - pas dan werkt de sibling-conflictcontrole in controleren() ook op dit niveau (bv. twee I2C-apparaten op hetzelfde adres, 
-// of FSR_RFP en SerialOutput die toevallig dezelfde D-pin claimen).
+// of FsrRfp en SerialOutput die toevallig dezelfde D-pin claimen).
 // ============================================================================
 extern GedeeldeBusNode Native;
 

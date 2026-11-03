@@ -97,12 +97,12 @@ GedeeldeBusNewComponent<MF52x>(
 
 ### Aansluiting van het gebruikte MF52A-element
 
-Voor het gebruikte **MF52A**-element is de nominale weerstand **`R25 = 10 kΩ` bij 25 °C** bevestigd. De **B-waarde is nog niet bekend**; neem hiervoor niet automatisch 3950 K of een waarde uit de MF52D-specificatie over.
+Voor het gebruikte **MF52A / MF52AT**-element zijn de nominale weerstand **`R25 = 10 kΩ` bij 25 °C** en **`B = 3950 K`** bevestigd.
 
 - Dit is een **tweepolige NTC-weerstand**, zonder polariteit en zonder eigen `VCC`-, `GND`- of `OUT`-contact.
 - Voor de bestaande analoge `MF52x`-route: maak een spanningsdeler, bijvoorbeeld **VCC → vaste weerstand 10 kΩ → meetknooppunt → MF52A → GND**. Verbind het meetknooppunt met het gekozen ADC-Extender-kanaal; GND moet gemeenschappelijk zijn.
 - Met een vaste weerstand van 10 kΩ ligt het knooppunt bij een ideaal 10kΩ-NTC-element op **ongeveer de helft van de voedingsspanning bij 25 °C**. Controleer zelfverhitting en het ingangsbereik van de ADC.
-- De bestaande FrameWork-driver leest **ADC-spanning**, niet rechtstreeks °C. Voor een betrouwbare temperatuurconversie blijft de B-waarde of een gemeten R/T-kalibratie nodig.
+- De bestaande FrameWork-driver leest **ADC-spanning**, niet rechtstreeks °C. Voor een eventuele temperatuurconversie van dit element is **`B = 3950 K`** bevestigd; een gemeten R/T-kalibratie kan aanvullend gebruikt worden.
 
 ## Testen
 

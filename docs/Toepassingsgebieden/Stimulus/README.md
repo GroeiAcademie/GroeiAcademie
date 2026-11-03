@@ -22,7 +22,7 @@ of:
 
 ## v2.0.0 Sensorroute
 
-De huidige Stimuluscode neemt `src/Systeem/Sensor/FSR_RFP.h` op en leest de analoge kanalen via de globale pointer `sensorFSR_RFPset1`. FSR_RFP meet via een ADC-Extender (nu: ADS1115), zoals elke Sensor op een Extender wordt ingeplugd. De Stimulusvoorbeelden maken eerst de Extender aan en daarna de Sensor met die Extender als parent:
+De huidige Stimuluscode neemt `src/Systeem/Sensor/FsrRfp.h` op en leest de analoge kanalen via de globale pointer `sensorFsrRfpSet1`. FsrRfp meet via een ADC-Extender (nu: ADS1115), zoals elke Sensor op een Extender wordt ingeplugd. De Stimulusvoorbeelden maken eerst de Extender aan en daarna de Sensor met die Extender als parent:
 
 ```cpp
 ExtenderADS1115 extenderADS1115(
@@ -33,11 +33,11 @@ ExtenderADS1115 extenderADS1115(
   HardwareResourceToegang::GEDEELD
 );
 
-sensorFSR_RFPset1 = GedeeldeBusNewComponent<struct FSR_RFP>(&extenderADS1115, GedeeldeBusComponent::FSR_RFP);
-if (sensorFSR_RFPset1 == nullptr) exit(0);
+sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, GedeeldeBusComponent::FsrRfp);
+if (sensorFsrRfpSet1 == nullptr) exit(0);
 ```
 
-Zonder kanaalargumenten gebruikt FSR_RFP de standaardkanalen `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` (ADS1115: `EP_AIN0` tot `EP_AIN3`). Een `.ino` kan ook vier eigen kanalen meegeven. `RawAnalogRead()` leest via `ExtenderADS1115::readADC()`.
+Zonder kanaalargumenten gebruikt FsrRfp de standaardkanalen `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` (ADS1115: `EP_AIN0` tot `EP_AIN3`). Een `.ino` kan ook vier eigen kanalen meegeven. `RawAnalogRead()` leest via `ExtenderADS1115::readADC()`.
 
 ## Doel
 

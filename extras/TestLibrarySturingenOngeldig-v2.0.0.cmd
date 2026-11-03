@@ -55,16 +55,16 @@ set "TEST_FLAGS=-DSTURING_A4988_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set "VERWACHTE_FOUT=Zet STURING_A4988_AANTAL op minstens 1 voor deze test."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_DCmotorL293D\Sturing_DCmotorL293D.ino"
-set "TEST_NAAM=DCmotorL293D uitgeschakeld"
-set "TEST_FLAGS=-DSTURING_DCMOTORL293D_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=Zet STURING_DCMOTORL293D_AANTAL op minstens 1 voor deze test."
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_L293D\Sturing_L293D.ino"
+set "TEST_NAAM=L293D uitgeschakeld"
+set "TEST_FLAGS=-DSTURING_L293D_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=Zet STURING_L293D_AANTAL op minstens 1 voor deze test."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_DCmotorL298N\Sturing_DCmotorL298N.ino"
-set "TEST_NAAM=DCmotorL298N uitgeschakeld"
-set "TEST_FLAGS=-DSTURING_DCMOTORL298N_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=Zet STURING_DCMOTORL298N_AANTAL op minstens 1 voor deze test."
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_L298N\Sturing_L298N.ino"
+set "TEST_NAAM=L298N uitgeschakeld"
+set "TEST_FLAGS=-DSTURING_L298N_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=Zet STURING_L298N_AANTAL op minstens 1 voor deze test."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_MG996R\Sturing_MG996R.ino"

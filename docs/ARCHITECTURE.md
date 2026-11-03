@@ -48,12 +48,12 @@ GroeiAcademie/
 │   │   │   ├── ConfigTCA9548A.h
 │   │   │   └── ConfigTCA9548A_template.h
 │   │   ├── Sensoren/
-│   │   │   ├── ConfigFSR_RFP.h
-│   │   │   └── ConfigFSR_RFP_template.h
+│   │   │   ├── ConfigFsrRfp.h
+│   │   │   └── ConfigFsrRfp_template.h
 │   │   ├── Sturingen/
 │   │   │   ├── ConfigA4988_template.h
-│   │   │   ├── ConfigDCmotorL293D_template.h
-│   │   │   ├── ConfigDCmotorL298N_template.h
+│   │   │   ├── ConfigL293D_template.h
+│   │   │   ├── ConfigL298N_template.h
 │   │   │   ├── ConfigMG996R_template.h
 │   │   │   ├── ConfigRelais_template.h
 │   │   │   ├── ConfigRGBLED_template.h
@@ -156,8 +156,8 @@ GroeiAcademie/
 │   │   │   ├── DS3231.cpp
 │   │   │   ├── DS3231.h
 │   │   │   ├── EGBOPulseSensor.h
-│   │   │   ├── FSR_RFP.cpp
-│   │   │   ├── FSR_RFP.h
+│   │   │   ├── FsrRfp.cpp
+│   │   │   ├── FsrRfp.h
 │   │   │   ├── GSRGrove.h
 │   │   │   ├── HCSR501.h
 │   │   │   ├── HSR0x.cpp
@@ -211,8 +211,8 @@ GroeiAcademie/
 │   │   │   └── WATER.h
 │   │   ├── Sturing/
 │   │   │   ├── A4988.h
-│   │   │   ├── DCmotorL293D.h
-│   │   │   ├── DCmotorL298N.h
+│   │   │   ├── L293D.h
+│   │   │   ├── L298N.h
 │   │   │   ├── MG996R.h
 │   │   │   ├── Relais.h
 │   │   │   ├── RGBLED.h
@@ -312,18 +312,18 @@ GroeiAcademie/
 │   │   │   │   ├── Sensor_DS18B20/
 │   │   │   │   ├── Sensor_DS3231/
 │   │   │   │   ├── Sensor_EGBOPulseSensor/
-│   │   │   │   ├── Sensor_FSR_RFP/
-│   │   │   │   ├── Sensor_FSR_RFP_DIRECT/
-│   │   │   │   ├── Sensor_FSR_RFP_FLASH/
-│   │   │   │   ├── Sensor_FSR_RFP_MICROSD/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_ADC_Bezet/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_EigenBuffers/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_Hardwarefout/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_OngeldigePin/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_Timeout_Conversie/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_VerkeerdeParent/
-│   │   │   │   ├── Sensor_FSR_RFP_Test_ZonderGet/
-│   │   │   │   ├── Sensor_FSR_RFP_TweeSetsOpTweeADS1115/
+│   │   │   │   ├── Sensor_FsrRfp/
+│   │   │   │   ├── Sensor_FsrRfp_DIRECT/
+│   │   │   │   ├── Sensor_FsrRfp_FLASH/
+│   │   │   │   ├── Sensor_FsrRfp_MICROSD/
+│   │   │   │   ├── Sensor_FsrRfp_Test_ADC_Bezet/
+│   │   │   │   ├── Sensor_FsrRfp_Test_EigenBuffers/
+│   │   │   │   ├── Sensor_FsrRfp_Test_Hardwarefout/
+│   │   │   │   ├── Sensor_FsrRfp_Test_OngeldigePin/
+│   │   │   │   ├── Sensor_FsrRfp_Test_Timeout_Conversie/
+│   │   │   │   ├── Sensor_FsrRfp_Test_VerkeerdeParent/
+│   │   │   │   ├── Sensor_FsrRfp_Test_ZonderGet/
+│   │   │   │   ├── Sensor_FsrRfp_TweeSetsOpTweeADS1115/
 │   │   │   │   ├── Sensor_GSRGrove/
 │   │   │   │   ├── Sensor_HCSR04/
 │   │   │   │   ├── Sensor_HCSR04P/
@@ -360,9 +360,9 @@ GroeiAcademie/
 │   │   │   │   └── Sensor_XYSTICK/
 │   │   │   └── Sturingen/
 │   │   │       ├── Sturing_A4988/
-│   │   │       ├── Sturing_DCmotorL293D/
-│   │   │       ├── Sturing_DCmotorL298N/
 │   │   │       ├── Sturing_ISD1820/
+│   │   │       ├── Sturing_L293D/
+│   │   │       ├── Sturing_L298N/
 │   │   │       ├── Sturing_MG996R/
 │   │   │       ├── Sturing_Relais/
 │   │   │       ├── Sturing_RGBLED/
@@ -479,8 +479,8 @@ GroeiAcademie/
 │   │   │   └── WATER.md
 │   │   ├── Sturing/
 │   │   │   ├── A4988.md
-│   │   │   ├── DCmotorL293D.md
-│   │   │   ├── DCmotorL298N.md
+│   │   │   ├── L293D.md
+│   │   │   ├── L298N.md
 │   │   │   ├── MG996R.md
 │   │   │   ├── Relais.md
 │   │   │   ├── RGBLED.md
@@ -567,7 +567,7 @@ De actuele componentdocumentatie is onderverdeeld volgens de broncode:
 
 - [Extenders](Systeem/Extender/): 16 componentdocumenten, met korte bestandsnamen zoals `ADS1115.md`.
 - [Sensoren](Systeem/Sensor/): 49 componentdocumenten voor afzonderlijke Sensoren en algemene Sensor-basisklassen, waaronder `FSR400.md`, `FSR402.md` en `RFP602.md`.
-- [Sturingen](Systeem/Sturing/): negen componentdocumenten voor A4988, DCmotorL293D, DCmotorL298N, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
+- [Sturingen](Systeem/Sturing/): negen componentdocumenten voor A4988, L293D, L298N, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
 
 De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.
 
@@ -658,7 +658,7 @@ I2C-adressen worden intern als exclusieve claim in hetzelfde mechanisme behandel
 
 `firstExtenderNode()` bepaalt in welk resourcegebied een node zit. Claims worden alleen rechtstreeks vergeleken wanneer ze tot hetzelfde resourcegebied behoren. Native claims vergelijken dus met Native claims; children van dezelfde Extender vergelijken binnen die Extender.
 
-**Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). FSR_RFP doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
+**Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). FsrRfp doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
 
 ## I2C en SPI
 
@@ -713,7 +713,7 @@ De fabrikant-/functiebenaming blijft in de comments naast elke enumwaarde staan.
 
 Er is geen aparte ADC-laag meer: een ADC is een gewone Extender. De `.ino` maakt de ADC-Extender aan (nu: `ExtenderADS1115`, componentcode `ADC_ADS1115`) en geeft hem als parent aan de Sensor door, zoals bij elke Extender. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`.
 
-`Sensor` is momenteel een tussenstruct boven `GedeeldeBusNode`. `FSR_RFP` staat onder `src/Systeem/Sensor/` en leest analoge waarden via het bestaande generieke ADC-parentcontract (`StartExtenderReadAnalog`, `IsExtenderReadAnalogReady`, `GetExtenderReadAnalogValue`). De concrete ADC-implementatie blijft bij de Extender. Eén `FSR_RFP`-object beheert maximaal vier kanalen op één ADC-Extender; de kanalen komen uit de constructor of anders uit `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot en met `FSR_RFP_ADC_PIN_SENSOR_4_SET_1`. Set 1 en set 2 worden onderscheiden via de parameter `set`, `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2`, `sensorFSR_RFPset1` en `sensorFSR_RFPset2`; elke set gebruikt een eigen ADS1115 en elk object eigen buffers.
+`Sensor` is momenteel een tussenstruct boven `GedeeldeBusNode`. `FsrRfp` staat onder `src/Systeem/Sensor/` en leest analoge waarden via het bestaande generieke ADC-parentcontract (`StartExtenderReadAnalog`, `IsExtenderReadAnalogReady`, `GetExtenderReadAnalogValue`). De concrete ADC-implementatie blijft bij de Extender. Eén `FsrRfp`-object beheert maximaal vier kanalen op één ADC-Extender; de kanalen komen uit de constructor of anders uit `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot en met `FSR_RFP_ADC_PIN_SENSOR_4_SET_1`. Set 1 en set 2 worden onderscheiden via de parameter `set`, `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2`, `sensorFsrRfpSet1` en `sensorFsrRfpSet2`; elke set gebruikt een eigen ADS1115 en elk object eigen buffers.
 
 ## Screen
 
@@ -744,7 +744,7 @@ Zie [Systeem/INPUT.md](Systeem/INPUT.md).
 
 ## Stimulus
 
-`Stimulus` blijft een toepassingsmodule onder `src/Toepassingsgebieden/Stimulus/`. De directe sensoruitlezing loopt in de huidige code via de globale pointer `sensorFSR_RFPset1`; de voorbeelden maken `Screen`, `Input` en `sensorFSR_RFPset1` via `GedeeldeBusNewComponent()` aan voordat de Stimuluslogica wordt gebruikt.
+`Stimulus` blijft een toepassingsmodule onder `src/Toepassingsgebieden/Stimulus/`. De directe sensoruitlezing loopt in de huidige code via de globale pointer `sensorFsrRfpSet1`; de voorbeelden maken `Screen`, `Input` en `sensorFsrRfpSet1` via `GedeeldeBusNewComponent()` aan voordat de Stimuluslogica wordt gebruikt.
 
 ## Configuratiemodel
 
@@ -796,7 +796,7 @@ Niet iedere build gebruikt alle dependencycode. Preprocessorconfiguratie bepaalt
 
 ## Samenwerking tussen modules
 
-Screen en Input zijn frameworkbrede systeemlagen. GedeeldeBus verzorgt hun resourceboom en lifecycle, maar de concrete Screen- en Inputlogica blijft in de eigen module. Stimulus gebruikt de systeemlagen en `FSR_RFP`, maar GedeeldeBus bevat geen Stimulus-algoritmen.
+Screen en Input zijn frameworkbrede systeemlagen. GedeeldeBus verzorgt hun resourceboom en lifecycle, maar de concrete Screen- en Inputlogica blijft in de eigen module. Stimulus gebruikt de systeemlagen en `FsrRfp`, maar GedeeldeBus bevat geen Stimulus-algoritmen.
 
 ## Elektronische documentatie
 
@@ -806,7 +806,7 @@ Een geldig schema vermeldt ten minste boardvariant, pinbezetting, voeding/massa,
 
 ## Testarchitectuur
 
-De huidige examples onder `examples/Systeem/GedeeldeBus/Extenders/` bevatten per Extender een basisvoorbeeld en aparte `ExtenderPins`-tests voor toegelaten en geweigerde resources. `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FSR_RFP/` bevat de eerste Sensor-lifecycletest.
+De huidige examples onder `examples/Systeem/GedeeldeBus/Extenders/` bevatten per Extender een basisvoorbeeld en aparte `ExtenderPins`-tests voor toegelaten en geweigerde resources. `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp/` bevat de eerste Sensor-lifecycletest.
 
 Deze tests bewijzen niet automatisch de volledige elektronische werking van elk kanaal. Zie `extras/TESTEN.md` voor het onderscheid tussen lifecycle-/resourcecontrole, elektronische functietests en praktijktests.
 
