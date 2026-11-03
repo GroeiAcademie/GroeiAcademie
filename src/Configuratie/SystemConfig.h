@@ -4,8 +4,7 @@
 #include "../Systeem/Input/InputTypes.h"
 #include "../Systeem/Screen/ScreenTypes.h"
 
-// BOARD_VERSIONs: ondersteunde ARDUINO UNO-vormfactor boards die vóór UserConfig.h beschikbaar moeten zijn.
-#define BOARD_UNO_R3                       0
+// BOARD_VERSIONs: ondersteunde Arduino Uno R3-vormfactorborden die vóór UserConfig.h beschikbaar moeten zijn.
 #define BOARD_UNO_R4_MINIMA                1
 #define BOARD_UNO_R4_WIFI                  2
 #define BOARD_UNO_Q                        7
@@ -300,6 +299,9 @@
     #if __has_include("Sturingen/ConfigL298N.h")
       #include "Sturingen/ConfigL298N.h"
     #endif
+    #if __has_include("Sturingen/ConfigMAX7219.h")
+      #include "Sturingen/ConfigMAX7219.h"
+    #endif
     #if __has_include("Sturingen/ConfigRelais.h")
       #include "Sturingen/ConfigRelais.h"
     #endif
@@ -343,9 +345,7 @@
 #ifndef BOARD_VERSION
   // Automatische detectie gebruikt de compiler-/boardmacro van de geselecteerde Arduino-boardcore.
   // Voor SB Components Ardi32 blijft expliciete BOARD_VERSION-keuze nodig wanneer de generieke ESP32S3 Dev Module wordt gebruikt; zie docs/HARDWARE_SUPPORT.md.
-  #if defined(ARDUINO_AVR_UNO)
-    #define BOARD_VERSION BOARD_UNO_R3
-  #elif defined(ARDUINO_UNOR4_MINIMA)
+  #if defined(ARDUINO_UNOR4_MINIMA)
     #define BOARD_VERSION BOARD_UNO_R4_MINIMA
   #elif defined(ARDUINO_UNOR4_WIFI)
     #define BOARD_VERSION BOARD_UNO_R4_WIFI
@@ -449,7 +449,7 @@
 #endif
 
 // Uitgebreide gebeurtenissen (loslaten, lang indrukken, timeout bij geen invoer).
-// Standaard UIT, om geheugen te sparen op geheugenarme boards (bv. AVR Uno R3).
+// Standaard UIT om geheugen te sparen.
 // Enkel van toepassing bij OpvragenHuidigeToetsAanslag(false), niet bij wachten=true.
 // #define INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
 
@@ -1220,7 +1220,7 @@
 // ****************************************************************************
 
 // BOARD
-#if BOARD_VERSION != BOARD_UNO_R3 && BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_UNO_Q && BOARD_VERSION != BOARD_ESP32S3_ARDI32 && BOARD_VERSION != BOARD_ESP32S3_DEV && BOARD_VERSION != BOARD_ESP32_D1_UNO_R32 && BOARD_VERSION != BOARD_RP2040_CYTRON_MAKER_UNO && BOARD_VERSION != BOARD_STM32F4_NUCLEO64_F401RE
+#if BOARD_VERSION != BOARD_UNO_R4_MINIMA && BOARD_VERSION != BOARD_UNO_R4_WIFI && BOARD_VERSION != BOARD_UNO_Q && BOARD_VERSION != BOARD_ESP32S3_ARDI32 && BOARD_VERSION != BOARD_ESP32S3_DEV && BOARD_VERSION != BOARD_ESP32_D1_UNO_R32 && BOARD_VERSION != BOARD_RP2040_CYTRON_MAKER_UNO && BOARD_VERSION != BOARD_STM32F4_NUCLEO64_F401RE
   #error Selecteer een geldige BOARD_VERSION.
 #endif
 
@@ -1241,52 +1241,7 @@
 // ============================================================================
 
 // Gebruik deze GPIOxx-labels in plaats van kale cijfers, zodat de mapping leesbaar en controleerbaar blijft.
-#if BOARD_VERSION == BOARD_UNO_R3 || BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI || BOARD_VERSION == BOARD_UNO_Q
-  #if BOARD_VERSION == BOARD_UNO_R3
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D0
-      #define ARDUINO_UNO_SHIELD_PIN_D0 0
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D1
-      #define ARDUINO_UNO_SHIELD_PIN_D1 1
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D2
-      #define ARDUINO_UNO_SHIELD_PIN_D2 2
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D3
-      #define ARDUINO_UNO_SHIELD_PIN_D3 3
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D4
-      #define ARDUINO_UNO_SHIELD_PIN_D4 4
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D5
-      #define ARDUINO_UNO_SHIELD_PIN_D5 5
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D6
-      #define ARDUINO_UNO_SHIELD_PIN_D6 6
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D7
-      #define ARDUINO_UNO_SHIELD_PIN_D7 7
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D8
-      #define ARDUINO_UNO_SHIELD_PIN_D8 8
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D9
-      #define ARDUINO_UNO_SHIELD_PIN_D9 9
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D10
-      #define ARDUINO_UNO_SHIELD_PIN_D10 10
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D11
-      #define ARDUINO_UNO_SHIELD_PIN_D11 11
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D12
-      #define ARDUINO_UNO_SHIELD_PIN_D12 12
-    #endif
-    #ifndef ARDUINO_UNO_SHIELD_PIN_D13
-      #define ARDUINO_UNO_SHIELD_PIN_D13 13
-    #endif
-
-  #elif BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI || BOARD_VERSION == BOARD_UNO_Q
+#if BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI || BOARD_VERSION == BOARD_UNO_Q
     #ifndef ARDUINO_UNO_SHIELD_PIN_D0
       #define ARDUINO_UNO_SHIELD_PIN_D0 D0
     #endif
@@ -1329,7 +1284,6 @@
     #ifndef ARDUINO_UNO_SHIELD_PIN_D13
       #define ARDUINO_UNO_SHIELD_PIN_D13 D13
     #endif
-  #endif
 
   #ifndef ARDUINO_UNO_SHIELD_PIN_A0
     #define ARDUINO_UNO_SHIELD_PIN_A0 A0
@@ -1371,7 +1325,7 @@
     #ifndef ARDUINO_UNO_SHIELD_PIN_SCK
       #define ARDUINO_UNO_SHIELD_PIN_SCK  D13
     #endif
-  #else // Standaard fallback voor Uno R3, R4 Minima en R4 WiFi
+  #else // Standaard voor Uno R4 Minima en R4 WiFi
     #ifndef ARDUINO_UNO_SHIELD_PIN_SS
       #define ARDUINO_UNO_SHIELD_PIN_SS   SS
     #endif
@@ -2015,9 +1969,7 @@
 // Met DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE_FOR(component, channel) kan per sensor en kanaal
 // een andere capaciteit worden gekozen. 0 = alleen lastValue, geen FIFO/LIFO.
 #ifndef DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE
-  #if BOARD_VERSION == BOARD_UNO_R3
-    #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE 4
-  #elif BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
+  #if BOARD_VERSION == BOARD_ESP32S3_ARDI32 || BOARD_VERSION == BOARD_ESP32S3_DEV
     #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE 32
   #else
     #define DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE 16
@@ -2042,6 +1994,9 @@
 #endif
 #ifndef STURING_L298N_AANTAL
   #define STURING_L298N_AANTAL 0
+#endif
+#ifndef STURING_MAX7219_AANTAL
+  #define STURING_MAX7219_AANTAL 0
 #endif
 #ifndef STURING_MG996R_AANTAL
   #define STURING_MG996R_AANTAL 0
@@ -2143,7 +2098,7 @@
 #ifndef RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS
   #define RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS 100UL
 #endif
-// Maximale duur van één I2C-transactie (setWireTimeout, AVR en UNO R4). Zonder timeout kan AVR blijven hangen.
+// Maximale duur van één I2C-transactie (setWireTimeout op ondersteunde cores).
 #ifndef I2C_TIMEOUT_PER_TRANSACTIE_US
   #define I2C_TIMEOUT_PER_TRANSACTIE_US 25000UL
 #endif
@@ -2939,8 +2894,8 @@
 // AFGELEID: GPIO via een Extender (niet zelf instellen)
 // ============================================================================
 // 1 = SetExtenderPinMode(), WriteExtenderPin() en ReadExtenderPin() worden meegecompileerd:
-// bij gemengde pinnen, of wanneer een digitale Sensor (HCSR501, HW201) samen met een GPIO-Extender gebruikt wordt.
-#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)))
+// bij gemengde pinnen, of wanneer HCSR501, HW201 of MAX7219 samen met een GPIO-Extender gebruikt wordt.
+#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0 || STURING_MAX7219_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)))
   #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 1
 #else
   #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 0

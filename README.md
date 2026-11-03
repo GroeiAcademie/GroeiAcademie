@@ -6,7 +6,7 @@
 
 ![GROEI ACADEMIE FrameWork - v2.0.0](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20v2.0.0.jpg)
 
-*Eén library, de ondersteunde Arduino Uno-vormfactorborden, en alle schermen, keypads, afstandsbedieningen, Extenders en sensoren die v2.0.0 ondersteunt.*
+*Eén library, de ondersteunde Arduino Uno R3-vormfactorborden, en alle schermen, keypads, afstandsbedieningen, Extenders en sensoren die v2.0.0 ondersteunt.*
 
 ![GroeiAcademie FrameWork v2.0.0 - Sensoren (43)](docs/Systeem/Screenshots/GroeiAcademie%20FrameWork%20v2.0.0%20-%20Sensoren%20%2843%29.png)
 
@@ -85,7 +85,7 @@ Op deze afbeelding zie je het **elektronische schema** van het Stimulus Shield v
 
 ![GROEI ACADEMIE FrameWork - Boards](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Board.JPG)
 
-Op deze foto zie je alle succesvol geteste en reeds ondersteunde **ARDUINO UNO-vormfactor boards**.
+Op deze foto zie je alle succesvol geteste en reeds ondersteunde **Arduino Uno R3-vormfactorborden**.
 
 ## Inputkanalen
 
@@ -160,7 +160,6 @@ De validatie omvat:
 - `extras/TestLibraryGereleased.cmd` voor de huidige gereleasete regressieset; daarnaast bestaan gerichte v2-testscripts `TestLibraryExtenders-v2.0.0.cmd`, `TestLibraryInput-v2.0.0.cmd`, `TestLibraryScreen-v2.0.0.cmd` en `TestLibraryGedeeldeBus.cmd`;
 - afzonderlijke HX1838-validatie met geldige en bewust ongeldige configuraties;
 - menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
-- Arduino UNO R3;
 - Arduino Uno R4 Minima;
 - Arduino Uno R4 WiFi;
 - WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) via `esp32:esp32:d1_uno32`;
@@ -228,9 +227,9 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 - `EXTENDER_ADS1115_AANTAL` en `I2C_ADDRESS_EXTENDER_ADS1115_1`;
 - `BOARD_VERSION`.
 
-Op UNO R3 kan de combinatie van alle functionaliteit en uitgebreide debuguitvoer de beschikbare flash overschrijden. Schakel `DEBUG` uit voor de normale UNO R3-build wanneer nodig.
 
-UNO R3 wordt in v2.0.0 gebruikt als test- en compatibiliteitsplatform. Niet alle subsystemen en configuraties worden op UNO R3 ondersteund of meegecompileerd.
+
+
 
 ## Snel starten
 

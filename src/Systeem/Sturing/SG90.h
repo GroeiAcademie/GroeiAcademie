@@ -19,7 +19,7 @@ struct SG90 : GedeeldeBusNode {
     return parent && channel < 16 && minimumPWM > 0 && minimumPWM < maximumPWM && maximumPWM < 4096
       && parent->WriteExtenderPWM(channel,0);
   }
-  bool setServoAngle(uint8_t angle) {
+  bool PositioneerAbsoluutNaarHoek(uint8_t angle) {
     if (!actief || !parent || angle > 180) return false;
     uint16_t ticks = minimumPWM + (uint32_t(maximumPWM-minimumPWM)*angle)/180;
     return parent->WriteExtenderPWM(channel,ticks);

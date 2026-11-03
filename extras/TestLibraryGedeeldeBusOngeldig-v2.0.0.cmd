@@ -11,8 +11,8 @@ call "%~dp0TestLibraryCommonOngeldig.cmd" %*
 exit /b %errorlevel%
 
 :EXPECT_FAIL
-set "TEST_FQBN=arduino:avr:uno"
-set "TEST_BOARD_VERSION=BOARD_UNO_R3"
+set "TEST_FQBN=arduino:renesas_uno:minima"
+set "TEST_BOARD_VERSION=BOARD_UNO_R4_MINIMA"
 echo !TEST_FLAGS! | findstr /C:"BOARD_VERSION" >nul
 if not errorlevel 1 set "TEST_BOARD_VERSION="
 call "%~dp0TestLibraryCommonOngeldig.cmd" --VOER_DEZE_ONGELDIGE_TEST_UIT

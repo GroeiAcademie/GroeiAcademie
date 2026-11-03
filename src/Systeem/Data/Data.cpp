@@ -28,10 +28,10 @@ namespace {
   #if FLASH_BUFFER_ACTIEF
     // Een meting is één int: een buffer > 0 moet er minstens één kunnen bevatten, anders schrijft memcpy() buiten de buffer.
     static_assert(DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE == 0 || DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE >= sizeof(int),
-                  "DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE moet 0 zijn, of minstens sizeof(int): 2 op de UNO R3, 4 op de 32-bit boards.");
+                  "DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE moet 0 zijn, of minstens sizeof(int): 4 op de ondersteunde 32-bit boards.");
     #if DATA_LAYER_FLASH_SPI_AANTAL >= 2
     static_assert(DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE == 0 || DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE >= sizeof(int),
-                  "DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE moet 0 zijn, of minstens sizeof(int): 2 op de UNO R3, 4 op de 32-bit boards.");
+                  "DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE moet 0 zijn, of minstens sizeof(int): 4 op de ondersteunde 32-bit boards.");
     #endif
 namespace {
   #if DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE > 0
@@ -725,7 +725,7 @@ void Data::StreamingWrite(const Sensor& sensor, uint8_t numberChannel, const Sen
     static_cast<uint8_t>(id >> 16), static_cast<uint8_t>(id >> 24),
     numberChannel, channel.valueType, 0, 0, 0, 0, 0 };
   if (channel.valueType == 0) {
-    // int is 16-bit op AVR, 32-bit op veel andere boards: altijd sign-extended int32 opslaan.
+    // int is 32-bit op de ondersteunde boards: altijd sign-extended int32 opslaan.
     const int32_t waarde = channel.lastValue;
     memcpy(record + 10, &waarde, sizeof(waarde));
   } else if (channel.valueType == 1) {

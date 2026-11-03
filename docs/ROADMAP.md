@@ -135,7 +135,6 @@ Het project volgt Semantic Versioning 2.0.0.
 
 De actuele compileprofielen omvatten:
 
-- Arduino UNO R3;
 - Arduino UNO R4 Minima;
 - Arduino UNO R4 WiFi;
 - Arduino UNO Q;
@@ -194,7 +193,6 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 
 | Arduino Uno R3-vormfactorbord | Status |
 |---|---|
-| Arduino UNO R3 | geïmplementeerd en getest |
 | Arduino UNO R4 Minima | geïmplementeerd en getest |
 | Arduino UNO R4 WiFi | geïmplementeerd en getest |
 | Arduino UNO Q | geïmplementeerd en getest |
@@ -348,7 +346,7 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 - de volledige actuele compilatiematrix uitvoeren na bronaanpassingen die de matrix kunnen beïnvloeden;
 - Arduino Lint uitvoeren en het definitieve resultaat vastleggen;
-- geheugenrapport voor UNO R3 vastleggen;
+- geheugenrapport per ondersteund board vastleggen;
 - Screen-regressietests uitvoeren voor standaarduitvoer, callbacks, twee en vier regels, `action`, `delayTime` en `delayTussenPaginas`;
 - FsrRfp via de ADS1115-Extender hardwarematig valideren;
 - schone installatie vanuit ZIP controleren;

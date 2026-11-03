@@ -36,7 +36,7 @@ set TEST_NAAM="Default CharacterScreen + PixelScreen"
 set TEST_FLAGS="-DSCREEN_OUTPUT_CONFIG=7"
 set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
-set WELKE_FQBN_SKIPPEN="arduino:avr:uno"
+set WELKE_FQBN_SKIPPEN=""
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\Screen\Default_PixelScreen\Default_PixelScreen.ino"

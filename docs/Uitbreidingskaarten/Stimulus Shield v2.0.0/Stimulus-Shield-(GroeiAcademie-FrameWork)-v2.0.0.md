@@ -93,7 +93,7 @@ In dit deel worden de connectorreferenties uit het schema expliciet gebruikt. Zo
 | H13 | 1x3 Dupont-connector tussen het shield en de HX1838 IR Receiver |
 | U10 | HX1838 IR Receiver; DATA is verbonden met Arduino D8 |
 | SW1 | 4-kanaals DIP-switch voor ADS1115 ADDR-keuze |
-| U1 | Arduino UNO R3/R4 |
+| U1 | Arduino UNO R4 |
 | U3 | Quad Logic Level Shifter voor LCD-I2C en TFT-RST |
 | U8 | Quad Logic Level Shifter voor TFTSPI SCL, SDA, DC en CS |
 

@@ -40,9 +40,6 @@ Na een mislukte cardBegin() of volumeBegin() wordt end() aangeroepen voordat de 
 #include <SdFat.h>
 #include <PCF8574.h>
 
-#if defined(ARDUINO_AVR_UNO)
-#error Test_microSD wordt niet uitgevoerd op Arduino UNO R3.
-#endif
 
 #if SD_CHIP_SELECT_MODE != 1
 #error SD_CHIP_SELECT_MODE moet in SdFatConfig.h op 1 staan voor deze test.

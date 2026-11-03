@@ -54,10 +54,10 @@
 // Voor SB Components Ardi32 blijft expliciete BOARD_VERSION-keuze nodig wanneer de generieke ESP32S3 Dev Module wordt gebruikt; zie docs/HARDWARE_SUPPORT.md.
 //
 // Hardwarevalidatiestatus (zie docs/HARDWARE_SUPPORT.md voor details):
-// - Getest en goedgekeurd: BOARD_UNO_R3, BOARD_UNO_R4_MINIMA, BOARD_UNO_R4_WIFI, BOARD_ESP32_D1_UNO_R32 (WEMOS D1 R32), BOARD_RP2040_CYTRON_MAKER_UNO & BOARD_STM32F4_NUCLEO64_F401RE.
+// - Getest en goedgekeurd: BOARD_UNO_R4_MINIMA, BOARD_UNO_R4_WIFI, BOARD_ESP32_D1_UNO_R32 (WEMOS D1 R32), BOARD_RP2040_CYTRON_MAKER_UNO & BOARD_STM32F4_NUCLEO64_F401RE.
 // - Nog hardwarematig te testen: BOARD_UNO_Q, BOARD_ESP32S3_ARDI32 & BOARD_ESP32S3_DEV
 //
-// Mogelijke waarden: BOARD_UNO_R3, BOARD_UNO_R4_MINIMA, BOARD_UNO_R4_WIFI, BOARD_UNO_Q, BOARD_ESP32_D1_UNO_R32, BOARD_ESP32S3_ARDI32, BOARD_ESP32S3_DEV, BOARD_RP2040_CYTRON_MAKER_UNO & BOARD_STM32F4_NUCLEO64_F401RE
+// Mogelijke waarden: BOARD_UNO_R4_MINIMA, BOARD_UNO_R4_WIFI, BOARD_UNO_Q, BOARD_ESP32_D1_UNO_R32, BOARD_ESP32S3_ARDI32, BOARD_ESP32S3_DEV, BOARD_RP2040_CYTRON_MAKER_UNO & BOARD_STM32F4_NUCLEO64_F401RE
 #ifndef BOARD_VERSION
 // #define BOARD_VERSION BOARD_UNO_R4_MINIMA // geen standaard waarde, wordt automatisch bepaald in SystemConfig.h
 #endif
@@ -200,7 +200,7 @@
 #endif
 
 // Uitgebreide gebeurtenissen (loslaten, lang indrukken, timeout bij geen invoer).
-// Standaard UIT, om geheugen te sparen op geheugenarme boards (bv. AVR Uno R3).
+// Standaard UIT om geheugen te sparen.
 // Enkel van toepassing bij OpvragenHuidigeToetsAanslag(false), niet bij wachten=true.
 // #define INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
 
@@ -363,24 +363,7 @@
 
 // Gebruik GPIOxx-labels in plaats van kale cijfers, zodat de mapping controleerbaar blijft.
 // Laat deze blokken normaal uitgeschakeld: SystemConfig.h bevat de standaardmappingen.
-#if BOARD_VERSION == BOARD_UNO_R3 || BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI || BOARD_VERSION == BOARD_UNO_Q
-  #if BOARD_VERSION == BOARD_UNO_R3
-    // #define ARDUINO_UNO_SHIELD_PIN_D0   0    // 0  / RX   / PD0 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D1   1    // 1  / TX   / PD1 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D2   2    // 2  / INT0 / PD2 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D3   3    // 3  / INT1 / PD3 / PWM
-    // #define ARDUINO_UNO_SHIELD_PIN_D4   4    // 4  /      / PD4 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D5   5    // 5  /      / PD5 / PWM
-    // #define ARDUINO_UNO_SHIELD_PIN_D6   6    // 6  /      / PD6 / PWM
-    // #define ARDUINO_UNO_SHIELD_PIN_D7   7    // 7  /      / PD7 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D8   8    // 8  /      / PB0 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D9   9    // 9  /      / PB1 / PWM
-    // #define ARDUINO_UNO_SHIELD_PIN_D10  10   // 10 / SS   / PB2 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D11  11   // 11 / MOSI / PB3 / PWM
-    // #define ARDUINO_UNO_SHIELD_PIN_D12  12   // 12 / MISO / PB4 /
-    // #define ARDUINO_UNO_SHIELD_PIN_D13  13   // 13 / SCK  / PB5 /
-
-  #elif BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI || BOARD_VERSION == BOARD_UNO_Q
+#if BOARD_VERSION == BOARD_UNO_R4_MINIMA || BOARD_VERSION == BOARD_UNO_R4_WIFI || BOARD_VERSION == BOARD_UNO_Q
     // #define ARDUINO_UNO_SHIELD_PIN_D0   D0   // D0  / RX   / PD0 /
     // #define ARDUINO_UNO_SHIELD_PIN_D1   D1   // D1  / TX   / PD1 /
     // #define ARDUINO_UNO_SHIELD_PIN_D2   D2   // D2  / INT0 / PD2 /
@@ -395,7 +378,6 @@
     // #define ARDUINO_UNO_SHIELD_PIN_D11  D11  // D11 / MOSI / PB3 / PWM
     // #define ARDUINO_UNO_SHIELD_PIN_D12  D12  // D12 / MISO / PB4 /
     // #define ARDUINO_UNO_SHIELD_PIN_D13  D13  // D13 / SCK  / PB5 /
-  #endif
 
   // #define ARDUINO_UNO_SHIELD_PIN_A0   A0   // A0  /      / PC0
   // #define ARDUINO_UNO_SHIELD_PIN_A1   A1   // A1  /      / PC1
@@ -412,7 +394,7 @@
     // #define ARDUINO_UNO_SHIELD_PIN_MOSI D11
     // #define ARDUINO_UNO_SHIELD_PIN_MISO D12
     // #define ARDUINO_UNO_SHIELD_PIN_SCK  D13
-  #else // Standaard fallback voor Uno R3, R4 Minima en R4 WiFi
+  #else // Standaard voor Uno R4 Minima en R4 WiFi
     // #define ARDUINO_UNO_SHIELD_PIN_SS   SS
     // #define ARDUINO_UNO_SHIELD_PIN_MOSI MOSI
     // #define ARDUINO_UNO_SHIELD_PIN_MISO MISO
@@ -638,7 +620,7 @@
 #endif
 
 #ifndef DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE
-// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
+// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens sizeof(int) (4 op de ondersteunde 32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
 #endif
 
 // ============================================================================
@@ -649,7 +631,7 @@
 #endif
 
 #ifndef DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE
-// #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
+// #define DATA_LAYER_FLASH_SPI_2_BUFFER_SIZE 0  // standaard waarde: 0 = elke meting meteen naar FLASH; minstens sizeof(int) (4 op de ondersteunde 32-bit boards) t/m 256 = bytes in RAM verzamelen en in één keer schrijven (sneller; bij stroomuitval gaat de inhoud verloren)
 #endif
 
 // CS via een Extender: zet de drie instellingen samen. DATA_LAYER_FLASH_SPI_1_CS_PIN wordt dan de pin op de Extender.

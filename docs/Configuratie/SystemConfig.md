@@ -167,7 +167,7 @@ Voor FLASH geldt:
 | `DATA_LAYER_FLASH_SPI_AANTAL` | Aantal FLASH-instanties. Wanneer niet expliciet ingesteld: 1 als `DATA_TYPE_FLASH_SPI` actief is, anders 0. |
 | `DATA_LAYER_FLASH_SPI_1_CS_PIN` | Exclusieve CS-pin van FLASH #1, standaard `HardwareResourcePin::NONE`. |
 | `DATA_LAYER_FLASH_SPI_2_CS_PIN` | Exclusieve CS-pin van FLASH #2, standaard `HardwareResourcePin::NONE`. |
-| `DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE` / `_2_` | Schrijfbuffer in RAM: `0` (standaard, geen buffer), of minstens `sizeof(int)` (`2` op de UNO R3, `4` op de 32-bit boards) t/m `256` bytes. Zie `DATA.md`. |
+| `DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE` / `_2_` | Schrijfbuffer in RAM: `0` (standaard, geen buffer), of minstens `sizeof(int)` (`4` op de ondersteunde 32-bit boards) t/m `256` bytes. Zie `DATA.md`. |
 
 FLASH gebruikt uitsluitend SPI via `Adafruit SPIFlash` (`Adafruit_SPIFlashBase`, zonder cache) met het eigen transport `TransportFLASHviaSPI`. SCK, MISO en MOSI komen uit de bestaande boardconfiguratie.
 
@@ -220,7 +220,6 @@ FsrRfp meet via een ADC-Extender, net zoals elke andere Sensor op een Extender w
 `BOARD_VERSION` vervangt `UNO_VERSION`. De vaste keuzewaarden zijn vóór `UserConfig.h` beschikbaar:
 
 ```cpp
-#define BOARD_UNO_R3                       0
 #define BOARD_UNO_R4_MINIMA                1
 #define BOARD_UNO_R4_WIFI                  2
 #define BOARD_UNO_Q                        7
@@ -231,10 +230,10 @@ FsrRfp meet via een ADC-Extender, net zoals elke andere Sensor op een Extender w
 #define BOARD_STM32F4_NUCLEO64_F401RE      6
 ```
 
-De gebruiker kiest:
+De gebruiker kiest bijvoorbeeld:
 
 ```cpp
-#define BOARD_VERSION BOARD_UNO_R3
+#define BOARD_VERSION BOARD_UNO_R4_MINIMA
 ```
 
 `ADC_BITS` is standaard `15` (ADS1115 single-ended: 0-32767 bruikbaar bereik) en `DELAY_US` standaard `0`: de ADS1115 wacht zelf op de conversie, er komt geen extra wachttijd tussen samples. Beide blijven via `UserConfig.h` aanpasbaar.
@@ -308,7 +307,7 @@ Bron voor de board- en pinmapping: de officiële `boards.txt` en `variants/d1_un
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
-`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
+`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R4 verwijzen deze standaard naar de D0–D13-aanduidingen van de boardcore. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven.
 
 
 ## GedeeldeBus en Extenders (v2.0.0)

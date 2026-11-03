@@ -4,7 +4,7 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 
 ## Overzicht
 
-| Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte UNO R3-geheugenbeperkingen | Onverwachte fouten | Opmerking |
+| Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte -geheugenbeperkingen | Onverwachte fouten | Opmerking |
 |--------|-------|:------------:|------------:|---:|------------------------------------:|-------------------:|-----------|
 | v2.0.0 | 26-10-2026 | GESLAAGD | 735 | 735 | 0 | 0 | GESLAAGD |
 

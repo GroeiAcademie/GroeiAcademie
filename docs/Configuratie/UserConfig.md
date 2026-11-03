@@ -159,7 +159,7 @@ FLASH gebruikt uitsluitend SPI via `Adafruit SPIFlash` (zonder cache, met een ei
 // #define DATA_LAYER_FLASH_SPI_AANTAL 1
 // #define DATA_LAYER_FLASH_SPI_1_CS_PIN HardwareResourcePin::NONE
 // #define DATA_LAYER_FLASH_SPI_2_CS_PIN HardwareResourcePin::NONE
-// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0   // 0 = geen buffer; minstens 2 (UNO R3) of 4 (32-bit boards) t/m 256 = schrijfbuffer in RAM (zie DATA.md)
+// #define DATA_LAYER_FLASH_SPI_1_BUFFER_SIZE 0   // 0 = geen buffer; minstens 2 of 4 (32-bit boards) t/m 256 = schrijfbuffer in RAM (zie DATA.md)
 ```
 
 FRAM gebruikt momenteel uitsluitend I2C via Rob Tillaart `FRAM_I2C`:
@@ -213,7 +213,6 @@ Het I2C-adres van de ADS1115 staat in `src/Configuratie/Extenders/ConfigADS1115_
 `BOARD_VERSION` is de algemene boardkeuze. De beschikbare waarden zijn:
 
 ```cpp
-#define BOARD_UNO_R3                       0
 #define BOARD_UNO_R4_MINIMA                1
 #define BOARD_UNO_R4_WIFI                  2
 #define BOARD_UNO_Q                        7
@@ -227,7 +226,7 @@ Het I2C-adres van de ADS1115 staat in `src/Configuratie/Extenders/ConfigADS1115_
 Selecteer het bord met één regel:
 
 ```cpp
-#define BOARD_VERSION BOARD_UNO_R3
+#define BOARD_VERSION BOARD_UNO_R4_MINIMA
 ```
 
 `ADC_BITS` is standaard `15` (ADS1115) en `DELAY_US` standaard `0`; beide blijven via `UserConfig.h` aanpasbaar.
@@ -248,7 +247,7 @@ Dit actieve bestand staat in `.gitignore`. Het templatebestand blijft onderdeel 
 
 ## Officiële Arduino-pincodes en gebruikersafwijkingen
 
-`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R3 en Uno R4 verwijzen deze standaard naar de numerieke Arduino-pinnummers 0 tot en met 13. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven. Dit geldt ook voor de actieve `BOARD_STM32F4_NUCLEO64_F401RE`-mapping: D0-D13, A0-A5, SDA/SCL en SS/MOSI/MISO/SCK zijn elk afzonderlijk met `#ifndef` beschermd.
+`SystemConfig.h` gebruikt `ARDUINO_UNO_SHIELD_PIN_D0` tot en met `ARDUINO_UNO_SHIELD_PIN_D13` als bordonafhankelijke namen voor de fysieke D0-D13-posities van de Arduino Uno-shieldheader. Voor Uno R4 verwijzen deze standaard naar de D0–D13-aanduidingen van de boardcore. Voor `BOARD_ESP32_D1_UNO_R32` verwijzen ze naar de overeenkomstige `D0` tot en met `D13`-namen van de geselecteerde compatibele boardcore. `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` gebruiken eveneens de shieldnamen; de standaard `PIXEL_SCREEN_RST` is D7. De standaard `HX1838_ONTVANGER_PIN` is D8. `PIXEL_SCREEN_CS` blijft `SS`, omdat dit de officiële SPI-functienaam is. Een afwijkende boardcoremapping kan in `UserConfig.h` per shieldpin worden overschreven. Dit geldt ook voor de actieve `BOARD_STM32F4_NUCLEO64_F401RE`-mapping: D0-D13, A0-A5, SDA/SCL en SS/MOSI/MISO/SCK zijn elk afzonderlijk met `#ifndef` beschermd.
 
 
 Beschikbare HX1838-toetsenindelingen:

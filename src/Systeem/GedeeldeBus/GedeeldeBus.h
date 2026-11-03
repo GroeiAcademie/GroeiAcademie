@@ -256,12 +256,13 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   X(A4988,                        0xE0) \
   X(L293D,                        0xE1) \
   X(L298N,                        0xE2) \
-  X(MG996R,                       0xE3) \
-  X(Relais,                       0xE4) \
-  X(RGBLED,                       0xE5) \
-  X(SG90,                         0xE6) \
-  X(ULN2003,                      0xE7) \
-  X(WS2812,                       0xE8) \
+  X(MAX7219,                      0xE3) \
+  X(MG996R,                       0xE4) \
+  X(Relais,                       0xE5) \
+  X(RGBLED,                       0xE6) \
+  X(SG90,                         0xE7) \
+  X(ULN2003,                      0xE8) \
+  X(WS2812,                       0xE9) \
   /*                                */ \
   /* ROOT-node -------------------- */ \
   X(ROOT,                         0xFF) /* GedeeldeBusComponent::ROOT */
@@ -304,7 +305,7 @@ enum class HardwareResourceType : uint8_t {
 // Twee GEDEELD-claims op dezelfde pin zijn enkel compatibel bij exact dezelfde identiteit.
 enum class HardwareResourceIdentiteit : uint8_t { GEEN, I2C_SDA, I2C_SCL, SPI_SCK, SPI_MISO, SPI_MOSI, I2C_TCA_CHANNEL };
 
-// De NP_-waarden zijn de fysieke resources van de UNO-vormfactor.
+// De NP_-waarden zijn de fysieke resources van de Arduino Uno R3-vormfactor.
 // CUSTOM en NONE zijn speciale waarden en zijn zelf geen pinnen.
 // Sensor- of module-interne resources horen bij die sensor/module en worden niet in deze enum verzameld.
 // HardwareResourcePin: geeft aan welke native pin gebruikt wordt of dat een speciale waarde van toepassing is.

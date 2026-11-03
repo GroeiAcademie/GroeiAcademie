@@ -7,8 +7,8 @@ set BASIC_FQBN_MAPPING_BOARDS="BOARD_UNO_R4_MINIMA" "BOARD_UNO_R4_WIFI"
 set EXTENDED_FQBN="esp32:esp32:d1_uno32" "esp32:esp32:esp32s3" "rp2040:rp2040:cytron_maker_uno_rp2040" "STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE"
 set EXTENDED_FQBN_MAPPING_BOARDS="BOARD_ESP32_D1_UNO_R32" "BOARD_ESP32S3_ARDI32|BOARD_ESP32S3_DEV" "BOARD_RP2040_CYTRON_MAKER_UNO" "BOARD_STM32F4_NUCLEO64_F401RE"
 
-set EXPERIMENTAL_FQBN="arduino:avr:uno" "arduino:zephyr:unoq"
-set EXPERIMENTAL_FQBN_MAPPING_BOARDS="BOARD_UNO_R3" "BOARD_UNO_Q"
+set EXPERIMENTAL_FQBN="arduino:zephyr:unoq"
+set EXPERIMENTAL_FQBN_MAPPING_BOARDS="BOARD_UNO_Q"
 
 set "REGRESSIETEST=FALSE"
 set "NO_PAUSE=FALSE"
@@ -369,22 +369,7 @@ if "!COMPILE_RESULT!"=="0" (
         )
     ) else (
         set "EXPECTED_MEMORY_LIMIT=0"
-        if "!FQBN_ACTIEF!"=="arduino:avr:uno" if /I "!TEST_BESTAND!"=="Tik_Enkele_Samen_Instortend_Cocktail.ino" (
-            findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
-            if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
-        )
-        if "!FQBN_ACTIEF!"=="arduino:avr:uno" (
-            for %%I in (IN001 IN101 IN201 IN202 IN301 IN302 IN303 IN304 IN305 IN401 IN402 SS301) do (
-                if /I "!TEST_BESTAND!"=="Hardwaretest_Foutinjectie_%%I.ino" (
-                    findstr /C:"text section exceeds available space in board" "!COMPILE_LOG!" >nul
-                    if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
-                )
-            )
-        )
-        if "!FQBN_ACTIEF!"=="arduino:avr:uno" (
-            findstr /C:"data section exceeds available space in board" "!COMPILE_LOG!" >nul
-            if not errorlevel 1 set "EXPECTED_MEMORY_LIMIT=1"
-        )
+
         if "!EXPECTED_MEMORY_LIMIT!"=="1" (
             set "GEHEUGEN_FQBN=!FQBN_ACTIEF!"
             set "GEHEUGEN_BOARD_VERSION=!BOARD_VERSION_ACTIEF!"

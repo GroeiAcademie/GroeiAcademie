@@ -21,7 +21,7 @@ De volledige architecturale motivatie, alle ontwerpbeslissingen, en de technisch
 ## 3. Wat expliciet nog niet werkt of getest is
 
 - **Niets is gecompileerd op `arduino-cli` of echte hardware.** Dit is de belangrijkste beperking van dit hele document.
-- UNO R3 ondersteunt enkel de eenvoudige, analoge sensoren (Pulse Sensor, FSR402/RFP602, BioAmp EXG Pill, Piëzo-ademhalingsband). De overige vier pilot-drivers vereisen minimaal UNO R4, en INMP441 vereist specifiek een ESP32-bord.
+-  ondersteunt enkel de eenvoudige, analoge sensoren (Pulse Sensor, FSR402/RFP602, BioAmp EXG Pill, Piëzo-ademhalingsband). De overige vier pilot-drivers vereisen minimaal UNO R4, en INMP441 vereist specifiek een ESP32-bord.
 - DS18B20 ondersteunt nog geen meerdere sensoren op dezelfde One-Wire-bus.
 - NeuroSky TGAM mist nog checksumvalidatie.
 - INMP441 is ESP32-specifiek gecodeerd; op RP2040/STM32 geeft dit een onduidelijke compileerfout in plaats van een nette melding.

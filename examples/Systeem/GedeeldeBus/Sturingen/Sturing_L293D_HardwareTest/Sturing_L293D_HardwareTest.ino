@@ -1,4 +1,4 @@
-// Compileer- en levenscyclustest voor L293D. Geen automatische beweging of schakelactie.
+// Begeleide hardwaretest voor L293D. Elke beweging vereist eerst bevestiging via Serial.
 #include <GroeiAcademie.h>
 #if STURING_L293D_AANTAL == 0
   #error Zet STURING_L293D_AANTAL op minstens 1 voor deze test.
@@ -10,37 +10,119 @@
 ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
 L293D sturing(&extender,0,1,2);
 
+DCmotorBesturing motorBesturing(sturing);
 
 bool testActief = false;
 bool startGelukt = false;
 bool testGestopt = false;
 String invoer;
-void antwoord(bool ok) { GA_SERIAL.println(ok ? F("OPDRACHT: OK") : F("OPDRACHT: FOUT")); }
+uint8_t testStap = 0;
+uint8_t testFase = 0;
+unsigned long testStartMillis = 0;
+
 void toonStart() {
-  GA_SERIAL.println(F("RUN42 HARDWARETEST: typ START na controle van bedrading en voeding."));
-  GA_SERIAL.println(F("STOP stopt testuitvoer; herstart voor nieuwe test."));
+  GA_SERIAL.println(F("RUN42 HARDWARETEST"));
+  GA_SERIAL.println(F("BEGELEIDE DC-MOTORTEST. Zet de motor stevig vast en houd bewegende onderdelen vrij."));
+  GA_SERIAL.println(F("PWM 800/4095 is circa 20 procent aansturing, geen gemeten toerental."));
+  GA_SERIAL.println(F("Elke beweging start pas na '1' + Enter. STOP + Enter schakelt de driver uit."));
 }
+
+void toonTest() {
+  GA_SERIAL.println();
+  switch (testStap) {
+    case 0: GA_SERIAL.println(F("TEST 1: StelDraairichtingEnSnelheidIn(vooruit,800), StartMotor. Verwacht: circa 2 seconden in beginrichting.")); break;
+    case 1: GA_SERIAL.println(F("TEST 2: StelSnelheidIn(800), BeweegVooruit. Verwacht: circa 2 seconden vooruit.")); break;
+    case 2: GA_SERIAL.println(F("TEST 3: StelSnelheidIn(800), BeweegAchteruit. Verwacht: circa 2 seconden achteruit.")); break;
+    case 3: GA_SERIAL.println(F("TEST 4: PauzeerMotor en HervatMotor. Eerst 0,8 seconde bewegen, dan wachten op 1 voor hervatten.")); break;
+    case 4: GA_SERIAL.println(F("TEST 5: DraairichtingOmkeren terwijl motor gestopt is, daarna StartMotor. Verwacht: omgekeerde draairichting.")); break;
+    case 5: GA_SERIAL.println(F("TEST 6: StelSnelheidIn tijdens beweging. Verwacht: na 0,8 seconde PWM van 500 naar 1300.")); break;
+    default: GA_SERIAL.println(F("ALLE DC-MOTORFUNCTIES VAN RUN133 AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
+  }
+  GA_SERIAL.println(F("Controleer de motorruimte. Typ 1 + Enter om deze test te starten."));
+}
+
+void antwoord(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen toerental- of positiefeedback)") : F("FUNCTIEAANROEP: FOUT")); }
+
+void rondTestAf(bool ok) {
+  motorBesturing.StopMotor();
+  GA_SERIAL.println(F("MOTOR: STOP aangeroepen; driver-ENABLE = 0 gevraagd."));
+  antwoord(ok);
+  testActief = false;
+  if (!ok) { testGestopt = true; GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer hardware en herstart Arduino.")); return; }
+  ++testStap;
+  toonTest();
+}
+
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   startGelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren() && sturing.aanmelden() && sturing.controleren() && sturing.inpluggen() && sturing.activeren();
-  GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK") : F("LEVENSCYCLUS: FOUT"));
+  if (startGelukt) motorBesturing.StopMotor();
+  GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK. BEGINSTATUS: MOTOR GESTOPT.") : F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
   toonStart();
+  if (startGelukt) toonTest();
 }
+
 void loop() {
-  if (!GA_SERIAL.available()) return;
-  invoer = GA_SERIAL.readStringUntil('\n');
-  invoer.trim();
-  invoer.toUpperCase();
-  if (invoer == "STOP") { if (startGelukt) sturing.StopSturing(); testActief=false; testGestopt=true; GA_SERIAL.println(F("STOP: uitvoer uit / opdracht gestopt. Herstart om opnieuw te testen.")); return; }
-  if (testGestopt) { GA_SERIAL.println(F("Test gestopt: reset Arduino.")); return; }
-  if (!startGelukt) { GA_SERIAL.println(F("FOUT: levenscyclus.")); return; }
-  if (invoer == "START") { if (!testActief) { testActief=true; GA_SERIAL.println(F("START: bevestigd.")); } return; }
-  if (!testActief) { GA_SERIAL.println(F("Eerst START invoeren.")); return; }
-  if (invoer == "0") { sturing.StopSturing(); GA_SERIAL.println(F("Motor gestopt (EN=0).")); return; }
-  if (!(invoer.startsWith("+") || invoer.startsWith("-"))) { GA_SERIAL.println(F("Gebruik +1..+100, -1..-100 of 0.")); return; }
-  int snelheid = invoer.toInt();
-  if (snelheid == 0 || snelheid < -100 || snelheid > 100) { GA_SERIAL.println(F("FOUT: bereik -100..100")); return; }
-  uint16_t pwm = (uint32_t)abs(snelheid) * 4095 / 100;
-  antwoord(sturing.setDirectionAndSpeed(snelheid > 0, pwm));
-  GA_SERIAL.print(F("Gevraagd percentage: ")); GA_SERIAL.println(snelheid);
+  if (GA_SERIAL.available()) {
+    invoer = GA_SERIAL.readStringUntil('\n');
+    invoer.trim();
+    invoer.toUpperCase();
+    if (invoer == "STOP") {
+      if (startGelukt) motorBesturing.StopMotor();
+      testActief = false;
+      testGestopt = true;
+      GA_SERIAL.println(F("STOP: driver uit. Herstart Arduino voor een nieuwe test."));
+      return;
+    }
+    if (invoer == "1" && startGelukt && !testGestopt) {
+      if (testActief && testStap == 3 && testFase == 1) {
+        const bool ok = motorBesturing.HervatMotor();
+        GA_SERIAL.println(F("HervatMotor(): oude richting en PWM opnieuw gevraagd."));
+        antwoord(ok);
+        if (!ok) { rondTestAf(false); return; }
+        testFase = 2;
+        testStartMillis = millis();
+        return;
+      }
+      if (testActief) { GA_SERIAL.println(F("TEST BEZIG. Wacht op automatische stop of typ STOP.")); return; }
+      if (testStap >= 6) { toonTest(); return; }
+      GA_SERIAL.print(F("START TEST ")); GA_SERIAL.println(testStap + 1);
+      bool ok = false;
+      switch (testStap) {
+        case 0: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing.StartMotor(); break;
+        case 1: ok = motorBesturing.StelSnelheidIn(800) && motorBesturing.BeweegVooruit(); break;
+        case 2: ok = motorBesturing.StelSnelheidIn(800) && motorBesturing.BeweegAchteruit(); break;
+        case 3: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing.StartMotor(); break;
+        case 4: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing.DraairichtingOmkeren() && motorBesturing.StartMotor(); break;
+        case 5: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 500) && motorBesturing.StartMotor(); break;
+      }
+      if (!ok) { rondTestAf(false); return; }
+      testActief = true;
+      testFase = 0;
+      testStartMillis = millis();
+      GA_SERIAL.println(F("FUNCTIEAANROEP: OK. Beweging heeft een automatische stoptijd."));
+      return;
+    }
+    GA_SERIAL.println(F("Geen geldige opdracht. Typ 1 + Enter, of STOP + Enter."));
+  }
+  if (!testActief) return;
+  const unsigned long verstreken = millis() - testStartMillis;
+  if (testStap == 3 && testFase == 1) return;
+  if (testStap == 3 && testFase == 0 && verstreken >= 800UL) {
+    const bool ok = motorBesturing.PauzeerMotor();
+    GA_SERIAL.println(F("PauzeerMotor(): driver uit, richting/snelheid intern bewaard."));
+    antwoord(ok);
+    if (!ok) { rondTestAf(false); return; }
+    testFase = 1;
+    GA_SERIAL.println(F("Motor is gepauzeerd. Typ 1 + Enter om de bewaarde beweging te hervatten."));
+    return;
+  }
+  if (testStap == 5 && testFase == 0 && verstreken >= 800UL) {
+    const bool ok = motorBesturing.StelSnelheidIn(1300);
+    GA_SERIAL.println(F("StelSnelheidIn(1300): gevraagde PWM verhoogd, fysieke snelheid onbekend."));
+    antwoord(ok);
+    if (!ok) { rondTestAf(false); return; }
+    testFase = 2;
+  }
+  if (verstreken >= 2000UL) rondTestAf(true);
 }

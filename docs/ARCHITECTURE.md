@@ -642,7 +642,7 @@ Er zijn in de huidige code nog geen concrete `Diagnose()`-overrides. Uitgebreide
 
 ### Native resources
 
-`HardwareResourcePin` gebruikt voor de fysieke resources van de UNO-vormfactor de prefix `NP_`: `NP_D0..NP_D13`, `NP_A0..NP_A5`, `NP_SDA`, `NP_SCL`, `NP_MISO`, `NP_MOSI`, `NP_SCK` en `NP_SS`. `CUSTOM` en `NONE` blijven zonder `NP_`: dit zijn speciale waarden en geen fysieke pinnen.
+`HardwareResourcePin` gebruikt voor de fysieke resources van de Arduino Uno R3-vormfactor de prefix `NP_`: `NP_D0..NP_D13`, `NP_A0..NP_A5`, `NP_SDA`, `NP_SCL`, `NP_MISO`, `NP_MOSI`, `NP_SCK` en `NP_SS`. `CUSTOM` en `NONE` blijven zonder `NP_`: dit zijn speciale waarden en geen fysieke pinnen.
 
 `NativeArduinoPinVan()` vertaalt zo'n logische resource naar het board-specifieke Arduino-pinnummer uit `SystemConfig.h`. ExtenderPins gaan nooit door deze functie.
 
@@ -812,4 +812,4 @@ Deze tests bewijzen niet automatisch de volledige elektronische werking van elk 
 
 ## Geheugen en timing
 
-UNO R3 blijft een belangrijke ondergrens. Nieuwe code wordt beoordeeld op flash, SRAM, blokkerende wachttijden en samplegedrag. DEBUG- en TRACE-functionaliteit moet uitschakelbaar blijven. `Diagnose()` bestaat uitsluitend in DEBUG-builds.
+ blijft een belangrijke ondergrens. Nieuwe code wordt beoordeeld op flash, SRAM, blokkerende wachttijden en samplegedrag. DEBUG- en TRACE-functionaliteit moet uitschakelbaar blijven. `Diagnose` bestaat uitsluitend in DEBUG-builds.

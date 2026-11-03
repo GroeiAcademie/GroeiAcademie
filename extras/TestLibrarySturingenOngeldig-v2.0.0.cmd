@@ -103,6 +103,12 @@ set "TEST_FLAGS=-DSTURING_WS2812_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set "VERWACHTE_FOUT=Zet STURING_WS2812_AANTAL op minstens 1 voor deze test."
 call :EXPECT_FAIL
 
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_MAX7219\Sturing_MAX7219.ino"
+set "TEST_NAAM=MAX7219 uitgeschakeld"
+set "TEST_FLAGS=-DSTURING_MAX7219_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=Zet STURING_MAX7219_AANTAL op minstens 1 voor deze test."
+call :EXPECT_FAIL
+
 echo.
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!
 if !FAIL! GTR 0 exit /b 1

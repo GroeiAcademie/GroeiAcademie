@@ -77,7 +77,6 @@ De software bepaalt automatisch welke hardware aanwezig is, welke hardware onder
 
 In versie v2.0.0 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
 
-• Arduino UNO R3;
 • Arduino UNO R4 Minima;
 • Arduino UNO R4 WiFi;
 • Arduino UNO Q;
@@ -270,7 +269,6 @@ Het GroeiAcademie Stimulus Hardware Shield ondersteunt meerdere Arduino-compatib
 
 In versie v2.0.0 worden volgende Arduino Uno R3-vormfactorborden ondersteund:
 
-• Arduino UNO R3
 • Arduino UNO R4 Minima
 • Arduino UNO R4 WiFi
 • Arduino UNO Q
@@ -289,7 +287,6 @@ Gebruikersvraag
 
 Welk Arduino Uno R3-vormfactorbord wordt gebruikt?
 
-□ Arduino UNO R3
 □ Arduino UNO R4 Minima
 □ Arduino UNO R4 WiFi
 □ Arduino UNO Q
@@ -498,7 +495,7 @@ Indien antwoord = 5V
 
 Controleer of deze instelling overeenkomt met het geselecteerde Arduino Uno R3-vormfactorbord.
 
-Voor de Arduino UNO R3 en de Arduino UNO R4 Minima/WiFi is dit momenteel de standaardconfiguratie.
+Voor de Arduino UNO R4 Minima/WiFi is dit momenteel de standaardconfiguratie.
 
 De werkspanning wordt geregistreerd als 5V.
 

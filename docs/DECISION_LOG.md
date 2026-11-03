@@ -27,7 +27,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D006 Eerste boards
 
-**Besluit:** Arduino UNO R3 en UNO R4. De huidige voorbeelden zijn gecompileerd voor UNO R3, UNO R4 Minima en UNO R4 WiFi.
+**Besluit:** Arduino UNO R4. De huidige voorbeelden zijn gecompileerd voor UNO R4 Minima en UNO R4 WiFi.
 
 ## D007 Ontwikkel- en validatieomgeving
 
@@ -110,7 +110,7 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 **Besluit:** `CharacterScreenConfigureren()` krijgt een instelbare `CHARACTERSCREEN_I2C_ADRES_MODUS` (default `1`) om om te gaan met I2C-characterschermen waarvan het adres niet vooraf gekend is:
 
-- **0**: geen scan, enkel de bestaande handdruk-check op het geconfigureerde `I2C_ADRES`. Kleinste footprint; voor boards die tegen hun geheugengrens zitten (bv. gekende UNO R3-beperkingen, zie `extras/TESTRESULTATEN.md`).
+- **0**: geen scan, enkel de bestaande handdruk-check op het geconfigureerde `I2C_ADRES`. Kleinste footprint; voor boards die tegen hun geheugengrens zitten (zie `extras/TESTRESULTATEN.md`).
 - **1** (standaard): scan van een korte kandidatenlijst (`I2C_ADRES`, dan `0x27`, `0x3F`) en rapporteren via de foutmelding (`CS002`, met het gevonden adres erin), geen zelfherstel. Voor normaal gebruik en overal waar reproduceerbaarheid/betrouwbaarheid telt (onderzoek, metingen, meerdere I2C-apparaten op de bus).
 - **2**: scan + automatisch herbouwen van het `lcd`-object op het gevonden adres via placement-new (`lcd.~LiquidCrystal_I2C(); new (&lcd) LiquidCrystal_I2C(...);`), zodat `lcd.`-aanroepen in bestaande voorbeelden en gebruikerscode ongewijzigd blijven werken. Nooit meer hercompileren bij een ander scherm/adres. Enkel voor actief ontwikkelen met wisselende schermen, geen ander I2C-apparaat op de bus, geen lopende metingen: de scan controleert enkel of een apparaat op dat adres reageert (ACK), niet of het effectief een LCD-scherm is.
 
@@ -224,9 +224,9 @@ Dit logboek bevat kernbeslissingen. Nieuwe beslissingen krijgen een nieuw nummer
 
 ## D041 v2.0.0: bewust niet gedaan
 
-**Besluit:** (1) de namen van GedeeldeBus niet naar PROGMEM verplaatsen: dat helpt alleen de UNO R3; (2) zonder Data blijft de naam `DATA_DIRECT` in de namenlijst (12 bytes op de UNO R3, 8 tot 16 bytes flash op de 32-bit boards); (3) geen `TransferFrame`: er is geen gebruiker; (4) config per sensor-pin om de Extender te kiezen pas wanneer een sensor het nodig heeft; (5) de QueueOrStack krijgt geen peek, geen leegmaken, geen andere types dan `int` en geen bewaren na een stroomonderbreking: het kan (bijvoorbeeld met `FRAM_RINGBUFFER` van FRAM_I2C), maar er is nu geen nood aan.
+**Besluit:** (1) de namen van GedeeldeBus niet naar PROGMEM verplaatsen; (2) zonder Data blijft de naam `DATA_DIRECT` in de namenlijst (8 tot 16 bytes flash op de ondersteunde 32-bit boards); (3) geen `TransferFrame`: er is geen gebruiker; (4) config per sensor-pin om de Extender te kiezen pas wanneer een sensor het nodig heeft; (5) de QueueOrStack krijgt geen peek, geen leegmaken, geen andere types dan `int` en geen bewaren na een stroomonderbreking: het kan (bijvoorbeeld met `FRAM_RINGBUFFER` van FRAM_I2C), maar er is nu geen nood aan.
 
-**Context:** maximale snelheid en minimaal geheugen blijven de maatstaf; de UNO R3 is alleen een testboard.
+**Context:** maximale snelheid en minimaal geheugen blijven de maatstaf.
 
 ## D042 v2.0.0: runtime-herstel van I2C-componenten
 

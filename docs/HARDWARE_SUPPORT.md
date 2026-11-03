@@ -6,7 +6,6 @@ Compilatieondersteuning en hardwarevalidatie zijn afzonderlijke controles. De st
 
 | Arduino Uno R3-vormfactorbord | Architectuur | Compilatiestatus in de repository | Status |
 |---|---|---|---|
-| Arduino UNO R3 | `avr` | opgenomen in de compilatiematrix | geïmplementeerd en getest |
 | Arduino UNO R4 Minima | `renesas_uno` | opgenomen in de compilatiematrix | geïmplementeerd en getest |
 | Arduino UNO R4 WiFi | `renesas_uno` | opgenomen in de compilatiematrix | geïmplementeerd en getest |
 | Arduino UNO Q | `zephyr` | experimentele compilaties via `arduino:zephyr:unoq` | EXPERIMENTAL: tests blijven lopen; bekende Screen- en Tools-fouten |
@@ -33,7 +32,7 @@ Voor de dependencycontrole delen WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (
 Een combinatie die op een board niet compileert, krijgt een van drie statussen:
 
 1. platform of library incompatibel;
-2. build overschrijdt RAM (bijvoorbeeld op de UNO R3: FLASH + microSD samen, EEPROM NATIVE + HX1838 samen);
+2. build overschrijdt het beschikbare RAM;
 3. libraryselectie of configuratie nog op te lossen.
 
 Waarschuwing microSD-modules: sommige modules laten de MISO-lijn nooit los, ook niet wanneer hun CS hoog staat. Een tweede microSD of een ander SPI-apparaat (FLASH, FRAM SPI) op dezelfde bus werkt dan niet. Voorbeeld: de HW-125, waarop de OE-pin van de MISO-buffer (74LVC125, pin 13) volgens het Arduino-forum vast aan GND hangt. Gebruik dan één microSD alleen op de bus, of een module die MISO loslaat (bijvoorbeeld Adafruit 254, nog te testen).
@@ -50,7 +49,7 @@ De gemelde waarschuwing van de externe library `LiquidCrystal I2C` betreft de ar
 
 ## v2.0.0 Extenders en Sensoren
 
-UNO R3 wordt in v2.0.0 gebruikt als test- en compatibiliteitsplatform. Niet alle subsystemen en configuraties worden op UNO R3 ondersteund of meegecompileerd.
+
 
 De broncode bevat 16 concrete Extenderclasses onder `src/Systeem/Extender/` en 38 Sensorclasses onder `src/Systeem/Sensor/` (met de gemeenschappelijke basissen `SensorAnaloog` en `SensorDigitaal`; zie `docs/Systeem/Sensor/`). Hun aanwezigheid in de broncode of het slagen van een lifecycle-/resourcevoorbeeld is niet hetzelfde als een volledige elektronische hardwarevalidatie van iedere functie van die chip. Die validatiestatus moet afzonderlijk worden vastgelegd wanneer de elektronische functietests zijn uitgevoerd.
 
@@ -58,7 +57,6 @@ De broncode bevat 16 concrete Extenderclasses onder `src/Systeem/Extender/` en 3
 
 | Boardnaam | FQBN | Platform-ID | Boards Manager package / core | Exacte boardselectie in Arduino IDE | Pinstrategie |
 |---|---|---|---|---|---|
-| Arduino UNO R3 | `arduino:avr:uno` | `arduino:avr` | `Arduino AVR Boards by Arduino` | `Arduino Uno` | standaardmapping van de boardcore |
 | Arduino UNO R4 Minima | `arduino:renesas_uno:minima` | `arduino:renesas_uno` | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 Minima` | standaardmapping van de boardcore |
 | Arduino UNO R4 WiFi | `arduino:renesas_uno:unor4wifi` | `arduino:renesas_uno` | `Arduino UNO R4 Boards by Arduino` | `Arduino UNO R4 WiFi` | standaardmapping van de boardcore |
 | Arduino UNO Q | `arduino:zephyr:unoq` | `arduino:zephyr` | `Arduino Zephyr Boards by Arduino` | `Arduino UNO Q` | `SystemConfig.h` gebruikt `BOARD_UNO_Q` |
@@ -91,7 +89,6 @@ Bij gebruik van een PixelScreen is **jumper U11 op pin 9 de enige oplossing die 
 
 | Boardnaam | Referentiebeeld(en) |
 |---|---|
-| Arduino UNO R3 | [Arduino UNO R3.jpg](Systeem/Screenshots/Arduino%20UNO%20R3.jpg) |
 | Arduino UNO R4 Minima | [Arduino UNO R4 Minima.jpg](Systeem/Screenshots/Arduino%20UNO%20R4%20Minima.jpg) |
 | Arduino UNO R4 WiFi | [Arduino UNO R4 WiFi.jpg](Systeem/Screenshots/Arduino%20UNO%20R4%20WiFi.jpg) |
 | Cytron Maker UNO RP2040 | [voorkant](Systeem/Screenshots/Cytron%20Maker%20Uno%20RP2040-voorkant.jpg) · [achterkant](Systeem/Screenshots/Cytron%20Maker%20Uno%20RP2040-achterkant.jpg) |
@@ -223,7 +220,6 @@ Het FrameWork gebruikt de interne ADC niet: analoge metingen lopen via een ADC-E
 
 | Arduino Uno R3-vormfactorbord | Interne ADC-resolutie van het bord |
 |---|---:|
-| Arduino UNO R3 | 10-bit |
 | Arduino UNO R4 Minima | 14-bit |
 | Arduino UNO R4 WiFi | 14-bit |
 | Arduino UNO Q | 10-bit |
@@ -241,13 +237,12 @@ Analoge metingen lopen via de externe **ADS1115** als Extender. `SystemConfig.h`
 Kopieer voor persoonlijke instellingen `src/Configuratie/UserConfig_template.h` vóór gebruik naar `src/Configuratie/UserConfig.h`. Zonder `UserConfig.h` gebruikt de library de fallback uit `SystemConfig.h`.
 
 ```cpp
-#define BOARD_VERSION BOARD_UNO_R3
+#define BOARD_VERSION BOARD_UNO_R4_MINIMA
 ```
 
 Mogelijke waarden:
 
 ```cpp
-#define BOARD_UNO_R3                       0
 #define BOARD_UNO_R4_MINIMA                1
 #define BOARD_UNO_R4_WIFI                  2
 #define BOARD_UNO_Q                        7
@@ -262,7 +257,7 @@ De configuratie bepaalt onder andere `ADC_BITS`, `ADC_MAX`, `DELAY_US` en de sch
 
 ## Geheugen
 
-UNO R3 is de strengste huidige grens. Met uitgebreide functionaliteit kan de grootste gecombineerde Stimulus-sketch de beschikbare flash overschrijden wanneer PixelScreen-code meegecompileerd wordt. Exact gebruik kan wijzigen bij code-, core- of dependencyversies en moet bij releases opnieuw worden gemeten.
+Het geheugenverbruik van gecombineerde toepassingen moet bij releases per ondersteund board opnieuw gemeten worden.
 
 ## Huidige externe hardware
 

@@ -109,10 +109,7 @@ De versienummers volgen de versie in `library.properties`.
 
 ## [Unreleased]
 
-### Overwogen: afbouw Arduino UNO R3-ondersteuning
 
-- het project overweegt om ondersteuning voor Arduino UNO R3 te schrappen vanaf v1.1.3, wegens te weinig beschikbaar geheugen voor recentere functionaliteit (zoals `GedeeldeBus`, die `std::initializer_list` gebruikt);
-- nog geen definitieve beslissing; deze aankondiging dient als vooraankondiging, in lijn met het deprecatiebeleid uit `ROADMAP.md`.
 
 ### GedeeldeBus: compile-time Extenders
 
@@ -314,7 +311,7 @@ De versienummers volgen de versie in `library.properties`.
 - `PrintToScreenIntern()` toont voortaan, maximaal één keer, een duidelijke foutmelding (`CS000`/`PS000` bij een vergeten configuratie-aanroep, de opgeslagen foutcode bij een mislukte configuratie) in plaats van de aanroep stil te laten mislukken;
 - nieuwe foutcodes `_FATAL_CS000`, `_FATAL_CS001`, `_FATAL_CS002` en `_FATAL_PS000` toegevoegd aan de vier taalbestanden; bestaande `_FATAL_PS001`–`_FATAL_PS004` ongewijzigd;
 - `PixelScreenFoutmeldingWeergeven()` gebruikt voortaan enkel een reeds geconfigureerd en werkend characterscherm als terugvalpad (voorheen onvoorwaardelijk); nieuwe, symmetrische `CharacterScreenFoutmeldingWeergeven()` doet hetzelfde in de andere richting;
-- **Vereist een volledige nieuwe testronde** (niet overgenomen van v1.0.0): dit wijzigt echt gedrag, in tegenstelling tot v1.0.2/v1.0.3. Resultaten volgen in `extras/TESTRESULTATEN.md` zodra de compilatiematrix op echte hardware is uitgevoerd: inclusief empirische bevestiging van de placement-new (modus 2) op AVR (UNO R3);
+- **Vereist een volledige nieuwe testronde** (niet overgenomen van v1.0.0): dit wijzigt echt gedrag, in tegenstelling tot v1.0.2/v1.0.3. Resultaten volgen in `extras/TESTRESULTATEN.md` zodra de compilatiematrix op echte hardware is uitgevoerd: inclusief empirische bevestiging van de placement-new (modus 2) op AVR;
 - **Bugfix tijdens eigen validatie ontdekt (vóór publicatie):** `PixelScreenConfigureren()` zette `pixelScreenActief` niet op `true` bij een geslaagde configuratie, waardoor `PrintToScreenIntern()` een geslaagde pixelscherm-configuratie als mislukt beschouwde. Bij CHARACTER+PIXELS samen leidde dit tot een lege foutmelding op het characterscherm en geen enkele uitvoer op het pixelscherm. Gecorrigeerd vóór release;
 - `docs/Systeem/PIXELSCREEN_FOUTCODES.md` hernoemd naar `docs/Systeem/SCREEN_FOUTCODES.md` en aangevuld met `CS000`, `CS001`, `CS002` en `PS000`: voorheen enkel PS001–PS004 gedocumenteerd, waardoor de nieuwe CharacterScreen-foutcodes nergens terug te vinden waren voor wie de "ZOEK DIT NU OP"-instructie opvolgde;
 - **Naar aanleiding van code review, vóór publicatie:** het configuratiecontroleblok in `PrintToScreenIntern()` geldt voortaan enkel voor de ingebouwde hardware: is er een callback geregistreerd, dan wordt die niet langer geblokkeerd wanneer de ingebouwde hardware niet geconfigureerd is (zie `docs/DECISION_LOG.md`, D024);
@@ -347,7 +344,7 @@ De versienummers volgen de versie in `library.properties`.
 ### Documentatie
 
 - documentatie onderling afgestemd op de actuele v1.0.1-status;
-- foutieve compilatiecijfers gecorrigeerd naar 188 uitgevoerde compilaties, 184 succesvolle compilaties, 4 gekende UNO R3-geheugenbeperkingen en 0 onverwachte compilatiefouten;
+- foutieve compilatiecijfers gecorrigeerd naar 188 uitgevoerde compilaties, 184 succesvolle compilaties, 4 gekende -geheugenbeperkingen en 0 onverwachte compilatiefouten;
 - boardprofiel `esp32:esp32:d1_uno32` verduidelijkt voor WeMos D1 R32 (ESP32-WROOM-32U), TTGO D1 R32 (ESP32-WROOM-32U) en compatibele ESP32-borden in Arduino Uno R3-vormfactor;
 - status van WeMos D1 R32 (ESP32-WROOM-32U) overal gelijkgetrokken: compileert sinds v1.0.0, hardwarematig nog niet bevestigd;
 - fysieke teststatus van TTGO D1 R32 (ESP32-WROOM-32U) en andere compatibele borden onderscheiden van het gedeelde boardprofiel;
@@ -388,7 +385,7 @@ De versienummers volgen de versie in `library.properties`.
 ### Configuratie, boards en taal
 
 - `UserConfig_template.h` bevat alle in deze release rechtstreeks instelbare gebruikersparameters en wordt als `UserConfig.h` vóór de fallbackwaarden uit `SystemConfig.h` geladen;
-- `UNO_VERSION` vervangen door `BOARD_VERSION`, met afzonderlijke keuzewaarden voor UNO R3, UNO R4 Minima, UNO R4 WiFi en WeMos D1 R32 (ESP32-WROOM-32U);
+- `UNO_VERSION` vervangen door `BOARD_VERSION`, met afzonderlijke keuzewaarden voor UNO R4 Minima, UNO R4 WiFi en WeMos D1 R32 (ESP32-WROOM-32U);
 - 12-bit ADC-schaling toegevoegd voor WeMos D1 R32 (ESP32-WROOM-32U); de Stimulusvoorbeelden passen `analogReadResolution(ADC_BITS)` nu toe bij 12 en 14 bits;
 - `src/Configuratie/Examples.h` behoudt zijn naam en laadt per gekozen taal eerst een eventueel `UserExample_XX.h` en daarna `Examples_XX.h`;
 - `UserExample_XX_template.h` en `UserLibrary_XX_template.h` zijn voor NL, DE, EN en FR toegevoegd onder `src/Language/`; actieve gebruikersbestanden blijven in dezelfde map;
@@ -397,7 +394,7 @@ De versienummers volgen de versie in `library.properties`.
 - `DEBUG` en `TRACE` worden uitsluitend via `UserConfig.h` geactiveerd; `TRACE` activeert automatisch `DEBUG`;
 - gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in; persoonlijke instellingen worden vanuit `UserConfig.h` geladen en ontbrekende waarden vallen terug op `SystemConfig.h`; globale compilerdefinities kunnen voor gecontroleerde builds vóór deze configuratie worden vastgelegd;
 - `FATAL_ZOEK_OP` is verplaatst van `Screen.h` naar de vier `Library_XX.h`-bestanden en de vier `UserLibrary_XX_template.h`-bestanden;
-- status van UNO R3, UNO R4 Minima en UNO R4 WiFi verduidelijkt;
+- status van UNO R4 Minima en UNO R4 WiFi verduidelijkt;
 - WeMos D1 R32 (ESP32-WROOM-32U)-pintoewijzing toegevoegd aan `ADC_Validatie_Native`;
 
 ### Stimulus en ADC
@@ -419,17 +416,17 @@ De versienummers volgen de versie in `library.properties`.
 - elektronisch schema en pinbezetting voor de ADS1115-variant van Stimulus toegevoegd onder `docs/Uitbreidingskaarten/Stimulus Shield v1.0.0/`;
 - hardwaredocumentatie voor H5, H6 en H7 toegevoegd;
 - hardwaredocumentatie en schema uitgebreid met TFT-SPI, levelshifter en draadbruggen;
-- een hardwarevalidatieprogramma toegevoegd voor de specifieke UNO R3/R4-shieldhardware;
+- een hardwarevalidatieprogramma toegevoegd voor de specifieke UNO R4-shieldhardware;
 - een validatieprotocol toegevoegd met testvolgorde en goedkeuringscriteria;
 - hardwarevalidatie compileert optionele hardware en de bijbehorende libraries alleen wanneer de overeenkomstige validatiekeuze actief is;
 - `Handleiding-GroeiAcademie-Stimulus-Hardware-Validatie-v1.0.0.md` toegevoegd;
 
 ### Tests en validatie
 
-- compilatie gecontroleerd voor Arduino UNO R3, UNO R4 Minima en UNO R4 WiFi;
+- compilatie gecontroleerd voor Arduino UNO R4 Minima en UNO R4 WiFi;
 - Arduino LINT uitgevoerd zonder fouten, met één bekende onschadelijke waarschuwing.
 - alle `.cmd`-testscripts werken vanuit de hoofdmap van de library, ook wanneer ze vanuit `extras` worden gestart;
-- testscripts uitgebreid met WeMos D1 R32 (ESP32-WROOM-32U), schone sequentiële compilatie, Arduino LINT-status en afzonderlijke registratie van de vier gekende UNO R3-geheugenbeperkingen;
+- testscripts uitgebreid met WeMos D1 R32 (ESP32-WROOM-32U), schone sequentiële compilatie, Arduino LINT-status en afzonderlijke registratie van de vier gekende -geheugenbeperkingen;
 
 ### Documentatie, structuur en licentie
 

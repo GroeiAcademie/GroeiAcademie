@@ -16,9 +16,9 @@ Elke module heeft een afgebakende verantwoordelijkheid en werkt binnen één Ard
 
 De kern blijft zo onafhankelijk mogelijk. Concrete hardwarelibraries worden alleen gebruikt via duidelijke, beperkte integraties.
 
-## UNO R3 als discipline
+##  als discipline
 
-Ondersteuning van UNO R3 dwingt zuinig gebruik van flash, SRAM en processortijd af. Zwaardere functionaliteit wordt expliciet gemarkeerd en mag de basisondersteuning niet stilzwijgend verbreken.
+Ondersteuning van  dwingt zuinig gebruik van flash, SRAM en processortijd af. Zwaardere functionaliteit wordt expliciet gemarkeerd en mag de basisondersteuning niet stilzwijgend verbreken.
 
 ## Transparantie
 

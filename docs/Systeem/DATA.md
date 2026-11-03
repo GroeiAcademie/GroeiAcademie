@@ -120,7 +120,7 @@ void    Data->WriteNativeEEPROM(uint16_t adres, uint8_t waarde);
 
 Buiten `DATA_LAYER_EEPROM_NATIVE_SIZE` geeft lezen 0 en doet schrijven niets.
 
-- R3, R4, STM32: `update()`, dat alleen schrijft wanneer de waarde verandert.
+- R4, STM32: `update()`, dat alleen schrijft wanneer de waarde verandert.
 - ESP32 en RP2040: Input en Data roepen `EEPROM.begin()` aan met dezelfde som (`HX1838_EEPROM_NATIVE_SIZE + DATA_LAYER_EEPROM_NATIVE_SIZE`). Na elke schrijfactie die iets verandert, volgt meteen `commit()`, want een volgende `begin()` leest het geheugen opnieuw in.
 - UNO Q: geen `EEPROM.h` in de core. Het medium wordt niet aangemaakt; lezen geeft 0.
 
@@ -155,11 +155,11 @@ SCK, MISO en MOSI komen uit de boardconfiguratie. De chips staan in `Data->FLASH
 ```
 
 - `0` (standaard): elke `StreamingWrite()` schrijft meteen naar FLASH. Er wordt geen buffer gecompileerd.
-- minstens `sizeof(int)` (`2` op de UNO R3, `4` op de 32-bit boards) t/m `256`: de metingen worden in RAM verzameld en in één keer geschreven wanneer de buffer vol is, bij `StreamingStop()` en bij het afmelden van Data. Bij `StreamingStart()` vervalt wat nog in de buffer zat. `256` is één pagina en geeft de grootste winst.
+- minstens `sizeof(int)` (`4` op de ondersteunde 32-bit boards) t/m `256`: de metingen worden in RAM verzameld en in één keer geschreven wanneer de buffer vol is, bij `StreamingStop()` en bij het afmelden van Data. Bij `StreamingStart()` vervalt wat nog in de buffer zat. `256` is één pagina en geeft de grootste winst.
 - Waarom: elke schrijfactie naar FLASH is een volledige "page program" (typisch rond 0,7 ms, aanname uit datasheets), ook voor één meting. Met een buffer van één pagina gebeurt dat één keer per 64 metingen van 4 bytes.
 - Kleiner dan één `int` (maar groter dan 0) geeft een compileerfout.
 - `StreamingRead()` geeft ook de laatste meting terug als die nog in de buffer wacht.
-- Nadeel: bij stroomuitval gaat wat nog in de buffer zit verloren (maximaal de buffergrootte). Op de UNO R3 kost een buffer van 256 bytes te veel RAM.
+- Nadeel: bij stroomuitval gaat wat nog in de buffer zit verloren (maximaal de buffergrootte). De buffer kost per instantie de ingestelde grootte in RAM.
 - EEPROM I2C, FRAM en microSD hebben geen buffer: EEPROM I2C zit nog in geen enkele Data-route, FRAM schrijft zonder wachttijd, en SdFat heeft zelf een buffer van 512 bytes.
 
 Voor continue sensordata geldt:
@@ -218,7 +218,7 @@ Zo ook `_2_` en `MICROSD_SPI`. Data zoekt de Extender in de boom op component en
 - FLASH: het transport schakelt CS via de Extender.
 - microSD: SdFat schakelt CS zelf met `sdCsInit()`/`sdCsWrite()`. Die functies kan de library alleen vervangen wanneer in `SdFatConfig.h` van "SdFat - Adafruit Fork" `SD_CHIP_SELECT_MODE` op `1` of `2` staat (standaard `0`). Staat het op `0`, dan geeft de compilatie een duidelijke `#error`. Pas die ene regel in `SdFatConfig.h` aan, of geef `-DSD_CHIP_SELECT_MODE=1` mee als compileerflag.
 - Snelheid: elke CS-wissel via een I2C-Extender kost ongeveer 0,05 ms (400 kHz) tot 0,2 ms (100 kHz) (berekend). CS op het board blijft de standaard.
-- Op de UNO R3 (testboard) past dit niet in het RAM.
+- 
 
 Alternatief (niet gekozen): de originele `SdFat` van Bill Greiman (`#include <SdFat.h>`). Die is de bron van de fork, met dezelfde klassen (`SdFat32`, `File32`, `SdSpiConfig`). Waarom niet: `Adafruit SPIFlash` vereist de fork, en twee SdFat-versies in één programma geven compileerfouten wanneer FLASH en microSD samen gebruikt worden. Overschakelen is mogelijk door in `microSD.h` de include te wijzigen en in `library.properties` `SdFat - Adafruit Fork` door `SdFat` te vervangen; FLASH en microSD samen werken dan niet meer. Het officiële Adafruit-voorbeeld `SdFat_Flash_and_SDcard` gebruikt dezelfde combinatie als de library (fork + Adafruit SPIFlash).
 

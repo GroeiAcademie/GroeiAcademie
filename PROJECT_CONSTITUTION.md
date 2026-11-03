@@ -97,7 +97,6 @@ De eerste officiële ontwikkelomgeving is Arduino IDE. Arduino CLI wordt gebruik
 
 De huidige library is gecompileerd voor:
 
-- Arduino UNO R3;
 - Arduino UNO R4 Minima;
 - Arduino UNO R4 WiFi.
 

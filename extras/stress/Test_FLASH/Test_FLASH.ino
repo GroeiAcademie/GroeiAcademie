@@ -4,9 +4,6 @@
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_FlashTransport.h>
 
-#if defined(ARDUINO_AVR_UNO)
-#error Test_FLASH wordt niet uitgevoerd op Arduino UNO R3.
-#endif
 
 const uint8_t FLASH_CS_NATIVE = 10;
 

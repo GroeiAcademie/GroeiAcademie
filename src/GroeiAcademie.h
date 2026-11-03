@@ -16,6 +16,9 @@
 #if STURING_L298N_AANTAL > 0
   #include "Systeem/Sturing/L298N.h"
 #endif
+#if STURING_MAX7219_AANTAL > 0
+  #include "Systeem/Sturing/MAX7219.h"
+#endif
 #if STURING_MG996R_AANTAL > 0
   #include "Systeem/Sturing/MG996R.h"
 #endif
@@ -33,6 +36,16 @@
 #endif
 #if STURING_WS2812_AANTAL > 0
   #include "Systeem/Sturing/WS2812.h"
+#endif
+
+#if STURING_A4988_AANTAL > 0 || STURING_ULN2003_AANTAL > 0
+  #include "Systeem/Sturing/Functies/Elektromotoren/StappenmotorBesturing.h"
+#endif
+#if STURING_SG90_AANTAL > 0 || STURING_MG996R_AANTAL > 0
+  #include "Systeem/Sturing/Functies/Elektromotoren/ServomotorBesturing.h"
+#endif
+#if STURING_L293D_AANTAL > 0 || STURING_L298N_AANTAL > 0
+  #include "Systeem/Sturing/Functies/Elektromotoren/DCmotorBesturing.h"
 #endif
 
 
