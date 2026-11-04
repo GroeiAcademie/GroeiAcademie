@@ -1,5 +1,10 @@
+// ============================================================================
+// Sensor: HW201
+// ============================================================================
 // VCC/GND volgens concrete module; controleer OUT-niveau voor 3,3V-board.
 // De sensor heeft geen bus-ID. Dit voorbeeld bevestigt GEEN echte detectie.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_HW201_AANTAL != 1
 #error Zet SENSOR_HW201_AANTAL op 1 voor deze test.
@@ -7,6 +12,8 @@
 HW201* sensorHW201 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_HW201"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorHW201 = GedeeldeBusNewComponent<HW201>(&Native, GedeeldeBusComponent::HW201, HardwareResourcePin::NP_D2);

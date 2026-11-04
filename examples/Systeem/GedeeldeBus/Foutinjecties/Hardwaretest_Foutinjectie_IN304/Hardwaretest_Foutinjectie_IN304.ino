@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: IN304
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie IN304: HX1838-pin niet bruikbaar voor het interruptmechanisme
 // Verwachte build: normaal of DEBUG, met HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
@@ -5,6 +8,7 @@
 // Bewezen = de echte FrameWork-melding "_CRITICAL_IN304" verschijnt. Geen melding = NIET BEWEZEN.
 // Aanname: alleen op boards waar USE_ATTACH_INTERRUPT en NOT_AN_INTERRUPT bestaan (TODO in Input.cpp).
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -89,6 +93,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN304"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));
   ToonUitleg();

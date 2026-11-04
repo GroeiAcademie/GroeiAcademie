@@ -29,6 +29,7 @@ ExtenderTCA9548A extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_TCA9548A"));
 
   GA_SERIAL.println(F("=== ExtenderTCA9548A driver-/lifecycletest ==="));
 

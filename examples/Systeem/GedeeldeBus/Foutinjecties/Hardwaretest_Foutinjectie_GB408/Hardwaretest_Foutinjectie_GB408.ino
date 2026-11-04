@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: GB408
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie GB408: Sensor kan tijdens runtime niet meten: storing van zijn Extender
 // Verwachte build: normaal of DEBUG
 // Opstelling: FsrRfp op een ADS1115, los te koppelen via een schakelaar of jumper in VCC
 // Bewezen = de echte FrameWork-melding "<foutniveau>: GB408" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = fase 1 referentie, toets 3 = fase 2 storing, toets 4 = fase 3 herstel.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -179,6 +183,7 @@ void VolgFase() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB408"));
   ToonUitleg();
 }
 

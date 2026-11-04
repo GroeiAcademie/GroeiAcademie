@@ -1,3 +1,11 @@
+// ============================================================================
+// Stresstest: Test_FRAM
+// ============================================================================
+// Stresstest voor een MB85RC256V FRAM op de I2C-bus.
+// Schrijft en leest herhaaldelijk data en toont foutenaantal en tijden via Serial.
+// Het I2C-adres en het aantal herhalingen staan in de constanten hieronder.
+// ============================================================================
+
 #include <Wire.h>
 #include <FRAM.h>
 

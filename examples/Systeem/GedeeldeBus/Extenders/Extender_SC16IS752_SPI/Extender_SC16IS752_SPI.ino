@@ -30,6 +30,7 @@ ExtenderSC16IS752SPI extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_SC16IS752_SPI"));
 
   GA_SERIAL.println(F("=== ExtenderSC16IS752SPI aanmelden/controleren-test ==="));
 

@@ -55,6 +55,7 @@ GedeeldeBusNode SensorTest(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_CD74HC4067_Test_ExtenderPins_Toegelaten"));
 
   GA_SERIAL.println(F("=== ExtenderCD74HC4067 ExtenderPins Toegelaten ==="));
 

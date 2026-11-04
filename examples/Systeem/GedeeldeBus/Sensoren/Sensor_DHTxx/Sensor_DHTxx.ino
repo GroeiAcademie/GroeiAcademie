@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: DHTxx
+// ============================================================================
 // DATA=D2, DHT11 (KY-015) of DHT22 en pull-up correct aansluiten.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_DHT11_AANTAL + SENSOR_DHT22_AANTAL != 1
 #error Zet SENSOR_DHT11_AANTAL of SENSOR_DHT22_AANTAL op 1 (niet beide) voor deze hardwaretest.
@@ -13,6 +18,8 @@ const GedeeldeBusComponent fysiekType = GedeeldeBusComponent::DHT11;
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_DHTxx"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const bool parentOK = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();

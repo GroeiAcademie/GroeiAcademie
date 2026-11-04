@@ -29,6 +29,7 @@ ExtenderADS1115 extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_ADS1115"));
 
   GA_SERIAL.println(F("=== ExtenderADS1115 driver-/lifecycletest ==="));
 

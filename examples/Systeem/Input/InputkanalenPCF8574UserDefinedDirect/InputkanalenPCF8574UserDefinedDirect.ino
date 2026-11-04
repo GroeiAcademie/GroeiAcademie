@@ -11,6 +11,7 @@
 // De KEYPAD_GENERIEK_...-instellingen moeten in UserConfig.h staan. Bij
 // KEYPAD_TYPE_USER_DEFINED_DIRECT staat daar een uitgecommentarieerd voorbeeld: haal in UserConfig.h de // voor de benodigde #define-regels weg en pas de waarden aan je keypad aan.
 // Het onderstaande oude configuratiefragment is uitsluitend een referentie en wordt vanuit deze .ino niet meegecompileerd.
+// ============================================================================
 
 /*
 #if defined(INPUT_KANAAL_CONFIG) && ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)

@@ -30,6 +30,7 @@ ExtenderADS7953 extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_ADS7953"));
 
   GA_SERIAL.println(F("=== ExtenderADS7953 aanmelden/controleren-test ==="));
 

@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: SCD41
+// ============================================================================
 // Sensirion I2C SCD4X library vereist, bron: github.com/Sensirion/arduino-i2c-scd4x
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_SCD41_AANTAL != 1
 #error SENSOR_SCD41_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -11,6 +16,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::SCD41, I2C_ADDRE
 SCD41* sensor = nullptr;
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ while (!GA_SERIAL) { ; }
+ GA_SERIAL.println(F("TEST: Sensor_SCD41"));
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
  const bool parentOK=apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();

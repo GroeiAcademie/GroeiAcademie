@@ -1,3 +1,13 @@
+// ============================================================================
+// Sensor: GSRGrove
+// ============================================================================
+// Hardwaretest voor GSRGrove binnen de bestaande Sensor-architectuur.
+// Configuratie: Zet SENSOR_GSRGROVE_AANTAL op 1 voor deze hardwaretest.
+// Configuratie: Zet EXTENDER_ADS1115_AANTAL op minstens 1 voor deze hardwaretest.
+// Configuratie: Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE voor deze hardwaretest.
+// Serial toont de uitlezing van het in deze sketch gebruikte ADC-kanaal.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_GSRGROVE_AANTAL != 1
   #error Zet SENSOR_GSRGROVE_AANTAL op 1 voor deze hardwaretest.
@@ -17,6 +27,8 @@ GSRGrove* sensorGSRGrove = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_GSRGrove"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorGSRGrove = GedeeldeBusNewComponent<GSRGrove>(

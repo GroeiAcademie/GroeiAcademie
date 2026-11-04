@@ -81,6 +81,7 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_MixedPins"));
 
   // Eerst de Extender, dan de sensor: de sensor gebruikt pinnen van die Extender.
   ToonResultaat(F("Extender A"), extenderA.aanmelden() && extenderA.controleren() && extenderA.inpluggen() && extenderA.activeren());

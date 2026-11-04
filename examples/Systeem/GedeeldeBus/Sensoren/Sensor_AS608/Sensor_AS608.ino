@@ -1,3 +1,12 @@
+// ============================================================================
+// Sensor: AS608
+// ============================================================================
+// Hardwaretest voor AS608 binnen de bestaande Sensor-architectuur.
+// Configuratie: SENSOR_AS608_AANTAL moet 1 zijn.
+// Configuratie: Hardwaretest AS608 vereist Serial1. Gebruik op andere boards een apart goedgekeurde seriele poortintegratie.
+// Serial meldt initialisatie; een fysieke sensorrespons is niet automatisch bewezen.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_AS608_AANTAL != 1
 #error SENSOR_AS608_AANTAL moet 1 zijn.
@@ -7,6 +16,8 @@
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_AS608"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   bool basis = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();

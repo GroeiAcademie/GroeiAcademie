@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: PS305
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie PS305: tekstgrid kleiner dan het minimum
 // Verwachte build: normaal of DEBUG, met een te grote PIXEL_SCREEN_MARGIN
 // Opstelling: de gewone schermopstelling; in UserConfig.h tijdelijk #define PIXEL_SCREEN_MARGIN 100
 // Bewezen = de echte FrameWork-melding "_CRITICAL_PS305" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -88,6 +92,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_PS305"));
   ToonUitleg();
 }
 

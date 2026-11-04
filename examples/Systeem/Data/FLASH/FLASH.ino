@@ -28,6 +28,7 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: FLASH"));
 
 #ifdef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
   ToonResultaat(F("Extender voor CS"), extenderCS.aanmelden() && extenderCS.controleren() && extenderCS.inpluggen() && extenderCS.activeren());

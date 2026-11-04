@@ -1,5 +1,10 @@
+// ============================================================================
+// Sensor: DS3231
+// ============================================================================
 // DS3231-klokmodule op I2C (SDA/SCL), knoopcel geplaatst.
 // Let op: de MPU6050/MPU6500 gebruiken met AD0 laag ook adres 0x68.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_DS3231_AANTAL != 1
 #error SENSOR_DS3231_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -17,6 +22,8 @@ void ToonDatumTijd(const DateTime& datumTijd) {
 }
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ while (!GA_SERIAL) { ; }
+ GA_SERIAL.println(F("TEST: Sensor_DS3231"));
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
  const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();

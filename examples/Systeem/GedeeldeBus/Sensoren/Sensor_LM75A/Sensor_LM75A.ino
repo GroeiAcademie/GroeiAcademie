@@ -1,3 +1,12 @@
+// ============================================================================
+// Sensor: LM75A
+// ============================================================================
+// Hardwaretest voor LM75A binnen de bestaande Sensor-architectuur.
+// Configuratie: SENSOR_LM75A_AANTAL moet 1 zijn voor deze hardwaretest.
+// Configuratie: DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze hardwaretest.
+// Serial toont afzonderlijk de I2C-resource en de Sensor-lifecyclestatus.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_LM75A_AANTAL != 1
 #error SENSOR_LM75A_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -10,6 +19,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::LM75A, I2C_ADDRE
 LM75A* sensor = nullptr;
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ while (!GA_SERIAL) { ; }
+ GA_SERIAL.println(F("TEST: Sensor_LM75A"));
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
  const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();

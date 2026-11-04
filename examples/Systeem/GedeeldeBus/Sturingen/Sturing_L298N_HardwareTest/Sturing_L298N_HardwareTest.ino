@@ -1,4 +1,17 @@
+// ============================================================================
+// Sturing: L298N_HardwareTest
+// ============================================================================
 // Begeleide hardwaretest voor L298N. Elke beweging vereist eerst bevestiging via Serial.
+// Pinnen zijn afgeleid uit de bestaande constructoren en de boardmapping in src/Configuratie/UserConfig.h en SystemConfig.h.
+// PCA9685 kanaal 3/4/5 -> L298N IN1/IN2/ENABLE; motorvoeding extern, GND gemeenschappelijk.
+// I2C-aansluiting: SDA/SCL en GND op dezelfde bus; modulevoeding volgens het werkelijke Extender-bord.
+// UNO R4 Minima/WiFi en UNO Q: SDA/SCL op de gelijknamige boardaansluitingen.
+// ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22.
+// ESP32-S3 ARDI-32: SDA=GPIO38, SCL=GPIO39; ESP32-S3 DEV: SDA=GPIO8, SCL=GPIO9.
+// RP2040 Cytron Maker UNO: SDA=GPIO20, SCL=GPIO21.
+// STM32 F401RE Nucleo: SDA=PB9, SCL=PB8.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_L298N_AANTAL == 0
   #error Zet STURING_L298N_AANTAL op minstens 1 voor deze test.
@@ -7,10 +20,10 @@
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
-L298N sturing(&extender,3,4,5);
+ExtenderPCA9685* extender = nullptr;
+L298N* sturing = nullptr;
 
-DCmotorBesturing motorBesturing(sturing);
+DCmotorBesturing* motorBesturing = nullptr;
 
 bool testActief = false;
 bool startGelukt = false;
@@ -44,7 +57,7 @@ void toonTest() {
 void antwoord(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen toerental- of positiefeedback)") : F("FUNCTIEAANROEP: FOUT")); }
 
 void rondTestAf(bool ok) {
-  motorBesturing.StopMotor();
+  motorBesturing->StopMotor();
   GA_SERIAL.println(F("MOTOR: STOP aangeroepen; driver-ENABLE = 0 gevraagd."));
   antwoord(ok);
   testActief = false;
@@ -55,8 +68,13 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
-  startGelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren() && sturing.aanmelden() && sturing.controleren() && sturing.inpluggen() && sturing.activeren();
-  if (startGelukt) motorBesturing.StopMotor();
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sturing_L298N_HardwareTest"));
+  extender = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
+  if (extender != nullptr) sturing = GedeeldeBusNewComponent<L298N>(extender, 3, 4, 5);
+  if (sturing != nullptr) motorBesturing = new DCmotorBesturing(*sturing);
+  startGelukt = sturing != nullptr && motorBesturing != nullptr;
+  if (startGelukt) motorBesturing->StopMotor();
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK. BEGINSTATUS: MOTOR GESTOPT.") : F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
   toonStart();
   if (startGelukt) toonTest();
@@ -68,7 +86,7 @@ void loop() {
     invoer.trim();
     invoer.toUpperCase();
     if (invoer == "STOP") {
-      if (startGelukt) motorBesturing.StopMotor();
+      if (startGelukt) motorBesturing->StopMotor();
       testActief = false;
       testGestopt = true;
       GA_SERIAL.println(F("STOP: driver uit. Herstart Arduino voor een nieuwe test."));
@@ -76,7 +94,7 @@ void loop() {
     }
     if (invoer == "1" && startGelukt && !testGestopt) {
       if (testActief && testStap == 3 && testFase == 1) {
-        const bool ok = motorBesturing.HervatMotor();
+        const bool ok = motorBesturing->HervatMotor();
         GA_SERIAL.println(F("HervatMotor(): oude richting en PWM opnieuw gevraagd."));
         antwoord(ok);
         if (!ok) { rondTestAf(false); return; }
@@ -89,12 +107,12 @@ void loop() {
       GA_SERIAL.print(F("START TEST ")); GA_SERIAL.println(testStap + 1);
       bool ok = false;
       switch (testStap) {
-        case 0: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing.StartMotor(); break;
-        case 1: ok = motorBesturing.StelSnelheidIn(800) && motorBesturing.BeweegVooruit(); break;
-        case 2: ok = motorBesturing.StelSnelheidIn(800) && motorBesturing.BeweegAchteruit(); break;
-        case 3: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing.StartMotor(); break;
-        case 4: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing.DraairichtingOmkeren() && motorBesturing.StartMotor(); break;
-        case 5: ok = motorBesturing.StelDraairichtingEnSnelheidIn(true, 500) && motorBesturing.StartMotor(); break;
+        case 0: ok = motorBesturing->StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing->StartMotor(); break;
+        case 1: ok = motorBesturing->StelSnelheidIn(800) && motorBesturing->BeweegVooruit(); break;
+        case 2: ok = motorBesturing->StelSnelheidIn(800) && motorBesturing->BeweegAchteruit(); break;
+        case 3: ok = motorBesturing->StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing->StartMotor(); break;
+        case 4: ok = motorBesturing->StelDraairichtingEnSnelheidIn(true, 800) && motorBesturing->DraairichtingOmkeren() && motorBesturing->StartMotor(); break;
+        case 5: ok = motorBesturing->StelDraairichtingEnSnelheidIn(true, 500) && motorBesturing->StartMotor(); break;
       }
       if (!ok) { rondTestAf(false); return; }
       testActief = true;
@@ -109,7 +127,7 @@ void loop() {
   const unsigned long verstreken = millis() - testStartMillis;
   if (testStap == 3 && testFase == 1) return;
   if (testStap == 3 && testFase == 0 && verstreken >= 800UL) {
-    const bool ok = motorBesturing.PauzeerMotor();
+    const bool ok = motorBesturing->PauzeerMotor();
     GA_SERIAL.println(F("PauzeerMotor(): driver uit, richting/snelheid intern bewaard."));
     antwoord(ok);
     if (!ok) { rondTestAf(false); return; }
@@ -118,7 +136,7 @@ void loop() {
     return;
   }
   if (testStap == 5 && testFase == 0 && verstreken >= 800UL) {
-    const bool ok = motorBesturing.StelSnelheidIn(1300);
+    const bool ok = motorBesturing->StelSnelheidIn(1300);
     GA_SERIAL.println(F("StelSnelheidIn(1300): gevraagde PWM verhoogd, fysieke snelheid onbekend."));
     antwoord(ok);
     if (!ok) { rondTestAf(false); return; }

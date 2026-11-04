@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: LD2450
+// ============================================================================
 // Standaard 256000 baud: uitsluitend op een board met geschikte Serial1 en foutloze baudrate.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_LD2450_AANTAL != 1
 #error SENSOR_LD2450_AANTAL moet 1 zijn.
@@ -8,6 +13,8 @@
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_LD2450"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   Serial1.begin(256000);

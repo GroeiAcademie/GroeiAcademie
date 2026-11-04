@@ -1,8 +1,13 @@
+// ============================================================================
+// Sensor: XYSTICK
+// ============================================================================
 // XY-STICK (PS2-joystick): twee analoge assen en een drukknop, zonder eigen klasse.
 // VRx -> AIN0 en VRy -> AIN1 van een ADS1115 (via het bestaande ADC-contract van de Extender), SW -> D4 (native, INPUT_PULLUP).
 // +5V en GND van de joystick op de voeding van de ADS1115 (dezelfde referentie).
 // Elke joystick staat in rust net iets anders dan in het midden: de middenstand wordt bij de start gemeten,
 // en een dode zone rond het midden telt als "niet bewogen".
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if EXTENDER_ADS1115_AANTAL < 1
 #error Zet EXTENDER_ADS1115_AANTAL op minstens 1.
@@ -37,6 +42,8 @@ int32_t Richting(int32_t waarde, int32_t midden) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_XYSTICK"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   extenderOK = extenderADS1115.aanmelden() && extenderADS1115.controleren() && extenderADS1115.inpluggen() && extenderADS1115.activeren();

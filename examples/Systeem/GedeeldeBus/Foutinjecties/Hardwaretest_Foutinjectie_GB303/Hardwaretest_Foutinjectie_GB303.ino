@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: GB303
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie GB303: activeren() mislukt: antwoord, maar initialisatie van de library mislukt
 // Verwachte build: DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: een aangesloten PCF8574 op TEST_ADRES_PCF8574
 // Bewezen = de echte FrameWork-melding "_CRITICAL_GB303" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -97,6 +101,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB303"));
   ToonUitleg();
 }
 

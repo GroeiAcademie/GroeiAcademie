@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: MAX30102
+// ============================================================================
 // Vereist geïnstalleerde officiële library: MAX30105.h.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_MAX30102_AANTAL != 1
 #error SENSOR_MAX30102_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -12,6 +17,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::MAX30102,
 MAX30102* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_MAX30102"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const unsigned long beginTijd=millis();

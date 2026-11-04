@@ -1,3 +1,13 @@
+// ============================================================================
+// Sensor: LM35DZ
+// ============================================================================
+// Hardwaretest voor LM35DZ binnen de bestaande Sensor-architectuur.
+// Configuratie: Zet SENSOR_LM35DZ_AANTAL op 1 voor deze hardwaretest.
+// Configuratie: Zet EXTENDER_ADS1115_AANTAL op minstens 1 voor deze hardwaretest.
+// Configuratie: Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE voor deze hardwaretest.
+// Serial toont de uitlezing van het in deze sketch gebruikte ADC-kanaal.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_LM35DZ_AANTAL != 1
   #error Zet SENSOR_LM35DZ_AANTAL op 1 voor deze hardwaretest.
@@ -17,6 +27,8 @@ LM35DZ* sensorLM35DZ = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_LM35DZ"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorLM35DZ = GedeeldeBusNewComponent<LM35DZ>(

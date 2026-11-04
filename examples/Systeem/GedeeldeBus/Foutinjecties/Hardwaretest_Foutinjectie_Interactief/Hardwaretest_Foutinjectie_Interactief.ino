@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: Interactief
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Interactieve PCF8574-foutinjectie: referentie -> fout -> herstel.
 // Basis: examples/Systeem/Input/InputkanalenHX1838/InputkanalenHX1838.ino
@@ -7,6 +10,7 @@
 // Een ontbrekende foutcode is GEEN geslaagde foutcodetest.
 // LET OP: geen draden onder spanning lostrekken. Gebruik een vooraf veilige,
 //        gecontroleerde testvoorziening die de HX1838 bereikbaar houdt.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 #include <Configuratie/Examples.h>
@@ -129,6 +133,7 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_Interactief"));
 
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);

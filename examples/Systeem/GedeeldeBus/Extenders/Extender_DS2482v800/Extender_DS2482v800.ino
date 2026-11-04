@@ -29,6 +29,7 @@ ExtenderDS2482v800 extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_DS2482v800"));
 
   GA_SERIAL.println(F("=== ExtenderDS2482v800 driver-/lifecycletest ==="));
 

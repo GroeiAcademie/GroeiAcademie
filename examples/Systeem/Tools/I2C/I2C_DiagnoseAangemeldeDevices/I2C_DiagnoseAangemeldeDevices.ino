@@ -28,6 +28,7 @@ I2C_SCANNER i2cScanner;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: I2C_DiagnoseAangemeldeDevices"));
 
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) { GA_SERIAL.println(F("FOUT: Screen")); while (true) { ; } }

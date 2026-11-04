@@ -1,6 +1,11 @@
+// ============================================================================
+// Sensor: AD8232
+// ============================================================================
 // SparkFun AD8232, OUTPUT via ADC; LO+/LO- later afzonderlijk
 // Bron: https://learn.sparkfun.com/tutorials/ad8232-heart-rate-monitor-hookup-guide/
 // Biosignalen: nooit op een persoon testen zonder geschikte elektrische isolatie/veiligheidscontrole.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_AD8232_AANTAL != 1
 #error Zet SENSOR_AD8232_AANTAL op 1 voor deze hardwaretest.
@@ -18,6 +23,8 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 AD8232* sensorAD8232 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_AD8232"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorAD8232 = GedeeldeBusNewComponent<AD8232>(&extenderADS1115,

@@ -31,6 +31,8 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: NRF24L01"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 

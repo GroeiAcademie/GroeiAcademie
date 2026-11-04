@@ -19,6 +19,8 @@ RF24 radio(pinCE, pinCS);
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: NRF24L01_Ontvanger"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 

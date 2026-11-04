@@ -22,6 +22,8 @@ static const uint16_t AANTAL_METINGEN = 20;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: N8_PixelScreen_Meten"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 

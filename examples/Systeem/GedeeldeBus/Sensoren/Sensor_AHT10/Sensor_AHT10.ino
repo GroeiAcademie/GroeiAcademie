@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: AHT10
+// ============================================================================
 // Vereist geïnstalleerde officiële library: Adafruit_AHTX0.h.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_AHT10_AANTAL != 1
 #error SENSOR_AHT10_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -12,6 +17,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::AHT10,
 AHT10* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_AHT10"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const unsigned long beginTijd=millis();

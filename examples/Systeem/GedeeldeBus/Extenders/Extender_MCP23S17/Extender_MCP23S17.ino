@@ -21,6 +21,7 @@ ExtenderMCP23S17 extender(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23S17, 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_MCP23S17"));
   bool gelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren();
   if (gelukt) gelukt = extender.pinMode1(0, OUTPUT) && extender.write1(0, LOW);
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);

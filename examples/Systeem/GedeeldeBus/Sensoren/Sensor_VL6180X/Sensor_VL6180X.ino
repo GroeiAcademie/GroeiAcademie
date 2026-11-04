@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: VL6180X
+// ============================================================================
 // Vereist geïnstalleerde officiële library: Adafruit_VL6180X.h.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_VL6180X_AANTAL != 1
 #error SENSOR_VL6180X_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -12,6 +17,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::VL6180X,
 SensorVL6180X* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_VL6180X"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const unsigned long beginTijd=millis();

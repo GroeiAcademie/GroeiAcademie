@@ -1,6 +1,11 @@
+// ============================================================================
+// Sensor: EGBOPulseSensor
+// ============================================================================
 // EGBO Pulse Sensor, analoge variant voorlopig, exact bord bevestigen
 // Bron: Niet officieel geverifieerd: identiteit/elektrische eigenschappen te bevestigen
 // Biosignalen: nooit op een persoon testen zonder geschikte elektrische isolatie/veiligheidscontrole.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_EGBOPULSESENSOR_AANTAL != 1
 #error Zet SENSOR_EGBOPULSESENSOR_AANTAL op 1 voor deze hardwaretest.
@@ -18,6 +23,8 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 EGBOPulseSensor* sensorEGBOPulseSensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_EGBOPulseSensor"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorEGBOPulseSensor = GedeeldeBusNewComponent<EGBOPulseSensor>(&extenderADS1115,

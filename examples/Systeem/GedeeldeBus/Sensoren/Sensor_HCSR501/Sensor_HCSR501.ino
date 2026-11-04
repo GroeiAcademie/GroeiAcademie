@@ -1,3 +1,12 @@
+// ============================================================================
+// Sensor: HCSR501
+// ============================================================================
+// Hardwaretest voor HCSR501 binnen de bestaande Sensor-architectuur.
+// Configuratie: SENSOR_HCSR501_AANTAL moet 1 zijn voor deze hardwaretest.
+// Configuratie: DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze test.
+// De sketch toont de bestaande parent- en Sensor-controles via Serial.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_HCSR501_AANTAL != 1
 #error SENSOR_HCSR501_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -8,6 +17,8 @@
 
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ while (!GA_SERIAL) { ; }
+ GA_SERIAL.println(F("TEST: Sensor_HCSR501"));
  const unsigned long startTijd = millis();
  while (!GA_SERIAL && millis()-startTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
  bool parentOK = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();

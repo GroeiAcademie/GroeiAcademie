@@ -76,6 +76,7 @@ unsigned long laatsteSample = 0;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_ADS1115_Meetkwaliteit"));
 
   ads1115Aanwezig = extenderADS1115.aanmelden()
     && extenderADS1115.controleren()

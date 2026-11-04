@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: SS302
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie SS302: SerialScreen niet beschikbaar (SIMULATIE)
 // Verwachte build: normaal of DEBUG
@@ -5,6 +8,7 @@
 // Bewezen = de echte FrameWork-melding "_CRITICAL_SS302" verschijnt. Geen melding = NIET BEWEZEN.
 // SIMULATIE: de sketch zet Screen->actief tijdelijk op false; een echte weg naar SS302 bestaat bijna niet.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -94,6 +98,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_SS302"));
   ToonUitleg();
 }
 

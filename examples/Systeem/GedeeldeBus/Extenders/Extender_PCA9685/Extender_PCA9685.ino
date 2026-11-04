@@ -21,6 +21,7 @@ ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::PWM_PCA9685, HardwareRes
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_PCA9685"));
   bool gelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren();
   if (gelukt) gelukt = (extender.setPWM(0, 0, 0) == 0);
   GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(&extender);

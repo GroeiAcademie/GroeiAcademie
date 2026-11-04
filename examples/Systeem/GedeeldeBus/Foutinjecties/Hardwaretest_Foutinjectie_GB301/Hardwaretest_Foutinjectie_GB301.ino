@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: GB301
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie GB301: activeren() mislukt
 // Verwachte build: zonder DEBUG
 // Opstelling: een PCF8574 op TEST_ADRES_PCF8574, los te koppelen via een schakelaar of jumper in VCC
 // Bewezen = de echte FrameWork-melding "_CRITICAL_GB301" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = fase 1 referentie, toets 3 = fase 2 storing, toets 4 = fase 3 herstel.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -137,6 +141,7 @@ void Herstel() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB301"));
   ToonUitleg();
 }
 

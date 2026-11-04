@@ -34,6 +34,7 @@ ExtenderMAX14830SPI extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_MAX14830_SPI"));
 
   GA_SERIAL.println(F("=== ExtenderMAX14830SPI aanmelden/controleren-test ==="));
 

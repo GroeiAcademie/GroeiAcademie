@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: IN305
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie IN305: HX1838-receiver niet correct gestart
 // Verwachte build: normaal of DEBUG, met IRremote
@@ -5,6 +8,7 @@
 // Bewezen = de echte FrameWork-melding "_CRITICAL_IN305" verschijnt. Geen melding = NIET BEWEZEN.
 // Aanname: isIdle() is direct na begin() false zolang er IR binnenkomt (TODO in Input.cpp).
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = fase 1 referentie, toets 3 = fase 2 storing, toets 4 = fase 3 herstel.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -147,6 +151,7 @@ void Herstel() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN305"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));
   ToonUitleg();

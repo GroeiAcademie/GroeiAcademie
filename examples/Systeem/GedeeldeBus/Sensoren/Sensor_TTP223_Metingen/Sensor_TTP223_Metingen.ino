@@ -1,3 +1,11 @@
+// ============================================================================
+// Sensor: TTP223_Metingen
+// ============================================================================
+// Hardwaretest voor TTP223_Metingen binnen de bestaande Sensor-architectuur.
+// Configuratie: Zet SENSOR_TTP223_AANTAL op 1 in de bestaande configuratie om deze sketch te testen.
+// Serial toont aanraakstatus, aantal gebeurtenissen en duur.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_TTP223_AANTAL == 0
 #error Zet SENSOR_TTP223_AANTAL op 1 in de bestaande configuratie om deze sketch te testen.
@@ -5,6 +13,8 @@
 TTP223* sensorAanraking = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_TTP223_Metingen"));
   sensorAanraking = GedeeldeBusNewComponent<TTP223>(&Native, GedeeldeBusComponent::TTP223, HardwareResourcePin::NP_D2);
   GA_SERIAL.println(sensorAanraking ? F("TTP223 SENSOR: OK") : F("TTP223 SENSOR: FOUT"));
 }

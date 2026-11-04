@@ -1,3 +1,11 @@
+// ============================================================================
+// Sensor: OT3686_Metingen
+// ============================================================================
+// Hardwaretest voor OT3686_Metingen binnen de bestaande Sensor-architectuur.
+// Configuratie: Zet SENSOR_OT3686_AANTAL op 1, SENSOR_OT3686_AANTAL_SLEUVEN op jouw wiel.
+// Serial toont de pulstelling en de bestaande RPM-metingen.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_OT3686_AANTAL == 0
 #error Zet SENSOR_OT3686_AANTAL op 1, SENSOR_OT3686_AANTAL_SLEUVEN op jouw wiel.
@@ -5,6 +13,8 @@
 OT3686* sensorSnelheid = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_OT3686_Metingen"));
   sensorSnelheid = GedeeldeBusNewComponent<OT3686>(&Native, GedeeldeBusComponent::OT3686, HardwareResourcePin::NP_D2);
   GA_SERIAL.println(sensorSnelheid ? F("OT3686: OK") : F("OT3686: FOUT"));
 }

@@ -20,6 +20,7 @@
 // elk gekoppeld aan een functie met het argumenten-veld. 
 // Zo toont het display precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
 // Voor INPUT_TYPE_PCF8574, zie InputkanalenPCF8574metArgumenten.ino.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 #include <Configuratie/Examples.h>

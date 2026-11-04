@@ -19,6 +19,8 @@
 // Lokale keuze voor dit voorbeeld:
 // - gedefinieerd: test via Input.UitVoerenFunctieVolgensMappingMetToetsAanslag().
 // - niet gedefinieerd: test rechtstreeks via Input.OpvragenHuidigeToetsAanslag().
+// ============================================================================
+
 #define USER_DEFINED_VIA_MAPPING
 
 #include <GroeiAcademie.h>

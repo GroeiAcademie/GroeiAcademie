@@ -34,6 +34,7 @@ ExtenderMAX14830I2C extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_MAX14830_I2C"));
 
   GA_SERIAL.println(F("=== ExtenderMAX14830I2C aanmelden/controleren-test ==="));
 

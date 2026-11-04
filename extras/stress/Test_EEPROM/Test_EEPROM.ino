@@ -1,3 +1,11 @@
+// ============================================================================
+// Stresstest: Test_EEPROM
+// ============================================================================
+// Stresstest voor I2C-EEPROM: een directe verbinding en twee kanalen via TCA9548A.
+// Controleert schrijven, lezen, inhoud en herhaalde wisselingen; toont resultaten via Serial.
+// De I2C-adressen en aantallen zijn ingesteld in de bestaande constanten hieronder.
+// ============================================================================
+
 #include <Wire.h>
 #include <I2C_eeprom.h>
 

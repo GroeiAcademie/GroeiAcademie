@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: SS301
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie SS301: SerialScreen activeren() mislukt
 // Verwachte build: normaal of DEBUG, met REDIRECT_SERIAL_CONNECT_TIMEOUT_MS
@@ -6,6 +9,7 @@
 // Afzonderlijk opstartscenario: de test loopt bij elke reset. Resultaatsoort: HANDMATIG CONTROLEREN (op het LCD).
 // Bediening: HX1838, toets 1 = uitleg op het LCD.
 // Werkwijze: sluit de Serial Monitor, druk reset, wacht SERIAL_CONNECT_TIMEOUT_MS en lees het LCD. Druk reset om te herhalen.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 

@@ -1,3 +1,12 @@
+// ============================================================================
+// Sensor: SDP810125PA
+// ============================================================================
+// Hardwaretest voor SDP810125PA binnen de bestaande Sensor-architectuur.
+// Configuratie: SENSOR_SDP810125PA_AANTAL moet 1 zijn voor deze hardwaretest.
+// Configuratie: DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze test.
+// De sketch toont de bestaande parent- en Sensor-controles via Serial.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_SDP810125PA_AANTAL != 1
 #error SENSOR_SDP810125PA_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -9,6 +18,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::SDP810125PA, 0x2
  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ while (!GA_SERIAL) { ; }
+ GA_SERIAL.println(F("TEST: Sensor_SDP810125PA"));
  const unsigned long startTijd = millis();
  while (!GA_SERIAL && millis()-startTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
  bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();

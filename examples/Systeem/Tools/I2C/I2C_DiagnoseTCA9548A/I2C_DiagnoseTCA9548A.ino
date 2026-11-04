@@ -32,6 +32,7 @@ I2C_SCANNER i2cScanner;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: I2C_DiagnoseTCA9548A"));
 
   GA_SERIAL.println(F("I2C DIAGNOSE TCA9548A"));
   GA_SERIAL.println(F("---------------------"));

@@ -1,3 +1,12 @@
+// ============================================================================
+// Sensor: BMP280
+// ============================================================================
+// Hardwaretest voor BMP280 binnen de bestaande Sensor-architectuur.
+// Configuratie: SENSOR_BMP280_AANTAL moet 1 zijn voor deze hardwaretest.
+// Configuratie: DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze hardwaretest.
+// Serial toont afzonderlijk de I2C-resource en de Sensor-lifecyclestatus.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_BMP280_AANTAL != 1
 #error SENSOR_BMP280_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -11,6 +20,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::BMP280,
 BMP280* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_BMP280"));
   const unsigned long beginTijd = millis();
   while (!GA_SERIAL && millis() - beginTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();

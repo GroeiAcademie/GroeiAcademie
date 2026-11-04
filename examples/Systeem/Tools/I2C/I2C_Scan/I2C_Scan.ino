@@ -13,6 +13,7 @@ I2C_SCANNER i2cScanner;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: I2C_Scan"));
 
   InitialiserenGedeeldeBus(GedeeldeBusType::I2C);
   i2cScanner.begin();

@@ -1,6 +1,11 @@
+// ============================================================================
+// Sensor: MAX9814
+// ============================================================================
 // Microfoonversterker, analoge OUT via ADC
 // Bron: https://learn.adafruit.com/adafruit-agc-electret-microphone-amplifier-max9814/overview
 // Biosignalen: nooit op een persoon testen zonder geschikte elektrische isolatie/veiligheidscontrole.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_MAX9814_AANTAL != 1
 #error Zet SENSOR_MAX9814_AANTAL op 1 voor deze hardwaretest.
@@ -18,6 +23,8 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 MAX4466_9814* sensorMAX9814 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_MAX9814"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorMAX9814 = GedeeldeBusNewComponent<MAX4466_9814>(&extenderADS1115,

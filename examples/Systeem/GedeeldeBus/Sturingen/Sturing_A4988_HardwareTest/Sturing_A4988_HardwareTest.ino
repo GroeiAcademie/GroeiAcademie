@@ -1,13 +1,26 @@
+// ============================================================================
+// Sturing: A4988_HardwareTest
+// ============================================================================
 // Begeleide hardwaretest voor A4988. Elke beweging vereist eerst bevestiging via Serial.
+// Pinnen zijn afgeleid uit de bestaande constructoren en de boardmapping in src/Configuratie/UserConfig.h en SystemConfig.h.
+// A4988 STEP -> D6, DIR -> D7; ENABLE, RESET, SLEEP en motorvoeding volgens de concrete driver.
+// Native pinlabels in de code: D6 en D7; boardmapping:
+// UNO R4 Minima/WiFi en UNO Q: D6 en D7.
+// ESP32 D1 UNO R32: D6=GPIO27, D7=GPIO14.
+// ESP32-S3 ARDI-32: D6=GPIO9, D7=GPIO14; ESP32-S3 DEV: D6=GPIO3, D7=GPIO14.
+// RP2040 Cytron Maker UNO: D6=GPIO6, D7=GPIO7.
+// STM32 F401RE Nucleo: D6=PB10, D7=PA8.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_A4988_AANTAL == 0
   #error Zet STURING_A4988_AANTAL op minstens 1 voor deze test.
 #endif
 
 
-A4988 sturing(&Native,HardwareResourcePin::NP_D6,HardwareResourcePin::NP_D7);
+A4988* sturing = nullptr;
 
-StappenmotorBesturing motorBesturing(sturing);
+StappenmotorBesturing* motorBesturing = nullptr;
 
 bool testActief = false;
 bool startGelukt = false;
@@ -41,7 +54,7 @@ void toonTest() {
 void antwoord(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen bevestiging van fysieke beweging)") : F("FUNCTIEAANROEP: FOUT")); }
 
 void rondTestAf(bool ok) {
-  motorBesturing.StopMotor();
+  motorBesturing->StopMotor();
   GA_SERIAL.println(F("MOTOR: STOP aangeroepen. De motor krijgt geen nieuwe stappen."));
   antwoord(ok);
   testActief = false;
@@ -52,8 +65,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
-  startGelukt = sturing.aanmelden() && sturing.controleren() && sturing.inpluggen() && sturing.activeren();
-  if (startGelukt) motorBesturing.StopMotor();
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sturing_A4988_HardwareTest"));
+  sturing = GedeeldeBusNewComponent<A4988>(&Native, HardwareResourcePin::NP_D6, HardwareResourcePin::NP_D7);
+  if (sturing != nullptr) motorBesturing = new StappenmotorBesturing(*sturing);
+  startGelukt = sturing != nullptr && motorBesturing != nullptr;
+  if (startGelukt) motorBesturing->StopMotor();
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK. BEGINSTATUS: MOTOR GESTOPT.") : F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
   toonStart();
   if (startGelukt) toonTest();
@@ -65,7 +82,7 @@ void loop() {
     invoer.trim();
     invoer.toUpperCase();
     if (invoer == "STOP") {
-      if (startGelukt) motorBesturing.StopMotor();
+      if (startGelukt) motorBesturing->StopMotor();
       testActief = false;
       testGestopt = true;
       GA_SERIAL.println(F("NOODSTOP: geen nieuwe stappen. Controleer of de aandrijving veilig is; herstart Arduino om opnieuw te testen."));
@@ -73,7 +90,7 @@ void loop() {
     }
     if (invoer == "1" && startGelukt && !testGestopt) {
       if (testActief && testStap == 3 && testFase == 1) {
-        const bool ok = motorBesturing.HervatMotor();
+        const bool ok = motorBesturing->HervatMotor();
         GA_SERIAL.println(F("HervatMotor(): uitvoering gevraagd, resterende motorstappen volgen."));
         antwoord(ok);
         if (!ok) { rondTestAf(false); return; }
@@ -88,10 +105,10 @@ void loop() {
       laatsteStapMillis = millis();
       stappenGedaan = 0;
       testFase = 0;
-      bool ok = motorBesturing.StartMotor();
-      if (ok && testStap == 0) ok = motorBesturing.VoerEenStapUit();
-      if (ok && testStap == 1) ok = motorBesturing.VoerMeerdereStappenUit(4);
-      if (ok && testStap == 2) ok = motorBesturing.DraairichtingOmkeren();
+      bool ok = motorBesturing->StartMotor();
+      if (ok && testStap == 0) ok = motorBesturing->VoerEenStapUit();
+      if (ok && testStap == 1) ok = motorBesturing->VoerMeerdereStappenUit(4);
+      if (ok && testStap == 2) ok = motorBesturing->DraairichtingOmkeren();
       if (!ok) { rondTestAf(false); return; }
       testActief = true;
       GA_SERIAL.println(F("FUNCTIEAANROEP: OK. Test loopt; de motor wordt nadien gestopt."));
@@ -105,17 +122,17 @@ void loop() {
   if (testStap == 2) {
     if (nu - laatsteStapMillis < 50UL) return;
     laatsteStapMillis = nu;
-    if (!motorBesturing.VoerEenStapUit()) { rondTestAf(false); return; }
+    if (!motorBesturing->VoerEenStapUit()) { rondTestAf(false); return; }
     if (++stappenGedaan >= 80) rondTestAf(true);
     return;
   }
   if (testStap == 3 && testFase == 1) return;
   if (nu - laatsteStapMillis < 50UL) return;
   laatsteStapMillis = nu;
-  if (!motorBesturing.VoerEenStapUit()) { rondTestAf(false); return; }
+  if (!motorBesturing->VoerEenStapUit()) { rondTestAf(false); return; }
   ++stappenGedaan;
   if (testFase == 0 && stappenGedaan == 30) {
-    const bool ok = motorBesturing.PauzeerMotor();
+    const bool ok = motorBesturing->PauzeerMotor();
     GA_SERIAL.println(F("PauzeerMotor(): stappen onderbroken; reeds uitgevoerde stappen zijn niet fysiek gemeten."));
     antwoord(ok);
     if (!ok) { rondTestAf(false); return; }

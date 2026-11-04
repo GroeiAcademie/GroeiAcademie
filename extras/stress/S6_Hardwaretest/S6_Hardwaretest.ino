@@ -74,6 +74,8 @@ void RapportRegelTonen(const __FlashStringHelper* naamBron, BlokkeertijdPerBron&
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: S6_Hardwaretest"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
 

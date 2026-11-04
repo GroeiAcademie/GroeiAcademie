@@ -49,6 +49,7 @@ GedeeldeBusNode SensorTest(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_SC16IS752_I2C_Test_ExtenderPins_Toegelaten"));
 
   GA_SERIAL.println(F("=== ExtenderSC16IS752I2C ExtenderPins Toegelaten ==="));
 

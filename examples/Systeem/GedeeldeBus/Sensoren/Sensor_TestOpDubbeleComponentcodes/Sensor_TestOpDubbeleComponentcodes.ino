@@ -1,3 +1,10 @@
+// ============================================================================
+// Sensor: TestOpDubbeleComponentcodes
+// ============================================================================
+// Compileertest: een dubbele X-macro-componentcode moet een compileerfout veroorzaken.
+// De sketch controleert dit via de bestaande componentcodes en een switch-statement.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 // Compileertest: een dubbele X-macro-componentcode veroorzaakt een duplicate case value.
 static void ControleerOpDubbeleComponentcodes(uint8_t code) {

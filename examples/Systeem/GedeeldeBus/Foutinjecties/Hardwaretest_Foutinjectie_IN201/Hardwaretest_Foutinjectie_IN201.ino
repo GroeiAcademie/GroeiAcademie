@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: IN201
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie IN201: InputKanalen inpluggen() mislukt
 // Verwachte build: normaal of DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: de gewone invoeropstelling
 // Bewezen = de echte FrameWork-melding "_CRITICAL_IN201" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -96,6 +100,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN201"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));
   ToonUitleg();

@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: CS401
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie CS401: CharacterScreen tijdens runtime niet actief
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware
 // Bewezen = de echte FrameWork-melding "_FATAL_CS401" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -87,6 +91,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_CS401"));
   ToonUitleg();
 }
 

@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: IN401
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie IN401: InputKanalen tijdens runtime niet actief
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware
 // Bewezen = de echte FrameWork-melding "_FATAL_IN401" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -87,6 +91,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN401"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));
   ToonUitleg();

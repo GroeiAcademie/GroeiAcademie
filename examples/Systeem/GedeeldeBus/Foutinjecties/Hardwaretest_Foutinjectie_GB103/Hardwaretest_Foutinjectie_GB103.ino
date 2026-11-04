@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: GB103
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie GB103: twee GEDEELD-claims, andere identiteit
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware
 // Bewezen = de echte FrameWork-melding "_FATAL_GB103" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -90,6 +94,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB103"));
   nodeA.gedeeldeIdentiteiten = identiteitA;
   nodeB.gedeeldeIdentiteiten = identiteitB;
   ToonUitleg();

@@ -1,6 +1,11 @@
+// ============================================================================
+// Sensor: BioAmpEXGPill
+// ============================================================================
 // Upside Down Labs BioAmp EXG Pill, OUT via ADC
 // Bron: https://docs.upsidedownlabs.tech/hardware/bioamp/bioamp-exg-pill/index.html
 // Biosignalen: nooit op een persoon testen zonder geschikte elektrische isolatie/veiligheidscontrole.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_BIOAMPEXGPILL_AANTAL != 1
 #error Zet SENSOR_BIOAMPEXGPILL_AANTAL op 1 voor deze hardwaretest.
@@ -18,6 +23,8 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 BioAmpEXGPill* sensorBioAmpEXGPill = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_BioAmpEXGPill"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   sensorBioAmpEXGPill = GedeeldeBusNewComponent<BioAmpEXGPill>(&extenderADS1115,

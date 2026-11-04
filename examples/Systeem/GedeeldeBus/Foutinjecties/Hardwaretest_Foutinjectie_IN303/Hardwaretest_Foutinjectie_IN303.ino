@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: IN303
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie IN303: TinyIRReceiver interruptinitialisatie mislukt
 // Verwachte build: normaal of DEBUG, met HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
@@ -5,6 +8,7 @@
 // Bewezen = de echte FrameWork-melding "_CRITICAL_IN303" verschijnt. Geen melding = NIET BEWEZEN.
 // Aanname: welke pin per board faalt, moet op hardware bevestigd worden (TODO in Input.cpp).
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -89,6 +93,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN303"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));
   ToonUitleg();

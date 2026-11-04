@@ -34,6 +34,7 @@
 // type kan opleveren, elk gekoppeld aan een functie met het argumenten-veld. Zo toont het
 // display precies welke fysieke toets herkend werd, niet enkel dat er "een" toets herkend werd.
 // Voor INPUT_TYPE_HX1838, zie InputkanalenHX1838metArgumenten.ino.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 #include <Configuratie/Examples.h>

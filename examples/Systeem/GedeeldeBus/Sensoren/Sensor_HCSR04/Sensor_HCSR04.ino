@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: HCSR04
+// ============================================================================
 // TRIG=D2; ECHO=D3; GND gemeenschappelijk; controleer 5V/3.3V-levelcompatibiliteit.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_HCSR04_AANTAL != 1
 #error SENSOR_HCSR04_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -8,6 +13,8 @@
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_HCSR04"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const bool parentOK = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();

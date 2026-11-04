@@ -23,6 +23,7 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: FRAM"));
 
   if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>();
   ToonResultaat(F("Data aanmelden/controleren/inpluggen/activeren"), Data != nullptr);

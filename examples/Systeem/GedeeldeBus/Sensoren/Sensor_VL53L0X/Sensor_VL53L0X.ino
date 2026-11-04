@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: VL53L0X
+// ============================================================================
 // Vereist geïnstalleerde officiële library: Adafruit_VL53L0X.h.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_VL53L0X_AANTAL != 1
 #error SENSOR_VL53L0X_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -12,6 +17,8 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::VL53L0X,
 SensorVL53L0X* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_VL53L0X"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const unsigned long beginTijd=millis();

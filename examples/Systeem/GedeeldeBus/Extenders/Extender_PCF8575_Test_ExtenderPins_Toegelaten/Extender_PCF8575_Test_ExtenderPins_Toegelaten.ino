@@ -55,6 +55,7 @@ GedeeldeBusNode SensorTest(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_PCF8575_Test_ExtenderPins_Toegelaten"));
 
   GA_SERIAL.println(F("=== ExtenderPCF8575 ExtenderPins Toegelaten ==="));
 

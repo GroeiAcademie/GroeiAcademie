@@ -1,7 +1,12 @@
+// ============================================================================
+// Extender: TCA9548A_Test_GedeeldChannelAdresconflict
+// ============================================================================
 // Test zonder hardwaretransacties: twee gelijke I2C-adressen op verschillende
 // TCA9548A-channels toegelaten, hetzelfde adres op hetzelfde channel geweigerd.
 // Vereist bestaande configuratie: EXTENDER_TCA9548A_AANTAL >= 1.
 // De resultaten zijn pas geldig nadat deze sketch echt is gecompileerd en uitgevoerd.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 
 #if EXTENDER_TCA9548A_AANTAL == 0
@@ -40,6 +45,7 @@ HardwareResourceTypeI2C sensorDubbelChannel0(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_TCA9548A_Test_GedeeldChannelAdresconflict"));
   bool basis = multiplexer.aanmelden();
   if (basis) basis = multiplexer.controleren();
   bool eerste = basis && sensorChannel0.aanmelden();

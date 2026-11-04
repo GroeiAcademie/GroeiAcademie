@@ -39,6 +39,7 @@ GedeeldeBusNode SensorTest(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_MAX14830_I2C_Test_ExtenderPins_Geweigerd"));
 
   GA_SERIAL.println(F("=== ExtenderMAX14830I2C ExtenderPins Geweigerd ==="));
 

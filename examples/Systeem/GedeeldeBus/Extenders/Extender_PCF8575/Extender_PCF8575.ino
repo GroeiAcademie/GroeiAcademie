@@ -29,6 +29,7 @@ ExtenderPCF8575 extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_PCF8575"));
 
   GA_SERIAL.println(F("=== ExtenderPCF8575 driver-/lifecycletest ==="));
 

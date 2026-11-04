@@ -1,9 +1,13 @@
+// ============================================================================
+// Foutinjectie: PS303
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie PS303: PixelScreen afmetingencontrole mislukt
 // Verwachte build: normaal of DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: de gewone schermopstelling
 // Bewezen = de echte FrameWork-melding "_CRITICAL_PS303" verschijnt. Geen melding = NIET BEWEZEN.
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = test uitvoeren.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -96,6 +100,7 @@ void VoerTestUit() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_PS303"));
   ToonUitleg();
 }
 

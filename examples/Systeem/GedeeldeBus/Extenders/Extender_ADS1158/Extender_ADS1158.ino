@@ -30,6 +30,7 @@ ExtenderADS1158 extender(
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Extender_ADS1158"));
 
   GA_SERIAL.println(F("=== ExtenderADS1158 aanmelden/controleren-test ==="));
 

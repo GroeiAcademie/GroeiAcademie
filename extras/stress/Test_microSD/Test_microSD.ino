@@ -1,40 +1,43 @@
-/*
-Test_microSD.ino bevat nu 7 stresstests:
-1. Native #1 alleen
-2. Native #2 alleen
-3. PCF8574-CS alleen
-4. Native #1 + Native #2
-5. Native #2 + PCF8574-CS
-6. Native #1 + PCF8574-CS
-7. Native #1 + Native #2 + PCF8574-CS
+// ============================================================================
+// Stresstest: Test_microSD
+// ============================================================================
+// Test_microSD.ino bevat nu 7 stresstests:
+// 1. Native #1 alleen
+// 2. Native #2 alleen
+// 3. PCF8574-CS alleen
+// 4. Native #1 + Native #2
+// 5. Native #2 + PCF8574-CS
+// 6. Native #1 + PCF8574-CS
+// 7. Native #1 + Native #2 + PCF8574-CS
+//
+// microSD #1 Native
+// SCK  -> D13
+// MISO -> D12
+// MOSI -> D11
+// CS   -> D10
+//
+// microSD #2 Native
+// SCK  -> D13
+// MISO -> D12
+// MOSI -> D11
+// CS   -> D9
+//
+// microSD #3 via PCF8574
+// SCK  -> D13
+// MISO -> D12
+// MOSI -> D11
+// CS   -> PCF8574 P0
+//
+// Diagnose volgens de officiële SdFat 2.3.1-opbouw:
+// 1. cardBegin(): kaart / SPI
+// 2. volumeBegin(): bestandssysteem
+// 3. open(): bestand
+//
+// Bij een fout in laag 1 gebruikt de test printSdError().
+// Bij een fout in laag 2 gebruikt de test errorPrint().
+// Na een mislukte cardBegin() of volumeBegin() wordt end() aangeroepen voordat de volgende kaart wordt getest.
+// ============================================================================
 
-microSD #1 Native
-SCK  -> D13
-MISO -> D12
-MOSI -> D11
-CS   -> D10
-
-microSD #2 Native
-SCK  -> D13
-MISO -> D12
-MOSI -> D11
-CS   -> D9
-
-microSD #3 via PCF8574
-SCK  -> D13
-MISO -> D12
-MOSI -> D11
-CS   -> PCF8574 P0
-
-Diagnose volgens de officiële SdFat 2.3.1-opbouw:
-1. cardBegin(): kaart / SPI
-2. volumeBegin(): bestandssysteem
-3. open(): bestand
-
-Bij een fout in laag 1 gebruikt de test printSdError().
-Bij een fout in laag 2 gebruikt de test errorPrint().
-Na een mislukte cardBegin() of volumeBegin() wordt end() aangeroepen voordat de volgende kaart wordt getest.
-*/
 #include <SPI.h>
 #include <Wire.h>
 #include <SdFat.h>

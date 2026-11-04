@@ -1,3 +1,6 @@
+// ============================================================================
+// Foutinjectie: IN402
+// ============================================================================
 // GROEI ACADEMIE FrameWork v2.0.0 RC1
 // Foutinjectie IN402: PCF8574 niet bereikbaar op het ingestelde adres
 // Verwachte build: normaal of DEBUG
@@ -5,6 +8,7 @@
 // Bewezen = de echte FrameWork-melding "_FATAL_IN402" verschijnt. Geen melding = NIET BEWEZEN.
 // Ook CRITICAL: IN301 verschijnt (activeren mislukt).
 // Bediening: Serial Monitor op SERIAL_BAUDRATE. toets 1 = uitleg, toets 2 = fase 1 referentie, toets 3 = fase 2 storing, toets 4 = fase 3 herstel.
+// ============================================================================
 
 #include <GroeiAcademie.h>
 
@@ -144,6 +148,7 @@ void Herstel() {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN402"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));
   ToonUitleg();

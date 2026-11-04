@@ -1,5 +1,10 @@
+// ============================================================================
+// Foutinjectie: UART_LegeBuffer
+// ============================================================================
 // Negatieve UART-contracttest: geen RX-data op SC16IS752-channel A.
 // Verwacht: .available()==0, .read()==-1; eerst bridge fysiek aansluiten.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if EXTENDER_SC16IS752_I2C_AANTAL != 1
 #error Vereist EXTENDER_SC16IS752_I2C_AANTAL=1 voor deze test.
@@ -11,6 +16,8 @@ ExtenderSC16IS752I2C extender(
   EXTENDER_SC16IS752_I2C_1_IRQ, EXTENDER_SC16IS752_I2C_1_RESET);
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_UART_LegeBuffer"));
   bool gelukt = extender.aanmelden();
   if (gelukt) gelukt = extender.controleren();
   if (gelukt) gelukt = extender.inpluggen();

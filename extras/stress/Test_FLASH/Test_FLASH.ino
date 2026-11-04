@@ -1,3 +1,11 @@
+// ============================================================================
+// Stresstest: Test_FLASH
+// ============================================================================
+// Stresstest voor SPI-FLASH met native CS en CS via PCF8574.
+// Controleert initialisatie, wissen, schrijven en lezen met en zonder cache.
+// De gebruikte hardwarepinnen, adressen en tests staan in de code hieronder.
+// ============================================================================
+
 #include <SPI.h>
 #include <Wire.h>
 #include <PCF8574.h>

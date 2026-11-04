@@ -1,4 +1,9 @@
+// ============================================================================
+// Sensor: HX711
+// ============================================================================
 // DOUT=D2, PD_SCK=D3, loadcell en module correct voeden.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_HX711_AANTAL != 1
 #error SENSOR_HX711_AANTAL moet 1 zijn voor deze hardwaretest.
@@ -8,6 +13,8 @@
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_HX711"));
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   const bool parentOK = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();

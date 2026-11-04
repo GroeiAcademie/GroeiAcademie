@@ -1,3 +1,12 @@
+// ============================================================================
+// Sensor: MCU6701_Analoog
+// ============================================================================
+// Hardwaretest voor MCU6701_Analoog binnen de bestaande Sensor-architectuur.
+// Configuratie: Zet SENSOR_MCU6701_AANTAL op 1 voor deze test.
+// Configuratie: Deze analoge voorbeeldsketch gebruikt een ADS1115. Activeer die Extender in de bestaande configuratie.
+// Serial toont de uitlezing van het in deze sketch gebruikte ADC-kanaal.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if SENSOR_MCU6701_AANTAL == 0
 #error Zet SENSOR_MCU6701_AANTAL op 1 voor deze test.
@@ -12,6 +21,8 @@ ExtenderADS1115 extenderVoorGSR(&Native, GedeeldeBusComponent::ADC_ADS1115,
 MCU6701* analogeGSR = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_MCU6701_Analoog"));
   // OUT -> AIN0 van ADS1115; CS, MIS en SCK hier niet aansluiten.
   analogeGSR = GedeeldeBusNewComponent<MCU6701>(&extenderVoorGSR,
       GedeeldeBusComponent::MCU6701, static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0));
