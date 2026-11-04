@@ -20,15 +20,15 @@
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCA9685* extender = nullptr;
-MG996R* sturing = nullptr;
+ExtenderPCA9685* extenderPCA9685 = nullptr;
+MG996R* mg996r = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_MG996R"));
-  extender = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
-  if (extender != nullptr) sturing = GedeeldeBusNewComponent<MG996R>(extender, 1, 205, 410);
-  bool gelukt = sturing != nullptr;
+  extenderPCA9685 = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
+  if (extenderPCA9685 != nullptr) mg996r = GedeeldeBusNewComponent<MG996R>(extenderPCA9685, 1, 205, 410);
+  bool gelukt = mg996r != nullptr;
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
 void loop() {}

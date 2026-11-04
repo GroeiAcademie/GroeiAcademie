@@ -4,6 +4,10 @@
 // Hardwaretest voor MCU6701_SPI binnen de bestaande Sensor-architectuur.
 // Configuratie: Zet SENSOR_MCU6701_AANTAL op 1 voor deze test.
 // De sketch toont de bestaande parent- en Sensor-controles via Serial.
+// CJMCU-6701 via MCP3201: chip-CS -> D10, chip-SCK -> board-SCK, chip-MISO -> board-MISO.
+// GEEN fysieke MOSI naar deze ADC; NP_MOSI in de constructor reserveert de gedeelde SPI-bus.
+// UNO R4 Minima: CS=D10, SCK=D13, MISO=D12; GND gemeenschappelijk.
+// Voeding VCC en signaalniveaus conform de concrete CJMCU-6701-print.
 // ============================================================================
 
 #include <GroeiAcademie.h>

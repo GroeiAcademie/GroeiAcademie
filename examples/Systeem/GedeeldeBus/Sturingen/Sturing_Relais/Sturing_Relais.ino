@@ -21,16 +21,16 @@
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCF8574* extender = nullptr;
-Relais* sturing = nullptr;
+ExtenderPCF8574* extenderPCF8574 = nullptr;
+Relais* relais = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_Relais"));
-  extender = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
-  if (extender != nullptr) sturing = GedeeldeBusNewComponent<Relais>(extender, 0, LOW);
-  bool gelukt = sturing != nullptr;
+  extenderPCF8574 = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
+  if (extenderPCF8574 != nullptr) relais = GedeeldeBusNewComponent<Relais>(extenderPCF8574, 0, LOW);
+  bool gelukt = relais != nullptr;
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
 

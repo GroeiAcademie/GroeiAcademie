@@ -5,6 +5,8 @@
 // Configuratie: SENSOR_DS18B20_AANTAL moet 1 zijn voor deze hardwaretest.
 // Configuratie: DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze test.
 // De sketch toont de bestaande parent- en Sensor-controles via Serial.
+// DS18B20 DATA -> fysieke Arduino D2 (NP_D2), GND -> GND, VDD volgens de sensoruitvoering.
+// Gebruik de pull-up voor de 1-Wire-datalijn volgens de officiële sensor-/breakoutspecificatie.
 // ============================================================================
 
 #include <GroeiAcademie.h>

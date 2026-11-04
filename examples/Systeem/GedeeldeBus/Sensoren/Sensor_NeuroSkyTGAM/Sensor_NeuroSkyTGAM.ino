@@ -5,6 +5,9 @@
 // Configuratie: SENSOR_NEUROSKYTGAM_AANTAL moet 1 zijn.
 // Configuratie: Hardwaretest TGAM vereist Serial1; voor andere boards eerst poortintegratie goedkeuren.
 // Serial meldt initialisatie; een fysieke sensorrespons is niet automatisch bewezen.
+// Fysieke UART op UNO R4 Minima: sensor TX -> D0/RX (Serial1); sensor RX -> D1/TX (Serial1).
+// GND gemeenschappelijk; voeding en UART-logicaniveau volgens de concrete sensormodule.
+// Op andere boards eerst de werkelijke Serial1-pinnen in het bestaande boardprofiel controleren.
 // ============================================================================
 
 #include <GroeiAcademie.h>

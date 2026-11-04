@@ -24,16 +24,16 @@
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCF8574* extender = nullptr;
+ExtenderPCF8574* extenderPCF8574 = nullptr;
 Relais* opnemen = nullptr;     // REC: actief hoog
 Relais* afspelen = nullptr;    // PLAYE: actief hoog, puls
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_ISD1820"));
-  extender = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
-  if (extender != nullptr) opnemen = GedeeldeBusNewComponent<Relais>(extender, 0, HIGH);
-  if (opnemen != nullptr) afspelen = GedeeldeBusNewComponent<Relais>(extender, 1, HIGH);
+  extenderPCF8574 = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
+  if (extenderPCF8574 != nullptr) opnemen = GedeeldeBusNewComponent<Relais>(extenderPCF8574, 0, HIGH);
+  if (opnemen != nullptr) afspelen = GedeeldeBusNewComponent<Relais>(extenderPCF8574, 1, HIGH);
   bool gelukt = opnemen != nullptr && afspelen != nullptr;
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
   if (!gelukt) return;

@@ -4,6 +4,8 @@
 // Hardwaretest voor OT3686_Metingen binnen de bestaande Sensor-architectuur.
 // Configuratie: Zet SENSOR_OT3686_AANTAL op 1, SENSOR_OT3686_AANTAL_SLEUVEN op jouw wiel.
 // Serial toont de pulstelling en de bestaande RPM-metingen.
+// Signaaluitgang van de sensor -> fysieke Arduino D2 (NP_D2); GND gemeenschappelijk.
+// VCC en eventuele levelshifting volgens de concrete module-uitvoering.
 // ============================================================================
 
 #include <GroeiAcademie.h>

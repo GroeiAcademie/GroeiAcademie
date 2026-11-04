@@ -4,6 +4,8 @@
 // Hardwaretest voor TTP223_Metingen binnen de bestaande Sensor-architectuur.
 // Configuratie: Zet SENSOR_TTP223_AANTAL op 1 in de bestaande configuratie om deze sketch te testen.
 // Serial toont aanraakstatus, aantal gebeurtenissen en duur.
+// Signaaluitgang van de sensor -> fysieke Arduino D2 (NP_D2); GND gemeenschappelijk.
+// VCC en eventuele levelshifting volgens de concrete module-uitvoering.
 // ============================================================================
 
 #include <GroeiAcademie.h>

@@ -18,13 +18,13 @@
 #endif
 
 
-A4988* sturing = nullptr;
+A4988* a4988 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_A4988"));
-  sturing = GedeeldeBusNewComponent<A4988>(&Native, HardwareResourcePin::NP_D6, HardwareResourcePin::NP_D7);
-  bool gelukt = sturing != nullptr;
+  a4988 = GedeeldeBusNewComponent<A4988>(&Native, HardwareResourcePin::NP_D6, HardwareResourcePin::NP_D7);
+  bool gelukt = a4988 != nullptr;
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
 void loop() {}

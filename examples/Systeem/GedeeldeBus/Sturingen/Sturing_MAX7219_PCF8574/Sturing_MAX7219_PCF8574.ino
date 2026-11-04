@@ -30,8 +30,8 @@
   #error Deze test vereist EXTENDER_PCF8574_AANTAL > 0.
 #endif
 
-ExtenderPCF8574* extender = nullptr;
-MAX7219* sturing = nullptr;
+ExtenderPCF8574* extenderPCF8574 = nullptr;
+MAX7219* max7219 = nullptr;
 uint8_t beeld[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int8_t huidigeStap = -1;
 bool laatSpoorAchter = true;
@@ -49,17 +49,17 @@ uint8_t testStap = 0;
 bool Reset() {
   for (uint8_t i = 0; i < 8; i++) beeld[i] = 0;
   huidigeStap = -1;
-  return sturing->ToonPatroon(8, beeld);
+  return max7219->ToonPatroon(8, beeld);
 }
 
 bool VerwerkImpuls(bool isUp) {
   if (!BerekenSpiraalPatroon(8, huidigeStap, isUp, stapGrootte, wrapAround, laatSpoorAchter, beeld)) return false;
-  if (!sturing->ToonPatroon(8, beeld)) return false;
+  if (!max7219->ToonPatroon(8, beeld)) return false;
   GA_SERIAL.print(F("SPIRAAL STAP: ")); GA_SERIAL.println(huidigeStap);
   return true;
 }
 
-void toonTest() {
+void toonTestInstructies() {
   GA_SERIAL.println();
   switch (testStap) {
     case 0: GA_SERIAL.println(F("TEST 1: PIXEL AAN. Verwacht: alleen pixel (0,0) licht op.")); break;
@@ -89,26 +89,36 @@ void rondTestAf(bool ok) {
   autoActief = false;
   testActief = false;
   GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK. Controleer ZELF het fysieke beeld.") : F("FUNCTIEAANROEP: FOUT. De test stopt."));
-  if (!ok) { testGestopt = true; if (sturing != nullptr) sturing->StopSturing(); return; }
+
+  if (!ok) {
+    testGestopt = true;
+    if (max7219 != nullptr) max7219->StopSturing();
+    return;
+  }
   ++testStap;
-  toonTest();
+  toonTestInstructies();
 }
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_MAX7219_PCF8574"));
-  extender = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
-  if (extender != nullptr) sturing = GedeeldeBusNewComponent<MAX7219>(extender, 0, 1, 2, MD_MAX72XX::FC16_HW);
-  startGelukt = sturing != nullptr;
+  extenderPCF8574 = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
+  if (extenderPCF8574 != nullptr) max7219 = GedeeldeBusNewComponent<MAX7219>(extenderPCF8574, 0, 1, 2, MD_MAX72XX::FC16_HW);
+  startGelukt = max7219 != nullptr;
   GA_SERIAL.println(startGelukt ? F("AUTOMATISCHE LEVENSCYCLUS: OK") : F("AUTOMATISCHE LEVENSCYCLUS: FOUT"));
   GA_SERIAL.println(F("Het FrameWork verzorgt aanmelden, controleren, inpluggen en activeren."));
   GA_SERIAL.println(F("De matrix blijft na iedere test zichtbaar tot je op 1 drukt."));
   GA_SERIAL.println(F("STOP stopt de test. Herstart de Arduino om opnieuw te beginnen."));
   GA_SERIAL.println(F("Voor de MAX7219: controleer het gekozen hardwaretype; FC16_HW is niet bevestigd."));
   if (startGelukt) {
-    if (!Reset()) { GA_SERIAL.println(F("FOUT: matrix wissen mislukt.")); testGestopt = true; return; }
-    toonTest();
+
+    if (!Reset()) {
+      GA_SERIAL.println(F("FOUT: matrix wissen mislukt."));
+      testGestopt = true;
+      return;
+    }
+    toonTestInstructies();
   } else GA_SERIAL.println(F("Controleer de actieve configuratie, bedrading en hardware. Geen test mogelijk."));
 }
 
@@ -121,15 +131,35 @@ void loop() {
       autoActief = false;
       testActief = false;
       testGestopt = true;
-      if (sturing != nullptr) sturing->StopSturing();
+      if (max7219 != nullptr) max7219->StopSturing();
       GA_SERIAL.println(F("STOP: matrix gestopt. Herstart de Arduino voor een nieuwe reeks."));
       return;
     }
-    if (testGestopt) { GA_SERIAL.println(F("Test gestopt: herstart Arduino.")); return; }
-    if (!startGelukt) { GA_SERIAL.println(F("FOUT: automatische levenscyclus niet geslaagd.")); return; }
-    if (invoer != "1") { GA_SERIAL.println(F("Typ 1 + Enter voor de aangekondigde test, of STOP + Enter.")); return; }
-    if (testActief) { GA_SERIAL.println(F("Test loopt. Gebruik STOP om te onderbreken.")); return; }
-    if (testStap >= 18) { toonTest(); return; }
+
+    if (testGestopt) {
+      GA_SERIAL.println(F("Test gestopt: herstart Arduino."));
+      return;
+    }
+
+    if (!startGelukt) {
+      GA_SERIAL.println(F("FOUT: automatische levenscyclus niet geslaagd."));
+      return;
+    }
+
+    if (invoer != "1") {
+      GA_SERIAL.println(F("Typ 1 + Enter voor de aangekondigde test, of STOP + Enter."));
+      return;
+    }
+
+    if (testActief) {
+      GA_SERIAL.println(F("Test loopt. Gebruik STOP om te onderbreken."));
+      return;
+    }
+
+    if (testStap >= 18) {
+      toonTestInstructies();
+      return;
+    }
     GA_SERIAL.print(F("UITVOEREN TEST ")); GA_SERIAL.println(testStap + 1);
     bool ok = Reset();
     laatSpoorAchter = true;
@@ -139,15 +169,15 @@ void loop() {
     autoNaarBinnen = true;
     switch (testStap) {
     case 0:
-      if (ok) ok = sturing->setPixel(0, 0, true);
+      if (ok) ok = max7219->setPixel(0, 0, true);
       rondTestAf(ok);
       return;
     case 1:
-      if (ok) ok = sturing->setPixel(0, 0, true) && sturing->setPixel(7, 0, true) && sturing->setPixel(0, 7, true) && sturing->setPixel(7, 7, true);
+      if (ok) ok = max7219->setPixel(0, 0, true) && max7219->setPixel(7, 0, true) && max7219->setPixel(0, 7, true) && max7219->setPixel(7, 7, true);
       rondTestAf(ok);
       return;
     case 2:
-      if (ok) ok = sturing->setPixel(0, 0, true) && sturing->setPixel(7, 0, true) && sturing->setPixel(0, 7, true) && sturing->setPixel(7, 7, true) && sturing->setPixel(0, 0, false);
+      if (ok) ok = max7219->setPixel(0, 0, true) && max7219->setPixel(7, 0, true) && max7219->setPixel(0, 7, true) && max7219->setPixel(7, 7, true) && max7219->setPixel(0, 0, false);
       rondTestAf(ok);
       return;
     case 3:
@@ -164,7 +194,7 @@ void loop() {
     case 6:
       if (ok) {
         while (huidigeStap < 63 && ok) ok = BerekenSpiraalPatroon(8, huidigeStap, true, 1, false, true, beeld);
-        if (ok) ok = sturing->ToonPatroon(8, beeld);
+        if (ok) ok = max7219->ToonPatroon(8, beeld);
       }
       autoNaarBinnen = false;
       break;
@@ -178,7 +208,7 @@ void loop() {
     case 10:
       if (ok) {
         while (huidigeStap < 63 && ok) ok = BerekenSpiraalPatroon(8, huidigeStap, true, 1, false, true, beeld);
-        if (ok) ok = sturing->ToonPatroon(8, beeld);
+        if (ok) ok = max7219->ToonPatroon(8, beeld);
       }
       wrapAround = (testStap == 10);
       if (ok && testStap == 9) ok = !BerekenSpiraalPatroon(8, huidigeStap, true, 1, false, true, beeld) && huidigeStap == 63;
@@ -199,15 +229,18 @@ void loop() {
       break;
     case 14:
     case 15:
-      if (ok) { stapGrootte = 64; ok = VerwerkImpuls(true); }
-      if (ok) ok = sturing->setIntensity(testStap == 14 ? 0 : 15);
+      if (ok) {
+        stapGrootte = 64;
+        ok = VerwerkImpuls(true);
+      }
+      if (ok) ok = max7219->setIntensity(testStap == 14 ? 0 : 15);
       rondTestAf(ok);
       return;
     case 16:
       rondTestAf(ok);
       return;
     case 17:
-      if (sturing != nullptr) sturing->StopSturing();
+      if (max7219 != nullptr) max7219->StopSturing();
       testGestopt = true;
       GA_SERIAL.println(F("STOP UITGEVOERD. Testreeks klaar. Herstart Arduino om opnieuw te beginnen."));
       return;
@@ -215,7 +248,11 @@ void loop() {
       GA_SERIAL.println(F("FOUT: onbekend testnummer."));
       return;
     }
-    if (!ok) { rondTestAf(false); return; }
+
+    if (!ok) {
+      rondTestAf(false);
+      return;
+    }
     autoActief = true;
     testActief = true;
     vorigeStapMs = millis();
@@ -224,6 +261,10 @@ void loop() {
   if (!autoActief || !testActief || testGestopt) return;
   if (static_cast<uint32_t>(millis() - vorigeStapMs) < stapVertragingms) return;
   vorigeStapMs = millis();
-  if (!VerwerkImpuls(autoNaarBinnen)) { rondTestAf(false); return; }
+
+  if (!VerwerkImpuls(autoNaarBinnen)) {
+    rondTestAf(false);
+    return;
+  }
   if ((autoNaarBinnen && huidigeStap == 63) || (!autoNaarBinnen && huidigeStap == -1) || (testStap == 13 && huidigeStap == 0)) rondTestAf(true);
 }

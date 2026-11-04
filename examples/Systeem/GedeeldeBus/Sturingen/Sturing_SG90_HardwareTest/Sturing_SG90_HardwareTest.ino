@@ -20,8 +20,8 @@
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCA9685* extender = nullptr;
-SG90* sturing = nullptr;
+ExtenderPCA9685* extenderPCA9685 = nullptr;
+SG90* sg90 = nullptr;
 
 ServomotorBesturing* motorBesturing = nullptr;
 
@@ -33,14 +33,15 @@ uint8_t testStap = 0;
 uint8_t testFase = 0;
 unsigned long testStartMillis = 0;
 
-void toonStart() {
-  GA_SERIAL.println(F("RUN42 HARDWARETEST"));
+void toonStartInstructies() {
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_SG90_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE SERVOTEST. Controleer voeding, kalibratie en mechanische hoekgrenzen."));
   GA_SERIAL.println(F("STOP schakelt het PWM-signaal uit; de servo houdt zijn positie dan niet gegarandeerd vast."));
   GA_SERIAL.println(F("Elke beweging start pas na '1' + Enter. STOP + Enter stopt de test."));
+  GA_SERIAL.println(F("Controleer de beweging fysiek; een geslaagde functieaanroep bewijst geen motorbeweging."));
 }
 
-void toonTest() {
+void toonTestInstructies() {
   GA_SERIAL.println();
   switch (testStap) {
     case 0: GA_SERIAL.println(F("TEST 1: PositioneerAbsoluutNaarHoek(45). Verwacht: beweging naar opgegeven 45 graden.")); break;
@@ -54,31 +55,43 @@ void toonTest() {
   GA_SERIAL.println(F("Controleer vrije bewegingsruimte. Typ 1 + Enter om deze test te starten."));
 }
 
-void antwoord(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen fysieke positiefeedback)") : F("FUNCTIEAANROEP: FOUT")); }
+void toonFunctieResultaat(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen fysieke positiefeedback)") : F("FUNCTIEAANROEP: FOUT")); }
 
 void rondTestAf(bool ok) {
-  if (testStap == 5 && ok) { ok = motorBesturing->SchakelMotorUit(); GA_SERIAL.println(F("SchakelMotorUit(): PWM uitgeschakeld.")); antwoord(ok); }
+
+  if (testStap == 5 && ok) {
+    ok = motorBesturing->SchakelMotorUit();
+    GA_SERIAL.println(F("SchakelMotorUit(): PWM uitgeschakeld."));
+    toonFunctieResultaat(ok);
+  }
+
   motorBesturing->StopMotor();
   GA_SERIAL.println(F("MOTOR: STOP aangeroepen. PWM-signaal uit; servo kan kracht verliezen."));
-  antwoord(ok);
+  toonFunctieResultaat(ok);
   testActief = false;
-  if (!ok) { testGestopt = true; GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer hardware en herstart Arduino.")); return; }
+
+  if (!ok) {
+    testGestopt = true;
+    GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer hardware en herstart Arduino."));
+    return;
+  }
+
   ++testStap;
-  toonTest();
+  toonTestInstructies();
 }
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_SG90_HardwareTest"));
-  extender = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
-  if (extender != nullptr) sturing = GedeeldeBusNewComponent<SG90>(extender, 0, 205, 410);
-  if (sturing != nullptr) motorBesturing = new ServomotorBesturing(*sturing);
-  startGelukt = sturing != nullptr && motorBesturing != nullptr;
+  extenderPCA9685 = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
+  if (extenderPCA9685 != nullptr) sg90 = GedeeldeBusNewComponent<SG90>(extenderPCA9685, 0, 205, 410);
+  if (sg90 != nullptr) motorBesturing = new ServomotorBesturing(*sg90);
+  startGelukt = sg90 != nullptr && motorBesturing != nullptr;
   if (startGelukt) motorBesturing->StopMotor();
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK. BEGINSTATUS: PWM UIT.") : F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
-  toonStart();
-  if (startGelukt) toonTest();
+  toonStartInstructies();
+  if (startGelukt) toonTestInstructies();
 }
 
 void loop() {
@@ -97,14 +110,28 @@ void loop() {
       if (testActief && testStap == 4 && testFase == 1) {
         const bool ok = motorBesturing->HervatMotor();
         GA_SERIAL.println(F("HervatMotor(): PWM voor bewaarde doelhoek opnieuw ingeschakeld."));
-        antwoord(ok);
-        if (!ok) { rondTestAf(false); return; }
+        toonFunctieResultaat(ok);
+
+        if (!ok) {
+          rondTestAf(false);
+          return;
+        }
+
         testFase = 2;
         testStartMillis = millis();
         return;
       }
-      if (testActief) { GA_SERIAL.println(F("TEST BEZIG. Wacht op STOP of de automatische stop.")); return; }
-      if (testStap >= 6) { toonTest(); return; }
+
+      if (testActief) {
+        GA_SERIAL.println(F("TEST BEZIG. Wacht op STOP of de automatische stop."));
+        return;
+      }
+
+      if (testStap >= 6) {
+        toonTestInstructies();
+        return;
+      }
+
       GA_SERIAL.print(F("START TEST ")); GA_SERIAL.println(testStap + 1);
       bool ok = false;
       switch (testStap) {
@@ -115,7 +142,12 @@ void loop() {
         case 4: ok = motorBesturing->PositioneerAbsoluutNaarHoek(135); break;
         case 5: ok = motorBesturing->SchakelMotorIn(); break;
       }
-      if (!ok) { rondTestAf(false); return; }
+
+      if (!ok) {
+        rondTestAf(false);
+        return;
+      }
+
       testActief = true;
       testFase = 0;
       testStartMillis = millis();
@@ -129,8 +161,13 @@ void loop() {
   if (testStap == 4 && testFase == 0 && millis() - testStartMillis >= 500UL) {
     const bool ok = motorBesturing->PauzeerMotor();
     GA_SERIAL.println(F("PauzeerMotor(): PWM uit. De fysieke stand is niet gemeten."));
-    antwoord(ok);
-    if (!ok) { rondTestAf(false); return; }
+    toonFunctieResultaat(ok);
+
+    if (!ok) {
+      rondTestAf(false);
+      return;
+    }
+
     testFase = 1;
     GA_SERIAL.println(F("Motor heeft geen houdsignaal. Typ 1 + Enter om de doelhoek opnieuw aan te sturen."));
     return;

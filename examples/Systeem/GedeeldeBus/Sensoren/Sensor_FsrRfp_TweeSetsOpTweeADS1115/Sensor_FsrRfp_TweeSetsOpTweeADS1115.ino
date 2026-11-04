@@ -6,6 +6,15 @@
 // Nodig in je configuratie (of als compileervlag):
 //   EXTENDER_ADS1115_AANTAL 2, I2C_ADDRESS_EXTENDER_ADS1115_2 (bv. 0x49)
 //   FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2 (2 of 4)
+// Aansluiting gebruikte I2C-parent/Extender: SDA -> board-SDA, SCL -> board-SCL; GND -> board-GND.
+// UNO R4 Minima/WiFi: fysieke SDA- en SCL-header (bij R4 Minima ook A4=SDA, A5=SCL); UNO Q: board-SDA/SCL.
+// ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22 (bestaand FrameWork-boardprofiel).
+// ESP32-S3 ARDI-32: SDA=GPIO38, SCL=GPIO39; DEV: SDA=GPIO8, SCL=GPIO9 (FrameWork-profiel).
+// RP2040 Cytron Maker UNO: SDA=GPIO20, SCL=GPIO21 (ook Maker/Grove 6).
+// STM32 F401RE Nucleo: SDA=PB9, SCL=PB8 (bestaand FrameWork-boardprofiel).
+// Voeding VCC en GND volgens het concrete modulebord; controleer I2C-logicaniveau, pull-ups en eventuele levelshifting.
+// Bij een analoge sensor is dit de bus van de ADC-Extender, NIET een I2C-aansluiting op de sensor zelf.
+// Sluit de analoge sensoruitgang op het in de code/configuratie gebruikte ADC-kanaal aan.
 // ============================================================================
 
 #include <GroeiAcademie.h>

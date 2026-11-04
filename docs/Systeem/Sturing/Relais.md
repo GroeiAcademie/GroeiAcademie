@@ -110,3 +110,19 @@ De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en
 Configuratie: `STURING_RELAIS_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.
 
 `Activeren()` ontvangt geen resultaat van `WriteExtenderPin()` of `SetExtenderPinMode()` (beide `void`); eventuele I²C-fouten worden door de bestaande Extender-runtimeafhandeling verwerkt.
+
+## Hardwaretestbediening
+
+De vijf `Sturing_Relais_*_HardwareTest.ino`-voorbeelden gebruiken dezelfde bediening.
+
+- `START` + Enter bevestigt dat voeding en bedrading gecontroleerd zijn.
+- `1` + Enter: relais AAN, NO-contact hoort te sluiten.
+- `0` + Enter: relais UIT, NO-contact hoort te openen.
+- `STOP` + Enter: relais UIT, test beëindigd; herstart de Arduino.
+- Serial vermeldt de fysieke meetpin, het ruwe HIGH/LOW-meetniveau (1/0),
+  de NO-contactstatus en PASS/FAIL. De functieaanroep is geen bewijs van
+  fysieke contactwerking.
+- Terugmelding: NO naar Native D2, COM naar GND. Alleen spanningsvrije
+  testcontacten; geen externe spanning op D2.
+- Het enige verschil tussen de vijf tests is de relaisaansturing: Native D6,
+  PCF8574 P0, PCF8575 P0, MCP23017 GPA0 of MCP23S17 GPA0.

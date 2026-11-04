@@ -2,7 +2,7 @@
 // Sturing: Sturing_Relais_Native_HardwareTest
 // ============================================================================
 // Begeleide fysieke aan/uit-test van een Relais, met automatische GedeeldeBus-lifecycle.
-// De test start uitgeschakeld. Typ 1 + Enter om AAN en daarna UIT te schakelen.
+// Na START: 1 + Enter schakelt AAN, 0 + Enter schakelt UIT.
 // STOP + Enter schakelt UIT en beëindigt de test; herstart de Arduino voor een nieuwe reeks.
 // Test uitsluitend met een geschikte relaismodule en een geïsoleerd laagspanningscontact.
 // Rechtstreeks relais via Native: aansluiting D6 (relais IN), GND gemeenschappelijk.
@@ -25,46 +25,111 @@
   #error Zet STURING_RELAIS_AANTAL op minstens 1 voor deze test.
 #endif
 
-Relais* sturing = nullptr;
+Relais* relais = nullptr;
 
 bool testActief = false;
 bool startGelukt = false;
 bool testGestopt = false;
 String invoer;
+
+// INPUT_PULLUP: NO open = HIGH, NO gesloten = LOW.
+// Sluit NO op D2 en COM op GND aan. Geen externe spanning op D2.
 const uint8_t meetPin = NativeArduinoPinVan(HardwareResourcePin::NP_D2);
+
+void toonFunctieResultaat(bool ok) {
+  GA_SERIAL.println(ok ? F("OPDRACHT: OK") : F("OPDRACHT: FOUT"));
+}
+
+void toonStartInstructies() {
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_Relais_Native_HardwareTest. Typ START na controle van bedrading en voeding."));
+  GA_SERIAL.println(F("Typ 1 + Enter voor relais AAN, 0 + Enter voor relais UIT."));
+  GA_SERIAL.println(F("STOP schakelt het relais UIT; herstart de Arduino voor een nieuwe test."));
+}
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
+
   GA_SERIAL.println(F("TEST: Sturing_Relais_Native_HardwareTest"));
-  sturing = GedeeldeBusNewComponent<Relais>(&Native, static_cast<uint8_t>(HardwareResourcePin::NP_D6), LOW);
-  startGelukt = sturing != nullptr;
+  relais = GedeeldeBusNewComponent<Relais>(&Native, static_cast<uint8_t>(HardwareResourcePin::NP_D6), LOW);
+
+  startGelukt = relais != nullptr;
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK") : F("LEVENSCYCLUS: FOUT"));
-  if (!startGelukt) return;
+
   pinMode(meetPin, INPUT_PULLUP);
-  sturing->setRelayStatusOnOff(false);
-  GA_SERIAL.println(F("UIT: relais niet bekrachtigd; NO-contact moet OPEN zijn."));
-  GA_SERIAL.println(F("TEST 1: schakel relais AAN. Verwacht: NO-contact sluit. Typ 1 + Enter."));
+
+  if (startGelukt) {
+    relais->setRelayStatusOnOff(false);
+  }
+
+  // Toon de fysieke meetpin en het ruwe digitale rustniveau.
+  GA_SERIAL.print(F("MEETPIN (Arduino): "));
+  GA_SERIAL.println(meetPin);
+  GA_SERIAL.print(F("D2 RAW (rust): "));
+  GA_SERIAL.println(digitalRead(meetPin));
+  toonStartInstructies();
 }
 
 void loop() {
-  if (!startGelukt || !GA_SERIAL.available()) return;
+  if (!GA_SERIAL.available()) return;
+
   invoer = GA_SERIAL.readStringUntil('\n');
   invoer.trim();
   invoer.toUpperCase();
+
   if (invoer == "STOP") {
-    sturing->StopSturing();
+    if (startGelukt) relais->StopSturing();
+
+    testActief = false;
     testGestopt = true;
     GA_SERIAL.println(F("STOP: relais UIT. Herstart de Arduino om opnieuw te testen."));
     return;
   }
-  if (testGestopt) { GA_SERIAL.println(F("Test gestopt: herstart de Arduino.")); return; }
-  if (invoer != "1") { GA_SERIAL.println(F("Typ 1 + Enter, of STOP + Enter.")); return; }
-  testActief = !testActief;
-  if (!sturing->setRelayStatusOnOff(testActief)) { GA_SERIAL.println(F("FUNCTIEAANROEP: FOUT")); sturing->StopSturing(); testGestopt = true; return; }
+
+  if (testGestopt) {
+    GA_SERIAL.println(F("Test gestopt: herstart de Arduino."));
+    return;
+  }
+
+  if (!startGelukt) {
+    GA_SERIAL.println(F("FOUT: levenscyclus."));
+    return;
+  }
+
+  if (invoer == "START") {
+    if (!testActief) {
+      testActief = true;
+      GA_SERIAL.println(F("START: bevestigd."));
+    }
+
+    return;
+  }
+
+  if (!testActief) {
+    GA_SERIAL.println(F("Eerst START invoeren."));
+    return;
+  }
+
+  if (invoer != "1" && invoer != "0") {
+    GA_SERIAL.println(F("Gebruik 1 (AAN) of 0 (UIT)."));
+    return;
+  }
+
+  bool aan = invoer == "1";
+  bool gelukt = relais->setRelayStatusOnOff(aan);
+
+  if (!gelukt) {
+    toonFunctieResultaat(false);
+    return;
+  }
+
   delay(80);
-  const bool gesloten = digitalRead(meetPin) == LOW;
-  GA_SERIAL.print(F("NO-contact: ")); GA_SERIAL.println(gesloten ? F("GESLOTEN") : F("OPEN"));
-  GA_SERIAL.println(gesloten == testActief ? F("TERUGMELDING: PASS") : F("TERUGMELDING: FAIL (controleer bedrading en polariteit)"));
-  GA_SERIAL.println(testActief ? F("TEST 2: schakel relais UIT. Verwacht: NO-contact opent. Typ 1 + Enter.") : F("TEST 1: schakel relais AAN. Verwacht: NO-contact sluit. Typ 1 + Enter."));
+  bool gesloten = digitalRead(meetPin) == LOW;
+
+  GA_SERIAL.print(F("D2 RAW: "));
+  GA_SERIAL.println(gesloten ? LOW : HIGH);
+  GA_SERIAL.print(F("NO-contact: "));
+  GA_SERIAL.println(gesloten ? F("GESLOTEN") : F("OPEN"));
+  GA_SERIAL.println(gesloten == aan ? F("TERUGMELDING: PASS") : F("TERUGMELDING: FAIL (controleer polariteit/bedrading)"));
+  GA_SERIAL.println(F("LED visueel controleren (geen automatische LED-feedback)."));
 }

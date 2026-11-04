@@ -2,7 +2,9 @@
 // Sensor: MR60BHA2
 // ============================================================================
 // MR60BHA2 gebruikt de FrameWork-Stream-driver, ook voor niet-ESP32-borden.
-// Aansluiting: radar TX -> MCU RX, radar RX -> MCU TX; GND gemeenschappelijk.
+// Aansluiting volgens constructor: radar TX -> Native D0/RX (Serial1),
+// radar RX -> Native D1/TX (Serial1), GND gemeenschappelijk.
+// UNO R4 Minima/WiFi: fysieke header D0/RX en D1/TX (Serial1).
 // Voeding volgens de officiele datasheet van de concrete module.
 // ============================================================================
 
@@ -18,7 +20,7 @@ void setup() {
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   // Gebruik de bestaande Serial1; FrameWork initialiseert deze op 115200 baud.
-  // De definitieve native TX/RX-pintoewijzing blijft afhankelijk van het board.
+  // Op andere boards blijven de fysieke GPIO-nummers afhankelijk van de gekozen boardmapping.
   sensorMR60BHA2 = GedeeldeBusNewComponent<MR60BHA2>(
       &Native, GedeeldeBusComponent::MR60BHA2, &Serial1, HardwareResourcePin::NP_D1, HardwareResourcePin::NP_D0);
   GA_SERIAL.println(sensorMR60BHA2 ? F("INITIALISATIE: component aangemaakt; SENSORRESPONS: niet bewezen") : F("LIFECYCLE: FOUT"));

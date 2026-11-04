@@ -22,8 +22,8 @@
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCF8574* extender = nullptr;
-ULN2003* sturing = nullptr;
+ExtenderPCF8574* extenderPCF8574 = nullptr;
+ULN2003* uln2003 = nullptr;
 
 StappenmotorBesturing* motorBesturing = nullptr;
 
@@ -37,18 +37,19 @@ uint16_t stappenGedaan = 0;
 unsigned long testStartMillis = 0;
 unsigned long laatsteStapMillis = 0;
 
-void toonStart() {
-  GA_SERIAL.println(F("RUN42 HARDWARETEST"));
+void toonStartInstructies() {
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_ULN2003_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE STAPPENMOTORTEST. Sluit de motor veilig aan en maak het mechanisme vrij."));
-  GA_SERIAL.println(F("Bij A4988 blijft de motor mogelijk bekrachtigd na STOP; schakel zo nodig de voeding fysiek uit."));
+  GA_SERIAL.println(F("Bij ULN2003 stopt STOP de stapcommando's; schakel de motorvoeding uit voordat je bedrading wijzigt."));
   GA_SERIAL.println(F("Elke stap start pas na '1' + Enter. STOP + Enter onderbreekt de test."));
+  GA_SERIAL.println(F("Controleer de beweging fysiek; een geslaagde functieaanroep bewijst geen motorbeweging."));
 }
 
-void toonTest() {
+void toonTestInstructies() {
   GA_SERIAL.println();
   switch (testStap) {
-    case 0: GA_SERIAL.println(F("TEST 1: StartMotor + VoerEenStapUit. Verwacht: een motorstap in de beginrichting.")); break;
-    case 1: GA_SERIAL.println(F("TEST 2: StartMotor + VoerMeerdereStappenUit(4). Verwacht: vier korte motorstappen; mogelijk nauwelijks zichtbaar.")); break;
+    case 0: GA_SERIAL.println(F("TEST 1: StartMotor + VoerEenStapUit. Verwacht: een stap; markeer de motoras om kleine beweging te herkennen.")); break;
+    case 1: GA_SERIAL.println(F("TEST 2: StartMotor + VoerMeerdereStappenUit(4). Verwacht: vier stappen; markeer de motoras om kleine beweging te herkennen.")); break;
     case 2: GA_SERIAL.println(F("TEST 3: DraairichtingOmkeren + 80 losse motorstappen. Verwacht: beweging in de andere draairichting, met tussenpozen.")); break;
     case 3: GA_SERIAL.println(F("TEST 4: StartMotor, stappen, PauzeerMotor, HervatMotor, resterende stappen. Verwacht: beweging - stilstand - beweging.")); break;
     default: GA_SERIAL.println(F("ALLE STAPPENMOTORFUNCTIES VAN RUN133 AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
@@ -56,30 +57,36 @@ void toonTest() {
   GA_SERIAL.println(F("Controleer de ruimte rond de motor. Typ 1 + Enter om deze test te starten."));
 }
 
-void antwoord(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen bevestiging van fysieke beweging)") : F("FUNCTIEAANROEP: FOUT")); }
+void toonFunctieResultaat(bool ok) { GA_SERIAL.println(ok ? F("FUNCTIEAANROEP: OK (geen bevestiging van fysieke beweging)") : F("FUNCTIEAANROEP: FOUT")); }
 
 void rondTestAf(bool ok) {
   motorBesturing->StopMotor();
   GA_SERIAL.println(F("MOTOR: STOP aangeroepen. De motor krijgt geen nieuwe stappen."));
-  antwoord(ok);
+  toonFunctieResultaat(ok);
   testActief = false;
-  if (!ok) { testGestopt = true; GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer hardware, herstart Arduino.")); return; }
+
+  if (!ok) {
+    testGestopt = true;
+    GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer hardware, herstart Arduino."));
+    return;
+  }
+
   ++testStap;
-  toonTest();
+  toonTestInstructies();
 }
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_ULN2003_HardwareTest"));
-  extender = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
-  if (extender != nullptr) sturing = GedeeldeBusNewComponent<ULN2003>(extender, 0, 1, 2, 3);
-  if (sturing != nullptr) motorBesturing = new StappenmotorBesturing(*sturing);
-  startGelukt = sturing != nullptr && motorBesturing != nullptr;
+  extenderPCF8574 = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
+  if (extenderPCF8574 != nullptr) uln2003 = GedeeldeBusNewComponent<ULN2003>(extenderPCF8574, 0, 1, 2, 3);
+  if (uln2003 != nullptr) motorBesturing = new StappenmotorBesturing(*uln2003);
+  startGelukt = uln2003 != nullptr && motorBesturing != nullptr;
   if (startGelukt) motorBesturing->StopMotor();
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK. BEGINSTATUS: MOTOR GESTOPT.") : F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
-  toonStart();
-  if (startGelukt) toonTest();
+  toonStartInstructies();
+  if (startGelukt) toonTestInstructies();
 }
 
 void loop() {
@@ -98,14 +105,28 @@ void loop() {
       if (testActief && testStap == 3 && testFase == 1) {
         const bool ok = motorBesturing->HervatMotor();
         GA_SERIAL.println(F("HervatMotor(): uitvoering gevraagd, resterende motorstappen volgen."));
-        antwoord(ok);
-        if (!ok) { rondTestAf(false); return; }
+        toonFunctieResultaat(ok);
+
+        if (!ok) {
+          rondTestAf(false);
+          return;
+        }
+
         testFase = 2;
         laatsteStapMillis = millis();
         return;
       }
-      if (testActief) { GA_SERIAL.println(F("TEST BEZIG. Gebruik STOP voor een onderbreking.")); return; }
-      if (testStap >= 4) { toonTest(); return; }
+
+      if (testActief) {
+        GA_SERIAL.println(F("TEST BEZIG. Gebruik STOP voor een onderbreking."));
+        return;
+      }
+
+      if (testStap >= 4) {
+        toonTestInstructies();
+        return;
+      }
+
       GA_SERIAL.print(F("START TEST ")); GA_SERIAL.println(testStap + 1);
       testStartMillis = millis();
       laatsteStapMillis = millis();
@@ -115,7 +136,12 @@ void loop() {
       if (ok && testStap == 0) ok = motorBesturing->VoerEenStapUit();
       if (ok && testStap == 1) ok = motorBesturing->VoerMeerdereStappenUit(4);
       if (ok && testStap == 2) ok = motorBesturing->DraairichtingOmkeren();
-      if (!ok) { rondTestAf(false); return; }
+
+      if (!ok) {
+        rondTestAf(false);
+        return;
+      }
+
       testActief = true;
       GA_SERIAL.println(F("FUNCTIEAANROEP: OK. Test loopt; de motor wordt nadien gestopt."));
       return;
@@ -124,24 +150,44 @@ void loop() {
   }
   if (!testActief) return;
   const unsigned long nu = millis();
-  if (testStap < 2) { if (nu - testStartMillis >= 2000UL) rondTestAf(true); return; }
+
+  if (testStap < 2) {
+    if (nu - testStartMillis >= 2000UL) rondTestAf(true);
+    return;
+  }
+
   if (testStap == 2) {
     if (nu - laatsteStapMillis < 50UL) return;
     laatsteStapMillis = nu;
-    if (!motorBesturing->VoerEenStapUit()) { rondTestAf(false); return; }
+
+    if (!motorBesturing->VoerEenStapUit()) {
+      rondTestAf(false);
+      return;
+    }
+
     if (++stappenGedaan >= 80) rondTestAf(true);
     return;
   }
   if (testStap == 3 && testFase == 1) return;
   if (nu - laatsteStapMillis < 50UL) return;
   laatsteStapMillis = nu;
-  if (!motorBesturing->VoerEenStapUit()) { rondTestAf(false); return; }
+
+  if (!motorBesturing->VoerEenStapUit()) {
+    rondTestAf(false);
+    return;
+  }
+
   ++stappenGedaan;
   if (testFase == 0 && stappenGedaan == 30) {
     const bool ok = motorBesturing->PauzeerMotor();
     GA_SERIAL.println(F("PauzeerMotor(): stappen onderbroken; reeds uitgevoerde stappen zijn niet fysiek gemeten."));
-    antwoord(ok);
-    if (!ok) { rondTestAf(false); return; }
+    toonFunctieResultaat(ok);
+
+    if (!ok) {
+      rondTestAf(false);
+      return;
+    }
+
     testFase = 1;
     GA_SERIAL.println(F("Motor staat stil. Typ 1 + Enter om de resterende 50 stappen te hervatten."));
   }

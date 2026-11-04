@@ -2,6 +2,9 @@
 // Sensor: LD2450
 // ============================================================================
 // Standaard 256000 baud: uitsluitend op een board met geschikte Serial1 en foutloze baudrate.
+// Fysieke UART op UNO R4 Minima: sensor TX -> D0/RX (Serial1); sensor RX -> D1/TX (Serial1).
+// GND gemeenschappelijk; voeding en UART-logicaniveau volgens de concrete sensormodule.
+// Op andere boards eerst de werkelijke Serial1-pinnen in het bestaande boardprofiel controleren.
 // ============================================================================
 
 #include <GroeiAcademie.h>
