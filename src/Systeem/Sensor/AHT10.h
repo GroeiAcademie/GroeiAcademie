@@ -1,11 +1,14 @@
 #ifndef SENSOR_AHT10_H
 #define SENSOR_AHT10_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_AHT10_AANTAL > 0
 
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <Adafruit_AHTX0.h>
+
 // Officiële API: https://github.com/adafruit/Adafruit_AHTX0/blob/master/Adafruit_AHTX0.h
 struct AHT10 : Sensor {
   Adafruit_AHTX0 aht;
@@ -15,5 +18,7 @@ struct AHT10 : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

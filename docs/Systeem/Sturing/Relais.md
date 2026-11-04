@@ -8,14 +8,14 @@ Relais. De component is header-only geïmplementeerd.
 
 - Broncode: `src/Systeem/Sturing/Relais.h`.
 - C++-component: `Relais`, rechtstreeks afgeleid van `GedeeldeBusNode`.
-- Aansluiting: Digitaal parentkanaal via `WriteExtenderPin()` en `SetExtenderPinMode()`.
+- Aansluiting: Native GPIO via `digitalWrite()` en `pinMode()`, of een digitaal Extender-kanaal via `WriteExtenderPin()` en `SetExtenderPinMode()`.
 - Bestaande aansturing: `setRelayStatusOnOff(bool aan)`.
 - Lifecycle: de component bevat een `Activeren()`-override en een `StopSturing()`-override voor uitschakeling.
 - Configuratie: `src/Configuratie/Sturingen/ConfigRelais_template.h`; optioneel persoonlijk `ConfigRelais.h`.
 
 ## Aandachtspunt
 
-De digitale parentfuncties zijn afhankelijk van `GEDEELDE_BUS_MIXED_PINS`; actief-laag/actief-hoog en foutveiligheid moeten overeenkomen met de module.
+Voor GPIO-Extenders zijn de bestaande Extender-GPIO-functies nodig, niet `GEDEELDE_BUS_MIXED_PINS`; actief-laag/actief-hoog en foutveiligheid moeten overeenkomen met de module.
 
 ## ISD1820
 
@@ -50,7 +50,7 @@ De ISD1820 (geluidsfragment opnemen en afspelen) wordt bediend met twee keer `Re
 - De relaiscontacten (`COM`, `NO`, `NC` waar aanwezig) zijn **gescheiden lastcontacten**, geen GPIO-aansluitingen; belastingen uitsluitend binnen de concrete module-/contactwaardes aansluiten.
 - De constructor krijgt `relayValueOnAtCreation`: dit is het **actieve ingangsniveau** van de aangesloten relaismodule (`HIGH` of `LOW`). Bij activeren initialiseert de code het kanaal eerst op het tegenovergestelde niveau en daarna als `OUTPUT`.
 - `setRelayStatusOnOff(bool on)` schrijft het actieve niveau wanneer `on=true` en het tegenovergestelde niveau wanneer `on=false`. `StopSturing()` schrijft de uit-toestand.
-- `GEDEELDE_BUS_MIXED_PINS` moet actief zijn om deze klasse te compileren. Gebruik op de relaiscontacten uitsluitend lasten die binnen de specificaties van de exacte relaismodule vallen; het GPIO-signaal voedt de last niet.
+- `GEDEELDE_BUS_MIXED_PINS` is niet vereist voor Relais. Gebruik op de relaiscontacten uitsluitend lasten die binnen de specificaties van de exacte relaismodule vallen; het GPIO-signaal voedt de last niet.
 
 **Bestaande constructor (parameter-/pinvolgorde):**
 
@@ -73,7 +73,11 @@ Relais sturing(&extender,0,LOW);
 
 **Bestaande test-/voorbeeldsketches:**
 
-- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_HardwareTest/Sturing_Relais_HardwareTest.ino`
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_Native_HardwareTest/Sturing_Relais_Native_HardwareTest.ino`
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_PCF8574_HardwareTest/Sturing_Relais_PCF8574_HardwareTest.ino`
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_PCF8575_HardwareTest/Sturing_Relais_PCF8575_HardwareTest.ino`
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_MCP23017_HardwareTest/Sturing_Relais_MCP23017_HardwareTest.ino`
+- `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_MCP23S17_HardwareTest/Sturing_Relais_MCP23S17_HardwareTest.ino`
 - `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais/Sturing_Relais.ino`
 
 

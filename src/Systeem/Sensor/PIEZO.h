@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "SensorAnaloog.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_PIEZO_AANTAL > 0
 
 // PIEZO: piezo-element; alleen beveiligd/conditioneerd analoog signaal.
@@ -16,4 +17,5 @@ struct PIEZO : SensorAnaloog {
 };
 
 #endif
+
 #endif

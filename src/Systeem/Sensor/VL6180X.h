@@ -1,11 +1,14 @@
 #ifndef SENSOR_VL6180X_H
 #define SENSOR_VL6180X_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_VL6180X_AANTAL > 0
 
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <Adafruit_VL6180X.h>
+
 // Officiële API: https://github.com/adafruit/Adafruit_VL6180X/blob/master/Adafruit_VL6180X.cpp
 struct SensorVL6180X : Sensor {
   Adafruit_VL6180X vl;
@@ -17,5 +20,7 @@ struct SensorVL6180X : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

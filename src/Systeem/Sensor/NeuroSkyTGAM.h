@@ -1,9 +1,12 @@
 #ifndef SENSOR_NEUROSKYTGAM_H
 #define SENSOR_NEUROSKYTGAM_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_NEUROSKYTGAM_AANTAL > 0
 #include "../GedeeldeBus/GedeeldeBus.h"
+
 struct NeuroSkyTGAM : Sensor {
   Stream* poort;
   // De sketch verklaart deze TX/RX-pinnen; de claim controleert niet de werkelijke poortconfiguratie.
@@ -31,5 +34,7 @@ struct NeuroSkyTGAM : Sensor {
   bool LeesMeditatie(float& waarde);
   bool LeesEEGBanden(uint32_t banden[8]);
 };
+
 #endif
+
 #endif

@@ -16,15 +16,14 @@
 #if STURING_RELAIS_AANTAL == 0
   #error Zet STURING_RELAIS_AANTAL op minstens 1 voor deze test.
 #endif
+
 #if EXTENDER_PCF8574_AANTAL == 0
   #error Schakel de vereiste Extender in voor deze Sturing-test.
-#endif
-#if !GEDEELDE_BUS_MIXED_PINS
-  #error GEDEELDE_BUS_MIXED_PINS is vereist voor deze Sturing-test.
 #endif
 
 ExtenderPCF8574* extender = nullptr;
 Relais* sturing = nullptr;
+
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
@@ -34,4 +33,5 @@ void setup() {
   bool gelukt = sturing != nullptr;
   GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
+
 void loop() {}

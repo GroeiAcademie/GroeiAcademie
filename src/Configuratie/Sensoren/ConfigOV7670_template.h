@@ -1,5 +1,6 @@
 #ifndef CONFIG_OV7670_H
 #define CONFIG_OV7670_H
+
 // Alleen ESP32-S3 ARDI32 en DEV; configureer de echte camerapinnen, geen standaardpinnen.
 // #define SENSOR_OV7670_AANTAL 1
 // OV7670 zonder FIFO: bestaande constructor met HardwareResourcePin pinnen[16].
@@ -12,4 +13,5 @@
 //   AL422B-WCK fysiek aan OV7670-PCLK; AL422B-/OE actief laag; WEN actief hoog
 //   volgens ArduCAM OV7670FIFO-voorbeeld. Aparte hardwareverificatie vereist.
 // De bestaande OV7670::BewaarBeeldOpMicroSD("beeld.bmp") werkt voor beide routes.
+
 #endif

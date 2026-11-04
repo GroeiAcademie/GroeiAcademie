@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "SensorAnaloog.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_WATER_AANTAL > 0
 
 // WATER: analoge watersensormodule; exacte modulevariant te controleren.
@@ -16,4 +17,5 @@ struct WATER : SensorAnaloog {
 };
 
 #endif
+
 #endif

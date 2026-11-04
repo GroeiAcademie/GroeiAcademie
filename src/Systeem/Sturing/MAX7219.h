@@ -1,5 +1,6 @@
 #ifndef MAX7219_H
 #define MAX7219_H
+
 #include <Arduino.h>
 #include <MD_MAX72xx.h>
 #include <SPI.h>
@@ -76,6 +77,7 @@ struct MAX7219 : GedeeldeBusNode {
       parent->WriteExtenderPin(clk,LOW); parent->SetExtenderPinMode(clk,OUTPUT);
       parent->WriteExtenderPin(din,LOW); parent->SetExtenderPinMode(din,OUTPUT);
     }
+
     for (uint8_t i=0;i<8;i++) buffer_[i]=0;
     schrijfRegister(0x0F,0); // display test uit
     schrijfRegister(0x09,0); // decode mode uit
@@ -139,6 +141,7 @@ struct MAX7219 : GedeeldeBusNode {
           const bool aan=(beeld[y] & (1u<<x)) != 0;
           if (matrix.getPoint(y,x) != aan && !matrix.setPoint(y,x,aan)) gelukt=false;
         }
+
       if (bundelen) { matrix.update(); matrix.update(MD_MAX72XX::ON); }
       return gelukt;
     }
@@ -162,6 +165,7 @@ struct MAX7219 : GedeeldeBusNode {
       const uint8_t kolom=kolomOmgekeerd ? (7-(digitsAlsRijen ? x : y)) : (digitsAlsRijen ? x : y);
       nieuw[rij] |= static_cast<uint8_t>(1u<<kolom);
     }
+
     for (uint8_t i=0; i<8; ++i) if (nieuw[i]!=buffer_[i]) {
       schrijfRegister(i+1,nieuw[i]);
       buffer_[i]=nieuw[i];
@@ -232,4 +236,5 @@ private:
 #endif
   }
 };
+
 #endif

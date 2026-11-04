@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "SensorAnaloog.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_MF52A_AANTAL > 0 || SENSOR_MF52D_AANTAL > 0
 
 // MF52A: NTC thermistor; spanning, niet omgerekende temperatuur.
@@ -18,4 +19,5 @@ struct MF52x : SensorAnaloog {
 };
 
 #endif
+
 #endif

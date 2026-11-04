@@ -1,9 +1,11 @@
 #ifndef SENSOR_BMP280_H
 #define SENSOR_BMP280_H
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_BMP280_AANTAL > 0
 #include <Adafruit_BMP280.h>
 
@@ -17,5 +19,7 @@ struct BMP280 : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

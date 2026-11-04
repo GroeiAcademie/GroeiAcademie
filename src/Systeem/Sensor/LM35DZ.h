@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "SensorAnaloog.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_LM35DZ_AANTAL > 0
 
 // LM35DZ: temperatuursensor; ruwe ADC-waarde plus temperatuur via expliciet ADC-meetbereik.
@@ -28,4 +29,5 @@ protected:
 };
 
 #endif
+
 #endif

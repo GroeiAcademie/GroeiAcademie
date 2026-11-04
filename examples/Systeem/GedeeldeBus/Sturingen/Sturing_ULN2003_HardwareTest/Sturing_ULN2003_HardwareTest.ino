@@ -4,6 +4,8 @@
 // Begeleide hardwaretest voor ULN2003. Elke beweging vereist eerst bevestiging via Serial.
 // Pinnen zijn afgeleid uit de bestaande constructoren en de boardmapping in src/Configuratie/UserConfig.h en SystemConfig.h.
 // PCF8574 P0/P1/P2/P3 -> ULN2003 IN1/IN2/IN3/IN4; externe motorvoeding en GND correct aansluiten.
+// Alternatieve GPIO-parents: PCF8575, MCP23017 (I2C) en MCP23S17 (SPI); dit voorbeeld gebruikt PCF8574.
+// Extender-pinnen worden gekozen uit de parent van het Sturing-object; MIXED is hiervoor niet nodig.
 // I2C-aansluiting: SDA/SCL en GND op dezelfde bus; modulevoeding volgens het werkelijke Extender-bord.
 // UNO R4 Minima/WiFi en UNO Q: SDA/SCL op de gelijknamige boardaansluitingen.
 // ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22.
@@ -18,9 +20,6 @@
 #endif
 #if EXTENDER_PCF8574_AANTAL == 0
   #error Schakel de vereiste Extender in voor deze Sturing-test.
-#endif
-#if !GEDEELDE_BUS_MIXED_PINS
-  #error GEDEELDE_BUS_MIXED_PINS is vereist voor deze Sturing-test.
 #endif
 
 ExtenderPCF8574* extender = nullptr;

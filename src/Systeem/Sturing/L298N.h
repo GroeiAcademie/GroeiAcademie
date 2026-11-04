@@ -1,5 +1,6 @@
 #ifndef DCMOTORL298N_H
 #define DCMOTORL298N_H
+
 #include <Arduino.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 
@@ -15,6 +16,7 @@ struct L298N : GedeeldeBusNode {
     return parent && in1<16 && in2<16 && en<16 && in1!=in2 && in1!=en && in2!=en &&
       parent->WriteExtenderPWM(en,0) && parent->WriteExtenderPWM(in1,0) && parent->WriteExtenderPWM(in2,0);
   }
+
   bool StelDraairichtingEnSnelheidIn(bool forward,uint16_t pwm) {
     if(!actief || !parent || pwm>4095) return false;
     if(!parent->WriteExtenderPWM(en,0)) return false;
@@ -22,6 +24,7 @@ struct L298N : GedeeldeBusNode {
     if(!parent->WriteExtenderPWM(in2,forward?0:4095)) return false;
     return parent->WriteExtenderPWM(en,pwm);
   }
+
   void StopSturing() override {
     if(parent) { parent->WriteExtenderPWM(en,0); parent->WriteExtenderPWM(in1,0); parent->WriteExtenderPWM(in2,0); }
   }

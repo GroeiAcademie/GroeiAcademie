@@ -1,5 +1,6 @@
 #ifndef CONFIG_EGBOPULSESENSOR_H
 #define CONFIG_EGBOPULSESENSOR_H
+
 // standaard uit. Eén exemplaar via bestaande ADC-Extender.
 #ifndef SENSOR_EGBOPULSESENSOR_AANTAL
 // #define SENSOR_EGBOPULSESENSOR_AANTAL 1  // standaard waarde: 0
@@ -10,4 +11,5 @@
 #ifndef SENSOR_EGBOPULSESENSOR_ADC_BEREIK_MILLIVOLT
 // #define SENSOR_EGBOPULSESENSOR_ADC_BEREIK_MILLIVOLT 5000  // standaard waarde: 5000 (module op 5 V; op 3,3 V gevoed: 3300); pas aan aan de werkelijk aangesloten sensorspanning
 #endif
+
 #endif

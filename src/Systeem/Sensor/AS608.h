@@ -1,11 +1,14 @@
 #ifndef SENSOR_AS608_H
 #define SENSOR_AS608_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_AS608_AANTAL > 0
 
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <Adafruit_Fingerprint.h>
+
 struct AS608 : Sensor {
   Adafruit_Fingerprint vingerafdruk;
   // De sketch verklaart deze TX/RX-pinnen; de claim controleert niet de werkelijke poortconfiguratie.
@@ -29,5 +32,7 @@ struct AS608 : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

@@ -1,10 +1,13 @@
 #ifndef SENSOR_DS3231_H
 #define SENSOR_DS3231_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_DS3231_AANTAL > 0
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <RTClib.h>
+
 // DS3231: klok met batterijback-up (datum en tijd), plus de eigen temperatuursensor van de chip.
 // Data-kanalen: 1 = Unix-tijd (seconden sinds 1 januari 1970, uint32_t), 2 = temperatuur (°C).
 // Met microSD krijgt SENSOR.DAT (en elk ander bestand) automatisch de echte bestandsdatum.
@@ -18,5 +21,7 @@ struct DS3231 : Sensor {
   bool LeesDatumTijd(DateTime& datumTijd);
   bool ZetDatumTijd(const DateTime& datumTijd);
 };
+
 #endif
+
 #endif

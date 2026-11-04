@@ -4,9 +4,10 @@
 // ISD1820: geluidsfragment (ongeveer 10 s) opnemen en afspelen via twee keer Relais op een PCF8574.
 // P0 = REC (hoog zolang er opgenomen wordt), P1 = PLAYE (korte puls speelt het fragment volledig af).
 // De ISD1820 neemt op met zijn eigen microfoon; er komt geen audiodata naar de Arduino.
-// Relais vereist GEDEELDE_BUS_MIXED_PINS 1 (in UserConfig.h).
 // Pinnen zijn afgeleid uit de bestaande constructoren en de boardmapping in src/Configuratie/UserConfig.h en SystemConfig.h.
 // PCF8574 P0 -> ISD1820 REC via relais, P1 -> PLAYE via tweede relais (beide actief HIGH).
+// Alternatieve GPIO-parents: PCF8575, MCP23017 (I2C) en MCP23S17 (SPI); dit voorbeeld gebruikt PCF8574.
+// Extender-pinnen worden gekozen uit de parent van het Sturing-object; MIXED is hiervoor niet nodig.
 // I2C-aansluiting: SDA/SCL en GND op dezelfde bus; modulevoeding volgens het werkelijke Extender-bord.
 // UNO R4 Minima/WiFi en UNO Q: SDA/SCL op de gelijknamige boardaansluitingen.
 // ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22.
@@ -21,9 +22,6 @@
 #endif
 #if EXTENDER_PCF8574_AANTAL == 0
   #error Schakel de vereiste Extender in voor deze Sturing-test.
-#endif
-#if !GEDEELDE_BUS_MIXED_PINS
-  #error GEDEELDE_BUS_MIXED_PINS is vereist voor deze Sturing-test.
 #endif
 
 ExtenderPCF8574* extender = nullptr;

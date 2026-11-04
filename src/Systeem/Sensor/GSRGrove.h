@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "SensorAnaloog.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_GSRGROVE_AANTAL > 0
 
 // GSRGrove: Grove GSR analoge uitgang, uitsluitend ADC-waarde.
@@ -16,4 +17,5 @@ struct GSRGrove : SensorAnaloog {
 };
 
 #endif
+
 #endif

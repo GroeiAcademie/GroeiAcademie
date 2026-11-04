@@ -91,11 +91,11 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
-  GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
   GA_SERIAL.println(F("TEST: Sturing_MAX7219"));
 
   sturing = GedeeldeBusNewComponent<MAX7219>(&Native, HardwareResourcePin::NP_D10, MD_MAX72XX::FC16_HW);
+  startGelukt = sturing != nullptr;
   GA_SERIAL.println(F("Het FrameWork verzorgt aanmelden, controleren, inpluggen en activeren."));
   GA_SERIAL.println(F("De matrix blijft na iedere test zichtbaar tot je op 1 drukt."));
   GA_SERIAL.println(F("STOP stopt de test. Herstart de Arduino om opnieuw te beginnen."));

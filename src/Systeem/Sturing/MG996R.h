@@ -1,5 +1,6 @@
 #ifndef MG996R_H
 #define MG996R_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
 #include "../GedeeldeBus/GedeeldeBus.h"
@@ -19,11 +20,13 @@ struct MG996R : GedeeldeBusNode {
     return parent && channel < 16 && minimumPWM > 0 && minimumPWM < maximumPWM && maximumPWM < 4096
       && parent->WriteExtenderPWM(channel,0);
   }
+
   bool PositioneerAbsoluutNaarHoek(uint8_t angle) {
     if (!actief || !parent || angle > 180) return false;
     uint16_t ticks = minimumPWM + (uint32_t(maximumPWM-minimumPWM)*angle)/180;
     return parent->WriteExtenderPWM(channel,ticks);
   }
+
   void StopSturing() override { if(parent) parent->WriteExtenderPWM(channel,0); }
 };
 

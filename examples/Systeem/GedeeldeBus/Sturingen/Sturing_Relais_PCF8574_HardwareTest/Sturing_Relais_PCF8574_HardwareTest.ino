@@ -16,34 +16,34 @@
 #if STURING_RELAIS_AANTAL == 0
   #error Zet STURING_RELAIS_AANTAL op minstens 1 voor deze test.
 #endif
+
 #if EXTENDER_PCF8574_AANTAL == 0
   #error Schakel de vereiste Extender in voor deze Sturing-test.
-#endif
-#if !GEDEELDE_BUS_MIXED_PINS
-  #error GEDEELDE_BUS_MIXED_PINS is vereist voor deze Sturing-test.
 #endif
 
 ExtenderPCF8574* extender = nullptr;
 Relais* sturing = nullptr;
-
 
 bool testActief = false;
 bool startGelukt = false;
 bool testGestopt = false;
 String invoer;
 void antwoord(bool ok) { GA_SERIAL.println(ok ? F("OPDRACHT: OK") : F("OPDRACHT: FOUT")); }
+
 void toonStart() {
   GA_SERIAL.println(F("RUN42 HARDWARETEST: typ START na controle van bedrading en voeding."));
   GA_SERIAL.println(F("STOP stopt testuitvoer; herstart voor nieuwe test."));
 }
+
 // Terugmelding via NO -> digitale pin D2, COM -> GND.
 // INPUT_PULLUP: NO open is HIGH, NO dicht is LOW.
 // LED op NC vraagt een aparte, stroombegrensde en elektrisch veilige kring.
 const uint8_t meetPin = 2;
+
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_Relais_HardwareTest"));
+  GA_SERIAL.println(F("TEST: Sturing_Relais_PCF8574_HardwareTest"));
   extender = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
   if (extender != nullptr) sturing = GedeeldeBusNewComponent<Relais>(extender, 0, LOW);
   startGelukt = sturing != nullptr;
@@ -51,6 +51,7 @@ void setup() {
   pinMode(meetPin,INPUT_PULLUP);
   toonStart();
 }
+
 void loop() {
   if (!GA_SERIAL.available()) return;
   invoer = GA_SERIAL.readStringUntil('\n');

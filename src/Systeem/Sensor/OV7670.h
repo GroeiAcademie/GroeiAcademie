@@ -1,7 +1,9 @@
 #ifndef SENSOR_OV7670_H
 #define SENSOR_OV7670_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_OV7670_AANTAL > 0
 #if BOARD_VERSION != BOARD_ESP32S3_ARDI32 && BOARD_VERSION != BOARD_ESP32S3_DEV
 #error OV7670 is in het FrameWork uitsluitend voor ESP32-S3 ARDI32 of DEV voorzien.
@@ -55,5 +57,7 @@ public:
   bool LeesBeeld(camera_fb_t*& beeld);
   bool BewaarBeeldOpMicroSD(const char* naam);
 };
+
 #endif
+
 #endif

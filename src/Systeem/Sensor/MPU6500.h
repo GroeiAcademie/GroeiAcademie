@@ -1,10 +1,13 @@
 #ifndef SENSOR_MPU6500_H
 #define SENSOR_MPU6500_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_MPU6500_AANTAL > 0
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <MPU6500_WE.h>
+
 struct MPU6500 : Sensor {
   MPU6500_WE mpu6500;
   MPU6500(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
@@ -13,5 +16,7 @@ struct MPU6500 : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

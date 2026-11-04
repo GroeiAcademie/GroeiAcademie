@@ -1,12 +1,15 @@
 #ifndef SENSOR_DS18B20_H
 #define SENSOR_DS18B20_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_DS18B20_AANTAL > 0
 
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <OneWire.h>
 #include <DallasTemperature.h>
+
 struct DS18B20 : Sensor {
   const HardwareResourcePin np_DQ;
   uint8_t exclusief_[1];
@@ -28,9 +31,11 @@ struct DS18B20 : Sensor {
       romExpliciet = true;
     }
   }
+
   bool inpluggen() override;
   // Alleen de DS2482 levert een hardware-1-Wire-bus; een generieke GPIO-Extender is fysiek ongeschikt (GB112).
   bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const override { return extender->component == GedeeldeBusComponent::ONE_WIRE_DS2482v800; }
+
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
   bool Activeren() override;
   bool StartTemperatuurmeting();
@@ -42,5 +47,7 @@ struct DS18B20 : Sensor {
   bool romExpliciet = false;
   bool romGevonden = false;
 };
+
 #endif
+
 #endif

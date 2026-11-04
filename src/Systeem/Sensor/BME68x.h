@@ -1,9 +1,11 @@
 #ifndef SENSOR_BME68X_H
 #define SENSOR_BME68X_H
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_BME680_AANTAL > 0 || SENSOR_BME688_AANTAL > 0
 #include <Adafruit_BME680.h>
 
@@ -17,5 +19,7 @@ struct BME68x : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

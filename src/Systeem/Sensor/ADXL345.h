@@ -1,9 +1,11 @@
 #ifndef SENSOR_ADXL345_H
 #define SENSOR_ADXL345_H
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_ADXL345_AANTAL > 0
 #include <Adafruit_ADXL345_U.h>
 
@@ -17,5 +19,7 @@ struct SensorADXL345 : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif

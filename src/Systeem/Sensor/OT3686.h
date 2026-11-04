@@ -1,9 +1,12 @@
 #ifndef SENSOR_OT3686_H
 #define SENSOR_OT3686_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_OT3686_AANTAL > 0
 #include "../GedeeldeBus/GedeeldeBus.h"
+
 // OT3686: DO digitaal; AO is volgens Otronic niet functioneel.
 // Eén native interrupt per sensor, pulse count = software teller; geen Input-code.
 struct OT3686 : Sensor {
@@ -23,6 +26,7 @@ struct OT3686 : Sensor {
     : Sensor(parent, {nullptr, 0, exclusief_, 1}, component, HardwareResourceToegang::EXCLUSIEF), np_OUT(np_OUT) {
     exclusief_[0] = static_cast<uint8_t>(np_OUT);
   }
+
   bool inpluggen() override;
   uint8_t AantalChannels() const override { return 4; }   // meetkanalen voor Data
   bool Activeren() override;
@@ -35,5 +39,7 @@ struct OT3686 : Sensor {
   bool LeesRPMViaPeriode(float& waarde);
   bool LeesHoofdwaarde(float& waarde); // RPM via vaste tijdinterval
 };
+
 #endif
+
 #endif

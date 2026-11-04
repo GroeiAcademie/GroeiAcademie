@@ -1,9 +1,11 @@
 #ifndef WS2812_H
 #define WS2812_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <Adafruit_NeoPixel.h>
+
 // Native datapin. NeoPixel-protocol kan niet via PCF8574 of PCA9685.
 // Parent: native/root node. Aparte geschikte 5V-voeding en signaalniveau vereist.
 struct WS2812 : GedeeldeBusNode {
@@ -17,6 +19,7 @@ struct WS2812 : GedeeldeBusNode {
     :GedeeldeBusNode(parent,{nullptr,0,exclusief_,1},GedeeldeBusComponent::WS2812),
      exclusief_{static_cast<uint8_t>(dataPin)},pin(NativeArduinoPinVan(dataPin)),width(matrixWidth),height(matrixHeight),pixels(uint16_t(matrixWidth)*matrixHeight,NativeArduinoPinVan(dataPin),NEO_GRB+NEO_KHZ800){}
   bool Activeren() override {if (!width || !height || pin==static_cast<uint8_t>(HardwareResourcePin::NONE)) return false;pixels.begin();pixels.clear();pixels.show();return true;}
+
   bool setPixelColor(uint8_t x,uint8_t y,uint32_t color){if(!actief||x>=width||y>=height)return false;pixels.setPixelColor(uint16_t(y)*width+x,color);pixels.show();return true;}
   // Monochroom patroon met een gekozen RGB-kleur; een enkele show() per gewijzigd beeld.
   bool ToonPatroon(uint8_t maat, const uint8_t beeld[8], uint32_t kleur) {
@@ -30,9 +33,11 @@ struct WS2812 : GedeeldeBusNode {
         gewijzigd=true;
       }
     }
+
     if (gewijzigd) pixels.show();
     return true;
   }
+
   void StopSturing() override {if(!actief)return;pixels.clear();pixels.show();}   // niet actief: begin() liep niet
 };
 

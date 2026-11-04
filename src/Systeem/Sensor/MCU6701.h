@@ -1,10 +1,13 @@
 #ifndef SENSOR_MCU6701_H
 #define SENSOR_MCU6701_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_MCU6701_AANTAL > 0
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include <SPI.h>
+
 // CJMCU-6701: analog OUT of MCP3201 SPI. SPI heeft geen MOSI-dataoverdracht.
 // Modus wordt door de bestaande constructor-pinstructuur gekozen.
 struct MCU6701 : Sensor {
@@ -35,6 +38,7 @@ struct MCU6701 : Sensor {
     gedeeld_[2] = static_cast<uint8_t>(np_MOSI);
     exclusief_[0] = static_cast<uint8_t>(np_CS);
   }
+
   bool inpluggen() override;
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
   bool Activeren() override;
@@ -45,5 +49,7 @@ struct MCU6701 : Sensor {
   bool LeesHoofdwaarde(float& waarde);
   bool afmelden() override;
 };
+
 #endif
+
 #endif

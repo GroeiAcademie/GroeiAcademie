@@ -1,5 +1,6 @@
 #ifndef A4988_H
 #define A4988_H
+
 #include <Arduino.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 
@@ -11,6 +12,7 @@ struct A4988 : GedeeldeBusNode {
     :GedeeldeBusNode(parent,{nullptr,0,exclusief_,2},GedeeldeBusComponent::A4988),
      exclusief_{static_cast<uint8_t>(step),static_cast<uint8_t>(dir)},stepPin(NativeArduinoPinVan(step)),dirPin(NativeArduinoPinVan(dir)){}
   bool Activeren() override {if(stepPin==static_cast<uint8_t>(HardwareResourcePin::NONE)||dirPin==static_cast<uint8_t>(HardwareResourcePin::NONE)||stepPin==dirPin)return false;digitalWrite(stepPin,LOW);pinMode(stepPin,OUTPUT);pinMode(dirPin,OUTPUT);return true;}
+
   bool VoerEenStapUit(bool forward,uint16_t pulseMicroseconds=2){if(!actief||pulseMicroseconds<1)return false;
     digitalWrite(dirPin,forward?HIGH:LOW);digitalWrite(stepPin,HIGH);delayMicroseconds(pulseMicroseconds);digitalWrite(stepPin,LOW);return true;}
   void StopSturing() override {if(!actief)return;digitalWrite(stepPin,LOW);}   // niet actief: pin mogelijk NONE (255), niet schrijven

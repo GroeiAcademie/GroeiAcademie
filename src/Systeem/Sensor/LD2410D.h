@@ -1,9 +1,12 @@
 #ifndef SENSOR_LD2410D_H
 #define SENSOR_LD2410D_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_LD2410D_AANTAL > 0
 #include "../GedeeldeBus/GedeeldeBus.h"
+
 struct LD2410D : Sensor {
   Stream* poort;
   // De sketch verklaart deze TX/RX-pinnen; de claim controleert niet de werkelijke poortconfiguratie.
@@ -23,5 +26,7 @@ struct LD2410D : Sensor {
   uint8_t framePositie = 0;
   uint8_t verwachteLengte = 0;
 };
+
 #endif
+
 #endif

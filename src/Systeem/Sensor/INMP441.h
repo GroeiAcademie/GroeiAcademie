@@ -1,7 +1,9 @@
 #ifndef SENSOR_INMP441_H
 #define SENSOR_INMP441_H
+
 #include <Arduino.h>
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_INMP441_AANTAL > 0
 #if BOARD_VERSION != BOARD_ESP32S3_ARDI32 && BOARD_VERSION != BOARD_ESP32S3_DEV
 #error INMP441 via I2S is in het FrameWork uitsluitend voor ESP32-S3 ARDI32 of DEV voorzien.
@@ -26,11 +28,14 @@ struct INMP441 : Sensor {
     exclusief_[1] = static_cast<uint8_t>(np_WS);
     exclusief_[2] = static_cast<uint8_t>(np_SD);
   }
+
   bool inpluggen() override;
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
   bool Activeren() override;
   bool afmelden() override;
   size_t LeesSamples(int32_t* samples, size_t aantal);
 };
+
 #endif
+
 #endif

@@ -1,8 +1,10 @@
 #ifndef SENSOR_BIOAMPEXGPILL_H
 #define SENSOR_BIOAMPEXGPILL_H
+
 #include <Arduino.h>
 #include "SensorAnaloog.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_BIOAMPEXGPILL_AANTAL > 0
 struct BioAmpEXGPill : SensorAnaloog {
   BioAmpEXGPill(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensorPin,
@@ -19,6 +21,7 @@ struct BioAmpEXGPill : SensorAnaloog {
   float laatsteEnvelop = NAN;
   bool LeesEMGEnvelop(float& waarde);
 #endif
+
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG || SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG
   // Officiële Getpeak(): piek als de waarde meer dan piekFactor x de standaardafwijking boven het gemiddelde ligt.
   // Gemiddelde en standaardafwijking per positie in het venster bewaard, zoals in het voorbeeld.
@@ -37,12 +40,16 @@ struct BioAmpEXGPill : SensorAnaloog {
   bool laatstePiek = false;
   bool piekBekend = false;
 #endif
+
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
   bool LeesHartslagPiek(bool& piek);
 #endif
+
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG
   bool LeesKnipperen(bool& knipper);
 #endif
 };
+
 #endif
+
 #endif

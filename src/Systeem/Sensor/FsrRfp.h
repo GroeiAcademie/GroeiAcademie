@@ -39,6 +39,7 @@ struct FsrRfp : Sensor {
   int ruweDataQueueOrStackChannel4[FSR_RFP_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 > 0 ? FSR_RFP_CHANNEL_4_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1 : 1];
 #endif
 #endif
+
   // De sensor kiest per channel: false = FIFO (oudste eerst), true = LIFO (nieuwste eerst).
   SensorQueueOrStack FsrRfptoQueueOrStack[4] = { { 0 }, { 0 }, { 0 }, { 0 } };
 #endif
@@ -57,6 +58,7 @@ struct FsrRfp : Sensor {
 #elif (defined(FSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1) || (defined(FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2) && defined(FSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_2)))
   ToestandTijdensRuntime toestandTijdensRuntime;
 #endif
+
  // V5: geen ADS1115viaParent() meer; FsrRfp meet via de analoge functies van zijn parent, op elke ADC-Extender.
   void MetingTijdensRuntimeVerwerken(int sensorPin, bool gelukt);
   bool OpnieuwAanmeldenNaPauze();

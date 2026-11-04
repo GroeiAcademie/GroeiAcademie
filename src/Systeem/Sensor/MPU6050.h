@@ -1,9 +1,11 @@
 #ifndef SENSOR_MPU6050_H
 #define SENSOR_MPU6050_H
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 #include "../../Configuratie/SystemConfig.h"
+
 #if SENSOR_MPU6050_AANTAL > 0
 #include <Adafruit_MPU6050.h>
 
@@ -17,5 +19,7 @@ struct SensorMPU6050 : Sensor {
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);
 };
+
 #endif
+
 #endif
