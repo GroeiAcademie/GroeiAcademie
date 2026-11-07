@@ -122,6 +122,13 @@ set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_ADS7953_HardwareTest\Extender_ADS7953_HardwareTest.ino"
+set TEST_NAAM="Extender ADS7953 hardwaretest | -DEXTENDER_ADS7953_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_ADS7953_AANTAL=1"
+set TEST_TYPE="EXPERIMENTEEL"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_ADS7953_Test_ExtenderPins_Geweigerd\Extender_ADS7953_Test_ExtenderPins_Geweigerd.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender ADS7953 Test ExtenderPins Geweigerd\Extender ADS7953 Test ExtenderPins Geweigerd | -DEXTENDER_ADS7953_AANTAL=1"
 set TEST_FLAGS="-DEXTENDER_ADS7953_AANTAL=1"
@@ -194,56 +201,56 @@ call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_I2C\Extender_MAX14830_I2C.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MAX14830 I2C\Extender MAX14830 I2C | -DEXTENDER_MAX14830_I2C_AANTAL=1"
-set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=1 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_I2C\Extender_MAX14830_I2C.ino"
 set TEST_NAAM="EXTENDER_MAX14830_I2C_AANTAL=2"
-set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=2"
+set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=2 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_I2C_Test_ExtenderPins_Geweigerd\Extender_MAX14830_I2C_Test_ExtenderPins_Geweigerd.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MAX14830 I2C Test ExtenderPins Geweigerd\Extender MAX14830 I2C Test ExtenderPins Geweigerd | -DEXTENDER_MAX14830_I2C_AANTAL=1"
-set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=1 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_I2C_Test_ExtenderPins_Toegelaten\Extender_MAX14830_I2C_Test_ExtenderPins_Toegelaten.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MAX14830 I2C Test ExtenderPins Toegelaten\Extender MAX14830 I2C Test ExtenderPins Toegelaten | -DEXTENDER_MAX14830_I2C_AANTAL=1"
-set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_MAX14830_I2C_AANTAL=1 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_SPI\Extender_MAX14830_SPI.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MAX14830 SPI\Extender MAX14830 SPI | -DEXTENDER_MAX14830_SPI_AANTAL=1"
-set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=1 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_SPI\Extender_MAX14830_SPI.ino"
 set TEST_NAAM="EXTENDER_MAX14830_SPI_AANTAL=2"
-set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=2"
+set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=2 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_SPI_Test_ExtenderPins_Geweigerd\Extender_MAX14830_SPI_Test_ExtenderPins_Geweigerd.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MAX14830 SPI Test ExtenderPins Geweigerd\Extender MAX14830 SPI Test ExtenderPins Geweigerd | -DEXTENDER_MAX14830_SPI_AANTAL=1"
-set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=1 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MAX14830_SPI_Test_ExtenderPins_Toegelaten\Extender_MAX14830_SPI_Test_ExtenderPins_Toegelaten.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MAX14830 SPI Test ExtenderPins Toegelaten\Extender MAX14830 SPI Test ExtenderPins Toegelaten | -DEXTENDER_MAX14830_SPI_AANTAL=1"
-set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=1"
+set TEST_FLAGS="-DEXTENDER_MAX14830_SPI_AANTAL=1 -DEXTENDER_MAX14830_BRONKLOK_HZ=3686400UL"
 set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT

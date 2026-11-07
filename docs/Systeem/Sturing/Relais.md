@@ -19,7 +19,7 @@ Voor GPIO-Extenders zijn de bestaande Extender-GPIO-functies nodig, niet `GEDEEL
 
 ## ISD1820
 
-De ISD1820 (geluidsfragment opnemen en afspelen) wordt bediend met twee keer `Relais`: REC (hoog zolang er opgenomen wordt) en PLAYE (een korte puls speelt het fragment af). Voorbeeld: `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820/`.
+De gewone ISD1820-sketch gebruikt twee `Relais`-objecten: REC (hoog tijdens opname) en PLAYE (korte puls voor afspelen). De begeleide hardwaretest gebruikt vier `Relais`-objecten voor REC, PLAYE, PLAYL en FT. Er worden geen fysieke relaismodules gebruikt. Voorbeeld: `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820/`.
 
 ## Aansluiten
 
@@ -126,3 +126,19 @@ De vijf `Sturing_Relais_*_HardwareTest.ino`-voorbeelden gebruiken dezelfde bedie
   testcontacten; geen externe spanning op D2.
 - Het enige verschil tussen de vijf tests is de relaisaansturing: Native D6,
   PCF8574 P0, PCF8575 P0, MCP23017 GPA0 of MCP23S17 GPA0.
+
+### Contactterugmelding en herstel
+
+- Verifieer werkelijke contactschakeling met de bestaande NO/COM-teruglus: relais UIT = NO open, relais AAN = NO gesloten. Herhaal bij busfout, voeding uit en reset. Succes van `setRelayStatusOnOff()` zonder teruglus bewijst alleen de opdracht.
+- **Status:** fysieke proef vereist; nog geen hardwarebewijs.
+
+### ISD1820 via MCP23017 zonder fysieke relais
+
+- Gewone test blijft `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820/Sturing_ISD1820.ino`.
+- Nieuwe begeleide hardwaretest: `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820_HardwareTest/Sturing_ISD1820_HardwareTest.ino`.
+- MCP23017 GPA0 → REC, GPA1 → P-E / PLAYE, GPA2 → P-L / PLAYL en GPA3 → FT. Alle GND-aansluitingen gemeenschappelijk. De vier `Relais`-objecten sturen rechtstreeks digitale signalen, zonder fysieke relais.
+- Voor deze hardwaretest: `STURING_RELAIS_AANTAL=4` en `EXTENDER_MCP23017_AANTAL=1` (de gewone `Sturing_ISD1820.ino` blijft twee objecten gebruiken).
+- `START` bevestigt. `REC` neemt vijf seconden op, `PLAY` geeft een PLAYE-puls van 100 ms en `PLAYL` houdt P-L HIGH tot `PLAYLSTOP` of `STOP`; hierdoor kan het afspelen vroegtijdig gestopt worden. `FT` schakelt microfoon-doorluistering in tot `FTSTOP` of `STOP`.
+- Herhaal `REC` en `PLAY` voor meerdere proefopnames. Beoordeel afzonderlijk de afspeelkwaliteit, het afbreken via `PLAYLSTOP` en het in-/uitschakelen van FT. `OK` en `FOUT` vermelden de manuele beoordeling in Serial; leg per handeling de uitslag ook vast in het HTML-register. Een geslaagde levenscyclus bewijst geen hoorbaar resultaat.
+- Tijdens de synchrone opname van vijf seconden wordt `STOP` pas nadien gelezen. Bij een GPIO-fout kan LOW niet gegarandeerd worden; onderbreek zo nodig de modulevoeding.
+- Verwijder eventuele P-E/FT-jumpers van de module bij externe GPIO-bediening. Controleer dat het concrete bord zijn stuuringangen werkelijk beschikbaar heeft. Gebruik compatibele voeding en logicaniveaus; geen 5V-signalen rechtstreeks op een 3,3V-module.

@@ -37,17 +37,29 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
   uint16_t effectiefBereikMillivolt = 0;
   uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const override { return effectiefBereikMillivolt; }
 
-  bool Activeren() override { metingBezig = false; effectiefBereikMillivolt = 0; return ingeplugd && parent && parent->actief; }
+  bool Activeren() override {
+    metingBezig = false;
+    effectiefBereikMillivolt = 0;
+    if (!ingeplugd || !parent || !parent->actief) return false;
+    // ADS7953 manual mode: de gevraagde kanaaltag komt na de pijplijnvertraging terug.
+    // Controleer twee verschillende kanalen zodat een vast laag/hoog MISO-signaal niet als chiprespons telt.
+    uint16_t antwoord = 0;
+    if (!ADCTransferFrame(0x1800, antwoord) || !ADCTransferFrame(0x1800, antwoord)) return false;
+    if (!ADCTransferFrame(0x1800, antwoord) || (antwoord >> 12) != 0) return false;
+    if (!ADCTransferFrame(0x1880, antwoord) || !ADCTransferFrame(0x1880, antwoord)) return false;
+    return ADCTransferFrame(0x1880, antwoord) && (antwoord >> 12) == 1;
+  }
 
   // één SPI-frame: eigen CS gedurende de 16 klokslagen actief.
-  uint16_t ADCTransferFrame(uint16_t commando) {
+  bool ADCTransferFrame(uint16_t commando, uint16_t& antwoord) {
+    antwoord = 0;
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-    WriteCS(LOW);
-    const uint16_t antwoord = (static_cast<uint16_t>(SPI.transfer(static_cast<uint8_t>(commando >> 8))) << 8) |
-                             SPI.transfer(static_cast<uint8_t>(commando));
-    WriteCS(HIGH);
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
+    antwoord = (static_cast<uint16_t>(SPI.transfer(static_cast<uint8_t>(commando >> 8))) << 8) |
+               SPI.transfer(static_cast<uint8_t>(commando));
+    const bool gelukt = WriteCS(HIGH);
     SPI.endTransaction();
-    return antwoord;
+    return gelukt;
   }
 
   int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
@@ -70,7 +82,8 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
     const bool dubbelBereik = bereikMillivolt > EXTENDER_ADS7953_REFERENTIE_MILLIVOLT;
     const uint16_t commando = static_cast<uint16_t>(0x1800 | (pin << 7) | (dubbelBereik ? 0x40 : 0));
     laatsteCommando = commando;
-    (void)ADCTransferFrame(commando);
+    uint16_t antwoord = 0;
+    if (!ADCTransferFrame(commando, antwoord)) return -1;
     effectiefBereikMillivolt = static_cast<uint16_t>(EXTENDER_ADS7953_REFERENTIE_MILLIVOLT * (dubbelBereik ? 2UL : 1UL));
     metingBezig = true;
     return 1;
@@ -84,8 +97,8 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
     if (!actief) return false;
     // Frame N: channel aanvragen. Frame N+1: selectie; frame N+2: sample CHn.
     // Handhaaf de manual-mode en channelkeuze tijdens beide vervolgframes.
-    (void)ADCTransferFrame(laatsteCommando);
-    const uint16_t antwoord = ADCTransferFrame(laatsteCommando);
+    uint16_t antwoord = 0;
+    if (!ADCTransferFrame(laatsteCommando, antwoord) || !ADCTransferFrame(laatsteCommando, antwoord)) return false;
     if ((antwoord >> 12) != metingChannel) return false;
     const uint16_t ruw = antwoord & 0x0FFF;
 #if ADC_BITS >= 12
@@ -134,12 +147,12 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
   #undef BUNDEL_EXTENDER
 
   ExtenderADS7953(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender) {
-    exclusiefMetGpio_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO0)] = static_cast<uint8_t>(ExtenderLijst[teller].gpio0);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO1)] = static_cast<uint8_t>(ExtenderLijst[teller].gpio1);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO2)] = static_cast<uint8_t>(ExtenderLijst[teller].gpio2);
-    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO3)] = static_cast<uint8_t>(ExtenderLijst[teller].gpio3);
+    : HardwareResourceTypeSPI(parent, component, (teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE), np_SCK, np_MISO, np_MOSI, Extender) {
+    exclusiefMetGpio_[0] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE));
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO0)] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].gpio0 : HardwareResourcePin::NONE));
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO1)] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].gpio1 : HardwareResourcePin::NONE));
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO2)] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].gpio2 : HardwareResourcePin::NONE));
+    exclusiefMetGpio_[1 + static_cast<uint8_t>(NativeClientPin::EXTENDER_CLIENT_PIN_GPIO3)] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].gpio3 : HardwareResourcePin::NONE));
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetGpio_, 5 };
   }
   #endif

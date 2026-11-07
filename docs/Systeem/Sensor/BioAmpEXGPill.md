@@ -80,3 +80,6 @@ GedeeldeBusNewComponent<BioAmpEXGPill>(&extenderADS1115,
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_BioAmpEXGPill/` (lifecycle), `Sensor_BioAmpEXGPill_ECG_Hartslag/` (`LeesHartslagPiek()`, met `SENSOR_BIOAMPEXGPILL_MEETMETHODE` `BIOAMPEXGPILL_MEETMETHODE_ECG`), `Sensor_BioAmpEXGPill_EMG_Envelop/` (`LeesEMGEnvelop()`, `_EMG`) en `Sensor_BioAmpEXGPill_EOG_Knipperen/` (`LeesKnipperen()`, `_EOG`), volgens de officiële voorbeelden HeartBeatDetection, EMGEnvelop en EyeBlinkDetection.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Betekenis van gemeten waarden
+- Maak in hardwareverslagen strikt onderscheid tussen **ruw sensorsignaal**, een door code berekende waarde en een klinisch gevalideerde meting. De aanwezigheid van een meetwaarde in Data bewijst geen medische validiteit.
+- **Proef:** registreer nul-/referentie- of gecontroleerde testinput, juiste eenheden en invloed van kabels/contactkwaliteit. Geen medische conclusie afleiden. **Status:** metrologie/kalibratie open.

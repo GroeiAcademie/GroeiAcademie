@@ -36,7 +36,7 @@ struct ExtenderDS2482v800 : HardwareResourceTypeI2C, Adafruit_DS248x {
   #undef BUNDEL_EXTENDER
 
   ExtenderDS2482v800(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel) {}
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel) {}
   #endif
 
   // 1-Wire-contract via de officiële Adafruit_DS248x-functies.

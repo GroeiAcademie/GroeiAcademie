@@ -28,6 +28,7 @@ struct StappenmotorBesturing {
   bool DraairichtingOmkeren();
   bool VoerEenStapUit();
   bool VoerMeerdereStappenUit(uint32_t aantalStappen);
+  bool StelSnelheidIn(uint16_t stappenPerSeconde);
 private:
 #if STURING_A4988_AANTAL > 0
   A4988* a4988 = nullptr;
@@ -39,6 +40,7 @@ private:
   bool gestart = false;
   bool gepauzeerd = false;
   bool richtingVooruit = true;
+  uint16_t stappenPerSeconde = 20;   // stappen per seconde; standaard 50 ms tussen de stappen
 };
 
 #endif

@@ -45,20 +45,22 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
   uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const override {
     return static_cast<uint16_t>((static_cast<uint32_t>(EXTENDER_ADS1158_REFERENTIE_MILLIVOLT) * 32767UL) / 30720UL);
   }
-  void ADS1158SchrijfRegister(uint8_t adres, uint8_t waarde) {
+  bool ADS1158SchrijfRegister(uint8_t adres, uint8_t waarde) {
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-    WriteCS(LOW);
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
     SPI.transfer(static_cast<uint8_t>(0x60 | (adres & 0x0F))); // C[2:0]=011 WRITE
     SPI.transfer(waarde);
-    WriteCS(HIGH);
+    const bool gelukt = WriteCS(HIGH);
     SPI.endTransaction();
+    return gelukt;
   }
-  void ADS1158Pulse() {
+  bool ADS1158Pulse() {
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-    WriteCS(LOW);
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
     SPI.transfer(0x80); // C[2:0]=100, één conversie met START laag
-    WriteCS(HIGH);
+    const bool gelukt = WriteCS(HIGH);
     SPI.endTransaction();
+    return gelukt;
   }
   bool Activeren() override {
     metingBezig = false;
@@ -74,15 +76,15 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
       pinMode(NativeArduinoPinVan(np_PWDN), OUTPUT);
     }
     // CONFIG0: MUXMOD=0 (auto-scan), STAT=1; geen externe BYPAS.
-    ADS1158SchrijfRegister(0x00, 0x02);
+    if (!ADS1158SchrijfRegister(0x00, 0x02)) return false;
     // CONFIG1: IDLMOD=1 (sleep), DRATE=11 (auto-scan), datasheet default.
-    ADS1158SchrijfRegister(0x01, 0x83);
+    if (!ADS1158SchrijfRegister(0x01, 0x83)) return false;
     // Geen differential of interne monitor: het gewenste single-ended channel
     // wordt voor elke afzonderlijke PULSE geselecteerd via MUXSG0/MUXSG1.
-    ADS1158SchrijfRegister(0x03, 0x00); // MUXDIF
-    ADS1158SchrijfRegister(0x04, 0x00); // MUXSG0
-    ADS1158SchrijfRegister(0x05, 0x00); // MUXSG1
-    ADS1158SchrijfRegister(0x06, 0x00); // SYSRED
+    if (!ADS1158SchrijfRegister(0x03, 0x00)) return false; // MUXDIF
+    if (!ADS1158SchrijfRegister(0x04, 0x00)) return false; // MUXSG0
+    if (!ADS1158SchrijfRegister(0x05, 0x00)) return false; // MUXSG1
+    if (!ADS1158SchrijfRegister(0x06, 0x00)) return false; // SYSRED
     return true;
   }
   int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
@@ -94,16 +96,16 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
     // Auto-scan: exact één AIN0..AIN15 tegenover AINCOM.
     // Begin altijd met de lege groep om de channel-pointer correct te resetten.
     if (pin < 8) {
-      ADS1158SchrijfRegister(0x05, 0x00);
-      ADS1158SchrijfRegister(0x04, static_cast<uint8_t>(1U << pin));
+      if (!ADS1158SchrijfRegister(0x05, 0x00)) return -1;
+      if (!ADS1158SchrijfRegister(0x04, static_cast<uint8_t>(1U << pin))) return -1;
     } else {
-      ADS1158SchrijfRegister(0x04, 0x00);
-      ADS1158SchrijfRegister(0x05, static_cast<uint8_t>(1U << (pin - 8)));
+      if (!ADS1158SchrijfRegister(0x04, 0x00)) return -1;
+      if (!ADS1158SchrijfRegister(0x05, static_cast<uint8_t>(1U << (pin - 8)))) return -1;
     }
     metingChannel = pin;
     meetwaardeKlaar = false;
+    if (!ADS1158Pulse()) return -1;
     metingBezig = true;
-    ADS1158Pulse();
     tijdstipConversiestartMicros = micros();
     return 1;
   }
@@ -119,13 +121,14 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
     metingBezig = false;
     // Auto-scan met één channel: statusbyte heeft NEW, OVF, SUPPLY en CHID.
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-    WriteCS(LOW);
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
     SPI.transfer(0x30); // READ CHANNEL DATA, MUL=1
     const uint8_t status = SPI.transfer(0x00);
     const uint8_t msb = SPI.transfer(0x00);
     const uint8_t lsb = SPI.transfer(0x00);
-    WriteCS(HIGH);
+    const bool gelukt = WriteCS(HIGH);
     SPI.endTransaction();
+    if (!gelukt) return false;
     // Single-ended channels AIN0..AIN15 hebben CHID 0x08..0x17.
     // Accepteer nooit een oude sample, oversturing of een ander channel.
     if ((status & 0x80) == 0 || (status & 0x60) != 0 ||
@@ -171,8 +174,8 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
   #undef BUNDEL_EXTENDER
 
   ExtenderADS1158(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_START(ExtenderLijst[teller].start), np_RESET(ExtenderLijst[teller].reset), np_PWDN(ExtenderLijst[teller].pwdn) {
-    exclusiefMetControle_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
+    : HardwareResourceTypeSPI(parent, component, (teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE), np_SCK, np_MISO, np_MOSI, Extender), np_START((teller < 2 ? ExtenderLijst[teller].start : HardwareResourcePin::NONE)), np_RESET((teller < 2 ? ExtenderLijst[teller].reset : HardwareResourcePin::NONE)), np_PWDN((teller < 2 ? ExtenderLijst[teller].pwdn : HardwareResourcePin::NONE)) {
+    exclusiefMetControle_[0] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE));
     exclusiefMetControle_[1] = static_cast<uint8_t>(np_START);
     exclusiefMetControle_[2] = static_cast<uint8_t>(np_RESET);
     exclusiefMetControle_[3] = static_cast<uint8_t>(np_PWDN);

@@ -38,11 +38,12 @@ struct TransportFLASHviaSPI : Adafruit_FlashTransport {
   bool writeMemory(uint32_t addr, uint8_t const* data, uint32_t len) override;
 
   // WriteCS: CS op het board, of via de Extender van CS.
-  void WriteCS(uint8_t niveau) {
+  bool WriteCS(uint8_t niveau) {
 #if GEDEELDE_BUS_MIXED_PINS
-    if (extenderCS != nullptr) { extenderCS->WriteExtenderPin(pinCS, niveau); return; }
+    if (extenderCS != nullptr) return extenderCS->WriteExtenderPin(pinCS, niveau);
 #endif
     digitalWrite(pinCS, niveau);
+    return true;
   }
 };
 

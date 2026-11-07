@@ -5,7 +5,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "REPORT=%~dp0TestLibraryStatusReport.txt"
 set "MARKER=[EINDE] Testen voltooid. Druk op een toets om af te sluiten..."
 set "DOMEINEN=Data Extenders Foutinjecties GedeeldeBus Input Screen Sensoren Sturingen Tools"
-set "AANTAL_TESTCYCLI=16"
+set "AANTAL_TESTCYCLI=18"
 set "MAPPING_SCRIPT=%~dp0TestLibraryMappingControle.cmd"
 set "MAPPING_LOG=%TEMP%\GroeiAcademieMappingControle_%RANDOM%_%RANDOM%.txt"
 set "RESULTAAT_MAPPING=NIET BEOORDEELD"

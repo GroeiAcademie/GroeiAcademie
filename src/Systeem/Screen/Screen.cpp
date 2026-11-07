@@ -711,6 +711,9 @@ bool Screen::Activeren() {
       this->Pixel.display.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
 #endif
       this->Pixel.display.setRotation(PIXEL_SCREEN_ROTATION);
+#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7789)
+      this->Pixel.display.invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0);
+#endif
       this->Pixel.gfx = &this->Pixel.display;
 #if GEDEELDE_BUS_FOUTINJECTIE
       if (FoutinjectieActief(GedeeldeBusComponent::PIXEL_SCREEN, FoutinjectieStap::KOPPELEN)) this->Pixel.gfx = nullptr;

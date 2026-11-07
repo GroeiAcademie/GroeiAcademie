@@ -78,7 +78,7 @@ bool DCmotorBesturing::StelSnelheidIn(uint16_t snelheid) {
 
 bool DCmotorBesturing::StelDraairichtingEnSnelheidIn(bool vooruit, uint16_t snelheid) {
   if (snelheid > 4095 || gepauzeerd) return false;
-  // Driver sets enable to zero before changing direction.
+  // De driver zet ENABLE op nul voordat hij de draairichting wijzigt.
   if (gestart) {
     bool gelukt = false;
 #if STURING_L293D_AANTAL > 0

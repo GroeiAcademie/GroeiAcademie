@@ -199,7 +199,7 @@ struct ExtenderMAX14830I2C : HardwareResourceTypeI2C {
   #undef BUNDEL_EXTENDER
 
   ExtenderMAX14830I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), np_IRQ(ExtenderLijst[teller].irq) {
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel), np_IRQ((teller < 2 ? ExtenderLijst[teller].irq : HardwareResourcePin::NONE)) {
     exclusiefMetIrq_[0] = exclusief_[0];
     exclusiefMetIrq_[1] = static_cast<uint8_t>(np_IRQ);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetIrq_, 2 };

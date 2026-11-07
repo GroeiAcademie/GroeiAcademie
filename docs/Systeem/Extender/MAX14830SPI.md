@@ -39,6 +39,14 @@ src/Systeem/Extender/MAX14830SPI.h
 src/Systeem/Extender/MAX14830SPI.cpp
 ```
 
+## Uitwisselbaarheid
+
+- **Rechtstreeks verwant:** `ExtenderMAX14830I2C` met vier UART-kanalen en hetzelfde UART-parent-contract. `ExtenderSC16IS752I2C` en `ExtenderSC16IS752SPI` zijn alleen voorwaardelijk uitwisselbaar voor kanalen 0 en 1.
+- **Omzetten:** vervang parenttype/componentcode, doelconstructor en configuratie; bij I²C verandert SPI-CS in I²C-adres en SDA/SCL. Controleer kanaalclaims, UART-TX/RX en de werkelijke bronklok.
+- **Beperking:** het UART-contract garandeert geen identiek klok-/baudgedrag; SC16IS752 heeft slechts twee kanalen. SPI heeft niet hetzelfde I²C-runtime-herstel.
+
+Zie ook [`GEDEELDEBUS.md`](../GEDEELDEBUS.md#uitwisselbaarheid-van-extenders) voor de gezamenlijke uitwisselbaarheidstabel en de stappen voor een omschakeling.
+
 ## Aansluiten
 
 - SPI: `SCLK`, `MOSI`, `MISO`, `CS`; de chip biedt vier UART-kanalen met TX/RX en 16 GPIO.
@@ -111,3 +119,12 @@ ExtenderMAX14830SPI extender(
 **Fabrikantdatasheet:** https://www.analog.com/media/en/technical-documentation/data-sheets/MAX14830.pdf
 
 **Bestaand bronbestand voor de component:** `src/Systeem/Extender/MAX14830SPI.h`
+
+### UART-buffer- en vierkanaalsproef
+- **Proef:** configureer alle vier UART-kanalen met de werkelijk aangesloten bronklok; zend/ontvang simultaan verschillende bytestrings op ieder kanaal. Test een onvolledig pakket, hoge datarate, overvolle RX, een lege TX-buffer, andere baudrate en opnieuw verbinden na SPI-/CS-uitval.
+- **Bewijs:** vergelijk per kanaal verzonden en ontvangen bytes, volgorde, verlies en foutrespons; alleen een werkende kanaal-0-demo is onvoldoende. **Status:** hardwareproef open.
+
+### Uitwisselbaarheid met SC16IS752
+
+- Bij vervanging door SC16IS752 blijven slechts twee UART-kanalen beschikbaar in plaats van vier. Controleer per client het gebruikte kanaal, de UART-stream, baudrate en buffergrootte. Een wissel tussen I²C en SPI vereist ook andere bedrading en pinclaims.
+- **Status:** fysieke proef vereist; nog geen hardwarebewijs.

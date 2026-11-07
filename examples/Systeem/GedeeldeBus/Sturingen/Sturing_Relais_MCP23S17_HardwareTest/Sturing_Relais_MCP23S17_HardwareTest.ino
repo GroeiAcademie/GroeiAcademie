@@ -6,10 +6,9 @@
 // STOP + Enter schakelt UIT en beëindigt de test; herstart de Arduino voor een nieuwe reeks.
 // Test uitsluitend met een geschikte relaismodule en een geïsoleerd laagspanningscontact.
 // Extender MCP23S17: GPA0 naar relais IN; SPI SCK, MISO en MOSI op de SPI-pinnen van het gekozen board.
-// MCP23S17 DIN/SI -> MOSI, SO -> MISO, SCK -> SCK, CS ->
-// de fysiek ingestelde EXTENDER_MCP23S17_1_CS_PIN (bij NP_D10: de board-D10-header).
+// MCP23S17 DIN/SI -> MOSI, SO -> MISO, SCK -> SCK, CS -> de fysiek ingestelde EXTENDER_MCP23S17_1_CS_PIN (bij NP_D10: de board-D10-header).
 // Voeding, GND en logicaniveaus volgens het concrete MCP23S17- en relaisbord.
-// Terugmelding: spanningsvrij NO-contact naar Native D2 en COM naar GND; geen netspanning op D2.
+// Terugmelding: spanningsvrij NO-contact naar MCP23S17 GPA1 en COM naar GND; geen externe spanning op GPA1.
 // De fysieke boardmapping van SPI en CS komt uit SystemConfig.h en het gekozen boardprofiel.
 // Configuratie: ConfigRelais.h (STURING_RELAIS_AANTAL >= 1) en ConfigMCP23S17.h.
 // ConfigMCP23S17.h: EXTENDER_MCP23S17_AANTAL 1; EXTENDER_MCP23S17_1_CS_PIN = aangesloten Native CS-resource (bv. NP_D10).
@@ -42,8 +41,7 @@ bool testGestopt = false;
 String invoer;
 
 // INPUT_PULLUP: NO open = HIGH, NO gesloten = LOW.
-// Sluit NO op D2 en COM op GND aan. Geen externe spanning op D2.
-const uint8_t meetPin = NativeArduinoPinVan(HardwareResourcePin::NP_D2);
+// Sluit NO op GPA1 en COM op GND aan. Geen externe spanning op GPA1.
 
 void toonFunctieResultaat(bool ok) {
   GA_SERIAL.println(ok ? F("OPDRACHT: OK") : F("OPDRACHT: FOUT"));
@@ -66,17 +64,13 @@ void setup() {
   startGelukt = relais != nullptr;
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK") : F("LEVENSCYCLUS: FOUT"));
 
-  pinMode(meetPin, INPUT_PULLUP);
-
   if (startGelukt) {
+    extenderMCP23S17->SetExtenderPinMode(1, INPUT_PULLUP);
     relais->setRelayStatusOnOff(false);
-  }
 
-  // Toon de fysieke meetpin en het ruwe digitale rustniveau.
-  GA_SERIAL.print(F("MEETPIN (Arduino): "));
-  GA_SERIAL.println(meetPin);
-  GA_SERIAL.print(F("D2 RAW (rust): "));
-  GA_SERIAL.println(digitalRead(meetPin));
+    GA_SERIAL.print(F("GPA1 RAW (rust): "));
+    GA_SERIAL.println(extenderMCP23S17->ReadExtenderPin(1));
+  }
   toonStartInstructies();
 }
 
@@ -134,9 +128,9 @@ void loop() {
   }
 
   delay(80);
-  bool gesloten = digitalRead(meetPin) == LOW;
+  bool gesloten = extenderMCP23S17->ReadExtenderPin(1) == LOW;
 
-  GA_SERIAL.print(F("D2 RAW: "));
+  GA_SERIAL.print(F("GPA1 RAW: "));
   GA_SERIAL.println(gesloten ? LOW : HIGH);
   GA_SERIAL.print(F("NO-contact: "));
   GA_SERIAL.println(gesloten ? F("GESLOTEN") : F("OPEN"));

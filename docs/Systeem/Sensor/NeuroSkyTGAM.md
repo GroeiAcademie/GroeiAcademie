@@ -77,3 +77,8 @@ GedeeldeBusNewComponent<NeuroSkyTGAM>(&Native, GedeeldeBusComponent::NeuroSkyTGA
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_NeuroSkyTGAM/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+
+### Checksumcontrole en herstel van UART-pakketten
+
+- Injecteer een afgebroken UART-pakket, verkeerd checksumbyte en een nieuwe geldige frame. Controleer dat ongeldige frames niet als nieuwe meting verschijnen en dat het eerstvolgende geldige frame correct wordt verwerkt.
+- **Status:** fysieke proef vereist; nog geen hardwarebewijs.

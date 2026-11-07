@@ -42,8 +42,10 @@ De huidige beta v2.0.0-code scant niet automatisch naar alternatieve LCD-adresse
 | `PS302` | CRITICAL | PixelScreen is niet gekoppeld aan een bruikbaar `Adafruit_GFX`-object. |
 | `PS303` | CRITICAL | Bij `PIXEL_SCREEN_ROTATION` 1 of 3 komen de omgewisselde breedte en hoogte niet overeen met de ingestelde PixelScreen-afmetingen. |
 | `PS304` | CRITICAL | Bij `PIXEL_SCREEN_ROTATION` 0 of 2 komen de niet-omgewisselde breedte en hoogte niet overeen met de ingestelde PixelScreen-afmetingen. |
-| `PS305` | CRITICAL | Het berekende tekstgrid is kleiner dan `PIXELGRID_MIN_KOLOMMEN × PIXELGRID_MIN_RIJEN`. |
+| `PS305` | CRITICAL | Bij activatie is het berekende tekstgrid kleiner dan `PIXELGRID_MIN_KOLOMMEN × PIXELGRID_MIN_RIJEN`, bijvoorbeeld door tekstgrootte, marges, teken-/regelafstand en schermafmetingen. |
 | `PS401` | FATAL | PixelScreen is tijdens runtime niet actief/beschikbaar terwijl uitvoer via PixelScreen nodig is. |
+
+Bij `ACTIEF_PIXEL_SCREEN=SCREEN_128X160` en `PIXEL_SCREEN_TEXT_SIZE>1` stopt de compilatie nu eerder met `#error SCREEN_128X160 vereist PIXEL_SCREEN_TEXT_SIZE 1.`. Dit is **geen nieuwe foutcode**: andere ongeldige gridcombinaties blijven tijdens activatie onder `PS305` vallen. De negatieve compilatietest staat in `extras/TestLibraryScreenOngeldig-v2.0.0.cmd`.
 
 `PixelScreen::inpluggen()` configureert in de huidige code de controlpinnen. `PixelScreen::Activeren()` bevat momenteel nog geen volwaardige elektronische identificatietest van de ST7789; een eerdere ID-proef staat in de broncode uitgecommentarieerd. Een toekomstige DEBUG-`Diagnose()` mag daarom niet als reeds aanwezige PixelScreen-test worden gelezen.
 

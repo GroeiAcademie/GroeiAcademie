@@ -4,6 +4,7 @@
 // standaard uit. Eén exemplaar via bestaande ADC-Extender.
 #ifndef SENSOR_MAX4466_AANTAL
 // #define SENSOR_MAX4466_AANTAL 1  // standaard waarde: 0
+#endif
 
 // ADS7828 met interne 2500 mV-referentie: signalen daarboven worden afgekapt.
 // Bij hogere analoge uitgangsspanning: geschikte spanningsdeler of externe

@@ -36,24 +36,24 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
     if (channel > 3 || registerAdres > 0x1F) return false;
     if (!ingeplugd) return false;
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-    WriteCS(LOW);
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
     SPI.transfer(static_cast<uint8_t>((channel << 5) | registerAdres));   // bit 7 = 0: lezen
     waarde = SPI.transfer(0x00);
-    WriteCS(HIGH);
+    const bool gelukt = WriteCS(HIGH);
     SPI.endTransaction();
-    return true;
+    return gelukt;
   }
   bool MAX14830SchrijfRegister(uint8_t channel, uint8_t registerAdres, uint8_t waarde) {
 
     if (channel > 3 || registerAdres > 0x1F) return false;
     if (!ingeplugd) return false;
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-    WriteCS(LOW);
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
     SPI.transfer(static_cast<uint8_t>(0x80 | (channel << 5) | registerAdres));   // bit 7 = 1: schrijven (datasheet)
     SPI.transfer(waarde);
-    WriteCS(HIGH);
+    const bool gelukt = WriteCS(HIGH);
     SPI.endTransaction();
-    return true;
+    return gelukt;
   }
   // De werkelijke kristal/clockfrequentie moet door de gebruiker zijn ingesteld.
   // Geen stilzwijgende aanname over de fysieke klok of PLL-configuratie.
@@ -201,8 +201,8 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
   #undef BUNDEL_EXTENDER
 
   ExtenderMAX14830SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_IRQ(ExtenderLijst[teller].irq) {
-    exclusiefMetIrq_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
+    : HardwareResourceTypeSPI(parent, component, (teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE), np_SCK, np_MISO, np_MOSI, Extender), np_IRQ((teller < 2 ? ExtenderLijst[teller].irq : HardwareResourcePin::NONE)) {
+    exclusiefMetIrq_[0] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE));
     exclusiefMetIrq_[1] = static_cast<uint8_t>(np_IRQ);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrq_, 2 };
     for (uint8_t i = 0; i < 4; ++i) uartChannels[i].verbinden(this, i);

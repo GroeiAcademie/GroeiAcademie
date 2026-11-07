@@ -68,16 +68,34 @@ De gebruiker stelt `SCREEN_OUTPUT_CONFIG` in. `SCREEN_OUTPUT` is de door de libr
 
 ## PixelScreen-lay-out
 
-De PixelScreen-instellingen blijven in `UserConfig_template.h` standaard uitgecommentarieerd. Activeer alleen de waarden die bewust van de officiële standaard moeten afwijken:
+De PixelScreen-instellingen blijven in `UserConfig_template.h` standaard uitgecommentarieerd. Activeer alleen de waarden die bewust van de standaard uit `SystemConfig.h` moeten afwijken. `SCREEN_TYPE_PIXELS` moet via `SCREEN_OUTPUT_CONFIG` geselecteerd zijn:
 
 ```cpp
-// #define PIXEL_SCREEN_TEXT_SIZE         2
+// #define PIXEL_SCREEN_CS                HardwareResourcePin::NP_SS
+// #define PIXEL_SCREEN_DC                HardwareResourcePin::NP_D9
+// #define PIXEL_SCREEN_RST               HardwareResourcePin::NP_D7
+// #define ACTIEF_PIXEL_SCREEN            SCREEN_240X320
+// #define ACTIEF_PIXEL_SCREEN_CONTROLLER SCREEN_ST7789
+// #define ACTIEF_PIXEL_SCREEN_INVERSIE    1
+// #define PIXEL_SCREEN_ROTATION          3
+// #define PIXEL_SCREEN_TEXT_SIZE         3
 // #define PIXEL_SCREEN_MARGIN            5
 // #define PIXEL_SCREEN_CHARACTER_SPACING 1
-// #define PIXEL_SCREEN_LINE_SPACING      2
+// #define PIXEL_SCREEN_LINE_SPACING      5
+// #define PIXEL_SCREEN_TEXT_COLOR        0xFFFF
+// #define PIXEL_SCREEN_BACKGROUND_COLOR  0x0000
+// #define PIXEL_SCREEN_KLEUR_FATAL       0xF800
+// #define PIXEL_SCREEN_KLEUR_FAULT       0xFC00
+// #define PIXEL_SCREEN_KLEUR_WARNING     0xFFE0
+// #define PIXEL_SCREEN_KLEUR_INFO        0x07FF
+// #define PIXEL_SCREEN_KLEUR_CRITICAL    0xF81F
+// #define PIXEL_SCREEN_KLEUR_ABORT       0x780F
+// #define PIXEL_SCREEN_KLEUR_PANIC       0xFFFF
 ```
 
-`PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` voegt witruimte tussen tekens toe en `PIXEL_SCREEN_LINE_SPACING` voegt witruimte tussen regels toe. Deze drie waarden beïnvloeden rechtstreeks hoeveel kolommen en regels in het automatisch gecentreerde tekstgrid passen.
+`ACTIEF_PIXEL_SCREEN_CONTROLLER` kiest `SCREEN_ST7789` of `SCREEN_ST7735S`. ST7735S gebruikt `initR(INITR_BLACKTAB)` en vereist `ACTIEF_PIXEL_SCREEN=SCREEN_128X160` met `PIXEL_SCREEN_TEXT_SIZE=1`; een grotere tekstgrootte geeft in dat geval een compileerfout. ST7789 gebruikt `init(breedte, hoogte)` met de geselecteerde resolutie. `ACTIEF_PIXEL_SCREEN_INVERSIE` werkt uitsluitend bij ST7789: `1` behoudt de bestaande Adafruit-kleurinversie (INVON), `0` schakelt deze uit. ST7735S wordt hierdoor niet beïnvloed.
+
+`PIXEL_SCREEN_ROTATION` accepteert `0`, `1`, `2` of `3`. `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` voegt witruimte tussen tekens toe en `PIXEL_SCREEN_LINE_SPACING` voegt witruimte tussen regels toe. Deze waarden bepalen samen met `PIXEL_SCREEN_TEXT_SIZE` hoeveel kolommen en regels in het automatisch gecentreerde tekstgrid passen. De tekst- en achtergrondkleuren zijn RGB565; de instellingen `PIXEL_SCREEN_KLEUR_*` zijn alleen bedoeld voor een zelfgeschreven pixelcallback.
 
 ## Input
 

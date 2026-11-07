@@ -6,7 +6,7 @@
 // Werkwijze: laat de sketch lopen (LED brandt half), maak de PCA9685 los (SDA of voeding van de logica)
 // tot hij uitgeschakeld is, en sluit hem daarna terug aan.
 // Verwacht: OE-pin LOW zolang alles werkt; HIGH zodra de PCA9685 uitgeschakeld is; na herstel weer LOW.
-// Let op: de OE-pin wordt niet gereserveerd in de GedeeldeBus; kies een vrije pin.
+// De OE-pin wordt exclusief geclaimd in GedeeldeBus; kies een vrije, ondersteunde boardpin.
 // Aansluiting gebruikte I2C-parent/Extender: SDA -> board-SDA, SCL -> board-SCL; GND -> board-GND.
 // UNO R4 Minima/WiFi: fysieke SDA- en SCL-header (bij R4 Minima ook A4=SDA, A5=SCL); UNO Q: board-SDA/SCL.
 // ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22 (bestaand FrameWork-boardprofiel).

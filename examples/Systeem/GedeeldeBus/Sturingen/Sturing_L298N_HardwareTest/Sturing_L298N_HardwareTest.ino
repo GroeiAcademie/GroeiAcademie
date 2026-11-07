@@ -50,7 +50,7 @@ void toonTestInstructies() {
     case 3: GA_SERIAL.println(F("TEST 4: PauzeerMotor en HervatMotor. Eerst 0,8 seconde bewegen, dan wachten op 1 voor hervatten.")); break;
     case 4: GA_SERIAL.println(F("TEST 5: DraairichtingOmkeren terwijl motor gestopt is, daarna StartMotor. Verwacht: omgekeerde draairichting.")); break;
     case 5: GA_SERIAL.println(F("TEST 6: StelSnelheidIn tijdens beweging. Verwacht: na 0,8 seconde PWM van 500 naar 1300.")); break;
-    default: GA_SERIAL.println(F("ALLE DC-MOTORFUNCTIES VAN RUN133 AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
+    default: GA_SERIAL.println(F("ALLE DC-MOTORFUNCTIES AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
   }
   GA_SERIAL.println(F("Controleer de motorruimte. Typ 1 + Enter om deze test te starten."));
 }

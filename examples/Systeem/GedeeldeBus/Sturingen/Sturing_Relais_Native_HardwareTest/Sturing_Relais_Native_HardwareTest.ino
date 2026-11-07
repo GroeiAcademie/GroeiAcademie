@@ -7,9 +7,9 @@
 // Test uitsluitend met een geschikte relaismodule en een geïsoleerd laagspanningscontact.
 // Rechtstreeks relais via Native: aansluiting D6 (relais IN), GND gemeenschappelijk.
 // Voeding van de relaismodule volgens haar specificaties, niet vanaf een Arduino-GPIO.
-// Terugmelding: spanningsvrij NO-contact naar D2 en COM naar GND. Geen netspanning op meetpin D2.
+// Terugmelding: spanningsvrij NC-contact naar D2 en COM naar GND. Geen netspanning op meetpin D2.
 // De Native pin D6 wordt via NativeArduinoPinVan() naar de effectieve boardpin vertaald.
-// Concrete boardmapping uit UserConfig.h (relais IN / NO-contactmeting):
+// Concrete boardmapping uit UserConfig.h (relais IN / NC-contactmeting):
 // UNO R4 Minima/WiFi en UNO Q: D6 / D2.
 // ESP32 D1 UNO R32: GPIO27 (D6) / GPIO26 (D2).
 // ESP32-S3 ARDI-32: GPIO9 (D6) / GPIO1 (D2); ESP32-S3 DEV: GPIO3 (D6) / GPIO18 (D2).
@@ -71,6 +71,14 @@ void setup() {
 }
 
 void loop() {
+  static bool gesloten = digitalRead(meetPin) == LOW;
+
+  if (gesloten != (digitalRead(meetPin) == LOW)) {
+    gesloten = !gesloten;
+    GA_SERIAL.print(F("D2 RAW (wijziging): "));
+    GA_SERIAL.println(digitalRead(meetPin));
+  }
+
   if (!GA_SERIAL.available()) return;
 
   invoer = GA_SERIAL.readStringUntil('\n');
@@ -124,10 +132,10 @@ void loop() {
   }
 
   delay(80);
-  bool gesloten = digitalRead(meetPin) == LOW;
+  gesloten = digitalRead(meetPin) == LOW;
 
   GA_SERIAL.print(F("D2 RAW: "));
-  GA_SERIAL.println(gesloten ? LOW : HIGH);
+  GA_SERIAL.println(digitalRead(meetPin));
   GA_SERIAL.print(F("NO-contact: "));
   GA_SERIAL.println(gesloten ? F("GESLOTEN") : F("OPEN"));
   GA_SERIAL.println(gesloten == aan ? F("TERUGMELDING: PASS") : F("TERUGMELDING: FAIL (controleer polariteit/bedrading)"));

@@ -26,7 +26,7 @@ Voor de dependencycontrole delen WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (
 | `DATA_TYPE_EEPROM_I2C` | Rob Tillaart `I2C_EEPROM` | |
 | `DATA_TYPE_FLASH_SPI` | `Adafruit SPIFlash` | Zonder cache, eigen transport. |
 | `DATA_TYPE_FRAM_I2C` | Rob Tillaart `FRAM_I2C` | Zie hieronder. |
-| `DATA_TYPE_MICROSD_SPI` | `SdFat - Adafruit Fork` | FAT16/FAT32. |
+| `DATA_TYPE_MICROSD_SPI` | `SdFat - Adafruit Fork` | FAT16/FAT32; native CS of CS via een ondersteunde digitale I2C-Extender. |
 | `DATA_TYPE_EEPROM_SPI`, `DATA_TYPE_FRAM_SPI` | | Nog niet ondersteund in v2.0.0. |
 
 Een combinatie die op een board niet compileert, krijgt een van drie statussen:
@@ -34,6 +34,8 @@ Een combinatie die op een board niet compileert, krijgt een van drie statussen:
 1. platform of library incompatibel;
 2. build overschrijdt het beschikbare RAM;
 3. libraryselectie of configuratie nog op te lossen.
+
+De bestaande microSD-route gebruikt SPI met een native CS-pin, of CS via PCF8574, PCF8575 of MCP23017. De Extender moet vóór Data aangemaakt zijn; bij CS via Extender vereist de gebruikte `SdFat - Adafruit Fork` `SD_CHIP_SELECT_MODE=1` of `2` in `SdFatConfig.h` (de bestaande tests gebruiken `1`). De opname in de compilatie-/regressietests bewijst niet automatisch een geslaagde hardwaretest van iedere combinatie. Zie [`Systeem/DATA.md`](Systeem/DATA.md) voor de beperkingen van de CS-callback. **Wel op echte hardware getest en werkend:** microSD met CS via PCF8574, uitgang P0. Dit resultaat bevestigt niet automatisch de overige Extender-/CS-combinaties.
 
 Waarschuwing microSD-modules: sommige modules laten de MISO-lijn nooit los, ook niet wanneer hun CS hoog staat. Een tweede microSD of een ander SPI-apparaat (FLASH, FRAM SPI) op dezelfde bus werkt dan niet. Voorbeeld: de HW-125, waarop de OE-pin van de MISO-buffer (74LVC125, pin 13) volgens het Arduino-forum vast aan GND hangt. Gebruik dan één microSD alleen op de bus, of een module die MISO loslaat (bijvoorbeeld Adafruit 254, nog te testen).
 
@@ -281,7 +283,13 @@ De compiletest staat in `examples/Systeem/Data/FRAM/FRAM.ino`. De hardware-stres
 
 ### PixelScreen
 
-PixelScreen wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` in `SCREEN_OUTPUT` staat. De Screen-laag bezit zelf het concrete `Adafruit_ST7789`-object en gebruikt daarnaast een `Adafruit_GFX*`-pointer voor de generieke pixeluitvoer; de toepassing hoeft die displaydriver in de huidige v2.0.0-objectroute niet afzonderlijk te construeren. Voor een ST7789 op Arduino UNO zijn `D11` (MOSI) en `D13` (SCK) de hardware-SPI-pinnen. `CS`, `DC` en `RST` zijn configureerbaar.
+PixelScreen wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` in `SCREEN_OUTPUT` staat. `ACTIEF_PIXEL_SCREEN_CONTROLLER` selecteert de bestaande `Adafruit_ST7789`- of `Adafruit_ST7735`-driver; `Screen.Pixel.display` is het concrete object en `Screen.Pixel.gfx` de algemene `Adafruit_GFX*`-pointer. De sketch maakt geen eigen driverobject aan. ST7735S is in de huidige code beperkt tot `SCREEN_128X160` en gebruikt `initR(INITR_BLACKTAB)`; `PIXEL_SCREEN_TEXT_SIZE` moet hiervoor `1` zijn. ST7789 gebruikt `init(breedte, hoogte)` met de in `Screen.h` gedefinieerde schermresoluties (`128x32`, `128x64`, `128x160`, `240x240`, `240x320`, `320x480`, `480x320`). Deze configuratieopties zijn geen bewijs dat iedere resolutie met een concrete ST7789-module fysiek werkt.
+
+Voor ST7789 behoudt `ACTIEF_PIXEL_SCREEN_INVERSIE=1` (standaard) de Adafruit-initialisatie met kleurinversie; `0` schakelt inversie uit. ST7735S wordt niet beïnvloed. Voor de Arduino UNO-shieldaansluiting van de SPI-module zijn `D11` (MOSI) en `D13` (SCK) de hardware-SPI-pinnen; `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST` zijn configureerbaar. Succesvolle compilatie, een aanwezige driver en fysieke schermvalidatie blijven afzonderlijke statussen.
+
+**Op echte hardware getest en werkend:** de 1,8-inch ST7735S (128x160, `INITR_BLACKTAB`) met rode-lettertest zonder ruis aan de schermranden; de 2,8-inch ST7789V via SPI (240x320) met `ACTIEF_PIXEL_SCREEN_INVERSIE=0`. De aanraaklaag van de 2,8-inchmodule (`T_`-pinnen) wordt niet ondersteund; deze pinnen blijven los.
+
+Ook de microSD op de 2,8-inchmodule is hardwarematig getest en werkt via de afzonderlijke 4-pins SD-header. `SD_MISO` moet aangesloten zijn: bij de geteste opstelling leidde ontbrekende MISO tot een SPI-initialisatiefout (`GB304` met `DEBUG`, anders `GB301`). `GB304` kan ook andere SPI-initialisatiefouten aanduiden.
 
 Voor de STM32F4 Nucleo-F401RE-acceptatiebuild is een externe dependencybeperking gekend: `Adafruit ST7735 and ST7789 Library` kan bij de gebruikte STM32-core stoppen op `wiring_private.h: No such file or directory`. De maintainer-test classificeert uitsluitend die specifieke fout als verwachte dependencybeperking; dit is geen bevestigde PixelScreen-ondersteuning op Nucleo-F401RE en andere compilefouten blijven acceptatiefouten.
 
@@ -343,3 +351,8 @@ De acceptance-compilaties voor SB Components Ardi-32 (ESP32-S3-WROOM-1) gebruike
 
 Deze acceptance-tests controleren de compileerbaarheid van de Ardi-32-ondersteuning. De fysieke hardwarevalidatie van SB Components Ardi-32 (ESP32-S3-WROOM-1) is afgerond; de boardstatus is geïmplementeerd en getest.
 
+
+### Ondersteunde boards
+
+- De klassieke 8-bit Arduino UNO R3 is geen ondersteund RC1-board. In code en documentatie gevonden `BOARD_ESP32_D1_UNO_R32` en `ESP32 D1 UNO R32` verwijzen naar een **ESP32-bord** en mogen niet worden verwijderd als verwijzing naar de klassieke UNO R3.
+- Controle van actuele `src/`, `docs/` en `examples/` vond geen expliciete `UNO R3`-ondersteuningsvermelding. De fysieke multi-board compileermatrix blijft de beslissende controle.

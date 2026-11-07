@@ -44,7 +44,7 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C, TCA9548 {
   #undef BUNDEL_EXTENDER
 
   ExtenderTCA9548A(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), TCA9548(ExtenderLijst[teller].adres, &Wire), np_RESET(ExtenderLijst[teller].reset) {
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel), TCA9548((teller < 2 ? ExtenderLijst[teller].adres : 0xFF), &Wire), np_RESET((teller < 2 ? ExtenderLijst[teller].reset : HardwareResourcePin::NONE)) {
     exclusiefMetReset_[0] = exclusief_[0];
     exclusiefMetReset_[1] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetReset_, 2 };

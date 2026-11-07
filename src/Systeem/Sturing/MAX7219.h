@@ -65,27 +65,26 @@ struct MAX7219 : GedeeldeBusNode {
     if (viaMixed) {
       if (parent!=&Native || extenderCS_[0]==nullptr || !extenderCS_[0]->actief || cs>7 ||
           extenderCS_[0]->component!=GedeeldeBusComponent::DIGITAL_PINS_PCF8574) return false;
-      extenderCS_[0]->WriteExtenderPin(cs,HIGH);
-      extenderCS_[0]->SetExtenderPinMode(cs,OUTPUT);
+      if (!extenderCS_[0]->WriteExtenderPin(cs,HIGH) || !extenderCS_[0]->SetExtenderPinMode(cs,OUTPUT)) return false;
       InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
     } else
 #endif
     {
       if (parent!=firstExtenderNode() || parent->component!=GedeeldeBusComponent::DIGITAL_PINS_PCF8574 ||
           din>7 || clk>7 || cs>7 || din==clk || din==cs || clk==cs) return false;
-      parent->WriteExtenderPin(cs,HIGH); parent->SetExtenderPinMode(cs,OUTPUT);
-      parent->WriteExtenderPin(clk,LOW); parent->SetExtenderPinMode(clk,OUTPUT);
-      parent->WriteExtenderPin(din,LOW); parent->SetExtenderPinMode(din,OUTPUT);
+      if (!parent->WriteExtenderPin(cs,HIGH) || !parent->SetExtenderPinMode(cs,OUTPUT)) return false;
+      if (!parent->WriteExtenderPin(clk,LOW) || !parent->SetExtenderPinMode(clk,OUTPUT)) return false;
+      if (!parent->WriteExtenderPin(din,LOW) || !parent->SetExtenderPinMode(din,OUTPUT)) return false;
     }
 
     for (uint8_t i=0;i<8;i++) buffer_[i]=0;
-    schrijfRegister(0x0F,0); // display test uit
-    schrijfRegister(0x09,0); // decode mode uit
-    schrijfRegister(0x0B,7); // acht digits
-    schrijfRegister(0x0A,4); // testhelderheid
-    for (uint8_t i=0;i<8;i++) schrijfRegister(i+1,0);
-    schrijfRegister(0x0C,1); // normaal bedrijf
-    return true; // De GPIO-interface heeft geen afzonderlijke foutstatus voor de hardwareoverdracht.
+    if (!schrijfRegister(0x0F,0)) return false; // display test uit
+    if (!schrijfRegister(0x09,0)) return false; // decode mode uit
+    if (!schrijfRegister(0x0B,7)) return false; // acht digits
+    if (!schrijfRegister(0x0A,4)) return false; // testhelderheid
+    for (uint8_t i=0;i<8;i++) if (!schrijfRegister(i+1,0)) return false;
+    if (!schrijfRegister(0x0C,1)) return false; // normaal bedrijf
+    return true; // GPIO-schrijfacties bevestigd; de MAX7219 levert zelf geen ACK.
 #else
     return false;
 #endif
@@ -113,7 +112,7 @@ struct MAX7219 : GedeeldeBusNode {
     const uint8_t bit = kolom;
     const uint8_t masker=static_cast<uint8_t>(1u<<bit);
     const uint8_t waarde=aan ? static_cast<uint8_t>(buffer_[digit]|masker) : static_cast<uint8_t>(buffer_[digit]&static_cast<uint8_t>(~masker));
-    schrijfRegister(digit+1,waarde);
+    if (!schrijfRegister(digit+1,waarde)) return false;
     buffer_[digit]=waarde;
     return true; // Schrijfopdracht uitgevoerd; geen ACK van de MAX7219.
 #else
@@ -167,7 +166,7 @@ struct MAX7219 : GedeeldeBusNode {
     }
 
     for (uint8_t i=0; i<8; ++i) if (nieuw[i]!=buffer_[i]) {
-      schrijfRegister(i+1,nieuw[i]);
+      if (!schrijfRegister(i+1,nieuw[i])) return false;
       buffer_[i]=nieuw[i];
     }
     return true; // Geen hardware-ACK beschikbaar.
@@ -180,7 +179,10 @@ struct MAX7219 : GedeeldeBusNode {
     if (!actief) return false;
     if (!viaExtender) {matrix.clear();return true;}
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
-    for(uint8_t i=0;i<8;i++) {schrijfRegister(i+1,0);buffer_[i]=0;}
+    for(uint8_t i=0;i<8;i++) {
+      if (!schrijfRegister(i+1,0)) return false;
+      buffer_[i]=0;
+    }
     return true;
 #else
     return false;
@@ -191,7 +193,7 @@ struct MAX7219 : GedeeldeBusNode {
     if (!actief || waarde>15) return false;
     if (!viaExtender) return matrix.control(0,MD_MAX72XX::INTENSITY,waarde);
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
-    schrijfRegister(0x0A,waarde);return true;
+    return schrijfRegister(0x0A,waarde);
 #else
     return false;
 #endif
@@ -209,30 +211,34 @@ struct MAX7219 : GedeeldeBusNode {
   }
 
 private:
-  void schrijfRegister(uint8_t reg,uint8_t data) {
+  bool schrijfRegister(uint8_t reg,uint8_t data) {
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
-    // MAX7219: 16 bits MSB-first, LOAD/CS blijft laag tot na beide bytes.
+    // MAX7219: 16 bits MSB-first. Bij schrijffout geen LOAD-flank forceren:
+    // hardwaretoestand onbekend; een heractivering via GedeeldeBus schrijft de configuratie opnieuw.
 #if GEDEELDE_BUS_MIXED_PINS
     if (viaMixed) {
       SPI.beginTransaction(SPISettings(1000000,MSBFIRST,SPI_MODE0));
-      extenderCS_[0]->WriteExtenderPin(cs,LOW);
+      if (!extenderCS_[0]->WriteExtenderPin(cs,LOW)) { SPI.endTransaction(); return false; }
       SPI.transfer(reg);
       SPI.transfer(data);
-      extenderCS_[0]->WriteExtenderPin(cs,HIGH);
+      const bool gelukt=extenderCS_[0]->WriteExtenderPin(cs,HIGH);
       SPI.endTransaction();
-      return;
+      return gelukt;
     }
 #endif
     const uint16_t pakket=(static_cast<uint16_t>(reg)<<8)|data;
-    parent->WriteExtenderPin(cs,LOW);
+    if (!parent->WriteExtenderPin(clk,LOW) || !parent->WriteExtenderPin(cs,LOW)) return false;
     for(int8_t i=15;i>=0;--i) {
-      parent->WriteExtenderPin(din,(pakket&(static_cast<uint16_t>(1u)<<i))?HIGH:LOW);
-      parent->WriteExtenderPin(clk,HIGH);
-      parent->WriteExtenderPin(clk,LOW);
+      if (!parent->WriteExtenderPin(din,(pakket&(static_cast<uint16_t>(1u)<<i))?HIGH:LOW) ||
+          !parent->WriteExtenderPin(clk,HIGH) || !parent->WriteExtenderPin(clk,LOW)) {
+        return false;
+      }
     }
-    parent->WriteExtenderPin(cs,HIGH);
+    if (!parent->WriteExtenderPin(cs,HIGH)) return false;
+    return true;
 #else
     (void)reg;(void)data;
+    return false;
 #endif
   }
 };

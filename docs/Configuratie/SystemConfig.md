@@ -371,7 +371,7 @@ FsrRfp kiest zijn ADC niet via een globale instelling, maar via zijn parent: de 
 | `RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU` | Hoger kan een storing niet stijgen; `ScreenData::TYPE_WARNING` tot `ScreenData::TYPE_FATAL`; standaard `ScreenData::TYPE_FATAL`. |
 | `RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU` | Vanaf dit foutniveau: uitschakelen en herstelpogingen met pauze; standaard `ScreenData::TYPE_CRITICAL`. |
 | `RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS` | Wachttijd tussen twee herstelpogingen; standaard `100UL`. |
-| `I2C_TIMEOUT_PER_TRANSACTIE_US` | Maximale duur van één I2C-transactie (AVR en UNO R4); standaard `25000UL`. |
+| `I2C_TIMEOUT_PER_TRANSACTIE_US` | Maximale duur van één I2C-transactie (UNO R4); standaard `25000UL`. |
 | `EXTENDER_<TYPE>_RUNTIME_DREMPELS_FOUTNIVEAU`, `EXTENDER_<TYPE>_<N>_RUNTIME_DREMPELS_FOUTNIVEAU`, `<SENSOR>_RUNTIME_DREMPELS_FOUTNIVEAU`, `<SENSOR>_CHANNEL_<N>_RUNTIME_DREMPELS_FOUTNIVEAU` | Overrides; bestaan alleen als je ze zet. Waarde: `{ {5 aantallen}, {5 tijden in ms}, hoogst toegelaten foutniveau, uitschakelen vanaf foutniveau }`. Zie [GedeeldeBus](../Systeem/GEDEELDEBUS.md). |
 
 ## Data QueueOrStack

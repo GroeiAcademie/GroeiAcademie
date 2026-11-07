@@ -50,4 +50,12 @@ SensorAnaloog(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t s
 
 ## Testen
 
+### Foutstatus en meetbereik
+- `GetAnalogRead()` heeft het bestaande `int`-returncontract: bij fout levert het 0 terug, wat ook een geldige ADC-meetwaarde kan zijn. **Voor een beoordeling die fout en nul moet onderscheiden: gebruik de reeds bestaande `RawAnalogRead(int32_t& waarde)` met `bool`-resultaat**; wijzig niet stilzwijgend het contract van `GetAnalogRead()`.
+- **Proef:** meet 0 V (succes met waarde 0), meet een gekende referentiespanning (succes met niet-nul), verbreek de ADC-verbinding (foutstatus via `RawAnalogRead`), test te groot meetbereik (geweigerd). Noteer de ADC-referentie, werkelijke bits, ingestelde schaal en de eenheden van de Sensor.
+- **Status:** bestaande API biedt een afzonderlijke foutstatus; alle verbruikers van `GetAnalogRead()` moeten nog per gebruik gecontroleerd worden.
 
+### ADC-time-outs en foutstatus
+
+- De bestaande `RawAnalogRead()` wacht maximaal 150 ms. Test bij iedere ADC-configuratie trage conversie, ontbrekende READY, losgekoppelde ingang en herstel. Controleer of time-outs als fout gerapporteerd worden en niet als geldige nul. Verhoog 150 ms niet algemeen zonder concrete meetresultaten.
+- **Status:** fysieke proef vereist; nog geen hardwarebewijs.

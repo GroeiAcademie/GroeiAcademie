@@ -50,7 +50,7 @@ void toonTestInstructies() {
     case 3: GA_SERIAL.println(F("TEST 4: StartMotor. Verwacht: hernieuwde PWM-opdracht voor laatst opgedragen 90 graden.")); break;
     case 4: GA_SERIAL.println(F("TEST 5: Positie 135 graden, PauzeerMotor, vervolgens HervatMotor. Pauzeren = PWM uit, geen gemeten stilstand.")); break;
     case 5: GA_SERIAL.println(F("TEST 6: SchakelMotorIn en SchakelMotorUit. Verwacht: PWM inschakelen en weer uitschakelen.")); break;
-    default: GA_SERIAL.println(F("ALLE SERVOMOTORFUNCTIES VAN RUN133 AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
+    default: GA_SERIAL.println(F("ALLE SERVOMOTORFUNCTIES AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
   }
   GA_SERIAL.println(F("Controleer vrije bewegingsruimte. Typ 1 + Enter om deze test te starten."));
 }

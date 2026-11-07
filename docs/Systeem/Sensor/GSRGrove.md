@@ -80,3 +80,6 @@ GedeeldeBusNewComponent<GSRGrove>(
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Schaal en interpretatie
+- De bestaande ADC-waarde is geen automatisch gekalibreerde huidgeleiding in µS. Controleer spanning, effectieve ADC-referentie, bekende testweerstand en plausibele meetrange voordat een eenheid of interpretatie wordt toegekend.
+- **Status:** referentiemetingen open.

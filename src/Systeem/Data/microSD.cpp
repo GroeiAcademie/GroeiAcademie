@@ -28,7 +28,9 @@ void sdCsWrite(SdCsPin_t pin, bool level) {
   if (pin >= startValueCSviaExtender) {
     if (static_cast<uint32_t>(pin - startValueCSviaExtender) >= DATA_LAYER_MICROSD_SPI_AANTAL) return;
     struct DataMICROSDviaSPI* card = linkCSviaExtender[pin - startValueCSviaExtender];   // de kaart met dit pinnummer
-    if (card != nullptr) card->WriteCS(level ? HIGH : LOW);
+    // Bij een gemelde CS-schrijffout dezelfde toestand maximaal eenmaal opnieuw proberen.
+    // SdFat heeft een void-callback: ook na een tweede fout kan SdFat de SPI-overdracht voortzetten.
+    if (card != nullptr && !card->WriteCS(level ? HIGH : LOW)) card->WriteCS(level ? HIGH : LOW);
     return;
   }
   digitalWrite(pin, level ? HIGH : LOW);
@@ -50,6 +52,9 @@ bool DataMICROSDviaSPI::Activeren() {
   SdCsPin_t pinCS = NativeArduinoPinVan(np_CS);   // het pinnummer dat SdFat krijgt
 #if MICROSD_CS_VIA_EXTENDER
   if (extenderCS[0] != nullptr) {
+    // Verifieer de vrijgegeven CS-lijn vóór SdFat.begin(); een fout mag geen SPI-init starten.
+    if (!WriteCS(HIGH)) return false;
+    pinCS = startValueCSviaExtender + DATA_LAYER_MICROSD_SPI_AANTAL;   // ongeldig totdat een vrije koppeling gevonden is
     for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
       if (linkCSviaExtender[teller] == nullptr || linkCSviaExtender[teller] == this) {
         linkCSviaExtender[teller] = this;
@@ -57,6 +62,8 @@ bool DataMICROSDviaSPI::Activeren() {
         break;
       }
     }
+    // Nooit stilzwijgend terugvallen op een native CS-pin wanneer geen koppeling beschikbaar is.
+    if (pinCS == startValueCSviaExtender + DATA_LAYER_MICROSD_SPI_AANTAL) return false;
   }
 #endif
   // SdFat geeft een foutcode terug (sdErrorCode()), 0 = geen fout. Gedeelde SPI-bus, 4 MHz zoals voorheen.

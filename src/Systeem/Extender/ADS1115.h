@@ -105,7 +105,7 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
   #undef BUNDEL_EXTENDER
 
   ExtenderADS1115(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), ADS1115(ExtenderLijst[teller].adres, &Wire), np_ALERT_RDY(ExtenderLijst[teller].alertRdy) {
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel), ADS1115((teller < 2 ? ExtenderLijst[teller].adres : 0xFF), &Wire), np_ALERT_RDY((teller < 2 ? ExtenderLijst[teller].alertRdy : HardwareResourcePin::NONE)) {
     exclusiefMetAlert_[0] = exclusief_[0];
     exclusiefMetAlert_[1] = static_cast<uint8_t>(np_ALERT_RDY);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetAlert_, 2 };

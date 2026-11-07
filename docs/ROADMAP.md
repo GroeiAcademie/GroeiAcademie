@@ -149,7 +149,9 @@ Platformen buiten deze lijst worden pas officieel ondersteund nadat pinmapping, 
 
 ### PixelScreen-uitbreidingen
 
-De veilige tekstruimte en dynamische gridberekening zijn reeds aanwezig. Mogelijke uitbreidingen voor een volgende minor release:
+De veilige tekstruimte en dynamische gridberekening zijn reeds aanwezig. De ST7735S-initialisatie (128x160, tekstgrootte 1), ST7789-initialisatie, controllerselectie en configureerbare ST7789-kleurinversie zijn in de broncode opgenomen. De compile-time-afwijzing van `SCREEN_128X160` met `PIXEL_SCREEN_TEXT_SIZE>1` is voorzien; `PS305` blijft de runtimecontrole voor andere te kleine grids. De bestaande positieve en negatieve Screen-tests zijn hierop aangepast. Dit is geïmplementeerde functionaliteit. **Op hardware getest en werkend:** de 1,8-inch ST7735S (`INITR_BLACKTAB`, rode-lettertest zonder randruis) en de 2,8-inch ST7789V via SPI (`ACTIEF_PIXEL_SCREEN_INVERSIE=0`). Dit is geen bevestiging van geslaagde compilaties op alle boards of van fysieke validatie van alle overige schermmodules/resoluties.
+
+Mogelijke uitbreidingen voor een volgende minor release:
 
 - optioneel zichtbaar kader, afzonderlijk instelbaar van de schermmarges;
 - gecontroleerde afkapping of scrolling van tekst die niet binnen het grid past;
@@ -214,10 +216,11 @@ Selectiecriterium: parallelle (8-bits) interfaces worden uitgesloten wegens te v
 | Scherm | Interface | Status |
 |---|---|---|
 | 2.4 inch TFT 240x320 LCD-scherm ST7789V v1.3 | op zoek naar SPI/I2C-alternatief (huidig exemplaar: parallel) | ter-discussie |
-| 2.8 inch TFT 240x320 LCD-scherm ST7789V v1.1 | op zoek naar SPI/I2C-alternatief (huidig exemplaar: parallel) | ter-discussie |
+| 2.8 inch TFT 240x320 LCD-scherm ST7789V v1.1 (eerder parallel exemplaar) | op zoek naar SPI/I2C-alternatief voor dit parallelle exemplaar | ter-discussie |
+| 2.8 inch TFT 240x320 LCD-scherm ST7789V (SPI-module met aanraking en microSD) | SPI; scherm en microSD hardwarematig getest, aanraking niet ondersteund | geïmplementeerd |
 | 3.5 inch TFT 480x320 LCD-scherm ILI9486 met touchpen en SD Card Socket for Arduino Board Module - TFT LCD SHIELD | op zoek naar SPI/I2C-alternatief (huidig exemplaar: parallel) | ter-discussie |
 
-De drie momenteel beschikbare exemplaren zijn alle drie parallelle uitvoeringen en voldoen op dit moment niet aan het selectiecriterium. De zoektocht gaat dus niet over deze exemplaren zelf, maar over het vinden van SPI- of I2C-varianten van hetzelfde schermtype, of een alternatief scherm dat wél SPI of I2C gebruikt.
+De drie oorspronkelijk vermelde exemplaren (2,4 inch, 2,8 inch en 3,5 inch) zijn parallelle uitvoeringen en voldoen niet aan het selectiecriterium. Daarnaast is nu een 2,8-inch ST7789V SPI-module hardwarematig getest en werkend, met `ACTIEF_PIXEL_SCREEN_INVERSIE=0`; ook de microSD via de afzonderlijke 4-pins SD-header werkt wanneer `SD_MISO` is aangesloten. De `T_`-pinnen voor aanraking worden niet ondersteund en blijven los. Voor de overige parallelle exemplaren blijft een SPI- of I2C-alternatief te onderzoeken.
 
 I2C als alternatieve, nog te testen interface voor PixelScreen (naast SPI), bijvoorbeeld een SSD1306 OLED-scherm. Kan dezelfde I2C-bus delen met het characterscherm, mits een verschillend adres.
 
@@ -307,7 +310,7 @@ Naast deze lijst bevinden zich in [SENSOR_INVENTARIS.md](Toepassingsgebieden/SEN
 - centrale optionele gebruikersconfiguratie via `UserConfig.h` met fallback naar `SystemConfig.h`;
 - gedeelde voorbeeldconfiguratie via `ExamplesConfig.h`;
 - huidige Screen-laag met CharacterScreen, PixelScreen, callbacks en gecombineerde uitvoer;
-- PixelScreen-marges, tekstgrootte, tekenafstand, regelafstand en automatisch gecentreerd tekstgrid;
+- PixelScreen-marges, tekstgrootte, tekenafstand, regelafstand en automatisch gecentreerd tekstgrid; selectie ST7735S/ST7789 en configureerbare kleurinversie voor ST7789 (broncode aanwezig, niet alle hardwarecombinaties gevalideerd);
 - huidige Stimulusmodule en vijf gewone Stimulusvoorbeelden;
 - afzonderlijke Native-ADC- en ADS1115-hardwarevalidatievoorbeelden;
 - eerste project-, community-, hardware- en onderzoeksdocumentatie.

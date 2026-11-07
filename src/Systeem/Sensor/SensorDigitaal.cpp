@@ -18,8 +18,7 @@ bool SensorDigitaal::inpluggen() {
       default: return false;
     }
     if (!Sensor::inpluggen()) return false;
-    parent->SetExtenderPinMode(static_cast<uint8_t>(np_OUT), INPUT);
-    return true;
+    return parent->SetExtenderPinMode(static_cast<uint8_t>(np_OUT), INPUT);
 #else
     return false;  // Buiten de bestaande compile-time mixed-pininterface.
 #endif
@@ -45,10 +44,11 @@ bool SensorDigitaal::LeesHoofdwaarde(float& waarde) {
       if (apparaat->ingeplugd && !apparaat->ComponentBeschikbaarTijdensRuntime()) return false;
     }
     waarde = static_cast<float>(parent->ReadExtenderPin(static_cast<uint8_t>(np_OUT)));
+    if (waarde != LOW && waarde != HIGH) { waarde = NAN; return false; }
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
     WriteQueueOrStack(1, waarde);
 #endif
-    return true; // De bestaande GPIO-interface retourneert geen transportfoutstatus.
+    return true;
 #else
     return false;  // Buiten de bestaande compile-time mixed-pininterface.
 #endif

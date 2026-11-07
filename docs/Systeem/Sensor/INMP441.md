@@ -69,3 +69,8 @@ Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MS3625/` (alleen ESP3
 
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+
+### I²S-timing en sampleverlies
+
+- Meet bij werkelijke I²S samplefrequentie de maximale blokkeertijd van `readBytes()` en het aantal gemiste samples wanneer een andere Sturing of Sensor gelijktijdig actief is. Beoordeel buffer-overrun en herstel na onderbroken opname.
+- **Status:** fysieke proef vereist; nog geen hardwarebewijs.

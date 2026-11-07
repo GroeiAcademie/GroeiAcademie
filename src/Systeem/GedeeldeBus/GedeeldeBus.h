@@ -88,7 +88,7 @@ enum class ScreenData : uint8_t;
 // Runtime-herstel: toestand en drempels van de foutladder WARNING, ALERT, FAULT, CRITICAL, FATAL.
 // Twee assen: de code (GB400 tot GB410) zegt WAT er gebeurde, het foutniveau HOE ERNSTIG het nu is.
 // ============================================================================
-// Per I2C-component (en per Sensor of kanaal met een override): 11 bytes op AVR, 12 op 32-bit.
+// Per I2C-component (en per Sensor of kanaal met een override): 12 bytes op 32-bit.
 // Twee aparte tijdvelden: ook uitgeschakeld klimt de ladder verder op tijd (bv. CRITICAL naar FATAL).
 struct ToestandTijdensRuntime {
   uint8_t aantalOpeenvolgendeFouten = 0;               // 0 tot 255; terug op 0 bij succes. Ook mislukte herstelpogingen tellen mee.
@@ -660,9 +660,9 @@ struct GedeeldeBusNode {
 
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // Een pin van deze node gebruiken wanneer ze een Extender is. Standaard niets; ingevuld door de Extenders met digitale pinnen.
-  virtual void SetExtenderPinMode(uint8_t pin, uint8_t modus) { (void)pin; (void)modus; }
-  virtual void WriteExtenderPin(uint8_t pin, uint8_t niveau) { (void)pin; (void)niveau; }
-  virtual uint8_t ReadExtenderPin(uint8_t pin) { (void)pin; return 0; }
+  virtual bool SetExtenderPinMode(uint8_t pin, uint8_t modus) { (void)pin; (void)modus; return false; }
+  virtual bool WriteExtenderPin(uint8_t pin, uint8_t niveau) { (void)pin; (void)niveau; return false; }
+  virtual uint8_t ReadExtenderPin(uint8_t pin) { (void)pin; return 0xFF; }
 #endif
 
   bool IsVoorouderVan(const GedeeldeBusNode* ander) const {
@@ -861,8 +861,12 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
     if (!GedeeldeBusNode::inpluggen()) return false;
 #if GEDEELDE_BUS_MIXED_PINS
     if (extenderCS[0] != nullptr) {
-      extenderCS[0]->WriteExtenderPin(static_cast<uint8_t>(np_CS), HIGH);   // eerst HIGH, dan uitgang: geen korte LOW op CS
-      extenderCS[0]->SetExtenderPinMode(static_cast<uint8_t>(np_CS), OUTPUT);
+      // Alleen inpluggen als de CS-Extender beide operaties bevestigd heeft.
+      if (!extenderCS[0]->WriteExtenderPin(static_cast<uint8_t>(np_CS), HIGH) ||
+          !extenderCS[0]->SetExtenderPinMode(static_cast<uint8_t>(np_CS), OUTPUT)) {
+        ingeplugd = false;
+        return false;
+      }
     } else
 #endif
     {
@@ -873,26 +877,27 @@ struct HardwareResourceTypeSPI : GedeeldeBusNode {
     return true;
   }
 
-  // WriteCS: CS schrijven, op het board of via de Extender van CS.
-  void WriteCS(uint8_t niveau) {
+  // WriteCS: false betekent dat de CS-Extender de schrijfopdracht niet bevestigd heeft.
+  bool WriteCS(uint8_t niveau) {
 #if GEDEELDE_BUS_MIXED_PINS
-    if (extenderCS[0] != nullptr) { extenderCS[0]->WriteExtenderPin(static_cast<uint8_t>(np_CS), niveau); return; }
+    if (extenderCS[0] != nullptr) return extenderCS[0]->WriteExtenderPin(static_cast<uint8_t>(np_CS), niveau);
 #endif
     digitalWrite(NativeArduinoPinVan(np_CS), niveau);
+    return true;
   }
 
   // Over te erven basisfunctie - kale SPI-wrapper, generiek voor elk SPI-Extender.
   // Met SPISettings, zodat elke SPI-component zijn eigen snelheid en modus krijgt op de gedeelde bus.
-  // Let op: NativeArduinoPinVan(np_CS) is alleen juist voor CS op een pin van het board; CS op een Extender gaat via WriteCS().
+  // Let op: bij een CS-fout geeft deze legacy byte-interface 0xFF terug; 0xFF kan ook geldige SPI-data zijn.
   uint8_t Transfer(uint8_t data, SPISettings instellingen) {
 #if GEDEELDE_BUS_MIXED_PINS
     if (extenderCS[0] != nullptr) {
       SPI.beginTransaction(instellingen);
-      WriteCS(LOW);
+      if (!WriteCS(LOW)) { SPI.endTransaction(); return 0xFF; }
       const uint8_t resultaat = SPI.transfer(data);
-      WriteCS(HIGH);
+      const bool gelukt = WriteCS(HIGH);
       SPI.endTransaction();
-      return resultaat;
+      return gelukt ? resultaat : 0xFF;
     }
 #endif
     const uint8_t csPin = NativeArduinoPinVan(np_CS);

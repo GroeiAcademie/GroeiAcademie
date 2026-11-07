@@ -6,8 +6,7 @@ Dit document bevat de resultaten van alle officiële validaties vóór publicati
 
 | Versie | Datum | Arduino LINT | Compilaties | OK | Verwachte -geheugenbeperkingen | Onverwachte fouten | Opmerking |
 |--------|-------|:------------:|------------:|---:|------------------------------------:|-------------------:|-----------|
-| v2.0.0 | 26-10-2026 | GESLAAGD | 735 | 735 | 0 | 0 | GESLAAGD |
-
+| v2.0.0 | 05-11-2026 | GESLAAGD | 1530 | 1530 | 0 | 0 | GESLAAGD |
 
 # v2.0.0 beta — actuele ontwikkelstatus
 

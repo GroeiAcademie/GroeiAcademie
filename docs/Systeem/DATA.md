@@ -216,7 +216,9 @@ FLASH en microSD kunnen CS op een Extender hebben (PCF8574, PCF8575 of MCP23017)
 Zo ook `_2_` en `MICROSD_SPI`. Data zoekt de Extender in de boom op component en adres; de Extender moet dus vóór `Data` aangemaakt en geactiveerd zijn. Niet gevonden: GB108 (CS ontbreekt). `GEDEELDE_BUS_MIXED_PINS` wordt dan automatisch `1`.
 
 - FLASH: het transport schakelt CS via de Extender.
-- microSD: SdFat schakelt CS zelf met `sdCsInit()`/`sdCsWrite()`. Die functies kan de library alleen vervangen wanneer in `SdFatConfig.h` van "SdFat - Adafruit Fork" `SD_CHIP_SELECT_MODE` op `1` of `2` staat (standaard `0`). Staat het op `0`, dan geeft de compilatie een duidelijke `#error`. Pas die ene regel in `SdFatConfig.h` aan, of geef `-DSD_CHIP_SELECT_MODE=1` mee als compileerflag.
+- microSD: SdFat schakelt CS zelf met `sdCsInit()`/`sdCsWrite()`. Die functies kan de library alleen vervangen wanneer in `SdFatConfig.h` van "SdFat - Adafruit Fork" `SD_CHIP_SELECT_MODE` op `1` of `2` staat (standaard `1` in de hier gecontroleerde SdFat - Adafruit Fork 2.3.103). Staat het op `0`, dan geeft de compilatie een duidelijke `#error`. Pas die ene regel in `SdFatConfig.h` aan, of geef `-DSD_CHIP_SELECT_MODE=1` mee als compileerflag.
+**CS-fouten bij microSD via een Extender (SdFat - Adafruit Fork 2.3.103):** `sdCsWrite()` heeft een `void`-resultaat en wordt door SdFat tijdens selectie en vrijgave aangeroepen. Een mislukte GPIO-schrijfactie wordt door de bestaande GedeeldeBus-Extender verwerkt; de callback probeert hetzelfde CS-niveau maximaal eenmaal opnieuw. Deze herhaalpoging is geen bevestiging dat de kaart correct geselecteerd of vrijgegeven werd. SdFat kan onmiddellijk daarna SPI-data versturen zonder deze fout te kennen. Bij een aanhoudende CS- of busfout kan de FrameWork-code een veilige voortzetting van de SD-overdracht niet garanderen; gegevensverlies of een onvolledige schrijfactie blijft mogelijk. Er wordt niet onvoorwaardelijk HIGH uitgegeven vóór iedere LOW-opdracht, omdat SdFat CS bewust laag houdt gedurende lopende overdrachten. Voor een harde stop vóór iedere volgende SPI-byte is een afzonderlijk foutdoorgevingsmechanisme nodig, binnen het huidige `void`-contract niet beschikbaar.
+
 - Snelheid: elke CS-wissel via een I2C-Extender kost ongeveer 0,05 ms (400 kHz) tot 0,2 ms (100 kHz) (berekend). CS op het board blijft de standaard.
 - 
 
@@ -369,3 +371,12 @@ REDIRECT_SERIAL_FILE "serial.log"
 
 
 Bij REDIRECT_SERIAL_TO_MICROSD moet GA_SERIAL.begin() aangeroepen worden vóór GedeeldeBusNewComponent<struct Screen>().
+
+
+### microSD: controle bij initialisatie en grenzen van de CS-callback
+
+Voor CS via een GPIO-Extender controleert `DataMICROSDviaSPI::Activeren()` vóór `SdFat32::begin()` of `WriteCS(HIGH)` is gelukt en of er een vrije koppeling bestaat in `linkCSviaExtender[]`. Als een van beide voorwaarden ontbreekt, wordt de activering geweigerd. Een ontbrekende koppeling mag niet stilzwijgend terugvallen op een native chipselect-pin.
+
+De geïnstalleerde `SdFat - Adafruit Fork` 2.3.103 gebruikt bij `SD_CHIP_SELECT_MODE=1` de bestaande callbacks `void sdCsInit(SdCsPin_t)` en `void sdCsWrite(SdCsPin_t, bool)`. Bij het omschakelen van de chipselect tijdens kaarttransacties kan `sdCsWrite()` geen succes- of foutwaarde teruggeven. Het FrameWork herhaalt een gemelde mislukte schakeling maximaal eenmaal, maar kan **niet garanderen dat SdFat bij een tweede fout ophoudt met SPI-data versturen**. Dit is een harde integratiebeperking; een geslaagde `SdFat32`-aanroep is geen bewijs dat bij een CS-storing alle overgebrachte gegevens betrouwbaar zijn.
+
+Voor opslag die geen gegevensverlies mag tolereren: CS via een directe geschikte native uitgang gebruiken zolang er geen door de bibliotheek ondersteund, foutdoorgevend selectiemechanisme beschikbaar is. De broncode van de externe SdFat-bibliotheek is niet aangepast. Foutinjectie vereist fysieke validatie; bij een onzekere CS-toestand niet blijven schrijven.

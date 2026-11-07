@@ -42,7 +42,7 @@ struct ExtenderPCF8574 : HardwareResourceTypeI2C, PCF8574 {
   #undef BUNDEL_EXTENDER
 
   ExtenderPCF8574(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), PCF8574(ExtenderLijst[teller].adres, &Wire), np_INT(ExtenderLijst[teller].intPin) {
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel), PCF8574((teller < 2 ? ExtenderLijst[teller].adres : 0xFF), &Wire), np_INT((teller < 2 ? ExtenderLijst[teller].intPin : HardwareResourcePin::NONE)) {
     exclusiefMetInt_[0] = exclusief_[0];
     exclusiefMetInt_[1] = static_cast<uint8_t>(np_INT);
     aangemeldePinnen = { gedeeld_, 2, exclusiefMetInt_, 2 };
@@ -66,23 +66,24 @@ struct ExtenderPCF8574 : HardwareResourceTypeI2C, PCF8574 {
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
   // SetExtenderPinMode: geen richtingsregister. INPUT schrijft HIGH; OUTPUT laat de laatst geschreven waarde staan (geen korte LOW op CS).
   // Runtime-herstel: eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
-  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P7)) return;
-    if (modus != INPUT || !ComponentBeschikbaarTijdensRuntime()) return;
+  bool SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P7) || (modus != INPUT && modus != OUTPUT)) return false;
+    if (!ComponentBeschikbaarTijdensRuntime()) return false;
+    if (modus == OUTPUT) return true; // Geen richtingsregister; bestaande uitgangswaarde behouden.
     PCF8574::write(pin, HIGH);
-    ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == 0);
+    return ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == PCF8574_OK);
   }
-  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P7)) return;
-    if (!ComponentBeschikbaarTijdensRuntime()) return;
+  bool WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P7)) return false;
+    if (!ComponentBeschikbaarTijdensRuntime()) return false;
     PCF8574::write(pin, niveau);
-    ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == 0);
+    return ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == PCF8574_OK);
   }
   uint8_t ReadExtenderPin(uint8_t pin) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P7)) return 0;
-    if (!ComponentBeschikbaarTijdensRuntime()) return 0;
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_P7)) return 0xFF;
+    if (!ComponentBeschikbaarTijdensRuntime()) return 0xFF;
     const uint8_t waarde = PCF8574::read(pin);
-    ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == 0);
+    if (!ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574::lastError() == PCF8574_OK)) return 0xFF;
     return waarde;
   }
 #endif

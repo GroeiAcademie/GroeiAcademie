@@ -66,7 +66,21 @@ bool StappenmotorBesturing::VoerEenStapUit() {
 
 bool StappenmotorBesturing::VoerMeerdereStappenUit(uint32_t aantalStappen) {
   if (!gestart || gepauzeerd || !aantalStappen) return false;
-  // Synchronous: cannot handle a new pause command during this call; no calibrated speed here.
-  for (uint32_t stap = 0; stap < aantalStappen; ++stap) if (!VoerEenStapUit()) return false;
+  // Synchroon: tijdens deze aanroep kan geen nieuw pauzecommando worden verwerkt.
+  for (uint32_t stap = 0; stap < aantalStappen; ++stap) {
+    const unsigned long start = micros();
+    if (!VoerEenStapUit()) return false;
+    if (stap + 1 < aantalStappen) {
+      const unsigned long verstreken = micros() - start;
+      const unsigned long periode = 1000000UL / stappenPerSeconde;
+      if (verstreken < periode) delayMicroseconds(periode - verstreken);
+    }
+  }
+  return true;
+}
+
+bool StappenmotorBesturing::StelSnelheidIn(uint16_t stappenPerSeconde) {
+  if (stappenPerSeconde < 1 || stappenPerSeconde > 1000 || gestart) return false;
+  this->stappenPerSeconde = stappenPerSeconde;
   return true;
 }

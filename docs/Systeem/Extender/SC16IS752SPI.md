@@ -29,6 +29,14 @@ src/Systeem/Extender/SC16IS752SPI.h
 src/Systeem/Extender/SC16IS752SPI.cpp
 ```
 
+## Uitwisselbaarheid
+
+- **Rechtstreeks verwant:** `ExtenderSC16IS752I2C` (kanalen A/0 en B/1). `ExtenderMAX14830I2C` en `ExtenderMAX14830SPI` zijn voorwaardelijke alternatieven voor de gemeenschappelijke UART-kanalen 0 en 1.
+- **Omzetten:** wijzig parenttype, componentcode, doelconstructor en configuratie; maak I²C/SPI-aansluitingen passend en controleer de bestaande kanaalclaim en UART-TX/RX.
+- **Beperking:** fysiek gebruik, klok-/baudinstellingen en extra chipfuncties zijn niet automatisch gelijkwaardig. SPI heeft geen I²C-runtime-herstel.
+
+Zie ook [`GEDEELDEBUS.md`](../GEDEELDEBUS.md#uitwisselbaarheid-van-extenders) voor de gezamenlijke uitwisselbaarheidstabel en de stappen voor een omschakeling.
+
 ## Aansluiten
 
 - SPI: `SCLK`, `MOSI`, `MISO`, `CS`; twee UART-kanalen met TX/RX en acht GPIO.
@@ -97,3 +105,8 @@ ExtenderSC16IS752SPI extender(
 **Fabrikantdatasheet:** https://www.nxp.com/docs/en/data-sheet/SC16IS752_SC16IS762.pdf
 
 **Bestaand bronbestand voor de component:** `src/Systeem/Extender/SC16IS752SPI.h`
+
+### Gelijktijdige UART-kanalen en herstel
+
+- Loopback op UART-kanaal A en B, gelijktijdig, met korte/lange pakketten, verschillende baudrates, volle RX/FIFO-buffer, ontbrekende bytes en SPI-storing. Vergelijk exacte bytes en controleer CS, IRQ en reset na herstel.
+- **Status:** fysieke proef vereist; nog geen hardwarebewijs.

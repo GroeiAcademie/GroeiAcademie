@@ -66,9 +66,9 @@ void InitialiserenGedeeldeBus(GedeeldeBusType busType) {
         Wire.begin();
         i2cGeinitialiseerd = true;
       #endif
-      // Runtime-herstel: een transactie wacht nooit langer dan I2C_TIMEOUT_PER_TRANSACTIE_US; true = de I2C-hardware resetten na een timeout.
-      // Nagekeken: AVR (Wire.h, setWireTimeout) en UNO R4 (Wire.h, setWireTimeout). Andere cores houden hun eigen standaard.
-      #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_RENESAS)
+      // UNO R4: de Wire-timeout wordt ingesteld; het tweede argument wordt door de Renesas-core genegeerd.
+      // Andere cores behouden hun eigen standaard.
+      #if defined(ARDUINO_ARCH_RENESAS)
         Wire.setWireTimeout(I2C_TIMEOUT_PER_TRANSACTIE_US, true);
       #endif
 

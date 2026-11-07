@@ -114,7 +114,7 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
   #undef BUNDEL_EXTENDER
 
   ExtenderCD74HC4067(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 6 }, component, Extender), np_S0(ExtenderLijst[teller].s0), np_S1(ExtenderLijst[teller].s1), np_S2(ExtenderLijst[teller].s2), np_S3(ExtenderLijst[teller].s3), np_EN(ExtenderLijst[teller].en), np_Z(ExtenderLijst[teller].z) {
+    : GedeeldeBusNode(parent, { nullptr, 0, exclusief_, 6 }, component, Extender), np_S0((teller < 2 ? ExtenderLijst[teller].s0 : HardwareResourcePin::NONE)), np_S1((teller < 2 ? ExtenderLijst[teller].s1 : HardwareResourcePin::NONE)), np_S2((teller < 2 ? ExtenderLijst[teller].s2 : HardwareResourcePin::NONE)), np_S3((teller < 2 ? ExtenderLijst[teller].s3 : HardwareResourcePin::NONE)), np_EN((teller < 2 ? ExtenderLijst[teller].en : HardwareResourcePin::NONE)), np_Z((teller < 2 ? ExtenderLijst[teller].z : HardwareResourcePin::NONE)) {
     exclusief_[0] = static_cast<uint8_t>(np_S0);
     exclusief_[1] = static_cast<uint8_t>(np_S1);
     exclusief_[2] = static_cast<uint8_t>(np_S2);

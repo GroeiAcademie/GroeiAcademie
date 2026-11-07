@@ -441,4 +441,20 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+REM Aanvullende hardware-foutinjecties zonder afzonderlijke foutcode.
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_DS2482_GeenSensor\Hardwaretest_Foutinjectie_DS2482_GeenSensor.ino"
+set TEST_NAAM="Foutinjectie DS2482 zonder 1-Wire-sensor"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DEXTENDER_DS2482_800_AANTAL=1 -DSENSOR_DS18B20_AANTAL=1"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_UART_LegeBuffer\Hardwaretest_Foutinjectie_UART_LegeBuffer.ino"
+set TEST_NAAM="Foutinjectie SC16IS752 I2C met lege RX-buffer"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DEXTENDER_SC16IS752_I2C_AANTAL=1"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 exit /b 0

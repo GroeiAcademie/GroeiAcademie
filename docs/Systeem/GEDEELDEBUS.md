@@ -181,8 +181,8 @@ Herstel na een afwezige opstart is dus niet generiek voor alle subsystemen. FsrR
 - Uitschakelniveau hoger dan het hoogst toegelaten foutniveau mag en betekent: wel melden, nooit automatisch uitschakelen (bv. voor een optioneel component).
 - Het runtime-herstel veronderstelt sequentiële toegang: niet vanuit interrupts of callbacks (de herstelcontext is gedeeld).
 - Elke sensor die tijdens runtime uitgeschakeld kan worden, heeft een eigen herstelpad nodig (FsrRfp: `OpnieuwAanmeldenNaPauze()`, voor blokkerend en niet-blokkerend lezen).
-- De Wire-timeout (`I2C_TIMEOUT_PER_TRANSACTIE_US`, standaard 25 ms) wordt gezet op AVR en UNO R4 (nagekeken in hun Wire.h). Andere cores houden hun eigen standaard.
-- Geheugen per I2C-component: 11 bytes op AVR, 12 op 32-bit (twee aparte tijdvelden, zodat ook een uitgeschakeld component verder klimt).
+- De Wire-timeout (`I2C_TIMEOUT_PER_TRANSACTIE_US`, standaard 25 ms) wordt gezet op UNO R4 (nagekeken in zijn Wire.h; het tweede argument wordt genegeerd). Andere cores houden hun eigen standaard.
+- Geheugen per I2C-component: 12 bytes op 32-bit (twee aparte tijdvelden, zodat ook een uitgeschakeld component verder klimt).
 
 ## Native resources
 
@@ -249,13 +249,42 @@ Alleen Extenders die compile-time effectief gebruikt worden, worden mee gecompil
 
 De concrete controlpinnen van een Extender, zoals CS, IRQ, RESET, START, PWDN of de selectorlijnen van de CD74HC4067, blijven Native `HardwareResourcePin`-claims wanneer ze aan het Arduino-board gekoppeld zijn.
 
+## Uitwisselbaarheid van Extenders
+
+Een Extender vervangen betekent in dit FrameWork dat de **parent** van de aangesloten Sensor of Sturing verandert. Waar beide Extenders hetzelfde GedeeldeBus-contract uitvoeren, kan de logica van het child-object behouden blijven. Een gelijk contract garandeert niet dezelfde elektrische eigenschappen, het aantal kanalen, de resolutie of de bekabeling. De onderstaande beoordeling betreft de **actuele RC1-code**; een compileerbare variant is nog geen bewezen hardwaretest.
+
+| Functiegroep | Uitwisselbare Extenders binnen het bestaande contract | Wat blijft gelijk? | Wat moet worden gecontroleerd of veranderd? |
+|---|---|---|---|
+| Digitale GPIO | `ExtenderPCF8574` (8), `ExtenderPCF8575` (16), `ExtenderMCP23017` (16), `ExtenderMCP23S17` (16) | `SetExtenderPinMode()`, `WriteExtenderPin()`, `ReadExtenderPin()` bij geactiveerde GPIO-ondersteuning; een child zoals `Relais` kan behouden blijven | Parenttype en constructor, componentcode, configuratie, fysieke pinnen en claims, I²C versus SPI, voedings-/signaalniveau, source-/sink-stroom en opstarttoestand |
+| Analoge ADC | `ExtenderADS1115` (4), `ExtenderADS7828` (8), `ExtenderADS1158` (16), `ExtenderADS7953` (16) | `StartExtenderReadAnalog()`, `IsExtenderReadAnalogReady()`, `GetExtenderReadAnalogValue()` en `GetExtenderReadAnalogEffectiefBereikMillivolt()` zijn in alle vier headers geïmplementeerd | Kanaal, bereik in mV, referentiespanning, resolutie, timing/conversie, I²C versus SPI en Sensor-configuratie; geen blind gelijkgestelde meetwaarden |
+| Analoge kanaalselectie | `ExtenderCD74HC4067` heeft geen gelijkwaardige vervanger als zelfstandige Extender | Het geeft het analoge meetcontract door aan een Native- of ADC-parent | Het is een **analoge multiplexer, geen ADC**: selectielijnen, `EN`, `Z` en de achterliggende analoge ingang/parent blijven noodzakelijk |
+| UART binnen MAX14830 | `ExtenderMAX14830I2C` ↔ `ExtenderMAX14830SPI` | `GetExtenderStream(channel)` en `StartExtenderUART(channel, baud)` voor kanalen 0–3 | Andere hostbus, parentconstructor, adres of CS, IRQ en bronklok/PLL-configuratie |
+| UART binnen SC16IS752 | `ExtenderSC16IS752I2C` ↔ `ExtenderSC16IS752SPI` | Hetzelfde UART-contract voor kanalen 0–1 | Andere hostbus, adres of CS, IRQ/RESET en bijbehorende configuratie |
+| UART tussen families | `MAX14830*` ↔ `SC16IS752*`, **voorwaardelijk** | Alleen het gemeenschappelijke `Stream`-/baud-contract bij bestaande children | MAX14830 heeft vier kanalen, SC16IS752 twee; alleen kanalen 0 en 1 zijn gemeenschappelijk. Klok, baud, FIFO, aanvullende chipfuncties en configuratie zijn niet gelijk |
+| Gespecialiseerd | `ExtenderPCA9685` (PWM), `ExtenderTCA9548A` (I²C-multiplexing), `ExtenderDS2482v800` (1-Wire) | Geen algemene onderlinge vervangbaarheid | Voor hun specifieke functies is er binnen deze zestien Extenders geen gelijkwaardige drop-in vervanger |
+
+### Zo wissel je een Extender in de bestaande code
+
+1. **Controleer het contract van het child-object.** `Relais` gebruikt digitale GPIO via de parent; een analoge Sensor gebruikt `StartExtenderReadAnalog()`/`IsExtenderReadAnalogReady()`/`GetExtenderReadAnalogValue()`; een UART-Sensor gebruikt `GetExtenderStream()` en `StartExtenderUART()`. Een Extender met een andere functie is geen automatische vervanger.
+2. **Pas alleen de bestaande Extender-instantie aan:** het `Extender...`-type, de bijbehorende `GedeeldeBusComponent`, de constructorargumenten en de parentreferentie bij de bestaande child-constructor. Gebruik de exacte constructor uit de betreffende `src/Systeem/Extender/*.h` en het bijbehorende voorbeeld; I²C-adres en SPI-CS zijn niet uitwisselbaar.
+3. **Zet de bestaande configuratie voor het doeltype juist:** in `src/Configuratie/Extenders/Config*.h` de toepasselijke `EXTENDER_*_AANTAL`, het I²C-adres of de SPI-CS-pin en eventuele `INT`/`IRQ`/`RESET`/referentie-/klokinstellingen. Een `*_template.h` wordt niet rechtstreeks ingelezen. Controleer ook de bestaande benodigde Sensor-/Sturing-configuratie.
+4. **Controleer de child-pinnen en resourceclaims:** een gebruikte kanaalindex moet op de nieuwe parent bestaan. GPIO-nummers 0–7 corresponderen bij PCF8574 met P0–P7, bij PCF8575 met P00–P07 en bij MCP23x17 met GPA0–GPA7; 8–15 corresponderen bij PCF8575 met P10–P17 en bij MCP23x17 met GPB0–GPB7. Dezelfde kanaalindex betekent niet dezelfde fysieke aansluitpin.
+5. **Wijzig de bedrading passend bij de nieuwe chip:** I²C SDA/SCL of SPI SCK/MISO/MOSI/CS, eventuele controlpinnen, gemeenschappelijke GND en de echte sensor-/sturingssignalen. Controleer voedingsspanning, logic-high/low, maximaal toegelaten stromen en opstarttoestand. PCF8574/PCF8575 hebben quasi-bidirectionele GPIO met een zwakke HIGH-bron; MCP23017/MCP23S17 hebben configureerbare I/O-richtingen. Gebruik geen rechtstreekse aansluiting louter op basis van een passende software-interface.
+6. **Test opnieuw:** aanmelding, inpluggen, activeren, claims, het echte uitgangs- of meetsignaal en bij UART de gewenste baud. GedeeldeBus-lifecycle is gemeenschappelijk; runtime-herstel is niet gelijk voor I²C en SPI.
+
+**Concreet voorbeeld: ISD1820 van PCF8574 naar MCP23017.** De twee bestaande `Relais`-children voor `REC` en `P-E` blijven met kanaal `0` en `1` en actief niveau `HIGH` behouden. De parent verandert van `ExtenderPCF8574`/`DIGITAL_PINS_PCF8574` naar `ExtenderMCP23017`/`DIGITAL_PINS_MCP23017`. De aanmaak gebruikt dan `I2C_ADDRESS_EXTENDER_MCP23017_1`, `EXTENDER_MCP23017_1_INTA`, `EXTENDER_MCP23017_1_INTB` en `EXTENDER_MCP23017_1_RESET` in plaats van het PCF8574-adres en `INT`. Hardware: GPA0 → REC, GPA1 → P-E, gemeenschappelijke GND en compatibele voedings-/logicaniveaus. Er zijn **geen fysieke relais** vereist: `Relais` is hier de bestaande softwarematige GPIO-aansturing. De opname- en afspeellogica hoeft niet te veranderen. De hoorbare werking moet afzonderlijk worden getest.
+
+**GPIO-compileervoorwaarde:** `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF` wordt in `SystemConfig.h` afgeleid, niet handmatig ingesteld. Ze wordt onder meer actief wanneer een ondersteunde GPIO-Extender samen met `STURING_RELAIS_AANTAL > 0` of `STURING_ULN2003_AANTAL > 0` geconfigureerd is; `GEDEELDE_BUS_MIXED_PINS` is dus niet de enige mogelijke activeringsvoorwaarde.
+
+Zie voor de exacte `ExtenderPins`, de bestaande constructor en configuratienamen de desbetreffende bestanden onder `docs/Systeem/Extender/`.
+
 ## ADC als Extender
 
 Een ADC is een gewone Extender; er bestaat geen statische ADC-parent meer. De `.ino` maakt bijvoorbeeld een `ExtenderADS1115` (componentcode `ADC_ADS1115`) aan en geeft die als parent aan FsrRfp door. De kanalen van de Sensor zijn `ExtenderPins` van die Extender (`EP_AIN0..EP_AIN3`) en worden als exclusieve claims onder die parent aangemeld.
 
 ### Analoog meten via de parent (V8, R1 tot R3)
 
-Een Sensor meet via drie functies van zijn parent, zonder het type ADC te kennen: `StartExtenderReadAnalog(pin, bereikMillivolt)`, `IsExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue(waarde)`. Vandaag vult alleen `ExtenderADS1115` ze in; een andere ADC-Extender vult ze later in zijn eigen bestand in, zonder GedeeldeBus te wijzigen.
+Een Sensor meet via drie functies van zijn parent, zonder het type ADC te kennen: `StartExtenderReadAnalog(pin, bereikMillivolt)`, `IsExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue(waarde)`. In de huidige RC1-headers vullen `ExtenderADS1115`, `ExtenderADS7828`, `ExtenderADS1158` en `ExtenderADS7953` dit contract alle vier in, elk met de eigen kanalen, bereik- en conversievoorwaarden.
 
 | `StartExtenderReadAnalog()` | Betekenis | Foutladder D042 |
 |---|---|---|
@@ -274,7 +303,7 @@ Een Sensor meet via drie functies van zijn parent, zonder het type ADC te kennen
 
 1. **Runtime-herstel alleen voor I2C.** D042 bestaat alleen voor I2C-componenten (`ComponentBeschikbaarTijdensRuntime()` staat op `HardwareResourceTypeI2C`). Een ADC-Extender op SPI krijgt geen foutladder; een Sensor daarop meet, maar herstelt niet automatisch.
 2. **Genormaliseerde waarde, geen echte resolutie.** De waarde is geschaald naar `ADC_BITS` (`SystemConfig.h`). Een ADC met minder bits geeft na opschaling niet meer nauwkeurigheid; een Sensor die de echte resolutie nodig heeft, moet dat weten.
-3. **Digitale pinfuncties alleen met `GEDEELDE_BUS_MIXED_PINS`.** `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()` bestaan alleen als `GEDEELDE_BUS_MIXED_PINS` 1 is. Dat gebeurt in `SystemConfig.h`, vandaag alleen voor de CS-pinnen van Data. Een nieuwe digitale Sensor of Sturing voegt daar zijn eigen voorwaarde toe; GedeeldeBus zelf verandert niet.
+3. **Digitale pinfuncties alleen met `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF`.** `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()` worden meegecompileerd als deze afgeleide macro 1 is. `SystemConfig.h` activeert ze onder meer bij `GEDEELDE_BUS_MIXED_PINS` of bij bepaalde digitale Sensoren/Sturingen (waaronder `Relais` en ULN2003) samen met een van de vier GPIO-Extenders. De macro niet zelf instellen.
 
 ## UART als Extender
 
@@ -308,3 +337,23 @@ Onder `examples/Systeem/GedeeldeBus/Extenders/` bestaan per Extender:
 Onder `examples/Systeem/GedeeldeBus/Sensoren/` staan `Sensor_FsrRfp.ino`, `Sensor_FsrRfp_DIRECT.ino`, `Sensor_FsrRfp_FLASH.ino` en `Sensor_FsrRfp_MICROSD.ino`.
 
 Deze tests moeten niet worden geïnterpreteerd als een volledige elektronische functietest van alle chipfuncties. Zie `extras/TESTEN.md`.
+
+### Integratie- en herstelscenario's
+- **Gelijktijdig:** start één sensorconversie terwijl twee Sturingen kanalen van dezelfde GPIO/PWM-Extender gebruiken; voeg een tweede child en een tweede Extender op dezelfde bus toe. Controleer ongewijzigde resourceclaims en sensorwaarden tijdens bewegingen.
+- **Busuitval:** verbreek een verbinding alleen in een elektrisch veilige, spanningsloze voorbereiding of met geschikte schakelvoorziening; observeer gedrag bij actieve sensorconversie/motor, daarna reconnect en herinitialisatie. Een software-OK zonder fysieke respons is geen PASS.
+- **Claimtests:** dubbele exclusieve pin, dubbele I²C-adresclaim, gedeeltelijk mislukte activering, daarna afmelden en opnieuw aanmelden. Controleer dat er geen spookclaim of onbedoelde motoractivatie overblijft.
+- **Opstart/voedingsuitval:** noteer de werkelijke outputtoestanden bij reset, brown-out en onderbroken actuatorvoeding; voer deze testen uitsluitend met geschikte stroombeperking/veilige mechanische opstelling uit.
+- **Langdurig:** motor aan/uit, GPIO, ADC-conversies en UART-data gelijktijdig; registreer fouten, vertragingen en herinnerhaalbaarheid. **Status:** alleen testplan, geen hardwarebewijs.
+
+### Indexcontrole van Extenders
+
+- Alle bestaande constructoren met `ExtenderLijst[teller]` hebben momenteel twee tabelingangen (index 0 en 1). De constructor controleert nu de index vóór toegang tot de tabel en gebruikt voor ongeldige index een ongeldig I²C-adres (`0xFF`) of `HardwareResourcePin::NONE`.
+- De bestaande GedeeldeBus-controle moet zo'n foutieve configuratie vóór activering weigeren. Dit moet nog met compileertests en foutinjectie op `teller=2` en `teller=255` bevestigd worden.
+
+### Meetresultaten en kalibratie
+
+- Leg voor elke Sensor vast of de waarde vers uit de hardware komt, wanneer deze werd gemeten en of een eerdere waarde nog geldig is. Bij een ontbrekende nieuwe sample blijft het testresultaat **onbewezen**; rapporteer geen oude waarde als nieuwe meting.
+- Leg per type vast wat ruwe eenheden zijn, welke kalibratie (nulpunt, schaalfactor, referentiespanning) vereist is en welke referentiemeting de sensor bewijst. Vermeng geen ruwe waarden met gevalideerde fysische metingen.
+- Houd de beoordelingsresultaten voor compilatie/statische analyse, normale hardwarewerking, foutinjectie en stresstests afzonderlijk. Bestaande ingevulde HTML-resultaten worden niet overschreven; de nieuwste HTML moet eerst als bron worden gecontroleerd.
+- Documenteer per hardwaretest het exacte bestaande `.ino`-pad, gebruikte `Config*.h`-definities, bedrading, voeding, concrete handeling en verwachte Serial-uitvoer. Dit moet bij de nieuwste HTML per test concreet worden gecontroleerd, niet via een generieke verwijzing.
+- De 70-punten-test voor Flash/RAM-regressie vereist dezelfde FQBN en buildinstellingen voor de vorige en de nieuwe versie. Zonder Arduino-compilatie zijn er nog geen betrouwbare bytes of percentages.

@@ -364,120 +364,82 @@ this->Pixel.offsetY
 this->Pixel.gfx
 ```
 
-Start:
+Start van de aanmelding:
 
 ```cpp
-this->Pixel.actief = false;
 this->Pixel.foutmelding = nullptr;
 this->Pixel.foutmeldingWeergegeven = false;
 ```
 
-GedeeldeBus-object:
+GedeeldeBus-object in `Screen::aanmelden()`:
 
 ```cpp
-if (this->Pixel.gedeeldeBus == nullptr) {
-  this->Pixel.gedeeldeBus =
-    ObjectAanmakenEnInpluggenGedeeldeBus<::PixelScreen>(
-      this,
-      GedeeldeBusComponent::PIXEL_SCREEN,
-      PIXEL_SCREEN_CS,
-      HardwareResourcePin::NP_SCK,
-      HardwareResourcePin::NP_MISO,
-      HardwareResourcePin::NP_MOSI,
-      PIXEL_SCREEN_DC,
-      PIXEL_SCREEN_RST
-    );
+if ((this->typesActief & SCREEN_TYPE_PIXELS) && this->Pixel.gedeeldeBus == nullptr) {
+  ::PixelScreen* child = new ::PixelScreen(this, GedeeldeBusComponent::PIXEL_SCREEN, PIXEL_SCREEN_CS, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
+  child->componentCreated = true;
+
+  if (child->aanmelden()) {
+    this->Pixel.gedeeldeBus = child;
+  } else {
+    delete child;
+    this->Pixel.foutmelding = _ABORT_PS001;
+  }
 }
 ```
 
-Bij falen:
+`Screen::controleren()` controleert de PixelScreen-child. Bij een mislukte GedeeldeBus-controle wordt deze child verwijderd; een afzonderlijke foutmelding `PS101` volgt alleen wanneer GedeeldeBus niet al een conflict heeft gemeld. `Screen::inpluggen()` plugt de child in en meldt bij falen `PS201`. De concrete driverinitialisatie en het tekstgrid worden pas ingesteld in `Screen::Activeren()` na `this->Pixel.gedeeldeBus->activeren()`.
+
+Displayinitialisatie in `Screen::Activeren()`:
 
 ```cpp
-this->Pixel.actief = false;
-this->actief = false;
-return false;
-```
-
-Displayinitialisatie:
-
-```cpp
-this->Pixel.display.init(
-  ACTIEF_PIXEL_SCREEN_BREEDTE,
-  ACTIEF_PIXEL_SCREEN_HOOGTE
-);
+#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7735S)
+  this->Pixel.display.initR(INITR_BLACKTAB);
+#else
+  this->Pixel.display.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
+#endif
 
 this->Pixel.display.setRotation(PIXEL_SCREEN_ROTATION);
+#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7789)
+  this->Pixel.display.invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0);
+#endif
 this->Pixel.gfx = &this->Pixel.display;
 ```
+
+ST7735S gebruikt `SCREEN_128X160` met `PIXEL_SCREEN_TEXT_SIZE=1`. Een hogere tekstgrootte wordt bij compilatie geweigerd. Voor ST7789 behoudt `ACTIEF_PIXEL_SCREEN_INVERSIE=1` het bestaande Adafruit-gedrag met inversie, terwijl `0` inversie uitschakelt. ST7735S wordt niet beïnvloed.
 
 Bij ontbrekende pointer:
 
 ```cpp
-this->Pixel.actief = false;
-this->Pixel.foutmelding = _FATAL_PS001;
-
-if (this->Pixel.gedeeldeBus != nullptr) {
-  this->Pixel.gedeeldeBus->afmelden();
-  this->Pixel.gedeeldeBus = nullptr;
-}
-
-this->actief = false;
-return false;
+this->Pixel.foutmelding = _CRITICAL_PS302;
+pixelOk = false;
 ```
 
 Rotatie `1` of `3`:
 
 ```cpp
-if (
-  this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_HOOGTE ||
-  this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_BREEDTE
-) {
-  this->Pixel.actief = false;
-  this->Pixel.foutmelding = _FATAL_PS002;
-
-  if (this->Pixel.gedeeldeBus != nullptr) {
-    this->Pixel.gedeeldeBus->afmelden();
-    this->Pixel.gedeeldeBus = nullptr;
-  }
-
-  this->actief = false;
-  return false;
+if (foutAfmetingen || this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) {
+  this->Pixel.foutmelding = _CRITICAL_PS303;
+  pixelOk = false;
 }
 ```
 
-Rotatie `0` of `2` gebruikt dezelfde foutflow met `_FATAL_PS003`.
+Rotatie `0` of `2` gebruikt dezelfde foutflow met `_CRITICAL_PS304` en controleert de niet-verwisselde breedte/hoogte.
 
 Gridberekening:
 
 ```cpp
-int16_t bruikbareBreedte =
-  this->Pixel.gfx->width() - (2 * PIXEL_SCREEN_MARGIN);
+const int16_t bruikbareBreedte = this->Pixel.gfx->width() - (2 * PIXEL_SCREEN_MARGIN);
+const int16_t bruikbareHoogte  = this->Pixel.gfx->height() - (2 * PIXEL_SCREEN_MARGIN);
 
-int16_t bruikbareHoogte =
-  this->Pixel.gfx->height() - (2 * PIXEL_SCREEN_MARGIN);
-
-int32_t ruweKolommen =
-  (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) /
-  this->Pixel.KarakterStap();
-
-int32_t ruweRegels =
-  (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) /
-  this->Pixel.RegelStap();
+const int32_t ruweKolommen = (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) / this->Pixel.KarakterStap();
+const int32_t ruweRegels   = (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) / this->Pixel.RegelStap();
 ```
 
 Minimum niet gehaald:
 
 ```cpp
-this->Pixel.actief = false;
-this->Pixel.foutmelding = _FATAL_PS004;
-
-if (this->Pixel.gedeeldeBus != nullptr) {
-  this->Pixel.gedeeldeBus->afmelden();
-  this->Pixel.gedeeldeBus = nullptr;
-}
-
-this->actief = false;
-return false;
+this->Pixel.foutmelding = _CRITICAL_PS305;
+pixelOk = false;
 ```
 
 Daarna blijven de bestaande berekeningen voor:
@@ -494,12 +456,7 @@ en:
 
 ```cpp
 this->Pixel.gfx->setTextSize(PIXEL_SCREEN_TEXT_SIZE);
-
-this->Pixel.gfx->setTextColor(
-  PIXEL_SCREEN_TEXT_COLOR,
-  PIXEL_SCREEN_BACKGROUND_COLOR
-);
-
+this->Pixel.gfx->setTextColor(PIXEL_SCREEN_TEXT_COLOR, PIXEL_SCREEN_BACKGROUND_COLOR);
 this->Pixel.gfx->setTextWrap(false);
 ```
 
@@ -508,6 +465,8 @@ Pas daarna:
 ```cpp
 this->Pixel.actief = true;
 ```
+
+Als `pixelOk` onwaar is, zet `Screen::Activeren()` de `gfx`-pointer op `nullptr`, markeert het pixelscherm als niet actief en verwijdert de child via `ChildVerwijderen()`. Andere Screen-uitvoer kan actief blijven.
 
 ### Serial
 
@@ -742,11 +701,13 @@ Screen.Controleren();
 Screen.Inpluggen();
 ```
 
-`Screen::inpluggen()` bestuurt de concrete Character-, Pixel- en Serial-uitvoer. Er bestaan geen afzonderlijke `Screen.Character.Inpluggen()`, `Screen.Pixel.Inpluggen()` of `Screen.Serial.Inpluggen()`-functies. Na een geslaagde PixelScreen-inplug voert `Screen` intern, in deze volgorde, `Screen.Pixel.display.init(...)`, `Screen.Pixel.display.setRotation(...)` en `Screen.Pixel.gfx = &Screen.Pixel.display` uit. Daarna controleert `Screen.Inpluggen()` de gekoppelde `Adafruit_GFX`-instantie, houdt rekening met rotatie 0 tot en met 3, trekt de ingestelde buitenmarges van de beschikbare schermruimte af, berekent het tekstgrid en stelt tekstgrootte, tekstkleur, achtergrondkleur en tekstomloop in.
+`Screen::inpluggen()` plugt de concrete Character-, Pixel- en Serial-children via GedeeldeBus in. Er bestaan geen afzonderlijke `Screen.Character.Inpluggen()`, `Screen.Pixel.Inpluggen()` of `Screen.Serial.Inpluggen()`-functies. Pas in `Screen::Activeren()` wordt het pixelscherm geïnitialiseerd: bij ST7735S met `initR(INITR_BLACKTAB)`, bij ST7789 met `init(breedte, hoogte)`. Daarna volgen `setRotation(...)`, uitsluitend bij ST7789 `invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0)` en de `Adafruit_GFX`-koppeling. In dezelfde activatiefase worden de afmetingen na rotatie 0 tot en met 3 gecontroleerd, de marges verrekend, het tekstgrid berekend en tekstgrootte, kleuren en tekstomloop ingesteld. ST7789 gebruikt standaard inversie `1` (bestaand Adafruit-gedrag); `0` schakelt die uit. ST7735S blijft ongewijzigd.
 
-Omdat het concrete object onderdeel van `Screen` is, kan de actieve displaydriver nadien rechtstreeks worden aangesproken, bijvoorbeeld `Screen.Pixel.display.setRotation(1);`. Die rechtstreekse driveraanroep wijzigt het fysieke pixelscherm; de standaard `Screen.Print()`-gridberekening blijft gebaseerd op de activatie die door `Screen.Inpluggen()` is uitgevoerd.
+Omdat het concrete object onderdeel van `Screen` is, kan de actieve displaydriver nadien rechtstreeks worden aangesproken, bijvoorbeeld `Screen.Pixel.display.setRotation(1);`. Die rechtstreekse driveraanroep wijzigt het fysieke pixelscherm; de standaard `Screen.Print()`-gridberekening blijft gebaseerd op de activatie die door `Screen::Activeren()` is uitgevoerd.
 
-Zonder geregistreerde pixelcallback verwerkt de standaarduitvoer alleen `ScreenData::TYPE_NONE`. De tekst wordt met het ingebouwde vaste Adafruit_GFX-font in een gecentreerd grid van minimaal 16×2 en maximaal 40×4 geplaatst. `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING` bepalen de extra witruimte tussen tekens en regels. Om karakterafstand mogelijk te maken, plaatst de standaarduitvoer ieder teken afzonderlijk op de berekende cursorpositie. Voor andere fonts, vrije pixelposities, grafieken of andere `ScreenData`-typen is een pixelcallback bedoeld. De standaard cursoradministratie gaat uit van eenvoudige tekens; UTF-8-tekens kunnen meerdere bytes tellen en worden niet volledig ondersteund.
+Zonder geregistreerde pixelcallback verwerkt de standaarduitvoer alleen `ScreenData::TYPE_NONE`. De tekst wordt met het ingebouwde vaste Adafruit_GFX-font in een gecentreerd grid van minimaal 16×2 en maximaal 40×4 geplaatst. Bij `SCREEN_128X160` vereist dat `PIXEL_SCREEN_TEXT_SIZE=1`; een grotere tekstgrootte wordt vooraf bij compilatie geweigerd, terwijl de runtimecontrole `PS305` voor andere te kleine grids behouden blijft. `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING` bepalen de extra witruimte tussen tekens en regels. Om karakterafstand mogelijk te maken, plaatst de standaarduitvoer ieder teken afzonderlijk op de berekende cursorpositie. Voor andere fonts, vrije pixelposities, grafieken of andere `ScreenData`-typen is een pixelcallback bedoeld. De standaard cursoradministratie gaat uit van eenvoudige tekens; UTF-8-tekens kunnen meerdere bytes tellen en worden niet volledig ondersteund.
+
+Hardwarematig getest en werkend: de 1,8-inch ST7735S met `INITR_BLACKTAB` en rode tekst zonder ruis aan de randen; de 2,8-inch ST7789V via SPI met `ACTIEF_PIXEL_SCREEN_INVERSIE=0`. Dit bevestigt niet automatisch andere PixelScreen-resoluties of -modules.
 
 ## ScreenData
 
@@ -830,6 +791,8 @@ Een I2C-characterscherm gebruikt `VCC`, `GND`, `SDA` en `SCL`. Controleer `I2C_A
 
 Een SPI-PixelScreen op Arduino UNO gebruikt voor hardware-SPI standaard `D11` als MOSI en `D13` als SCK. `CS`, `DC` en `RST` worden ingesteld met `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`. De standaard `PIXEL_SCREEN_RST` is Arduino Uno-shieldpin `D7`. Controleer altijd de voedingsspanning en logicaniveaus van de concrete displaymodule.
 
+De geteste 2,8-inch ST7789V SPI-module heeft ook een aanraaklaag: de `T_`-pinnen worden door de huidige Screen-laag niet ondersteund en blijven los. De microSD werkt via een afzonderlijke SD-header van 4 pinnen, met **aangesloten `SD_MISO`**. Zonder die verbinding mislukte de initialisatie in deze testopstelling (`GB304` bij `DEBUG`, anders `GB301`); de code is niet specifiek voor een ontbrekende MISO-verbinding. Ook microSD met CS via PCF8574-uitgang P0 is op hardware getest en werkt.
+
 ## Beperkingen
 
 De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange wachttijden onderbreken andere verwerking.
@@ -848,7 +811,7 @@ De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange w
 
 CharacterScreen en PixelScreen blijven bij gecombineerde standaarduitvoer synchroon. Een geregistreerde callback wordt exact één keer aangeroepen. `action`, `derdeRegel` en `vierdeRegel` worden ongewijzigd doorgegeven. Wanneer een standaardscherm actief is, ontvangt de callback voor `delayTime` en `delayTussenPaginas` de waarde `0`, omdat de standaarduitvoer de toepasselijke wachttijden al afhandelt. Wanneer geen standaardscherm actief is, ontvangt de callback de oorspronkelijke wachttijden. Bij gelijktijdige CharacterScreen- en PixelScreen-callbacks is de gebruiker verantwoordelijk voor de gewenste synchronisatie en voor het voorkomen van dubbele wachttijden.
 
-`PIXEL_SCREEN_ROTATION` bepaalt de rotatie waarmee `Screen.Inpluggen()` de standaard PixelScreen-uitvoer configureert. `Screen.Pixel.display` blijft daarnaast rechtstreeks toegankelijk voor driverbewerkingen. De standaard `Screen.Print()`-gridberekening hoort bij de activatie die via `Screen.Inpluggen()` uitgevoerd werd.
+`PIXEL_SCREEN_ROTATION` bepaalt de rotatie waarmee `Screen::Activeren()` de standaard PixelScreen-uitvoer configureert. `Screen.Pixel.display` blijft daarnaast rechtstreeks toegankelijk voor driverbewerkingen. De standaard `Screen.Print()`-gridberekening hoort bij de activatie die via `Screen::Activeren()` uitgevoerd werd.
 
 ## Doel van de Screen-voorbeelden
 

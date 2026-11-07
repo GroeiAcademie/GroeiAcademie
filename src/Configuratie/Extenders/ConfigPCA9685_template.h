@@ -18,7 +18,7 @@
 // #define EXTENDER_PCA9685_1_PWM_FREQUENTIE 50  // standaard: niet ingesteld (frequentie van de chip); 50 Hz voor servo's, hoger voor LED's
 #endif
 #ifndef EXTENDER_PCA9685_1_OE_PIN
-// #define EXTENDER_PCA9685_1_OE_PIN 7  // standaard: niet ingesteld; pin van het board naar OE van de PCA9685 (noodstop in hardware). LET OP: wordt niet gereserveerd, kies een vrije pin
+// #define EXTENDER_PCA9685_1_OE_PIN 7  // standaard: niet ingesteld; pin naar OE. Wordt exclusief geclaimd; gebruik een ondersteunde boardpin.
 #endif
 
 // ============================================================================
@@ -31,6 +31,6 @@
 // #define EXTENDER_PCA9685_2_PWM_FREQUENTIE 50  // standaard: niet ingesteld (frequentie van de chip); 50 Hz voor servo's, hoger voor LED's
 #endif
 #ifndef EXTENDER_PCA9685_2_OE_PIN
-// #define EXTENDER_PCA9685_2_OE_PIN 7  // standaard: niet ingesteld; pin van het board naar OE van de PCA9685 (noodstop in hardware). LET OP: wordt niet gereserveerd, kies een vrije pin
+// #define EXTENDER_PCA9685_2_OE_PIN 7  // standaard: niet ingesteld; pin naar OE. Wordt exclusief geclaimd; gebruik een ondersteunde boardpin.
 #endif
 #endif

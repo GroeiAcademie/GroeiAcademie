@@ -54,7 +54,7 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
   #undef BUNDEL_EXTENDER
 
   ExtenderMCP23017(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), MCP23017(ExtenderLijst[teller].adres, &Wire), np_INTA(ExtenderLijst[teller].inta), np_INTB(ExtenderLijst[teller].intb), np_RESET(ExtenderLijst[teller].reset) {
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel), MCP23017((teller < 2 ? ExtenderLijst[teller].adres : 0xFF), &Wire), np_INTA((teller < 2 ? ExtenderLijst[teller].inta : HardwareResourcePin::NONE)), np_INTB((teller < 2 ? ExtenderLijst[teller].intb : HardwareResourcePin::NONE)), np_RESET((teller < 2 ? ExtenderLijst[teller].reset : HardwareResourcePin::NONE)) {
     exclusiefMetIntReset_[0] = exclusief_[0];
     exclusiefMetIntReset_[1] = static_cast<uint8_t>(np_INTA);
     exclusiefMetIntReset_[2] = static_cast<uint8_t>(np_INTB);
@@ -87,23 +87,21 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // Pin van deze Extender voor een component van een ander gebied (bv. CS van een SPI-chip).
   // Runtime-herstel: eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
-  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return;
-    if (!ComponentBeschikbaarTijdensRuntime()) return;
-    MCP23017::pinMode1(pin, modus);
-    ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
+  bool SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return false;
+    if (!ComponentBeschikbaarTijdensRuntime()) return false;
+    return ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::pinMode1(pin, modus));
   }
-  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return;
-    if (!ComponentBeschikbaarTijdensRuntime()) return;
-    MCP23017::write1(pin, niveau);
-    ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
+  bool WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return false;
+    if (!ComponentBeschikbaarTijdensRuntime()) return false;
+    return ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::write1(pin, niveau));
   }
   uint8_t ReadExtenderPin(uint8_t pin) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return 0;
-    if (!ComponentBeschikbaarTijdensRuntime()) return 0;
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return 0xFF;
+    if (!ComponentBeschikbaarTijdensRuntime()) return 0xFF;
     const uint8_t waarde = MCP23017::read1(pin);
-    ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK);
+    if (!ResultaatComponentToegangTijdensRuntimeVerwerken(MCP23017::lastError() == MCP23017_OK)) return 0xFF;
     return waarde;
   }
 #endif

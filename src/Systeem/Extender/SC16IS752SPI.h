@@ -59,8 +59,8 @@ struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI {
   #undef BUNDEL_EXTENDER
 
   ExtenderSC16IS752SPI(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), np_IRQ(ExtenderLijst[teller].irq), np_RESET(ExtenderLijst[teller].reset) {
-    exclusiefMetIrqReset_[0] = static_cast<uint8_t>(ExtenderLijst[teller].csPin);
+    : HardwareResourceTypeSPI(parent, component, (teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE), np_SCK, np_MISO, np_MOSI, Extender), np_IRQ((teller < 2 ? ExtenderLijst[teller].irq : HardwareResourcePin::NONE)), np_RESET((teller < 2 ? ExtenderLijst[teller].reset : HardwareResourcePin::NONE)) {
+    exclusiefMetIrqReset_[0] = static_cast<uint8_t>((teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE));
     exclusiefMetIrqReset_[1] = static_cast<uint8_t>(np_IRQ);
     exclusiefMetIrqReset_[2] = static_cast<uint8_t>(np_RESET);
     aangemeldePinnen = { gedeeld_, 3, exclusiefMetIrqReset_, 3 };

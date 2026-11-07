@@ -16,7 +16,9 @@ struct RGBLED : GedeeldeBusNode {
   bool Activeren() override {return parent && r<16 && g<16 && b<16 && r!=g && r!=b && g!=b &&
     parent->WriteExtenderPWM(r,switchPWMvalues(0)) && parent->WriteExtenderPWM(g,switchPWMvalues(0)) && parent->WriteExtenderPWM(b,switchPWMvalues(0));}
   bool setRGBcolor(uint16_t red,uint16_t green,uint16_t blue){if(!actief||!parent||red>4095||green>4095||blue>4095)return false;
-    return parent->WriteExtenderPWM(r,switchPWMvalues(red)) && parent->WriteExtenderPWM(g,switchPWMvalues(green)) && parent->WriteExtenderPWM(b,switchPWMvalues(blue));}
+    if (parent->WriteExtenderPWM(r,switchPWMvalues(red)) && parent->WriteExtenderPWM(g,switchPWMvalues(green)) && parent->WriteExtenderPWM(b,switchPWMvalues(blue))) return true;
+    StopSturing(); // best effort: als de I2C-bus onbereikbaar is, kan software uitschakelen niet garanderen
+    return false;}
   void StopSturing() override {if(parent){parent->WriteExtenderPWM(r,switchPWMvalues(0));parent->WriteExtenderPWM(g,switchPWMvalues(0));parent->WriteExtenderPWM(b,switchPWMvalues(0));}}
 };
 

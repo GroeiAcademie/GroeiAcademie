@@ -1,28 +1,41 @@
 // ============================================================================
-// Sturing: ULN2003_HardwareTest
+// Sturing: Sturing_ULN2003_MCP23S17_HardwareTest
 // ============================================================================
-// Begeleide hardwaretest voor ULN2003. Elke beweging vereist eerst bevestiging via Serial.
-// Pinnen zijn afgeleid uit de bestaande constructoren en de boardmapping in src/Configuratie/UserConfig.h en SystemConfig.h.
-// PCF8574 P0/P1/P2/P3 -> ULN2003 IN1/IN2/IN3/IN4; externe motorvoeding en GND correct aansluiten.
-// Alternatieve GPIO-parents: PCF8575, MCP23017 (I2C) en MCP23S17 (SPI); dit voorbeeld gebruikt PCF8574.
-// Extender-pinnen worden gekozen uit de parent van het Sturing-object; MIXED is hiervoor niet nodig.
-// I2C-aansluiting: SDA/SCL en GND op dezelfde bus; modulevoeding volgens het werkelijke Extender-bord.
-// UNO R4 Minima/WiFi en UNO Q: SDA/SCL op de gelijknamige boardaansluitingen.
-// ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22.
-// ESP32-S3 ARDI-32: SDA=GPIO38, SCL=GPIO39; ESP32-S3 DEV: SDA=GPIO8, SCL=GPIO9.
-// RP2040 Cytron Maker UNO: SDA=GPIO20, SCL=GPIO21.
-// STM32 F401RE Nucleo: SDA=PB9, SCL=PB8.
+// Begeleide fysieke test van ULN2003 met 28BYJ-48 stappenmotor.
+// Iedere test start met 1 + Enter; STOP + Enter voorkomt nieuwe stapcommando's.
+// De motor draait pas als de test actief is en de sturing daadwerkelijk werkt.
+// GPIO-Extender MCP23S17: GPA0 -> ULN2003 IN1, GPA1 -> IN2,
+// GPA2 -> IN3 en GPA3 -> IN4. Motorstekker -> ULN2003-motorconnector.
+// ULN2003-motorvoeding: geschikte EXTERNE 5V, GND gedeeld met Extender en Arduino.
+// Controleer voeding bij het ULN2003-bord (V+ en GND). Gebruik geen Arduino-5V als motorvoeding.
+// Extender-pinnen horen bij dezelfde GPIO-parent; GEDEELDE_BUS_MIXED_PINS is niet nodig.
+// Actieve configuratie: ConfigULN2003.h (STURING_ULN2003_AANTAL >= 1)
+// en ConfigMCP23S17.h (EXTENDER_MCP23S17_AANTAL >= 1, correct adres/pininstellingen).
+// ============================================================================
+// SPI-aansluiting: SI/DIN -> MOSI, SO -> MISO, SCK -> SCK, CS -> ingestelde CS-pin.
+// VOORBEELD Arduino UNO R4 Minima / WiFi: SI/DIN D11, SO D12, SCK D13,
+// CS D10 ALS EXTENDER_MCP23S17_1_CS_PIN op NP_D10 is geconfigureerd.
+// MCP23S17 VDD -> 5V (indien module geschikt), VSS -> GND, RESET -> HIGH.
+// MCP23S17 adresselectie A0/A1/A2 -> vaste niveaus (bij hardwareadres 0: GND).
+// Let op: adresselectie A0/A1/A2 is NIET hetzelfde als GPA0/GPA1/GPA2.
+// ESP32 D1 UNO R32: MOSI GPIO23, MISO GPIO19, SCK GPIO18; D10 is GPIO5.
+// ESP32-S3 ARDI-32/DEV: MOSI GPIO11, MISO GPIO13, SCK GPIO12; D10 GPIO10.
+// RP2040 Cytron Maker UNO: MOSI GPIO11, MISO GPIO12, SCK GPIO10; D10 GPIO13.
+// STM32 F401RE Nucleo: MOSI PA7, MISO PA6, SCK PA5; CS volgens configuratie.
+// UNO Q: MOSI D11, MISO D12, SCK D13; CS volgens configuratie.
+// Deze test gebruikt rechtstreeks de push-pull-GPIO-uitgangen van de MCP-Extender.
+// Een externe SN74AHCT125N is hiervoor niet vereist; de bedrading moet wel correct zijn.
 // ============================================================================
 
 #include <GroeiAcademie.h>
 #if STURING_ULN2003_AANTAL == 0
   #error Zet STURING_ULN2003_AANTAL op minstens 1 voor deze test.
 #endif
-#if EXTENDER_PCF8574_AANTAL == 0
+#if EXTENDER_MCP23S17_AANTAL == 0
   #error Schakel de vereiste Extender in voor deze Sturing-test.
 #endif
 
-ExtenderPCF8574* extenderPCF8574 = nullptr;
+ExtenderMCP23S17* extenderMCP23S17 = nullptr;
 ULN2003* uln2003 = nullptr;
 
 StappenmotorBesturing* motorBesturing = nullptr;
@@ -38,7 +51,7 @@ unsigned long testStartMillis = 0;
 unsigned long laatsteStapMillis = 0;
 
 void toonStartInstructies() {
-  GA_SERIAL.println(F("HARDWARETEST: Sturing_ULN2003_HardwareTest"));
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_ULN2003_MCP23S17_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE STAPPENMOTORTEST. Sluit de motor veilig aan en maak het mechanisme vrij."));
   GA_SERIAL.println(F("Bij ULN2003 stopt STOP de stapcommando's; schakel de motorvoeding uit voordat je bedrading wijzigt."));
   GA_SERIAL.println(F("Elke stap start pas na '1' + Enter. STOP + Enter onderbreekt de test."));
@@ -52,7 +65,7 @@ void toonTestInstructies() {
     case 1: GA_SERIAL.println(F("TEST 2: StartMotor + VoerMeerdereStappenUit(4). Verwacht: vier stappen; markeer de motoras om kleine beweging te herkennen.")); break;
     case 2: GA_SERIAL.println(F("TEST 3: DraairichtingOmkeren + 80 losse motorstappen. Verwacht: beweging in de andere draairichting, met tussenpozen.")); break;
     case 3: GA_SERIAL.println(F("TEST 4: StartMotor, stappen, PauzeerMotor, HervatMotor, resterende stappen. Verwacht: beweging - stilstand - beweging.")); break;
-    default: GA_SERIAL.println(F("ALLE STAPPENMOTORFUNCTIES VAN RUN133 AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
+    default: GA_SERIAL.println(F("ALLE STAPPENMOTORFUNCTIES AANGEROEPEN. Controleer zelf het fysieke resultaat.")); return;
   }
   GA_SERIAL.println(F("Controleer de ruimte rond de motor. Typ 1 + Enter om deze test te starten."));
 }
@@ -78,9 +91,9 @@ void rondTestAf(bool ok) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_ULN2003_HardwareTest"));
-  extenderPCF8574 = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
-  if (extenderPCF8574 != nullptr) uln2003 = GedeeldeBusNewComponent<ULN2003>(extenderPCF8574, 0, 1, 2, 3);
+  GA_SERIAL.println(F("TEST: Sturing_ULN2003_MCP23S17_HardwareTest"));
+  extenderMCP23S17 = GedeeldeBusNewComponent<ExtenderMCP23S17>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23S17, EXTENDER_MCP23S17_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI);
+  if (extenderMCP23S17 != nullptr) uln2003 = GedeeldeBusNewComponent<ULN2003>(extenderMCP23S17, 0, 1, 2, 3);
   if (uln2003 != nullptr) motorBesturing = new StappenmotorBesturing(*uln2003);
   startGelukt = uln2003 != nullptr && motorBesturing != nullptr;
   if (startGelukt) motorBesturing->StopMotor();

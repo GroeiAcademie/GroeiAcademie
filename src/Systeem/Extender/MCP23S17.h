@@ -45,7 +45,7 @@ struct ExtenderMCP23S17 : HardwareResourceTypeSPI, MCP23S17 {
   #undef BUNDEL_EXTENDER
 
   ExtenderMCP23S17(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
-    : HardwareResourceTypeSPI(parent, component, ExtenderLijst[teller].csPin, np_SCK, np_MISO, np_MOSI, Extender), MCP23S17(NativeArduinoPinVan(ExtenderLijst[teller].csPin), 0x00, &SPI) {}
+    : HardwareResourceTypeSPI(parent, component, (teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE), np_SCK, np_MISO, np_MOSI, Extender), MCP23S17(NativeArduinoPinVan((teller < 2 ? ExtenderLijst[teller].csPin : HardwareResourcePin::NONE)), 0x00, &SPI) {}
   #endif
 
   bool Activeren() override {
@@ -74,12 +74,19 @@ struct ExtenderMCP23S17 : HardwareResourceTypeSPI, MCP23S17 {
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
   // V10: pin van deze Extender voor een component van een ander gebied, zoals bij MCP23017.
   // Geen runtime-herstel: dat bestaat alleen voor I2C.
-  void SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return; MCP23S17::pinMode1(pin, modus); }
-  void WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return; MCP23S17::write1(pin, niveau); }
+  bool SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7) || !actief) return false;
+    return MCP23S17::pinMode1(pin, modus);
+  }
+  bool WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7) || !actief) return false;
+    return MCP23S17::write1(pin, niveau);
+  }
   uint8_t ReadExtenderPin(uint8_t pin) override {
-    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7)) return 0; return MCP23S17::read1(pin); }
+    if (pin > static_cast<uint8_t>(ExtenderPins::EP_GPB7) || !actief) return 0xFF;
+    const uint8_t waarde = MCP23S17::read1(pin);
+    return MCP23S17::lastError() == MCP23S17_OK ? waarde : 0xFF;
+  }
 #endif
 };
 

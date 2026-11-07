@@ -276,6 +276,11 @@
 // #define ACTIEF_PIXEL_SCREEN_CONTROLLER SCREEN_ST7789            // standaard waarde: SCREEN_ST7789
 #endif
 
+// Alleen ST7789: 1 behoudt de Adafruit-initialisatie (INVON); 0 schakelt kleurinversie uit. ST7735S blijft onveranderd.
+#ifndef ACTIEF_PIXEL_SCREEN_INVERSIE
+// #define ACTIEF_PIXEL_SCREEN_INVERSIE    1                        // standaard waarde: 1
+#endif
+
 // Standaard rotatiewaarden (met de klok mee):
 // 0:   0 graden: Portretmodus (standaard, met de kabels vaak aan de onder- of bovenkant).
 // 1:  90 graden: Landschapsmodus (horizontaal).

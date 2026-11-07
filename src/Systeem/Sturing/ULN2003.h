@@ -11,11 +11,32 @@ struct ULN2003 : GedeeldeBusNode {
   ULN2003(GedeeldeBusNode* parent,uint8_t p1,uint8_t p2,uint8_t p3,uint8_t p4)
    : GedeeldeBusNode(parent,{nullptr,0,exclusief_,4},GedeeldeBusComponent::ULN2003),
      exclusief_{p1,p2,p3,p4},p{p1,p2,p3,p4}{}
-  bool Activeren() override {if(!parent)return false;for(uint8_t i=0;i<4;i++){parent->WriteExtenderPin(p[i],LOW);parent->SetExtenderPinMode(p[i],OUTPUT);}return true;}
+  bool Activeren() override {
+    if (!parent || !parent->actief || parent != firstExtenderNode()) return false;
+    switch (parent->component) {
+      case GedeeldeBusComponent::DIGITAL_PINS_PCF8574:
+      case GedeeldeBusComponent::DIGITAL_PINS_PCF8575:
+      case GedeeldeBusComponent::DIGITAL_PINS_MCP23017:
+      case GedeeldeBusComponent::DIGITAL_PINS_MCP23S17:
+        break;
+      default: return false;
+    }
+    for (uint8_t i=0;i<4;i++) {
+      if (!parent->WriteExtenderPin(p[i], LOW) || !parent->SetExtenderPinMode(p[i], OUTPUT)) return false;
+    }
+    return true;
+  }
 
   bool VoerEenStapUit(bool forward){if(!actief||!parent)return false;phase=(phase+(forward?1:3))%4;
     const uint8_t patterns[4]={0x03,0x06,0x0C,0x09};
-    for(uint8_t i=0;i<4;i++)parent->WriteExtenderPin(p[i],(patterns[phase]&(1<<i))?HIGH:LOW);return true;}
+    for (uint8_t i=0;i<4;i++) {
+      if (!parent->WriteExtenderPin(p[i], (patterns[phase]&(1<<i))?HIGH:LOW)) {
+        StopSturing();
+        return false;
+      }
+    }
+    return true;
+  }
   void StopSturing() override {if(parent)for(uint8_t i=0;i<4;i++)parent->WriteExtenderPin(p[i],LOW);}
 };
 

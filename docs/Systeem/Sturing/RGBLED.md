@@ -100,3 +100,16 @@ De aanwezige kleine **RGBLED-print** is geen WS2812-matrix. De aansluitingen op 
 De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en het script `extras/TestLibrarySturingen-v2.0.0.cmd`. 
 
 Configuratie: `STURING_RGBLED_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.
+
+## Uitval van I²C en veilige eindtoestand (RC1)
+
+Deze Sturing gebruikt een PCA9685-parent. `StopSturing()` kan de output niet betrouwbaar wijzigen zolang de I²C-bus onbereikbaar is. Een softwarematig `RESULTAAT: OK` of een geslaagde aanroep bewijst niet dat de aangesloten actuator/uitgang werkelijk gestopt is.
+
+- Optionele OE-bedrading van de PCA9685 geeft onafhankelijk van I²C een gezamenlijke uitgangsvrijgave zolang het board en de OE-besturing functioneren. Zie `docs/Systeem/Extender/PCA9685.md` voor de noodzakelijke externe opstart-/resetbeveiliging en de afhankelijkheid van MODE2.OUTNE.
+- De **voeding van de aangesloten actuator** blijft een afzonderlijke veiligheidsvoorziening. Gebruik waar de toepassing dat vereist een apart hardwarematig uitschakelpad en controleer de eindtoestand met een fysieke meting.
+- RC1-hardwaretest: tijdens een actieve beweging/uitgang de I²C-bus tijdelijk onderbreken, veilig uitschakelen, de uitgang en voeding afzonderlijk meten, vervolgens herstellen. Herhaal met reset van de MCU. **Nog niet fysiek bewezen.**
+
+### Gedeeltelijke kleurupdate
+- `setRGBcolor()` schakelt bij een gemelde fout op R/G/B nu alle drie de kanalen via het bestaande `StopSturing()` uit (best effort), in plaats van een gedeeltelijke kleurupdate ongemerkt te laten staan.
+- **Proef:** kleurinstelling in normale toestand; ontkoppel I²C gecontroleerd tijdens de tweede/derde kanaalupdate; controleer de retourwaarde en fysiek de drie PWM-uitgangen. **Grenzen:** bij volledig busverlies is de stop niet gegarandeerd; gebruik hardwarematig OE/voedingsonderbreking als deze eis geldt.
+- **Status:** code aangepast, compileer- en hardwaretest open.

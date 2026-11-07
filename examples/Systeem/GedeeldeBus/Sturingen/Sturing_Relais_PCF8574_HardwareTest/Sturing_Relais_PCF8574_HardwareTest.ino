@@ -3,10 +3,10 @@
 // ============================================================================
 // Begeleide fysieke AAN/UIT-test voor Relais, met automatische GedeeldeBus-lifecycle.
 // Na START schakelt 1 het relais AAN en 0 het relais UIT; STOP schakelt UIT en beëindigt de test.
-// NO-contact naar Native D2, COM naar GND; alleen een spanningsvrij laagspanningscontact.
+// NO-contact naar PCF8574 P1, COM naar GND; alleen een spanningsvrij laagspanningscontact.
 // De aansluitpinnen volgen de bestaande constructor en boardmapping.
 // PCF8574 P0 -> relais IN (actief LOW); modulevoeding en gemeenschappelijke GND volgens de module.
-// Terugmelding: spanningsvrij NO -> Native D2, COM -> GND; geen netspanning op D2.
+// Terugmelding: spanningsvrij NO -> PCF8574 P1, COM -> GND; geen externe spanning op P1.
 // I2C-aansluiting: SDA/SCL en GND op dezelfde bus; modulevoeding volgens het werkelijke Extender-bord.
 // UNO R4 Minima/WiFi en UNO Q: SDA/SCL op de gelijknamige boardaansluitingen.
 // ESP32 D1 UNO R32: SDA=GPIO21, SCL=GPIO22.
@@ -32,9 +32,8 @@ bool startGelukt = false;
 bool testGestopt = false;
 String invoer;
 
-// INPUT_PULLUP: NO open = HIGH, NO gesloten = LOW.
-// Sluit NO op D2 en COM op GND aan. Geen externe spanning op D2.
-const uint8_t meetPin = NativeArduinoPinVan(HardwareResourcePin::NP_D2);
+// INPUT: NO open = HIGH, NO gesloten = LOW.
+// Sluit NO op P1 en COM op GND aan. Geen externe spanning op P1.
 
 void toonFunctieResultaat(bool ok) {
   GA_SERIAL.println(ok ? F("OPDRACHT: OK") : F("OPDRACHT: FOUT"));
@@ -57,17 +56,13 @@ void setup() {
   startGelukt = relais != nullptr;
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK") : F("LEVENSCYCLUS: FOUT"));
 
-  pinMode(meetPin, INPUT_PULLUP);
-
   if (startGelukt) {
+    extenderPCF8574->SetExtenderPinMode(1, INPUT);
     relais->setRelayStatusOnOff(false);
-  }
 
-  // Toon de fysieke meetpin en het ruwe digitale rustniveau.
-  GA_SERIAL.print(F("MEETPIN (Arduino): "));
-  GA_SERIAL.println(meetPin);
-  GA_SERIAL.print(F("D2 RAW (rust): "));
-  GA_SERIAL.println(digitalRead(meetPin));
+    GA_SERIAL.print(F("P1 RAW (rust): "));
+    GA_SERIAL.println(extenderPCF8574->ReadExtenderPin(1));
+  }
   toonStartInstructies();
 }
 
@@ -125,9 +120,9 @@ void loop() {
   }
 
   delay(80);
-  bool gesloten = digitalRead(meetPin) == LOW;
+  bool gesloten = extenderPCF8574->ReadExtenderPin(1) == LOW;
 
-  GA_SERIAL.print(F("D2 RAW: "));
+  GA_SERIAL.print(F("P1 RAW: "));
   GA_SERIAL.println(gesloten ? LOW : HIGH);
   GA_SERIAL.print(F("NO-contact: "));
   GA_SERIAL.println(gesloten ? F("GESLOTEN") : F("OPEN"));

@@ -108,7 +108,7 @@ Op deze foto zie je de geteste schermen, die slechts enkele voorbeelden zijn van
 - de standaard HX1838-pin is `D8` en de standaard PixelScreen-resetpin is `D7`;
 - hardwarestatus: alle tien ondersteunde boards zijn **geïmplementeerd en getest**; de volledige bevestigde hardwarestatus staat in `docs/HARDWARE_SUPPORT.md` en `extras/TESTRESULTATEN.md`;
 - ontwikkelfase: beta;
-- huidige implementatie: GedeeldeBus met Native resources, Screen, Input, Extenders, de eerste Sensor (`RFP602`) en de Stimulusmodule;
+- huidige implementatie: GedeeldeBus met Native resources, Screen, Input, Extenders, Sensoren (waaronder `FsrRfp`) en de Stimulusmodule;
 - HX1838 met `HX1838_BRON_CODES_DEFINE` is released;
 - `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` laat binnen deze DEFINE-route een eigen afstandsbediening toe via een configureerbaar aantal toetsen en opschriftkoppeling in `UserConfig.h`; de 8-bit commandcodes kunnen via `HX1838_GENERIEK_CODES` worden opgegeven of automatisch worden gekalibreerd wanneer die define ontbreekt;
 - deze HX1838-route is hardwarematig bevestigd met beide ontvangstbackends: TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) en IRremote (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0`);
@@ -187,7 +187,7 @@ FRAM_I2C van Rob Tillaart
 IRremote
 ```
 
-Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderPCF8574` blijft beschikbaar wanneer Input via PCF8574 actief is. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat RFP602 via de ADS1115-Extender meet.
+Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderPCF8574` blijft beschikbaar wanneer Input via PCF8574 actief is. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115-Extender meet.
 
 ## Configuratie
 
@@ -197,7 +197,8 @@ De configuratie- en taalbestanden zijn:
 src/Configuratie/SystemConfig.h
 src/Configuratie/UserConfig_template.h
 src/Configuratie/Extenders/Config<NAAM>_template.h
-src/Configuratie/Sensoren/ConfigRFP602_template.h
+src/Configuratie/Sensoren/Config<NAAM>_template.h
+src/Configuratie/Sturingen/Config<NAAM>_template.h
 src/Configuratie/Examples.h
 src/Configuratie/StimulusConfig.h
 
@@ -219,11 +220,12 @@ Wanneer je een eigen `UserConfig.h` gebruikt, controleer daarin vóór compilati
 - `I2C_ADDRESS_PCF8574` wanneer `INPUT_TYPE_PCF8574` gebruikt wordt;
 - `I2C_ADDRESS_CHARACTER_SCREEN`;
 - `ACTIEF_CHARACTER_SCREEN`;
-- `ACTIEF_PIXEL_SCREEN`;
+- `ACTIEF_PIXEL_SCREEN` en `ACTIEF_PIXEL_SCREEN_CONTROLLER`;
+- `ACTIEF_PIXEL_SCREEN_INVERSIE` (alleen ST7789, standaard `1`);
 - `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`;
-- `PIXEL_SCREEN_ROTATION`;
-- `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1`;
-- `RFP602_ADC_PIN_SENSOR_1_SET_1` tot en met `RFP602_ADC_PIN_SENSOR_4_SET_1`;
+- `PIXEL_SCREEN_ROTATION`, `PIXEL_SCREEN_TEXT_SIZE`, `PIXEL_SCREEN_MARGIN`, `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING`;
+- `PIXEL_SCREEN_TEXT_COLOR` en `PIXEL_SCREEN_BACKGROUND_COLOR`;
+- `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1` en de FsrRfp-kanalen uit `ConfigFsrRfp.h`;
 - `EXTENDER_ADS1115_AANTAL` en `I2C_ADDRESS_EXTENDER_ADS1115_1`;
 - `BOARD_VERSION`.
 
@@ -267,7 +269,7 @@ examples/
 │   │   │   ├── Extender_SC16IS752_SPI/ + 2 ExtenderPins-tests
 │   │   │   └── Extender_TCA9548A/ + 2 ExtenderPins-tests
 │   │   └── Sensoren/
-│   │       └── Sensor_RFP602/
+│   │       └── Sensor_FsrRfp/
 │   ├── Input/
 │   │   ├── InputkanalenHX1838/
 │   │   ├── InputkanalenHX1838UserDefined/
@@ -309,7 +311,7 @@ GroeiAcademie/
 │   │   ├── GedeeldeBus/       # GedeeldeBus.h/.cpp + 16 Extender .h/.cpp-paren
 │   │   ├── Input/             # Input.h, Input.cpp, InputTypes.h
 │   │   ├── Screen/            # Screen.h, Screen.cpp, ScreenTypes.h
-│   │   └── Sensor/            # RFP602.h/.cpp
+│   │   └── Sensor/            # Sensoren, waaronder FsrRfp.h/.cpp
 │   └── Toepassingsgebieden/
 │       └── Stimulus/          # Stimulus.h/.cpp
 ├── examples/

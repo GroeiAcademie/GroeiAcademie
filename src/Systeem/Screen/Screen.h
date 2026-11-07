@@ -72,6 +72,10 @@
   #error ACTIEF_PIXEL_SCREEN bevat geen ondersteunde pixelschermresolutie.
 #endif
 
+#if (ACTIEF_PIXEL_SCREEN == SCREEN_128X160) && (PIXEL_SCREEN_TEXT_SIZE > 1)
+  #error SCREEN_128X160 vereist PIXEL_SCREEN_TEXT_SIZE 1.
+#endif
+
 #if (PIXEL_SCREEN_ROTATION > 3)
   #error PIXEL_SCREEN_ROTATION moet 0, 1, 2 of 3 zijn.
 #endif

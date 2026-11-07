@@ -59,7 +59,7 @@ struct ExtenderSC16IS752I2C : HardwareResourceTypeI2C {
   #undef BUNDEL_EXTENDER
 
   ExtenderSC16IS752I2C(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_SDA, HardwareResourcePin np_SCL, uint8_t teller, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD, uint8_t tcaChannel = 0xFF)
-    : HardwareResourceTypeI2C(parent, component, ExtenderLijst[teller].adres, np_SDA, np_SCL, Extender, tcaChannel), np_IRQ(ExtenderLijst[teller].irq), np_RESET(ExtenderLijst[teller].reset) {
+    : HardwareResourceTypeI2C(parent, component, (teller < 2 ? ExtenderLijst[teller].adres : 0xFF), np_SDA, np_SCL, Extender, tcaChannel), np_IRQ((teller < 2 ? ExtenderLijst[teller].irq : HardwareResourcePin::NONE)), np_RESET((teller < 2 ? ExtenderLijst[teller].reset : HardwareResourcePin::NONE)) {
     exclusiefMetIrqReset_[0] = exclusief_[0];
     exclusiefMetIrqReset_[1] = static_cast<uint8_t>(np_IRQ);
     exclusiefMetIrqReset_[2] = static_cast<uint8_t>(np_RESET);

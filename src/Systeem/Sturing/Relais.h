@@ -21,9 +21,8 @@ struct Relais : GedeeldeBusNode {
       return true;
     }
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
-    parent->WriteExtenderPin(channel, relayValueOn == LOW ? HIGH : LOW);
-    parent->SetExtenderPinMode(channel, OUTPUT);
-    return true;
+    return parent->WriteExtenderPin(channel, relayValueOn == LOW ? HIGH : LOW) &&
+           parent->SetExtenderPinMode(channel, OUTPUT);
 #else
     return false;
 #endif
@@ -36,8 +35,7 @@ struct Relais : GedeeldeBusNode {
       return true;
     }
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
-    parent->WriteExtenderPin(channel, on ? relayValueOn : (relayValueOn == LOW ? HIGH : LOW));
-    return true;
+    return parent->WriteExtenderPin(channel, on ? relayValueOn : (relayValueOn == LOW ? HIGH : LOW));
 #else
     return false;
 #endif
