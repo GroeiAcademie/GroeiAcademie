@@ -187,7 +187,7 @@ bool FsrRfp::OpnieuwAanmeldenNaPauze() {
 
 int FsrRfp::RawAnalogRead(int sensorPin) {
   if (parent == nullptr) return 0;
-  HardwareResourceTypeI2C* i2c = (parent != nullptr && parent->gedeeldeIdentiteiten != nullptr && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA)
+  HardwareResourceTypeI2C* i2c = (parent->gedeeldeIdentiteiten != nullptr && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA)
       ? static_cast<HardwareResourceTypeI2C*>(parent) : nullptr;
   // Runtime-herstel: ADC uitgeschakeld en nog in de pauze: niet meten. Na herstel heractiveert de ADC deze sensor zelf.
   // Nog niet ingeplugd (bv. na een mislukte aanmelding): het herstelpad hieronder regelt de levenscyclus.
@@ -226,7 +226,7 @@ int FsrRfp::RawAnalogRead(int sensorPin) {
 // Niet-blokkerend: StartAnalogRead(), IsAnalogReadKlaar() en GetAnalogRead() samen zijn één meting = één resultaat.
 bool FsrRfp::StartAnalogRead(int sensorPin) {
   if (parent == nullptr) return false;
-  HardwareResourceTypeI2C* i2c = (parent != nullptr && parent->gedeeldeIdentiteiten != nullptr && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA)
+  HardwareResourceTypeI2C* i2c = (parent->gedeeldeIdentiteiten != nullptr && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA)
       ? static_cast<HardwareResourceTypeI2C*>(parent) : nullptr;
   if (i2c != nullptr && i2c->ingeplugd && !i2c->ComponentBeschikbaarTijdensRuntime()) return false;
   if (!OpnieuwAanmeldenNaPauze()) return false;

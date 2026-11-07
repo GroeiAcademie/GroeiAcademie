@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB107
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB107: binnen een component twee GEDEELD-claims, andere identiteit
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

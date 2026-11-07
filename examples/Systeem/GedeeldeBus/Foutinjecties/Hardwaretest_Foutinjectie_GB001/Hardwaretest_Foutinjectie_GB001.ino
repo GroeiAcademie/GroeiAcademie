@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB001
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB001: GEDEELD-claim zonder geldige identiteit
 // Verwachte build: GEDEELDE_BUS_FOUTINJECTIE 1 (standaard aan bij DEBUG); de melding bestaat alleen met de testingang
 // Opstelling: geen extra hardware

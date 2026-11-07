@@ -20,6 +20,23 @@
 // In dat geval verschijnt er ook GEEN tekst op Serial.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// MAX7219 matrix VCC -> voor de matrix bedoelde 5V, GND -> Arduino/Extender GND.
+// Bij 3,3V-GPIO/Extender moet logic-HIGH voor de 5V-MAX7219 worden gecontroleerd
+//   (datasheet VIH >= 3,5 V); zo nodig niveauomzetting toepassen.
+// Herken IN versus OUT op de ketenmodule; DIN/CLK/CS naar de IN-connector.
+// Het in de code gebruikte FC16_HW is VOORLOPIG; fysieke oriëntatie testen
+//   met de officiele MD_MAX72xx_HW_Mapper en gekozen matrixmodule.
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigMAX7219.h,
+//   STURING_MAX7219_AANTAL >= 1.
+// MAX7219 DIN -> board MOSI; CLK -> board SCK; CS/LOAD -> D10.
+// MISO is niet nodig voor deze MAX7219-driver.
+// Serietest: pixels, hoeken, spiraal, helderheid en RESET/STOP zien.
+// Dit is een fysieke lichttest, niet slechts succesvolle Serial-functieaanroepen.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #include <Systeem/Sturing/Functies/MatrixFuncties/SpiraalPatroon.h>
 #if STURING_MAX7219_AANTAL == 0

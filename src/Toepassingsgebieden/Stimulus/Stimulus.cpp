@@ -454,7 +454,6 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
       if (sensor[sensorNummer].actueleTikKracht > TIK_MINIMALE_DRUKWAARDE) {
         InitialiseerSensorStart(nu, sensor[sensorNummer]);
-        minstensEenSensorGestart = true;
       }
     }
 
@@ -555,7 +554,6 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
           }
         }
 
-        alleSensorenKlaar = true;
         break;
       }
     }
@@ -576,7 +574,6 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
         }
       }
 
-      alleSensorenKlaar = true;
       break;
     }
 

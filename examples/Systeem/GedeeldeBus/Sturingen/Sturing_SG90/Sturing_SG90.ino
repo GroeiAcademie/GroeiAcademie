@@ -12,6 +12,32 @@
 // STM32 F401RE Nucleo: SDA=PB9, SCL=PB8.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+// Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+// Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+// Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+// PCA9685 VCC is de logica-/I2C-voeding; V+ is een APARTE servo-/lastvoeding.
+// PCA9685 OE moet een gedefinieerd niveau hebben; controleer de concrete breakout.
+// Actieve Extenderconfig: src/Configuratie/Extenders/ConfigPCA9685.h
+//   EXTENDER_PCA9685_AANTAL >= 1, I2C_ADDRESS_EXTENDER_PCA9685_1 = fysiek adres.
+// Externe servovoeding (+) -> PCA9685 V+; voeding (-) -> PCA9685 GND.
+// Servostekker: GND (meestal bruin/zwart) -> GND, + (meestal rood) -> V+,
+//   signaal (meestal oranje/geel/wit) -> signaalcontact van gekozen kanaal.
+// Laat de servo onbelast en vrij bewegen; gebruik Arduino 5V niet als motorvoeding.
+// Extender-PWM-frequentie wordt alleen geconfigureerd wanneer
+//   EXTENDER_PCA9685_1_PWM_FREQUENTIE in ConfigPCA9685.h is gedefinieerd.
+//   Voor een servo-test circa 50 Hz instellen/nameten; geen automatische default aannemen.
+// 205 en 410 in de constructor zijn 12-bit-ticks, geen graden of microseconden:
+//   controleer de daadwerkelijke pulsbreedten en kalibreer zonder eindstopbelasting.
+// Een STOP schakelt PWM uit, niet de externe servovoeding of het houdkoppel.
+// PCA9685 signaalkanaal 0 -> SG90-signaaldraad.
+// Actieve config: ConfigSG90.h (STURING_SG90_AANTAL >= 1).
+// Deze .ino voert geen motorbeweging uit; aanmaak is geen fysieke test.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_SG90_AANTAL == 0
   #error Zet STURING_SG90_AANTAL op minstens 1 voor deze test.

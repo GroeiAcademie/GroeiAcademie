@@ -1131,6 +1131,8 @@ struct SensorQueueOrStack;   // staat in Data.h
 
 struct Sensor : GedeeldeBusNode {
   using GedeeldeBusNode::GedeeldeBusNode;
+  Sensor(const Sensor&) = delete;
+  Sensor& operator=(const Sensor&) = delete;
   // Aantal meetkanalen van deze Sensor; Data wijst daarvoor bij activeren() één keer de kanaaltabel toe.
   virtual uint8_t AantalChannels() const { return 0; }
 #if (DATA_LAYER_CONFIG) != DATA_TYPE_NONE

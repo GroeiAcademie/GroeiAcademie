@@ -20,6 +20,25 @@
 // Dit voorbeeld gebruikt een LOW-actieve relaismodule; geen ander niveau veronderstellen.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+// Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+// Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+// Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+// Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+// Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+// Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+// Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+// Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+// Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+//   STURING_RELAIS_AANTAL >= 1.
+// MCP23017 GPA0 -> relais IN (actief LOW), GPA1 -> NO; COM -> GND.
+// I2C-extender: ConfigMCP23017.h (EXTENDER_MCP23017_AANTAL >= 1).
+// ============================================================================
+
 #include <GroeiAcademie.h>
 
 #if STURING_RELAIS_AANTAL == 0

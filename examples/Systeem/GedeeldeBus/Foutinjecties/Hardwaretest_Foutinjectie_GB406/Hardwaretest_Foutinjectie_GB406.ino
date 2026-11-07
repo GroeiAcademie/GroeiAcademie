@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB406
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB406: heractiveren mislukt: verkeerde chip, teruglezen klopt niet
 // Verwachte build: DEBUG
 // Opstelling: een MCP23017 op TEST_ADRES_MCP23017, en een PCF8574 met hetzelfde adres om te wisselen

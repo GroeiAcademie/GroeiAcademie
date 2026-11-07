@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: IN304
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN304: HX1838-pin niet bruikbaar voor het interruptmechanisme
 // Verwachte build: normaal of DEBUG, met HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE 1
 // Opstelling: HX1838 op een pin zonder attachInterrupt-ondersteuning

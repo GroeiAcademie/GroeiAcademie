@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: CS301
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie CS301: CharacterScreen activeren() mislukt
 // Verwachte build: normaal of DEBUG
 // Opstelling: het LCD (I2C) op I2C_ADDRESS_CHARACTER_SCREEN, los te koppelen via een schakelaar of jumper in VCC

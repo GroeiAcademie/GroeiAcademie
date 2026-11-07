@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB111
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB111: parent/Extender biedt de gevraagde resource niet aan
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

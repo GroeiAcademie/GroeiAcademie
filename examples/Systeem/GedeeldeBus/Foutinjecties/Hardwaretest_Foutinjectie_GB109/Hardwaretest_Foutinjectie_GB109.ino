@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB109
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB109: I2C-adres niet toegestaan voor dit hardwaretype
 // Verwachte build: GEDEELDE_BUS_FOUTINJECTIE 1 (standaard aan bij DEBUG); de melding bestaat alleen met de testingang
 // Opstelling: geen extra hardware

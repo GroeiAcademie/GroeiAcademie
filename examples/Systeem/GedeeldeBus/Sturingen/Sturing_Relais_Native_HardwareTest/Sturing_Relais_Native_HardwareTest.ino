@@ -7,9 +7,9 @@
 // Test uitsluitend met een geschikte relaismodule en een geïsoleerd laagspanningscontact.
 // Rechtstreeks relais via Native: aansluiting D6 (relais IN), GND gemeenschappelijk.
 // Voeding van de relaismodule volgens haar specificaties, niet vanaf een Arduino-GPIO.
-// Terugmelding: spanningsvrij NC-contact naar D2 en COM naar GND. Geen netspanning op meetpin D2.
+// Terugmelding: spanningsvrij NO-contact naar D2 en COM naar GND. Geen netspanning op meetpin D2.
 // De Native pin D6 wordt via NativeArduinoPinVan() naar de effectieve boardpin vertaald.
-// Concrete boardmapping uit UserConfig.h (relais IN / NC-contactmeting):
+// Concrete boardmapping uit UserConfig.h (relais IN / NO-contactmeting):
 // UNO R4 Minima/WiFi en UNO Q: D6 / D2.
 // ESP32 D1 UNO R32: GPIO27 (D6) / GPIO26 (D2).
 // ESP32-S3 ARDI-32: GPIO9 (D6) / GPIO1 (D2); ESP32-S3 DEV: GPIO3 (D6) / GPIO18 (D2).
@@ -17,6 +17,21 @@
 // STM32 F401RE Nucleo: PB10 (D6) / PA10 (D2).
 // Configuratie: src/Configuratie/Sturingen/ConfigRelais.h met STURING_RELAIS_AANTAL >= 1.
 // Dit voorbeeld gebruikt een LOW-actieve relaismodule; geen ander niveau veronderstellen.
+// ============================================================================
+
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+// Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+// Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+// Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+// Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+// Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+//   STURING_RELAIS_AANTAL >= 1.
+// Arduino D6 -> relais IN (actief LOW), D2 (INPUT_PULLUP) -> NO;
+//   COM -> GND; rust NO open: HIGH, AAN NO gesloten: LOW.
 // ============================================================================
 
 #include <GroeiAcademie.h>

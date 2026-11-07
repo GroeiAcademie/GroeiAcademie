@@ -2,7 +2,6 @@
 #if SENSOR_VL6180X_AANTAL > 0
 bool SensorVL6180X::Activeren() {
   if (!parent || !parent->actief) return false;
-  HardwareResourceTypeI2C* const apparaat = static_cast<HardwareResourceTypeI2C*>(parent);
   // Hardware-aanmelding via officiële library. Geen fictieve successtatus.
   return vl.begin(&Wire);
 }

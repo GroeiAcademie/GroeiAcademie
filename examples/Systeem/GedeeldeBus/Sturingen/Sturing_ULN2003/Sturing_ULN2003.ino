@@ -14,6 +14,24 @@
 // STM32 F401RE Nucleo: SDA=PB9, SCL=PB8.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// 28BYJ-48 motorstekker -> 5-polige motorconnector van ULN2003-driverprint.
+// ULN2003 V+ -> geschikte EXTERNE motorvoeding; GND -> motorvoeding (-).
+// Arduino-, Extender- en ULN2003-GND gemeenschappelijk; geen motorstroom via GPIO.
+// Extenderuitgangen -> ULN2003 IN1, IN2, IN3, IN4 volgens onderstaande volgorde.
+// Zorg dat de motor mechanisch vrij kan draaien; markeer de motoras.
+// Elke fysieke test pas starten met 1 + Enter; STOP voorkomt nieuwe stappen.
+// Verwacht 1 stap, 4 stappen, achteruit en pauzeren/hervatten.
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigULN2003.h,
+//   STURING_ULN2003_AANTAL >= 1.
+// PCF8574 P0..P3 -> ULN2003 IN1..IN4.
+// I2C: SDA, SCL, VCC op correcte Extender-logica, GND gemeenschappelijk.
+// ConfigPCF8574.h: EXTENDER_PCF8574_AANTAL >= 1.
+// Deze .ino doet enkel componentaanmaak: geen motorbeweging.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_ULN2003_AANTAL == 0
   #error Zet STURING_ULN2003_AANTAL op minstens 1 voor deze test.

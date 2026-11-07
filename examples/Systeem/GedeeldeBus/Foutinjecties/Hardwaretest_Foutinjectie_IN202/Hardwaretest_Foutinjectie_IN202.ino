@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: IN202
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN202: HX1838-pin niet om te zetten naar een native pin
 // Verwachte build: normaal of DEBUG, met een ongeldige HX1838_ONTVANGER_PIN
 // Opstelling: in UserConfig.h tijdelijk #define HX1838_ONTVANGER_PIN 99

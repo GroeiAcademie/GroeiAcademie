@@ -12,6 +12,24 @@
 // STM32 F401RE Nucleo: D6=PB10, D7=PA8.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Native Arduino D6 -> A4988 STEP; D7 -> A4988 DIR; GND -> logica-GND.
+// A4988 VDD -> bij driver en board passende logicavoeding; GND -> GND.
+// A4988 VMOT -> afzonderlijke motorvoeding (+), motor-GND -> (-).
+// Twee gevonden motorwikkelingen -> 1A/1B en 2A/2B (niet onder spanning omsteken).
+// ENABLE, RESET, SLEEP en MS1/MS2/MS3 zijn NIET door deze .ino aangestuurd:
+//   stel ze extern volgens de eigen A4988-carrier in (RESET/SLEEP actief houden).
+// Voor Pololu-carrier: motorvoeding 8..35 V; VDD 3..5,5 V en voldoende
+//   voedingsbuffer dicht bij VMOT; controleer pinout van het ECHTE printje.
+// VOOR stroom inschakelen stroomlimiet/VREF afstellen op motor en carrier.
+// Roterende as vrijmaken; STOP stopt STEP-pulsen, niet noodzakelijk spoelstroom.
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigA4988.h,
+//   STURING_A4988_AANTAL >= 1.
+// Deze .ino controleert alleen aanmaak; er worden geen motorstappen verzonden.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_A4988_AANTAL == 0
   #error Zet STURING_A4988_AANTAL op minstens 1 voor deze test.

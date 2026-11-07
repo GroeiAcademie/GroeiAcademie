@@ -105,6 +105,187 @@ De gebruikte hardware omvat **meerdere afzonderlijke relaismodules**. Het zijn *
 
 ## Testen
 
+### Concrete aansluiting en uitvoering van de bestaande sketches
+
+Deze gegevens gelden voor de hieronder genoemde **bestaande sketches** en hun echte constructoren.
+Ze vervangen de overige technische documentatie niet. Een succesvolle functieaanroep
+of levenscyclus is geen bewijs van een fysieke beweging, licht- of contactreactie.
+
+#### `Sturing_Relais.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais/Sturing_Relais.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+- Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+- Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+- Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+- Deze .ino schakelt niet fysiek; START/1/0/STOP zitten in de HardwareTests.
+- Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+- STURING_RELAIS_AANTAL >= 1.
+- PCF8574 P0 -> relais IN; deze .ino voert geen schakeltest uit.
+- Actieve Extenderconfig: ConfigPCF8574.h (EXTENDER_PCF8574_AANTAL >= 1).
+
+**Uitvoering:** zie de start- en loopfunctie van deze bestaande sketch;
+controleer of deze sketch zelf uitvoer activeert voordat je een fysiek resultaat verwacht.
+
+#### `Sturing_Relais_Native_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_Native_HardwareTest/Sturing_Relais_Native_HardwareTest.ino`.
+
+- Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+- Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+- Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+- Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+- Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+- Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+- STURING_RELAIS_AANTAL >= 1.
+- Arduino D6 -> relais IN (actief LOW), D2 (INPUT_PULLUP) -> NO;
+- COM -> GND; rust NO open: HIGH, AAN NO gesloten: LOW.
+
+**Uitvoering:** gebruik de in de sketch beschreven START-/STOP-/Serial-commando's.
+Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
+
+#### `Sturing_Relais_PCF8574_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_PCF8574_HardwareTest/Sturing_Relais_PCF8574_HardwareTest.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+- Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+- Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+- Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+- Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+- Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+- STURING_RELAIS_AANTAL >= 1.
+- PCF8574 P0 -> relais IN (actief LOW), P1 -> NO; COM -> GND.
+- I2C-extender: ConfigPCF8574.h (EXTENDER_PCF8574_AANTAL >= 1).
+
+**Uitvoering:** gebruik de in de sketch beschreven START-/STOP-/Serial-commando's.
+Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
+
+#### `Sturing_Relais_PCF8575_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_PCF8575_HardwareTest/Sturing_Relais_PCF8575_HardwareTest.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+- Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+- Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+- Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+- Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+- Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+- STURING_RELAIS_AANTAL >= 1.
+- PCF8575 P00 -> relais IN (actief LOW), P01 -> NO; COM -> GND.
+- I2C-extender: ConfigPCF8575.h (EXTENDER_PCF8575_AANTAL = 1).
+
+**Uitvoering:** gebruik de in de sketch beschreven START-/STOP-/Serial-commando's.
+Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
+
+#### `Sturing_Relais_MCP23017_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_MCP23017_HardwareTest/Sturing_Relais_MCP23017_HardwareTest.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+- Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+- Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+- Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+- Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+- Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+- STURING_RELAIS_AANTAL >= 1.
+- MCP23017 GPA0 -> relais IN (actief LOW), GPA1 -> NO; COM -> GND.
+- I2C-extender: ConfigMCP23017.h (EXTENDER_MCP23017_AANTAL >= 1).
+
+**Uitvoering:** gebruik de in de sketch beschreven START-/STOP-/Serial-commando's.
+Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
+
+#### `Sturing_Relais_MCP23S17_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_Relais_MCP23S17_HardwareTest/Sturing_Relais_MCP23S17_HardwareTest.ino`.
+
+- Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+- Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+- Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+- Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+- Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+- Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+- STURING_RELAIS_AANTAL >= 1.
+- MCP23S17 GPA0 -> relais IN (actief LOW), GPA1 -> NO; COM -> GND.
+- SPI-extender: SI -> MOSI, SO -> MISO, SCK -> SCK,
+- CS -> EXTENDER_MCP23S17_1_CS_PIN uit ConfigMCP23S17.h.
+- VDD, VSS, RESET, adresselectie A0/A1/A2 volgens de echte MCP23S17-print.
+- ConfigMCP23S17.h: EXTENDER_MCP23S17_AANTAL >= 1.
+
+**Uitvoering:** gebruik de in de sketch beschreven START-/STOP-/Serial-commando's.
+Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
+
+### ISD1820 via de bestaande Relais-klasse
+
+Er is in RUN146 geen afzonderlijke `ISD1820.md`; daarom worden de twee reeds bestaande
+ISD1820-sketches hier beschreven zonder een nieuwe bestandsnaam aan te maken.
+
+#### `Sturing_ISD1820.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820/Sturing_ISD1820.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- MCP23017 GPA0 -> ISD1820 REC, GPA1 -> P-E/PLAYE.
+- Voor HardwareTest ook GPA2 -> P-L/PLAYL en GPA3 -> FT.
+- MCP23017 GND -> ISD1820 GND; luidspreker -> SP+ en SP-.
+- ISD1820 VCC -> de volgens de werkelijke module toegelaten voeding:
+-   IC-specificatie 2,7..4,5 V; geen 5V-GPIO op ISD zonder verificatie.
+- Geen fysieke relais: de bestaande Relais-klasse schakelt direct GPIO.
+- Bij een 5V-I2C-host en 3,3V-MCP23017 passende niveauomzetting controleren.
+- Actieve configs: src/Configuratie/Extenders/ConfigMCP23017.h en
+-   src/Configuratie/Sturingen/ConfigRelais.h.
+- Deze .ino neemt direct na setup 5 s op en geeft PLAYE-puls; luister.
+- RESULTAAT: OK bevestigt de fysieke luidsprekerweergave NIET.
+
+#### `Sturing_ISD1820_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820_HardwareTest/Sturing_ISD1820_HardwareTest.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- MCP23017 GPA0 -> ISD1820 REC, GPA1 -> P-E/PLAYE.
+- Voor HardwareTest ook GPA2 -> P-L/PLAYL en GPA3 -> FT.
+- MCP23017 GND -> ISD1820 GND; luidspreker -> SP+ en SP-.
+- ISD1820 VCC -> de volgens de werkelijke module toegelaten voeding:
+-   IC-specificatie 2,7..4,5 V; geen 5V-GPIO op ISD zonder verificatie.
+- Geen fysieke relais: de bestaande Relais-klasse schakelt direct GPIO.
+- Bij een 5V-I2C-host en 3,3V-MCP23017 passende niveauomzetting controleren.
+- Actieve configs: src/Configuratie/Extenders/ConfigMCP23017.h en
+-   src/Configuratie/Sturingen/ConfigRelais.h.
+- Hardwaretest: REC, PLAYE, PLAYL en FT in Serial handmatig doorlopen.
+- Hoorbare opname/afspelen en directe microfoon-doorvoer fysiek beoordelen.
+- STOP kan een al gestarte synchrone opname van 5 s niet onderbreken.
+
+
+
 De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en het script `extras/TestLibrarySturingen-v2.0.0.cmd`. 
 
 Configuratie: `STURING_RELAIS_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.

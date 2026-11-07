@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB101
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB101: twee nodes, zelfde pin, minstens een EXCLUSIEF
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

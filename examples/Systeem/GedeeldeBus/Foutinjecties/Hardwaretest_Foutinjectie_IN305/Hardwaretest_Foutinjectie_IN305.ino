@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: IN305
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN305: HX1838-receiver niet correct gestart
 // Verwachte build: normaal of DEBUG, met IRremote
 // Opstelling: HX1838 aangesloten, afstandsbediening bij de hand

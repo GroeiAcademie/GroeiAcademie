@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB102
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB102: zelfde I2C-adres op dezelfde bus
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: IN302
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN302: HX1838-ontvangstlijn blijft permanent LOW
 // Verwachte build: normaal of DEBUG
 // Opstelling: de HX1838 aangesloten; een draad om OUT met GND te verbinden

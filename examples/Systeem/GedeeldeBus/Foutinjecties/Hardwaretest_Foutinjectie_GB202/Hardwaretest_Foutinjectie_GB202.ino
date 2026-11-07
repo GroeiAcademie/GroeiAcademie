@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB202
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB202: inpluggen() mislukt: bus start niet
 // Verwachte build: DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: geen extra hardware

@@ -573,7 +573,7 @@ static struct Screen* GedeeldeBusVindHardwareResourceComponentScreen(const Gedee
   while (wortel->parent != nullptr) wortel = wortel->parent;
 
   for (const GedeeldeBusNode* n = wortel; n != nullptr; n = GedeeldeBusNode::VolgendeInBoom(n, wortel)) {
-    if (n->component == GedeeldeBusComponent::GC_SCREEN) return (struct Screen*)n;
+    if (n->component == GedeeldeBusComponent::GC_SCREEN) return static_cast<struct Screen*>(const_cast<GedeeldeBusNode*>(n));
   }
 
   return nullptr;

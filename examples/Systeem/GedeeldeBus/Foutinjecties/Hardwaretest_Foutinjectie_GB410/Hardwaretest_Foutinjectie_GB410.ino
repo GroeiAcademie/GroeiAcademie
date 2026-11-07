@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB410
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB410: meting tijdens runtime hersteld (Sensor-ladder)
 // Verwachte build: normaal of DEBUG
 // Opstelling: FsrRfp op een ADS1115, los te koppelen via een schakelaar of jumper in VCC

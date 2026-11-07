@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: IN402
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN402: PCF8574 niet bereikbaar op het ingestelde adres
 // Verwachte build: normaal of DEBUG
 // Opstelling: de PCF8574 van het keypad op I2C_ADDRESS_PCF8574, los te koppelen via een schakelaar of jumper in VCC

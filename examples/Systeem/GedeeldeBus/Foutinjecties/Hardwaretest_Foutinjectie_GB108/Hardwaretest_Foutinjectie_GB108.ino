@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB108
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB108: verplichte resource ontbreekt
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

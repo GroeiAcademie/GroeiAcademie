@@ -97,6 +97,68 @@ De aanwezige kleine **RGBLED-print** is geen WS2812-matrix. De aansluitingen op 
 
 ## Testen
 
+### Concrete aansluiting en uitvoering van de bestaande sketches
+
+Deze gegevens gelden voor de hieronder genoemde **bestaande sketches** en hun echte constructoren.
+Ze vervangen de overige technische documentatie niet. Een succesvolle functieaanroep
+of levenscyclus is geen bewijs van een fysieke beweging, licht- of contactreactie.
+
+#### `Sturing_RGBLED.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_RGBLED/Sturing_RGBLED.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- PCA9685 VCC is de logica-/I2C-voeding; V+ is een APARTE servo-/lastvoeding.
+- PCA9685 OE moet een gedefinieerd niveau hebben; controleer de concrete breakout.
+- Actieve Extenderconfig: src/Configuratie/Extenders/ConfigPCA9685.h
+- EXTENDER_PCA9685_AANTAL >= 1, I2C_ADDRESS_EXTENDER_PCA9685_1 = fysiek adres.
+- PCA9685 kanaal 0 -> R, kanaal 1 -> G, kanaal 2 -> B.
+- Per afzonderlijke LED-kleur een passende SERIEWEERSTAND plaatsen.
+- De bestaande RGBLED-constructor gebruikt commonAnode=false (standaard):
+- gemeenschappelijke kathode -> GND; geen gemeenschappelijke anode aansluiten
+- zonder de polariteit en de bestaande constructor te herzien.
+- Controleer met R/G/B-commando of de overeenkomstige LED-kleur oplicht.
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRGBLED.h,
+- STURING_RGBLED_AANTAL >= 1.
+- Deze .ino controleert alleen componentaanmaak; geen kleurtest.
+
+**Uitvoering:** zie de start- en loopfunctie van deze bestaande sketch;
+controleer of deze sketch zelf uitvoer activeert voordat je een fysiek resultaat verwacht.
+
+#### `Sturing_RGBLED_HardwareTest.ino`
+
+**Exact pad:** `examples/Systeem/GedeeldeBus/Sturingen/Sturing_RGBLED_HardwareTest/Sturing_RGBLED_HardwareTest.ino`.
+
+- Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+- Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+- Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+- Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+- PCA9685 VCC is de logica-/I2C-voeding; V+ is een APARTE servo-/lastvoeding.
+- PCA9685 OE moet een gedefinieerd niveau hebben; controleer de concrete breakout.
+- Actieve Extenderconfig: src/Configuratie/Extenders/ConfigPCA9685.h
+- EXTENDER_PCA9685_AANTAL >= 1, I2C_ADDRESS_EXTENDER_PCA9685_1 = fysiek adres.
+- PCA9685 kanaal 0 -> R, kanaal 1 -> G, kanaal 2 -> B.
+- Per afzonderlijke LED-kleur een passende SERIEWEERSTAND plaatsen.
+- De bestaande RGBLED-constructor gebruikt commonAnode=false (standaard):
+- gemeenschappelijke kathode -> GND; geen gemeenschappelijke anode aansluiten
+- zonder de polariteit en de bestaande constructor te herzien.
+- Controleer met R/G/B-commando of de overeenkomstige LED-kleur oplicht.
+- Actieve configuratie: src/Configuratie/Sturingen/ConfigRGBLED.h,
+- STURING_RGBLED_AANTAL >= 1.
+- Na START R/G/B met waarden 0..4095 instellen; controleer kleur en UIT.
+
+**Uitvoering:** gebruik de in de sketch beschreven START-/STOP-/Serial-commando's.
+Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
+
+**Officiële hardwarehandleiding (controleer de eigen modulevariant):**
+
+- https://learn.adafruit.com/16-channel-pwm-servo-driver/hooking-it-up
+
+
+
 De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en het script `extras/TestLibrarySturingen-v2.0.0.cmd`. 
 
 Configuratie: `STURING_RGBLED_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.

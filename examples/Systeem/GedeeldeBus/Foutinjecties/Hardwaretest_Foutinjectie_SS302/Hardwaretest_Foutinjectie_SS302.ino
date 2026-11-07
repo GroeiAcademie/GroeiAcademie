@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: SS302
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie SS302: SerialScreen niet beschikbaar (SIMULATIE)
 // Verwachte build: normaal of DEBUG
 // Opstelling: LCD aangesloten; de melding verschijnt op het LCD

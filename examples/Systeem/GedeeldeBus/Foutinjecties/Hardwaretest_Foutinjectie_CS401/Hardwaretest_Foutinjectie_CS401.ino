@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: CS401
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie CS401: CharacterScreen tijdens runtime niet actief
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

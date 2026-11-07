@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB402
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB402: heractiveren mislukt: geen antwoord op I2C-adres
 // Verwachte build: DEBUG
 // Opstelling: een PCF8574 op TEST_ADRES_PCF8574, los te koppelen via een schakelaar of jumper in VCC

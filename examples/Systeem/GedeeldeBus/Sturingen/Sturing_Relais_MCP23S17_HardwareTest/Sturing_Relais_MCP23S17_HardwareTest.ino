@@ -22,6 +22,24 @@
 // Dit voorbeeld gebruikt een LOW-actieve relaismodule; geen ander niveau veronderstellen.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Gebruik een LOW-actieve relaisMODULE met geschikte stuurspanning en voeding.
+// Relaismodule VCC en GND volgens het bord; signaalbron en relais-GND verbinden.
+// Alleen een SPANNINGSVRIJ laagspanningscontact testen: COM -> GND, NO -> meetpin.
+// Geen netspanning op een Arduino- of Extender-meetpin aansluiten.
+// Na START: 1 + Enter = relais AAN; 0 + Enter = UIT; STOP schakelt UIT.
+// Verwacht een relaisklik EN overgang van het terugmeldsignaal (NO open/gesloten).
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigRelais.h,
+//   STURING_RELAIS_AANTAL >= 1.
+// MCP23S17 GPA0 -> relais IN (actief LOW), GPA1 -> NO; COM -> GND.
+// SPI-extender: SI -> MOSI, SO -> MISO, SCK -> SCK,
+//   CS -> EXTENDER_MCP23S17_1_CS_PIN uit ConfigMCP23S17.h.
+// VDD, VSS, RESET, adresselectie A0/A1/A2 volgens de echte MCP23S17-print.
+// ConfigMCP23S17.h: EXTENDER_MCP23S17_AANTAL >= 1.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 
 #if STURING_RELAIS_AANTAL == 0

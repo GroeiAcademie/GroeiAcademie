@@ -15,6 +15,22 @@
 // STM32 F401RE Nucleo: D6=PB10.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Native Arduino D6 -> DI/DIN van de EERSTE WS2812-pixel, NIET DOUT.
+// Matrix +5V -> voor de volledige matrix geschikte externe voeding (+).
+// Matrix GND -> voeding (-) en Arduino GND (gemeenschappelijke referentie).
+// Een datalijnserieweerstand van 300..500 ohm en buffercondensator
+//   bij de matrixvoeding worden door Adafruit aanbevolen; module kan die al hebben.
+// Controleer bij 3,3V-datapin of een geschikt niveau naar de 5V-matrix nodig is.
+// Fysiek: pixels, hoeken, rijen, kolommen, diagonaal zichtbaar volgen.
+// De Arduino kan niet meten of de LED werkelijk licht geeft.
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigWS2812.h,
+//   STURING_WS2812_AANTAL >= 1.
+// Gebruik de bestaande interactieve sketch voor spiraalcommando's.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #include <Systeem/Sturing/Functies/MatrixFuncties/SpiraalPatroon.h>
 #if STURING_WS2812_AANTAL == 0

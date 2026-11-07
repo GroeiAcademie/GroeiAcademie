@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB303
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB303: activeren() mislukt: antwoord, maar initialisatie van de library mislukt
 // Verwachte build: DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: een aangesloten PCF8574 op TEST_ADRES_PCF8574

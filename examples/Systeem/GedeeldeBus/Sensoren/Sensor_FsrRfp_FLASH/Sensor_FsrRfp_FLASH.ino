@@ -69,7 +69,7 @@ void setup() {
 void loop() {
   if (sensorFsrRfpSet1 == nullptr || Data == nullptr) return;
   for (uint8_t sensorNummer = 0; sensorNummer < FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1; sensorNummer++) {
-    const int ruweData = sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[sensorNummer]);
+    sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[sensorNummer]);
     GA_SERIAL.print(F("Sensor "));
     GA_SERIAL.print(sensorNummer + 1);
     GA_SERIAL.print(F(": "));

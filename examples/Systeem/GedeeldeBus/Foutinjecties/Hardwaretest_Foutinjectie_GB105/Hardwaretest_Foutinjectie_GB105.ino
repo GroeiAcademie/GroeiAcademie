@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB105
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB105: binnen een component twee EXCLUSIEF-claims op dezelfde pin
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

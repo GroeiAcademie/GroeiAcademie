@@ -635,7 +635,7 @@ if ($Capture) {
     $bronDatabase = Join-Path $bronmap 'compile_commands.json'
     $test = if ($env:TEST_INO_ACTIEF) { $env:TEST_INO_ACTIEF } else { $env:TEST_INO }
     $testNaam = if ($env:TEST_NAAM_ACTIEF) { $env:TEST_NAAM_ACTIEF } else { $env:TEST_NAAM }
-    $flags = if ($env:TEST_FLAGS_ACTIEF) { $env:TEST_FLAGS_ACTIEF } else { $env:TEST_FLAGS }
+    $flags = if ($env:TEST_FLAGS_ACTIEF) { $env:TEST_FLAGS_ACTIEF } else { [string]$env:TEST_FLAGS }
     $fqbn = if ($env:FQBN_ACTIEF) { $env:FQBN_ACTIEF } else { $env:TEST_FQBN }
     $boardVersion = if ($env:BOARD_VERSION_ACTIEF) { $env:BOARD_VERSION_ACTIEF } else { $env:TEST_BOARD_VERSION }
     $sleutel = @($Mode, $env:BESTANDSNAAM, $test, $testNaam, $flags, $fqbn, $boardVersion) -join "`n"

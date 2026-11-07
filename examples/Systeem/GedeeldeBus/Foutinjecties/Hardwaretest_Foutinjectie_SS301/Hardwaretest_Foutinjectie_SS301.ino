@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: SS301
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie SS301: SerialScreen activeren() mislukt
 // Verwachte build: normaal of DEBUG, met REDIRECT_SERIAL_CONNECT_TIMEOUT_MS
 // Opstelling: board met native USB (UNO R4, ESP32-S3), LCD aangesloten, HX1838 aangesloten, GEEN Serial Monitor open

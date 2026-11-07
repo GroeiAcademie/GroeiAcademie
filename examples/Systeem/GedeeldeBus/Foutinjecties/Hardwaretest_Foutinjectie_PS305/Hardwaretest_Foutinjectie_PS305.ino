@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: PS305
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie PS305: tekstgrid kleiner dan het minimum
 // Verwachte build: normaal of DEBUG, met een te grote PIXEL_SCREEN_MARGIN
 // Opstelling: de gewone schermopstelling; in UserConfig.h tijdelijk #define PIXEL_SCREEN_MARGIN 100

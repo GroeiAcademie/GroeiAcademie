@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB400
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB400: communicatie met component mislukt tijdens runtime
 // Verwachte build: normaal of DEBUG
 // Opstelling: een PCF8574 op TEST_ADRES_PCF8574, los te koppelen via een schakelaar of jumper in VCC

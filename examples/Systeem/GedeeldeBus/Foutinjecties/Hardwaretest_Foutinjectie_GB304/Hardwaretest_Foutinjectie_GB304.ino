@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB304
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB304: activeren() mislukt: SPI-component antwoordt niet geldig
 // Verwachte build: DEBUG
 // Opstelling: een MCP23S17 op CS D8, los te koppelen via een schakelaar of jumper in VCC

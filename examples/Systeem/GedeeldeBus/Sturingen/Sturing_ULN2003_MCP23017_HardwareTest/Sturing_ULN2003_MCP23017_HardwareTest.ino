@@ -23,6 +23,27 @@
 // Een externe SN74AHCT125N is hiervoor niet vereist; de bedrading moet wel correct zijn.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// 28BYJ-48 motorstekker -> 5-polige motorconnector van ULN2003-driverprint.
+// ULN2003 V+ -> geschikte EXTERNE motorvoeding; GND -> motorvoeding (-).
+// Arduino-, Extender- en ULN2003-GND gemeenschappelijk; geen motorstroom via GPIO.
+// Extenderuitgangen -> ULN2003 IN1, IN2, IN3, IN4 volgens onderstaande volgorde.
+// Zorg dat de motor mechanisch vrij kan draaien; markeer de motoras.
+// Elke fysieke test pas starten met 1 + Enter; STOP voorkomt nieuwe stappen.
+// Verwacht 1 stap, 4 stappen, achteruit en pauzeren/hervatten.
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigULN2003.h,
+//   STURING_ULN2003_AANTAL >= 1.
+// MCP23017 GPA0..GPA3 in indexvolgorde 0,1,2,3 -> ULN2003 IN1,IN2,IN3,IN4.
+// Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+// Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+// Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+// Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+// MCP GPIO-uitgangen sturen de driver direct; een extra AHCT125 is niet vereist.
+// Extenderconfig: src/Configuratie/Extenders/ConfigMCP23017.h, echt adres/CS.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_ULN2003_AANTAL == 0
   #error Zet STURING_ULN2003_AANTAL op minstens 1 voor deze test.

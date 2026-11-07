@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB104
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB104: parent exclusief al bezet door een andere child
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

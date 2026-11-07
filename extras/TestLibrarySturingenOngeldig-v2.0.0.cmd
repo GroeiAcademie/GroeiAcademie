@@ -100,13 +100,13 @@ call :EXPECT_FAIL
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_WS2812\Sturing_WS2812.ino"
 set "TEST_NAAM=WS2812 uitgeschakeld"
 set "TEST_FLAGS=-DSTURING_WS2812_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=Zet STURING_WS2812_AANTAL op minstens 1 voor deze test."
+set "VERWACHTE_FOUT=Zet STURING_WS2812_AANTAL in de actieve configuratie op minstens 1 voor deze test."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_MAX7219\Sturing_MAX7219.ino"
 set "TEST_NAAM=MAX7219 uitgeschakeld"
 set "TEST_FLAGS=-DSTURING_MAX7219_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=Zet STURING_MAX7219_AANTAL op minstens 1 voor deze test."
+set "VERWACHTE_FOUT=Zet STURING_MAX7219_AANTAL in ConfigMAX7219.h of UserConfig.h op minstens 1 voor deze test."
 call :EXPECT_FAIL
 
 echo.

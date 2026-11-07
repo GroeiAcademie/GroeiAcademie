@@ -247,15 +247,13 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_CHARACTER)
   // Enkel afdwingen voor de ingebouwde hardware, een geregistreerde callback vervangt die volledig en is de eigen verantwoordelijkheid van de gebruiker.
   if (!this->actief && !this->Character.callback && !this->Character.actief && !this->Character.foutmeldingWeergegeven) {
-    if (!this->Character.foutmeldingWeergegeven) {
-      if (this->Character.foutmelding != nullptr) {
-        this->Character.FoutmeldingWeergeven(this->Character.foutmelding);
-      } else if (this->Character.gedeeldeBus == nullptr) {
-        this->Character.FoutmeldingWeergeven(_FATAL_CS401);
-      }
-
-      this->Character.foutmeldingWeergegeven = true;
+    if (this->Character.foutmelding != nullptr) {
+      this->Character.FoutmeldingWeergeven(this->Character.foutmelding);
+    } else if (this->Character.gedeeldeBus == nullptr) {
+      this->Character.FoutmeldingWeergeven(_FATAL_CS401);
     }
+
+    this->Character.foutmeldingWeergegeven = true;
 
     lifecycleFoutWeergegeven = true;
   }
@@ -264,15 +262,13 @@ const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime, c
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
   // Zelfde redenering: enkel afdwingen wanneer er geen callback geregistreerd is.
   if (!this->actief && !this->Pixel.callback && !this->Pixel.actief && !this->Pixel.foutmeldingWeergegeven) {
-    if (!this->Pixel.foutmeldingWeergegeven) {
-      if (this->Pixel.foutmelding != nullptr) {
-        this->Pixel.FoutmeldingWeergeven(this->Pixel.foutmelding);
-      } else if (this->Pixel.gedeeldeBus == nullptr) {
-        this->Pixel.FoutmeldingWeergeven(_FATAL_PS401);
-      }
-
-      this->Pixel.foutmeldingWeergegeven = true;
+    if (this->Pixel.foutmelding != nullptr) {
+      this->Pixel.FoutmeldingWeergeven(this->Pixel.foutmelding);
+    } else if (this->Pixel.gedeeldeBus == nullptr) {
+      this->Pixel.FoutmeldingWeergeven(_FATAL_PS401);
     }
+
+    this->Pixel.foutmeldingWeergegeven = true;
 
     lifecycleFoutWeergegeven = true;
   }

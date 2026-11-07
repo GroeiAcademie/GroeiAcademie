@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: CS201
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie CS201: CharacterScreen inpluggen() mislukt
 // Verwachte build: normaal of DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: de gewone schermopstelling

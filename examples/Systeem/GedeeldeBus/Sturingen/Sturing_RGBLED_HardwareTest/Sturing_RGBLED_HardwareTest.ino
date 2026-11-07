@@ -12,6 +12,28 @@
 // STM32 F401RE Nucleo: SDA=PB9, SCL=PB8.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+// Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+// Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+// Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+// PCA9685 VCC is de logica-/I2C-voeding; V+ is een APARTE servo-/lastvoeding.
+// PCA9685 OE moet een gedefinieerd niveau hebben; controleer de concrete breakout.
+// Actieve Extenderconfig: src/Configuratie/Extenders/ConfigPCA9685.h
+//   EXTENDER_PCA9685_AANTAL >= 1, I2C_ADDRESS_EXTENDER_PCA9685_1 = fysiek adres.
+// PCA9685 kanaal 0 -> R, kanaal 1 -> G, kanaal 2 -> B.
+// Per afzonderlijke LED-kleur een passende SERIEWEERSTAND plaatsen.
+// De bestaande RGBLED-constructor gebruikt commonAnode=false (standaard):
+//   gemeenschappelijke kathode -> GND; geen gemeenschappelijke anode aansluiten
+//   zonder de polariteit en de bestaande constructor te herzien.
+// Controleer met R/G/B-commando of de overeenkomstige LED-kleur oplicht.
+// Actieve configuratie: src/Configuratie/Sturingen/ConfigRGBLED.h,
+//   STURING_RGBLED_AANTAL >= 1.
+// Na START R/G/B met waarden 0..4095 instellen; controleer kleur en UIT.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_RGBLED_AANTAL == 0
   #error Zet STURING_RGBLED_AANTAL op minstens 1 voor deze test.

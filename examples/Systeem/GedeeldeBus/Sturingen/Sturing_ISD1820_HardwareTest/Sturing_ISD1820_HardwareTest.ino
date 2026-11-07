@@ -15,6 +15,27 @@
 // Bestaande configuratie: ConfigMCP23017.h en ConfigRelais.h.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+// Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+// Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+// Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+// MCP23017 GPA0 -> ISD1820 REC, GPA1 -> P-E/PLAYE.
+// Voor HardwareTest ook GPA2 -> P-L/PLAYL en GPA3 -> FT.
+// MCP23017 GND -> ISD1820 GND; luidspreker -> SP+ en SP-.
+// ISD1820 VCC -> de volgens de werkelijke module toegelaten voeding:
+//   IC-specificatie 2,7..4,5 V; geen 5V-GPIO op ISD zonder verificatie.
+// Geen fysieke relais: de bestaande Relais-klasse schakelt direct GPIO.
+// Bij een 5V-I2C-host en 3,3V-MCP23017 passende niveauomzetting controleren.
+// Actieve configs: src/Configuratie/Extenders/ConfigMCP23017.h en
+//   src/Configuratie/Sturingen/ConfigRelais.h.
+// Hardwaretest: REC, PLAYE, PLAYL en FT in Serial handmatig doorlopen.
+// Hoorbare opname/afspelen en directe microfoon-doorvoer fysiek beoordelen.
+// STOP kan een al gestarte synchrone opname van 5 s niet onderbreken.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 
 #if STURING_RELAIS_AANTAL < 4

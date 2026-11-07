@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: IN101
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN101: InputKanalen controleren() mislukt
 // Verwachte build: normaal of DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: de gewone invoeropstelling

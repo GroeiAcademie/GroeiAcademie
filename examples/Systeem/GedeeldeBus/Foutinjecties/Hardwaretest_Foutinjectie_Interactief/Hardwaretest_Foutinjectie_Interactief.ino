@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: Interactief
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Interactieve PCF8574-foutinjectie: referentie -> fout -> herstel.
 // Basis: examples/Systeem/Input/InputkanalenHX1838/InputkanalenHX1838.ino
 //        examples/Systeem/GedeeldeBus/Extenders/Extender_PCF8574/Extender_PCF8574.ino

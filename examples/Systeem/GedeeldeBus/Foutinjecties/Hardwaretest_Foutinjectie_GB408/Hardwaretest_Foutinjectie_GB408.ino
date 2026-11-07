@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB408
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB408: Sensor kan tijdens runtime niet meten: storing van zijn Extender
 // Verwachte build: normaal of DEBUG
 // Opstelling: FsrRfp op een ADS1115, los te koppelen via een schakelaar of jumper in VCC

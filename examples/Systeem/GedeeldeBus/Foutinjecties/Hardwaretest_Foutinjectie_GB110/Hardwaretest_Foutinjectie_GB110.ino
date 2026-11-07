@@ -1,7 +1,7 @@
 // ============================================================================
 // Foutinjectie: GB110
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0 RC1
+// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB110: ongeldig I2C-adres
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware

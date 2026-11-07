@@ -12,6 +12,34 @@
 // STM32 F401RE Nucleo: SDA=PB9, SCL=PB8.
 // ============================================================================
 
+// ============================================================================
+// CONCREET AANSLUITEN EN TESTEN
+// ============================================================================
+// Arduino SDA -> SDA van de I2C-Extender; Arduino SCL -> SCL; GND -> GND.
+// Voed de Extender-logica op het voor board en I2C-niveau geschikte VCC/VDD.
+// Verifieer fysiek I2C-adres en optionele INT/RESET-pinnen met de actieve Config*.h.
+// Bij 3,3V-logica op een 5V-bus: controleer een passende I2C-niveauomzetter.
+// PCA9685 VCC is de logica-/I2C-voeding; V+ is een APARTE servo-/lastvoeding.
+// PCA9685 OE moet een gedefinieerd niveau hebben; controleer de concrete breakout.
+// Actieve Extenderconfig: src/Configuratie/Extenders/ConfigPCA9685.h
+//   EXTENDER_PCA9685_AANTAL >= 1, I2C_ADDRESS_EXTENDER_PCA9685_1 = fysiek adres.
+// PCA9685 PWM-uitgangen zijn uitsluitend LOGICA-signalen voor de H-brug.
+// H-brug VCC/VSS-logica en afzonderlijke motorvoeding volgens eigen driver/module.
+// H-brug GND, PCA9685 GND, Arduino GND en motorvoeding (-) verbinden.
+// DC-motor aan twee H-brug-uitgangen, NOOIT aan de PCA9685 of een GPIO.
+// Controleer dat PCA9685-signaal-HIGH de driver-ingangen betrouwbaar activeert.
+// Test met vrij draaiende motor en geschikte stroombegrenzing.
+// PCA9685: kanaal 3 -> IN1, 4 -> IN2, 5 -> ENA (enable-jumper verwijderen)
+// L298N MODULE: PCA-EN -> ENA, PCA-IN1 -> IN1, PCA-IN2 -> IN2;
+//   DC-motor -> OUT1/OUT2, externe motorvoeding -> VS/12V-klem en GND.
+//   ENA-jumper verwijderen om PCA9685-PWM op ENA toe te laten;
+//   5V-regelaarjumper/logicavoeding uitsluitend volgens de concrete module.
+// Actieve configs: ConfigL298N.h (STURING_L298N_AANTAL >= 1)
+//   en ConfigPCA9685.h (EXTENDER_PCA9685_AANTAL >= 1).
+// Na Serial-bevestiging telkens vooruit, achteruit, pauze/hervat en
+//   verandering van draairichting/snelheid fysiek beoordelen.
+// ============================================================================
+
 #include <GroeiAcademie.h>
 #if STURING_L298N_AANTAL == 0
   #error Zet STURING_L298N_AANTAL op minstens 1 voor deze test.
