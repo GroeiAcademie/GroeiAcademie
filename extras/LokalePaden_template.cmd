@@ -15,6 +15,7 @@ set "PATH_OPTION1="
 set "PATH_OPTION2="
 set "PATH_OPTION3="
 set "CCPCHECK_DATA_PATH="
+set "CPPCHECK_PATH="
 
 if exist "%PATH_OPTION1%\arduino-cli.exe" (
     set "BASE_PATH=%PATH_OPTION1%"

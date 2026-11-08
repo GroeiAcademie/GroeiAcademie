@@ -30,6 +30,11 @@ struct ServomotorBesturing {
   bool PositioneerAbsoluutNaarHoek(uint8_t hoek);
   bool DraaiRelatiefOverHoek(int16_t aantalGraden);
   bool PositioneerNaarMiddenpositie();
+  bool SetPulsLimitsMS(uint16_t minimumUs, uint16_t maximumUs);
+  bool SetAbsolutePulseWidthUS(uint16_t microseconden);
+  bool CalibrationServomotor(uint16_t microseconden);
+  bool ReadTargetAngle(uint8_t& hoek) const;
+  bool ReadLastPulseWidthUS(uint16_t& microseconden);
 private:
 #if STURING_SG90_AANTAL > 0
   SG90* sg90 = nullptr;
@@ -40,6 +45,8 @@ private:
 #endif
   uint8_t huidigePositie = 0;
   bool positieBekend = false;
+  uint16_t laatstePulsbreedteUS = 0;
+  bool pulsOpdracht = false;
   bool gestart = false;
   bool gepauzeerd = false;
 };

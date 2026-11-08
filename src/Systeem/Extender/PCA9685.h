@@ -128,6 +128,17 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
     PCA9685::allOFF();
   }
 
+  bool ReadExtenderPWMFrequency(uint16_t& frequentie) override {
+    if (!ComponentBeschikbaarTijdensRuntime()) return false;
+
+    const uint16_t waarde = PCA9685::getFrequency(false);
+    const bool gelukt = waarde != 0 && PCA9685::lastError() == PCA9685_OK;
+    ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt);
+
+    if (gelukt) frequentie = waarde;
+    return gelukt;
+  }
+
   // V9: een PWM-kanaal zetten voor een child (bv. later een servo), zonder dat die de PCA9685 kent. waarde: 0 tot 4095.
   // Runtime-herstel: eerst ComponentBeschikbaarTijdensRuntime(), daarna het resultaat van de library doorgeven.
   bool WriteExtenderPWM(uint8_t pin, uint16_t waarde) override {

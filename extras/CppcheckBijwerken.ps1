@@ -11,7 +11,9 @@ param(
     [string]$TestScript,
     [string]$SnapshotRoot,
     [string]$CliPath,
-    [string]$OutputDatabase
+    [string]$OutputDatabase,
+    [string]$ProefHashes,
+    [switch]$CacheResponsbestanden
 )
 
 $ErrorActionPreference = 'Stop'
@@ -21,6 +23,20 @@ $database = if ($OutputDatabase) { $OutputDatabase } elseif ($env:CCPCHECK_DATA_
 $databaseOngeldig = if ($env:CCPCHECK_DATA_PATH) { Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands_ongeldig.json' } else { $null }
 $opslag = if ($SnapshotRoot) { $SnapshotRoot } elseif ($env:CCPCHECK_DATA_PATH) { Join-Path $env:CCPCHECK_DATA_PATH 'Databases' } else { $null }
 if (-not $opslag -or (-not $TestScript -and -not $Capture -and -not $database)) { throw 'CCPCHECK_DATA_PATH ontbreekt. Stel het pad in via extras\LokalePaden.cmd.' }
+if ($PSBoundParameters.ContainsKey('ProefHashes')) {
+    if (-not $Finalize -or $SnapshotRoot -or $Capture -or $UpdateAll -or $TestScript -or $CountOnly -or $ListHashes) {
+        throw '-ProefHashes is uitsluitend toegestaan met -Finalize, zonder -SnapshotRoot.'
+    }
+    if (-not $ProefHashes -or $ProefHashes -notmatch '^[0-9a-f]{64}(?:,[0-9a-f]{64})*$') {
+        throw '-ProefHashes verwacht een of meer bestaande SHA-256-hashes, gescheiden door komma''s.'
+    }
+    if (-not $OutputDatabase) { throw '-ProefHashes vereist -OutputDatabase voor een afzonderlijke proefdatabase.' }
+    if ([System.IO.Path]::GetFullPath($database).Equals([System.IO.Path]::GetFullPath((Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands.json')), [System.StringComparison]::OrdinalIgnoreCase) -or
+        [System.IO.Path]::GetFullPath($database).Equals([System.IO.Path]::GetFullPath((Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands_ongeldig.json')), [System.StringComparison]::OrdinalIgnoreCase) -or
+        [System.IO.Path]::GetFullPath($database).StartsWith([System.IO.Path]::GetFullPath($opslag).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw '-ProefHashes mag geen bestaande volledige database of snapshot overschrijven.'
+    }
+}
 
 
 # De Cppcheck-update is losgekoppeld van de bestaande compilatie-CMD's.
@@ -218,7 +234,12 @@ if ($TestScript) {
                                     }
                                 }
                                 if ($items.Count -gt 0 -and $sketchItem.Count -gt 0 -and
-                                    (Test-Path -LiteralPath ([string]$sketchItem[0].file) -PathType Leaf)) {
+                                    @($items | Where-Object {
+                                        ($_.PSObject.Properties['arguments'] -and @($_.arguments | Where-Object { [string]$_ -match '^(?:@|-imacros|-iprefix|-iwithprefix)' }).Count -gt 0) -or
+                                        ($_.PSObject.Properties['command'] -and $_.command -match '(?<!\S)(?:"?@|-imacros|-iprefix|-iwithprefix)')
+                                    }).Count -eq 0 -and
+                                    @($sketchItem | Where-Object { -not (Test-Path -LiteralPath ([string]$_.file) -PathType Leaf) }).Count -eq 0 -and
+                                    @($sketchItem | Where-Object { -not (Select-String -LiteralPath ([string]$_.file) -Pattern '^\s*#line\s+\d+\s+.*\.ino' -Quiet) }).Count -eq 0) {
                                     $herbruikbaar = $true
                                 } elseif ($items.Count -eq 0) {
                                     Write-Warning "[CCPCHECK] $TestScript | $hash | afkeur: compile_commands.json bevat geen compileropdrachten."
@@ -336,7 +357,7 @@ if ($TestScript) {
                         }
                         $env:SKETCH_HASH_ACTIEF = $sketchHash
                         $env:COMPILE_RESULT = '0'
-                        & $PSCommandPath -Capture $bouwmap -Mode Gewoon -SnapshotRoot $SnapshotRoot
+                        & $PSCommandPath -Capture $bouwmap -Mode Gewoon -SnapshotRoot $SnapshotRoot -CacheResponsbestanden:$CacheResponsbestanden
                         if ($LASTEXITCODE -ne 0) { throw "Snapshot opslaan mislukt: $ino | $fqbn | $board" }
                         $herbruikbaar = $true
                         $geslaagd++
@@ -393,10 +414,14 @@ if ($UpdateAll) {
     try {
         foreach ($domein in $domeinen) {
             $jobs += Start-Job -ScriptBlock {
-                param($script, $domein, $snapshotRoot, $cli)
-                & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $script -TestScript $domein -SnapshotRoot $snapshotRoot -CliPath $cli
+                param($script, $domein, $snapshotRoot, $cli, $cache)
+                if ($cache) {
+                    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $script -TestScript $domein -SnapshotRoot $snapshotRoot -CliPath $cli -CacheResponsbestanden
+                } else {
+                    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $script -TestScript $domein -SnapshotRoot $snapshotRoot -CliPath $cli
+                }
                 if ($LASTEXITCODE -ne 0) { throw "Cppcheck-domein mislukt: $domein" }
-            } -ArgumentList $PSCommandPath,$domein,$snapshotRoot,$CliPath
+            } -ArgumentList @($PSCommandPath, $domein, $snapshotRoot, $CliPath, $CacheResponsbestanden.IsPresent)
         }
         do {
             Start-Sleep -Seconds 2
@@ -468,6 +493,12 @@ if ($Finalize -and -not $SnapshotRoot) {
         }
     }
     if ($actueel.Count -eq 0) { throw 'Geen actuele gewone configuraties gevonden. Niets samengevoegd of opgeruimd.' }
+    if ($ProefHashes) {
+        foreach ($hash in $ProefHashes.Split(',')) {
+            if (-not $actueel.Contains($hash)) { throw "Proefhash komt niet voor in de actuele testlijsten: $hash" }
+        }
+        $actueel.IntersectWith($ProefHashes.Split(','))
+    }
 
     $mutex = [System.Threading.Mutex]::new($false, 'Local\GroeiAcademieCcpcheckMerge')
     $vergrendeld = $false
@@ -480,6 +511,20 @@ if ($Finalize -and -not $SnapshotRoot) {
         # Schrijf direct naar een tijdelijk JSON-bestand om duizenden snapshots
         # zonder een volledige database in het PowerShell-geheugen samen te voegen.
         $gezien = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        $gecontroleerdeBronnen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        # Bestaande FQBN's uit TestLibraryCommon.cmd; definities letterlijk uit de cores.
+        $notAnInterruptPerFqbn = @{
+            'esp32:esp32:d1_uno32' = '-1'
+            'esp32:esp32:esp32s3' = '-1'
+            'rp2040:rp2040:cytron_maker_uno_rp2040' = '(-1)'
+            'STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE' = '(pin_size_t)NC'
+        }
+        foreach ($fqbn in $notAnInterruptPerFqbn.Keys) {
+            if (-not (Get-Content -LiteralPath (Join-Path $framework 'extras\TestLibraryCommon.cmd') -Encoding UTF8 |
+                Where-Object { $_ -match '^set (?:BASIC|EXTENDED|EXPERIMENTAL)_FQBN=' -and $_.Contains('"' + $fqbn + '"') })) {
+                throw "NOT_AN_INTERRUPT: FQBN ontbreekt in TestLibraryCommon.cmd: $fqbn"
+            }
+        }
         $aantal = 0
         $verwerkt = 0
         $problemen = [System.Collections.Generic.List[string]]::new()
@@ -525,6 +570,12 @@ if ($Finalize -and -not $SnapshotRoot) {
                     $items = if ($geladen.PSObject.Properties['value'] -and $geladen.value) { @($geladen.value) } else { @($geladen) }
                     if ($items.Count -eq 1 -and $items[0] -is [array]) { $items = @($items[0]) }
                     if ($items.Count -eq 0) { throw "Lege compilatiedatabase: $bestand" }
+                    if (@($items | Where-Object {
+                                        ($_.PSObject.Properties['arguments'] -and @($_.arguments | Where-Object { [string]$_ -match '^(?:@|-imacros|-iprefix|-iwithprefix)' }).Count -gt 0) -or
+                                        ($_.PSObject.Properties['command'] -and $_.command -match '(?<!\S)(?:"?@|-imacros|-iprefix|-iwithprefix)')
+                                    }).Count -gt 0) {
+                        throw "Onverwerkte compiler-responsbestanden of -imacros in snapshot: $bestand. Voer eerst het verzamelscript uit."
+                    }
                     $sketchItems = @($items | Where-Object { $_.PSObject.Properties['file'] -and ([string]$_.file) -like '*.ino.cpp' })
                     if ($sketchItems.Count -eq 0) {
                         throw "Gegenereerde .ino.cpp ontbreekt in compilatiedatabase: $bestand"
@@ -551,12 +602,15 @@ if ($Finalize -and -not $SnapshotRoot) {
                                 throw "Gegenereerde .ino.cpp ontbreekt: $($item.file)"
                             }
                         }
-                        $databasePad = $bestand + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
-                        try {
-                            [System.IO.File]::WriteAllText($databasePad, (ConvertTo-Json -InputObject $items -Depth 30 -Compress), $utf8)
-                            [System.IO.File]::Replace($databasePad, $bestand, [System.Management.Automation.Language.NullString]::Value)
-                        } finally {
-                            if (Test-Path -LiteralPath $databasePad) { Remove-Item -LiteralPath $databasePad -Force }
+                        # In de proef uitsluitend de in-memory paden corrigeren; snapshots blijven onaangeroerd.
+                        if (-not $ProefHashes) {
+                            $databasePad = $bestand + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
+                            try {
+                                [System.IO.File]::WriteAllText($databasePad, (ConvertTo-Json -InputObject $items -Depth 30 -Compress), $utf8)
+                                [System.IO.File]::Replace($databasePad, $bestand, [System.Management.Automation.Language.NullString]::Value)
+                            } finally {
+                                if (Test-Path -LiteralPath $databasePad) { Remove-Item -LiteralPath $databasePad -Force }
+                            }
                         }
                     }
                     foreach ($item in $sketchItems) {
@@ -567,8 +621,70 @@ if ($Finalize -and -not $SnapshotRoot) {
                     $patroon = [regex]::Escape($snapshotmap.Replace('\', '/')).Replace('/', '[\\/]')
                     foreach ($item in $items) {
                         if (-not $item.PSObject.Properties['file']) { throw "Ongeldig compileritem in $bestand" }
-                        $bron = [regex]::Replace([string]$item.file, $patroon, '<BUILD>', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
-                        $opdracht = if ($item.PSObject.Properties['command']) { [string]$item.command } else { @($item.arguments) -join ' ' }
+                        $bron = ([string]$item.file).Replace('\', '/')
+                        # Alleen FrameWork-.cpp, gegenereerde .ino.cpp en eigen sketch-.cpp.
+                        $eigenBron = ($bron.StartsWith($framework.Replace('\', '/') + '/src/', [System.StringComparison]::OrdinalIgnoreCase) -and $bron.EndsWith('.cpp', [System.StringComparison]::OrdinalIgnoreCase)) -or
+                            ($bron.StartsWith($snapshotmap.Replace('\', '/') + '/sketch/', [System.StringComparison]::OrdinalIgnoreCase) -and $bron.EndsWith('.cpp', [System.StringComparison]::OrdinalIgnoreCase)) -or
+                            ($bron.StartsWith((Split-Path -Parent $sketch).Replace('\', '/') + '/', [System.StringComparison]::OrdinalIgnoreCase) -and $bron.EndsWith('.cpp', [System.StringComparison]::OrdinalIgnoreCase))
+                        if ($bron.EndsWith('.ino.cpp', [System.StringComparison]::OrdinalIgnoreCase) -and -not $eigenBron) {
+                            throw "Gegenereerde .ino.cpp valt buiten de eigen bronselectie: $bron"
+                        }
+                        if (-not $eigenBron) { continue }
+                        if (-not $item.PSObject.Properties['arguments'] -or @($item.arguments).Count -eq 0) {
+                            throw "Compileropdracht zonder arguments in $bestand; voer eerst het verzamelscript uit."
+                        }
+
+                        # Behoud -D/-U uit de uitgewerkte responsbestanden. Geen volledige core/SDK-preprocessing.
+                        $behoudenArgumenten = [System.Collections.Generic.List[string]]::new()
+                        for ($i = 0; $i -lt $item.arguments.Count; $i++) {
+                            $argument = [string]$item.arguments[$i]
+                            if ($argument -cmatch '^(-I|-isystem|-iquote|-idirafter|-include|-imacros)(.*)$') {
+                                $waarde = [string]$Matches[2]
+                                if ($waarde.Length -eq 0) {
+                                    $i++
+                                    if ($i -ge $item.arguments.Count) { throw "Include-optie zonder pad voor $($item.file): $argument" }
+                                    $waarde = [string]$item.arguments[$i]
+                                }
+                                $includePad = $waarde.Trim('"').Replace('\', '/')
+                                if (-not [System.IO.Path]::IsPathRooted($includePad)) {
+                                    $includePad = [System.IO.Path]::GetFullPath((Join-Path ([string]$item.directory) $includePad)).Replace('\', '/')
+                                }
+                                $includePad = $includePad.TrimEnd('/')
+                                # Eigen library/sketch, lokale Arduino-libraries en libraries van de geïnstalleerde core.
+                                if ($includePad.Equals((Split-Path -Parent $framework).Replace('\', '/'), [System.StringComparison]::OrdinalIgnoreCase) -or
+                                    $includePad.StartsWith((Split-Path -Parent $framework).Replace('\', '/') + '/', [System.StringComparison]::OrdinalIgnoreCase) -or
+                                    $includePad.Equals($snapshotmap.Replace('\', '/') + '/sketch', [System.StringComparison]::OrdinalIgnoreCase) -or
+                                    $includePad.StartsWith($snapshotmap.Replace('\', '/') + '/sketch/', [System.StringComparison]::OrdinalIgnoreCase) -or
+                                    $includePad -match '(?i)/packages/[^/]+/hardware/[^/]+/[^/]+/libraries(?:/|$)') {
+                                    if ($argument -cmatch '^(-include|-imacros)') {
+                                        [void]$behoudenArgumenten.Add('-include')
+                                        [void]$behoudenArgumenten.Add($includePad)
+                                    } else {
+                                        [void]$behoudenArgumenten.Add('-I' + $includePad)
+                                    }
+                                }
+                                continue
+                            }
+                            if ($argument -cmatch '^(?:-isysroot.*|--sysroot(?:=.*)?)$') {
+                                if ($argument -ceq '-isysroot' -or $argument -ceq '--sysroot') {
+                                    $i++
+                                    if ($i -ge $item.arguments.Count) { throw "Sysroot-optie zonder pad voor $($item.file)" }
+                                }
+                                continue
+                            }
+                            [void]$behoudenArgumenten.Add($argument)
+                        }
+                        if ($notAnInterruptPerFqbn.ContainsKey([string]$metadata.fqbn) -and
+                            @($behoudenArgumenten | Where-Object { $_ -match '^-DNOT_AN_INTERRUPT(?:=|$)' }).Count -eq 0) {
+                            [void]$behoudenArgumenten.Add('-DNOT_AN_INTERRUPT=' + $notAnInterruptPerFqbn[$metadata.fqbn])
+                        }
+                        $item.arguments = @($behoudenArgumenten.ToArray())
+                        # Een eventuele oude 'command' mag niet opnieuw ongefilterde SDK-flags aanleveren.
+                        if ($item.PSObject.Properties['command']) { [void]$item.PSObject.Properties.Remove('command') }
+
+                        [void]$gecontroleerdeBronnen.Add($bron)
+                        $bron = [regex]::Replace($bron, $patroon, '<BUILD>', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
+                        $opdracht = @($item.arguments) -join ' '
                         $opdracht = [regex]::Replace($opdracht, $patroon, '<BUILD>', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
                         if ($gezien.Add($bron + "`n" + $opdracht)) {
                             if ($aantal -gt 0) { $writer.Write(',') }
@@ -595,6 +711,17 @@ if ($Finalize -and -not $SnapshotRoot) {
                 exit 1
             }
             if ($aantal -eq 0) { throw 'Geen compileropdrachten gevonden. Niets opgeruimd.' }
+            if ($ProefHashes) {
+                Write-Host "[CCPCHECK] Proefmodus: $($actueel.Count) hashes, $($gecontroleerdeBronnen.Count) eigen bronpaden in de database."
+            } else {
+                $ontbrekend = @(Get-ChildItem -LiteralPath (Join-Path $framework 'src') -Recurse -File -Filter '*.cpp' |
+                    Where-Object { -not $gecontroleerdeBronnen.Contains($_.FullName.Replace('\', '/')) })
+                if ($ontbrekend.Count -gt 0) {
+                    foreach ($bestand in $ontbrekend) { Write-Host "[CCPCHECK_PROBLEEM] FrameWork-.cpp niet geanalyseerd: $($bestand.FullName)" }
+                    throw "$($ontbrekend.Count) FrameWork-.cpp-bestand(en) ontbreken in de gezamenlijke compilatiedatabase."
+                }
+                Write-Host "[CCPCHECK] FrameWork-.cpp-dekking: $($gecontroleerdeBronnen.Count) compilerpaden gecontroleerd, geen ontbrekende src/*.cpp."
+            }
             $writer.Write(']')
             $writer.Flush()
         } finally {
@@ -609,15 +736,20 @@ if ($Finalize -and -not $SnapshotRoot) {
         }
         Write-Host "[CCPCHECK] Samenvoegen OK: $($actueel.Count) actuele hashes, $aantal compileropdrachten."
 
-        # Verwijder alleen echte verouderde hashmappen na succesvolle samenvoeging.
-        $opgeruimd = 0
-        foreach ($map in @(Get-ChildItem -LiteralPath $basis -Directory -ErrorAction SilentlyContinue)) {
-            if ($map.Name -match '^[0-9a-f]{64}$' -and -not $actueel.Contains($map.Name)) {
-                Remove-Item -LiteralPath $map.FullName -Recurse -Force
-                $opgeruimd++
+        # Proefmodus ruimt nooit snapshots op; normale volledige samenvoeging blijft ongewijzigd.
+        if ($ProefHashes) {
+            Write-Host '[CCPCHECK] Proefmodus: geen snapshots opgeruimd.'
+        } else {
+            # Verwijder alleen echte verouderde hashmappen na succesvolle samenvoeging.
+            $opgeruimd = 0
+            foreach ($map in @(Get-ChildItem -LiteralPath $basis -Directory -ErrorAction SilentlyContinue)) {
+                if ($map.Name -match '^[0-9a-f]{64}$' -and -not $actueel.Contains($map.Name)) {
+                    Remove-Item -LiteralPath $map.FullName -Recurse -Force
+                    $opgeruimd++
+                }
             }
+            Write-Host "[CCPCHECK] Opruimen OK: $opgeruimd verouderde hashmappen verwijderd."
         }
-        Write-Host "[CCPCHECK] Opruimen OK: $opgeruimd verouderde hashmappen verwijderd."
     } finally {
         if (Test-Path -LiteralPath $tijdelijkeUitvoer) { Remove-Item -LiteralPath $tijdelijkeUitvoer -Force }
         if ($vergrendeld) { $mutex.ReleaseMutex() }
@@ -693,6 +825,148 @@ if ($Capture) {
                 Copy-Item -LiteralPath $bestand.FullName -Destination $doel
             }
 
+            # Werk uitsluitend op de echte compilerargumenten (Arduino CLI levert een JSON-array 'arguments').
+            # Responsbestanden kunnen onder andere -iwithprefixbefore en -imacros bevatten.
+            # Optionele cache geldt uitsluitend tijdens deze Capture; inhoudshash voorkomt verouderde treffers.
+            $responsbestandCache = $null
+            if ($CacheResponsbestanden) {
+                $responsbestandCache = [System.Collections.Generic.Dictionary[string,object]]::new([System.StringComparer]::OrdinalIgnoreCase)
+            }
+            foreach ($item in $items) {
+                if (-not $item.PSObject.Properties['arguments'] -or @($item.arguments).Count -eq 0) {
+                    throw "Compileropdracht zonder arguments in $bronDatabase; kan niet veilig worden verwerkt."
+                }
+                $opdracht = @($item.arguments | ForEach-Object { [string]$_ })
+                for ($poging = 0; $poging -lt 8; $poging++) {
+                    if (@($opdracht | Where-Object { $_ -match '^@' }).Count -eq 0) { break }
+                    $uitvoer = [System.Collections.Generic.List[string]]::new()
+                    foreach ($argument in $opdracht) {
+                        if ($argument -notmatch '^@(.+)$') {
+                            [void]$uitvoer.Add($argument)
+                            continue
+                        }
+                        $responsePad = $Matches[1].Trim('"')
+                        if (-not [System.IO.Path]::IsPathRooted($responsePad)) {
+                            $responsePad = Join-Path ([string]$item.directory) $responsePad
+                        }
+                        if (-not (Test-Path -LiteralPath $responsePad -PathType Leaf)) {
+                            throw "Compiler-responsbestand ontbreekt: $responsePad"
+                        }
+                        if ($null -ne $responsbestandCache -and $responsbestandCache.ContainsKey($responsePad) -and
+                            $responsbestandCache[$responsePad].Hash -eq (Get-FileHash -LiteralPath $responsePad -Algorithm SHA256).Hash) {
+                            $overeenkomsten = $responsbestandCache[$responsePad].Argumenten
+                        } else {
+                            $inhoud = Get-Content -LiteralPath $responsePad -Raw -Encoding UTF8
+                            # GCC-responsbestanden: backslash escaped het volgende teken; enkele en dubbele quotes groeperen.
+                            $overeenkomsten = [System.Collections.Generic.List[string]]::new()
+                            $opgebouwdArgument = $null
+                            $openAanhalingsteken = $null
+                            for ($i = 0; $i -lt $inhoud.Length; $i++) {
+                                $huidigTeken = [string]$inhoud[$i]
+                                if ($huidigTeken -eq '\') {
+                                    $i++
+                                    if ($i -ge $inhoud.Length) { throw "Onvolledige escape in compiler-responsbestand: $responsePad" }
+                                    if ($null -eq $opgebouwdArgument) { $opgebouwdArgument = '' }
+                                    $opgebouwdArgument += [string]$inhoud[$i]
+                                    continue
+                                }
+                                if ($huidigTeken -eq '"' -or $huidigTeken -eq "'") {
+                                    if ($null -eq $openAanhalingsteken) {
+                                        $openAanhalingsteken = $huidigTeken
+                                        if ($null -eq $opgebouwdArgument) { $opgebouwdArgument = '' }
+                                        continue
+                                    }
+                                    if ($openAanhalingsteken -eq $huidigTeken) {
+                                        $openAanhalingsteken = $null
+                                        continue
+                                    }
+                                }
+                                if ([char]::IsWhiteSpace($inhoud[$i]) -and $null -eq $openAanhalingsteken) {
+                                    if ($null -ne $opgebouwdArgument) {
+                                        [void]$overeenkomsten.Add($opgebouwdArgument)
+                                        $opgebouwdArgument = $null
+                                    }
+                                    continue
+                                }
+                                if ($null -eq $opgebouwdArgument) { $opgebouwdArgument = '' }
+                                $opgebouwdArgument += $huidigTeken
+                            }
+                            if ($null -ne $openAanhalingsteken) { throw "Niet afgesloten quotes in compiler-responsbestand: $responsePad" }
+                            if ($null -ne $opgebouwdArgument) { [void]$overeenkomsten.Add($opgebouwdArgument) }
+                            if ($null -ne $responsbestandCache) {
+                                $responsbestandCache[$responsePad] = [pscustomobject]@{
+                                    Hash = (Get-FileHash -LiteralPath $responsePad -Algorithm SHA256).Hash
+                                    Argumenten = [string[]]$overeenkomsten.ToArray()
+                                }
+                            }
+                        }
+                        foreach ($overeenkomst in $overeenkomsten) {
+                            [void]$uitvoer.Add($overeenkomst)
+                        }
+                    }
+                    $opdracht = @($uitvoer.ToArray())
+                }
+                if (@($opdracht | Where-Object { $_ -match '^@' }).Count -gt 0) {
+                    throw "Niet alle compiler-responsbestanden verwerkt voor $($item.file)."
+                }
+
+                $uitvoer = [System.Collections.Generic.List[string]]::new()
+                $includeArgumentenAchteraan = [System.Collections.Generic.List[string]]::new()
+                $iprefix = $null
+                for ($i = 0; $i -lt $opdracht.Count; $i++) {
+                    $argument = [string]$opdracht[$i]
+                    if ($argument -match '^-iprefix(.*)$') {
+                        $waarde = $Matches[1]
+                        if (-not $waarde) {
+                            $i++
+                            if ($i -ge $opdracht.Count) { throw "Ontbrekende waarde bij -iprefix: $($item.file)" }
+                            $waarde = [string]$opdracht[$i]
+                        }
+                        $iprefix = $waarde
+                        continue
+                    }
+                    if ($argument -match '^-iwithprefix(before)?(.*)$') {
+                        $waarde = $Matches[2]
+                        if (-not $waarde) {
+                            $i++
+                            if ($i -ge $opdracht.Count) { throw "Ontbrekende waarde bij -iwithprefix: $($item.file)" }
+                            $waarde = [string]$opdracht[$i]
+                        }
+                        if (-not $iprefix) { throw "-iwithprefix zonder -iprefix: $($item.file)" }
+                        # GCC plakt de suffix aan -iprefix; dit is niet hetzelfde als Join-Path.
+                        $responsePad = ($iprefix + $waarde).Replace('\', '/')
+                        if (-not [System.IO.Path]::IsPathRooted($responsePad)) {
+                            $responsePad = Join-Path ([string]$item.directory) $responsePad
+                        }
+                        if (-not (Test-Path -LiteralPath $responsePad -PathType Container)) {
+                            Write-Warning "Include-map uit -iprefix/-iwithprefix ontbreekt en wordt overgeslagen: $responsePad"
+                            continue
+                        }
+                        if ($argument.StartsWith('-iwithprefixbefore')) {
+                            [void]$uitvoer.Add('-I' + $responsePad)
+                        } else {
+                            [void]$includeArgumentenAchteraan.Add('-I' + $responsePad)
+                        }
+                        continue
+                    }
+                    if ($argument -match '^-imacros(.*)$') {
+                        $waarde = $Matches[1]
+                        if (-not $waarde) {
+                            $i++
+                            if ($i -ge $opdracht.Count) { throw "Ontbrekende waarde bij -imacros: $($item.file)" }
+                            $waarde = [string]$opdracht[$i]
+                        }
+                        # Cppcheck 2.22 leest geforceerde -include uit compilatiedatabases.
+                        [void]$uitvoer.Add('-include')
+                        [void]$uitvoer.Add($waarde)
+                        continue
+                    }
+                    [void]$uitvoer.Add($argument)
+                }
+                foreach ($overeenkomst in $includeArgumentenAchteraan) { [void]$uitvoer.Add($overeenkomst) }
+                $item.arguments = @($uitvoer.ToArray())
+            }
+
             # Arduino CLI verwijst in de JSON nog naar de tijdelijke buildmap.
             # Vervang die verwijzingen door de definitieve snapshotmap.
             $patroon = '(?i)[A-Za-z]:[\\/](?:[^\\/"\r\n]+[\\/])*' + [regex]::Escape((Split-Path -Leaf $bronmap))
@@ -714,6 +988,13 @@ if ($Capture) {
             $lokaleSketch = ([string]$gegenereerd[0].file).Replace($doelmap.Replace('\', '/'), $tijdelijkeMap.Replace('\', '/'))
             if (-not (Test-Path -LiteralPath $lokaleSketch -PathType Leaf)) {
                 throw "Gegenereerde .ino.cpp ontbreekt in snapshot: $lokaleSketch"
+            }
+            foreach ($item in $gegenereerd) {
+                $lokaleSketch = ([string]$item.file).Replace($doelmap.Replace('\', '/'), $tijdelijkeMap.Replace('\', '/'))
+                if (-not (Test-Path -LiteralPath $lokaleSketch -PathType Leaf) -or
+                    -not (Select-String -LiteralPath $lokaleSketch -Pattern '^\s*#line\s+\d+\s+.*\.ino' -Quiet)) {
+                    throw "Gegenereerde .ino.cpp zonder controleerbare oorspronkelijke .ino-regels: $lokaleSketch"
+                }
             }
             [System.IO.File]::WriteAllText((Join-Path $tijdelijkeMap 'compile_commands.json'), (ConvertTo-Json -InputObject $items -Depth 30 -Compress), $utf8)
         }

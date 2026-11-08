@@ -533,6 +533,9 @@ struct GedeeldeBusNode {
   // De PWM-frequentie hoort bij de Extender (configuratie), niet bij de child.
   virtual bool WriteExtenderPWM(uint8_t pin, uint16_t waarde) { (void)pin; (void)waarde; return false; }
 
+  // Frequentie van de PWM-parent uitlezen voor servo-aansturing in microseconden.
+  virtual bool ReadExtenderPWMFrequency(uint16_t& frequentie) { (void)frequentie; return false; }
+
  // Een Sturing zet haar uitgangen in een veilige toestand. Standaard niets (Sensoren, Extenders, Input, Screen).
   // Aangeroepen bij uitschakelen tijdens runtime-herstel, bij afmelden en wanneer activeren() mislukt.
   // Is de parent onbereikbaar, dan lukt dit niet via de bus: een hardwarematige veiligheid (bv. OE-pin) blijft nodig.
