@@ -423,6 +423,13 @@ set TEST_TYPE="EXPERIMENTEEL"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_TCA9548A_Test_GedeeldChannelAdresconflict\Extender_TCA9548A_Test_GedeeldChannelAdresconflict.ino"
+set TEST_NAAM="Extender TCA9548A | gedeeld channel adresconflict"
+set TEST_FLAGS="-DEXTENDER_TCA9548A_AANTAL=1"
+set TEST_TYPE="EXPERIMENTEEL"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\GedeeldeBus\Extenders\Extender_MCP23S17\Extender_MCP23S17.ino"
 set TEST_NAAM="examples\Systeem\GedeeldeBus\Extenders\Extender MCP23S17\Extender MCP23S17 | -DEXTENDER_MCP23S17_AANTAL=1 -DCS_PIN_EXTENDER_MCP23S17_1=HardwareResourcePin::NP_D10"
 set TEST_FLAGS="-DEXTENDER_MCP23S17_AANTAL=1 -DCS_PIN_EXTENDER_MCP23S17_1=HardwareResourcePin::NP_D10"

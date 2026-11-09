@@ -15,8 +15,8 @@
 #endif
 
 #ifdef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
-// CS via een Extender: die Extender moet bestaan en werken vóór Data. Deze test gebruikt PCF8574 #1 (EXTENDER_PCF8574_AANTAL >= 1).
-ExtenderPCF8574 extenderCS(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);   // de Extender met CS
+// CS via een Extender: de gekozen Extender moet werken vóór Data.
+GedeeldeBusNode* extenderCS = nullptr;
 #endif
 
 void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
@@ -31,7 +31,19 @@ void setup() {
   GA_SERIAL.println(F("TEST: FLASH"));
 
 #ifdef DATA_LAYER_FLASH_SPI_1_CS_EXTENDER
-  ToonResultaat(F("Extender voor CS"), extenderCS.aanmelden() && extenderCS.controleren() && extenderCS.inpluggen() && extenderCS.activeren());
+#if EXTENDER_PCF8574_AANTAL > 0
+  if (DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8574) extenderCS = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
+#endif
+
+#if EXTENDER_PCF8575_AANTAL > 0
+  if (DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_PCF8575) extenderCS = GedeeldeBusNewComponent<ExtenderPCF8575>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8575, I2C_ADDRESS_EXTENDER_PCF8575_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8575_1_INT);
+#endif
+
+#if EXTENDER_MCP23017_AANTAL > 0
+  if (DATA_LAYER_FLASH_SPI_1_CS_EXTENDER == GedeeldeBusComponent::DIGITAL_PINS_MCP23017) extenderCS = GedeeldeBusNewComponent<ExtenderMCP23017>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23017, I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET);
+#endif
+
+  ToonResultaat(F("Extender voor CS"), extenderCS != nullptr);
 #endif
 
   if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>();

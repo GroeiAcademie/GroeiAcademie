@@ -132,6 +132,20 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+set TEST_INO="examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_ADC_OngeldigeChannel\Hardwaretest_Foutinjectie_ADC_OngeldigeChannel.ino"
+set TEST_NAAM="Foutinjectie ADC | ADS7828 ongeldig kanaal 8: resultaat -2"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DEXTENDER_ADS7828_AANTAL=1"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_GB112\Hardwaretest_Foutinjectie_GB112.ino"
+set TEST_NAAM="Foutinjectie GB112 | DHTxx niet via PCF8574"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20 -DSENSOR_DHT11_AANTAL=1"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\GedeeldeBus\Foutinjecties\Hardwaretest_Foutinjectie_GB201\Hardwaretest_Foutinjectie_GB201.ino"
 set TEST_NAAM="Foutinjectie GB201 | inpluggen() mislukt"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DGEDEELDE_BUS_FOUTINJECTIE=1 -DEXTENDER_PCF8574_AANTAL=1 -DI2C_ADDRESS_EXTENDER_PCF8574_1=0x20"

@@ -138,7 +138,7 @@ SDA en SCL komen uit de boardconfiguratie. De chips staan in `Data->EEPROMviaI2C
 
 ## FLASH
 
-FLASH gebruikt SPI en de library `Adafruit SPIFlash`, zonder cache en zonder bestandssysteem: de struct `DataFLASHviaSPI` erft van `Adafruit_SPIFlashBase`. Het transport is eigen code (`TransportFLASHviaSPI`): het schakelt CS en gebruikt de gedeelde SPI-bus met `beginTransaction()`/`endTransaction()`. Daar komt later CS via een Extender bij (O8). Bij activeren wordt de JEDEC-ID teruggelezen als controle.
+FLASH gebruikt SPI en de library `Adafruit SPIFlash`, zonder cache en zonder bestandssysteem: de struct `DataFLASHviaSPI` erft van `Adafruit_SPIFlashBase`. Het transport is eigen code (`TransportFLASHviaSPI`): het schakelt CS en gebruikt de gedeelde SPI-bus met `beginTransaction()`/`endTransaction()`. CS via PCF8574, PCF8575 of MCP23017 is al geïmplementeerd. Bij activeren wordt de JEDEC-ID teruggelezen als controle.
 
 ```cpp
 DATA_LAYER_FLASH_SPI_AANTAL
@@ -194,6 +194,8 @@ FRAM I2C is in deze stap alleen als Data-medium geïntegreerd. De bestaande STRE
 ## microSD
 
 microSD gebruikt SPI en `SdFat` (struct `DataMICROSDviaSPI`, erft van `SdFat32`: FAT16 en FAT32). De library is de "SdFat - Adafruit Fork" (`SdFat_Adafruit_Fork.h`): Adafruit SPIFlash brengt die mee, en twee SdFat-versies in één programma botsen. Bestanden zijn `File32`. SdFat geeft een foutcode terug (`sdErrorCode()`), die mee naar de foutdiagnose gaat.
+
+Bij CS via een Extender kan de `void`-callback `sdCsWrite()` een mislukte CS-schakeling niet rechtstreeks aan SdFat terugmelden; de bestaande beperkingen worden verderop beschreven.
 
 ```cpp
 DATA_LAYER_MICROSD_SPI_AANTAL
