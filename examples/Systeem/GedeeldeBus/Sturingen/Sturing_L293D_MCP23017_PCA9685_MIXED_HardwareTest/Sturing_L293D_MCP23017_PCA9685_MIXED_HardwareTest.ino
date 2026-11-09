@@ -1,7 +1,7 @@
 // ============================================================================
-// Sturing: Sturing_L293D_MCP23S17_HardwareTest
+// Sturing: Sturing_L293D_MCP23017_PCA9685_MIXED_HardwareTest
 // ============================================================================
-// MCP23S17 P0 -> L293D IN1, P1 -> IN2; PCA9685 PWM2 -> EN.
+// MCP23017 P0 -> L293D IN1, P1 -> IN2; PCA9685 PWM2 -> EN.
 // LET OP: P0/P1 zijn GPIO-pinnen, PWM2 is een PCA9685-kanaal.
 // PCA9685 en GPIO-Extender moeten vooraf succesvol actief zijn.
 // GEDEELDE_BUS_MIXED_PINS 1 instellen in UserConfig.h.
@@ -13,12 +13,12 @@
 #if STURING_L293D_AANTAL == 0
   #error Zet STURING_L293D_AANTAL op minstens 1 voor deze test.
 #endif
-#if EXTENDER_PCA9685_AANTAL == 0 || EXTENDER_MCP23S17_AANTAL == 0 || !GEDEELDE_BUS_MIXED_PINS
-  #error Activeer PCA9685, MCP23S17 en GEDEELDE_BUS_MIXED_PINS voor deze test.
+#if EXTENDER_PCA9685_AANTAL == 0 || EXTENDER_MCP23017_AANTAL == 0 || !GEDEELDE_BUS_MIXED_PINS
+  #error Activeer PCA9685, MCP23017 en GEDEELDE_BUS_MIXED_PINS voor deze test.
 #endif
 
 ExtenderPCA9685* extenderPCA9685 = nullptr;
-ExtenderMCP23S17* extenderMCP23S17 = nullptr;
+ExtenderMCP23017* extenderMCP23017 = nullptr;
 L293D* l293d = nullptr;
 
 DCmotorBesturing* motorBesturing = nullptr;
@@ -32,7 +32,7 @@ uint8_t testFase = 0;
 unsigned long testStartMillis = 0;
 
 void toonStartInstructies() {
-  GA_SERIAL.println(F("HARDWARETEST: Sturing_L293D_MCP23S17_HardwareTest"));
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_L293D_MCP23017_PCA9685_MIXED_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE DC-MOTORTEST. Zet de motor stevig vast en houd bewegende onderdelen vrij."));
   GA_SERIAL.println(F("PWM 800/4095 is circa 20 procent aansturing, geen gemeten toerental."));
   GA_SERIAL.println(F("Elke beweging start pas na '1' + Enter. STOP + Enter schakelt de driver uit."));
@@ -74,10 +74,10 @@ void rondTestAf(bool ok) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_L293D_MCP23S17_HardwareTest"));
+  GA_SERIAL.println(F("TEST: Sturing_L293D_MCP23017_PCA9685_MIXED_HardwareTest"));
   extenderPCA9685 = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
-  if (extenderPCA9685 != nullptr) extenderMCP23S17 = GedeeldeBusNewComponent<ExtenderMCP23S17>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23S17, EXTENDER_MCP23S17_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI);
-  if (extenderMCP23S17 != nullptr) l293d = GedeeldeBusNewComponent<L293D>(extenderMCP23S17, extenderPCA9685, 0, 1, 2);
+  if (extenderPCA9685 != nullptr) extenderMCP23017 = GedeeldeBusNewComponent<ExtenderMCP23017>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23017, I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET);
+  if (extenderMCP23017 != nullptr) l293d = GedeeldeBusNewComponent<L293D>(extenderMCP23017, extenderPCA9685, 0, 1, 2);
   if (l293d != nullptr) motorBesturing = new DCmotorBesturing(*l293d);
   startGelukt = l293d != nullptr && motorBesturing != nullptr;
   if (startGelukt) motorBesturing->StopMotor();

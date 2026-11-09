@@ -1,17 +1,17 @@
 // ============================================================================
-// Sturing: Sturing_L293D_MCP23017_HardwareTest
+// Sturing: Sturing_L298N_MCP23017_PCA9685_MIXED_HardwareTest
 // ============================================================================
-// MCP23017 P0 -> L293D IN1, P1 -> IN2; PCA9685 PWM2 -> EN.
-// LET OP: P0/P1 zijn GPIO-pinnen, PWM2 is een PCA9685-kanaal.
-// PCA9685 en GPIO-Extender moeten vooraf succesvol actief zijn.
-// GEDEELDE_BUS_MIXED_PINS 1 instellen in UserConfig.h.
-// L293D motoruitgangen en motorvoeding extern; GND gemeenschappelijk.
-// Start beweging uitsluitend met 1 + Enter.
+// Motor 1: MCP23017 P0/P1 -> L298N IN1/IN2, PCA9685 PWM5 -> ENA.
+// Motor 2: MCP23017 P2/P3 -> L298N IN3/IN4, PCA9685 PWM8 -> ENB.
+// EN(A/B)-jumper(s) verwijderen waar van toepassing; niet beide motoren tegelijk testen.
+// GEDEELDE_BUS_MIXED_PINS 1 in UserConfig.h, beide Extenders ingeschakeld.
+// Logica- en motorvoeding passend aansluiten; GND gemeenschappelijk.
+// Gebruik 1 of 2 voor motorkeuze, daarna de begeleide serietests.
 // ============================================================================
 
 #include <GroeiAcademie.h>
-#if STURING_L293D_AANTAL == 0
-  #error Zet STURING_L293D_AANTAL op minstens 1 voor deze test.
+#if STURING_L298N_AANTAL == 0
+  #error Zet STURING_L298N_AANTAL op minstens 1 voor deze test.
 #endif
 #if EXTENDER_PCA9685_AANTAL == 0 || EXTENDER_MCP23017_AANTAL == 0 || !GEDEELDE_BUS_MIXED_PINS
   #error Activeer PCA9685, MCP23017 en GEDEELDE_BUS_MIXED_PINS voor deze test.
@@ -19,7 +19,7 @@
 
 ExtenderPCA9685* extenderPCA9685 = nullptr;
 ExtenderMCP23017* extenderMCP23017 = nullptr;
-L293D* l293d = nullptr;
+L298N* l298n = nullptr;
 
 DCmotorBesturing* motorBesturing = nullptr;
 
@@ -32,10 +32,12 @@ uint8_t testFase = 0;
 unsigned long testStartMillis = 0;
 
 void toonStartInstructies() {
-  GA_SERIAL.println(F("HARDWARETEST: Sturing_L293D_MCP23017_HardwareTest"));
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_L298N_MCP23017_PCA9685_MIXED_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE DC-MOTORTEST. Zet de motor stevig vast en houd bewegende onderdelen vrij."));
   GA_SERIAL.println(F("PWM 800/4095 is circa 20 procent aansturing, geen gemeten toerental."));
-  GA_SERIAL.println(F("Elke beweging start pas na '1' + Enter. STOP + Enter schakelt de driver uit."));
+  GA_SERIAL.println(F("KIES MOTOR: 1 = Motor 1 (IN1/IN2/ENA, OUT1/OUT2), 2 = Motor 2 (IN3/IN4/ENB, OUT3/OUT4)."));
+  GA_SERIAL.println(F("Kies een motor met 1 of 2 + Enter. Daarna kies je een test en start je die met 1 + Enter."));
+  GA_SERIAL.println(F("STOP + Enter schakelt de driver uit."));
   GA_SERIAL.println(F("Controleer de beweging fysiek; een geslaagde functieaanroep bewijst geen motorbeweging."));
 }
 
@@ -63,27 +65,28 @@ void rondTestAf(bool ok) {
 
   if (!ok) {
     testGestopt = true;
-    GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer hardware en herstart Arduino."));
-    return;
+    GA_SERIAL.println(F("TEST GESTOPT NA FOUT. Controleer de hardware voordat je verdergaat."));
+  } else {
+    GA_SERIAL.println(F("TEST UITGEVOERD. Controleer of de motor heeft gedaan wat hierboven beschreven staat."));
   }
 
-  ++testStap;
-  toonTestInstructies();
+  testFase = 13;
+  GA_SERIAL.println(F("0 = Terug naar de motorkeuze."));
 }
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_L293D_MCP23017_HardwareTest"));
+  GA_SERIAL.println(F("TEST: Sturing_L298N_MCP23017_PCA9685_MIXED_HardwareTest"));
   extenderPCA9685 = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
   if (extenderPCA9685 != nullptr) extenderMCP23017 = GedeeldeBusNewComponent<ExtenderMCP23017>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23017, I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET);
-  if (extenderMCP23017 != nullptr) l293d = GedeeldeBusNewComponent<L293D>(extenderMCP23017, extenderPCA9685, 0, 1, 2);
-  if (l293d != nullptr) motorBesturing = new DCmotorBesturing(*l293d);
-  startGelukt = l293d != nullptr && motorBesturing != nullptr;
+  if (extenderMCP23017 != nullptr) l298n = GedeeldeBusNewComponent<L298N>(extenderMCP23017, extenderPCA9685, 0, 1, 5);
+  if (l298n != nullptr) motorBesturing = new DCmotorBesturing(*l298n);
+  startGelukt = l298n != nullptr && motorBesturing != nullptr;
   if (startGelukt) motorBesturing->StopMotor();
   GA_SERIAL.println(startGelukt ? F("LEVENSCYCLUS: OK. BEGINSTATUS: MOTOR GESTOPT.") : F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
-  toonStartInstructies();
-  if (startGelukt) toonTestInstructies();
+  testFase = 10;
+  if (startGelukt) toonStartInstructies();
 }
 
 void loop() {
@@ -91,39 +94,118 @@ void loop() {
     invoer = GA_SERIAL.readStringUntil('\n');
     invoer.trim();
     invoer.toUpperCase();
+
     if (invoer == "STOP") {
       if (startGelukt) motorBesturing->StopMotor();
       testActief = false;
       testGestopt = true;
-      GA_SERIAL.println(F("STOP: driver uit. Herstart Arduino voor een nieuwe test."));
+      testFase = 13;
+      GA_SERIAL.println(F("STOP: driver uit. De gekozen test is gestopt."));
+      GA_SERIAL.println(F("0 = Terug naar de motorkeuze."));
       return;
     }
-    if (invoer == "1" && startGelukt && !testGestopt) {
-      if (testActief && testStap == 3 && testFase == 1) {
-        const bool ok = motorBesturing->HervatMotor();
-        GA_SERIAL.println(F("HervatMotor(): oude richting en PWM opnieuw gevraagd."));
-        toonFunctieResultaat(ok);
 
-        if (!ok) {
-          rondTestAf(false);
+    if (!startGelukt) {
+      GA_SERIAL.println(F("LEVENSCYCLUS: FOUT. GEEN TEST UITVOEREN."));
+      return;
+    }
+
+    if (testFase == 13) {
+      if (invoer == "0") {
+        testGestopt = false;
+        testFase = 10;
+        toonStartInstructies();
+      } else {
+        GA_SERIAL.println(F("0 = Terug naar de motorkeuze."));
+      }
+
+      return;
+    }
+
+    if (testFase == 10) {
+      if (invoer != "1" && invoer != "2") {
+        GA_SERIAL.println(F("Kies motor 1 of motor 2 + Enter."));
+        return;
+      }
+
+      if ((invoer == "1" && l298n->in1 != 0) || (invoer == "2" && l298n->in1 != 2)) {
+        motorBesturing->StopMotor();
+        delete motorBesturing;
+        motorBesturing = nullptr;
+
+        if (!l298n->afmelden()) {
+          startGelukt = false;
+          GA_SERIAL.println(F("LEVENSCYCLUS: FOUT BIJ AFMELDEN. Herstart Arduino."));
           return;
         }
 
-        testFase = 2;
-        testStartMillis = millis();
+        l298n = nullptr;
+        l298n = GedeeldeBusNewComponent<L298N>(extenderMCP23017, extenderPCA9685, invoer == "1" ? 0 : 2, invoer == "1" ? 1 : 3, invoer == "1" ? 5 : 8);
+        if (l298n != nullptr) motorBesturing = new DCmotorBesturing(*l298n);
+        startGelukt = l298n != nullptr && motorBesturing != nullptr;
+
+        if (!startGelukt) {
+          GA_SERIAL.println(F("LEVENSCYCLUS: FOUT BIJ MOTORKEUZE. Herstart Arduino."));
+          return;
+        }
+
+        motorBesturing->StopMotor();
+      }
+
+      GA_SERIAL.print(F("GEKOZEN MOTOR: "));
+      GA_SERIAL.println(invoer);
+      GA_SERIAL.println(F("KIES EEN TEST:"));
+      GA_SERIAL.println(F("1 = StelDraairichtingEnSnelheidIn / StartMotor"));
+      GA_SERIAL.println(F("2 = StelSnelheidIn / BeweegVooruit"));
+      GA_SERIAL.println(F("3 = StelSnelheidIn / BeweegAchteruit"));
+      GA_SERIAL.println(F("4 = PauzeerMotor / HervatMotor"));
+      GA_SERIAL.println(F("5 = DraairichtingOmkeren / StartMotor"));
+      GA_SERIAL.println(F("6 = StelSnelheidIn tijdens beweging"));
+      GA_SERIAL.println(F("Typ 1 t/m 6 + Enter om de testuitleg te zien."));
+      testFase = 11;
+      return;
+    }
+
+    if (testFase == 11) {
+      if (invoer == "0") {
+        testFase = 10;
+        toonStartInstructies();
         return;
       }
 
-      if (testActief) {
-        GA_SERIAL.println(F("TEST BEZIG. Wacht op automatische stop of typ STOP."));
+      const int gekozenTest = invoer.toInt();
+      if (gekozenTest < 1 || gekozenTest > 6 || String(gekozenTest) != invoer) {
+        GA_SERIAL.println(F("Ongeldige test. Typ 1 t/m 6 + Enter."));
         return;
       }
 
-      if (testStap >= 6) {
-        toonTestInstructies();
+      testStap = static_cast<uint8_t>(gekozenTest - 1);
+      testFase = 12;
+      toonTestInstructies();
+      return;
+    }
+
+    if (testActief && testStap == 3 && testFase == 1 && invoer == "1") {
+      const bool ok = motorBesturing->HervatMotor();
+      GA_SERIAL.println(F("HervatMotor(): oude richting en PWM opnieuw gevraagd."));
+      toonFunctieResultaat(ok);
+
+      if (!ok) {
+        rondTestAf(false);
         return;
       }
 
+      testFase = 2;
+      testStartMillis = millis();
+      return;
+    }
+
+    if (testActief) {
+      GA_SERIAL.println(F("TEST BEZIG. Wacht op automatische stop of typ STOP."));
+      return;
+    }
+
+    if (testFase == 12 && invoer == "1") {
       GA_SERIAL.print(F("START TEST ")); GA_SERIAL.println(testStap + 1);
       bool ok = false;
       switch (testStap) {
@@ -146,8 +228,10 @@ void loop() {
       GA_SERIAL.println(F("FUNCTIEAANROEP: OK. Beweging heeft een automatische stoptijd."));
       return;
     }
-    GA_SERIAL.println(F("Geen geldige opdracht. Typ 1 + Enter, of STOP + Enter."));
+
+    GA_SERIAL.println(F("Typ 1 + Enter om de gekozen test te starten, of STOP + Enter."));
   }
+
   if (!testActief) return;
   const unsigned long verstreken = millis() - testStartMillis;
   if (testStap == 3 && testFase == 1) return;
@@ -165,6 +249,7 @@ void loop() {
     GA_SERIAL.println(F("Motor is gepauzeerd. Typ 1 + Enter om de bewaarde beweging te hervatten."));
     return;
   }
+
   if (testStap == 5 && testFase == 0 && verstreken >= 800UL) {
     const bool ok = motorBesturing->StelSnelheidIn(1300);
     GA_SERIAL.println(F("StelSnelheidIn(1300): gevraagde PWM verhoogd, fysieke snelheid onbekend."));
@@ -177,5 +262,6 @@ void loop() {
 
     testFase = 2;
   }
+
   if (verstreken >= 2000UL) rondTestAf(true);
 }

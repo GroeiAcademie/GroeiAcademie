@@ -1,5 +1,5 @@
 // ============================================================================
-// Sturing_MAX7219_MIXED
+// Sturing_MAX7219_PCF8574_MIXED
 // ============================================================================
 // MAX7219: hardware-SPI DIN/CLK, LOAD/CS via PCF8574.
 // Test voor spiraalbeweging en impulsbediening.
@@ -128,7 +128,7 @@ void rondTestAf(bool ok) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_MAX7219_MIXED"));
+  GA_SERIAL.println(F("TEST: Sturing_MAX7219_PCF8574_MIXED"));
   extenderPCF8574 = GedeeldeBusNewComponent<ExtenderPCF8574>(&Native, GedeeldeBusComponent::DIGITAL_PINS_PCF8574, I2C_ADDRESS_EXTENDER_PCF8574_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_PCF8574_1_INT);
   if (extenderPCF8574 != nullptr) max7219 = GedeeldeBusNewComponent<MAX7219>(&Native, extenderPCF8574, 2, MD_MAX72XX::FC16_HW);
   startGelukt = max7219 != nullptr;
