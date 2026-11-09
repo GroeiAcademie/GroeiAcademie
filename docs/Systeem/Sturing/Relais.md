@@ -240,7 +240,7 @@ Beoordeel het werkelijk aangesloten apparaat, niet uitsluitend `RESULTAAT: OK`.
 
 ### ISD1820 via de bestaande Relais-klasse
 
-Er is in RUN146 geen afzonderlijke `ISD1820.md`; daarom worden de twee reeds bestaande
+Er is geen afzonderlijke `ISD1820.md`; daarom worden de twee reeds bestaande
 ISD1820-sketches hier beschreven zonder een nieuwe bestandsnaam aan te maken.
 
 #### `Sturing_ISD1820.ino`

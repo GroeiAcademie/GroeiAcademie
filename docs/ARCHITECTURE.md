@@ -571,6 +571,9 @@ De actuele componentdocumentatie is onderverdeeld volgens de broncode:
 
 De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.
 
+
+De Sturing-tests onder `examples/Systeem/GedeeldeBus/Sturingen/` bevatten daarnaast 20 extra sketches voor de vijf bestaande drivers A4988, L293D, L298N, MAX7219 en ULN2003. De bestaande pinclaim- en foutafhandelingslogica wordt hergebruikt; gemengde L293D/L298N-aansturing gebruikt digitale richting via PCF/MCP en EN via PCA9685. MAX7219 kan 16 bits bitbangen via een GPIO-Extender; MCP23S17 wordt niet als LOAD/CS op dezelfde hardware-SPI-bus ondersteund. De nieuwe testsketches zijn opgenomen in `extras/TestLibrarySturingen-v2.0.0.cmd`. Hardwarevalidatie blijft afzonderlijk vereist.
+
 ## Architectuurgrens van GedeeldeBus
 
 GedeeldeBus is de gemeenschappelijke boom- en resourcebeheerlaag. De generieke kern staat in `src/Systeem/GedeeldeBus/GedeeldeBus.h/.cpp`. Concrete Extenders staan in `src/Systeem/Extender/`, Sensoren in `src/Systeem/Sensor/` en Sturingen in `src/Systeem/Sturing/`. Ze gebruiken de bestaande generieke GedeeldeBus-basis.
@@ -658,7 +661,7 @@ I2C-adressen worden intern als exclusieve claim in hetzelfde mechanisme behandel
 
 `firstExtenderNode()` bepaalt in welk resourcegebied een node zit. Claims worden alleen rechtstreeks vergeleken wanneer ze tot hetzelfde resourcegebied behoren. Native claims vergelijken dus met Native claims; children van dezelfde Extender vergelijken binnen die Extender.
 
-**Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). FsrRfp doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
+**Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017 en MCP23S17) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`; PCA9685 gebruikt `WriteExtenderPWM()` voor een afzonderlijke PWM-claim. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). FsrRfp doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
 
 ## I2C en SPI
 
@@ -813,3 +816,5 @@ Deze tests bewijzen niet automatisch de volledige elektronische werking van elk 
 ## Geheugen en timing
 
  blijft een belangrijke ondergrens. Nieuwe code wordt beoordeeld op flash, SRAM, blokkerende wachttijden en samplegedrag. DEBUG- en TRACE-functionaliteit moet uitschakelbaar blijven. `Diagnose` bestaat uitsluitend in DEBUG-builds.
+
+Voor L293D/L298N zijn drie verschillende hardware-routes beschikbaar: (1) digitale IN1/IN2 en PWM-EN op dezelfde PWM-controller of Native, (2) gemengde GPIO-Extender voor richting met één PCA9685-PWM-EN-kanaal en (3) tweepinsmodules met intern actieve EN, waarbij IN1/IN2 digitaal of rechtstreeks via PWM worden gestuurd. De extra tweepinstests zijn opgenomen in `TestLibrarySturingen-v2.0.0.cmd`. De bestaande EN-tests blijven beschikbaar.

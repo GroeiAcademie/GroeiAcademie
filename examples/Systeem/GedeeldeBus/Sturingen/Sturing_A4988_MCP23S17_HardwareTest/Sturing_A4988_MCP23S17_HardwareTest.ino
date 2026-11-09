@@ -1,40 +1,24 @@
 // ============================================================================
-// Sturing: A4988_HardwareTest
+// Sturing: Sturing_A4988_MCP23S17_HardwareTest
 // ============================================================================
-// Begeleide hardwaretest voor A4988. Elke beweging vereist eerst bevestiging via Serial.
-// Pinnen zijn afgeleid uit de bestaande constructoren en de boardmapping in src/Configuratie/UserConfig.h en SystemConfig.h.
-// A4988 STEP -> D6, DIR -> D7; ENABLE, RESET, SLEEP en motorvoeding volgens de concrete driver.
-// Native pinlabels in de code: D6 en D7; boardmapping:
-// UNO R4 Minima/WiFi en UNO Q: D6 en D7.
-// ESP32 D1 UNO R32: D6=GPIO27, D7=GPIO14.
-// ESP32-S3 ARDI-32: D6=GPIO9, D7=GPIO14; ESP32-S3 DEV: D6=GPIO3, D7=GPIO14.
-// RP2040 Cytron Maker UNO: D6=GPIO6, D7=GPIO7.
-// STM32 F401RE Nucleo: D6=PB10, D7=PA8.
-// ============================================================================
-
-// ============================================================================
-// CONCREET AANSLUITEN EN TESTEN
-// ============================================================================
-// Native Arduino D6 -> A4988 STEP; D7 -> A4988 DIR; GND -> logica-GND.
-// A4988 VDD -> bij driver en board passende logicavoeding; GND -> GND.
-// A4988 VMOT -> afzonderlijke motorvoeding (+), motor-GND -> (-).
-// Twee gevonden motorwikkelingen -> 1A/1B en 2A/2B (niet onder spanning omsteken).
-// ENABLE, RESET, SLEEP en MS1/MS2/MS3 zijn NIET door deze .ino aangestuurd:
-//   stel ze extern volgens de eigen A4988-carrier in (RESET/SLEEP actief houden).
-// Voor Pololu-carrier: motorvoeding 8..35 V; VDD 3..5,5 V en voldoende
-//   voedingsbuffer dicht bij VMOT; controleer pinout van het ECHTE printje.
-// VOOR stroom inschakelen stroomlimiet/VREF afstellen op motor en carrier.
-// Roterende as vrijmaken; STOP stopt STEP-pulsen, niet noodzakelijk spoelstroom.
-// Actieve configuratie: src/Configuratie/Sturingen/ConfigA4988.h,
-//   STURING_A4988_AANTAL >= 1.
-// Met 1 + Enter per test: een stap, vier stappen, 80 omgekeerde, pauze/hervat.
+// MCP23S17 P0 -> A4988 STEP, P1 -> DIR, P2 -> ENABLE (active LOW).
+// A4988 RESET/SLEEP/MS1/MS2/MS3 extern correct aansluiten.
+// Controleer LOGICA-spanning en uitgangs-HIGH van de gekozen Extender.
+// Externe motorvoeding en stroomlimiet instellen; gemeenschappelijke GND.
+// Fysieke test pas na 1 + Enter; STOP voorkomt nieuwe stappen en zet ENABLE HIGH.
+// STEP-pulsen via een Extender zijn beperkt door de werkelijke I2C/SPI-buslatentie.
+// Stel STURING_A4988_AANTAL en EXTENDER_MCP23S17_AANTAL minstens op 1.
 // ============================================================================
 
 #include <GroeiAcademie.h>
 #if STURING_A4988_AANTAL == 0
   #error Zet STURING_A4988_AANTAL op minstens 1 voor deze test.
 #endif
+#if EXTENDER_MCP23S17_AANTAL == 0
+  #error EXTENDER_MCP23S17_AANTAL moet minstens 1 zijn.
+#endif
 
+ExtenderMCP23S17* extenderMCP23S17 = nullptr;
 A4988* a4988 = nullptr;
 
 StappenmotorBesturing* motorBesturing = nullptr;
@@ -50,9 +34,9 @@ unsigned long testStartMillis = 0;
 unsigned long laatsteStapMillis = 0;
 
 void toonStartInstructies() {
-  GA_SERIAL.println(F("HARDWARETEST: Sturing_A4988_HardwareTest"));
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_A4988_MCP23S17_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE STAPPENMOTORTEST. Sluit de motor veilig aan en maak het mechanisme vrij."));
-  GA_SERIAL.println(F("Bij A4988 blijft de motor mogelijk bekrachtigd na STOP; schakel zo nodig de voeding fysiek uit."));
+  GA_SERIAL.println(F("ENABLE P2: active LOW tijdens stappen, HIGH bij STOP; controleer de werkelijke driver-uitgangen."));
   GA_SERIAL.println(F("Elke stap start pas na '1' + Enter. STOP + Enter onderbreekt de test."));
   GA_SERIAL.println(F("Controleer de beweging fysiek; een geslaagde functieaanroep bewijst geen motorbeweging."));
 }
@@ -90,8 +74,9 @@ void rondTestAf(bool ok) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_A4988_HardwareTest"));
-  a4988 = GedeeldeBusNewComponent<A4988>(&Native, HardwareResourcePin::NP_D6, HardwareResourcePin::NP_D7);
+  GA_SERIAL.println(F("TEST: Sturing_A4988_MCP23S17_HardwareTest"));
+  extenderMCP23S17 = GedeeldeBusNewComponent<ExtenderMCP23S17>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23S17, EXTENDER_MCP23S17_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI);
+  if (extenderMCP23S17 != nullptr) a4988 = GedeeldeBusNewComponent<A4988>(extenderMCP23S17, 0, 1, 2);
   if (a4988 != nullptr) motorBesturing = new StappenmotorBesturing(*a4988);
   startGelukt = a4988 != nullptr && motorBesturing != nullptr;
   if (startGelukt) motorBesturing->StopMotor();

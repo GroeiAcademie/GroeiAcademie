@@ -1,16 +1,30 @@
 # Changelog
 
-## 2026-10-31: RUN112, microSD-uitlijning
+## 2026-11-09: Sturingen × Extenders, herstel en testregister
+
+- A4988 Native `StopSturing()`: geen onjuiste GPIO-13-grens; `NONE`/dubbele pinnen blijven afgeschermd.
+- L293D/L298N Native tweepins PWM: op ESP32 terug naar GPIO-uitgangen vóór digitale richtingswissel en STOP.
+- Vier PWM-via-IN-testmappen en `.ino`-bestanden hernoemd naar `Native_PWM_IN`/`PWM_IN`; CMD-testregister en Sturing-documentatie volgen de nieuwe namen.
+- Geen fysieke hardwarevalidatie of Arduino-CLI-compilatie uitgevoerd.
+
+- Aanvulling: L293D/L298N ondersteunen ook modules met uitsluitend IN1/IN2: PWM op twee Native- of PCA9685-kanalen, of volledige digitale aansturing via Native/PCF8574/PCF8575/MCP23017/MCP23S17. Afzonderlijke EN- en MIXED-varianten zijn behouden. De drie oude hardwaretestmappen zijn hernoemd; de lifecycle-sketches van L293D/L298N gebruiken nu PCF8574 en de nieuwe digitale en PWM-via-IN-tests zijn in de CMD-testlijst opgenomen.
+
+- L298N controleert nu vóór de activatie of de parent bestaat en actief is; L293D/L298N roepen bij een mislukte PCA9685-schrijfactie ook in het bestaande driekanalenpad `StopSturing()` aan.
+- Eerder uitgewerkte aansluitingen behouden: A4988 via Native en vier GPIO-Extenders met optionele `enablePin`; L293D/L298N Native, PCA9685 en gemengde GPIO/PCA9685; MAX7219 Native, volledige GPIO-bitbanging en de ondersteunde gemengde SPI/CS-varianten; ULN2003 Native en vier GPIO-Extenders.
+- A4988 heeft de optionele `enablePin` en een aangepaste stopafhandeling; MAX7219 heeft een controle op de Native-parent in het hardware-SPI-pad. De bestaande namen, inclusief de goedgekeurde `extenderPWM_`, blijven behouden.
+- Vergeleken met de oorspronkelijke Sturingen-testbasis zijn er 32 extra testsketches en zijn drie bestaande hardwaretests hernoemd. Alle 62 Sturing-sketches staan in `extras/TestLibrarySturingen-v2.0.0.cmd`. De vijf Sturing-documenten en de relevante architectuur-, GedeeldeBus- en configuratiedocumenten zijn bijgewerkt. Arduino-CLI- en fysieke hardwarevalidatie staan nog open.
+
+## 2026-10-31: microSD-uitlijning
 
 - `SENSOR.DAT` wordt geopend met `O_APPEND` in plaats van `O_AT_END` (in `RecordingStart()` en bij het heropenen in `StreamingWrite()`). Na een mislukte `write()` blijven de volgende records uitgelijnd; een half record wordt geen deel van het bestand. Geen bescherming tegen een defecte sector; foutmelding van `write()` en `sync()` blijft open (V109).
 - RC1-register: handmatige test "microSD schrijffout en uitlijning".
 
-## 2026-10-31: RUN111, DS3231-afwerking
+## 2026-10-31: DS3231-afwerking
 
 - DS3231: de bestandsdatum controleert na het lezen of de chip nog antwoordt (zoals `LeesDatumTijd()`); zo niet, dan blijft de standaarddatum van SdFat staan. `ZetDatumTijd()` controleert eerst de beschikbaarheid tijdens het draaien (geen `adjust()` als de DS3231 niet beschikbaar is) en meldt het resultaat van de adrescontrole aan de foutafhandeling van GedeeldeBus, zoals `LeesDatumTijd()`.
 - RC1-register: de vaste starttekst van de teller vermeldt 266 testen (de teller wordt bij het openen nog altijd opnieuw berekend).
 
-## 2026-10-31: RUN110, correcties RUN109 en testen
+## 2026-10-31: correcties en testen
 
 - **Componentcodes alfabetisch binnen hun groep (nieuwe nummers):** Temperatuur en vochtigheid: `AHT10` 0xD0, `DHT11` 0xD1, `DHT22` 0xD2, `DS18B20` 0xD3, `DS3231` 0xD4, `LM35DZ` 0xD5, `LM75A` 0xD6, `MF52A` 0xD7, `MF52D` 0xD8. Geluid en trilling: `INMP441` 0xB5, `MAX4466` 0xB6, `MAX9814` 0xB7, `MS3625` 0xB8, `OV7670` 0xB9, `PIEZO` 0xBA. De code werkt met de namen; het nummer staat in nieuwe records van `SENSOR.DAT`/FLASH en in debugmeldingen. De docs per sensor zijn aangepast.
 - DS3231: na `now()` en `adjust()` wordt gecontroleerd of de chip nog antwoordt (patroon van de MPU6500); alleen dat gaat naar de foutafhandeling van GedeeldeBus. Batterijverlies of een ongeldige tijd geeft `false` in `LeesDatumTijd()` zonder busfout. `ZetDatumTijd()` geeft het resultaat van die controle terug. De bestandsdatum vult eerst de standaardwaarden van SdFat in (SdFat initialiseert ze niet) en gebruikt de klok alleen met dezelfde geldigheid als `LeesDatumTijd()`, inclusief batterijverlies. Beperking gedocumenteerd.
@@ -18,11 +32,11 @@
 - NRF24L01: DATA.md vermeldt expliciet best-effort zonder ontvangstgarantie en de meting van de duur van `write()` (gemiddeld en maximaal).
 - Nieuwe voorbeelden BioAmp EXG Pill: `Sensor_BioAmpEXGPill_ECG_Hartslag`, `_EMG_Envelop`, `_EOG_Knipperen`.
 - README: overzichtsafbeelding "Sensoren (43)" (`docs/Systeem/Screenshots/`).
-- Docs van RUN107 teruggezet: `ADS1115.md` (data rate), `AD8232.md` (LO+ en LO-), `VEILIGHEID.md`.
+- Documentatie teruggezet: `ADS1115.md` (data rate), `AD8232.md` (LO+ en LO-), `VEILIGHEID.md`.
 - Testscripts: nieuwe tests voor DS3231, XY-STICK, MS3625 (alleen ESP32-S3), de drie BioAmp-voorbeelden, ISD1820, NRF24L01 (zender en ontvanger), HC-05 (alleen UNO R4), microSD met DS3231 en ST7735S; ongeldige configuraties voor DS3231 (aantal, adres), NRF24L01 (aantal, type, radiokanaal) en de pixelschermcontroller.
-- `docs/ARCHITECTURE.md`: nieuwe bestanden van RUN109 en RUN110.
+- `docs/ARCHITECTURE.md`: nieuwe bestanden opgenomen.
 
-## 2026-10-31: RUN109, nieuwe hardware uit de Hardware-TODO
+## 2026-10-31: nieuwe hardware uit de Hardware-TODO
 
 - **Hernoemd (geen alias):** `KY015` wordt de familie `DHTxx` (`src/Systeem/Sensor/DHTxx.h/.cpp`). Componentcodes `DHT11` (was `KY015`) en `DHT22` (nieuw); `SENSOR_KY015_AANTAL` wordt `SENSOR_DHT11_AANTAL`, met daarnaast `SENSOR_DHT22_AANTAL`; `ConfigKY015` wordt `ConfigDHTxx`; het voorbeeld `Sensor_KY015` wordt `Sensor_DHTxx`; de doc `KY015.md` wordt `DHTxx.md`. De testscripts Sensoren en SensorenOngeldig testen DHT11 en DHT22.
 - Pixelscherm: nieuwe instelling `ACTIEF_PIXEL_SCREEN_CONTROLLER` met `SCREEN_ST7789` (standaard, ongewijzigd) of `SCREEN_ST7735S` (1,8″, alleen met `SCREEN_128X160`, `initR(INITR_BLACKTAB)`).
@@ -32,16 +46,16 @@
 - Nieuwe voorbeelden zonder nieuwe klasse: `Sensor_XYSTICK` (joystick via het ADC-contract van de ADS1115 en een native knop), `Sturing_ISD1820` (opnemen en afspelen met twee keer `Relais`), `Data/HC05` (Bluetooth via `Serial1`).
 - Docs: `DHTxx.md`, `DS3231.md`, `DATA.md` (NRF24L01, HC-05, bestandsdatum), `INMP441.md` (MS3625), `Relais.md` (ISD1820), `SCREEN.md` en `Configuratie/SystemConfig.md` (controller), `ARCHITECTURE.md`.
 
-## 2026-10-25: Testscripts (RUN31 en RUN32)
+## 2026-10-25: Testscripts
 
 - UNO Q (`arduino:zephyr:unoq`) staat in de testmatrix bij EXPERIMENTAL in plaats van EXTENDED (`TestLibraryCommon.cmd`); de UNO Q wordt nog altijd gecompileerd, maar telt niet mee voor de eindstatus. `docs/HARDWARE_SUPPORT.md` vermeldt de UNO Q als experimenteel.
 - `COMPILE_ISSUES.md`: de lokale correctie in Adafruit ST7735 and ST7789 Library voor de STM32 Nucleo F401RE (`wiring_private.h`), met de upstream-meldingen issue #225 en PR #226. `README.md` en `docs/HARDWARE_SUPPORT.md` verwijzen ernaar.
 - `TestLibraryCommonOngeldig.cmd`: `cls` vóór het wissen van het logbestand, en per run eigen tijdelijke bestanden (`GA_RUN_ID`), zodat scripts die tegelijk lopen elkaar niet overschrijven.
 - Nieuwe tests: GedeeldeBus `Tik_Enkele_Samen_Instortend_Cocktail`; Sensoren `Sensor_RFP602_DIRECT`, `_FLASH` en `_MICROSD`; Tools `I2C_MetenHerstelEnBlokkeertijd`; SensorenOngeldig de oude RFP602-namen; SturingenOngeldig "Relais vereist mixed pins" en "ULN2003 vereist mixed pins"; InputOngeldig en GedeeldeBusOngeldig onbekend invoertype en ongeldige invoertype-combinatie.
-- `TestLibraryInputOngeldig-v2.0.0.cmd`: de test "ongeldige invoertype-combinatie" verwacht nu de foutmelding "Geldige INPUT_KANAAL_CONFIG: ..." (RUN32), zodat ook de tweede controle in `Input.h` getest wordt.
-- `TestLibrarySturingenOngeldig-v2.0.0.cmd`: de test "PCA9685 ondersteunt maximaal 2 instanties" staat er weer (RUN32).
-- `extras/TestLibraryAllCmdParallel.cmd`: opent de acht testdomeinen als tabs in één Windows Terminal-venster, zonder BOM (RUN32).
-- `.gitattributes`: `*.cmd` en `*.bat` krijgen altijd Windows-regeleinden (CRLF); de zes `.cmd`-bestanden die nog LF hadden, zijn omgezet (RUN32).
+- `TestLibraryInputOngeldig-v2.0.0.cmd`: de test "ongeldige invoertype-combinatie" verwacht nu de foutmelding "Geldige INPUT_KANAAL_CONFIG: ...", zodat ook de tweede controle in `Input.h` getest wordt.
+- `TestLibrarySturingenOngeldig-v2.0.0.cmd`: de test "PCA9685 ondersteunt maximaal 2 instanties" staat er weer.
+- `extras/TestLibraryAllCmdParallel.cmd`: opent de acht testdomeinen als tabs in één Windows Terminal-venster, zonder BOM.
+- `.gitattributes`: `*.cmd` en `*.bat` krijgen altijd Windows-regeleinden (CRLF); de zes `.cmd`-bestanden die nog LF hadden, zijn omgezet.
 
 ## 2026-10-23: ADS1115 als gewone Extender; ADC_NATIVE en INPUT_TYPE_DIGITAL vervallen
 
@@ -60,10 +74,10 @@ Doel: v2.0.0 wordt de nieuwe basis zonder overbodige v1.1.2-sporen. Het Stimulus
 - Tekeningset Stimulus Shield v2.0.0 vervangen door de gecorrigeerde export van 2026-10-22: U8 HV3 en HV4 zijn nu verbonden met H10 pin 2 (D11 MOSI) en pin 1 (D13 SCK). De PDF heet `Schematic_Stimulus-Shield-GroeiAcademie-FrameWork-v2.0.0_2026-10-22.pdf`.
 - DECISION_LOG: D043 en D044 toegevoegd.
 - Opkuis voor de RC: ongebruikte `_LCD_ADS1115_FOUT` en `_LCD_ADS1115_NIET_GEVONDEN` verwijderd uit alle taalbestanden; `library.properties` vermeldt GedeeldeBus, Extenders en Sensoren; README noemt 16 Extenders; TODO-notities in de configuratie en bij IN302 herschreven als "MOGELIJKE UITBREIDING NA v2.0.0", "MOGELIJKE ALTERNATIEVE NAMEN" en "Na v2.0.0"; D042 punten (22) en (23) beslist (geen aparte busmelding in v2.0.0, pauze blijft 100 ms).
-- `GedeeldeBusComponent` hernummerd (RUN12): groepen alfabetisch, elke groep begint op een waarde die eindigt op 0 of 5. Bereiken: 0x00-0x0F Input, 0x10-0x1F Output en Data, 0x20-0x7F Extender, 0x80-0xDF Sensor, 0xE0-0xFE Sturing (gereserveerd), 0xFF ROOT. Nieuwe waarden: DigitalPins 0x40-0x43, TCA9548A 0x45, DS2482v800 0x50, PCA9685 0x55, MAX14830 0x65, SC16IS752 0x66, `GC_SENSOR` 0x80, `RFP602` 0xA4 (groep Druk en kracht). Componentcodes worden overal bij naam gebruikt; alleen de hexadecimale DEBUG-uitvoer verandert.
+- `GedeeldeBusComponent` hernummerd: groepen alfabetisch, elke groep begint op een waarde die eindigt op 0 of 5. Bereiken: 0x00-0x0F Input, 0x10-0x1F Output en Data, 0x20-0x7F Extender, 0x80-0xDF Sensor, 0xE0-0xFE Sturing (gereserveerd), 0xFF ROOT. Nieuwe waarden: DigitalPins 0x40-0x43, TCA9548A 0x45, DS2482v800 0x50, PCA9685 0x55, MAX14830 0x65, SC16IS752 0x66, `GC_SENSOR` 0x80, `RFP602` 0xA4 (groep Druk en kracht). Componentcodes worden overal bij naam gebruikt; alleen de hexadecimale DEBUG-uitvoer verandert.
 - `INPUT_DIGITAL` (0x01) verwijderd uit `GedeeldeBusComponent`: rest van `INPUT_TYPE_DIGITAL`.
 - `docs/HARDWARE_SUPPORT.md`: de tabel met interne ADC-resoluties blijft ter informatie; het FrameWork meet analoog via een ADC-Extender.
-- Sensoren en Sturingen transparant inpluggen (RUN12, V5 en V7 tot V11):
+- Sensoren en Sturingen transparant inpluggen (V5 en V7 tot V11):
   - V8: `GedeeldeBusNode` kreeg `StartExtenderReadAnalog()`, `IsExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue()`: een child meet via zijn parent-ADC zonder het type te kennen. Het meetbereik gaat mee per meting; de waarde is geschaald naar `ADC_BITS`. Ingevuld in `ExtenderADS1115`.
   - R1 tot R3: `StartExtenderReadAnalog()` geeft een `int8_t` (1 gestart, 0 bezet, -1 hardwarefout, -2 niet ondersteund); bereik 0 controleert alleen. `ExtenderADS1115` weigert een tweede meting zolang de vorige niet opgehaald is (`metingBezig`); `Get` geeft altijd vrij. Alleen -1 telt voor D042. RFP602 start in `Activeren()` geen meting meer.
   - `GetExtenderReadAnalogValue()` geeft nooit een oude registerwaarde als nieuwe meting (eerst `isReady()`); RFP602 onthoudt `laatstePin` alleen na een gestarte meting; de time-out van 150 ms geldt voor de volledige aanvraag.
@@ -74,22 +88,22 @@ Doel: v2.0.0 wordt de nieuwe basis zonder overbodige v1.1.2-sporen. Het Stimulus
   - V7: `ExtenderPCA9685` zet ALLCALL uit (mogelijk conflict met een TCA9548A op 0x70).
   - V10: `ExtenderMCP23S17` vult de drie digitale pinfuncties in, zoals `ExtenderMCP23017`.
   - V11: `StopSturing()` op `GedeeldeBusNode` (standaard leeg), aangeroepen bij uitschakelen tijdens runtime-herstel, bij afmelden en bij een mislukte activatie.
-  - G3 (RUN17): `StopSturing()` wordt bij uitval tijdens runtime-herstel ook bij het uitgevallen component zelf aangeroepen, na zijn kinderen.
-- RFP602 per set (RUN17, 1a en 1b):
+  - G3: `StopSturing()` wordt bij uitval tijdens runtime-herstel ook bij het uitgevallen component zelf aangeroepen, na zijn kinderen.
+- RFP602 per set (1a en 1b):
   - **Hernoemd:** de 16 instellingen van RFP602 krijgen `_SET_1`: `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_1`, `RFP602_ADC_PIN_SENSOR_1_SET_1` tot `_4_SET_1`, `RFP602_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1`, `RFP602_CHANNEL_1_DATA_LAYER_QUEUE_OR_STACK_SIZE_SET_1` tot `CHANNEL_4`, `RFP602_DATA_RECORD_FILE_SET_1`, `RFP602_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1` en `RFP602_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1` tot `CHANNEL_4`. Een oude naam geeft een `#error` met de nieuwe naam.
   - **Hernoemd:** het globale object `sensorRFP602` wordt `sensorRFP602set1`. Een sketch met de oude naam compileert niet meer ("sensorRFP602 was not declared").
   - **Nieuw:** een optionele tweede set. Ze bestaat alleen als `RFP602_AANTAL_SENSOREN_BESCHIKBAAR_SET_2` gedefinieerd is (2 of 4), met dezelfde instellingen op `_SET_2` en het globale object `sensorRFP602set2`. Elke set heeft een eigen ADS1115: set 2 vraagt `EXTENDER_ADS1115_AANTAL` 2. Alle constructors van RFP602 kregen als laatste parameter `uint8_t set = 1`.
   - Elk RFP602-object heeft zijn eigen buffers van de QueueOrStack, nooit gedeeld: `ruweDataQueueOrStackChannel1..4` (was `ruweDataQueueOrStackchannel1..4`). Met set 2 is de grootte per channel de grootste van set 1 en set 2; zonder set 2 is het geheugen ongewijzigd.
   - Een eigen opnamebestand per set kan de Data-laag nog niet: `RFP602_DATA_RECORD_FILE_SET_2` geeft een `#error`.
   - Nieuw voorbeeld `examples/Systeem/GedeeldeBus/Sensoren/Sensor_RFP602_TweeSetsOpTweeADS1115/` en een testgeval in `TestLibrarySensoren-v2.0.0.cmd`.
-- `ExtenderPCA9685`: optionele OE-pin `EXTENDER_PCA9685_1_OE_PIN` en `EXTENDER_PCA9685_2_OE_PIN` (noodstop in hardware). De uitgangen gaan pas aan als de chip goed opstartte; `StopSturing()` zet ze uit. De OE-pin wordt niet gereserveerd in de GedeeldeBus (RUN17, punt 3).
-- `ConfigRFP602_template.h`: het dubbele blok "RFP602 DATA" verwijderd (RUN17, punt 5).
-- `InputTypes.h`: de twee keypadtypes die nog niet bestaan, staan nu als "MOGELIJKE UITBREIDING NA v2.0.0" (RUN17, punt 7).
-- Testplan ADC-contract (RUN19, T2): zeven test-sketches onder `examples/Systeem/GedeeldeBus/Sensoren/` (`Sensor_RFP602_Test_OngeldigePin`, `_ADC_Bezet`, `_Hardwarefout`, `_Timeout_Conversie`, `_ZonderGet`, `_VerkeerdeParent`, `_EigenBuffers`) en `examples/Systeem/GedeeldeBus/Extenders/Extender_PCA9685_Test_OE_Pin`, opgenomen in `TestLibrarySensoren-v2.0.0.cmd` en `TestLibraryExtenders-v2.0.0.cmd`.
+- `ExtenderPCA9685`: optionele OE-pin `EXTENDER_PCA9685_1_OE_PIN` en `EXTENDER_PCA9685_2_OE_PIN` (noodstop in hardware). De uitgangen gaan pas aan als de chip goed opstartte; `StopSturing()` zet ze uit. De OE-pin wordt niet gereserveerd in de GedeeldeBus.
+- `ConfigRFP602_template.h`: het dubbele blok "RFP602 DATA" verwijderd.
+- `InputTypes.h`: de twee keypadtypes die nog niet bestaan, staan nu als "MOGELIJKE UITBREIDING NA v2.0.0".
+- Testplan ADC-contract (T2): zeven test-sketches onder `examples/Systeem/GedeeldeBus/Sensoren/` (`Sensor_RFP602_Test_OngeldigePin`, `_ADC_Bezet`, `_Hardwarefout`, `_Timeout_Conversie`, `_ZonderGet`, `_VerkeerdeParent`, `_EigenBuffers`) en `examples/Systeem/GedeeldeBus/Extenders/Extender_PCA9685_Test_OE_Pin`, opgenomen in `TestLibrarySensoren-v2.0.0.cmd` en `TestLibraryExtenders-v2.0.0.cmd`.
 - `TestLibraryInput-v2.0.0.cmd`: de drie EEPROM-tests van HX1838 slaan de UNO Q over (`arduino:zephyr:unoq`).
 
 
-## 2026-10-08 — Extenders: vaste libraries en documentatie
+## 2026-10-08: Extenders: vaste libraries en documentatie
 
 - `ExtenderADS1115` gebruikt voortaan uitsluitend **Rob Tillaart ADS1X15 0.6.2**; de keuze voor Adafruit ADS1X15 is uit de actuele configuratie en code verwijderd.
 - `ExtenderPCF8574` gebruikt voortaan uitsluitend **Rob Tillaart PCF8574 0.4.5**; de keuze tussen eigen driver en Rob Tillaart is uit de actuele configuratie en code verwijderd.

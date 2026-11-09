@@ -357,3 +357,11 @@ Deze tests moeten niet worden geïnterpreteerd als een volledige elektronische f
 - Houd de beoordelingsresultaten voor compilatie/statische analyse, normale hardwarewerking, foutinjectie en stresstests afzonderlijk. Bestaande ingevulde HTML-resultaten worden niet overschreven; de nieuwste HTML moet eerst als bron worden gecontroleerd.
 - Documenteer per hardwaretest het exacte bestaande `.ino`-pad, gebruikte `Config*.h`-definities, bedrading, voeding, concrete handeling en verwachte Serial-uitvoer. Dit moet bij de nieuwste HTML per test concreet worden gecontroleerd, niet via een generieke verwijzing.
 - De 70-punten-test voor Flash/RAM-regressie vereist dezelfde FQBN en buildinstellingen voor de vorige en de nieuwe versie. Zonder Arduino-compilatie zijn er nog geen betrouwbare bytes of percentages.
+## Aanvulling Sturingen en gemengde pinclaims
+
+- In de bestaande gemengde claimcontrole zijn de pinbereiken van `MCP23S17` (0–15) en `PCA9685` (0–15) opgenomen. De bestaande GedeeldeBus-architectuur blijft gelijk.
+- L293D/L298N kunnen `IN1`/`IN2` via een digitale GPIO-Extender reserveren, terwijl `EN` als afzonderlijk PCA9685-PWM-kanaal wordt geclaimd. Hiervoor moet `GEDEELDE_BUS_MIXED_PINS=1` staan.
+- Bij MAX7219 zijn de Native SPI-claims en de extra Extender-CS-claim afzonderlijke resources; MCP23S17 als CS op dezelfde SPI-bus wordt bewust niet aangeboden.
+- Een succesvolle GedeeldeBus-claim of schrijfactie is geen garantie voor een fysiek veilig uitschakelen bij communicatieverlies.
+
+De tweepins L293D/L298N-varianten gebruiken bestaande twee exclusieve IN-claims en `HardwareResourcePin::NONE` voor de optionele EN-claim. Ze gebruiken één parent (Native, geschikte GPIO-Extender of PCA9685); een tweede Extender is alleen voor de bestaande gemengde IN/EN-variant noodzakelijk.

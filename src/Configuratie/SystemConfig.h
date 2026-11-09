@@ -2898,8 +2898,8 @@
 // AFGELEID: GPIO via een Extender (niet zelf instellen)
 // ============================================================================
 // 1 = SetExtenderPinMode(), WriteExtenderPin() en ReadExtenderPin() worden meegecompileerd:
-// bij gemengde pinnen, of wanneer HCSR501, HW201, MAX7219, Relais of ULN2003 samen met een GPIO-Extender gebruikt wordt.
-#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0 || STURING_MAX7219_AANTAL > 0 || STURING_RELAIS_AANTAL > 0 || STURING_ULN2003_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)))
+// bij gemengde pinnen, of wanneer HCSR501, HW201, A4988, L293D, L298N, MAX7219, Relais of ULN2003 samen met een GPIO-Extender gebruikt wordt.
+#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0 || STURING_A4988_AANTAL > 0 || STURING_L293D_AANTAL > 0 || STURING_L298N_AANTAL > 0 || STURING_MAX7219_AANTAL > 0 || STURING_RELAIS_AANTAL > 0 || STURING_ULN2003_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)))
   #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 1
 #else
   #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 0

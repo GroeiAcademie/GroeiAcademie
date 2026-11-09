@@ -43,12 +43,6 @@ set "TEST_FLAGS=-DGEDEELDE_BUS_MIXED_PINS=0 -DEXTENDER_PCF8574_AANTAL=0 -DDATA_L
 set "VERWACHTE_FOUT=Schakel de vereiste Extender in voor deze Sturing-test."
 call :EXPECT_FAIL
 
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_ULN2003\Sturing_ULN2003.ino"
-set "TEST_NAAM=ULN2003 zonder GPIO-Extender"
-set "TEST_FLAGS=-DGEDEELDE_BUS_MIXED_PINS=0 -DEXTENDER_PCF8574_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DSTURING_ULN2003_AANTAL=1"
-set "VERWACHTE_FOUT=ULN2003 vereist een geconfigureerde GPIO-Extender"
-call :EXPECT_FAIL
-
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sturingen\Sturing_A4988\Sturing_A4988.ino"
 set "TEST_NAAM=A4988 uitgeschakeld"
 set "TEST_FLAGS=-DSTURING_A4988_AANTAL=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"

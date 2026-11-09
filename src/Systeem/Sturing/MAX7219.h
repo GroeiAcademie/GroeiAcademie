@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "../GedeeldeBus/GedeeldeBus.h"
 
-// MAX7219 8x8-matrix: hardware-SPI met CS native of via PCF8574, of alle drie signalen via PCF8574.
+// MAX7219 8x8-matrix: hardware-SPI met CS native of via GPIO-Extender, of alle drie signalen via GPIO-Extender.
 struct MAX7219 : GedeeldeBusNode {
   uint8_t gedeeld_[3];
   uint8_t exclusief_[3];
@@ -14,7 +14,7 @@ struct MAX7219 : GedeeldeBusNode {
   MD_MAX72XX::moduleType_t hardwareType;
   uint8_t din, clk, cs;
   bool viaExtender;
-#if GEDEELDE_BUS_MIXED_PINS && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_MIXED_PINS && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
   GedeeldeBusNode* extenderCS_[1] = {nullptr};
   bool viaMixed = false;
 #endif
@@ -30,16 +30,16 @@ struct MAX7219 : GedeeldeBusNode {
     gedeeldeIdentiteiten = GedeeldeBusIdentiteitSPI;
   }
 
-  // Alle signaalpinnen van dezelfde PCF8574-parent; exclusieve extenderclaims.
-  // pinDIN, pinCLK en pinCS zijn PCF8574-pinnummers P0..P7, geen Arduino-nummers.
+  // Alle signaalpinnen van dezelfde GPIO-Extender; exclusieve extenderclaims.
+  // pinDIN, pinCLK en pinCS zijn Extender-pinnummers, geen Arduino-nummers.
   MAX7219(GedeeldeBusNode* parent, uint8_t pinDIN, uint8_t pinCLK, uint8_t pinCS, MD_MAX72XX::moduleType_t type)
     : GedeeldeBusNode(parent,{nullptr,0,exclusief_,3},GedeeldeBusComponent::MAX7219),
       gedeeld_{0,0,0},exclusief_{pinDIN,pinCLK,pinCS},
       matrix(type,static_cast<int8_t>(-1),1),
       hardwareType(type),din(pinDIN),clk(pinCLK),cs(pinCS),viaExtender(true) {}
 
-#if GEDEELDE_BUS_MIXED_PINS && EXTENDER_PCF8574_AANTAL > 0
-  // Hardware-SPI voor DIN en CLK; alleen LOAD/CS is een PCF8574-pin.
+#if GEDEELDE_BUS_MIXED_PINS && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
+  // Hardware-SPI voor DIN en CLK; alleen LOAD/CS zit op een GPIO-Extender.
   MAX7219(GedeeldeBusNode* parent, GedeeldeBusNode* extender, uint8_t pinCS, MD_MAX72XX::moduleType_t type)
     : GedeeldeBusNode(parent,{gedeeld_,3,exclusief_,1},GedeeldeBusComponent::MAX7219),
       gedeeld_{static_cast<uint8_t>(HardwareResourcePin::NP_SCK),static_cast<uint8_t>(HardwareResourcePin::NONE),static_cast<uint8_t>(HardwareResourcePin::NP_MOSI)},
@@ -56,22 +56,43 @@ struct MAX7219 : GedeeldeBusNode {
   bool Activeren() override {
     if (!parent || !parent->actief) return false;
     if (!viaExtender) {
-      if (cs==static_cast<uint8_t>(HardwareResourcePin::NONE)) return false;
+      if (parent!=&Native || cs==static_cast<uint8_t>(HardwareResourcePin::NONE)) return false;
       InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
       return matrix.begin();
     }
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
 #if GEDEELDE_BUS_MIXED_PINS
     if (viaMixed) {
-      if (parent!=&Native || extenderCS_[0]==nullptr || !extenderCS_[0]->actief || cs>7 ||
-          extenderCS_[0]->component!=GedeeldeBusComponent::DIGITAL_PINS_PCF8574) return false;
+      if (parent!=&Native || extenderCS_[0]==nullptr || !extenderCS_[0]->actief) return false;
+      switch (extenderCS_[0]->component) {
+        case GedeeldeBusComponent::DIGITAL_PINS_PCF8574:
+          if (cs>7) return false;
+          break;
+        case GedeeldeBusComponent::DIGITAL_PINS_PCF8575:
+        case GedeeldeBusComponent::DIGITAL_PINS_MCP23017:
+          if (cs>15) return false;
+          break;
+        // MCP23S17 deelt hier de SPI-klok met MAX7219: bij CS terug HIGH zetten
+        // worden extra bits ingeklokt. Deze combinatie vereist een onafhankelijke SPI-bus.
+        default: return false;
+      }
       if (!extenderCS_[0]->WriteExtenderPin(cs,HIGH) || !extenderCS_[0]->SetExtenderPinMode(cs,OUTPUT)) return false;
       InitialiserenGedeeldeBus(GedeeldeBusType::SPI);
     } else
 #endif
     {
-      if (parent!=firstExtenderNode() || parent->component!=GedeeldeBusComponent::DIGITAL_PINS_PCF8574 ||
-          din>7 || clk>7 || cs>7 || din==clk || din==cs || clk==cs) return false;
+      if (parent!=firstExtenderNode() || din==clk || din==cs || clk==cs) return false;
+      switch (parent->component) {
+        case GedeeldeBusComponent::DIGITAL_PINS_PCF8574:
+          if (din>7 || clk>7 || cs>7) return false;
+          break;
+        case GedeeldeBusComponent::DIGITAL_PINS_PCF8575:
+        case GedeeldeBusComponent::DIGITAL_PINS_MCP23017:
+        case GedeeldeBusComponent::DIGITAL_PINS_MCP23S17:
+          if (din>15 || clk>15 || cs>15) return false;
+          break;
+        default: return false;
+      }
       if (!parent->WriteExtenderPin(cs,HIGH) || !parent->SetExtenderPinMode(cs,OUTPUT)) return false;
       if (!parent->WriteExtenderPin(clk,LOW) || !parent->SetExtenderPinMode(clk,OUTPUT)) return false;
       if (!parent->WriteExtenderPin(din,LOW) || !parent->SetExtenderPinMode(din,OUTPUT)) return false;
@@ -93,7 +114,7 @@ struct MAX7219 : GedeeldeBusNode {
   bool setPixel(uint8_t x,uint8_t y,bool aan) {
     if (!actief || x>=8 || y>=8) return false;
     if (!viaExtender) return matrix.setPoint(y,x,aan);
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     // Identieke row/column mapping als de officiële MD_MAX72XX::setPoint().
     const bool digitsAlsRijen = hardwareType==MD_MAX72XX::FC16_HW || hardwareType==MD_MAX72XX::PAROLA_HW ||
       hardwareType==MD_MAX72XX::ICSTATION_HW || hardwareType==MD_MAX72XX::DR1CR0RR0_HW ||
@@ -122,7 +143,7 @@ struct MAX7219 : GedeeldeBusNode {
 
   // Volledig gewenst monochroom patroon. De 8 is voorlopig de bestaande matrixmaat.
   // Bij native SPI: kleine wijzigingen rechtstreeks, grote wijzigingen gebundeld.
-  // Bij PCF8574: alleen gewijzigde MAX7219-registers versturen.
+  // Bij GPIO-Extender: alleen gewijzigde MAX7219-registers versturen.
   bool ToonPatroon(uint8_t maat, const uint8_t beeld[8]) {
     if (!actief || maat != 8 || beeld == nullptr) return false;
     if (!viaExtender) {
@@ -144,7 +165,7 @@ struct MAX7219 : GedeeldeBusNode {
       if (bundelen) { matrix.update(); matrix.update(MD_MAX72XX::ON); }
       return gelukt;
     }
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     // Identieke orientatiemapping als de bestaande setPixel().
     const bool digitsAlsRijen = hardwareType==MD_MAX72XX::FC16_HW || hardwareType==MD_MAX72XX::PAROLA_HW ||
       hardwareType==MD_MAX72XX::ICSTATION_HW || hardwareType==MD_MAX72XX::DR1CR0RR0_HW ||
@@ -178,7 +199,7 @@ struct MAX7219 : GedeeldeBusNode {
   bool clear() {
     if (!actief) return false;
     if (!viaExtender) {matrix.clear();return true;}
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     for(uint8_t i=0;i<8;i++) {
       if (!schrijfRegister(i+1,0)) return false;
       buffer_[i]=0;
@@ -192,7 +213,7 @@ struct MAX7219 : GedeeldeBusNode {
   bool setIntensity(uint8_t waarde) {
     if (!actief || waarde>15) return false;
     if (!viaExtender) return matrix.control(0,MD_MAX72XX::INTENSITY,waarde);
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     return schrijfRegister(0x0A,waarde);
 #else
     return false;
@@ -205,14 +226,14 @@ struct MAX7219 : GedeeldeBusNode {
       matrix.clear();matrix.control(MD_MAX72XX::SHUTDOWN,MD_MAX72XX::ON);
       return;
     }
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     if (parent && parent->actief) schrijfRegister(0x0C,0);
 #endif
   }
 
 private:
   bool schrijfRegister(uint8_t reg,uint8_t data) {
-#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && EXTENDER_PCF8574_AANTAL > 0
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     // MAX7219: 16 bits MSB-first. Bij schrijffout geen LOAD-flank forceren:
     // hardwaretoestand onbekend; een heractivering via GedeeldeBus schrijft de configuratie opnieuw.
 #if GEDEELDE_BUS_MIXED_PINS

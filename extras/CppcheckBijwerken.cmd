@@ -64,5 +64,7 @@ if errorlevel 1 (
     echo Cppcheck heeft een foutstatus gemeld. Controleer de uitvoerbestanden.
     exit /b 1
 )
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0CppcheckBijwerken.ps1" -RapportInoRegels "%CCPCHECK_DATA_PATH%\CppcheckBijwerken.xml" -OutputDatabase "%CCPCHECK_DATA_PATH%\compile_commands.json"
+if errorlevel 1 exit /b 1
 echo [CCPCHECK] Cppcheck voltooid. Rapport: "%CCPCHECK_DATA_PATH%\CppcheckBijwerken.xml"
 exit /b 0

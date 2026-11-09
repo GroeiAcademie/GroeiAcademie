@@ -62,7 +62,7 @@ uint8_t testFase = 0;
 unsigned long testStartMillis = 0;
 
 void toonStartInstructies() {
-  GA_SERIAL.println(F("HARDWARETEST: Sturing_L298N_HardwareTest"));
+  GA_SERIAL.println(F("HARDWARETEST: Sturing_L298N_PCA9685_HardwareTest"));
   GA_SERIAL.println(F("BEGELEIDE DC-MOTORTEST. Zet de motor stevig vast en houd bewegende onderdelen vrij."));
   GA_SERIAL.println(F("PWM 800/4095 is circa 20 procent aansturing, geen gemeten toerental."));
   GA_SERIAL.println(F("KIES MOTOR: 1 = Motor 1 (IN1/IN2/ENA, OUT1/OUT2), 2 = Motor 2 (IN3/IN4/ENB, OUT3/OUT4)."));
@@ -107,7 +107,7 @@ void rondTestAf(bool ok) {
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sturing_L298N_HardwareTest"));
+  GA_SERIAL.println(F("TEST: Sturing_L298N_PCA9685_HardwareTest"));
   extenderPCA9685 = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
   if (extenderPCA9685 != nullptr) l298n = GedeeldeBusNewComponent<L298N>(extenderPCA9685, 3, 4, 5);
   if (l298n != nullptr) motorBesturing = new DCmotorBesturing(*l298n);

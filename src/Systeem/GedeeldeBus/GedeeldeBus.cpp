@@ -1188,7 +1188,7 @@ bool GedeeldeBusNode::controleren() {
   }
 
 #if GEDEELDE_BUS_MIXED_PINS
-  // Exclusieve claims met een eigen Extender: de pin moet op die Extender bestaan. Alleen Extenders met digitale pinnen (SetExtenderPinMode/WriteExtenderPin/ReadExtenderPin).
+  // Exclusieve claims met een eigen Extender: de pin moet bestaan op de gekoppelde GPIO- of PWM-Extender.
   if (ownerClaim != nullptr) {
     for (uint8_t i = 0; i < aangemeldePinnen.aantalExclusief; i++) {
       const GedeeldeBusNode* extender = ownerClaim[i];
@@ -1205,6 +1205,12 @@ bool GedeeldeBusNode::controleren() {
   #endif
   #if EXTENDER_MCP23017_AANTAL > 0
         case GedeeldeBusComponent::DIGITAL_PINS_MCP23017: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23017::ExtenderPins::EP_GPB7); break;
+  #endif
+  #if EXTENDER_MCP23S17_AANTAL > 0
+        case GedeeldeBusComponent::DIGITAL_PINS_MCP23S17: geldig = waarde <= static_cast<uint8_t>(ExtenderMCP23S17::ExtenderPins::EP_GPB7); break;
+  #endif
+  #if EXTENDER_PCA9685_AANTAL > 0
+        case GedeeldeBusComponent::PWM_PCA9685: geldig = waarde <= static_cast<uint8_t>(ExtenderPCA9685::ExtenderPins::EP_PWM15); break;
   #endif
         default: break;
       }

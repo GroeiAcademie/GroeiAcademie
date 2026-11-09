@@ -377,3 +377,12 @@ FsrRfp kiest zijn ADC niet via een globale instelling, maar via zijn parent: de 
 ## Data QueueOrStack
 
 De oude instellingen `DATA_LAYER_<TYPE>_<NR>_QUEUE_OR_STACK_SIZE` per Data-instantie zijn verwijderd; de QueueOrStack bestaat alleen per sensor-channel. `DATA_QUEUE_OR_STACK_ACTIEF` wordt automatisch door `SystemConfig.h` afgeleid en wordt niet door de gebruiker ingesteld.
+## Sturingen × Extenders
+
+De compileervoorwaarde `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF` wordt nu ook ingeschakeld wanneer `STURING_A4988_AANTAL > 0` en minstens één van PCF8574, PCF8575, MCP23017 of MCP23S17 actief is. Daardoor kan A4988 de bestaande GedeeldeBus-GPIO-interface gebruiken. Dit verandert de standaardwaarde van `STURING_A4988_AANTAL` niet.
+
+Voor L293D en L298N met `IN1`/`IN2` via een GPIO-Extender en `EN` via PCA9685 is `GEDEELDE_BUS_MIXED_PINS=1` vereist. De bijbehorende testsketches vereisen ook `EXTENDER_PCA9685_AANTAL >= 1` en de gekozen GPIO-Extenderconfiguratie. De actieve configuratiebestanden blijven `Config*.h`, geen `_template.h`.
+
+De concrete compilerdefinities van deze twintig nieuwe tests staan in het bestaande `extras/TestLibrarySturingen-v2.0.0.cmd`.
+
+De afgeleide voorwaarde `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF` neemt ook L293D en L298N mee wanneer een digitale GPIO-Extender ingeschakeld is. Dat is noodzakelijk voor de nieuwe tweepins digitale aansturing zonder MIXED. Gemengde aansturing met afzonderlijk EN op PCA9685 blijft afhankelijk van `GEDEELDE_BUS_MIXED_PINS=1`.

@@ -13,6 +13,7 @@ param(
     [string]$CliPath,
     [string]$OutputDatabase,
     [string]$ProefHashes,
+    [string]$RapportInoRegels,
     [switch]$CacheResponsbestanden
 )
 
@@ -24,20 +25,144 @@ $databaseOngeldig = if ($env:CCPCHECK_DATA_PATH) { Join-Path $env:CCPCHECK_DATA_
 $opslag = if ($SnapshotRoot) { $SnapshotRoot } elseif ($env:CCPCHECK_DATA_PATH) { Join-Path $env:CCPCHECK_DATA_PATH 'Databases' } else { $null }
 if (-not $opslag -or (-not $TestScript -and -not $Capture -and -not $database)) { throw 'CCPCHECK_DATA_PATH ontbreekt. Stel het pad in via extras\LokalePaden.cmd.' }
 if ($PSBoundParameters.ContainsKey('ProefHashes')) {
-    if (-not $Finalize -or $SnapshotRoot -or $Capture -or $UpdateAll -or $TestScript -or $CountOnly -or $ListHashes) {
-        throw '-ProefHashes is uitsluitend toegestaan met -Finalize, zonder -SnapshotRoot.'
+    if (-not (($Finalize -and -not $TestScript -and -not $SnapshotRoot) -or
+        ($TestScript -and -not $Finalize -and $SnapshotRoot -and $CliPath)) -or
+        $Capture -or $UpdateAll -or $CountOnly -or $ListHashes) {
+        throw '-ProefHashes is uitsluitend toegestaan met -Finalize zonder -SnapshotRoot, of met -TestScript, -SnapshotRoot en -CliPath.'
     }
     if (-not $ProefHashes -or $ProefHashes -notmatch '^[0-9a-f]{64}(?:,[0-9a-f]{64})*$') {
         throw '-ProefHashes verwacht een of meer bestaande SHA-256-hashes, gescheiden door komma''s.'
     }
-    if (-not $OutputDatabase) { throw '-ProefHashes vereist -OutputDatabase voor een afzonderlijke proefdatabase.' }
-    if ([System.IO.Path]::GetFullPath($database).Equals([System.IO.Path]::GetFullPath((Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands.json')), [System.StringComparison]::OrdinalIgnoreCase) -or
-        [System.IO.Path]::GetFullPath($database).Equals([System.IO.Path]::GetFullPath((Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands_ongeldig.json')), [System.StringComparison]::OrdinalIgnoreCase) -or
-        [System.IO.Path]::GetFullPath($database).StartsWith([System.IO.Path]::GetFullPath($opslag).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw '-ProefHashes mag geen bestaande volledige database of snapshot overschrijven.'
+    if ($Finalize) {
+        if (-not $OutputDatabase) { throw '-ProefHashes vereist -OutputDatabase voor een afzonderlijke proefdatabase.' }
+        if ([System.IO.Path]::GetFullPath($database).Equals([System.IO.Path]::GetFullPath((Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands.json')), [System.StringComparison]::OrdinalIgnoreCase) -or
+            [System.IO.Path]::GetFullPath($database).Equals([System.IO.Path]::GetFullPath((Join-Path $env:CCPCHECK_DATA_PATH 'compile_commands_ongeldig.json')), [System.StringComparison]::OrdinalIgnoreCase) -or
+            [System.IO.Path]::GetFullPath($database).StartsWith([System.IO.Path]::GetFullPath($opslag).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw '-ProefHashes mag geen bestaande volledige database of snapshot overschrijven.'
+        }
     }
 }
 
+
+# Alleen de leesbare rapportweergave corrigeren: de ruwe XML, snapshots en .ino.cpp blijven intact.
+if ($PSBoundParameters.ContainsKey('RapportInoRegels')) {
+    if (-not $RapportInoRegels -or -not $OutputDatabase -or $Capture -or $Finalize -or $UpdateAll -or
+        $CountOnly -or $ListHashes -or $TestScript -or $SnapshotRoot -or $ProefHashes) {
+        throw '-RapportInoRegels vereist een XML-rapport en -OutputDatabase, zonder andere verwerkingsmodi.'
+    }
+    if (-not (Test-Path -LiteralPath $RapportInoRegels -PathType Leaf)) { throw "Cppcheck-XML ontbreekt: $RapportInoRegels" }
+    if (-not (Test-Path -LiteralPath $database -PathType Leaf)) { throw "Cppcheck-compilatiedatabase ontbreekt: $database" }
+
+    [xml]$geladen = Get-Content -LiteralPath $RapportInoRegels -Raw -Encoding UTF8
+    $items = @(ConvertFrom-Json -InputObject (Get-Content -LiteralPath $database -Raw -Encoding UTF8))
+    if ($items.Count -eq 1 -and $items[0] -is [array]) { $items = @($items[0]) }
+    $inoRegelCorrectiePerSketch = [System.Collections.Generic.Dictionary[string,object]]::new([System.StringComparer]::OrdinalIgnoreCase)
+
+    # Meet de #line-afwijking afzonderlijk voor iedere gegenereerde .ino.cpp.
+    # Dezelfde .ino kan voor verschillende boards anders zijn gegenereerd.
+    foreach ($item in $items) {
+        $bron = ([string]$item.file) -replace '[\\/]+', '/'
+        if (-not $bron.EndsWith('.ino.cpp', [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+        if (-not (Test-Path -LiteralPath $bron -PathType Leaf)) { throw "Gegenereerde .ino.cpp voor regelrapport ontbreekt: $bron" }
+        $a = -1
+        $b = ''
+        foreach ($regel in (Select-String -LiteralPath $bron -Pattern '^\s*#line\s+\d+\s+"[^"]+\.ino"' -Encoding UTF8)) {
+            $patroon = [regex]::Match($regel.Line, '^\s*#line\s+(\d+)\s+"([^"]+\.ino)"')
+            if (-not $patroon.Success) { continue }
+            $pad = $patroon.Groups[2].Value -replace '[\\/]+', '/'
+            if ($a -ge 0 -and $b.Equals($pad, [System.StringComparison]::OrdinalIgnoreCase) -and
+                [int]$patroon.Groups[1].Value -lt $a) {
+                $delen = @(
+                    ($a - [int]$patroon.Groups[1].Value + 2)
+                    ([int]$patroon.Groups[1].Value)
+                )
+                if ($inoRegelCorrectiePerSketch.ContainsKey($bron)) {
+                    if ($inoRegelCorrectiePerSketch[$bron][0] -ne $delen[0] -or
+                        $inoRegelCorrectiePerSketch[$bron][1] -ne $delen[1] -or
+                        -not $inoRegelCorrectiePerSketch[$bron][3].Equals($pad, [System.StringComparison]::OrdinalIgnoreCase)) {
+                        throw "Verschillende #line-regelcorrecties voor hetzelfde gegenereerde bestand: $bron. Rapport niet aangemaakt."
+                    }
+                } else {
+                    $inoRegelCorrectiePerSketch[$bron] = @(
+                        $delen[0]
+                        $delen[1]
+                        $(if (Test-Path -LiteralPath $pad -PathType Leaf) { @(Get-Content -LiteralPath $pad -Encoding UTF8).Count } else { 0 })
+                        $pad
+                    )
+                }
+                break
+            }
+            $a = [int]$patroon.Groups[1].Value
+            $b = $pad
+        }
+    }
+
+    $uitvoer = [System.IO.Path]::ChangeExtension([System.IO.Path]::GetFullPath($RapportInoRegels), '.ino-regels.txt')
+    $aantal = 0
+    $writer = [System.IO.StreamWriter]::new($uitvoer, $false, $utf8)
+    try {
+        $writer.WriteLine('Cppcheck-rapportweergave met controle van originele .ino-regelnummers')
+        $writer.WriteLine("Ruwe XML (ongewijzigd): $RapportInoRegels")
+        $writer.WriteLine("Compilatiedatabase: $database")
+        $writer.WriteLine('Bij een correctie staat het oorspronkelijke Cppcheck-regelnummer tussen haakjes.')
+        $writer.WriteLine('')
+        foreach ($item in @($geladen.results.errors.error)) {
+            if (-not $item) { continue }
+            if (-not $item.location) {
+                $writer.WriteLine("$($item.severity) | $($item.id) | $($item.msg)")
+                continue
+            }
+            foreach ($regel in @($item.location)) {
+                $pad = [string]$regel.file
+                $bron = $pad -replace '[\\/]+', '/'
+                $a = 0
+                if (-not [int]::TryParse([string]$regel.line, [ref]$a)) {
+                    $writer.WriteLine("$pad | $($item.severity) | $($item.id) | $($item.msg)")
+                    continue
+                }
+                if ($bron.EndsWith('.ino', [System.StringComparison]::OrdinalIgnoreCase)) {
+                    $delen = $null
+                    # file0 verwijst naar de exacte .ino.cpp (en dus de juiste boardconfiguratie).
+                    $b = ([string]$item.file0) -replace '[\\/]+', '/'
+                    if ($b) {
+                        if ($inoRegelCorrectiePerSketch.ContainsKey($b)) {
+                            $delen = $inoRegelCorrectiePerSketch[$b]
+                            if (-not $delen[3].Equals($bron, [System.StringComparison]::OrdinalIgnoreCase)) { $delen = $null }
+                        }
+                    } else {
+                        # Zonder file0 alleen corrigeren als alle configuraties dezelfde afwijking tonen.
+                        foreach ($b in $inoRegelCorrectiePerSketch.Keys) {
+                            if (-not $inoRegelCorrectiePerSketch[$b][3].Equals($bron, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+                            if ($null -eq $delen) {
+                                $delen = $inoRegelCorrectiePerSketch[$b]
+                            } elseif ($delen[0] -ne $inoRegelCorrectiePerSketch[$b][0] -or
+                                $delen[1] -ne $inoRegelCorrectiePerSketch[$b][1]) {
+                                $delen = $null
+                                break
+                            }
+                        }
+                    }
+                    if ($null -ne $delen) {
+                        $b = $a - [int]$delen[0]
+                        if ($a -ge ([int]$delen[0] + [int]$delen[1]) -and $b -ge 1 -and $b -le [int]$delen[2]) {
+                            $writer.WriteLine("${pad}:$b (Cppcheck: $a) | $($item.severity) | $($item.id) | $($item.msg)")
+                            $aantal++
+                            continue
+                        }
+                    }
+                }
+                $writer.WriteLine("${pad}:$a | $($item.severity) | $($item.id) | $($item.msg)")
+            }
+        }
+        $writer.WriteLine('')
+        $writer.WriteLine("Gecorrigeerde .ino-locaties: $aantal")
+        $writer.WriteLine('Locaties zonder bewezen #line-correctie zijn ongewijzigd weergegeven.')
+    } finally {
+        $writer.Dispose()
+    }
+    Write-Host "[CCPCHECK] Leesbaar regelrapport: $uitvoer | $aantal .ino-locaties gecorrigeerd."
+    exit 0
+}
 
 # De Cppcheck-update is losgekoppeld van de bestaande compilatie-CMD's.
 # Lees de bestaande testlijsten; voer nooit TestLibraryCommon.cmd uit.
@@ -101,11 +226,20 @@ if ($TestScript) {
     $mislukt = 0
 
     if (-not $CountOnly -and -not $ListHashes) {
-        $uitvoer = & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $PSCommandPath -TestScript $TestScript -SnapshotRoot $SnapshotRoot -CountOnly 2>&1
-        if ($LASTEXITCODE -ne 0 -or ($uitvoer -join '').Trim() -notmatch '^\d+$') {
-            throw "Configuraties tellen mislukt: $TestScript`n$($uitvoer -join "`n")"
+        if ($ProefHashes) {
+            $uitvoer = @(& powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $PSCommandPath -TestScript $TestScript -SnapshotRoot $SnapshotRoot -ListHashes 2>&1)
+            if ($LASTEXITCODE -ne 0) { throw "Proefhashes opvragen mislukt: $TestScript`n$($uitvoer -join "`n")" }
+            foreach ($hash in $ProefHashes.Split(',')) {
+                if ($hash -notin $uitvoer) { throw "Proefhash komt niet voor in domein ${TestScript}: $hash" }
+            }
+            $totaal = @($ProefHashes.Split(',') | Sort-Object -Unique).Count
+        } else {
+            $uitvoer = & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $PSCommandPath -TestScript $TestScript -SnapshotRoot $SnapshotRoot -CountOnly 2>&1
+            if ($LASTEXITCODE -ne 0 -or ($uitvoer -join '').Trim() -notmatch '^\d+$') {
+                throw "Configuraties tellen mislukt: $TestScript`n$($uitvoer -join "`n")"
+            }
+            $totaal = [int](($uitvoer -join '').Trim())
         }
-        $totaal = [int](($uitvoer -join '').Trim())
         Write-Host "[CCPCHECK] $TestScript : 0/$totaal"
     }
 
@@ -118,7 +252,7 @@ if ($TestScript) {
 
         # Zelfde INCLUDE-selectie als TestLibraryCommon.cmd.
         if ($waarden['TEST_TYPE'] -notin @('NIEUW', 'EXPERIMENTEEL') -or $waarden['TEST_NAAM'] -eq 'SCREEN_OUTPUT_CONFIG=1') {
-            $overgeslagen++
+            if (-not $ProefHashes) { $overgeslagen++ }
             [void]$waarden.Remove('WELKE_FQBN_SKIPPEN')
             [void]$waarden.Remove('WELKE_FQBN_INCOMPATIBLE')
             continue
@@ -142,11 +276,11 @@ if ($TestScript) {
                 $fqbn = $fqbnLijst[$i]
                 $teSkippen = @($waarden['WELKE_FQBN_SKIPPEN'], $waarden['WELKE_FQBN_INCOMPATIBLE']) -join ','
                 if ((',' + $teSkippen + ',').IndexOf(',' + $fqbn + ',', [StringComparison]::OrdinalIgnoreCase) -ge 0) {
-                    $overgeslagen++
+                    if (-not $ProefHashes) { $overgeslagen++ }
                     continue
                 }
                 foreach ($board in ($mappingLijst[$i] -split '\|')) {
-                    $aantal++
+                    if (-not $ProefHashes) { $aantal++ }
                     if ($CountOnly) { continue }
 
                     # Identieke hash als de bestaande -Capture-code.
@@ -165,6 +299,10 @@ if ($TestScript) {
                             Write-Output $hash
                         }
                         continue
+                    }
+                    if ($ProefHashes) {
+                        if ($hash -notin $ProefHashes.Split(',')) { continue }
+                        $aantal++
                     }
 
                     $doelmap = Join-Path (Join-Path $SnapshotRoot 'Gewoon') $hash
@@ -519,10 +657,21 @@ if ($Finalize -and -not $SnapshotRoot) {
             'rp2040:rp2040:cytron_maker_uno_rp2040' = '(-1)'
             'STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE' = '(pin_size_t)NC'
         }
-        foreach ($fqbn in $notAnInterruptPerFqbn.Keys) {
+        # UNO Q: bewuste Cppcheck-vervangwaarden voor de terugvaltak, niet de echte devicetree-waarden; 70 = digital-pin-gpios uit arduino_uno_q_stm32u585xx.overlay (Zephyr 1.1.0).
+        $zephyrMacroDefinitiesPerFqbn = @{
+            'arduino:zephyr:unoq' = @(
+                '-DDT_PATH(x)=0'
+                '-DDT_NODE_HAS_PROP(n,p)=0'
+                '-DDT_PROP_LEN(n,p)=0'
+                '-DDT_NODE_EXISTS(n)=1'
+                '-DDT_NODELABEL(x)=0'
+                '-DDT_FOREACH_PROP_ELEM_SEP(n,p,f,s)=70'
+            )
+        }
+        foreach ($fqbn in @($notAnInterruptPerFqbn.Keys) + @($zephyrMacroDefinitiesPerFqbn.Keys)) {
             if (-not (Get-Content -LiteralPath (Join-Path $framework 'extras\TestLibraryCommon.cmd') -Encoding UTF8 |
                 Where-Object { $_ -match '^set (?:BASIC|EXTENDED|EXPERIMENTAL)_FQBN=' -and $_.Contains('"' + $fqbn + '"') })) {
-                throw "NOT_AN_INTERRUPT: FQBN ontbreekt in TestLibraryCommon.cmd: $fqbn"
+                throw "Cppcheck-definities: FQBN ontbreekt in TestLibraryCommon.cmd: $fqbn"
             }
         }
         $aantal = 0
@@ -650,6 +799,7 @@ if ($Finalize -and -not $SnapshotRoot) {
                                     $includePad = [System.IO.Path]::GetFullPath((Join-Path ([string]$item.directory) $includePad)).Replace('\', '/')
                                 }
                                 $includePad = $includePad.TrimEnd('/')
+                                if ($argument -cmatch '^(-include|-imacros)' -and -not (Test-Path -LiteralPath $includePad -PathType Leaf)) { continue }
                                 # Eigen library/sketch, lokale Arduino-libraries en libraries van de geïnstalleerde core.
                                 if ($includePad.Equals((Split-Path -Parent $framework).Replace('\', '/'), [System.StringComparison]::OrdinalIgnoreCase) -or
                                     $includePad.StartsWith((Split-Path -Parent $framework).Replace('\', '/') + '/', [System.StringComparison]::OrdinalIgnoreCase) -or
@@ -677,6 +827,9 @@ if ($Finalize -and -not $SnapshotRoot) {
                         if ($notAnInterruptPerFqbn.ContainsKey([string]$metadata.fqbn) -and
                             @($behoudenArgumenten | Where-Object { $_ -match '^-DNOT_AN_INTERRUPT(?:=|$)' }).Count -eq 0) {
                             [void]$behoudenArgumenten.Add('-DNOT_AN_INTERRUPT=' + $notAnInterruptPerFqbn[$metadata.fqbn])
+                        }
+                        if ($zephyrMacroDefinitiesPerFqbn.ContainsKey([string]$metadata.fqbn)) {
+                            $behoudenArgumenten.AddRange([string[]]$zephyrMacroDefinitiesPerFqbn[[string]$metadata.fqbn])
                         }
                         $item.arguments = @($behoudenArgumenten.ToArray())
                         # Een eventuele oude 'command' mag niet opnieuw ongefilterde SDK-flags aanleveren.
