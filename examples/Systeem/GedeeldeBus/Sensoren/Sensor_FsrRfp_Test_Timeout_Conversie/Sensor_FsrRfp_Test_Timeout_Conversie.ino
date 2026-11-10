@@ -52,10 +52,13 @@ void ToonToestandADS1115() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_Test_Timeout_Conversie"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_Test_Timeout_Conversie"));
 
   GA_SERIAL.println(F("=== FsrRfp test ophalen na verlies van de ADC (T2-5) ==="));
   sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, GedeeldeBusComponent::FsrRfp);

@@ -15,6 +15,15 @@
 #else
 
 void setup() {
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+
+#if defined(DEBUG)
+  while (!GA_SERIAL) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
+
   Screen = GedeeldeBusNewComponent<struct Screen>(SCREEN_TYPE_CHARACTER | SCREEN_TYPE_PIXELS | SCREEN_TYPE_SERIAL);
   if (Screen == nullptr) exit(0);
 }

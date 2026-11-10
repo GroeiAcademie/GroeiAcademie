@@ -29,10 +29,13 @@ ExtenderPCA9685 extender(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Extender_PCA9685_Test_OE_Pin"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Extender_PCA9685_Test_OE_Pin"));
 
   GA_SERIAL.println(F("=== PCA9685 test OE-pin bij uitval (T2-10) ==="));
   const bool gelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren();

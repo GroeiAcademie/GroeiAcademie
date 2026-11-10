@@ -77,7 +77,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_L298N_MCP23S17_Digitaal_HardwareTest"));
   extenderMCP23S17 = GedeeldeBusNewComponent<ExtenderMCP23S17>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23S17, EXTENDER_MCP23S17_1_CS_PIN, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI);
   if (extenderMCP23S17 != nullptr) l298n = GedeeldeBusNewComponent<L298N>(extenderMCP23S17, 0, 1);

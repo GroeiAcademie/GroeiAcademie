@@ -183,435 +183,55 @@ Belangrijk voor de actuele implementatie: niet elke fysieke controle zit vandaag
 
 # Lifecycle
 
+De actuele `Screen`-implementatie in `src/Systeem/Screen/Screen.cpp` voert de lifecycle uit via het parentobject én de geselecteerde uitvoerchildren. `SCREEN_OUTPUT` bepaalt welke children kunnen worden gecompileerd; `typesActief` bepaalt welke daarvan voor dit Screen-object worden aangemaakt.
+
 ```text
-Screen.Aanmelden()
-↓
-Screen.Controleren()
-↓
-Screen.Inpluggen()
-↓
-Screen.actief
-↓
-Screen.Afmelden()
+Screen::aanmelden()   → Screen-parent aanmelden; geselecteerde children aanmaken en aanmelden
+Screen::controleren() → Parent en aanwezige children controleren; geweigerde children verwijderen
+Screen::inpluggen()   → Parent en aanwezige children inpluggen; mislukte children verwijderen
+Screen::Activeren()   → Overgebleven children activeren; displayinitialisatie en pixelgrid instellen
+Screen::afmelden()    → Children afmelden; daarna Screen-parent afmelden
 ```
 
-`Configureren()` bestaat niet meer voor Screen. Alle Screen-initialisatie loopt via `Screen::aanmelden()`, `Screen::controleren()` en `Screen::inpluggen()`.
-
----
+Een mislukte uitvoer hoeft het gehele `Screen`-object **niet** te laten falen. De huidige code meldt de betreffende fout, verwijdert die child via `ChildVerwijderen()` en laat de overige uitvoerdoelen doorwerken. Bij `typesActief != SCREEN_TYPE_NONE` faalt een lifecyclefase wanneer `AantalUitvoeren(*this) == 0`; `SCREEN_TYPE_NONE` blijft een geldige configuratie. `ActivatiefoutWeergeven()` toont waar mogelijk de bewaarde fouten via nog beschikbare uitvoerdoelen.
 
 ## `Screen::aanmelden()`
 
-`Screen::aanmelden()` meldt alleen het parentobject `Screen` aan.
+`Screen::aanmelden()` controleert eerst of `typesActief` een subset is van `SCREEN_OUTPUT` en meldt de parent aan met `GedeeldeBusNode::aanmelden()`. Daarna maakt deze functie alleen de geselecteerde `SerialOutput`, `CharacterScreen` en `PixelScreen` aan (met `new`). Elk childobject krijgt `componentCreated = true` en wordt afzonderlijk via `child->aanmelden()` aangemeld.
 
-```cpp
-bool Screen::aanmelden() {
-  return GedeeldeBusNode::aanmelden();
-}
-```
+- **Serial:** gebruikt `NP_D1`/`NP_D0` uitsluitend op de specifiek in `Screen.cpp` opgesomde boards; op de overige boards worden `NONE`/`NONE` doorgegeven. De uitzonderingsstatus voor UNO Q is in het broncommentaar nog niet officieel bevestigd.
+- **Character:** krijgt `I2C_ADDRESS_CHARACTER_SCREEN`, `NP_SDA` en `NP_SCL`. De code probeert geen alternatieve LCD-adressen.
+- **Pixel:** krijgt `PIXEL_SCREEN_CS`, SPI-pinnen, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`.
 
-De constructor blijft:
-
-```cpp
-Screen::Screen()
-  : GedeeldeBusNode(
-      &Native,
-      { nullptr, 0, nullptr, 0 },
-      GedeeldeBusComponent::GC_SCREEN,
-      HardwareResourceToegang::GEDEELD
-    )
-{}
-```
-
-Hier gebeurt niet:
-
-```text
-CharacterScreen aanmaken
-PixelScreen aanmaken
-SerialOutput aanmaken
-display.init()
-Serial.begin()
-actief = true
-```
-
----
+Bij mislukte child-aanmelding wordt het pas aangemaakte object verwijderd en wordt respectievelijk `_ABORT_SS001`, `_ABORT_CS001` of `_ABORT_PS001` onthouden. De andere geselecteerde children worden nog verwerkt.
 
 ## `Screen::controleren()`
 
-`Screen::controleren()` controleert het parentobject `Screen`.
+Deze fase begint met `GedeeldeBusNode::controleren()` en roept daarna `controleren()` aan op elk aanwezig child. Bij een conflict wordt `foutmeldingWeergegeven` gemarkeerd; anders volgt de eigen foutcode `_FATAL_SS101`, `_FATAL_CS101` of `_FATAL_PS101`. Niet-gecontroleerde children worden via `ChildVerwijderen()` verwijderd.
 
-```cpp
-bool Screen::controleren() {
-  return GedeeldeBusNode::controleren();
-}
-```
-
-`Screen` claimt zelf geen fysieke Screen-resources:
-
-```cpp
-{ nullptr, 0, nullptr, 0 }
-```
-
-De concrete Character-, Pixel- en Serial-resources worden gecontroleerd door hun eigen GedeeldeBus-object wanneer dat via `ObjectAanmakenEnInpluggenGedeeldeBus()` wordt opgebouwd.
-
----
+Het parentobject gebruikt zelf `{ nullptr, 0, nullptr, 0 }` als resourcebeschrijving. De fysieke resourceclaims horen bij de concrete Screen-children, niet bij `Screen` als parent.
 
 ## `Screen::inpluggen()`
 
-Eerst:
+Na `GedeeldeBusNode::inpluggen()` wordt voor elke nog aanwezige child `inpluggen()` opgeroepen. Bij falen krijgt die uitvoer `_CRITICAL_SS201`, `_CRITICAL_CS201` of `_CRITICAL_PS201` en wordt alleen de betrokken child verwijderd. De fysieke activering en scherminitialisatie vinden **niet** in deze functie plaats.
 
-```cpp
-if (!GedeeldeBusNode::inpluggen()) {
-  this->actief = false;
-  return false;
-}
-```
+## `Screen::Activeren()`
 
-Daarna worden de gecompileerde concrete Screen-uitvoerdoelen verwerkt.
+De huidige implementatie activeert de overgebleven uitvoerchildren afzonderlijk:
 
-### Character
+- **Serial:** roept `Serial.gedeeldeBus->activeren()` aan en stelt `Serial.actief` in. Bij falen volgt `_CRITICAL_SS301` en verwijdering van de child. De concrete seriële initialisatie staat in `SerialOutput::Activeren()`.
+- **Character:** na succesvolle `Character.gedeeldeBus->activeren()` worden `Character.display.init()` en `backlight()` uitgevoerd en wordt `Character.actief = true`. De adrescontrole zit in `CharacterScreen::Activeren()`. Bij falen volgt `_CRITICAL_CS301` en verwijdering van die child.
+- **Pixel:** na `Pixel.gedeeldeBus->activeren()` stelt `Screen::Activeren()` de controller, rotatie, eventuele display-inversie, `gfx`, afmetingen en het tekstgrid in. `_CRITICAL_PS301` t/m `_CRITICAL_PS305` dekken respectievelijk activering, ontbrekende `gfx`, onjuiste afmetingen en een te klein grid. Bij falen worden `Pixel.gfx = nullptr`, `Pixel.actief = false` en de child verwijderd.
 
-Correcte leden:
+`Screen::Activeren()` roept vervolgens `ActivatiefoutWeergeven()` aan en retourneert `true` bij `SCREEN_TYPE_NONE` of wanneer nog minimaal één uitvoerchild overblijft. Een eerdere storing op één uitvoer betekent dus niet automatisch dat alle weergave stopt.
 
-```cpp
-this->Character.actief
-this->Character.display
-this->Character.foutmelding
-this->Character.foutmeldingBuffer
-this->Character.foutmeldingWeergegeven
-this->Character.gedeeldeBus
-```
+**Character-adrescontrole:** de aanwezigheidscontrole in `CharacterScreen::Activeren()` gebruikt het geconfigureerde I²C-adres. `Screen` scant niet zelfstandig naar `0x27` of `0x3F`.
 
-Start:
+**Pixelcontroller:** voor `SCREEN_ST7735S` gebruikt de bestaande code `display.initR(INITR_BLACKTAB)`, anders `display.init(...)`. Daarna volgen rotatie en, alleen voor `SCREEN_ST7789`, `invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0)`. De gridberekening gebruikt de concrete `gfx`-afmetingen, margins, karakter- en regelstappen; bij een te klein grid volgt `_CRITICAL_PS305`.
 
-```cpp
-this->Character.actief = false;
-this->Character.foutmelding = nullptr;
-this->Character.foutmeldingWeergegeven = false;
-```
+## `Screen::afmelden()`
 
-GedeeldeBus-object:
-
-```cpp
-if (this->Character.gedeeldeBus == nullptr) {
-  this->Character.gedeeldeBus =
-    ObjectAanmakenEnInpluggenGedeeldeBus<::CharacterScreen>(
-      this,
-      GedeeldeBusComponent::CHARACTER_SCREEN,
-      I2C_ADDRESS_CHARACTER_SCREEN,
-      HardwareResourcePin::NP_SDA,
-      HardwareResourcePin::NP_SCL
-    );
-}
-```
-
-Bij:
-
-```cpp
-this->Character.gedeeldeBus == nullptr
-```
-
-volgt:
-
-```cpp
-this->Character.actief = false;
-this->actief = false;
-return false;
-```
-
-Het CharacterScreen gebruikt uitsluitend het geconfigureerde `I2C_ADDRESS_CHARACTER_SCREEN`. Er bestaan geen adresmodi meer en er wordt niet automatisch naar 0x27 of 0x3F uitgeweken.
-
-De fysieke aanwezigheidscontrole gebeurt in `CharacterScreen::Activeren()` op het adres dat reeds door GedeeldeBus is aangemeld en gecontroleerd:
-
-```cpp
-if (!HardwareResourceTypeI2C::Activeren()) return false;
-
-Wire.beginTransmission(adres);
-return Wire.endTransmission() == 0;
-```
-
-Wanneer deze controle faalt, faalt `GedeeldeBusNode::inpluggen()` en wordt de dynamisch aangemaakte `CharacterScreen`-node afgemeld. `ObjectAanmakenEnInpluggenGedeeldeBus()` geeft dan `nullptr` terug. `Screen::inpluggen()` zet daarop:
-
-```cpp
-this->Character.foutmelding = _FATAL_CS001;
-this->Character.actief = false;
-```
-
-Daarna:
-
-```cpp
-this->Character.display.init();
-this->Character.display.backlight();
-this->Character.actief = true;
-```
-
-`this->Character.actief` wordt dus pas `true` nadat de volledige Character-initialisatie geslaagd is.
-
-### Pixel
-
-Correcte leden:
-
-```cpp
-this->Pixel.actief
-this->Pixel.aantalKolommen
-this->Pixel.aantalRegels
-this->Pixel.display
-this->Pixel.emulateLCDxxx4
-this->Pixel.foutmelding
-this->Pixel.foutmeldingWeergegeven
-this->Pixel.gedeeldeBus
-this->Pixel.offsetX
-this->Pixel.offsetY
-this->Pixel.gfx
-```
-
-Start van de aanmelding:
-
-```cpp
-this->Pixel.foutmelding = nullptr;
-this->Pixel.foutmeldingWeergegeven = false;
-```
-
-GedeeldeBus-object in `Screen::aanmelden()`:
-
-```cpp
-if ((this->typesActief & SCREEN_TYPE_PIXELS) && this->Pixel.gedeeldeBus == nullptr) {
-  ::PixelScreen* child = new ::PixelScreen(this, GedeeldeBusComponent::PIXEL_SCREEN, PIXEL_SCREEN_CS, HardwareResourcePin::NP_SCK, HardwareResourcePin::NP_MISO, HardwareResourcePin::NP_MOSI, PIXEL_SCREEN_DC, PIXEL_SCREEN_RST);
-  child->componentCreated = true;
-
-  if (child->aanmelden()) {
-    this->Pixel.gedeeldeBus = child;
-  } else {
-    delete child;
-    this->Pixel.foutmelding = _ABORT_PS001;
-  }
-}
-```
-
-`Screen::controleren()` controleert de PixelScreen-child. Bij een mislukte GedeeldeBus-controle wordt deze child verwijderd; een afzonderlijke foutmelding `PS101` volgt alleen wanneer GedeeldeBus niet al een conflict heeft gemeld. `Screen::inpluggen()` plugt de child in en meldt bij falen `PS201`. De concrete driverinitialisatie en het tekstgrid worden pas ingesteld in `Screen::Activeren()` na `this->Pixel.gedeeldeBus->activeren()`.
-
-Displayinitialisatie in `Screen::Activeren()`:
-
-```cpp
-#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7735S)
-  this->Pixel.display.initR(INITR_BLACKTAB);
-#else
-  this->Pixel.display.init(ACTIEF_PIXEL_SCREEN_BREEDTE, ACTIEF_PIXEL_SCREEN_HOOGTE);
-#endif
-
-this->Pixel.display.setRotation(PIXEL_SCREEN_ROTATION);
-#if (ACTIEF_PIXEL_SCREEN_CONTROLLER == SCREEN_ST7789)
-  this->Pixel.display.invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0);
-#endif
-this->Pixel.gfx = &this->Pixel.display;
-```
-
-ST7735S gebruikt `SCREEN_128X160` met `PIXEL_SCREEN_TEXT_SIZE=1`. Een hogere tekstgrootte wordt bij compilatie geweigerd. Voor ST7789 behoudt `ACTIEF_PIXEL_SCREEN_INVERSIE=1` het bestaande Adafruit-gedrag met inversie, terwijl `0` inversie uitschakelt. ST7735S wordt niet beïnvloed.
-
-Bij ontbrekende pointer:
-
-```cpp
-this->Pixel.foutmelding = _CRITICAL_PS302;
-pixelOk = false;
-```
-
-Rotatie `1` of `3`:
-
-```cpp
-if (foutAfmetingen || this->Pixel.gfx->width() != ACTIEF_PIXEL_SCREEN_HOOGTE || this->Pixel.gfx->height() != ACTIEF_PIXEL_SCREEN_BREEDTE) {
-  this->Pixel.foutmelding = _CRITICAL_PS303;
-  pixelOk = false;
-}
-```
-
-Rotatie `0` of `2` gebruikt dezelfde foutflow met `_CRITICAL_PS304` en controleert de niet-verwisselde breedte/hoogte.
-
-Gridberekening:
-
-```cpp
-const int16_t bruikbareBreedte = this->Pixel.gfx->width() - (2 * PIXEL_SCREEN_MARGIN);
-const int16_t bruikbareHoogte  = this->Pixel.gfx->height() - (2 * PIXEL_SCREEN_MARGIN);
-
-const int32_t ruweKolommen = (bruikbareBreedte + PIXEL_SCREEN_CHARACTER_SPACING) / this->Pixel.KarakterStap();
-const int32_t ruweRegels   = (bruikbareHoogte + PIXEL_SCREEN_LINE_SPACING) / this->Pixel.RegelStap();
-```
-
-Minimum niet gehaald:
-
-```cpp
-this->Pixel.foutmelding = _CRITICAL_PS305;
-pixelOk = false;
-```
-
-Daarna blijven de bestaande berekeningen voor:
-
-```cpp
-this->Pixel.aantalKolommen
-this->Pixel.aantalRegels
-this->Pixel.offsetX
-this->Pixel.offsetY
-this->Pixel.emulateLCDxxx4
-```
-
-en:
-
-```cpp
-this->Pixel.gfx->setTextSize(PIXEL_SCREEN_TEXT_SIZE);
-this->Pixel.gfx->setTextColor(PIXEL_SCREEN_TEXT_COLOR, PIXEL_SCREEN_BACKGROUND_COLOR);
-this->Pixel.gfx->setTextWrap(false);
-```
-
-Pas daarna:
-
-```cpp
-this->Pixel.actief = true;
-```
-
-Als `pixelOk` onwaar is, zet `Screen::Activeren()` de `gfx`-pointer op `nullptr`, markeert het pixelscherm als niet actief en verwijdert de child via `ChildVerwijderen()`. Andere Screen-uitvoer kan actief blijven.
-
-### Serial
-
-Correcte leden:
-
-```cpp
-this->Serial.actief
-this->Serial.gedeeldeBus
-```
-
-Start:
-
-```cpp
-this->Serial.actief = false;
-```
-
-GedeeldeBus-object:
-
-```cpp
-if (this->Serial.gedeeldeBus == nullptr) {
-  this->Serial.gedeeldeBus =
-    ObjectAanmakenEnInpluggenGedeeldeBus<SerialOutput>(
-      this,
-      GedeeldeBusComponent::SERIAL_OUTPUT,
-      HardwareResourcePin::NP_D1,
-      HardwareResourcePin::NP_D0
-    );
-}
-```
-
-Bij falen:
-
-```cpp
-this->Serial.actief = false;
-this->actief = false;
-return false;
-```
-
-Serialinitialisatie:
-
-```cpp
-::GA_SERIAL.begin(SERIAL_BAUDRATE);
-
-const unsigned long startTijd = millis();
-
-while (
-  !::GA_SERIAL &&
-  (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS
-) {
-  ;
-}
-
-this->Serial.actief = (bool)::GA_SERIAL;
-```
-
-Bij timeout:
-
-```cpp
-if (!this->Serial.actief) {
-  if (this->Serial.gedeeldeBus != nullptr) {
-    this->Serial.gedeeldeBus->afmelden();
-    this->Serial.gedeeldeBus = nullptr;
-  }
-
-  this->actief = false;
-  return false;
-}
-```
-
-### Einde
-
-Alle gecompileerde uitvoerdoelen moeten volledig actief zijn.
-
-Alleen dan:
-
-```cpp
-this->actief = true;
-return true;
-```
-
-Bij een fout:
-
-```cpp
-this->actief = false;
-return false;
-```
-
----
-
-# `Screen::afmelden()`
-
-Afmelden gebeurt child voor child en daarna pas voor `Screen`.
-
-Character:
-
-```cpp
-this->Character.actief = false;
-
-if (this->Character.gedeeldeBus != nullptr) {
-  if (!this->Character.gedeeldeBus->afmelden()) {
-    this->actief = false;
-    return false;
-  }
-
-  this->Character.gedeeldeBus = nullptr;
-}
-```
-
-Pixel:
-
-```cpp
-this->Pixel.actief = false;
-this->Pixel.gfx = nullptr;
-
-if (this->Pixel.gedeeldeBus != nullptr) {
-  if (!this->Pixel.gedeeldeBus->afmelden()) {
-    this->actief = false;
-    return false;
-  }
-
-  this->Pixel.gedeeldeBus = nullptr;
-}
-```
-
-Serial:
-
-```cpp
-this->Serial.actief = false;
-
-if (this->Serial.gedeeldeBus != nullptr) {
-  if (!this->Serial.gedeeldeBus->afmelden()) {
-    this->actief = false;
-    return false;
-  }
-
-  this->Serial.gedeeldeBus = nullptr;
-}
-```
-
-Daarna:
-
-```cpp
-this->actief = false;
-return GedeeldeBusNode::afmelden();
-```
+De huidige code zet de betrokken `actief`-statussen uit, meldt eerst Serial-, Pixel- en Character-children af (indien aanwezig), zet hun pointers op `nullptr` en roept tenslotte `GedeeldeBusNode::afmelden()` aan. Als een `child->afmelden()` faalt, retourneert deze functie meteen `false`.
 
 ---
 

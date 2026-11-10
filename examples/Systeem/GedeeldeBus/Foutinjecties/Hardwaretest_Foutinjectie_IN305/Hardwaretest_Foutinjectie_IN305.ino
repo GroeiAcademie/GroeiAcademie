@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: IN305
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN305: HX1838-receiver niet correct gestart
 // Verwachte build: normaal of DEBUG, met IRremote
 // Opstelling: HX1838 aangesloten, afstandsbediening bij de hand
@@ -150,7 +149,12 @@ void Herstel() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN305"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));

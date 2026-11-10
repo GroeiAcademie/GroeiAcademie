@@ -33,10 +33,13 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 EGBOPulseSensor* sensorEGBOPulseSensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_EGBOPulseSensor"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_EGBOPulseSensor"));
   sensorEGBOPulseSensor = GedeeldeBusNewComponent<EGBOPulseSensor>(&extenderADS1115,
     GedeeldeBusComponent::EGBOPulseSensor,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

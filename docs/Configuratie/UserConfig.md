@@ -12,16 +12,17 @@ Alle aanpasbare instellingen staan in het template standaard als uitgecommentari
 
 Je mag na het kopiëren dus instellingen verwijderen die je niet persoonlijk wilt vastleggen. Alleen de overblijvende instellingen wijken dan blijvend af van de officiële standaardconfiguratie.
 
-## Instellingen per Extender en per Sensor
+## Instellingen per Extender, Sensor en Sturing
 
-Instellingen per Extender en per Sensor staan niet in `UserConfig.h`, maar in een eigen bestand per component:
+Instellingen per Extender, Sensor en Sturing staan niet in `UserConfig.h`, maar in een eigen bestand per component:
 
 ```text
 src/Configuratie/Extenders/Config<NAAM>_template.h   (meegeleverd)
 src/Configuratie/Extenders/Config<NAAM>.h            (persoonlijk, optioneel)
 src/Configuratie/Sensoren/Config<NAAM>_template.h            (meegeleverd)
 src/Configuratie/Sensoren/Config<NAAM>.h                     (persoonlijk, optioneel)
-src/Configuratie/Sturingen/                                  (voor later)
+src/Configuratie/Sturingen/Config<NAAM>_template.h  (meegeleverd)
+src/Configuratie/Sturingen/Config<NAAM>.h           (persoonlijk, optioneel)
 ```
 
 Kopieer `Config<NAAM>_template.h` naar `Config<NAAM>.h` in dezelfde map en zet alleen wat je wil afwijken. Eén bestand per componenttype: `ConfigADS1115.h` bevat zowel ADS1115 #1 als #2. Een template wordt nooit ingelezen, alleen de persoonlijke versie, en alleen als ze bestaat.
@@ -286,7 +287,7 @@ Native pinnamen in deze configuratie gebruiken `HardwareResourcePin::NP_...`. `H
 
 `UserConfig.h` kan vóór de fallbackwaarden van `SystemConfig.h` de GedeeldeBus-/Extenderconfiguratie vastleggen. Gebruik daarvoor exact de macro's die in `SystemConfig.h` als `#ifndef`-defaults bestaan, zoals `EXTENDER_<NAAM>_AANTAL`, de bijbehorende I2C-adressen, CS-pinnen en controlpinnen.
 
-`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115 meet. `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
+`EXTENDER_<NAAM>_AANTAL == 0` houdt de overeenkomstige Extender uit de build; een waarde groter dan 0 compileert die Extender mee. De fallbackwaarde van `EXTENDER_ADS1115_AANTAL` in `SystemConfig.h` is `1`, omdat FsrRfp via de ADS1115 meet. De meegeleverde actieve `ConfigADS1115.h` zet deze waarde echter op `0`, zolang geen eerdere definitie voorrang krijgt. Met `GROEIACADEMIE_IGNORE_USER_CONFIG` worden de persoonlijke componentbestanden overgeslagen en geldt de fallback bij afwezigheid van een andere definitie. `ExtenderPCF8574` blijft ook nodig wanneer Input via `INPUT_TYPE_PCF8574` werkt.
 
 De logische resources van een Extender worden niet hier hernoemd of gemapt: die staan als `ExtenderPins::EP_<pinnaam>` in de concrete `Extender*.h`.
 

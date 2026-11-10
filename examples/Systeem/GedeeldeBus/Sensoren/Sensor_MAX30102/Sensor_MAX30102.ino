@@ -24,12 +24,13 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::MAX30102,
 MAX30102* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_MAX30102"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-  const unsigned long beginTijd=millis();
-  while(!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_MAX30102"));
   const bool parentOK=apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
   GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
   if(parentOK) sensor=GedeeldeBusNewComponent<MAX30102>(&apparaat,GedeeldeBusComponent::MAX30102);

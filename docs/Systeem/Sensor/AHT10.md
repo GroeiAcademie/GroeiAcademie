@@ -51,7 +51,7 @@ AHT10(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigAHT10.h` (het aanwezige `src/Configuratie/Sensoren/ConfigAHT10_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_AHT10_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_AHT10_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_AHT10_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `I2C_ADDRESS_SENSOR_AHT10_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -69,6 +69,10 @@ GedeeldeBusNewComponent<AHT10>(&apparaat,GedeeldeBusComponent::AHT10);
 - De bestaande FrameWork gebruikt een I²C-parent voor AHT10. De officiële Adafruit **AHT20**-breakout heeft VIN/GND/SDA/SCL en adres **0x38**, met SDA/SCL-pull-ups op de breakout. Dit is geen bewijs dat elke **AHT10**-print dezelfde voeding en header heeft: de fysieke AHT10-adresselectie, voeding en pull-ups eerst aan die variant toetsen.
 
 **Technische handleiding:** https://learn.adafruit.com/adafruit-aht20/pinouts
+
+## Runtime-meetgedrag
+
+`AHT10::LeesHoofdwaarde(float&)` start bij de eerste aanroep de AHTX0-trigger (`AHTX0_CMD_TRIGGER`) en retourneert dan `false` met `waarde = NAN`. Latere aanroepen bekijken de status: zolang de sensor BUSY is en de meetstart minder dan 200 ms geleden is, retourneert de functie opnieuw `false` zonder een runtime-toegangsfout te registreren. Zodra de meting klaar is, worden zes bytes gelezen, temperatuur als hoofdwaarde en bij ingeschakelde datalaag de relatieve vochtigheid als tweede kanaal verwerkt. Een ontbrekende status, niet beantwoorde busactie of niet-afgeronde meting na de wachttijd wordt wel als mislukte runtime-toegang verwerkt. `Activeren()` heeft daarnaast afzonderlijke begrensde initialisatiewachtlussen. Een enkele `false` tijdens de meetfase betekent dus niet automatisch een defect.
 
 ## Testen
 

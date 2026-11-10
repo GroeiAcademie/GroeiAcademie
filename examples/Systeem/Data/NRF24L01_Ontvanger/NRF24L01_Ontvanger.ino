@@ -19,10 +19,13 @@ RF24 radio(pinCE, pinCS);
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: NRF24L01_Ontvanger"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: NRF24L01_Ontvanger"));
 
   const bool gelukt = radio.begin() && radio.isChipConnected();
   GA_SERIAL.println(gelukt ? F("RADIO: OK") : F("RADIO: FOUT"));

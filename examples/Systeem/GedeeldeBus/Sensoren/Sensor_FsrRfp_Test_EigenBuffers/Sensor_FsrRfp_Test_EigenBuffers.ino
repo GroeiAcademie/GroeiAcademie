@@ -49,10 +49,13 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_Test_EigenBuffers"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_Test_EigenBuffers"));
 
   GA_SERIAL.println(F("=== FsrRfp test eigen buffers per object (T2-9) ==="));
   if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_TYPE_DIRECT);

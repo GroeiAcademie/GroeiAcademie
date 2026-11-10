@@ -16,7 +16,12 @@ ExtenderADS7828 extender(
   HardwareResourcePin::NP_SCL);
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_ADC_OngeldigeChannel"));
   const bool foutcodeJuist = extender.StartExtenderReadAnalog(8, 1500) == -2;
   GA_SERIAL.println(foutcodeJuist ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));

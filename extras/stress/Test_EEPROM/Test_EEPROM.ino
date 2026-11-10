@@ -6,6 +6,7 @@
 // De I2C-adressen en aantallen zijn ingesteld in de bestaande constanten hieronder.
 // ============================================================================
 
+#include <SystemConfig.h>
 #include <Wire.h>
 #include <I2C_eeprom.h>
 
@@ -40,9 +41,12 @@ void tcaselect(uint8_t channel) {
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    delay(10);
-  }
+#if defined(DEBUG)
+  while (!Serial) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!Serial && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
 
   Wire.begin();
 

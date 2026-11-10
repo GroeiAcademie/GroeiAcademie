@@ -69,6 +69,15 @@ SynchronisatieProfiel nulmetingSynchronisatie, gemetenSynchronisatie[3];
 int TEST_AANTAL_KEER_HERHALEN  = 5;
 
 void setup() {
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+
+#if defined(DEBUG)
+  while (!GA_SERIAL) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
+
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) exit(0);
 

@@ -63,7 +63,12 @@ void toonStartInstructies() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
 
   GA_SERIAL.println(F("TEST: Sturing_Relais_Native_HardwareTest"));
   relais = GedeeldeBusNewComponent<Relais>(&Native, static_cast<uint8_t>(HardwareResourcePin::NP_D6), LOW);

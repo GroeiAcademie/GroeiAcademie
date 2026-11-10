@@ -47,7 +47,12 @@ GedeeldeBusNode SensorTest(
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Extender_ADS7828_Test_ExtenderPins_Geweigerd"));
 
   GA_SERIAL.println(F("=== ExtenderADS7828 ExtenderPins Geweigerd ==="));

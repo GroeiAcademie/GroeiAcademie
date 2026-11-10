@@ -51,7 +51,7 @@ SensorVL53L0X(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigVL53L0X.h` (het aanwezige `src/Configuratie/Sensoren/ConfigVL53L0X_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_VL53L0X_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_VL53L0X_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_VL53L0X_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `I2C_ADDRESS_SENSOR_VL53L0X_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -69,6 +69,10 @@ GedeeldeBusNewComponent<SensorVL53L0X>(&apparaat,GedeeldeBusComponent::VL53L0X);
 - De VL53L0X gebruikt I²C, met een optionele `XSHUT`-resetlijn en optionele interrupt. De huidige FrameWorkklasse vraagt een I²C-parent; de gekozen breakout moet een bij het hostboard passende voeding en levelshifting hebben.
 
 **Technische handleiding:** https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x
+
+## Runtime-meetgedrag
+
+`SensorVL53L0X::LeesHoofdwaarde(float&)` start een meting met `vl.startRange()` en retourneert dan `false` met `waarde = NAN`. Volgende aanroepen wachten zonder blokkerende lus via `vl.isRangeComplete()`. Is de meting nog niet voltooid binnen `tijdslimietMeting`, dan wordt de status gereset en de mislukking als runtime-toegang verwerkt. De tijdslimiet wordt bij `Activeren()` afgeleid van het meetbudget indien geldig, met een terugval van 200 ms. Na voltooiing worden API-status, rangesstatus en resultaat (`!= 0xFFFF`) gecontroleerd; alleen dan levert de functie een afstandswaarde. `false` terwijl de tijdslimiet nog niet is verstreken is een normale wachttoestand.
 
 ## Testen
 

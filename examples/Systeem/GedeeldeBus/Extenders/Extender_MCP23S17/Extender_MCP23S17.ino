@@ -28,7 +28,12 @@ ExtenderMCP23S17 extender(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23S17, 
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Extender_MCP23S17"));
   bool gelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren();
   if (gelukt) gelukt = extender.pinMode1(0, OUTPUT) && extender.write1(0, LOW);

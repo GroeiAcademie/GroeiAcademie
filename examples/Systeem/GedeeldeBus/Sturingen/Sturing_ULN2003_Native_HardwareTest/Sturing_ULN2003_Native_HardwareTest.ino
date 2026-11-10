@@ -67,7 +67,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_ULN2003_Native_HardwareTest"));
   uln2003 = GedeeldeBusNewComponent<ULN2003>(&Native, static_cast<uint8_t>(HardwareResourcePin::NP_D2), static_cast<uint8_t>(HardwareResourcePin::NP_D3), static_cast<uint8_t>(HardwareResourcePin::NP_D4), static_cast<uint8_t>(HardwareResourcePin::NP_D5));
   if (uln2003 != nullptr) motorBesturing = new StappenmotorBesturing(*uln2003);

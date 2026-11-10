@@ -55,6 +55,10 @@ SensorAnaloog(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t s
 - **Proef:** meet 0 V (succes met waarde 0), meet een gekende referentiespanning (succes met niet-nul), verbreek de ADC-verbinding (foutstatus via `RawAnalogRead`), test te groot meetbereik (geweigerd). Noteer de ADC-referentie, werkelijke bits, ingestelde schaal en de eenheden van de Sensor.
 - **Status:** bestaande API biedt een afzonderlijke foutstatus; alle verbruikers van `GetAnalogRead()` moeten nog per gebruik gecontroleerd worden.
 
+### Samengesteld analoog voorbeeld zonder eigen Sensor-klasse
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_XYSTICK/Sensor_XYSTICK.ino` leest twee joystickassen via een ADS1115 en de drukknop via een native digitale pin. Dit is een voorbeeldsketch, geen implementatie van een nieuwe `SensorAnaloog`-subklasse; geregistreerd in Sensoren Geldig.
+
 ### ADC-time-outs en foutstatus
 
 - De bestaande `RawAnalogRead()` wacht maximaal 150 ms. Test bij iedere ADC-configuratie trage conversie, ontbrekende READY, losgekoppelde ingang en herstel. Controleer of time-outs als fout gerapporteerd worden en niet als geldige nul. Verhoog 150 ms niet algemeen zonder concrete meetresultaten.

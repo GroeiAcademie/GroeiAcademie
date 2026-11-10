@@ -51,10 +51,13 @@ int32_t Richting(int32_t waarde, int32_t midden) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_XYSTICK"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_XYSTICK"));
   extenderOK = extenderADS1115.aanmelden() && extenderADS1115.controleren() && extenderADS1115.inpluggen() && extenderADS1115.activeren();
   GA_SERIAL.println(extenderOK ? F("ADS1115: OK") : F("ADS1115: FOUT"));
   pinMode(pinKnop, INPUT_PULLUP);

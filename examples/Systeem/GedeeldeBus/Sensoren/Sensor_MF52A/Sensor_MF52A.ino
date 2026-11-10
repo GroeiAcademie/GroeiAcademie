@@ -37,10 +37,13 @@ MF52x* sensorMF52A = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_MF52A"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_MF52A"));
   sensorMF52A = GedeeldeBusNewComponent<MF52x>(
     &extenderADS1115, GedeeldeBusComponent::MF52A,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

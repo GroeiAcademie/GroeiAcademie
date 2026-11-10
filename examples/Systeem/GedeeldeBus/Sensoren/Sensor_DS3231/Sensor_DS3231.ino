@@ -29,10 +29,13 @@ void ToonDatumTijd(const DateTime& datumTijd) {
 }
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ #if defined(DEBUG)
  while (!GA_SERIAL) { ; }
- GA_SERIAL.println(F("TEST: Sensor_DS3231"));
+ #else
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
+ #endif
+ GA_SERIAL.println(F("TEST: Sensor_DS3231"));
  const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
  GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
  if (parentOK) klok=GedeeldeBusNewComponent<DS3231>(&apparaat,GedeeldeBusComponent::DS3231);

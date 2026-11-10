@@ -15,5 +15,16 @@ static void ControleerOpDubbeleComponentcodes(uint8_t code) {
     default: break;
   }
 }
-void setup() { ControleerOpDubbeleComponentcodes(0); }
+void setup() {
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+
+#if defined(DEBUG)
+  while (!GA_SERIAL) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
+
+  ControleerOpDubbeleComponentcodes(0);
+}
 void loop() {}

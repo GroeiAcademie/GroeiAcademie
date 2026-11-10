@@ -36,7 +36,12 @@ ExtenderSC16IS752I2C extender(
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Extender_SC16IS752_I2C"));
 
   GA_SERIAL.println(F("=== ExtenderSC16IS752I2C aanmelden/controleren-test ==="));

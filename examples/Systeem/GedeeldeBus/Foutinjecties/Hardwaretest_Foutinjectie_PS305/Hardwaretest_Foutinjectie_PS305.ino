@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: PS305
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie PS305: tekstgrid kleiner dan het minimum
 // Verwachte build: normaal of DEBUG, met een te grote PIXEL_SCREEN_MARGIN
 // Opstelling: de gewone schermopstelling; in UserConfig.h tijdelijk #define PIXEL_SCREEN_MARGIN 100
@@ -91,7 +90,12 @@ void VoerTestUit() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_PS305"));
   ToonUitleg();
 }

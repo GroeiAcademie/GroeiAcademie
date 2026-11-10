@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: Interactief
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Interactieve PCF8574-foutinjectie: referentie -> fout -> herstel.
 // Basis: examples/Systeem/Input/InputkanalenHX1838/InputkanalenHX1838.ino
 //        examples/Systeem/GedeeldeBus/Extenders/Extender_PCF8574/Extender_PCF8574.ino
@@ -132,7 +131,12 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie mappingTestMenu[] = {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_Interactief"));
 
   Screen = GedeeldeBusNewComponent<struct Screen>();

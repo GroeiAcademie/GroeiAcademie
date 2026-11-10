@@ -9,7 +9,7 @@
 #if SENSOR_BME680_AANTAL > 0 || SENSOR_BME688_AANTAL > 0
 #include <Adafruit_BME680.h>
 
-// Alleen identiteit/lifecycle: nog geen volledige sensorinitialisatie of meting.
+// Sensorinitialisatie en meting via Activeren() en LeesHoofdwaarde().
 // parent moet de voor dit apparaat geregistreerde HardwareResourceTypeI2C-node zijn.
 struct BME68x : Sensor {
   BME68x(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)

@@ -17,7 +17,12 @@
 MCU6701* sensorGSR = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sensor_MCU6701_SPI"));
   // CJMCU-6701: CS -> D10, MIS -> MISO, SCK -> SCK; geen MOSI-verbinding naar de chip.
   // NP_MOSI claimt de gedeelde SPI-buslijn, niet een fysieke sensor-MOSI.

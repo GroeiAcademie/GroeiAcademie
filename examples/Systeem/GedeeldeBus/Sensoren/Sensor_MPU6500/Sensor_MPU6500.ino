@@ -26,10 +26,13 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::MPU6500, I2C_ADD
 MPU6500* sensor = nullptr;
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ #if defined(DEBUG)
  while (!GA_SERIAL) { ; }
- GA_SERIAL.println(F("TEST: Sensor_MPU6500"));
+ #else
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
+ #endif
+ GA_SERIAL.println(F("TEST: Sensor_MPU6500"));
  const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
  GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
  if (parentOK) sensor=GedeeldeBusNewComponent<MPU6500>(&apparaat,GedeeldeBusComponent::MPU6500);

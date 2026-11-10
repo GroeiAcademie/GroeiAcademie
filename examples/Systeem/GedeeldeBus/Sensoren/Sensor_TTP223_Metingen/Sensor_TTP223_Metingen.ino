@@ -15,7 +15,12 @@
 TTP223* sensorAanraking = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sensor_TTP223_Metingen"));
   sensorAanraking = GedeeldeBusNewComponent<TTP223>(&Native, GedeeldeBusComponent::TTP223, HardwareResourcePin::NP_D2);
   GA_SERIAL.println(sensorAanraking ? F("TTP223 SENSOR: OK") : F("TTP223 SENSOR: FOUT"));

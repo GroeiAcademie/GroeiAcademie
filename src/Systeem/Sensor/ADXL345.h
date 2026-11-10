@@ -9,7 +9,7 @@
 #if SENSOR_ADXL345_AANTAL > 0
 #include <Adafruit_ADXL345_U.h>
 
-// Alleen identiteit/lifecycle: nog geen volledige sensorinitialisatie of meting.
+// Sensorinitialisatie en meting via Activeren() en LeesHoofdwaarde().
 // parent moet de voor dit apparaat geregistreerde HardwareResourceTypeI2C-node zijn.
 struct SensorADXL345 : Sensor {
   SensorADXL345(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)

@@ -46,7 +46,7 @@ SCD41(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigSCD41.h` (het aanwezige `src/Configuratie/Sensoren/ConfigSCD41_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_SCD41_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_SCD41_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_SCD41_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `I2C_ADDRESS_SENSOR_SCD41_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):

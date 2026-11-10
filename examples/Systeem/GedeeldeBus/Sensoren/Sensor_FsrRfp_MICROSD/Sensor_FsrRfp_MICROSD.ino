@@ -41,10 +41,13 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_MICROSD"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_MICROSD"));
 
   if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_TYPE_MICROSD_SPI);
   ToonResultaat(F("Data aanmelden/controleren/inpluggen/activeren"), Data != nullptr);

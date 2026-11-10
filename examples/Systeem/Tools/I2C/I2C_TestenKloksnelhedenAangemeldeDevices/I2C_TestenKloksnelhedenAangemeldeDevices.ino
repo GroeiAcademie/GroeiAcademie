@@ -28,7 +28,12 @@ I2C_SCANNER i2cScanner;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: I2C_TestenKloksnelhedenAangemeldeDevices"));
 
   Screen = GedeeldeBusNewComponent<struct Screen>();

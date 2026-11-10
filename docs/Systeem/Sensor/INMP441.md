@@ -53,7 +53,7 @@ INMP441(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourc
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigINMP441.h` (het aanwezige `src/Configuratie/Sensoren/ConfigINMP441_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_INMP441_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_INMP441_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_INMP441_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
 
 De constructor van deze component vereist een board- of moduleafhankelijke aansluiting; kies de echte pinnen en de overeenkomende fysieke module voordat je `aanmelden()`, `inpluggen()` en `activeren()` uitvoert.
 
@@ -65,7 +65,7 @@ De constructor van deze component vereist een board- of moduleafhankelijke aansl
 
 ## Testen
 
-Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MS3625/` (alleen ESP32-S3).
+Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MS3625/Sensor_MS3625.ino` (MS3625 gebruikt de bestaande `INMP441`-klasse; normale hardwarevariant alleen op ESP32-S3). Deze sketch is zowel in Sensoren Geldig als in Sensoren Ongeldig geregistreerd, telkens met de bijbehorende testconfiguratie.
 
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 

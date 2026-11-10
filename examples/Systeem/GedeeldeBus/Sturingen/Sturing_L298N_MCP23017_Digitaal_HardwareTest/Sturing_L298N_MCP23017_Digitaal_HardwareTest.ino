@@ -4,8 +4,8 @@
 // De betreffende ENABLE moet op de concrete module intern actief zijn.
 // STOP zet de richtingsingangen LOW. Bij niet-communicerende Extender is een fysieke noodstop nodig.
 // ============================================================================
-// Motor 1: MCP23017 P0/P1 -> L298N IN1/IN2, ENA intern actief.
-// Motor 2: MCP23017 P2/P3 -> L298N IN3/IN4, ENB intern actief.
+// Motor 1: MCP23017 GPA0/GPA1 -> L298N IN1/IN2, ENA intern actief.
+// Motor 2: MCP23017 GPA2/GPA3 -> L298N IN3/IN4, ENB intern actief.
 // Alleen MCP23017 vereist; ENABLE moet intern actief zijn.
 // Logica- en motorvoeding passend aansluiten; GND gemeenschappelijk.
 // Gebruik 1 of 2 voor motorkeuze, daarna de begeleide serietests.
@@ -77,7 +77,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_L298N_MCP23017_Digitaal_HardwareTest"));
   extenderMCP23017 = GedeeldeBusNewComponent<ExtenderMCP23017>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23017, I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET);
   if (extenderMCP23017 != nullptr) l298n = GedeeldeBusNewComponent<L298N>(extenderMCP23017, 0, 1);

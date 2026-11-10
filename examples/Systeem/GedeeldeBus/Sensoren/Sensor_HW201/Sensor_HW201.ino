@@ -12,10 +12,13 @@
 HW201* sensorHW201 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_HW201"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_HW201"));
   sensorHW201 = GedeeldeBusNewComponent<HW201>(&Native, GedeeldeBusComponent::HW201, HardwareResourcePin::NP_D2);
   GA_SERIAL.println(sensorHW201 ? F("HW201: component aangemaakt; controleer lifecycle en OUT tijdens hardwaretest") : F("HW201: FOUT"));
 }

@@ -29,7 +29,12 @@ ExtenderADS7953* extender = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Extender_ADS7953_HardwareTest"));
   GA_SERIAL.println(F("=== ADS7953 hardwaretest ==="));
   GA_SERIAL.println(F("Voeding UIT voor aansluiten of wijzigen van de bedrading."));

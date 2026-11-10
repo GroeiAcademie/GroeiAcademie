@@ -113,7 +113,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_MAX7219"));
 
   max7219 = GedeeldeBusNewComponent<MAX7219>(&Native, HardwareResourcePin::NP_D10, MD_MAX72XX::FC16_HW);

@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: PS303
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie PS303: PixelScreen afmetingencontrole mislukt
 // Verwachte build: normaal of DEBUG, GEDEELDE_BUS_FOUTINJECTIE 1
 // Opstelling: de gewone schermopstelling
@@ -99,7 +98,12 @@ void VoerTestUit() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_PS303"));
   ToonUitleg();
 }

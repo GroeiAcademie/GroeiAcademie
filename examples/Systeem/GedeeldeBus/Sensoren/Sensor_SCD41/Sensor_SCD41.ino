@@ -23,10 +23,13 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::SCD41, I2C_ADDRE
 SCD41* sensor = nullptr;
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ #if defined(DEBUG)
  while (!GA_SERIAL) { ; }
- GA_SERIAL.println(F("TEST: Sensor_SCD41"));
+ #else
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
+ #endif
+ GA_SERIAL.println(F("TEST: Sensor_SCD41"));
  const bool parentOK=apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
  GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
  if (parentOK) sensor=GedeeldeBusNewComponent<SCD41>(&apparaat,GedeeldeBusComponent::SCD41);

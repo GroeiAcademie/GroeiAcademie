@@ -53,7 +53,7 @@ De gemelde waarschuwing van de externe library `LiquidCrystal I2C` betreft de ar
 
 
 
-De broncode bevat 16 concrete Extenderclasses onder `src/Systeem/Extender/` en 38 Sensorclasses onder `src/Systeem/Sensor/` (met de gemeenschappelijke basissen `SensorAnaloog` en `SensorDigitaal`; zie `docs/Systeem/Sensor/`). Hun aanwezigheid in de broncode of het slagen van een lifecycle-/resourcevoorbeeld is niet hetzelfde als een volledige elektronische hardwarevalidatie van iedere functie van die chip. Die validatiestatus moet afzonderlijk worden vastgelegd wanneer de elektronische functietests zijn uitgevoerd.
+De broncode bevat 16 concrete Extenderclasses onder `src/Systeem/Extender/` en 41 van `Sensor`, `SensorAnaloog` of `SensorDigitaal` afgeleide C++-klassen onder `src/Systeem/Sensor/`, inclusief de twee gemeenschappelijke basisklassen `SensorAnaloog` en `SensorDigitaal` (dus 39 overige sensorklassen). Dit is een telling van C++-klassen, niet van fysieke modulevarianten of hardwarematig bevestigde sensoren (zie `docs/Systeem/Sensor/`). Hun aanwezigheid in de broncode of het slagen van een lifecycle-/resourcevoorbeeld is niet hetzelfde als een volledige elektronische hardwarevalidatie van iedere functie van die chip. Die validatiestatus moet afzonderlijk worden vastgelegd wanneer de elektronische functietests zijn uitgevoerd.
 
 ## Vereiste Arduino IDE-boardselecties
 

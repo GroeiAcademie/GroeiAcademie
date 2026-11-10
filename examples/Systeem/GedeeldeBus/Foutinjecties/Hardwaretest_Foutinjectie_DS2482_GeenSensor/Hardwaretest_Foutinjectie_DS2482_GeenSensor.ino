@@ -18,7 +18,12 @@ DS18B20 sensor(&bridge, GedeeldeBusComponent::DS18B20,
                 static_cast<HardwareResourcePin>(0));
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_DS2482_GeenSensor"));
   bool gelukt = bridge.aanmelden();
   if (gelukt) gelukt = bridge.controleren();

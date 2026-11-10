@@ -66,7 +66,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_L293D_Native_PWM_IN_HardwareTest"));
   l293d = GedeeldeBusNewComponent<L293D>(&Native, 5, 6);
   if (l293d != nullptr) motorBesturing = new DCmotorBesturing(*l293d);

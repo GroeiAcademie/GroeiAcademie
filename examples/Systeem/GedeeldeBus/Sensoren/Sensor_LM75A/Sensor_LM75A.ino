@@ -26,10 +26,13 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::LM75A, I2C_ADDRE
 LM75A* sensor = nullptr;
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
+ #if defined(DEBUG)
  while (!GA_SERIAL) { ; }
- GA_SERIAL.println(F("TEST: Sensor_LM75A"));
+ #else
  const unsigned long beginTijd = millis();
  while (!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
+ #endif
+ GA_SERIAL.println(F("TEST: Sensor_LM75A"));
  const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
  GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
  if (parentOK) sensor=GedeeldeBusNewComponent<LM75A>(&apparaat,GedeeldeBusComponent::LM75A);

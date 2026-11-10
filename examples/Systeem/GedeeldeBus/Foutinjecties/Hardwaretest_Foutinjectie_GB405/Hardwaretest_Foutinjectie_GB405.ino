@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: GB405
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB405: heractiveren mislukt: I2C-busfout of timeout
 // Verwachte build: DEBUG
 // Opstelling: een PCF8574 op TEST_ADRES_PCF8574, los te koppelen via een schakelaar of jumper in VCC
@@ -179,7 +178,12 @@ void VolgFase() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB405"));
   ToonUitleg();
 }

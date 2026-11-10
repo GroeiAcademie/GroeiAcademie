@@ -33,10 +33,13 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_Test_VerkeerdeParent"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_FsrRfp_Test_VerkeerdeParent"));
 
   GA_SERIAL.println(F("=== FsrRfp test verkeerde parent (T2-7) ==="));
   const bool extenderGelukt = extenderPCF8574.aanmelden() && extenderPCF8574.controleren() && extenderPCF8574.inpluggen() && extenderPCF8574.activeren();

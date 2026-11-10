@@ -69,7 +69,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_L298N_Native_HardwareTest"));
   l298n = GedeeldeBusNewComponent<L298N>(&Native, 3, 4, 5);
   if (l298n != nullptr) motorBesturing = new DCmotorBesturing(*l298n);

@@ -6,6 +6,7 @@
 // Het I2C-adres en het aantal herhalingen staan in de constanten hieronder.
 // ============================================================================
 
+#include <SystemConfig.h>
 #include <Wire.h>
 #include <FRAM.h>
 
@@ -21,9 +22,12 @@ uint8_t leesBuffer[TEST_LENGTE];
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    delay(10);
-  }
+#if defined(DEBUG)
+  while (!Serial) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!Serial && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
 
   Wire.begin();
 

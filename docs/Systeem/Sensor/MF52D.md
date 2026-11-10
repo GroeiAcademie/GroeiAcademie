@@ -23,7 +23,7 @@ Deze sensor deelt een C++-klasse met andere uitvoeringen. De fysieke aansluitgeg
 
 ## Uit de broncode
 
-MF52A: NTC thermistor; spanning, niet omgerekende temperatuur. Eén component voor één fysiek apparaat, via de bestaande ADC-Extender. De meetcode zit in SensorAnaloog; deze klasse geeft alleen de pin en het bereik door. Het fysieke type behoudt zijn eigen componentcode en configuratie. De analoge ADC-meetfuncties zijn identiek aan die van MF52A.
+MF52D: NTC thermistor; spanning, niet omgerekende temperatuur. Eén component voor één fysiek apparaat, via de bestaande ADC-Extender. De meetcode zit in SensorAnaloog; deze klasse geeft alleen de pin en het bereik door. Het fysieke type behoudt zijn eigen componentcode en configuratie. De analoge ADC-meetfuncties zijn identiek aan die van MF52A.
 
 ## Aansluiten
 
@@ -64,7 +64,7 @@ MF52x(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensorPin
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigMF52D.h` (het aanwezige `src/Configuratie/Sensoren/ConfigMF52D_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_MF52D_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_MF52D_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_MF52D_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `SENSOR_MF52D_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `5000`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):

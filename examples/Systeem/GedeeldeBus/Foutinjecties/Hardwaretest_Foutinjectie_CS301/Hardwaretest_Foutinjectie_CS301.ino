@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: CS301
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie CS301: CharacterScreen activeren() mislukt
 // Verwachte build: normaal of DEBUG
 // Opstelling: het LCD (I2C) op I2C_ADDRESS_CHARACTER_SCREEN, los te koppelen via een schakelaar of jumper in VCC
@@ -135,7 +134,12 @@ void Herstel() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_CS301"));
   ToonUitleg();
 }

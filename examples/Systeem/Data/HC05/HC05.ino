@@ -20,10 +20,13 @@ unsigned long tijdLaatsteBericht = 0;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: HC05"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: HC05"));
   Serial1.begin(baudHC05);
   GA_SERIAL.println(F("HC-05: Serial1 gestart"));
 }

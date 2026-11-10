@@ -16,10 +16,13 @@
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_LD2410D"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_LD2410D"));
   Serial1.begin(115200);
   bool basis = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();
   if (!basis) { GA_SERIAL.println(F("PARENT: FOUT")); return; }

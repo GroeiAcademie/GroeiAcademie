@@ -24,12 +24,13 @@ HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::VL6180X,
 SensorVL6180X* sensor = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_VL6180X"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
-  const unsigned long beginTijd=millis();
-  while(!GA_SERIAL && millis()-beginTijd<SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_VL6180X"));
   const bool parentOK=apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
   GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
   if(parentOK) sensor=GedeeldeBusNewComponent<SensorVL6180X>(&apparaat,GedeeldeBusComponent::VL6180X);

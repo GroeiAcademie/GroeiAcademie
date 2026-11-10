@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: IN202
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN202: HX1838-pin niet om te zetten naar een native pin
 // Verwachte build: normaal of DEBUG, met een ongeldige HX1838_ONTVANGER_PIN
 // Opstelling: in UserConfig.h tijdelijk #define HX1838_ONTVANGER_PIN 99
@@ -91,7 +90,12 @@ void VoerTestUit() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN202"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));

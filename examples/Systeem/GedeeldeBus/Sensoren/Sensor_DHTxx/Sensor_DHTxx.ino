@@ -18,10 +18,13 @@ const GedeeldeBusComponent fysiekType = GedeeldeBusComponent::DHT11;
 #endif
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_DHTxx"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_DHTxx"));
   const bool parentOK = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();
   GA_SERIAL.println(parentOK ? F("PARENT: OK") : F("PARENT: FOUT"));
   if (!parentOK) return;

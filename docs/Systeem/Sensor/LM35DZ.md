@@ -52,7 +52,7 @@ LM35DZ(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensorPi
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigLM35DZ.h` (het aanwezige `src/Configuratie/Sensoren/ConfigLM35DZ_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_LM35DZ_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_LM35DZ_AANTAL`: sjabloonwaarde `1 // standaard waarde: 0`.
+  - `SENSOR_LM35DZ_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `1500 // standaard waarde: 1500 (LM35DZ: 10 mV/°C; meetbereik tot 150 °C)`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):

@@ -84,7 +84,7 @@ De GedeeldeBus-codes staan in `src/Language/Library_*.h`. Het niveau volgt `SCRE
 
 | Code | Niveau | Stap | Betekenis | Getoonde waarde | Build |
 |---|---|---|---|---|---|
-| GB001 | ABORT | `aanmelden()` | GEDEELD-claim zonder geldige identiteit | | gedefinieerd, wordt in de code nog nergens gemeld |
+| GB001 | ABORT | `aanmelden()` | GEDEELD-claim zonder geldige identiteit | | melding alleen bij `GEDEELDE_BUS_FOUTINJECTIE`; aanmelden wordt ook zonder die optie geweigerd |
 | GB101 | FATAL | `controleren()` | minstens een claim EXCLUSIEF, zelfde resource | pin | altijd |
 | GB102 | FATAL | `controleren()` | zelfde I2C-adres, zelfde bus | I2C-adres | altijd |
 | GB103 | FATAL | `controleren()` | twee GEDEELD-claims, andere identiteit | pin | altijd |
@@ -93,7 +93,7 @@ De GedeeldeBus-codes staan in `src/Language/Library_*.h`. Het niveau volgt `SCRE
 | GB106 | FATAL | `controleren()` | binnen een component EXCLUSIEF- en GEDEELD-claim op dezelfde resource | pin | altijd |
 | GB107 | FATAL | `controleren()` | binnen een component twee GEDEELD-claims, andere identiteit | pin | altijd |
 | GB108 | FATAL | `controleren()` | verplichte resource ontbreekt (CS van een SPI-component, DC van een PixelScreen) | pin | altijd |
-| GB109 | FATAL | `controleren()` | I2C-adres niet toegestaan voor dit hardwaretype | | gedefinieerd, wordt in de code nog nergens gemeld |
+| GB109 | FATAL | `controleren()` | I2C-adres niet toegestaan voor dit hardwaretype | I2C-adres | alleen bij `GEDEELDE_BUS_FOUTINJECTIE` |
 | GB110 | FATAL | `controleren()` | ongeldig I2C-adres | I2C-adres | altijd |
 | GB111 | FATAL | `controleren()` | parent/extender biedt gevraagde resource niet aan | ExtenderPin | altijd |
 | GB201 | CRITICAL | `inpluggen()` | inpluggen mislukt | I2C-adres | standaard |
@@ -337,6 +337,13 @@ Onder `examples/Systeem/GedeeldeBus/Extenders/` bestaan per Extender:
 Onder `examples/Systeem/GedeeldeBus/Sensoren/` staan `Sensor_FsrRfp.ino`, `Sensor_FsrRfp_DIRECT.ino`, `Sensor_FsrRfp_FLASH.ino` en `Sensor_FsrRfp_MICROSD.ino`.
 
 Deze tests moeten niet worden geïnterpreteerd als een volledige elektronische functietest van alle chipfuncties. Zie `extras/TESTEN.md`.
+
+### Aanvullende Sensor-sketches voor GedeeldeBus-regels
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` controleert gemengde native- en PCF8574-pinclaims; geregistreerd in Sensoren Geldig én Sensoren Ongeldig met verschillende compilerdefinities en foutverwachtingen.
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_TestOpDubbeleComponentcodes/Sensor_TestOpDubbeleComponentcodes.ino` bevat de compileertijdcontrole op dubbele `GedeeldeBusComponent`-codes; geregistreerd in Sensoren Geldig. De sketch verwacht geen fout zolang de componentcodes uniek zijn.
+
+Deze sketches testen generieke GedeeldeBus-regels en horen niet bij een specifieke fysieke Sensor-klasse. De volledige domeinregistratie staat in `extras/TESTEN.md` en de bestaande CMD-bestanden.
 
 ### Integratie- en herstelscenario's
 - **Gelijktijdig:** start één sensorconversie terwijl twee Sturingen kanalen van dezelfde GPIO/PWM-Extender gebruiken; voeg een tweede child en een tweede Extender op dezelfde bus toe. Controleer ongewijzigde resourceclaims en sensorwaarden tijdens bewegingen.

@@ -64,7 +64,7 @@ HSR0x(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourceP
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigHYSRF05.h` (het aanwezige `src/Configuratie/Sensoren/ConfigHYSRF05_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_HYSRF05_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_HYSRF05_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_HYSRF05_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
 

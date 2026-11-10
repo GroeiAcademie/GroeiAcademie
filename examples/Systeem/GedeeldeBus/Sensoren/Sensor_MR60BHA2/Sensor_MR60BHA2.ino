@@ -15,10 +15,13 @@
 MR60BHA2* sensorMR60BHA2 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_MR60BHA2"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_MR60BHA2"));
   // Gebruik de bestaande Serial1; FrameWork initialiseert deze op 115200 baud.
   // Op andere boards blijven de fysieke GPIO-nummers afhankelijk van de gekozen boardmapping.
   sensorMR60BHA2 = GedeeldeBusNewComponent<MR60BHA2>(

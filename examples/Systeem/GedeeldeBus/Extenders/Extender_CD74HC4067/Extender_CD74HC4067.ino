@@ -28,7 +28,12 @@ ExtenderCD74HC4067 extender(
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Extender_CD74HC4067"));
 
   GA_SERIAL.println(F("=== ExtenderCD74HC4067 driver-/lifecycletest ==="));

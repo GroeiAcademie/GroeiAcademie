@@ -6,6 +6,7 @@
 // De gebruikte hardwarepinnen, adressen en tests staan in de code hieronder.
 // ============================================================================
 
+#include <SystemConfig.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <PCF8574.h>
@@ -175,9 +176,12 @@ uint8_t leesBuffer[512];
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    delay(10);
-  }
+#if defined(DEBUG)
+  while (!Serial) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!Serial && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
 
   Wire.begin();
 

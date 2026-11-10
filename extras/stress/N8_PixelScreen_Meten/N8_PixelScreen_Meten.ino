@@ -7,7 +7,7 @@
 // 3. Volledige Screen->Print() meten.
 //
 // Gebaseerd op de publieke Screen/Pixel-interface en de bestaande
-// Default_PixelScreen-example van GROEI ACADEMIE FrameWork v2.0.0.
+// Default_PixelScreen-example van GROEI ACADEMIE FrameWork.
 // Wijzigt geen librarycode.
 // ============================================================================
 
@@ -22,10 +22,13 @@ static const uint16_t AANTAL_METINGEN = 20;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: N8_PixelScreen_Meten"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: N8_PixelScreen_Meten"));
 
   Screen = GedeeldeBusNewComponent<struct Screen>(SCREEN_TYPE_PIXELS);
   if (Screen == nullptr) {

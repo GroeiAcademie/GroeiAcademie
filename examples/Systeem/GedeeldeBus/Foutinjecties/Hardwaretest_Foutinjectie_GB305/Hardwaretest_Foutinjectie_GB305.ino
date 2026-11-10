@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: GB305
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB305: activeren() mislukt: I2C-busfout of timeout
 // Verwachte build: DEBUG
 // Opstelling: een AANGESLOTEN PCF8574 op TEST_ADRES_PCF8574 (alleen SCL is de oorzaak)
@@ -142,7 +141,12 @@ void Herstel() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB305"));
   ToonUitleg();
 }

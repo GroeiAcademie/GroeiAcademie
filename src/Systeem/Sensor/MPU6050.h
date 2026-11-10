@@ -9,7 +9,7 @@
 #if SENSOR_MPU6050_AANTAL > 0
 #include <Adafruit_MPU6050.h>
 
-// Alleen identiteit/lifecycle: nog geen volledige sensorinitialisatie of meting.
+// Sensorinitialisatie en meting via Activeren() en LeesHoofdwaarde().
 // parent moet de voor dit apparaat geregistreerde HardwareResourceTypeI2C-node zijn.
 struct SensorMPU6050 : Sensor {
   SensorMPU6050(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)

@@ -38,6 +38,7 @@
 // Na een mislukte cardBegin() of volumeBegin() wordt end() aangeroepen voordat de volgende kaart wordt getest.
 // ============================================================================
 
+#include <SystemConfig.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <SdFat.h>
@@ -91,9 +92,12 @@ void sdCsWrite(SdCsPin_t pin, bool level) {
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    delay(10);
-  }
+#if defined(DEBUG)
+  while (!Serial) { ; }
+#else
+  unsigned long startTijd = millis();
+  while (!Serial && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+#endif
 
   Wire.begin();
   Wire.setClock(400000); // Gecorrigeerd: Voorkom SPI-timeouts door I2C te versnellen naar 400kHz

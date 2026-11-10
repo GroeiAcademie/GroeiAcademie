@@ -31,7 +31,12 @@ ExtenderADS1115 extenderVoorGSR(&Native, GedeeldeBusComponent::ADC_ADS1115,
 MCU6701* analogeGSR = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sensor_MCU6701_Analoog"));
   // OUT -> AIN0 van ADS1115; CS, MIS en SCK hier niet aansluiten.
   analogeGSR = GedeeldeBusNewComponent<MCU6701>(&extenderVoorGSR,

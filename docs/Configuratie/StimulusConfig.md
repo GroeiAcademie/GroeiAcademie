@@ -69,10 +69,10 @@ Gebruikt als `doelTikTijd`-parameter in `VergelijkStimulus()`: `> 0` = expliciet
 | Define | Betekenis |
 |---|---|
 | `EXIT_TIKTIJD_MS` | 3000: achterdeur: na deze tijd kan de oefening verlaten worden |
-
-`EXIT_TIKTIJD_MS` is bewust een aparte veiligheids-/achterdeurgrens naast de algemene `timeoutMs` van `MeetStimulusSimultaan()`. De officiële voorbeelden gebruiken de standaardwaarde 3000 ms voor beide. Wanneer een reeds gestarte sensor door deze achterdeur niet tijdig wordt losgelaten, retourneert de meting `EXIT_STATUS_SENSOR_NIET_LOSGELATEN` in plaats van `EXIT_STATUS_SENSOR_LOSGELATEN`. `MeetStimulus()` gebruikt voor een sensor die al bij binnenkomst ingedrukt is dezelfde no-action-timeout en retourneert dan `EXIT_STATUS_NO_ACTION_TIMEOUT`.
 | `EXIT_NO_ACTION_MS` | 9000: timeout bij geen enkele actie |
 | `MINIMALE_TIKTIJD_MS` | 100: Fysiologisch onderbouwde ondergrens nog te bepalen |
 | `MAXIMALE_TIKTIJD_MS` | 2000: Fysiologisch onderbouwde bovengrens nog te bepalen |
+
+`EXIT_TIKTIJD_MS` is bewust een aparte veiligheids-/achterdeurgrens naast de algemene `timeoutMs` van `MeetStimulusSimultaan()`. De officiële voorbeelden gebruiken de standaardwaarde 3000 ms voor beide. Wanneer een reeds gestarte sensor door deze achterdeur niet tijdig wordt losgelaten, retourneert de meting `EXIT_STATUS_SENSOR_NIET_LOSGELATEN` in plaats van `EXIT_STATUS_SENSOR_LOSGELATEN`. `MeetStimulus()` gebruikt voor een sensor die al bij binnenkomst ingedrukt is dezelfde no-action-timeout en retourneert dan `EXIT_STATUS_NO_ACTION_TIMEOUT`.
 
 

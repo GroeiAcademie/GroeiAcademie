@@ -37,10 +37,13 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 BioAmpEXGPill* sensorBioAmpEXGPill = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_BioAmpEXGPill_EMG_Envelop"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_BioAmpEXGPill_EMG_Envelop"));
   sensorBioAmpEXGPill = GedeeldeBusNewComponent<BioAmpEXGPill>(&extenderADS1115,
     GedeeldeBusComponent::BioAmpEXGPill,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

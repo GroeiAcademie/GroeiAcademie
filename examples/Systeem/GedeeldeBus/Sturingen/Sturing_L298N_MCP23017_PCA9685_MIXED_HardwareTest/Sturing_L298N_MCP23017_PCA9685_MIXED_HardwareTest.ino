@@ -1,8 +1,8 @@
 // ============================================================================
 // Sturing: Sturing_L298N_MCP23017_PCA9685_MIXED_HardwareTest
 // ============================================================================
-// Motor 1: MCP23017 P0/P1 -> L298N IN1/IN2, PCA9685 PWM5 -> ENA.
-// Motor 2: MCP23017 P2/P3 -> L298N IN3/IN4, PCA9685 PWM8 -> ENB.
+// Motor 1: MCP23017 GPA0/GPA1 -> L298N IN1/IN2, PCA9685 PWM5 -> ENA.
+// Motor 2: MCP23017 GPA2/GPA3 -> L298N IN3/IN4, PCA9685 PWM8 -> ENB.
 // EN(A/B)-jumper(s) verwijderen waar van toepassing; niet beide motoren tegelijk testen.
 // GEDEELDE_BUS_MIXED_PINS 1 in UserConfig.h, beide Extenders ingeschakeld.
 // Logica- en motorvoeding passend aansluiten; GND gemeenschappelijk.
@@ -76,7 +76,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_L298N_MCP23017_PCA9685_MIXED_HardwareTest"));
   extenderPCA9685 = GedeeldeBusNewComponent<ExtenderPCA9685>(&Native, GedeeldeBusComponent::PWM_PCA9685, I2C_ADDRESS_EXTENDER_PCA9685_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL);
   if (extenderPCA9685 != nullptr) extenderMCP23017 = GedeeldeBusNewComponent<ExtenderMCP23017>(&Native, GedeeldeBusComponent::DIGITAL_PINS_MCP23017, I2C_ADDRESS_EXTENDER_MCP23017_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_MCP23017_1_INTA, EXTENDER_MCP23017_1_INTB, EXTENDER_MCP23017_1_RESET);

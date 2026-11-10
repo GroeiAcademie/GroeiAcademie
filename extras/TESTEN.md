@@ -14,7 +14,7 @@ Een geslaagde Extender-lifecycletest bewijst dus niet dat alle fysieke chipfunct
 
 ## Testscripts v2.0.0
 
-De releasevalidatie bestaat uit zeven domeinen. Elk domein heeft een gewoon testscript en een Ongeldig-testscript:
+De huidige teststructuur bestaat uit negen domeinen. Elk domein heeft een gewoon testscript en een Ongeldig-testscript:
 
 ```text
 TestLibraryData-v2.0.0.cmd
@@ -22,6 +22,9 @@ TestLibraryDataOngeldig-v2.0.0.cmd
 
 TestLibraryExtenders-v2.0.0.cmd
 TestLibraryExtendersOngeldig-v2.0.0.cmd
+
+TestLibraryFoutinjecties-v2.0.0.cmd
+TestLibraryFoutinjectiesOngeldig-v2.0.0.cmd
 
 TestLibraryGedeeldeBus-v2.0.0.cmd
 TestLibraryGedeeldeBusOngeldig-v2.0.0.cmd
@@ -35,6 +38,9 @@ TestLibraryScreenOngeldig-v2.0.0.cmd
 TestLibrarySensoren-v2.0.0.cmd
 TestLibrarySensorenOngeldig-v2.0.0.cmd
 
+TestLibrarySturingen-v2.0.0.cmd
+TestLibrarySturingenOngeldig-v2.0.0.cmd
+
 TestLibraryTools-v2.0.0.cmd
 TestLibraryToolsOngeldig-v2.0.0.cmd
 ```
@@ -47,13 +53,14 @@ TestLibraryCommonOngeldig.cmd
 TestLibraryDependency.cmd
 TestBoardplatformsDependency.cmd
 TestLibraryMappingControle.cmd
+TestLibraryAllCmdParallel.cmd
 TestLibraryGenereerTESTRESULTATEN.cmd
 LokalePaden_template.cmd
 ```
 
-De veertien domeincycli worden afzonderlijk uitgevoerd. Daarna beoordeelt `TestLibraryGenereerTESTRESULTATEN.cmd` de veertien bijbehorende `.txt`-logs en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit.
+De achttien domeincycli worden afzonderlijk uitgevoerd. Daarna beoordeelt `TestLibraryGenereerTESTRESULTATEN.cmd` de achttien bijbehorende `.txt`-logs en voert het automatisch `TestLibraryMappingControle.cmd --no-pause` uit.
 
-Een releasevalidatie is alleen geslaagd wanneer alle veertien domeincycli volledig zijn afgerond, alle releasecriteria slagen en ook de mappingcontrole slaagt.
+Een releasevalidatie is alleen geslaagd wanneer alle achttien domeincycli volledig zijn afgerond, alle releasecriteria slagen en ook de mappingcontrole slaagt.
 
 ## Padkeuze van de Windows-tests
 
@@ -71,9 +78,9 @@ Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en c
 
 `CONTROLE_PADEN` bepaalt welk domein eigenaar is van de voorbeelden en controles die door een testscript worden beheerd.
 
-De zeven gewone domeinscripts gebruiken `TestLibraryCommon.cmd`.
+De negen gewone domeinscripts gebruiken `TestLibraryCommon.cmd`.
 
-De zeven negatieve domeinscripts gebruiken `TestLibraryCommonOngeldig.cmd` en verwijzen via `BRON_TEST_SCRIPT` naar het gewone testscript van hetzelfde domein.
+De negen negatieve domeinscripts gebruiken `TestLibraryCommonOngeldig.cmd` en verwijzen via `BRON_TEST_SCRIPT` naar het gewone testscript van hetzelfde domein.
 
 De testarchitectuur blijft daardoor per domein opgesplitst. Een test hoort in het domein dat door de betrokken `CONTROLE_PADEN` wordt beheerd.
 
@@ -158,13 +165,15 @@ De interne `--logged`-werking wordt door de testscripts zelf gebruikt om uitvoer
 
 ## Releaseprocedure
 
-Voer de veertien domeinscripts uit:
+Voer de achttien domeinscripts uit:
 
 ```text
 TestLibraryData-v2.0.0.cmd
 TestLibraryDataOngeldig-v2.0.0.cmd
 TestLibraryExtenders-v2.0.0.cmd
 TestLibraryExtendersOngeldig-v2.0.0.cmd
+TestLibraryFoutinjecties-v2.0.0.cmd
+TestLibraryFoutinjectiesOngeldig-v2.0.0.cmd
 TestLibraryGedeeldeBus-v2.0.0.cmd
 TestLibraryGedeeldeBusOngeldig-v2.0.0.cmd
 TestLibraryInput-v2.0.0.cmd
@@ -173,6 +182,8 @@ TestLibraryScreen-v2.0.0.cmd
 TestLibraryScreenOngeldig-v2.0.0.cmd
 TestLibrarySensoren-v2.0.0.cmd
 TestLibrarySensorenOngeldig-v2.0.0.cmd
+TestLibrarySturingen-v2.0.0.cmd
+TestLibrarySturingenOngeldig-v2.0.0.cmd
 TestLibraryTools-v2.0.0.cmd
 TestLibraryToolsOngeldig-v2.0.0.cmd
 ```
@@ -185,7 +196,7 @@ TestLibraryGenereerTESTRESULTATEN.cmd
 
 ## Beoordeling van een gewoon domein
 
-Voor elk van de zeven gewone domeinlogs controleert `TestLibraryGenereerTESTRESULTATEN.cmd`:
+Voor elk van de negen gewone domeinlogs controleert `TestLibraryGenereerTESTRESULTATEN.cmd`:
 
 - de eindmarker, zodat alleen een volledig afgeronde run geldig is;
 - `BASIC_FQBN`;
@@ -202,7 +213,7 @@ EXPERIMENTAL_FQBN wordt wel in het rapport opgenomen maar blokkeert de release n
 
 ## Beoordeling van een Ongeldig-domein
 
-Voor elk van de zeven Ongeldig-logs moet de eindregel de vorm hebben:
+Voor elk van de negen Ongeldig-logs moet de eindregel de vorm hebben:
 
 ```text
 Totaal <aantal> - OK <aantal> - FOUT 0
@@ -220,7 +231,7 @@ TestLibraryMappingControle.cmd --no-pause
 
 Ook deze controle moet slagen.
 
-De volledige releasevalidatie bestaat daardoor uit veertien domeincycli plus de verplichte mappingcontrole.
+De volledige releasevalidatie bestaat daardoor uit achttien domeincycli plus de verplichte mappingcontrole.
 
 ## TestLibraryStatusReport.txt
 
@@ -229,7 +240,7 @@ De volledige releasevalidatie bestaat daardoor uit veertien domeincycli plus de 
 Het rapport bevat:
 
 - de totaalstatus van de releasevalidatie;
-- de status van alle veertien domeincycli;
+- de status van alle achttien domeincycli;
 - per gewoon domein BASIC + EXTENDED, EXPERIMENTAL_FQBN, statische controles, Arduino LINT en geheugengegevens;
 - per Ongeldig-domein het negatieve testtotaal;
 - de mappingcontrole;
@@ -238,13 +249,13 @@ Het rapport bevat:
 
 De libraryversie wordt gelezen uit `library.properties`.
 
-Na een volledig geslaagde releasevalidatie worden de veertien losse `.txt`-domeinlogs verwijderd. `TestLibraryStatusReport.txt` blijft behouden.
+Na een volledig geslaagde releasevalidatie worden de achttien losse `.txt`-domeinlogs verwijderd. `TestLibraryStatusReport.txt` blijft behouden.
 
 Wanneer de releasevalidatie niet slaagt, blijven de losse logs behouden en toont de generator welke scripts opnieuw moeten worden uitgevoerd.
 
-## Status 18-10-2026
+## Historische teststatus
 
-De v2.0.0-domeinsplitsing is aanwezig voor Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools.
+Onderstaande vaststellingen betreffen de oudere testsituatie van 18 oktober 2026; dit is geen actuele RUN166-validatie. De huidige testscripts omvatten naast Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools ook Foutinjecties en Sturingen.
 
 De Ongeldig-infrastructuur is aangepast zodat de controlebestanden opnieuw worden opgebouwd en versiegebonden `*Ongeldig-v2.0.0.cmd`-bestanden worden meegenomen.
 
@@ -256,7 +267,24 @@ Totaal 25 - OK 24 - FOUT 1
 
 De resterende fout zat in de negatieve microSD-test met CS via `ExtenderPCF8574`: de testconfiguratie activeerde de extender niet volledig en faalde daardoor vóór de bedoelde `SD_CHIP_SELECT_MODE`-validatie. Die `TEST_FLAGS` zijn daarna aangepast aan de bestaande werkende microSD-via-PCF8574-configuratie, zonder `SD_CHIP_SELECT_MODE=1`, zodat de bedoelde negatieve validatie kan worden bereikt.
 
-Die laatste correctie moet nog met een nieuwe Data-run worden bevestigd. De overige zeven Ongeldig-domeinen moeten eveneens met de finale testset opnieuw worden uitgevoerd voordat de volledige releasevalidatie bewezen geslaagd is.
+Die laatste correctie moet nog met een nieuwe Data-run worden bevestigd. De overige Ongeldig-domeinen moeten eveneens met de finale testset opnieuw worden uitgevoerd voordat de volledige releasevalidatie bewezen geslaagd is.
+
+## Bestaande aanvullende Sensor-sketches
+
+De volgende bestaande Sensor-sketches worden niet als afzonderlijke sensorklasse in de component-MD's beschreven. Hun paden zijn hier expliciet opgenomen; een sketchnaam die op een fouttest lijkt, bepaalt **niet** zelfstandig of de registratie in Geldig of Ongeldig thuishoort. Die indeling volgt uitsluitend de bestaande CMD-testblokken.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_ADC_Bezet/Sensor_FsrRfp_Test_ADC_Bezet.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_EigenBuffers/Sensor_FsrRfp_Test_EigenBuffers.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_Hardwarefout/Sensor_FsrRfp_Test_Hardwarefout.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_OngeldigePin/Sensor_FsrRfp_Test_OngeldigePin.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_Timeout_Conversie/Sensor_FsrRfp_Test_Timeout_Conversie.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_VerkeerdeParent/Sensor_FsrRfp_Test_VerkeerdeParent.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_Test_ZonderGet/Sensor_FsrRfp_Test_ZonderGet.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_FsrRfp_TweeSetsOpTweeADS1115/Sensor_FsrRfp_TweeSetsOpTweeADS1115.ino` (geregistreerd: Sensoren Geldig én Extenders Ongeldig, met verschillende `TEST_FLAGS`).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MS3625/Sensor_MS3625.ino` (geregistreerd: Geldig en Ongeldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (geregistreerd: Geldig en Ongeldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_TestOpDubbeleComponentcodes/Sensor_TestOpDubbeleComponentcodes.ino` (geregistreerd: Geldig).
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_XYSTICK/Sensor_XYSTICK.ino` (geregistreerd: Geldig).
 
 ## Definitieve releaseresultaten
 

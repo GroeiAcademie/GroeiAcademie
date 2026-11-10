@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: IN302
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie IN302: HX1838-ontvangstlijn blijft permanent LOW
 // Verwachte build: normaal of DEBUG
 // Opstelling: de HX1838 aangesloten; een draad om OUT met GND te verbinden
@@ -147,7 +146,12 @@ void Herstel() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_IN302"));
   Screen = GedeeldeBusNewComponent<struct Screen>();
   if (Screen == nullptr) GA_SERIAL.println(F("Let op: Screen start niet; de melding verschijnt dan niet."));

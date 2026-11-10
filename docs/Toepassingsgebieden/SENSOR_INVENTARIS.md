@@ -175,4 +175,4 @@ De OV7670 alleen garandeert nog niet dat pupil- of oogmetingen voldoende betrouw
 
 ## Sensorcode in beta v2.0.0
 
-Los van deze hardware-inventaris bevat de huidige broncode 38 Sensorclasses onder `src/Systeem/Sensor/` (zie `docs/Systeem/Sensor/`). Stimulus gebruikt `FsrRfp` in `src/Systeem/Sensor/FsrRfp.h/.cpp`. Deze class beheert maximaal vier analoge kanalen voor Stimulus en wordt ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft. Dit is een softwarestatus en geen uitbreiding van de bovenstaande fysieke hardware-inventaris.
+Los van deze hardware-inventaris bevat de huidige broncode 41 van de gemeenschappelijke Sensorbasisklassen afgeleide C++-klassen onder `src/Systeem/Sensor/` (inclusief `SensorAnaloog` en `SensorDigitaal`, dus 39 overige sensorklassen) (zie `docs/Systeem/Sensor/`). Stimulus gebruikt `FsrRfp` in `src/Systeem/Sensor/FsrRfp.h/.cpp`. Deze class beheert maximaal vier analoge kanalen voor Stimulus en wordt ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft. Dit is een softwarestatus en geen uitbreiding van de bovenstaande fysieke hardware-inventaris.

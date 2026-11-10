@@ -9,7 +9,7 @@
 #if SENSOR_BMP280_AANTAL > 0
 #include <Adafruit_BMP280.h>
 
-// Alleen identiteit/lifecycle: nog geen volledige sensorinitialisatie of meting.
+// Sensorinitialisatie en meting via Activeren() en LeesHoofdwaarde().
 // parent moet de voor dit apparaat geregistreerde HardwareResourceTypeI2C-node zijn.
 struct BMP280 : Sensor {
   BMP280(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)

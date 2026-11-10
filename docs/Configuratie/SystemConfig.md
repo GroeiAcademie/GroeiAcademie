@@ -9,7 +9,7 @@ De laadvolgorde voor de systeemconfiguratie is:
 ```text
 vaste keuzewaarden
 -> eventueel UserConfig.h
--> eventueel de persoonlijke componentbestanden (Extenders/Config<NAAM>.h, Sensoren/Config<NAAM>.h)
+-> eventueel de persoonlijke componentbestanden (Extenders/Config<NAAM>.h, Sensoren/Config<NAAM>.h, Sturingen/Config<NAAM>.h)
 -> officiële fallbackwaarden uit SystemConfig.h
 ```
 
@@ -29,6 +29,13 @@ Iedere gebruikersinstelling uit `UserConfig.h` krijgt voorrang op de fallback ui
 
 Gewone examples stellen libraryconfiguratie niet rechtstreeks in de `.ino` in. Een globale compilerdefinitie kan een configuratiewaarde vóór `UserConfig.h` vastleggen. Zonder zo'n compilerdefinitie geldt steeds: eventueel `UserConfig.h`, daarna de fallback uit `SystemConfig.h`. `GROEIACADEMIE_IGNORE_USER_CONFIG` kan worden gebruikt voor een gecontroleerde build die het persoonlijke gebruikersbestand en alle persoonlijke componentbestanden bewust overslaat.
 
+## Sjabloonvoorstel, fallback en actieve waarde
+
+Een `Config*_template.h` is uitsluitend een kopieersjabloon: regels als `// #define SENSOR_INMP441_AANTAL 1` zijn **uitgecommentarieerd** en activeren geen sensor. De term *sjabloonvoorstel* in een componenthandleiding geeft daarom geen effectieve standaardwaarde aan. De echte fallback volgt uit de `#ifndef`/`#define`-blokken van `SystemConfig.h` en wordt alleen gebruikt wanneer geen eerdere definitie bestaat.
+
+Voorbeeld uit de huidige code: `ConfigINMP441_template.h` toont `SENSOR_INMP441_AANTAL 1` als uitgecommentarieerd voorstel, maar `SystemConfig.h` gebruikt **0** als fallback. Een actieve definitie in `UserConfig.h`, `ConfigINMP441.h` of via een globale compilerdefinitie kan die fallback vervangen. Voor `EXTENDER_ADS1115_AANTAL` is de fallback juist **1**, terwijl het meegeleverde actieve `ConfigADS1115.h` **0** instelt. Ook bij andere aantallen moeten deze drie niveaus afzonderlijk worden gelezen.
+
+`FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_2` is uitzonderlijk: er bestaat **geen fallbackdefinitie** voor set 2. Zonder expliciete definitie is de tweede set afwezig. Dit volgt uit `SystemConfig.h` en `ConfigFsrRfp_template.h`; de waarde `2` in het sjabloon is alleen een optioneel voorstel.
 ## Taalkeuze
 
 Selecteer in `UserConfig.h` exact één taal. Zonder `UserConfig.h` gebruikt `SystemConfig.h` standaard Nederlands.

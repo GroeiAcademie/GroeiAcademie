@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: GB111
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB111: parent/Extender biedt de gevraagde resource niet aan
 // Verwachte build: normaal of DEBUG
 // Opstelling: geen extra hardware
@@ -92,7 +91,12 @@ void VoerTestUit() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB111"));
   ToonUitleg();
 }

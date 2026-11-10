@@ -48,17 +48,114 @@ GroeiAcademie/
 │   │   │   ├── ConfigTCA9548A.h
 │   │   │   └── ConfigTCA9548A_template.h
 │   │   ├── Sensoren/
+│   │   │   ├── ConfigAD8232.h
+│   │   │   ├── ConfigAD8232_template.h
+│   │   │   ├── ConfigADXL345.h
+│   │   │   ├── ConfigADXL345_template.h
+│   │   │   ├── ConfigAHT10.h
+│   │   │   ├── ConfigAHT10_template.h
+│   │   │   ├── ConfigAS608.h
+│   │   │   ├── ConfigAS608_template.h
+│   │   │   ├── ConfigBME680.h
+│   │   │   ├── ConfigBME680_template.h
+│   │   │   ├── ConfigBME688.h
+│   │   │   ├── ConfigBME688_template.h
+│   │   │   ├── ConfigBMP280.h
+│   │   │   ├── ConfigBMP280_template.h
+│   │   │   ├── ConfigBioAmpEXGPill.h
+│   │   │   ├── ConfigBioAmpEXGPill_template.h
+│   │   │   ├── ConfigDHTxx.h
+│   │   │   ├── ConfigDHTxx_template.h
+│   │   │   ├── ConfigDS18B20.h
+│   │   │   ├── ConfigDS18B20_template.h
+│   │   │   ├── ConfigDS3231.h
+│   │   │   ├── ConfigDS3231_template.h
+│   │   │   ├── ConfigEGBOPulseSensor.h
+│   │   │   ├── ConfigEGBOPulseSensor_template.h
 │   │   │   ├── ConfigFsrRfp.h
-│   │   │   └── ConfigFsrRfp_template.h
+│   │   │   ├── ConfigFsrRfp_template.h
+│   │   │   ├── ConfigGSRGrove.h
+│   │   │   ├── ConfigGSRGrove_template.h
+│   │   │   ├── ConfigHCSR04.h
+│   │   │   ├── ConfigHCSR04P.h
+│   │   │   ├── ConfigHCSR04P_template.h
+│   │   │   ├── ConfigHCSR04_template.h
+│   │   │   ├── ConfigHCSR501.h
+│   │   │   ├── ConfigHCSR501_template.h
+│   │   │   ├── ConfigHW201.h
+│   │   │   ├── ConfigHW201_template.h
+│   │   │   ├── ConfigHX711.h
+│   │   │   ├── ConfigHX711_template.h
+│   │   │   ├── ConfigHYSRF05.h
+│   │   │   ├── ConfigHYSRF05_template.h
+│   │   │   ├── ConfigINMP441.h
+│   │   │   ├── ConfigINMP441_template.h
+│   │   │   ├── ConfigLD2410D.h
+│   │   │   ├── ConfigLD2410D_template.h
+│   │   │   ├── ConfigLD2450.h
+│   │   │   ├── ConfigLD2450_template.h
+│   │   │   ├── ConfigLM35DZ.h
+│   │   │   ├── ConfigLM35DZ_template.h
+│   │   │   ├── ConfigLM75A.h
+│   │   │   ├── ConfigLM75A_template.h
+│   │   │   ├── ConfigMAX30102.h
+│   │   │   ├── ConfigMAX30102_template.h
+│   │   │   ├── ConfigMAX4466.h
+│   │   │   ├── ConfigMAX4466_template.h
+│   │   │   ├── ConfigMAX9814.h
+│   │   │   ├── ConfigMAX9814_template.h
+│   │   │   ├── ConfigMCU6701.h
+│   │   │   ├── ConfigMCU6701_template.h
+│   │   │   ├── ConfigMF52A.h
+│   │   │   ├── ConfigMF52A_template.h
+│   │   │   ├── ConfigMF52D.h
+│   │   │   ├── ConfigMF52D_template.h
+│   │   │   ├── ConfigMPU6050.h
+│   │   │   ├── ConfigMPU6050_template.h
+│   │   │   ├── ConfigMPU6500.h
+│   │   │   ├── ConfigMPU6500_template.h
+│   │   │   ├── ConfigMR60BHA2.h
+│   │   │   ├── ConfigMR60BHA2_template.h
+│   │   │   ├── ConfigNeuroSkyTGAM.h
+│   │   │   ├── ConfigNeuroSkyTGAM_template.h
+│   │   │   ├── ConfigOT3686.h
+│   │   │   ├── ConfigOT3686_template.h
+│   │   │   ├── ConfigOV7670.h
+│   │   │   ├── ConfigOV7670_template.h
+│   │   │   ├── ConfigPIEZO.h
+│   │   │   ├── ConfigPIEZO_template.h
+│   │   │   ├── ConfigSCD41.h
+│   │   │   ├── ConfigSCD41_template.h
+│   │   │   ├── ConfigSDP810125PA.h
+│   │   │   ├── ConfigSDP810125PA_template.h
+│   │   │   ├── ConfigTTP223.h
+│   │   │   ├── ConfigTTP223_template.h
+│   │   │   ├── ConfigVL53L0X.h
+│   │   │   ├── ConfigVL53L0X_template.h
+│   │   │   ├── ConfigVL6180X.h
+│   │   │   ├── ConfigVL6180X_template.h
+│   │   │   ├── ConfigWATER.h
+│   │   │   └── ConfigWATER_template.h
 │   │   ├── Sturingen/
+│   │   │   ├── ConfigA4988.h
 │   │   │   ├── ConfigA4988_template.h
+│   │   │   ├── ConfigL293D.h
 │   │   │   ├── ConfigL293D_template.h
+│   │   │   ├── ConfigL298N.h
 │   │   │   ├── ConfigL298N_template.h
+│   │   │   ├── ConfigMAX7219.h
+│   │   │   ├── ConfigMAX7219_template.h
+│   │   │   ├── ConfigMG996R.h
 │   │   │   ├── ConfigMG996R_template.h
-│   │   │   ├── ConfigRelais_template.h
+│   │   │   ├── ConfigRGBLED.h
 │   │   │   ├── ConfigRGBLED_template.h
+│   │   │   ├── ConfigRelais.h
+│   │   │   ├── ConfigRelais_template.h
+│   │   │   ├── ConfigSG90.h
 │   │   │   ├── ConfigSG90_template.h
+│   │   │   ├── ConfigULN2003.h
 │   │   │   ├── ConfigULN2003_template.h
+│   │   │   ├── ConfigWS2812.h
 │   │   │   └── ConfigWS2812_template.h
 │   │   ├── Examples.h
 │   │   ├── ExamplesConfig.h
@@ -213,12 +310,24 @@ GroeiAcademie/
 │   │   │   ├── A4988.h
 │   │   │   ├── L293D.h
 │   │   │   ├── L298N.h
+│   │   │   ├── MAX7219.h
 │   │   │   ├── MG996R.h
 │   │   │   ├── Relais.h
 │   │   │   ├── RGBLED.h
 │   │   │   ├── SG90.h
 │   │   │   ├── ULN2003.h
-│   │   │   └── WS2812.h
+│   │   │   ├── WS2812.h
+│   │   │   └── Functies/
+│   │   │       ├── Elektromotoren/
+│   │   │       │   ├── DCmotorBesturing.cpp
+│   │   │       │   ├── DCmotorBesturing.h
+│   │   │       │   ├── ServomotorBesturing.cpp
+│   │   │       │   ├── ServomotorBesturing.h
+│   │   │       │   ├── StappenmotorBesturing.cpp
+│   │   │       │   └── StappenmotorBesturing.h
+│   │   │       └── MatrixFuncties/
+│   │   │           ├── SpiraalPatroon.cpp
+│   │   │           └── SpiraalPatroon.h
 │   │   ├── Input/
 │   │   │   ├── Input.cpp
 │   │   │   ├── Input.h
@@ -360,15 +469,67 @@ GroeiAcademie/
 │   │   │   │   └── Sensor_XYSTICK/
 │   │   │   └── Sturingen/
 │   │   │       ├── Sturing_A4988/
+│   │   │       ├── Sturing_A4988_MCP23017_HardwareTest/
+│   │   │       ├── Sturing_A4988_MCP23S17_HardwareTest/
+│   │   │       ├── Sturing_A4988_Native_HardwareTest/
+│   │   │       ├── Sturing_A4988_PCF8574_HardwareTest/
+│   │   │       ├── Sturing_A4988_PCF8575_HardwareTest/
 │   │   │       ├── Sturing_ISD1820/
+│   │   │       ├── Sturing_ISD1820_HardwareTest/
 │   │   │       ├── Sturing_L293D/
+│   │   │       ├── Sturing_L293D_MCP23017_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L293D_MCP23017_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_L293D_MCP23S17_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L293D_MCP23S17_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_L293D_Native_HardwareTest/
+│   │   │       ├── Sturing_L293D_Native_PWM_IN_HardwareTest/
+│   │   │       ├── Sturing_L293D_PCA9685_HardwareTest/
+│   │   │       ├── Sturing_L293D_PCA9685_PWM_IN_HardwareTest/
+│   │   │       ├── Sturing_L293D_PCF8574_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L293D_PCF8574_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_L293D_PCF8575_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L293D_PCF8575_PCA9685_MIXED_HardwareTest/
 │   │   │       ├── Sturing_L298N/
+│   │   │       ├── Sturing_L298N_MCP23017_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L298N_MCP23017_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_L298N_MCP23S17_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L298N_MCP23S17_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_L298N_Native_HardwareTest/
+│   │   │       ├── Sturing_L298N_Native_PWM_IN_HardwareTest/
+│   │   │       ├── Sturing_L298N_PCA9685_HardwareTest/
+│   │   │       ├── Sturing_L298N_PCA9685_PWM_IN_HardwareTest/
+│   │   │       ├── Sturing_L298N_PCF8574_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L298N_PCF8574_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_L298N_PCF8575_Digitaal_HardwareTest/
+│   │   │       ├── Sturing_L298N_PCF8575_PCA9685_MIXED_HardwareTest/
+│   │   │       ├── Sturing_MAX7219/
+│   │   │       ├── Sturing_MAX7219_MCP23017/
+│   │   │       ├── Sturing_MAX7219_MCP23017_MIXED/
+│   │   │       ├── Sturing_MAX7219_MCP23S17/
+│   │   │       ├── Sturing_MAX7219_PCF8574/
+│   │   │       ├── Sturing_MAX7219_PCF8574_MIXED/
+│   │   │       ├── Sturing_MAX7219_PCF8575/
+│   │   │       ├── Sturing_MAX7219_PCF8575_MIXED/
 │   │   │       ├── Sturing_MG996R/
-│   │   │       ├── Sturing_Relais/
+│   │   │       ├── Sturing_MG996R_HardwareTest/
 │   │   │       ├── Sturing_RGBLED/
+│   │   │       ├── Sturing_RGBLED_HardwareTest/
+│   │   │       ├── Sturing_Relais/
+│   │   │       ├── Sturing_Relais_MCP23017_HardwareTest/
+│   │   │       ├── Sturing_Relais_MCP23S17_HardwareTest/
+│   │   │       ├── Sturing_Relais_Native_HardwareTest/
+│   │   │       ├── Sturing_Relais_PCF8574_HardwareTest/
+│   │   │       ├── Sturing_Relais_PCF8575_HardwareTest/
 │   │   │       ├── Sturing_SG90/
+│   │   │       ├── Sturing_SG90_HardwareTest/
 │   │   │       ├── Sturing_ULN2003/
-│   │   │       └── Sturing_WS2812/
+│   │   │       ├── Sturing_ULN2003_MCP23017_HardwareTest/
+│   │   │       ├── Sturing_ULN2003_MCP23S17_HardwareTest/
+│   │   │       ├── Sturing_ULN2003_Native_HardwareTest/
+│   │   │       ├── Sturing_ULN2003_PCF8574_HardwareTest/
+│   │   │       ├── Sturing_ULN2003_PCF8575_HardwareTest/
+│   │   │       ├── Sturing_WS2812/
+│   │   │       └── Sturing_WS2812_HardwareTest/
 │   │   ├── Input/
 │   │   │   ├── InputkanalenHX1838/
 │   │   │   ├── InputkanalenHX1838metArgumenten/
@@ -572,7 +733,7 @@ De actuele componentdocumentatie is onderverdeeld volgens de broncode:
 De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.
 
 
-De Sturing-tests onder `examples/Systeem/GedeeldeBus/Sturingen/` bevatten daarnaast 20 extra sketches voor de vijf bestaande drivers A4988, L293D, L298N, MAX7219 en ULN2003. De bestaande pinclaim- en foutafhandelingslogica wordt hergebruikt; gemengde L293D/L298N-aansturing gebruikt digitale richting via PCF/MCP en EN via PCA9685. MAX7219 kan 16 bits bitbangen via een GPIO-Extender; MCP23S17 wordt niet als LOAD/CS op dezelfde hardware-SPI-bus ondersteund. De nieuwe testsketches zijn opgenomen in `extras/TestLibrarySturingen-v2.0.0.cmd`. Hardwarevalidatie blijft afzonderlijk vereist.
+De actuele map `examples/Systeem/GedeeldeBus/Sturingen/` bevat 62 sketches, waaronder testvarianten voor A4988, L293D, L298N, MAX7219 en ULN2003. De bestaande pinclaim- en foutafhandelingslogica wordt hergebruikt; gemengde L293D/L298N-aansturing gebruikt digitale richting via PCF/MCP en EN via PCA9685. MAX7219 kan 16 bits bitbangen via een GPIO-Extender; MCP23S17 wordt niet als LOAD/CS op dezelfde hardware-SPI-bus ondersteund. De nieuwe testsketches zijn opgenomen in `extras/TestLibrarySturingen-v2.0.0.cmd`. Hardwarevalidatie blijft afzonderlijk vereist.
 
 ## Architectuurgrens van GedeeldeBus
 

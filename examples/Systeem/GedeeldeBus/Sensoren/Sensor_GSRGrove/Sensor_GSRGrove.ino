@@ -37,10 +37,13 @@ GSRGrove* sensorGSRGrove = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_GSRGrove"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_GSRGrove"));
   sensorGSRGrove = GedeeldeBusNewComponent<GSRGrove>(
     &extenderADS1115, GedeeldeBusComponent::GSRGrove,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

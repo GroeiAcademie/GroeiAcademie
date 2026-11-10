@@ -33,10 +33,13 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 MAX4466_9814* sensorMAX4466 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_MAX4466"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_MAX4466"));
   sensorMAX4466 = GedeeldeBusNewComponent<MAX4466_9814>(&extenderADS1115,
     GedeeldeBusComponent::MAX4466,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

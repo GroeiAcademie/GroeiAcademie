@@ -18,7 +18,12 @@ void ToonResultaat(const __FlashStringHelper* stap, bool gelukt) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: EEPROM"));
 
   if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>();

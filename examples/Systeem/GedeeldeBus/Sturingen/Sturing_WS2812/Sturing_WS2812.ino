@@ -105,7 +105,12 @@ void rondTestAf(bool ok) {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Sturing_WS2812"));
   ws2812 = GedeeldeBusNewComponent<WS2812>(&Native, HardwareResourcePin::NP_D6);
   startGelukt = ws2812 != nullptr;

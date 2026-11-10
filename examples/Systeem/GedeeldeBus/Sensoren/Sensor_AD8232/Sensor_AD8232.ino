@@ -33,10 +33,13 @@ ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
 AD8232* sensorAD8232 = nullptr;
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_AD8232"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_AD8232"));
   sensorAD8232 = GedeeldeBusNewComponent<AD8232>(&extenderADS1115,
     GedeeldeBusComponent::AD8232,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

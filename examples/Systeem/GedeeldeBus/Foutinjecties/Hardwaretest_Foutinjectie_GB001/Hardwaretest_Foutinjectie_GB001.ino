@@ -1,7 +1,6 @@
 // ============================================================================
 // Foutinjectie: GB001
 // ============================================================================
-// GROEI ACADEMIE FrameWork v2.0.0
 // Foutinjectie GB001: GEDEELD-claim zonder geldige identiteit
 // Verwachte build: GEDEELDE_BUS_FOUTINJECTIE 1 (standaard aan bij DEBUG); de melding bestaat alleen met de testingang
 // Opstelling: geen extra hardware
@@ -90,7 +89,12 @@ void VoerTestUit() {
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
+  #else
+  unsigned long startTijd = millis();
+  while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
   GA_SERIAL.println(F("TEST: Hardwaretest_Foutinjectie_GB001"));
   ToonUitleg();
 }

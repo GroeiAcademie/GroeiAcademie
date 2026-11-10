@@ -48,7 +48,7 @@ BioAmpEXGPill(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t s
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigBioAmpEXGPill.h` (het aanwezige `src/Configuratie/Sensoren/ConfigBioAmpEXGPill_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_BIOAMPEXGPILL_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_BIOAMPEXGPILL_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_BIOAMPEXGPILL_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `SENSOR_BIOAMPEXGPILL_ENVELOP_VENSTER`: sjabloonwaarde `128`.
   - `SENSOR_BIOAMPEXGPILL_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `5000`.
 

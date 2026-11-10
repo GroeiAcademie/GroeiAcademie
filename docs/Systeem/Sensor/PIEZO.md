@@ -51,7 +51,7 @@ PIEZO(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensorPin
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigPIEZO.h` (het aanwezige `src/Configuratie/Sensoren/ConfigPIEZO_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_PIEZO_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_PIEZO_AANTAL`: sjabloonwaarde `1`.
+  - `SENSOR_PIEZO_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
   - `SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `5000`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):

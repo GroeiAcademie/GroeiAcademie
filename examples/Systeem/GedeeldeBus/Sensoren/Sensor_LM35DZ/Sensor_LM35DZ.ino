@@ -37,10 +37,13 @@ LM35DZ* sensorLM35DZ = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_LM35DZ"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_LM35DZ"));
   sensorLM35DZ = GedeeldeBusNewComponent<LM35DZ>(
     &extenderADS1115, GedeeldeBusComponent::LM35DZ,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),

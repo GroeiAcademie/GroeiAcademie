@@ -37,10 +37,13 @@ WATER* sensorWATER = nullptr;
 
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
+  #if defined(DEBUG)
   while (!GA_SERIAL) { ; }
-  GA_SERIAL.println(F("TEST: Sensor_WATER"));
+  #else
   const unsigned long startTijd = millis();
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
+  #endif
+  GA_SERIAL.println(F("TEST: Sensor_WATER"));
   sensorWATER = GedeeldeBusNewComponent<WATER>(
     &extenderADS1115, GedeeldeBusComponent::WATER,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),
