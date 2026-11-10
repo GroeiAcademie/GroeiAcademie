@@ -3,6 +3,7 @@
 bool SensorVL6180X::Activeren() {
   if (!parent || !parent->actief) return false;
   // Hardware-aanmelding via officiële library. Geen fictieve successtatus.
+  metingGestart = false;
   return vl.begin(&Wire);
 }
 
@@ -18,19 +19,54 @@ bool SensorVL6180X::LeesHoofdwaarde(float& waarde) {
     Wire.beginTransmission(apparaat->adres);
     Wire.write(static_cast<uint8_t>(0x00));
     Wire.write(static_cast<uint8_t>(0x4D));
-    const bool geschreven = Wire.endTransmission(false) == 0;
-    const bool gelezen = geschreven && Wire.requestFrom(apparaat->adres, static_cast<uint8_t>(1)) == 1;
-    const uint8_t status = gelezen ? static_cast<uint8_t>(Wire.read()) : 0;
-    if (!gelezen) { apparaat->ResultaatComponentToegangTijdensRuntimeVerwerken(false); return false; }
-    if (!(status & 0x01)) return false;   // nog niet klaar: later opnieuw
-    metingGestart = vl.startRange();      // de wachtlus in startRange() eindigt meteen, want bit 0 staat al
+    const bool registeradresVerzonden = Wire.endTransmission(false) == 0;
+    const bool gereedstatusOntvangen = registeradresVerzonden && Wire.requestFrom(apparaat->adres, static_cast<uint8_t>(1)) == 1;
+    const uint8_t gereedstatus = gereedstatusOntvangen ? static_cast<uint8_t>(Wire.read()) : 0;
+    if (!gereedstatusOntvangen) { apparaat->ResultaatComponentToegangTijdensRuntimeVerwerken(false); return false; }
+    if (!(gereedstatus & 0x01)) return false;   // nog niet klaar: later opnieuw
+
+    // Het officiële single-shot-startregister schrijven zonder de onbegrensde wachtlus van startRange().
+    Wire.beginTransmission(apparaat->adres);
+    Wire.write(static_cast<uint8_t>(0x00));
+    Wire.write(static_cast<uint8_t>(0x18));
+    Wire.write(static_cast<uint8_t>(0x01));
+    metingGestart = Wire.endTransmission() == 0;
+    tijdstipMetingGestart = millis();
+    if (!metingGestart) apparaat->ResultaatComponentToegangTijdensRuntimeVerwerken(false);
     return false;
   }
-  if (!vl.isRangeComplete()) return false;   // één leesactie, geen wachtlus
+
+  if (!vl.isRangeComplete()) {   // één leesactie, geen wachtlus
+    if (millis() - tijdstipMetingGestart < 200UL) return false;
+
+    metingGestart = false;
+    apparaat->ResultaatComponentToegangTijdensRuntimeVerwerken(false);
+    return false;
+  }
+
   metingGestart = false;
-  const uint8_t afstand = vl.readRangeResult();
-  const bool gelukt = vl.readRangeStatus() == VL6180X_ERROR_NONE;
-  if (gelukt) waarde = static_cast<float>(afstand);
+  // Elke registerselectie wordt afgesloten, ook wanneer een voorafgaande lezing mislukt.
+  Wire.beginTransmission(apparaat->adres);
+  Wire.write(static_cast<uint8_t>(0x00));
+  Wire.write(static_cast<uint8_t>(0x62));   // RESULT__RANGE_VAL
+  bool registeradresVerzonden = Wire.endTransmission(false) == 0;
+  const bool afstandOntvangen = registeradresVerzonden && Wire.requestFrom(apparaat->adres, static_cast<uint8_t>(1)) == 1;
+  const uint8_t gemetenAfstand = afstandOntvangen ? static_cast<uint8_t>(Wire.read()) : 0;
+
+  Wire.beginTransmission(apparaat->adres);
+  Wire.write(static_cast<uint8_t>(0x00));
+  Wire.write(static_cast<uint8_t>(0x4D));   // RESULT__RANGE_STATUS
+  registeradresVerzonden = Wire.endTransmission(false) == 0;
+  const bool afstandStatusOntvangen = registeradresVerzonden && Wire.requestFrom(apparaat->adres, static_cast<uint8_t>(1)) == 1;
+  const uint8_t afstandStatus = afstandStatusOntvangen ? static_cast<uint8_t>(Wire.read()) : 0;
+
+  Wire.beginTransmission(apparaat->adres);
+  Wire.write(static_cast<uint8_t>(0x00));
+  Wire.write(static_cast<uint8_t>(0x15));   // SYSTEM__INTERRUPT_CLEAR
+  Wire.write(static_cast<uint8_t>(0x07));
+  const bool interruptWiscommandoVerzonden = Wire.endTransmission() == 0;
+  const bool gelukt = afstandOntvangen && afstandStatusOntvangen && interruptWiscommandoVerzonden && (afstandStatus >> 4) == VL6180X_ERROR_NONE;
+  if (gelukt) waarde = static_cast<float>(gemetenAfstand);
   apparaat->ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt);
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   if (gelukt) WriteQueueOrStack(1, waarde);

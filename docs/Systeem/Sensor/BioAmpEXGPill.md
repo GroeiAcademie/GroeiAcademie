@@ -83,3 +83,7 @@ Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySens
 ### Betekenis van gemeten waarden
 - Maak in hardwareverslagen strikt onderscheid tussen **ruw sensorsignaal**, een door code berekende waarde en een klinisch gevalideerde meting. De aanwezigheid van een meetwaarde in Data bewijst geen medische validiteit.
 - **Proef:** registreer nul-/referentie- of gecontroleerde testinput, juiste eenheden en invloed van kabels/contactkwaliteit. Geen medische conclusie afleiden. **Status:** metrologie/kalibratie open.
+
+### Controle van de haalbare samplefrequentie
+
+De vaste frequentie verschilt per meetmethode: ECG 125 Hz, EMG 500 Hz, EOG 75 Hz en EEG 256 Hz. De volledige ADC-keten moet die frequentie in de praktijk kunnen halen; de ingestelde ADC-datarate alleen is geen garantie. Bij gefilterde meetmethoden telt `aantalTeLateSamplesNaElkaar` metingen die meer dan 10 % te laat zijn. Vanaf drie opeenvolgende te late samples wordt `samplefrequentieNietHaalbaar` `true` en geven `LeesHoofdwaarde()` en de toepasselijke gespecialiseerde leesfuncties `false` terug. Als het ritme opnieuw gehaald wordt, wordt de status gewist. De RAW-meetmethode gebruikt deze filtercontrole niet. Bij een ADS1115 met 128 SPS zijn met name de vaste EMG- en EEG-frequenties niet haalbaar; 860 SPS moet nog op de werkelijke opstelling worden getest.

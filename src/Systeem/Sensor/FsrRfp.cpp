@@ -186,13 +186,19 @@ bool FsrRfp::OpnieuwAanmeldenNaPauze() {
 }
 
 int FsrRfp::RawAnalogRead(int sensorPin) {
-  if (parent == nullptr) return 0;
+  int32_t waarde = 0;
+  return RawAnalogRead(sensorPin, waarde) ? static_cast<int>(waarde) : 0;
+}
+
+bool FsrRfp::RawAnalogRead(int sensorPin, int32_t& waarde) {
+  waarde = 0;
+  if (parent == nullptr) return false;
   HardwareResourceTypeI2C* i2c = (parent->gedeeldeIdentiteiten != nullptr && parent->gedeeldeIdentiteiten[0] == HardwareResourceIdentiteit::I2C_SDA)
       ? static_cast<HardwareResourceTypeI2C*>(parent) : nullptr;
   // Runtime-herstel: ADC uitgeschakeld en nog in de pauze: niet meten. Na herstel heractiveert de ADC deze sensor zelf.
   // Nog niet ingeplugd (bv. na een mislukte aanmelding): het herstelpad hieronder regelt de levenscyclus.
-  if (i2c != nullptr && i2c->ingeplugd && !i2c->ComponentBeschikbaarTijdensRuntime()) return 0;
-  if (!OpnieuwAanmeldenNaPauze()) return 0;
+  if (i2c != nullptr && i2c->ingeplugd && !i2c->ComponentBeschikbaarTijdensRuntime()) return false;
+  if (!OpnieuwAanmeldenNaPauze()) return false;
 
   // Blokkerend: starten, wachten (met dezelfde grens als ADS1X15::readADC(), maximaal 138 ms), waarde ophalen.
   // De 150 ms gelden voor de volledige aanvraag: wachten op een vrije ADC en wachten op de eigen conversie samen.
@@ -200,9 +206,8 @@ int FsrRfp::RawAnalogRead(int sensorPin) {
   const unsigned long start = millis();
   int8_t gestart = parent->StartExtenderReadAnalog(static_cast<uint8_t>(sensorPin), FSR_RFP_ADC_BEREIK_MILLIVOLT);
   while (gestart == 0 && millis() - start <= 150) { yield(); gestart = parent->StartExtenderReadAnalog(static_cast<uint8_t>(sensorPin), FSR_RFP_ADC_BEREIK_MILLIVOLT); }
-  if (gestart == 0 || gestart == -2) return 0;   // bezet of niet ondersteund: geen meting, geen fout voor D042
+  if (gestart == 0 || gestart == -2) return false;   // bezet of niet ondersteund: geen meting, geen fout voor D042
   bool gelukt = false;
-  int32_t waarde = 0;
   if (gestart == 1) {
     bool klaar = parent->IsExtenderReadAnalogReady();
     while (!klaar && millis() - start <= 150) { yield(); klaar = parent->IsExtenderReadAnalogReady(); }
@@ -212,7 +217,7 @@ int FsrRfp::RawAnalogRead(int sensorPin) {
   }
   const int ruweData = static_cast<int>(waarde);
   MetingTijdensRuntimeVerwerken(sensorPin, gelukt);   // gestart == -1 of time-out: hardwarefout
-  if (!gelukt) return 0;
+  if (!gelukt) { waarde = 0; return false; }
 
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   // lastValue en QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
@@ -220,7 +225,7 @@ int FsrRfp::RawAnalogRead(int sensorPin) {
     if (this->sensorPin[sensorNummer - 1] == sensorPin) { WriteQueueOrStack(sensorNummer, ruweData); break; }
   }
 #endif
-  return ruweData;
+  return true;
 }
 
 // Niet-blokkerend: StartAnalogRead(), IsAnalogReadKlaar() en GetAnalogRead() samen zijn één meting = één resultaat.

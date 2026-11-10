@@ -5,6 +5,10 @@ bool SCD41::Activeren() {
   if (!parent || !parent->actief) return false;
   HardwareResourceTypeI2C* const apparaat = static_cast<HardwareResourceTypeI2C*>(parent);
   scd4x.begin(Wire, apparaat->adres);
+  // Na een reset met gevoede sensor kan een periodieke meting nog lopen: eerst stoppen, zoals het officiele voorbeeld (de library wacht 500 ms).
+  (void)scd4x.stopPeriodicMeasurement();
+  // De instellingen uit het eigen geheugen van de sensor opnieuw laden, zoals het officiele voorbeeld (de library wacht 30 ms).
+  (void)scd4x.reinit();
   // Begin meetmodus via officiele API; de eerste CO2-waarde komt pas na de updateperiode.
   return scd4x.startPeriodicMeasurement() == 0;
 }

@@ -20,6 +20,12 @@ bool BioAmpEXGPill::LeesHoofdwaarde(float& waarde) {
   // Meer dan 10 % te laat (of het eerste sample): opnieuw beginnen met een nieuw ritme en een gewiste filtertoestand,
   // want de officiële filtercoëfficiënten gelden alleen bij een regelmatige samplefrequentie.
   const bool opnieuwBeginnen = tijdstipLaatsteSample == 0 || nu - tijdstipLaatsteSample - periode > periode / 10;
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE != BIOAMPEXGPILL_MEETMETHODE_RAW
+  // Drie keer na elkaar te laat: de keten is te traag voor de filters van deze meetmethode.
+  if (tijdstipLaatsteSample != 0 && opnieuwBeginnen) { if (aantalTeLateSamplesNaElkaar < 255) ++aantalTeLateSamplesNaElkaar; }
+  else if (tijdstipLaatsteSample != 0) aantalTeLateSamplesNaElkaar = 0;
+  samplefrequentieNietHaalbaar = aantalTeLateSamplesNaElkaar >= 3;
+#endif
   tijdstipLaatsteSample = opnieuwBeginnen ? nu : tijdstipLaatsteSample + periode;
   int32_t raw = 0;
   if (!RawAnalogRead(raw)) return false;
@@ -98,6 +104,7 @@ bool BioAmpEXGPill::LeesHoofdwaarde(float& waarde) {
   piekIndex = static_cast<uint8_t>((piekIndex + 1) % piekVenster);
   piekBekend = true;
 #endif
+  if (samplefrequentieNietHaalbaar) return false;
   waarde = resultaat;
   return true;
 }
@@ -105,21 +112,21 @@ bool BioAmpEXGPill::LeesHoofdwaarde(float& waarde) {
 // Laatste EMG-envelop; wordt bijgewerkt door LeesHoofdwaarde().
 bool BioAmpEXGPill::LeesEMGEnvelop(float& waarde) {
   waarde = laatsteEnvelop;
-  return actief && !isnan(waarde);
+  return actief && !samplefrequentieNietHaalbaar && !isnan(waarde);
 }
 #endif
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
 // Piek bij het laatste ECG-sample; wordt bijgewerkt door LeesHoofdwaarde().
 bool BioAmpEXGPill::LeesHartslagPiek(bool& piek) {
   piek = laatstePiek;
-  return actief && piekBekend;
+  return actief && !samplefrequentieNietHaalbaar && piekBekend;
 }
 #endif
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG
 // Knipper (piek) bij het laatste EOG-sample, volgens EyeBlinkDetection ("Experimental!"); wordt bijgewerkt door LeesHoofdwaarde().
 bool BioAmpEXGPill::LeesKnipperen(bool& knipper) {
   knipper = laatstePiek;
-  return actief && piekBekend;
+  return actief && !samplefrequentieNietHaalbaar && piekBekend;
 }
 #endif
 #endif

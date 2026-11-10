@@ -12,6 +12,10 @@ struct BioAmpEXGPill : SensorAnaloog {
     : SensorAnaloog(parent, component, sensorPin, SENSOR_BIOAMPEXGPILL_ADC_BEREIK_MILLIVOLT, Extender) {}
   bool LeesHoofdwaarde(float& waarde);
   unsigned long tijdstipLaatsteSample = 0;
+  // true als de ADC-keten de vaste samplefrequentie van de meetmethode niet haalt: dan geen gefilterde waarde.
+  bool samplefrequentieNietHaalbaar = false;
+  // Aantal samples na elkaar die meer dan 10 % te laat waren; 0 bij een sample op tijd.
+  uint8_t aantalTeLateSamplesNaElkaar = 0;
   float filterToestand[4][2] = {};
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EMG
   // Officieel voorbeeld EMGEnvelop: voortschrijdend gemiddelde van |gefilterd EMG| over het venster, maal 2.

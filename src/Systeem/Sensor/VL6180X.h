@@ -13,6 +13,7 @@
 struct SensorVL6180X : Sensor {
   Adafruit_VL6180X vl;
   bool metingGestart = false;   // niet-blokkerend: eerste oproep start de meting, een volgende haalt ze op
+  unsigned long tijdstipMetingGestart = 0;   // millis() van het meetcommando, voor de time-out
   SensorVL6180X(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
     : Sensor(parent, {nullptr, 0, nullptr, 0}, component, HardwareResourceToegang::GEDEELD),
       vl(parent ? parent->adres : VL6180X_DEFAULT_I2C_ADDR) {}   // het geconfigureerde I2C-adres doorgeven

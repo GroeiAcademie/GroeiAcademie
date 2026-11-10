@@ -7,6 +7,7 @@ bool MAX30102::Activeren() {
   const bool gevonden = max30102.begin(Wire, I2C_SPEED_STANDARD, apparaat->adres);
   Wire.setClock(I2C_SPEED_STANDARD); // SparkFun begin() verandert globale busklok; centraal standaard herstellen
   if (!gevonden) return false;
+  aantalVerlorenSamples = 0;
   max30102.setup(0x1F, 4, 2, 400, 411, 4096); // gedocumenteerde Red+IR mode
   return true;
 }
@@ -19,9 +20,12 @@ bool MAX30102::LeesHoofdwaarde(float& waarde) {
   if (apparaat->ingeplugd && !apparaat->ComponentBeschikbaarTijdensRuntime()) return false;
   // check() geeft het aantal nieuwe samples; 0 betekent ook "nog niets nieuw" en is dus geen storing.
   // Geen nieuwe sample: geen meetwaarde en geen melding aan de foutladder (de chip zelf is al gecontroleerd hierboven).
+  // Nieuwe samples in de FIFO van de chip: boven 3 gaan er veelvouden van 4 verloren in de ring van de library.
+  const uint8_t aantalNieuweSamples = (max30102.getWritePointer() - max30102.getReadPointer()) & 0x1F;
+  if (aantalNieuweSamples > 3) aantalVerlorenSamples += aantalNieuweSamples - aantalNieuweSamples % 4;
   max30102.check();
   if (max30102.available() == 0) return false;
-  // Alle opgehaalde samples verwerken: de buffer van de library is klein en overschrijft anders de oudste.
+  // De library-ring houdt hoogstens 3 samples bij: meer dan 3 nieuwe samples tussen twee oproepen gaan verloren.
   while (max30102.available() > 0) {
     waarde = static_cast<float>(max30102.getFIFOIR()); // rauwe IR-telling, geen SpO2; de laatste blijft de hoofdwaarde
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE

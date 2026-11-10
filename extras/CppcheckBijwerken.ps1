@@ -668,7 +668,7 @@ if ($Finalize -and -not $SnapshotRoot) {
                 '-DDT_FOREACH_PROP_ELEM_SEP(n,p,f,s)=70'
             )
         }
-        foreach ($fqbn in @($notAnInterruptPerFqbn.Keys) + @($zephyrMacroDefinitiesPerFqbn.Keys)) {
+        foreach ($fqbn in @($notAnInterruptPerFqbn.Keys) + @($zephyrMacroDefinitiesPerFqbn.Keys) + @('arduino:renesas_uno:minima')) {
             if (-not (Get-Content -LiteralPath (Join-Path $framework 'extras\TestLibraryCommon.cmd') -Encoding UTF8 |
                 Where-Object { $_ -match '^set (?:BASIC|EXTENDED|EXPERIMENTAL)_FQBN=' -and $_.Contains('"' + $fqbn + '"') })) {
                 throw "Cppcheck-definities: FQBN ontbreekt in TestLibraryCommon.cmd: $fqbn"
@@ -830,6 +830,10 @@ if ($Finalize -and -not $SnapshotRoot) {
                         }
                         if ($zephyrMacroDefinitiesPerFqbn.ContainsKey([string]$metadata.fqbn)) {
                             $behoudenArgumenten.AddRange([string[]]$zephyrMacroDefinitiesPerFqbn[[string]$metadata.fqbn])
+                        }
+                        if ([string]$metadata.fqbn -eq 'arduino:renesas_uno:minima') {
+                            if (@($behoudenArgumenten | Where-Object { $_ -match '^-DPROGMEM(?:=|$)' }).Count -eq 0) { [void]$behoudenArgumenten.Add('-DPROGMEM=') }
+                            if (@($behoudenArgumenten | Where-Object { $_ -match '^-DNULL(?:=|$)' }).Count -eq 0) { [void]$behoudenArgumenten.Add('-DNULL=0') }
                         }
                         $item.arguments = @($behoudenArgumenten.ToArray())
                         # Een eventuele oude 'command' mag niet opnieuw ongefilterde SDK-flags aanleveren.

@@ -141,6 +141,7 @@ struct FsrRfp : Sensor {
 
   bool Activeren() override;
   int RawAnalogRead(int sensorPin);
+  bool RawAnalogRead(int sensorPin, int32_t& waarde);
 
   // Niet-blokkerend lezen: StartAnalogRead() start een meting, IsAnalogReadKlaar() meldt of ze klaar is,
   // GetAnalogRead() geeft de waarde terug en geeft ze door aan Data. RawAnalogRead() blijft blokkerend.

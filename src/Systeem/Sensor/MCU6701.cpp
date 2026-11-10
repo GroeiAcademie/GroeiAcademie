@@ -73,8 +73,8 @@ bool MCU6701::RawAnalogRead(int32_t& waarde) {
     const uint8_t onder = SPI.transfer(0);
     digitalWrite(NativeArduinoPinVan(np_CS), HIGH);
     SPI.endTransaction();
-    // MCP3201, Fig. 5-1: één HI-Z, één NULL, 12 databits en twee HI-Z bij 16 klokpulsen.
-    const uint16_t ruw = (static_cast<uint16_t>(boven & 0x3F) << 6) | (onder >> 2);
+    // MCP3201, Fig. 6-1: twee onbekende bits, één NULL, B11..B7 in de eerste byte; B6..B0 en B1 in de tweede byte.
+    const uint16_t ruw = (static_cast<uint16_t>(boven & 0x1F) << 7) | (onder >> 1);
     waarde = static_cast<int32_t>((static_cast<uint32_t>(ruw) * ADC_MAX) / 4095UL);
     return true; // SPI-interface kan zonder chip-ID geen fysiek ontbrekend device detecteren
   }

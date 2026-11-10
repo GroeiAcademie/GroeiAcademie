@@ -12,6 +12,8 @@
 // Officiële API: https://github.com/sparkfun/SparkFun_MAX3010x_Sensor_Library/blob/master/src/MAX30105.h
 struct MAX30102 : Sensor {
   MAX30105 max30102;
+  // Totaal aantal samples dat sinds het activeren verloren ging, omdat de library er tussen twee oproepen hoogstens 3 bijhoudt.
+  uint32_t aantalVerlorenSamples = 0;
   MAX30102(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
     : Sensor(parent, {nullptr, 0, nullptr, 0}, component, HardwareResourceToegang::GEDEELD) {}
   uint8_t AantalChannels() const override { return 2; }   // meetkanalen voor Data

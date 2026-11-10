@@ -15,6 +15,7 @@ struct BME68x : Sensor {
   BME68x(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
     : Sensor(parent, { nullptr, 0, nullptr, 0 }, component, HardwareResourceToegang::GEDEELD) {}
   Adafruit_BME680 bme68x;
+  bool metingGestart = false;   // een gestarte meting waarvan de gegevens nog niet zijn verwerkt
   uint8_t AantalChannels() const override { return 4; }   // meetkanalen voor Data
   bool Activeren() override;
   bool LeesHoofdwaarde(float& waarde);

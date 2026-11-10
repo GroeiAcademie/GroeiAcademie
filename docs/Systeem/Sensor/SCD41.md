@@ -70,3 +70,6 @@ GedeeldeBusNewComponent<SCD41>(&apparaat,GedeeldeBusComponent::SCD41);
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_SCD41/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Herstart tijdens ingeschakelde sensorvoeding
+
+Bij `Activeren()` stopt de bestaande periodieke meetmodus eerst via `stopPeriodicMeasurement()` en herlaadt `reinit()` de in de sensor bewaarde instellingen, vóór `startPeriodicMeasurement()` opnieuw start. De Sensirion-library wacht daarbij ongeveer 500 ms respectievelijk 30 ms. Zowel een koude start als een herstart terwijl de sensor gevoed blijft moeten fysiek worden getest; de eerste CO₂-waarde volgt pas na de meetperiode.
