@@ -17,7 +17,7 @@ Gebruik voor bouw en validatie uitsluitend de actuele v2.0.0-tekeningset in deze
 
 Op het Stimulus Shield v2.0.0 worden de vier FSR402/RFP602-sensorlijnen uitsluitend via een ADS1115-module op H5 gemeten. De ADS1115 hangt op de I2C-bus van de Arduino. De analoge ingangen A0-A3 van de Arduino worden niet meer gebruikt, net zoals de vroegere rechtstreekse keypadaansluiting: het keypad loopt via de PCF8574. Zo blijven acht native pinnen vrij.
 
-In de software is de ADS1115 een gewone Extender (`ExtenderADS1115`). De rest van de Stimulus-code hoeft niet te weten waar de analoge waarden vandaan komen: RFP602 meet via de ADC-Extender die de `.ino` als parent meegeeft.
+In de software is de ADS1115 een gewone Extender (`ExtenderADS1115`). De Stimuluscode leest de sensoren via `sensorFsrRfpSet1` van het type `FsrRfp`; deze Sensor gebruikt de algemene analoge functies van zijn ADC-parent. De vijf meegeleverde Stimulusvoorbeelden geven de ADS1115 als parent mee. De fysieke Shield-aansluiting via H5 blijft uitsluitend een ADS1115-opstelling.
 
 De hardware-opzet bestaat uit één schema met meerdere onafhankelijke bestukkingskeuzes via Dupont-connectoren, zonder solder-jumpers per sensorlijn.
 
@@ -402,7 +402,7 @@ Plaats nooit tegelijk een Quad Logic Level Shifter én draadbruggen op dezelfde 
 
 ## 13. Configuratie
 
-ADS1115 is in de software een gewone Extender. Er bestaat geen globale ADC-keuze meer (`ADC_BACKEND` is vervallen). De ADS1115-code gebruikt de library **ADS1X15 van Rob Tillaart** (0.6.2).
+ADS1115 is in de software een gewone Extender. Het Framework selecteert een ADC via de parent van de Sensor in plaats van via één globale ADC-keuze. De ADS1115-code gebruikt **ADS1X15 van Rob Tillaart**; `library.properties` vermeldt deze dependency zonder vaste versiepinnen.
 
 | Instelling | Standaard | Betekenis |
 |---|---|---|
@@ -418,7 +418,7 @@ Voor TFTSPI zijn `Adafruit GFX Library` en `Adafruit ST7735 and ST7789 Library` 
 
 ## 14. ADS1115 en RFP602 in de schets
 
-De `.ino` maakt de ADS1115-Extender aan en geeft die als parent aan RFP602:
+De `.ino` maakt de ADS1115-Extender aan en geeft die als parent aan `FsrRfp`:
 
 ```cpp
 ExtenderADS1115 extenderADS1115(
@@ -429,16 +429,16 @@ ExtenderADS1115 extenderADS1115(
   HardwareResourceToegang::GEDEELD
 );
 
-sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct RFP602>(&extenderADS1115, GedeeldeBusComponent::RFP602);
+sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, GedeeldeBusComponent::FsrRfp);
 ```
 
-Zonder kanaalargumenten gebruikt RFP602 `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `_4`. Per instantie kunnen ook vier eigen kanalen meegegeven worden.
+Zonder kanaalargumenten gebruikt `FsrRfp` de vier `FSR_RFP_ADC_PIN_SENSOR_*_SET_1`-instellingen. Bij de constructie kunnen ook vier eigen kanalen meegegeven worden.
 
 ## 15. Lezen en activeren
 
-`RFP602::Activeren()` stelt de gain van de ADS1115 in op `ADS1X15_GAIN_6144MV` (bereik ±6,144 V, passend voor spanningsdelers tot 5V). `RawAnalogRead(sensorPin)` leest via `ExtenderADS1115::readADC()`. Is de parent geen ADS1115, dan meet RFP602 niets en mislukt `Activeren()`.
+`FsrRfp::Activeren()` controleert via `StartExtenderReadAnalog(pin, 0)` of de parent een ondersteunde ADC-Extender is, zonder zelf een conversie te starten. `RawAnalogRead(sensorPin)` gebruikt de analoge Start/Ready/Get-interface van die parent. Bij een echte meting wordt `FSR_RFP_ADC_BEREIK_MILLIVOLT` meegegeven (6144 mV); de ADC-Extender kiest zelf zijn versterking. Een ongeschikte parent wordt afgewezen. De software is dus niet beperkt tot het concrete ADS1115-type, al gebruikt het fysieke Stimulus Shield v2.0.0 uitsluitend een ADS1115 op H5.
 
-Ontbreekt de ADS1115 bij het opstarten, dan mislukt de lifecycle (aanmelden, controleren, inpluggen, activeren) en geeft `GedeeldeBusNewComponent` `nullptr` terug. Valt de ADS1115 tijdens de werking weg, dan neemt het runtime-herstel van GedeeldeBus het over (D042).
+Ontbreekt de ADS1115 bij het opstarten, dan kan de lifecycle tijdens activeren mislukken en geeft `GedeeldeBusNewComponent` voor de betrokken component `nullptr` terug. Bij runtime-uitval gebruikt de Sensor de bestaande GedeeldeBus-controle en herstelroute; dat garandeert geen geslaagde meting tijdens de onderbreking.
 
 Let op: de analoge ingang van de ADS1115 mag niet boven de voedingsspanning van de ADS1115 komen. Als de FSR402/RFP602-spanningsdelers op 5V werken, moet de ADS1115 via H7 ook op 5V gevoed worden.
 
@@ -477,7 +477,7 @@ Plaats voor het TFTSPI-pad ofwel de benodigde Quad Logic Level Shifters, ofwel z
 De tekeningset en documentatie voor deze hardwareversie zijn:
 
 - `SCH_Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0_2026-10-22.json`;
-- `Schematic_Stimulus-Shield-GroeiAcademie-FrameWork-v2.0.0_2026-10-22.pdf`;
+- `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0_2026-10-22.pdf`;
 - `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0_2026-10-22.png`;
 - `Schematic_Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0_2026-10-22.svg`;
 - `Stimulus-Shield-(GroeiAcademie-FrameWork)-v2.0.0.md`;

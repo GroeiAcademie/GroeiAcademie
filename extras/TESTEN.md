@@ -76,7 +76,7 @@ Een `#define` in een `.ino` geldt alleen binnen die sketch-translation-unit en c
 
 ## Domeineigenaarschap
 
-`CONTROLE_PADEN` bepaalt welk domein eigenaar is van de voorbeelden en controles die door een testscript worden beheerd.
+`CONTROLE_PADEN` bepaalt welk domein eigenaar is van de voorbeelden en controles die door een testscript worden beheerd. Twee aanvullende Ongeldig-testgevallen gebruiken bewust een voorbeeld uit een ander domein: de FsrRfp-test met twee ADS1115-Extenders in `TestLibraryExtendersOngeldig-v2.0.0.cmd` en het microSD-voorbeeld in `TestLibrarySensorenOngeldig-v2.0.0.cmd`. Die voorbeelden blijven ook in het gewone script van hun eigen domein geregistreerd.
 
 De negen gewone domeinscripts gebruiken `TestLibraryCommon.cmd`.
 
@@ -91,6 +91,7 @@ Een gewoon testblok gebruikt één van deze waarden:
 - `NIEUW`
 - `REGRESSIE`
 - `GERELEASED`
+- `EXPERIMENTEEL`
 
 `TEST_TYPE` beschrijft de status van het testgeval. De domeinscripts mogen deze statussen naast elkaar bevatten.
 
@@ -255,7 +256,7 @@ Wanneer de releasevalidatie niet slaagt, blijven de losse logs behouden en toont
 
 ## Historische teststatus
 
-Onderstaande vaststellingen betreffen de oudere testsituatie van 18 oktober 2026; dit is geen actuele RUN166-validatie. De huidige testscripts omvatten naast Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools ook Foutinjecties en Sturingen.
+Onderstaande vaststellingen betreffen uitsluitend een oudere testsituatie en zijn geen bewijs van de actuele releasevalidatie. De huidige testscripts omvatten naast Data, Extenders, GedeeldeBus, Input, Screen, Sensoren en Tools ook Foutinjecties en Sturingen.
 
 De Ongeldig-infrastructuur is aangepast zodat de controlebestanden opnieuw worden opgebouwd en versiegebonden `*Ongeldig-v2.0.0.cmd`-bestanden worden meegenomen.
 
@@ -289,3 +290,81 @@ De volgende bestaande Sensor-sketches worden niet als afzonderlijke sensorklasse
 ## Definitieve releaseresultaten
 
 De definitieve releaseresultaten worden bijgehouden in `extras/TESTRESULTATEN.md`.
+
+## Aanvullende werking van de testscripts
+
+### Eindmarker zonder pauze
+
+- Met `--no-pause` schrijven `TestLibraryCommon.cmd` en `TestLibraryCommonOngeldig.cmd` nu ook de eindmarker `[EINDE] Testen voltooid. Druk op een toets om af te sluiten...`, zonder te wachten. Zo herkent de rapportgenerator ook een run zonder pauze als afgerond.
+
+### Strengere beoordeling door de rapportgenerator
+
+- Een Ongeldig-domein slaagt alleen als `Totaal` groter is dan 0, `Totaal` gelijk is aan `OK` en `FOUT` 0 is.
+- Een gewoon domein slaagt alleen als het totaal groter is dan 0, en als het totaal gelijk is aan OK plus verwachte geheugenbeperkingen plus onverwacht mislukt.
+- Of alle gedefinieerde tests echt uitgevoerd zijn, controleert de generator niet. Een run die voortijdig stopt, mist de eindmarker en wordt daardoor als onvolledig gemeld. Een test die uit een script verdwijnt, valt alleen op bij het nakijken van de scripts.
+
+### Herkomst en behoud van het rapport
+
+- De generator controleert niet of een log van de huidige code komt, en wist `TestLibraryStatusReport.txt` voor hij de logs beoordeelt.
+- Daarom vóór elke vrijgave: het vorige `TestLibraryStatusReport.txt` zelf bewaren, en alle 18 domeinlogs vers maken met de code die vrijgegeven wordt.
+
+### `TestLibraryAllCmdParallel.cmd`
+
+- Dit script opent alleen de tabbladen met de domeinscripts en eindigt meteen met code 0. Die 0 betekent "gestart", niet "geslaagd". Het resultaat komt uit `TestLibraryGenereerTESTRESULTATEN.cmd`.
+
+### De 18 lege controlebestanden `.ino`
+
+- De bestanden `extras/TestLibrary<domein>[Ongeldig]-v2.0.0.ino` zijn bewust leeg (0 bytes). Het zijn de controlebestanden uit de secties hierboven: ze tonen of een testlijst volledig is. Verwijder ze niet; de scripts maken ze anders opnieuw aan.
+
+### Testregistraties
+
+- `TestLibraryData-v2.0.0.cmd`: `FLASH_StartStopRead` en `microSD_StartStopRead` (starten, stoppen, opnieuw starten en teruglezen), en HC-05 nu op alle boards via `GA_SENSOR_SERIAL`.
+- `TestLibraryGedeeldeBus-v2.0.0.cmd`: `Scenario2_Simultaan`, `Scenario3_Ineenstortend` en `Scenario4_Cocktail` (Stimulus), elk met `INPUT_TYPE_NONE`, zoals `Scenario1_EnkelTik`.
+- `TestLibraryDependency.cmd` vermeldt nu PCF8574 0.4.5 als minimumversie; de versie zelf nakijken blijft handwerk.
+
+## EXPERIMENTEEL-tests en Ongeldig-tests
+
+### EXPERIMENTEEL wordt gecompileerd
+
+- **Uitvoering:** `TestLibraryCommon.cmd` compileert in `CONTROLE_MODUS=INCLUDE` ook tests met `TEST_TYPE="EXPERIMENTEEL"`. In `TestLibraryExtenders-v2.0.0.cmd` zijn daarvoor 41 verschillende voorbeelden met 53 testgevallen geregistreerd.
+- **Hoe ze tellen:** een EXPERIMENTEEL-test telt op elk board in de tellers `EXPERIMENTAL_*`, nooit in `BASIC_*` of `EXTENDED_*`. Een mislukte EXPERIMENTEEL-test blokkeert de vrijgave dus niet.
+- **In het rapport:** het blok "EXPERIMENTAL_FQBN" bevat nu de resultaten van de UNO Q én die van de EXPERIMENTEEL-tests op alle boards. Elke compilatieregel toont het board en `TEST_TYPE`.
+- **Testduur:** een run van de Extenders duurt langer, ongeveer 53 testgevallen maal het aantal boards.
+- **Vrijgave:** beoordeel na de volledige Windows-run per voorbeeld en per board of het testtype naar `NIEUW` kan worden omgezet; die omzetting vereist afzonderlijke goedkeuring.
+- **Uitzondering:** een onbekende `WELKE_FQBN_TESTEN` blijft `BASIC_FAIL` verhogen, ook bij een EXPERIMENTEEL-test. Dat is een fout in het script zelf, geen mislukte compilatie.
+
+### Ongeldig-testgevallen
+
+27 gerichte tests met bestaande voorbeelden:
+
+- **`TestLibrarySensorenOngeldig-v2.0.0.cmd` (4):**
+  - `NATIVE_ADC_RESOLUTIE_BITS`;
+  - `FSR_RFP_PROBE_SET_2`;
+  - de drempels van FsrRfp, algemeen en voor kanaal 1.
+- **`TestLibraryDataOngeldig-v2.0.0.cmd` (5):**
+  - `DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE`;
+  - de ondergrens van de FLASH-buffer;
+  - de CS-Extender van de FLASH;
+  - de CS-Extender van de microSD;
+  - het nRF24-adres. Die test gebruikt `__DATE__` als adres: een vaste tekst van 11 tekens, zonder aanhalingstekens in de vlag.
+- **`TestLibraryExtendersOngeldig-v2.0.0.cmd` (3):** de drie PLL-instellingen van de MAX14830.
+- **`TestLibraryGedeeldeBusOngeldig-v2.0.0.cmd` (3):** de grens van `RUNTIME_WARNING_…`, de oplopende foutladder en de drempel van de ADS1115.
+- **`TestLibraryInputOngeldig-v2.0.0.cmd` (12):** de instelbare grenzen van het PCF8574-keypad.
+  - direct: geen pin, meer dan 8, de lengte van `KEY_LAYOUT`, een pin buiten 0 tot 7, een dubbele pin;
+  - matrix: geen rij, geen kolom, meer dan 8, de lengte van `KEY_LAYOUT`, een pin buiten 0 tot 7, een dubbele pin, een pin die zowel rij als kolom is.
+
+### Wat bewust geen Ongeldig-test heeft
+
+- **Twee `#error` in SystemConfig.h:** de taalkeuze en "board niet ondersteund".
+- **Vier `static_assert` die een gebruiker niet kan veroorzaken:**
+  - de twee vaste constanten van het keypad (Input.cpp, regels 415 en 418);
+  - de EEPROM-grootte van de HX1838 (Input.cpp, regel 762), want die grootte ligt vast;
+  - "binaire float vereist 32 bit".
+- **Varianten van een getest soort:** bijvoorbeeld _2 naast _1, of de drempels van de andere Extenders. Daarvoor bestaat één representatieve test.
+- Het detailoverzicht van de testdekking wordt apart van de library bijgehouden; de daadwerkelijke testregistraties staan in de bestaande Ongeldig-CMD-bestanden.
+
+### Andere foutmeldingen in de uitvoer
+
+- Bij een paar keypad-tests faalt een tweede controle mee, omdat de fout ze allebei raakt. Een voorbeeld: 9 directe pinnen zijn altijd te veel én bevatten altijd een dubbele pin.
+- Een test met 0 pinnen geeft ook een fout van de compiler over een lege tabel.
+- De verwachte melding staat in elk geval in de uitvoer, en de runner zoekt die tekst.

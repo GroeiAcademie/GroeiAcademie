@@ -29,7 +29,7 @@ De beta-fase is bedoeld om deze nieuwe basis eerst grondig te valideren vóór v
 - `Diagnose()` is als DEBUG-only virtuele hook voorbereid; concrete elektronische diagnoses moeten nog per component worden gebouwd;
 - eerst architectuur- en conflicttesten, daarna elektronische functietesten en tenslotte praktijktesten met echte sensoren en randapparatuur.
 
-**Beta v2.0.0 is dus geen uitbreiding van v1.1.2 met enkele extra componenten, maar de fundering waarop de volgende generatie van het FrameWork wordt gebouwd.**
+**Beta v2.0.0 bevat ten opzichte van v1.1.2 een herwerkte GedeeldeBus-architectuur met concrete Extenders, Sensoren, Sturingen en Data. De actuele werking staat in de componenthandleidingen; de definitieve releaseverschillen staan in `CHANGELOG.md`.**
 
 ## Waar het FrameWork naartoe groeit
 
@@ -85,7 +85,7 @@ Op deze afbeelding zie je het **elektronische schema** van het Stimulus Shield v
 
 ![GROEI ACADEMIE FrameWork - Boards](docs/Systeem/Screenshots/GROEI%20ACADEMIE%20FrameWork%20-%20Board.JPG)
 
-Op deze foto zie je alle succesvol geteste en reeds ondersteunde **Arduino Uno R3-vormfactorborden**.
+Op deze foto zie je een aantal gebruikte **Arduino Uno R3-vormfactorborden**. Voor de actuele test- en ondersteuningsstatus per board, zie [Hardwareondersteuning](docs/HARDWARE_SUPPORT.md).
 
 ## Inputkanalen
 
@@ -106,14 +106,14 @@ Op deze foto zie je de geteste schermen, die slechts enkele voorbeelden zijn van
 - voor `BOARD_STM32F4_NUCLEO64_F401RE` is de Arduino Uno-shieldheader-mapping D0-D13, A0-A5, SDA/SCL en SPI nu actief in `SystemConfig.h` en per pin overschrijfbaar via `UserConfig.h`;
 - `BOARD_STM32F4_NUCLEO64_F401RE` is hardwarematig getest met CharacterDisplay, ADS1115, PCF8574, PixelScreen en HX1838; selecteer in Arduino IDE **Nucleo-64** met part number **Nucleo F401RE** (`STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_F401RE`); details en de vereiste PixelScreen/Adafruit-patch staan in `docs/HARDWARE_SUPPORT.md`;
 - de standaard HX1838-pin is `D8` en de standaard PixelScreen-resetpin is `D7`;
-- hardwarestatus: alle tien ondersteunde boards zijn **geïmplementeerd en getest**; de volledige bevestigde hardwarestatus staat in `docs/HARDWARE_SUPPORT.md` en `extras/TESTRESULTATEN.md`;
+- hardwarestatus: negen fysieke boards, waarvan acht **geïmplementeerd en getest** en de Arduino UNO Q **EXPERIMENTAL**; zie `docs/HARDWARE_SUPPORT.md` en `extras/TESTRESULTATEN.md` voor de exacte status per board;
 - ontwikkelfase: beta;
 - huidige implementatie: GedeeldeBus met Native resources, Screen, Input, Extenders, Sensoren (waaronder `FsrRfp`) en de Stimulusmodule;
 - HX1838 met `HX1838_BRON_CODES_DEFINE` is released;
 - `HX1838_TOETSENINDELING_REMOTE_USER_DEFINED` laat binnen deze DEFINE-route een eigen afstandsbediening toe via een configureerbaar aantal toetsen en opschriftkoppeling in `UserConfig.h`; de 8-bit commandcodes kunnen via `HX1838_GENERIEK_CODES` worden opgegeven of automatisch worden gekalibreerd wanneer die define ontbreekt;
 - deze HX1838-route is hardwarematig bevestigd met beide ontvangstbackends: TinyIRReceiver (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 1`) en IRremote (`HX1838_USE_TINYIRRECEIVER_INSTEAD_OF_IRREMOTE = 0`);
 - de EEPROM-gebaseerde HX1838-routes blijven experimenteel;
-- de interne releasetests worden in vier afzonderlijke testcycli uitgevoerd; de definitieve releaseresultaten worden vastgelegd in `extras/TESTRESULTATEN.md`;
+- de interne releasetests lopen via 9 gewone en 9 Ongeldig-domeinscripts, zie `extras/TESTEN.md`; de definitieve releaseresultaten worden vastgelegd in `extras/TESTRESULTATEN.md`;
 - Arduino LINT wordt afzonderlijk geregistreerd in `extras/TESTRESULTATEN.md`;
 - licentie: GNU LGPL v3.0-or-later, zie [LICENSE](LICENSE) en [LICENSE.md](LICENSE.md).
 
@@ -151,13 +151,13 @@ Installeer via Arduino Boards Manager `esp32 by Espressif Systems` en selecteer 
 
 ## Kwaliteitscontrole
 
-Elke officiële release van deze library wordt vóór publicatie met de meegeleverde Windows-releasetests gevalideerd. Alleen `extras/LokalePaden.cmd` is machinespecifiek en wordt via `.gitignore` niet gepubliceerd; `extras/LokalePaden_template.cmd` en de gedeelde testscripts maken wel deel uit van de library.
+Elke officiële release van deze library wordt vóór publicatie met de meegeleverde Windows-releasetests gevalideerd. `extras/LokalePaden.cmd` is machinespecifiek en staat in `.gitignore`; ook `src/Configuratie/UserConfig.h` valt onder de lokale configuratie. Beide bestanden zijn in deze interne werk-ZIP aanwezig. Een distributie-/releasepakket moet deze lokale bestanden afzonderlijk uitsluiten; `.gitignore` verwijdert ze niet automatisch uit een handmatig gemaakte ZIP. `extras/LokalePaden_template.cmd` en de gedeelde testscripts horen bij de library.
 
 De validatie omvat:
 
 - Arduino LINT (Library Manager)
 - volledige gereleasete regressie op Arduino UNO R4 Minima en een minimale gerichte regressie op de overige boards;
-- `extras/TestLibraryGereleased.cmd` voor de huidige gereleasete regressieset; daarnaast bestaan gerichte v2-testscripts `TestLibraryExtenders-v2.0.0.cmd`, `TestLibraryInput-v2.0.0.cmd`, `TestLibraryScreen-v2.0.0.cmd` en `TestLibraryGedeeldeBus.cmd`;
+- `extras/TestLibraryAllCmdParallel.cmd` voor de parallelle uitvoering van de bestaande domeinscripts, met `extras/TestLibraryGenereerTESTRESULTATEN.cmd` voor de samenvatting; de 9 gewone en 9 Ongeldig-domeinscripts staan volledig in [`extras/TESTEN.md`](extras/TESTEN.md), waaronder `TestLibraryGedeeldeBus-v2.0.0.cmd`;
 - afzonderlijke HX1838-validatie met geldige en bewust ongeldige configuraties;
 - menu-/functiekoppeling via `MappingTussenToetsaanslagEnUitTeVoerenFunctie`; één vaste mapping en meerdere expliciet doorgegeven mappings gebruiken dezelfde `UitVoerenFunctieVolgensMappingMetToetsAanslag()`-API; een volledig apart, tweede type, `MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten`, geeft daarnaast een `void*`-argument door aan de gekoppelde functie, zonder het eerste type te raken;
 - Arduino Uno R4 Minima;
@@ -175,19 +175,9 @@ Meer informatie:
 
 ## Afhankelijkheden
 
-De verplichte afhankelijkheden staan in `library.properties`:
+De volledige lijst van gedeclareerde afhankelijkheden staat in het veld `depends` van [`library.properties`](library.properties). Dit is de bron van waarheid voor alle externe libraries en hun eventuele minimumversies, waaronder `PCF8574 (>=0.4.5)`. De lijst omvat onder meer de Screen-, Input-, Extender-, Sensor-, Sturingen- en Data-afhankelijkheden, inclusief `SdFat - Adafruit Fork`, `Adafruit SPIFlash`, `Adafruit NeoPixel` en `MD_MAX72XX`.
 
-```text
-LiquidCrystal I2C
-Adafruit GFX Library
-Adafruit ST7735 and ST7789 Library
-ADS1X15 van Rob Tillaart
-PCF8574 (>=0.4.0)
-FRAM_I2C van Rob Tillaart
-IRremote
-```
-
-Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderPCF8574` blijft beschikbaar wanneer Input via PCF8574 actief is. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115-Extender meet.
+Niet iedere build gebruikt al deze libraries. `SCREEN_OUTPUT_CONFIG`, `INPUT_KANAAL_CONFIG` en de `EXTENDER_<NAAM>_AANTAL`-waarden bepalen welke onderdelen werkelijk worden gecompileerd. Niet gebruikte Extenders worden niet mee gecompileerd; `ExtenderPCF8574` blijft beschikbaar wanneer Input via PCF8574 actief is. De fallbackwaarde voor `EXTENDER_ADS1115_AANTAL` in `SystemConfig.h` is `1`, omdat FsrRfp via de ADS1115-Extender meet; de meegeleverde actieve `ConfigADS1115.h` zet deze waarde echter op `0`, zolang geen eerdere definitie voorrang krijgt.
 
 ## Configuratie
 
@@ -308,10 +298,13 @@ GroeiAcademie/
 │   ├── Configuratie/
 │   ├── Language/
 │   ├── Systeem/
-│   │   ├── GedeeldeBus/       # GedeeldeBus.h/.cpp + 16 Extender .h/.cpp-paren
+│   │   ├── Data/              # Data en de opslagmedia
+│   │   ├── Extender/          # 16 concrete Extender .h/.cpp-paren
+│   │   ├── GedeeldeBus/       # GedeeldeBus.h/.cpp
 │   │   ├── Input/             # Input.h, Input.cpp, InputTypes.h
 │   │   ├── Screen/            # Screen.h, Screen.cpp, ScreenTypes.h
-│   │   └── Sensor/            # Sensoren, waaronder FsrRfp.h/.cpp
+│   │   ├── Sensor/            # Sensoren en gedeelde sensorfuncties
+│   │   └── Sturing/           # Concrete Sturingen
 │   └── Toepassingsgebieden/
 │       └── Stimulus/          # Stimulus.h/.cpp
 ├── examples/
@@ -359,6 +352,11 @@ Aangevraagde en goedgekeurde uitbreidingen voor volgende releases staan in [de r
 - [Architectuur](docs/ARCHITECTURE.md)
 - [GedeeldeBus](docs/Systeem/GEDEELDEBUS.md)
 - [Configuratie](docs/Configuratie/README.md)
+- [Data](docs/Systeem/DATA.md)
+- [Extenders](docs/Systeem/Extender/)
+- [Sensoren](docs/Systeem/Sensor/)
+- [Sturingen](docs/Systeem/Sturing/)
+- [Input](docs/Systeem/INPUT.md)
 - [Screen](docs/Systeem/SCREEN.md)
 - [Screen-foutcodes](docs/Systeem/SCREEN_FOUTCODES.md)
 - [Toepassingsgebieden en schema-index](docs/Toepassingsgebieden/MODULES.md)

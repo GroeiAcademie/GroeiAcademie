@@ -17,6 +17,10 @@ bool LD2450::inpluggen() {
 bool LD2450::Activeren() {
   // Alleen interfacecontrole; een geldig frame moet bij het uitlezen worden gecontroleerd.
   if (parent == nullptr || !parent->actief || !ingeplugd) return false;
+  // Nieuwe sessie: parser leeg en geen positie of frame uit een vorige sessie.
+  framePositie = 0;
+  positieGeldig = false;
+  lastFrameMS = 0;
   // Via een UART-Extender: de baud van deze Sensor (256000) op zijn channel instellen.
   return aangemeldePinnen.aantalExclusief != 1 || parent->StartExtenderUART(exclusief_[0], 256000UL);
 }
@@ -62,6 +66,8 @@ bool LD2450::LeesHoofdwaarde(float& waarde) {
     if (framePositie != 30) continue;
     framePositie = 0;
     if (frame[28] != 0x55 || frame[29] != 0xCC) continue;
+    memcpy(lastFrameTargets, frame + 4, sizeof(lastFrameTargets));
+    lastFrameMS = millis();
     positieGeldig = false;
     // Het protocol sorteert de drie doelen niet op afstand: alle geldige doelen vergelijken en het dichtstbijzijnde houden.
     bool gevonden = false;
@@ -100,14 +106,34 @@ bool LD2450::LeesHoofdwaarde(float& waarde) {
     waarde = 0;
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
     WriteQueueOrStack(1, waarde);
+    // Ook X en Y zeggen "geen doel", zodat Data geen positie van het vorige doel blijft tonen.
+    WriteQueueOrStack(2, laatsteX);
+    WriteQueueOrStack(3, laatsteY);
 #endif
     return true;
   }
   return false;
 }
 bool LD2450::LeesPositie(float& x, float& y) {
-  x = positieGeldig ? laatsteX : NAN;
-  y = positieGeldig ? laatsteY : NAN;
-  return positieGeldig;
+  // Dezelfde controle als ReadTarget(): geen positie als de radar te lang zweeg.
+  if (!actief || !positieGeldig || IsModuleSilent()) { x = NAN; y = NAN; return false; }
+  x = laatsteX;
+  y = laatsteY;
+  return true;
+}
+bool LD2450::ReadTarget(uint8_t targetIndex, int16_t& xMillimeter, int16_t& yMillimeter, int16_t& speedCentimeterPerSecond, bool& targetPresent) {
+  xMillimeter = 0; yMillimeter = 0; speedCentimeterPerSecond = 0; targetPresent = false;
+  if (!actief || targetIndex > 2 || IsModuleSilent()) return false;
+  const uint8_t* t = lastFrameTargets + targetIndex * 8;
+  for (uint8_t j = 0; j < 8; ++j) if (t[j]) targetPresent = true;
+  if (!targetPresent) return true;
+  // Hi-Link: bit 15 = 1 is positief, 0 is negatief; zelfde omzetting als LeesHoofdwaarde().
+  const uint16_t rawX = static_cast<uint16_t>(t[0]) | (static_cast<uint16_t>(t[1]) << 8);
+  const uint16_t rawY = static_cast<uint16_t>(t[2]) | (static_cast<uint16_t>(t[3]) << 8);
+  const uint16_t rawSpeed = static_cast<uint16_t>(t[4]) | (static_cast<uint16_t>(t[5]) << 8);
+  xMillimeter = (rawX & 0x8000) ? static_cast<int16_t>(rawX & 0x7FFF) : static_cast<int16_t>(-static_cast<int16_t>(rawX));
+  yMillimeter = (rawY & 0x8000) ? static_cast<int16_t>(rawY & 0x7FFF) : static_cast<int16_t>(-static_cast<int16_t>(rawY));
+  speedCentimeterPerSecond = (rawSpeed & 0x8000) ? static_cast<int16_t>(rawSpeed & 0x7FFF) : static_cast<int16_t>(-static_cast<int16_t>(rawSpeed));
+  return true;
 }
 #endif

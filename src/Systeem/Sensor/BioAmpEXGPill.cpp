@@ -1,5 +1,21 @@
 #include "BioAmpEXGPill.h"
 #if SENSOR_BIOAMPEXGPILL_AANTAL > 0
+bool BioAmpEXGPill::Activeren() {
+  if (!SensorAnaloog::Activeren()) return false;
+  // Nieuwe sessie: tijdstipLaatsteSample 0 laat LeesHoofdwaarde() opnieuw beginnen (filters, envelop, pieken, EEG-venster).
+  tijdstipLaatsteSample = 0;
+  lastSuccessfulSampleUS = 0;
+  samplefrequentieNietHaalbaar = false;
+  aantalTeLateSamplesNaElkaar = 0;
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EMG
+  laatsteEnvelop = NAN;
+#endif
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
+  // Geen hartslag uit een vorige sessie.
+  heartRateFromBeats = HeartRateFromBeats();
+#endif
+  return true;
+}
 // Upside Down Labs BioAmp EXG Pill, OUT via ADC
 // Bron: https://docs.upsidedownlabs.tech/hardware/bioamp/bioamp-exg-pill/index.html
 // Controleert enkel ADC-ondersteuning, NIET aanwezigheid of werking van de analoge sensor.
@@ -29,6 +45,7 @@ bool BioAmpEXGPill::LeesHoofdwaarde(float& waarde) {
   tijdstipLaatsteSample = opnieuwBeginnen ? nu : tijdstipLaatsteSample + periode;
   int32_t raw = 0;
   if (!RawAnalogRead(raw)) return false;
+  lastSuccessfulSampleUS = micros();
   float resultaat = static_cast<float>(raw);
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE != BIOAMPEXGPILL_MEETMETHODE_RAW
   if (opnieuwBeginnen) memset(filterToestand, 0, sizeof(filterToestand));
@@ -104,15 +121,38 @@ bool BioAmpEXGPill::LeesHoofdwaarde(float& waarde) {
   piekIndex = static_cast<uint8_t>((piekIndex + 1) % piekVenster);
   piekBekend = true;
 #endif
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
+  // Elke piek is een kandidaat-slag; HeartRateFromBeats negeert pieken binnen 250 ms van de vorige (dezelfde slag).
+  if (laatstePiek && !samplefrequentieNietHaalbaar) {
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+    // Nieuwe slag aanvaard en geldige hartslag: meteen naar Data (kanaal 4).
+    float beatsPerMinute = NAN;
+    if (heartRateFromBeats.AddBeat(millis()) && heartRateFromBeats.ReadBeatsPerMinute(beatsPerMinute)) WriteQueueOrStack(4, beatsPerMinute);
+#else
+    heartRateFromBeats.AddBeat(millis());
+#endif
+  }
+#endif
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EEG
+  if (opnieuwBeginnen) eegFrequencyBands.sampleCount = 0;   // nieuw ritme: oud venster niet mengen
+  if (!samplefrequentieNietHaalbaar) eegFrequencyBands.AddSample(resultaat);
+#endif
   if (samplefrequentieNietHaalbaar) return false;
   waarde = resultaat;
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  WriteQueueOrStack(2, waarde);   // gefilterde waarde
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EMG
+  WriteQueueOrStack(3, laatsteEnvelop);   // EMG-envelop van deze sample
+#endif
+#endif
   return true;
 }
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EMG
 // Laatste EMG-envelop; wordt bijgewerkt door LeesHoofdwaarde().
+// Geen geslaagde ADC-lezing in de laatste seconde: false.
 bool BioAmpEXGPill::LeesEMGEnvelop(float& waarde) {
   waarde = laatsteEnvelop;
-  return actief && !samplefrequentieNietHaalbaar && !isnan(waarde);
+  return actief && !samplefrequentieNietHaalbaar && !isnan(waarde) && micros() - lastSuccessfulSampleUS <= 1000000UL;
 }
 #endif
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
@@ -120,6 +160,24 @@ bool BioAmpEXGPill::LeesEMGEnvelop(float& waarde) {
 bool BioAmpEXGPill::LeesHartslagPiek(bool& piek) {
   piek = laatstePiek;
   return actief && !samplefrequentieNietHaalbaar && piekBekend;
+}
+// Hartslag uit de slagen die LeesHoofdwaarde() bijhoudt; false met minder dan 2 slagen of na 3 s zonder slag.
+bool BioAmpEXGPill::ReadHeartRateBeatsPerMinute(float& beatsPerMinute) {
+  beatsPerMinute = NAN;
+  return actief && !samplefrequentieNietHaalbaar && heartRateFromBeats.ReadBeatsPerMinute(beatsPerMinute);
+}
+#endif
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EEG
+// Vermogen van de EEG-banden over de laatste 256 gefilterde samples.
+bool BioAmpEXGPill::ReadEEGbandPowers(float& delta, float& theta, float& alpha, float& beta, float& gamma) {
+  // Geen geslaagde ADC-lezing in de laatste seconde: false.
+  if (!actief || samplefrequentieNietHaalbaar || micros() - lastSuccessfulSampleUS > 1000000UL) { delta = theta = alpha = beta = gamma = NAN; return false; }
+  const bool succeeded = eegFrequencyBands.ReadBandPowers(delta, theta, alpha, beta, gamma);
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  // Geslaagde berekening: de vijf banden naar Data (kanaal 5 tot en met 9).
+  if (succeeded) { WriteQueueOrStack(5, delta); WriteQueueOrStack(6, theta); WriteQueueOrStack(7, alpha); WriteQueueOrStack(8, beta); WriteQueueOrStack(9, gamma); }
+#endif
+  return succeeded;
 }
 #endif
 #if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG

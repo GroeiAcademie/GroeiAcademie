@@ -69,7 +69,7 @@ bool testGestopt = false;
 bool autoActief = false;
 bool autoNaarBinnen = true;
 uint16_t stapVertragingms = 150;
-uint32_t vorigeStapMs = 0;
+uint32_t vorigeStapMS = 0;
 uint8_t testStap = 0;
 
 bool Reset() {
@@ -286,12 +286,12 @@ void loop() {
     }
     autoActief = true;
     testActief = true;
-    vorigeStapMs = millis();
+    vorigeStapMS = millis();
     GA_SERIAL.println(F("SPIRAAL LOOPT. Bekijk de leds; de test stopt automatisch."));
   }
   if (!autoActief || !testActief || testGestopt) return;
-  if (static_cast<uint32_t>(millis() - vorigeStapMs) < stapVertragingms) return;
-  vorigeStapMs = millis();
+  if (static_cast<uint32_t>(millis() - vorigeStapMS) < stapVertragingms) return;
+  vorigeStapMS = millis();
 
   if (!VerwerkImpuls(autoNaarBinnen)) {
     rondTestAf(false);

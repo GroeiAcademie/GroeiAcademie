@@ -57,6 +57,8 @@ if !CONTROLE_SIZE! GTR 0 (
     exit /b 1
 )
 
+set "TOTAAL_TESTS="
+for /f %%N in ('powershell -NoProfile -Command "([regex]::Matches([IO.File]::ReadAllText($env:TEST_SCRIPT_BESTAND), '(?m)^call :EXPECT_FAIL\s*$')).Count"') do set "TOTAAL_TESTS=%%N"
 call "!TEST_SCRIPT_BESTAND!" --TESTLIJST
 set "SCRIPT_RESULT=!errorlevel!"
 
@@ -65,6 +67,8 @@ echo === TEST VOLLEDIG AFGEROND ===
 if /I not "%~2"=="--no-pause" (
     <nul set /p =[EINDE] Testen voltooid. Druk op een toets om af te sluiten... & pause >nul
     echo.
+) else (
+    echo [EINDE] Testen voltooid. Druk op een toets om af te sluiten...
 )
 exit /b !SCRIPT_RESULT!
 
@@ -80,17 +84,17 @@ if defined TEST_BOARD_VERSION set "EXTRA_FLAGS=!EXTRA_FLAGS! -DBOARD_VERSION=!TE
 set "COMPILE_RESULT=!errorlevel!"
 
 if "!COMPILE_RESULT!"=="0" (
-    echo [FOUT] !TEST_NAAM! compileerde onverwacht.
+    echo [!TESTS!/!TOTAAL_TESTS!] [FOUT] !TEST_NAAM! compileerde onverwacht.
     set /A FAIL+=1
 ) else (
     >"%TEMP%\GA_VerwachteFout_!GA_RUN_ID!.txt" echo(!VERWACHTE_FOUT!
     powershell -NoProfile -Command "$log=[IO.File]::ReadAllText('%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt'); $verwacht=[IO.File]::ReadAllText('%TEMP%\GA_VerwachteFout_!GA_RUN_ID!.txt').TrimEnd([char]13,[char]10); if ($log.Contains($verwacht)) { exit 0 } else { exit 1 }"
     if errorlevel 1 (
-        echo [FOUT] !TEST_NAAM! faalde om een andere reden dan verwacht.
+        echo [!TESTS!/!TOTAAL_TESTS!] [FOUT] !TEST_NAAM! faalde om een andere reden dan verwacht.
         type "%TEMP%\GA_Ongeldig_!GA_RUN_ID!.txt"
         set /A FAIL+=1
     ) else (
-        echo [OK] !TEST_NAAM! correct geweigerd: !VERWACHTE_FOUT!
+        echo [!TESTS!/!TOTAAL_TESTS!] [OK] !TEST_NAAM! correct geweigerd: !VERWACHTE_FOUT!
         set /A OK+=1
     )
 )

@@ -1,4 +1,4 @@
-# Screen-foutcodes — beta v2.0.0
+# Screen-foutcodes
 
 Dit document beschrijft uitsluitend de foutcodes die in de huidige broncode bestaan. De definities staan in `src/Language/Library_NL.h`; de Screen-lifecycle die ze zet staat in `src/Systeem/Screen/Screen.cpp`.
 
@@ -29,7 +29,7 @@ Controleer in het bijzonder:
 - `I2C_ADDRESS_CHARACTER_SCREEN` in de configuratie;
 - of het fysieke apparaat op dat adres daadwerkelijk antwoordt.
 
-De huidige beta v2.0.0-code scant niet automatisch naar alternatieve LCD-adressen. De vroegere `CHARACTERSCREEN_I2C_ADRES_MODUS` en foutcode `CS002` behoren tot de historische Screen-architectuur en worden niet meer door de huidige code gebruikt.
+De huidige v2.0.0-code scant niet automatisch naar alternatieve LCD-adressen. De vroegere `CHARACTERSCREEN_I2C_ADRES_MODUS` en foutcode `CS002` behoren tot de historische Screen-architectuur en worden niet meer door de huidige code gebruikt.
 
 ## PixelScreen
 
@@ -53,11 +53,11 @@ Bij `ACTIEF_PIXEL_SCREEN=SCREEN_128X160` en `PIXEL_SCREEN_TEXT_SIZE>1` stopt de 
 
 | Code | Ernst | Huidige betekenis |
 |---|---|---|
-| `SS001` | ABORT | `SerialScreen::aanmelden()` mislukt. |
-| `SS101` | FATAL | `SerialScreen::controleren()` mislukt zonder dat de fout al als GedeeldeBus-conflict werd gerapporteerd. |
-| `SS201` | CRITICAL | `SerialScreen::inpluggen()` mislukt. |
-| `SS301` | CRITICAL | `SerialScreen::activeren()` / `SerialScreen::Activeren()` mislukt. |
-| `SS302` | CRITICAL | SerialScreen is na `SERIAL_CONNECT_TIMEOUT_MS` niet beschikbaar. |
+| `SS001` | ABORT | `SerialOutput::aanmelden()` mislukt. |
+| `SS101` | FATAL | `SerialOutput::controleren()` mislukt zonder dat de fout al als GedeeldeBus-conflict werd gerapporteerd. |
+| `SS201` | CRITICAL | `SerialOutput::inpluggen()` mislukt. |
+| `SS301` | CRITICAL | `SerialOutput::Activeren()` mislukt, ook wanneer de optionele verbindingstimeout verstrijkt. |
+| `SS302` | CRITICAL | Terugvalmelding wanneer SerialOutput niet beschikbaar is en geen specifiekere Serial-fout is opgeslagen. Dit betekent niet op zichzelf dat een timeout actief was. |
 
 ## Lifecycle en fallback
 
@@ -65,6 +65,8 @@ Bij `ACTIEF_PIXEL_SCREEN=SCREEN_128X160` en `PIXEL_SCREEN_TEXT_SIZE>1` stopt de 
 
 Een conflict dat al door GedeeldeBus zelf is gemeld wordt niet nogmaals als een generieke `CS101`, `PS101` of `SS101` gedupliceerd.
 
+`SerialOutput::Activeren()` wacht standaard op een seriële verbinding zonder tijdslimiet. Alleen bij `REDIRECT_SERIAL_CONNECT_TIMEOUT_MS` geldt `SERIAL_CONNECT_TIMEOUT_MS`; bij mislukte activering volgt `SS301`. De nooduitvoer van Character-/PixelScreen-fouten gebruikt rechtstreeks `GA_SERIAL.println()` maar roept zelf geen `GA_SERIAL.begin()` aan. Zonder al bruikbare seriële verbinding is zichtbare terugval dus niet gegarandeerd.
+
 ## Historische codes
 
-Oudere releases en beslissingsdocumenten kunnen andere Screen-codes of configuratiefuncties vermelden, onder meer `CS000`, `CS002`, `PS000`, `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()`. Die zijn geen onderdeel van de huidige beta v2.0.0-Screen-API. Historische beslissingen blijven bewaard in `docs/DECISION_LOG.md` en historische releases in `CHANGELOG.md`.
+Oudere releases en beslissingsdocumenten kunnen andere Screen-codes of configuratiefuncties vermelden, onder meer `CS000`, `CS002`, `PS000`, `CharacterScreenConfigureren()`, `PixelScreenConfigureren()` en `ScreensConfigureren()`. Die zijn geen onderdeel van de Screen-API in v2.0.0. Historische beslissingen blijven bewaard in `docs/DECISION_LOG.md` en historische releases in `CHANGELOG.md`.

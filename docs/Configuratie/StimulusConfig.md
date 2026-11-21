@@ -6,6 +6,8 @@ Instellingen specifiek voor de Stimulus-toepassing (VINGERTEST): meetversie, mar
 
 ## Stimulusversie
 
+De constanten blijven ongewijzigd; de actuele runtime-instellingen behoren tot het object `Stimulus`, bijvoorbeeld `Stimulus.stimulusVersie`, `Stimulus.MARGE_FACTOR` en `Stimulus.TOEGESTANE_MARGE_TIKTIJD`.
+
 ```cpp
 #define STIMULUS_BASIC     1  // basismeting: tiktijd en gemiddelde tikkracht
 #define STIMULUS_EXTENDED  2  // uitgebreide meting: ook piekkracht, tijd tot piek, opbouw- en afbouwsnelheid
@@ -73,6 +75,6 @@ Gebruikt als `doelTikTijd`-parameter in `VergelijkStimulus()`: `> 0` = expliciet
 | `MINIMALE_TIKTIJD_MS` | 100: Fysiologisch onderbouwde ondergrens nog te bepalen |
 | `MAXIMALE_TIKTIJD_MS` | 2000: Fysiologisch onderbouwde bovengrens nog te bepalen |
 
-`EXIT_TIKTIJD_MS` is bewust een aparte veiligheids-/achterdeurgrens naast de algemene `timeoutMs` van `MeetStimulusSimultaan()`. De officiële voorbeelden gebruiken de standaardwaarde 3000 ms voor beide. Wanneer een reeds gestarte sensor door deze achterdeur niet tijdig wordt losgelaten, retourneert de meting `EXIT_STATUS_SENSOR_NIET_LOSGELATEN` in plaats van `EXIT_STATUS_SENSOR_LOSGELATEN`. `MeetStimulus()` gebruikt voor een sensor die al bij binnenkomst ingedrukt is dezelfde no-action-timeout en retourneert dan `EXIT_STATUS_NO_ACTION_TIMEOUT`.
+`EXIT_TIKTIJD_MS` is bewust een aparte veiligheids-/achterdeurgrens naast de algemene `timeoutMS` van `MeetStimulusSimultaan()`. De officiële voorbeelden gebruiken de standaardwaarde 3000 ms voor beide. Wanneer een reeds gestarte sensor door deze achterdeur niet tijdig wordt losgelaten, retourneert de meting `EXIT_STATUS_SENSOR_NIET_LOSGELATEN` in plaats van `EXIT_STATUS_SENSOR_LOSGELATEN`. `MeetStimulus()` gebruikt voor een sensor die al bij binnenkomst ingedrukt is dezelfde no-action-timeout en retourneert dan `EXIT_STATUS_NO_ACTION_TIMEOUT`.
 
 

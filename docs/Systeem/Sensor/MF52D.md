@@ -2,7 +2,7 @@
 
 ## Sensor en gedeelde implementatie
 
-Fysieke MF52D NTC-probe. Componentcode `MF52D` (0xD8), klasse `MF52x`. De spanningsdeler wordt op een ADC-kanaal uitgelezen.
+Fysieke MF52D NTC-probe. Componentcode `MF52D` (0xD0), klasse `MF52x`. De spanningsdeler wordt op een ADC-kanaal uitgelezen.
 
 Deze sensor deelt een C++-klasse met andere uitvoeringen. De fysieke aansluitgegevens gelden alleen voor `MF52D` waar dat uitdrukkelijk vermeld is.
 
@@ -17,13 +17,13 @@ Deze sensor deelt een C++-klasse met andere uitvoeringen. De fysieke aansluitgeg
 - Broncode: `src/Systeem/Sensor/MF52x.h` (geen `.cpp`).
 - C++-component: `MF52x`, afgeleid van `SensorAnaloog`.
 - Parent: `GedeeldeBusNode*` in de constructor.
-- Componentcode: `MF52A` (0xD7), `MF52D` (0xD8).
+- Componentcode: `MF52A` (0xCF), `MF52D` (0xD0).
 - Configuratie: `src/Configuratie/Sensoren/ConfigMF52A_template.h`, `src/Configuratie/Sensoren/ConfigMF52D_template.h`; de optionele persoonlijke versie heet telkens zonder `_template`.
-- Data-kanalen: 1 (via SensorAnaloog).
+- Data-kanalen: 2 (kanaal 1 via SensorAnaloog; zie "Data-kanalen" verderop).
 
 ## Uit de broncode
 
-MF52D: NTC thermistor; spanning, niet omgerekende temperatuur. Eén component voor één fysiek apparaat, via de bestaande ADC-Extender. De meetcode zit in SensorAnaloog; deze klasse geeft alleen de pin en het bereik door. Het fysieke type behoudt zijn eigen componentcode en configuratie. De analoge ADC-meetfuncties zijn identiek aan die van MF52A.
+MF52x leest de ruwe ADC-waarde via SensorAnaloog. Daarnaast berekent `ReadTemperatureCelsius(float&)` de temperatuur in °C met de B-formule en de geconfigureerde NTC- en spanningsdelerparameters. `MF52A` en `MF52D` behouden elk hun eigen componentcode en ADC-bereik. Een juiste temperatuur vereist parameters die bij het werkelijk aangesloten NTC-element passen.
 
 ## Aansluiten
 
@@ -64,7 +64,7 @@ MF52x(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensorPin
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigMF52D.h` (het aanwezige `src/Configuratie/Sensoren/ConfigMF52D_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_MF52D_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_MF52D_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
+  - `SENSOR_MF52D_AANTAL`: sjabloonwaarde `1`.
   - `SENSOR_MF52D_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `5000`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -85,7 +85,7 @@ GedeeldeBusNewComponent<MF52x>(
 
 **Voor een losse MF52D-NTC volgens de bestaande FrameWorkroute:** maak een **spanningsdeler**, bijvoorbeeld `VCC → vaste weerstand → meetknooppunt → NTC → GND`, en verbind het meetknooppunt met `sensorPin` van de opgegeven ADC-Extender. Beide aansluitdraden van een los NTC-element zijn **weerstandsaansluitingen**, geen VCC en OUT. Een eventuele print met extra elektronica kan andere labels hebben.
 
-- De klasse `MF52x` gebruikt bij componenttype `MF52D` uitsluitend `SENSOR_MF52D_ADC_BEREIK_MILLIVOLT` voor het analoge ADC-bereik; de waarde is nog **geen temperatuur in graden**. De exacte `R25`, B-waarde, zelfopwarming en temperatuurlimieten hangen van de aangekochte MF52D-uitvoering af.
+- Voor componenttype `MF52D` gebruikt `MF52x` het ADC-bereik `SENSOR_MF52D_ADC_BEREIK_MILLIVOLT`. De ruwe ADC-waarde is geen temperatuur; `ReadTemperatureCelsius()` berekent afzonderlijk °C met de geconfigureerde NTC- en spanningsdelerparameters. Controleer `R25`, B-waarde, zelfopwarming en temperatuurlimieten van de werkelijk gebruikte MF52D-uitvoering.
 - De algemene MF52-seriegegevens van Songtian mogen niet automatisch als typeblad voor een **MF52D** worden toegepast: `MF52D` is hiermee niet als een specifieke Songtian-variant geïdentificeerd.
 
 **Algemene MF52-serie als technisch achtergrondmateriaal (niet als MF52D-pinout):** https://www.songtian-ste.com/en/products/ntc-thermistors/mf52/
@@ -101,7 +101,7 @@ Voor het gebruikte **MF52D**-element zijn **`R25 = 10 kΩ`** en **`B = 3950 K`**
 
 - Voor de bestaande analoge `MF52x`-route: bouw bijvoorbeeld **VCC → vaste weerstand 10 kΩ → meetknooppunt → MF52D → GND**. Verbind het meetknooppunt met het gekozen ADC-Extender-kanaal en gebruik gemeenschappelijke GND.
 - Bij **25 °C** ligt het meetknooppunt bij twee ideale 10kΩ-elementen op ongeveer **VCC/2**; controleer dat de totale spanning binnen het toegelaten ADC-bereik valt.
-- **B3950** dient voor een eventuele latere weerstand-naar-temperatuurconversie; de bestaande `MF52x`-klasse rekent de analoge waarde **niet** zelf om naar °C. Gebruik de B-waarde dus niet als impliciet aanwezige softwarefunctie.
+- **B3950** is de B-waarde voor de in `MF52x::ReadTemperatureCelsius()` aanwezige weerstand-naar-temperatuurconversie. Controleer vóór gebruik of `SENSOR_MF52X_NTC_BETA` en de overige spanningsdelerinstellingen overeenkomen met dit element.
 - Vermijd mechanische trekkracht op aansluitdraden en zelfverhitting door een te grote meetstroom.
 
 ## Testen
@@ -109,3 +109,42 @@ Voor het gebruikte **MF52D**-element zijn **`R25 = 10 kΩ`** en **`B = 3950 K`**
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52A/`, `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52D/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Aanvullende Sensor × Extender-testvoorbeelden
+
+De onderstaande `.ino`-bestanden behoren tot de huidige v2.0.0-voorbeelden. Hun aanwezigheid is gecontroleerd; compilatie en fysieke hardwarevalidatie zijn hier nog **niet** aangetoond.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_ADS1158/Sensor_MF52x_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_ADS7828/Sensor_MF52x_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_ADS7953/Sensor_MF52x_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_CD74HC4067/Sensor_MF52x_CD74HC4067.ino`
+
+### Functionele Sensor × Extender-voorbeelden
+
+De onderstaande voorbeelden bevatten **meetaanroepen na de activering**. Een getoonde waarde is geen bewijs van meetnauwkeurigheid of van een geslaagde hardwaretest.
+
+- **Fysieke test:** Verwarm de NTC licht; observeer ADC-variatie en controleer de berekende temperatuur met de passende NTC-instellingen en een referentiemeting.
+- **Huidige reikwijdte:** de `.ino` gebruikt uitsluitend reeds bestaande FrameWork-functies; niet-beschikbare meetkanalen, kalibraties of externe functies zijn niet toegevoegd.
+
+**Voorbeelden:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_ADS1158/Sensor_MF52x_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_ADS7828/Sensor_MF52x_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_ADS7953/Sensor_MF52x_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MF52x_CD74HC4067/Sensor_MF52x_CD74HC4067.ino`
+
+**Validatie:** Arduino-compilatie, fysieke test, kalibratie en meetkwaliteitsvalidatie zijn hier nog niet aangetoond.
+
+## Hulppinnen en routes via Extenders
+
+- `WriteVOEDING(bool aan)`: voeding van de NTC-deler via de tweede Extender (mixed); bij een PCA9685 via `WriteExtenderPWM` (4095 = aan).
+- Mixed constructor: `MF52x(parent, component, sensorPin, extender, np_VOEDING)`. Vereist `GEDEELDE_BUS_MIXED_PINS`.
+
+## Temperatuur
+
+- `ReadTemperatureCelsius(float&)`: B-formule 1/T = 1/298,15 + ln(R/R25)/B, met R uit de deler (VoltageDivider): voeding, serieweerstand, meetpunt, NTC, GND.
+- Instellingen: `SENSOR_MF52X_NTC_BETA` (3950), `SENSOR_MF52X_NTC_RESISTANCE_AT_25C_OHM` (10000), `SENSOR_MF52X_SERIES_RESISTOR_OHM` (10000). Nakijken op de module.
+- Voorbeeld: `Sensor_MF52x_ADS1158_Verwerking.ino`.
+
+## Data-kanalen
+
+- Kanaal 1: ruwe ADC-waarde (int), kanaal 2: temperatuur in °C (float), bij een geslaagde aanroep van `ReadTemperatureCelsius()`.

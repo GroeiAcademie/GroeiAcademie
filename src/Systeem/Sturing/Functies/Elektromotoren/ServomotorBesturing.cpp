@@ -31,13 +31,13 @@ bool ServomotorBesturing::DraaiRelatiefOverHoek(int16_t aantalGraden) {
 
 bool ServomotorBesturing::PositioneerNaarMiddenpositie() { return PositioneerAbsoluutNaarHoek(90); }
 
-bool ServomotorBesturing::SetPulsLimitsMS(uint16_t minimumUs, uint16_t maximumUs) {
+bool ServomotorBesturing::SetPulsLimitsMS(uint16_t minimumUS, uint16_t maximumUS) {
   bool gelukt = false;
 #if STURING_SG90_AANTAL > 0
-  if (sg90) gelukt = sg90->SetPulsLimitsMS(minimumUs, maximumUs);
+  if (sg90) gelukt = sg90->SetPulsLimitsMS(minimumUS, maximumUS);
 #endif
 #if STURING_MG996R_AANTAL > 0
-  if (mg996r) gelukt = mg996r->SetPulsLimitsMS(minimumUs, maximumUs);
+  if (mg996r) gelukt = mg996r->SetPulsLimitsMS(minimumUS, maximumUS);
 #endif
   return gelukt;
 }
@@ -124,7 +124,8 @@ bool ServomotorBesturing::StopMotor() {
 #if STURING_MG996R_AANTAL > 0
   if (mg996r && mg996r->actief) { mg996r->StopSturing(); actief = true; }
 #endif
-  if (!actief) return false;
+  // Geen actieve sturing: de motor draait niet, dus de status ook niet meer op gestart laten staan.
+  if (!actief) { gestart = false; gepauzeerd = false; return false; }
   gestart = false;
   gepauzeerd = false;
   return true;

@@ -39,7 +39,7 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
   bool metingBezig = false;
   uint8_t metingChannel = 0;
   bool meetwaardeKlaar = false;
-  unsigned long tijdstipConversiestartMicros = 0;
+  unsigned long tijdstipConversiestartUS = 0;
   int16_t laatsteMeetwaarde = 0;
   // Datasheet: +VREF geeft code 0x7800 (30720); 0x7FFF hoort bij 1,06 x VREF. De schaal 0..0x7FFF loopt dus tot VREF x 32767 / 30720.
   uint16_t GetExtenderReadAnalogEffectiefBereikMillivolt() const override {
@@ -54,6 +54,44 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
     SPI.endTransaction();
     return gelukt;
   }
+  // Eén register lezen (TI SBAS429: commando C[2:0]=010 READ, één byte, eigen CS).
+  bool ADS1158LeesRegister(uint8_t adres, uint8_t& waarde) {
+    waarde = 0;
+    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+    if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
+    SPI.transfer(static_cast<uint8_t>(0x40 | (adres & 0x0F))); // C[2:0]=010 READ
+    waarde = SPI.transfer(0x00);
+    const bool gelukt = WriteCS(HIGH);
+    SPI.endTransaction();
+    return gelukt;
+  }
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
+  // Eigen GPIO0..GPIO7 (EP_GPIO0..EP_GPIO7). TI SBAS429: GPIOC 0x07 = richting (1 = ingang, reset 0xFF), GPIOD 0x08 = data.
+  // Geen interne pull-up: INPUT_PULLUP wordt geweigerd. Uitgangsstroom volgens datasheet beperkt (enkele mA).
+  bool SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (!actief || pin < static_cast<uint8_t>(ExtenderPins::EP_GPIO0) || pin > static_cast<uint8_t>(ExtenderPins::EP_GPIO7)) return false;
+    if (modus != INPUT && modus != OUTPUT) return false;
+    uint8_t richting = 0;
+    if (!ADS1158LeesRegister(0x07, richting)) return false;
+    const uint8_t bit = static_cast<uint8_t>(1U << (pin - static_cast<uint8_t>(ExtenderPins::EP_GPIO0)));
+    richting = modus == OUTPUT ? static_cast<uint8_t>(richting & ~bit) : static_cast<uint8_t>(richting | bit);
+    return ADS1158SchrijfRegister(0x07, richting);
+  }
+  bool WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (!actief || pin < static_cast<uint8_t>(ExtenderPins::EP_GPIO0) || pin > static_cast<uint8_t>(ExtenderPins::EP_GPIO7)) return false;
+    uint8_t data = 0;
+    if (!ADS1158LeesRegister(0x08, data)) return false;
+    const uint8_t bit = static_cast<uint8_t>(1U << (pin - static_cast<uint8_t>(ExtenderPins::EP_GPIO0)));
+    data = niveau == HIGH ? static_cast<uint8_t>(data | bit) : static_cast<uint8_t>(data & ~bit);
+    return ADS1158SchrijfRegister(0x08, data);
+  }
+  uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (!actief || pin < static_cast<uint8_t>(ExtenderPins::EP_GPIO0) || pin > static_cast<uint8_t>(ExtenderPins::EP_GPIO7)) return 0xFF;
+    uint8_t data = 0;
+    if (!ADS1158LeesRegister(0x08, data)) return 0xFF;
+    return (data >> (pin - static_cast<uint8_t>(ExtenderPins::EP_GPIO0))) & 0x01 ? HIGH : LOW;
+  }
+#endif
   bool ADS1158Pulse() {
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
     if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }
@@ -75,16 +113,24 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
       digitalWrite(NativeArduinoPinVan(np_PWDN), HIGH);
       pinMode(NativeArduinoPinVan(np_PWDN), OUTPUT);
     }
+    // RESET actief laag: hoog zetten, zoals de TCA9548A, zodat een zwevende pin de chip niet in reset houdt.
+    if (np_RESET != HardwareResourcePin::NONE) {
+      digitalWrite(NativeArduinoPinVan(np_RESET), HIGH);
+      pinMode(NativeArduinoPinVan(np_RESET), OUTPUT);
+    }
     // CONFIG0: MUXMOD=0 (auto-scan), STAT=1; geen externe BYPAS.
-    if (!ADS1158SchrijfRegister(0x00, 0x02)) return false;
+    if (!ADS1158SchrijfRegister(0x00, 0x02)) return FoutDiagnoseSPI(false, 0, false);
     // CONFIG1: IDLMOD=1 (sleep), DRATE=11 (auto-scan), datasheet default.
-    if (!ADS1158SchrijfRegister(0x01, 0x83)) return false;
+    if (!ADS1158SchrijfRegister(0x01, 0x83)) return FoutDiagnoseSPI(false, 0, false);
+    // Aanwezigheid: CONFIG1 teruglezen; zonder chip leest MISO 0x00 of 0xFF, nooit 0x83.
+    uint8_t readBackConfig1 = 0;
+    if (!ADS1158LeesRegister(0x01, readBackConfig1) || readBackConfig1 != 0x83) return FoutDiagnoseSPI(false, 0, false);
     // Geen differential of interne monitor: het gewenste single-ended channel
     // wordt voor elke afzonderlijke PULSE geselecteerd via MUXSG0/MUXSG1.
-    if (!ADS1158SchrijfRegister(0x03, 0x00)) return false; // MUXDIF
-    if (!ADS1158SchrijfRegister(0x04, 0x00)) return false; // MUXSG0
-    if (!ADS1158SchrijfRegister(0x05, 0x00)) return false; // MUXSG1
-    if (!ADS1158SchrijfRegister(0x06, 0x00)) return false; // SYSRED
+    if (!ADS1158SchrijfRegister(0x03, 0x00)) return FoutDiagnoseSPI(false, 0, false); // MUXDIF
+    if (!ADS1158SchrijfRegister(0x04, 0x00)) return FoutDiagnoseSPI(false, 0, false); // MUXSG0
+    if (!ADS1158SchrijfRegister(0x05, 0x00)) return FoutDiagnoseSPI(false, 0, false); // MUXSG1
+    if (!ADS1158SchrijfRegister(0x06, 0x00)) return FoutDiagnoseSPI(false, 0, false); // SYSRED
     return true;
   }
   int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
@@ -106,19 +152,23 @@ struct ExtenderADS1158 : HardwareResourceTypeSPI {
     meetwaardeKlaar = false;
     if (!ADS1158Pulse()) return -1;
     metingBezig = true;
-    tijdstipConversiestartMicros = micros();
+    tijdstipConversiestartUS = micros();
     return 1;
   }
   bool IsExtenderReadAnalogReady() override {
     // Auto-scan: zonder DRDY-aansluiting voorlopig conservatief 2 ms wachten.
     // Get controleert bovendien de geldige STATUS/NEW/CHID-bits; dit is
     // nog geen vervanging van een fysiek gevalideerde DRDY-controle.
-    return !metingBezig || !actief || (micros() - tijdstipConversiestartMicros >= 2000UL);
+    return !metingBezig || !actief || (micros() - tijdstipConversiestartUS >= 2000UL);
   }
   bool GetExtenderReadAnalogValue(int32_t& waarde) override {
     waarde = 0;
-    if (!metingBezig || !IsExtenderReadAnalogReady() || !actief) return false;
+    if (!metingBezig) return false;
+    // Get geeft de ADC altijd vrij, ook vóór Ready of na een time-out (ADC-contract in GedeeldeBus.h).
+    // Ready eerst bepalen: zonder lopende meting meldt IsExtenderReadAnalogReady() altijd true.
+    const bool klaar = IsExtenderReadAnalogReady();
     metingBezig = false;
+    if (!klaar || !actief) return false;
     // Auto-scan met één channel: statusbyte heeft NEW, OVF, SUPPLY en CHID.
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
     if (!WriteCS(LOW)) { SPI.endTransaction(); return false; }

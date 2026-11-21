@@ -13,4 +13,8 @@
 // #define SENSOR_MAX4466_ADC_BEREIK_MILLIVOLT 5000  // standaard waarde: 5000 (module op 5 V; op 3,3 V gevoed: 3300); pas aan aan de werkelijk aangesloten sensorspanning
 #endif
 
+#ifndef SENSOR_MAX4466_SAMPLE_RATE_HZ
+// #define SENSOR_MAX4466_SAMPLE_RATE_HZ 500  // standaard waarde: 500; samplefrequentie voor het geluidsniveau (vast ritme); venster = een kwart seconde
+#endif
+
 #endif

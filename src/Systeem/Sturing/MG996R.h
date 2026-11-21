@@ -59,8 +59,8 @@ struct MG996R : GedeeldeBusNode {
   }
 
   // SetPulsLimitsMS: naam volgens afspraak; beide argumenten zijn microseconden (us), niet milliseconden.
-  bool SetPulsLimitsMS(uint16_t minimumUs, uint16_t maximumUs) {
-    if (!actief || !parent || minimumUs == 0 || minimumUs >= maximumUs) {
+  bool SetPulsLimitsMS(uint16_t minimumUS, uint16_t maximumUS) {
+    if (!actief || !parent || minimumUS == 0 || minimumUS >= maximumUS) {
       GA_DEBUG_PRINTLN(F("DEBUG: MG996R ongeldige pulsgrenzen."));
       return false;
     }
@@ -71,8 +71,8 @@ struct MG996R : GedeeldeBusNode {
       return false;
     }
 
-    const uint64_t minimumTicks = (uint64_t(minimumUs) * frequentie * 4096ULL + 500000ULL) / 1000000ULL;
-    const uint64_t maximumTicks = (uint64_t(maximumUs) * frequentie * 4096ULL + 500000ULL) / 1000000ULL;
+    const uint64_t minimumTicks = (uint64_t(minimumUS) * frequentie * 4096ULL + 500000ULL) / 1000000ULL;
+    const uint64_t maximumTicks = (uint64_t(maximumUS) * frequentie * 4096ULL + 500000ULL) / 1000000ULL;
     if (minimumTicks == 0 || minimumTicks >= maximumTicks || maximumTicks >= 4096) {
       GA_DEBUG_PRINTLN(F("DEBUG: MG996R pulsgrenzen buiten PWM-bereik."));
       return false;
@@ -83,8 +83,8 @@ struct MG996R : GedeeldeBusNode {
 
 #ifdef TRACE
     if (GA_SERIAL) {
-      GA_SERIAL.print(F("TRACE: MG996R pulsgrenzen us=")); GA_SERIAL.print(minimumUs);
-      GA_SERIAL.print(F("..")); GA_SERIAL.print(maximumUs);
+      GA_SERIAL.print(F("TRACE: MG996R pulsgrenzen us=")); GA_SERIAL.print(minimumUS);
+      GA_SERIAL.print(F("..")); GA_SERIAL.print(maximumUS);
       GA_SERIAL.print(F(" ticks=")); GA_SERIAL.print(minimumPWM);
       GA_SERIAL.print(F("..")); GA_SERIAL.println(maximumPWM);
     }

@@ -2,7 +2,7 @@
 
 ## Actuele codebasis beta v2.0.0
 
-De huidige codebasis bevat de boomgebaseerde GedeeldeBus-lifecycle, Screen, Input, 16 concrete Extenders, 38 Sensorclasses (zie `docs/Systeem/Sensor/`) en Stimulus. Alle `ExtenderPins` gebruiken `EP_<pinnaam>`. `Diagnose()` bestaat alleen als lege DEBUG-hook in `GedeeldeBusNode`; concrete elektronische diagnoses blijven open werk. De onderstaande roadmap moet vanuit deze codebasis worden gelezen.
+De huidige codebasis bevat de boomgebaseerde GedeeldeBus-lifecycle, Screen, Input, 16 concrete Extenders, 41 rechtstreeks of onrechtstreeks van `Sensor` afgeleide C++-klassen (inclusief `SensorAnaloog` en `SensorDigitaal`; zie `docs/Systeem/Sensor/`), tien Sturingen en Stimulus. Alle `ExtenderPins` gebruiken `EP_<pinnaam>`. `Diagnose()` bestaat alleen als lege DEBUG-hook in `GedeeldeBusNode`; concrete elektronische diagnoses blijven open werk. De onderstaande roadmap moet vanuit deze codebasis worden gelezen.
 
 
 Deze ROADMAP beschrijft de ontwikkelrichting van het GroeiAcademie FrameWork. Een onderdeel is pas voltooid wanneer de code, voorbeelden, documentatie en relevante hardwarecontrole met elkaar overeenstemmen.
@@ -31,11 +31,11 @@ Open werk voor beta v2.0.0:
 - per component DEBUG-only `Diagnose()` later invullen met echte elektronische functietesten;
 - de elektrische werking van Extenders per kanaal/pin testen;
 - daarna praktijktesten uitvoeren met echte sensoren en randapparatuur;
-- `FsrRfp` als eerste Sensor op de ADS1115-Extender blijven valideren;
+- `FsrRfp` via de analoge parentinterface op ADS1115, ADS1158, ADS7828 en ADS7953 afzonderlijk valideren;
 - SensorKernel pas verder uitbouwen nadat deze v2-basis stabiel is.
-- Data-media (D038 tot D040) compileren op ESP32, ESP32-S3, RP2040, Nucleo F401RE en UNO Q; vooral de native EEPROM (ESP32/RP2040: `begin()` en `commit()`), SdFat op ESP32 en de UNO Q zonder native EEPROM;
+- Data-media compileren op ESP32, ESP32-S3, RP2040, Nucleo F401RE en UNO Q; vooral native EEPROM (ESP32/RP2040: `begin()` en `commit()`), SdFat op ESP32 en UNO Q zonder native EEPROM;
 - Data-media hardwarematig testen, in deze volgorde: FLASH met buffer 0 en 256 (snelheid en teruglezen), native EEPROM samen met HX1838, CS via PCF8574 voor FLASH, microSD alleen en daarna met CS via PCF8574 (`SD_CHIP_SELECT_MODE` 1);
-- config per sensor-pin om de Extender te kiezen (D039), wanneer een sensor het nodig heeft.
+- configuratie per sensorpin verder toetsen wanneer de keuze van een Extender per pin nodig is.
 
 Een onderdeel is voor v2 pas klaar wanneer architectuur, code, voorbeelden, documentatie én de relevante hardwaretest hetzelfde gedrag beschrijven.
 
@@ -145,7 +145,7 @@ De actuele compileprofielen omvatten:
 - TTGO D1 R32 (ESP32-WROOM-32U);
 - WeMos D1 R32 (ESP32-WROOM-32U).
 
-Platformen buiten deze lijst worden pas officieel ondersteund nadat pinmapping, ADC-gedrag, timing, geheugen, dependencies en echte hardwarewerking per profiel zijn gevalideerd, zoals hierboven voor deze tien al gebeurd is (zie `docs/HARDWARE_SUPPORT.md`).
+Platformen buiten deze lijst worden pas officieel ondersteund nadat pinmapping, ADC-gedrag, timing, geheugen, dependencies en echte hardwarewerking per profiel zijn gevalideerd, zie voor de actuele status per board `docs/HARDWARE_SUPPORT.md`.
 
 ### PixelScreen-uitbreidingen
 
@@ -181,7 +181,7 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 
 ## 4. Hardware ROADMAP
 
-- FsrRfp via de ADS1115-Extender op de bedoelde hardware valideren;
+- FsrRfp via de ondersteunde ADC-Extenders op de bedoelde hardware valideren;
 - WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U) zijn geïmplementeerd en getest; andere compatibele D1-R32-borden blijven afzonderlijk te valideren;
 - Cytron Maker UNO RP2040 is geïmplementeerd en getest;
 - hardwareprofielen per ondersteund Arduino Uno R3-vormfactorbord vastleggen;
@@ -197,13 +197,15 @@ Iedere nieuwe module krijgt vóór officiële ondersteuning:
 |---|---|
 | Arduino UNO R4 Minima | geïmplementeerd en getest |
 | Arduino UNO R4 WiFi | geïmplementeerd en getest |
-| Arduino UNO Q | geïmplementeerd en getest |
+| Arduino UNO Q | EXPERIMENTAL |
 | Cytron Maker UNO RP2040 | geïmplementeerd en getest |
 | Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) | geïmplementeerd en getest |
 | SB Components Ardi-32 (ESP32-S3-WROOM-1) | geïmplementeerd en getest |
 | STM32F4 Nucleo-F401RE | geïmplementeerd en getest |
 | TTGO D1 R32 (ESP32-WROOM-32U) | geïmplementeerd en getest |
 | WeMos D1 R32 (ESP32-WROOM-32U) | geïmplementeerd en getest |
+
+Buiten scope: HW-588A en HW-389 (NodeMCU/ESP8266-borden, geen Arduino Uno R3-vormfactor).
 
 `ESP32-WROOM-32U` is de gezamenlijke technische aanduiding die in de dependencycontrole wordt gebruikt voor WeMos D1 R32 (ESP32-WROOM-32U) en TTGO D1 R32 (ESP32-WROOM-32U). `ESP32-S3-WROOM-1` is daar de gezamenlijke dependency-aanduiding voor Paradisetronic ESP32-S3 UNO (ESP32-S3-WROOM-1) en SB Components Ardi-32 (ESP32-S3-WROOM-1).
 
@@ -226,7 +228,7 @@ I2C als alternatieve, nog te testen interface voor PixelScreen (naast SPI), bijv
 
 ### Input-apparaten
 
-Vanaf v1.1.0 bestaat een gedeelde `System/Input`-laag. `INPUT_KANAAL_CONFIG` selecteert de actieve invoerbackend(s), `KEYPAD_TYPE` beschrijft het fysieke keypad en de publieke Input-API levert de toetsaanslag onafhankelijk van DIGITAL, PCF8574 of HX1838. Onderstaande hardware blijft per type afzonderlijk te valideren; opname in de Input-laag betekent niet automatisch dat ieder fysiek exemplaar al hardwarematig goedgekeurd is.
+Vanaf v1.1.0 bestaat een gedeelde `System/Input`-laag. `INPUT_KANAAL_CONFIG` selecteert de actieve invoerbackend(s), `KEYPAD_TYPE` beschrijft het fysieke keypad en de publieke Input-API levert de toetsaanslag onafhankelijk van de gekozen PCF8574- of HX1838-backend. Onderstaande hardware blijft per type afzonderlijk te valideren; opname in de Input-laag betekent niet automatisch dat ieder fysiek exemplaar al hardwarematig goedgekeurd is.
 
 | Apparaat | Status |
 |---|---|
@@ -253,6 +255,7 @@ Generieke elektronica-bouwstenen, niet gebonden aan één specifiek toepassingsg
 | Fujitsu MB85RC256V FRAM | softwarematig opgenomen als `DATA_TYPE_FRAM_I2C` via `FRAM_I2C`; hardware-stresstest beschikbaar |
 | AT41 (quad logic level shifter) | ter-discussie |
 | CD74HC4067 (16 kanaals multiplexor) | ter-discussie |
+| HW-130 (motorshield L293D) | on hold |
 
 ### Sensoren
 
@@ -378,11 +381,4 @@ Voor v1.0.0 en volgende releases omvat de validatie waar van toepassing:
 
 ### Aantekening: generiek opt-in-mechanisme voor experimentele functies
 
-Bij de inmiddels achterhaalde `CHARACTERSCREEN_I2C_ADRES_MODUS` (historische beslissing D023 in `docs/DECISION_LOG.md`) werd een generieke
-`BETATESTER`-vlag overwogen om functies die nog niet in alpha zitten toch al testbaar te
-maken. Bewust niet gebouwd: voor precies één concreet experiment een brede infrastructuur
-optuigen is voorbarig, en het zou een tweede, parallel classificatiesysteem naast de
-bestaande ondersteuningsniveaus (D018) creëren. Wanneer een tweede, onafhankelijk
-experiment opduikt dat hetzelfde soort opt-in nodig heeft, is dit het moment om een
-generiek mechanisme alsnog te overwegen, met dan twee concrete gevallen om de opzet aan
-te toetsen in plaats van één.
+Een generieke `BETATESTER`-vlag voor afzonderlijke experimentele functies is niet geïmplementeerd. Een tweede, parallel classificatiesysteem naast de bestaande ondersteuningsniveaus wordt pas overwogen wanneer meerdere concrete functies zo’n gemeenschappelijk opt-in-mechanisme nodig hebben. Historische afwegingen staan in `docs/DECISION_LOG.md`.

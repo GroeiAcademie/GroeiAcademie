@@ -140,6 +140,7 @@ struct FsrRfp : Sensor {
 #endif
 
   bool Activeren() override;
+  bool IsAnalogChild() const override { return true; }    // leest via StartExtenderReadAnalog() van de parent
   int RawAnalogRead(int sensorPin);
   bool RawAnalogRead(int sensorPin, int32_t& waarde);
 
@@ -148,7 +149,7 @@ struct FsrRfp : Sensor {
   bool StartAnalogRead(int sensorPin);
   bool IsAnalogReadKlaar();
   int GetAnalogRead();
-  int laatstePin = 0;
+  int laatstePin = -1;   // -1 = geen eigen lopende meting
   int laatsteWaarde = 0;
 };
 

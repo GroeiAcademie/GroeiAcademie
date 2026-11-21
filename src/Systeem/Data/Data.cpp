@@ -69,14 +69,16 @@ namespace {
   void FlushBufferFLASH(struct Data* data, uint8_t teller) {
     struct DataFLASHviaSPI* kanaal = data->FLASHviaSPI[teller];
     const uint16_t gevuld = countBufferFLASH[teller];
-    if (gevuld == 0 || kanaal == nullptr || !kanaal->actief || !kanaal->IsRuntimeEigenaar(data)) return;
-    if (data->adres[teller] > kanaal->size() || gevuld > kanaal->size() - data->adres[teller]) return;
+    if (gevuld == 0) return;
+    // Wachtende records die niet weggeschreven kunnen worden: een schrijffout van deze streaming.
+    if (kanaal == nullptr || !kanaal->actief || !kanaal->IsRuntimeEigenaar(data)) { data->streamingWriteFailed = true; return; }
+    if (data->adres[teller] > kanaal->size() || gevuld > kanaal->size() - data->adres[teller]) { data->streamingWriteFailed = true; return; }
     // RUN87: het startadres ligt in volledig ongebruikte FLASH-sectoren.
     // Tijdens een opname nooit een sector wissen: oudere opnames blijven intact.
     if (kanaal->writeBuffer(data->adres[teller], bufferFLASH[teller], gevuld) == gevuld) {
       data->adres[teller] += gevuld;
       countBufferFLASH[teller] = 0;
-    }
+    } else data->streamingWriteFailed = true;
   }
 }
   #endif
@@ -596,49 +598,49 @@ int Sensor::ReadQueueOrStackValue(uint8_t numberChannel) {
 
 int Sensor::StreamingRead(uint8_t numberChannel) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return 0;   // sensor bestaat niet
-  if (::Data->StreamingRead(*this, numberChannel, QueueOrStack[numberChannel - 1])) {
-    SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
+  // Een kopie: teruglezen mag de live waarde en de buffer van het channel niet overschrijven.
+  SensorQueueOrStack channel = QueueOrStack[numberChannel - 1];
+  if (::Data->StreamingRead(*this, numberChannel, channel)) {
     return channel.valueType == 0 ? channel.lastValue : 0; // overige types via ReadQueueOrStackFloat/UInt32
   }
-  const SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
-  return channel.valueType == 0 ? channel.lastValue : 0;   // lastValue deelt zijn geheugen met float en uint32 (union)
+  return QueueOrStack[numberChannel - 1].valueType == 0 ? QueueOrStack[numberChannel - 1].lastValue : 0;   // lastValue deelt zijn geheugen met float en uint32 (union)
 }
 
 int Sensor::RecordRead(uint8_t numberChannel) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return 0;   // sensor bestaat niet
-  if (::Data->RecordRead(*this, numberChannel, QueueOrStack[numberChannel - 1])) {
-    SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
+  // Een kopie: teruglezen mag de live waarde en de buffer van het channel niet overschrijven.
+  SensorQueueOrStack channel = QueueOrStack[numberChannel - 1];
+  if (::Data->RecordRead(*this, numberChannel, channel)) {
     return channel.valueType == 0 ? channel.lastValue : 0; // overige types via ReadQueueOrStackFloat/UInt32
   }
-  const SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
-  return channel.valueType == 0 ? channel.lastValue : 0;   // lastValue deelt zijn geheugen met float en uint32 (union)
+  return QueueOrStack[numberChannel - 1].valueType == 0 ? QueueOrStack[numberChannel - 1].lastValue : 0;   // lastValue deelt zijn geheugen met float en uint32 (union)
 }
 
 // Getypeerde overloads met de bestaande leesfunctienamen.
 bool Sensor::StreamingRead(uint8_t numberChannel, float& value) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return false;
-  SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
+  SensorQueueOrStack channel = QueueOrStack[numberChannel - 1];   // kopie: de live waarde blijft
   if (!::Data->StreamingRead(*this, numberChannel, channel) || channel.valueType != 1) return false;
   value = channel.lastValueFloat;
   return true;
 }
 bool Sensor::StreamingRead(uint8_t numberChannel, uint32_t& value) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return false;
-  SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
+  SensorQueueOrStack channel = QueueOrStack[numberChannel - 1];   // kopie: de live waarde blijft
   if (!::Data->StreamingRead(*this, numberChannel, channel) || channel.valueType != 2) return false;
   value = channel.lastValueUInt32;
   return true;
 }
 bool Sensor::RecordRead(uint8_t numberChannel, float& value) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return false;
-  SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
+  SensorQueueOrStack channel = QueueOrStack[numberChannel - 1];   // kopie: de live waarde blijft
   if (!::Data->RecordRead(*this, numberChannel, channel) || channel.valueType != 1) return false;
   value = channel.lastValueFloat;
   return true;
 }
 bool Sensor::RecordRead(uint8_t numberChannel, uint32_t& value) {
   if (::Data == nullptr || QueueOrStack == nullptr || numberChannel == 0 || numberChannel > numberOfChannels) return false;
-  SensorQueueOrStack& channel = QueueOrStack[numberChannel - 1];
+  SensorQueueOrStack channel = QueueOrStack[numberChannel - 1];   // kopie: de live waarde blijft
   if (!::Data->RecordRead(*this, numberChannel, channel) || channel.valueType != 2) return false;
   value = channel.lastValueUInt32;
   return true;
@@ -648,52 +650,92 @@ bool Sensor::RecordRead(uint8_t numberChannel, uint32_t& value) {
 // ============================================================================
 // STREAMING (FLASH) en RECORDING (microSD): rechtstreeks via de lijsten (N7), zonder zoeken op component.
 // ============================================================================
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+// De chip van deze plaats verdwijnt: zijn wachtende records vervallen, zodat ze nooit op een andere chip terechtkomen.
+// Een lege buffer verandert niets; zonder buffer doet deze functie niets.
+void Data::DiscardBufferFLASH(uint8_t teller) {
+  #if FLASH_BUFFER_ACTIEF
+  if (teller >= DATA_LAYER_FLASH_SPI_AANTAL || countBufferFLASH[teller] == 0) return;
+  countBufferFLASH[teller] = 0;
+  streamingWriteFailed = true;   // die records zijn verloren
+  #else
+  (void)teller;
+  #endif
+}
+
+// Eén FLASH-chip starten: reserveren, een vorige buffer wegschrijven en het startadres zoeken.
+// true = de chip is gestart en mag records krijgen.
+bool Data::StartFlashStreaming(uint8_t teller) {
+  if (teller >= DATA_LAYER_FLASH_SPI_AANTAL) return false;
+  struct DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
+  // Elke geconfigureerde chip telt; een chip die ontbreekt of niet start, krijgt geen records van deze streaming.
+  if (kanaal == nullptr || !kanaal->ReserveerRuntime(this)) { streamingWriteFailed = true; return false; }
+  #if FLASH_BUFFER_ACTIEF
+  // Een vorige, nog niet gestopte stream eerst volledig opslaan.
+  FlushBufferFLASH(this, teller);
+  if (countBufferFLASH[teller] != 0) {
+    // De vorige metingen konden niet worden weggeschreven.
+    // Het schrijfadres blijft staan, zodat een volgende start opnieuw op de juiste plaats probeert.
+    kanaal->VrijgevenRuntime(this);
+    streamingWriteFailed = true;
+    return false;
+  }
+  #endif
+  // De hele chip controleren: ook oude opnames na een herstart of na een onderbroken opname mogen niet geraakt worden.
+  // Een sector is pas vrij als AL zijn bytes 0xFF zijn.
+  // Geen bestaande sector wissen.
+  // Start steeds op de grens na de laatste gebruikte sector.
+  adres[teller] = 0;
+  const uint32_t grootte = kanaal->size();
+  uint8_t record[64];
+  bool gelezen = true;
+  for (uint32_t sector = 0; sector < grootte; sector += SFLASH_SECTOR_SIZE) {
+    bool gewist = true;
+    const uint32_t einde = (grootte - sector < SFLASH_SECTOR_SIZE) ? grootte : sector + SFLASH_SECTOR_SIZE;
+    for (uint32_t index = sector; index < einde; index += sizeof(record)) {
+      const uint32_t aantal = (einde - index < sizeof(record)) ? einde - index : sizeof(record);
+      if (kanaal->readBuffer(index, record, aantal) != aantal) { gelezen = false; break; }
+      for (uint32_t n = 0; n < aantal; ++n) {
+        if (record[n] != 0xFF) { gewist = false; break; }
+      }
+      if (!gewist) break;
+    }
+    if (!gelezen) break;
+    if (!gewist) adres[teller] = einde;
+  }
+  // Bij een leesfout niets schrijven; zeker geen bestaande FLASH wissen.
+  if (!gelezen) adres[teller] = grootte;
+  if (!gelezen || adres[teller] >= grootte) { kanaal->VrijgevenRuntime(this); streamingWriteFailed = true; }
+  else flashStreamingStarted[teller] = true;
+  #if FLASH_BUFFER_ACTIEF
+  countBufferFLASH[teller] = 0;
+  #endif
+  return flashStreamingStarted[teller];
+}
+#endif
+
 void Data::StreamingStart() {
-  if (streamingActief) return;
+  if (streamingActief) {
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+    // Een ander medium houdt de streaming actief: een FLASH-chip die niet startte, opnieuw proberen.
+    if (this->typesActief & DATA_TYPE_FLASH_SPI) {
+      for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) {
+        if (!flashStreamingStarted[teller]) StartFlashStreaming(teller);
+      }
+    }
+#endif
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+    // Na RecordingStop() loopt de streaming nog, maar de microSD-opname niet: die opnieuw starten.
+    if ((this->typesActief & DATA_TYPE_MICROSD_SPI) && !recordingActief) RecordingStart();
+#endif
+    return;
+  }
   bool flashGereserveerd = false;
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  streamingWriteFailed = false;   // alleen een nieuwe streaming begint zonder fout
   if (this->typesActief & DATA_TYPE_FLASH_SPI) {
     for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) {
-      struct DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
-      if (kanaal == nullptr || !kanaal->ReserveerRuntime(this)) continue;
-  #if FLASH_BUFFER_ACTIEF
-      // Een vorige, nog niet gestopte stream eerst volledig opslaan.
-      FlushBufferFLASH(this, teller);
-      if (countBufferFLASH[teller] != 0) {
-        adres[teller] = kanaal->size(); // vorige metingen konden niet worden weggeschreven
-        kanaal->VrijgevenRuntime(this);
-        continue;
-      }
-  #endif
-      // De hele chip controleren: ook oude opnames na een herstart of na
-      // een onderbroken opname mogen niet geraakt worden. Een sector is
-      // pas vrij als AL zijn bytes 0xFF zijn. Geen bestaande sector wissen.
-      // Start steeds op de grens na de laatste gebruikte sector.
-      adres[teller] = 0;
-      const uint32_t grootte = kanaal->size();
-      uint8_t record[64];
-      bool gelezen = true;
-      for (uint32_t sector = 0; sector < grootte; sector += SFLASH_SECTOR_SIZE) {
-        bool gewist = true;
-        const uint32_t einde = (grootte - sector < SFLASH_SECTOR_SIZE) ? grootte : sector + SFLASH_SECTOR_SIZE;
-        for (uint32_t index = sector; index < einde; index += sizeof(record)) {
-          const uint32_t aantal = (einde - index < sizeof(record)) ? einde - index : sizeof(record);
-          if (kanaal->readBuffer(index, record, aantal) != aantal) { gelezen = false; break; }
-          for (uint32_t n = 0; n < aantal; ++n) {
-            if (record[n] != 0xFF) { gewist = false; break; }
-          }
-          if (!gewist) break;
-        }
-        if (!gelezen) break;
-        if (!gewist) adres[teller] = einde;
-      }
-      // Bij een leesfout niets schrijven; zeker geen bestaande FLASH wissen.
-      if (!gelezen) adres[teller] = grootte;
-      if (!gelezen || adres[teller] >= grootte) kanaal->VrijgevenRuntime(this);
-      else flashGereserveerd = true;
-  #if FLASH_BUFFER_ACTIEF
-      countBufferFLASH[teller] = 0;
-  #endif
+      if (StartFlashStreaming(teller)) flashGereserveerd = true;
     }
   }
 #endif
@@ -739,21 +781,29 @@ void Data::StreamingWrite(const Sensor& sensor, uint8_t numberChannel, const Sen
   if (streamingActief && (typesActief & DATA_TYPE_FLASH_SPI)) {
     for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; ++teller) {
       DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
-      if (kanaal == nullptr || !kanaal->actief || !kanaal->IsRuntimeEigenaar(this)) continue;
+      // Alleen een chip die echt gestart is; zonder exclusieve opslag geeft IsRuntimeEigenaar() altijd true.
+      if (!flashStreamingStarted[teller]) continue;
+      // Een gestarte chip die verdween: dit record ontbreekt.
+      if (kanaal == nullptr) { streamingWriteFailed = true; continue; }
+      // Een gestarte chip die uitviel of niet meer toegankelijk is: dit record ontbreekt.
+      if (!kanaal->actief || !kanaal->IsRuntimeEigenaar(this)) { streamingWriteFailed = true; continue; }
 #if FLASH_BUFFER_ACTIEF
       if (bufferFLASH[teller] != nullptr && sizeBufferFLASH[teller] >= sizeof(record)) {
         if (countBufferFLASH[teller] + sizeof(record) > sizeBufferFLASH[teller]) FlushBufferFLASH(this, teller);
-        if (countBufferFLASH[teller] + sizeof(record) > sizeBufferFLASH[teller]) continue;
+        // Past het record na de flush nog niet in de buffer, dan ontbreekt het.
+        if (countBufferFLASH[teller] + sizeof(record) > sizeBufferFLASH[teller]) { streamingWriteFailed = true; continue; }
         memcpy(bufferFLASH[teller] + countBufferFLASH[teller], record, sizeof(record));
         countBufferFLASH[teller] += sizeof(record);
         continue;
       }
       FlushBufferFLASH(this, teller); // kleine buffer niet gebruiken voor een groter record
 #endif
-      if (adres[teller] > kanaal->size() || sizeof(record) > kanaal->size() - adres[teller]) continue;
+      // Chip vol of een mislukte write: dit record ontbreekt.
+      if (adres[teller] > kanaal->size() || sizeof(record) > kanaal->size() - adres[teller]) { streamingWriteFailed = true; continue; }
       // Bestaande sectoren en voorgaande sessies nooit wissen.
       if (kanaal->writeBuffer(adres[teller], record, sizeof(record)) == sizeof(record))
         adres[teller] += sizeof(record);
+      else streamingWriteFailed = true;
     }
   }
 #endif
@@ -761,17 +811,21 @@ void Data::StreamingWrite(const Sensor& sensor, uint8_t numberChannel, const Sen
   if (recordingActief && (typesActief & DATA_TYPE_MICROSD_SPI)) {
     for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; ++teller) {
       DataMICROSDviaSPI* kanaal = MICROSDviaSPI[teller];
-      if (kanaal == nullptr || !kanaal->actief || !kanaal->IsRuntimeEigenaar(this)) continue;
+      // Een geconfigureerde kaart die tijdens de opname niet toegankelijk is: dit record ontbreekt.
+      if (kanaal == nullptr || !kanaal->actief || !kanaal->IsRuntimeEigenaar(this)) { recordingWriteFailed = true; continue; }
       // De getypeerde opname houdt één bestand open per recording-sessie.
       // Geen bestandsopening of -sluiting per sample.
       if (!FileRecordingSensor[teller])
         FileRecordingSensor[teller] = kanaal->open("SENSOR.DAT", O_WRONLY | O_CREAT | O_APPEND);
-      if (!FileRecordingSensor[teller]) continue;
-      FileRecordingSensor[teller].write(record, sizeof(record));
+      // Een bestand dat niet opengaat of een mislukte write: dit record ontbreekt, en RecordingStop() meldt dat.
+      if (!FileRecordingSensor[teller]) { recordingWriteFailed = true; continue; }
+      // Zoals bij FLASH: een mislukte write telt niet mee als geschreven record.
+      if (FileRecordingSensor[teller].write(record, sizeof(record)) != sizeof(record)) { recordingWriteFailed = true; continue; }
       // Een record telt als regel: flushen na DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL records of na DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS.
       if (++aantalRegelsSindsFlush[teller] >= DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL ||
           millis() - timeLastFlush[teller] >= DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS) {
-        FileRecordingSensor[teller].flush();
+        // sync() in plaats van flush(), want flush() geeft geen resultaat.
+        if (!FileRecordingSensor[teller].sync()) recordingWriteFailed = true;
         aantalRegelsSindsFlush[teller] = 0;
         timeLastFlush[teller] = millis();
       }
@@ -798,6 +852,32 @@ bool Data::StreamingRead(const Sensor& sensor, uint8_t numberChannel, SensorQueu
   const uint32_t id = sensor.vasteRouteIdentiteit;   // één keer berekend in Sensor::activeren()
 #if FLASH_BUFFER_ACTIEF
   for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; ++teller) FlushBufferFLASH(this, teller);
+  // Na een mislukte flush staan de nieuwste records nog in RAM: daar eerst zoeken, van nieuw naar oud.
+  for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; ++teller) {
+    if (!(typesActief & DATA_TYPE_FLASH_SPI) || bufferFLASH[teller] == nullptr) continue;
+    uint8_t record[15];
+    for (uint16_t index = countBufferFLASH[teller]; index >= sizeof(record); index -= sizeof(record)) {
+      memcpy(record, bufferFLASH[teller] + index - sizeof(record), sizeof(record));
+      if (record[0] != 0x47 || record[1] != 0x42 ||
+          record[2] != static_cast<uint8_t>(static_cast<uint16_t>(sensor.component)) ||
+          record[3] != static_cast<uint8_t>(static_cast<uint16_t>(sensor.component) >> 8) ||
+          record[4] != static_cast<uint8_t>(id) || record[5] != static_cast<uint8_t>(id >> 8) ||
+          record[6] != static_cast<uint8_t>(id >> 16) || record[7] != static_cast<uint8_t>(id >> 24) ||
+          record[8] != numberChannel || record[9] > 2) continue;
+      uint8_t controle = 0;
+      for (uint8_t n = 0; n < 14; ++n) controle ^= record[n];
+      if (controle != record[14]) continue;
+#if DATA_QUEUE_OR_STACK_ACTIEF
+      channel.firstIndex = 0;
+      channel.countNumber = 0;
+#endif
+      channel.valueType = record[9];
+      if (channel.valueType == 0) { int32_t waarde; memcpy(&waarde, record + 10, 4); channel.lastValue = static_cast<int>(waarde); }
+      else if (channel.valueType == 1) memcpy(&channel.lastValueFloat, record + 10, 4);
+      else memcpy(&channel.lastValueUInt32, record + 10, 4);
+      return true;
+    }
+  }
 #endif
   for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; ++teller) {
     DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
@@ -860,6 +940,9 @@ bool Data::StreamingRead(const Sensor& sensor, uint8_t numberChannel, SensorQueu
 void Data::StreamingStop() {
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
   for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) {
+    // Een gestarte chip die intussen uitviel, verdween of zijn eigendom verloor: de streaming is niet volledig.
+    if (flashStreamingStarted[teller] && (FLASHviaSPI[teller] == nullptr || !FLASHviaSPI[teller]->actief || !FLASHviaSPI[teller]->IsRuntimeEigenaar(this))) streamingWriteFailed = true;
+    flashStreamingStarted[teller] = false;   // na het stoppen krijgt geen enkele chip nog records
     DataFLASHviaSPI* kanaal = FLASHviaSPI[teller];
     if (kanaal == nullptr || !kanaal->IsRuntimeEigenaar(this)) continue;
 #if FLASH_BUFFER_ACTIEF
@@ -886,16 +969,18 @@ void Data::RecordingStart() {
   recordingActief = false;
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
   if (!(this->typesActief & DATA_TYPE_MICROSD_SPI)) return;
+  recordingWriteFailed = false;   // een nieuwe opname begint zonder fout
 
   for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
     struct DataMICROSDviaSPI* kanaal = MICROSDviaSPI[teller];
-    if (kanaal == nullptr || !kanaal->ReserveerRuntime(this)) continue;
+    // Elke geconfigureerde kaart moet deelnemen; een kaart die ontbreekt of niet start, maakt de opname onvolledig.
+    if (kanaal == nullptr || !kanaal->ReserveerRuntime(this)) { recordingWriteFailed = true; continue; }
     if (!FileRecordingSensor[teller])
       FileRecordingSensor[teller] = kanaal->open("SENSOR.DAT", O_WRONLY | O_CREAT | O_APPEND);
     aantalRegelsSindsFlush[teller] = 0;
     timeLastFlush[teller] = millis();   // de flushtijd telt vanaf de start van de opname
     if (FileRecordingSensor[teller]) recordingActief = true;
-    else kanaal->VrijgevenRuntime(this);
+    else { kanaal->VrijgevenRuntime(this); recordingWriteFailed = true; }
   }
 #endif
 }
@@ -920,21 +1005,25 @@ bool Data::RecordRead(const Sensor& sensor, uint8_t numberChannel, SensorQueueOr
       // Elke header is GA (RUN85, 12 bytes) of GB (RUN86, 15 bytes).
       // Daardoor blijft een bestand met beide recordversies correct doorzoekbaar.
       if (bestand.read(record, 2) != 2) break;
-      if (record[0] != 0x47 || (record[1] != 0x41 && record[1] != 0x42)) continue;
+      // Geen header: één byte verder zoeken, zodat een verschoven record na een onvolledig record weer gevonden wordt.
+      if (record[0] != 0x47 || (record[1] != 0x41 && record[1] != 0x42)) { bestand.seekCur(-1); continue; }
       if (record[1] == 0x41) {
         if (bestand.read(record + 2, 10) != 10) break;
         continue; // runtime-ID uit RUN85 niet als blijvende identificatie gebruiken
       }
       if (bestand.read(record + 2, 13) != 13) break;
+      // Eerst de checksum: een foute checksum is geen echt record (bv. na een onderbroken write).
+      // Dan één byte na het begin van deze header opnieuw zoeken.
+      uint8_t controle = 0;
+      for (uint8_t n = 0; n < 14; ++n) controle ^= record[n];
+      if (controle != record[14]) { bestand.seekCur(-14); continue; }
+      // Een geldig record van een andere sensor of een ander channel: gewoon verder.
       if (record[0] != 0x47 || record[1] != 0x42 ||
           record[2] != static_cast<uint8_t>(static_cast<uint16_t>(sensor.component)) ||
           record[3] != static_cast<uint8_t>(static_cast<uint16_t>(sensor.component) >> 8) ||
           record[4] != static_cast<uint8_t>(id) || record[5] != static_cast<uint8_t>(id >> 8) ||
           record[6] != static_cast<uint8_t>(id >> 16) || record[7] != static_cast<uint8_t>(id >> 24) ||
           record[8] != numberChannel || record[9] > 2) continue;
-      uint8_t controle = 0;
-      for (uint8_t n = 0; n < 14; ++n) controle ^= record[n];
-      if (controle != record[14]) continue;
 #if DATA_QUEUE_OR_STACK_ACTIEF
       channel.firstIndex = 0;
       channel.countNumber = 0;
@@ -954,19 +1043,39 @@ bool Data::RecordRead(const Sensor& sensor, uint8_t numberChannel, SensorQueueOr
   return false;
 }
 
-void Data::RecordingStop() {
+bool Data::RecordingStop() {
+  // true = er liep een opname, en alles wat open stond, is volledig weggeschreven en gesloten.
+  // Zonder lopende opname is er niets bewaard: false.
+  bool gelukt = recordingActief;
   recordingActief = false;
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
   for (uint8_t teller = 0; teller < DATA_LAYER_MICROSD_SPI_AANTAL; teller++) {
+    DataMICROSDviaSPI* kanaal = MICROSDviaSPI[teller];
     if (FileRecordingSensor[teller]) {
-      FileRecordingSensor[teller].flush();
-      FileRecordingSensor[teller].close();
+      if (kanaal == nullptr || !kanaal->actief) {
+        // Uitgeschakelde kaart (bv. een onbetrouwbare CS): geen sync() of close(), want die schrijven naar de kaart.
+        // Zonder kaartobject (afgemeld) bestaat de kaart van dit bestand niet meer; ook dan geen kaarttoegang.
+        // Het bestandsobject alleen in het geheugen loslaten; de toewijzing doet geen kaarttoegang (SdFat - Adafruit Fork 2.3.103).
+        FileRecordingSensor[teller] = File32();
+        gelukt = false;
+      } else {
+        if (!FileRecordingSensor[teller].sync()) gelukt = false;
+        // De CS kan tijdens sync() uitvallen; dan niet meer sluiten.
+        if (!kanaal->actief) {
+          FileRecordingSensor[teller] = File32();
+          gelukt = false;
+        } else if (!FileRecordingSensor[teller].close()) gelukt = false;
+        // Ook een CS-fout tijdens close() maakt de stop onvolledig.
+        if (!kanaal->actief) gelukt = false;
+      }
       aantalRegelsSindsFlush[teller] = 0;
     }
-    DataMICROSDviaSPI* kanaal = MICROSDviaSPI[teller];
     if (kanaal != nullptr) kanaal->VrijgevenRuntime(this);
   }
+  // Een mislukte write of sync tijdens de opname: niet alle records zijn bewaard.
+  if (recordingWriteFailed) gelukt = false;
 #endif
+  return gelukt;
 }
 
 #endif

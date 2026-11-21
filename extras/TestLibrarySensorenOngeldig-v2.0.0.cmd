@@ -13,6 +13,8 @@ exit /b %errorlevel%
 :EXPECT_FAIL
 set "TEST_FQBN=arduino:renesas_uno:minima"
 set "TEST_BOARD_VERSION=BOARD_UNO_R4_MINIMA"
+echo !TEST_FLAGS! | findstr /C:"BOARD_VERSION" >nul
+if not errorlevel 1 set "TEST_BOARD_VERSION="
 call "%~dp0TestLibraryCommonOngeldig.cmd" --VOER_DEZE_ONGELDIGE_TEST_UIT
 goto :eof
 
@@ -43,12 +45,6 @@ set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_PIEZO\Sensor_PIEZO.in
 set "TEST_NAAM=Sensor PIEZO: maximaal een exemplaar"
 set "TEST_FLAGS=-DSENSOR_PIEZO_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set "VERWACHTE_FOUT=SENSOR_PIEZO_AANTAL moet 0 of 1 zijn."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_WATER\Sensor_WATER.ino"
-set "TEST_NAAM=Sensor WATER: maximaal een exemplaar"
-set "TEST_FLAGS=-DSENSOR_WATER_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=SENSOR_WATER_AANTAL moet 0 of 1 zijn."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_ADXL345\Sensor_ADXL345.ino"
@@ -175,12 +171,6 @@ set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_LD2450\Sensor_LD2450.
 set "TEST_NAAM=Sensor LD2450: maximaal een exemplaar"
 set "TEST_FLAGS=-DSENSOR_LD2450_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set "VERWACHTE_FOUT=SENSOR_LD2450_AANTAL moet 0 of 1 zijn."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_AS608\Sensor_AS608.ino"
-set "TEST_NAAM=Sensor AS608: maximaal een exemplaar"
-set "TEST_FLAGS=-DSENSOR_AS608_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=SENSOR_AS608_AANTAL moet 0 of 1 zijn."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_NeuroSkyTGAM\Sensor_NeuroSkyTGAM.ino"
@@ -454,6 +444,12 @@ set "TEST_FLAGS=-DSENSOR_INMP441_AANTAL=2"
 set "VERWACHTE_FOUT=SENSOR_INMP441_AANTAL moet 0 of 1 zijn."
 call :EXPECT_FAIL
 
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=SENSOR_MS3625_AANTAL: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_MS3625_AANTAL=2"
+set "VERWACHTE_FOUT=SENSOR_MS3625_AANTAL moet 0 of 1 zijn."
+call :EXPECT_FAIL
+
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MCU6701_Analoog\Sensor_MCU6701_Analoog.ino"
 set "TEST_NAAM=SENSOR_MCU6701_AANTAL: ongeldige configuratie"
 set "TEST_FLAGS=-DSENSOR_MCU6701_AANTAL=2"
@@ -482,12 +478,6 @@ set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_TTP223_Metingen\Senso
 set "TEST_NAAM=SENSOR_TTP223_AANTAL: ongeldige configuratie"
 set "TEST_FLAGS=-DSENSOR_TTP223_AANTAL=2"
 set "VERWACHTE_FOUT=SENSOR_TTP223_AANTAL moet 0 of 1 zijn."
-call :EXPECT_FAIL
-
-set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_WATER\Sensor_WATER.ino"
-set "TEST_NAAM=SENSOR_WATER_ADC_BEREIK_MILLIVOLT: ongeldige configuratie"
-set "TEST_FLAGS=-DSENSOR_WATER_ADC_BEREIK_MILLIVOLT=0"
-set "VERWACHTE_FOUT=SENSOR_WATER_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV)."
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_AD8232\Sensor_AD8232.ino"
@@ -520,6 +510,12 @@ set "TEST_FLAGS=-DSENSOR_INMP441_SAMPLEFREQUENTIE_HZ=7999 -DDATA_LAYER_CONFIG=DA
 set "VERWACHTE_FOUT=SENSOR_INMP441_SAMPLEFREQUENTIE_HZ moet tussen 8000 en 48000 Hz liggen."
 call :EXPECT_FAIL
 
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MS3625\Sensor_MS3625.ino"
+set "TEST_NAAM=SENSOR_MS3625_SAMPLEFREQUENTIE_HZ: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_MS3625_SAMPLEFREQUENTIE_HZ=7999 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_MS3625_SAMPLEFREQUENTIE_HZ moet tussen 8000 en 48000 Hz liggen."
+call :EXPECT_FAIL
+
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_BioAmpEXGPill\Sensor_BioAmpEXGPill.ino"
 set "TEST_NAAM=SENSOR_BIOAMPEXGPILL_MEETMETHODE: ongeldige configuratie"
 set "TEST_FLAGS=-DSENSOR_BIOAMPEXGPILL_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DSENSOR_BIOAMPEXGPILL_MEETMETHODE=99 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
@@ -527,9 +523,136 @@ set "VERWACHTE_FOUT=Onbekende SENSOR_BIOAMPEXGPILL_MEETMETHODE"
 call :EXPECT_FAIL
 
 set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MS3625\Sensor_MS3625.ino"
-set "TEST_NAAM=INMP441 via I2S: UNO R4 niet ondersteund"
-set "TEST_FLAGS=-DSENSOR_INMP441_AANTAL=1 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
-set "VERWACHTE_FOUT=INMP441 via I2S is in het FrameWork uitsluitend voor ESP32-S3 ARDI32 of DEV voorzien."
+set "TEST_NAAM=MS3625 via I2S: UNO R4 niet ondersteund"
+set "TEST_FLAGS=-DSENSOR_MS3625_AANTAL=1 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=INMP441 en MS3625 vereisen I2S; de RA4M1 van de UNO R4 heeft geen I2S-interface."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MAX4466\Sensor_MAX4466.ino"
+set "TEST_NAAM=Sensor_MAX4466: EXTENDER_ADS1115_DATARATE te traag"
+set "TEST_FLAGS=-DSENSOR_MAX4466_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DEXTENDER_ADS1115_DATARATE=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE is te traag voor SENSOR_MAX4466_SAMPLE_RATE_HZ; verhoog EXTENDER_ADS1115_DATARATE of verlaag de samplefrequentie."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MAX9814\Sensor_MAX9814.ino"
+set "TEST_NAAM=Sensor_MAX9814: EXTENDER_ADS1115_DATARATE te traag"
+set "TEST_FLAGS=-DSENSOR_MAX9814_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DEXTENDER_ADS1115_DATARATE=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE is te traag voor SENSOR_MAX9814_SAMPLE_RATE_HZ; verhoog EXTENDER_ADS1115_DATARATE of verlaag de samplefrequentie."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_BioAmpEXGPill_EMG_Envelop\Sensor_BioAmpEXGPill_EMG_Envelop.ino"
+set "TEST_NAAM=Sensor_BioAmpEXGPill_EMG_Envelop: EXTENDER_ADS1115_DATARATE te traag"
+set "TEST_FLAGS=-DSENSOR_BIOAMPEXGPILL_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DEXTENDER_ADS1115_DATARATE=4 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DSENSOR_BIOAMPEXGPILL_MEETMETHODE=BIOAMPEXGPILL_MEETMETHODE_EMG"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE is te traag voor de vaste EMG-frequentie van 500 Hz; verhoog EXTENDER_ADS1115_DATARATE."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_BioAmpEXGPill_EOG_Knipperen\Sensor_BioAmpEXGPill_EOG_Knipperen.ino"
+set "TEST_NAAM=Sensor_BioAmpEXGPill_EOG_Knipperen: EXTENDER_ADS1115_DATARATE te traag"
+set "TEST_FLAGS=-DSENSOR_BIOAMPEXGPILL_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DEXTENDER_ADS1115_DATARATE=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DSENSOR_BIOAMPEXGPILL_MEETMETHODE=BIOAMPEXGPILL_MEETMETHODE_EOG"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE is te traag voor de vaste EOG-frequentie van 75 Hz; verhoog EXTENDER_ADS1115_DATARATE."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_BioAmpEXGPill_ECG_Hartslag\Sensor_BioAmpEXGPill_ECG_Hartslag.ino"
+set "TEST_NAAM=Sensor_BioAmpEXGPill_ECG_Hartslag: EXTENDER_ADS1115_DATARATE te traag"
+set "TEST_FLAGS=-DSENSOR_BIOAMPEXGPILL_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DEXTENDER_ADS1115_DATARATE=3 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DSENSOR_BIOAMPEXGPILL_MEETMETHODE=BIOAMPEXGPILL_MEETMETHODE_ECG"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE is te traag voor de vaste ECG-frequentie van 125 Hz; verhoog EXTENDER_ADS1115_DATARATE."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_BioAmpEXGPill\Sensor_BioAmpEXGPill.ino"
+set "TEST_NAAM=Sensor_BioAmpEXGPill: EXTENDER_ADS1115_DATARATE te traag"
+set "TEST_FLAGS=-DSENSOR_BIOAMPEXGPILL_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DEXTENDER_ADS1115_DATARATE=3 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_DATARATE is te traag voor de samplefrequentie van de gekozen SENSOR_BIOAMPEXGPILL_MEETMETHODE; verhoog EXTENDER_ADS1115_DATARATE."
+call :EXPECT_FAIL
+
+:: De twee volgende tests controleren alleen de #error; ze compileren met de UNO R4-core en een andere BOARD_VERSION, niet met de core van dat board.
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MS3625\Sensor_MS3625.ino"
+set "TEST_NAAM=MS3625 via I2S: UNO Q niet ondersteund"
+set "TEST_FLAGS=-DSENSOR_MS3625_AANTAL=1 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DBOARD_VERSION=BOARD_UNO_Q"
+set "VERWACHTE_FOUT=INMP441 en MS3625 worden op de UNO Q momenteel niet ondersteund: er is nog geen werkende I2S-implementatie aangetoond voor de gebruikte Arduino-core."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_MS3625\Sensor_MS3625.ino"
+set "TEST_NAAM=MS3625 via I2S: Nucleo F401RE niet ondersteund"
+set "TEST_FLAGS=-DSENSOR_MS3625_AANTAL=1 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE -DBOARD_VERSION=BOARD_STM32F4_NUCLEO64_F401RE"
+set "VERWACHTE_FOUT=INMP441 en MS3625 worden op de Nucleo F401RE niet ondersteund: de STM32-core heeft geen standaard I2S-library."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_LM35DZ\Sensor_LM35DZ.ino"
+set "TEST_NAAM=SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_LM35DZ_AANTAL=1 -DEXTENDER_ADS1115_AANTAL=1 -DSENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV)."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_OT3686_Metingen\Sensor_OT3686_Metingen.ino"
+set "TEST_NAAM=Sensor OT3686: maximaal een exemplaar"
+set "TEST_FLAGS=-DSENSOR_OT3686_AANTAL=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_OT3686_AANTAL moet 0 of 1 zijn (één native interrupt per Sensor)."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_OT3686_Metingen\Sensor_OT3686_Metingen.ino"
+set "TEST_NAAM=SENSOR_OT3686_AANTAL_SLEUVEN: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_OT3686_AANTAL=1 -DSENSOR_OT3686_AANTAL_SLEUVEN=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_OT3686_AANTAL_SLEUVEN moet minstens 1 zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_OT3686_Metingen\Sensor_OT3686_Metingen.ino"
+set "TEST_NAAM=SENSOR_OT3686_MEETINTERVAL_MS: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_OT3686_AANTAL=1 -DSENSOR_OT3686_MEETINTERVAL_MS=5 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_OT3686_MEETINTERVAL_MS moet minstens 10 zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_TTP223_Metingen\Sensor_TTP223_Metingen.ino"
+set "TEST_NAAM=SENSOR_TTP223_DIRECTE_MODUS: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_TTP223_AANTAL=1 -DSENSOR_TTP223_DIRECTE_MODUS=2 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_TTP223_DIRECTE_MODUS moet 0 of 1 zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_ADS7828\Sensor_FsrRfp_ADS7828.ino"
+set "TEST_NAAM=EXTENDER_ADS7828_REFERENTIE_MILLIVOLT: ongeldige configuratie"
+set "TEST_FLAGS=-DEXTENDER_ADS7828_AANTAL=1 -DEXTENDER_ADS7828_REFERENTIE_MILLIVOLT=6000 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=EXTENDER_ADS7828_REFERENTIE_MILLIVOLT moet binnen 1..5250 mV liggen."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_AD8232_ADS7953\Sensor_AD8232_ADS7953.ino"
+set "TEST_NAAM=EXTENDER_ADS7953_VOEDING_MILLIVOLT: ongeldige configuratie"
+set "TEST_FLAGS=-DEXTENDER_ADS7953_AANTAL=1 -DSENSOR_AD8232_AANTAL=1 -DEXTENDER_ADS7953_VOEDING_MILLIVOLT=1000 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=EXTENDER_ADS7953_VOEDING_MILLIVOLT moet 0 of 2700..5250 mV zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp_CD74HC4067\Sensor_FsrRfp_CD74HC4067.ino"
+set "TEST_NAAM=EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT: ongeldige configuratie"
+set "TEST_FLAGS=-DEXTENDER_CD74HC4067_AANTAL=1 -DEXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT=6000 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT moet 0 of maximaal 5500 mV zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_HX711\Sensor_HX711.ino"
+set "TEST_NAAM=SENSOR_HX711_TARE_SAMPLE_COUNT: ongeldige configuratie"
+set "TEST_FLAGS=-DSENSOR_HX711_AANTAL=1 -DSENSOR_HX711_TARE_SAMPLE_COUNT=0 -DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
+set "VERWACHTE_FOUT=SENSOR_HX711_TARE_SAMPLE_COUNT moet tussen 1 en 255 liggen."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=NATIVE_ADC_RESOLUTIE_BITS buiten 1 tot 16"
+set "TEST_FLAGS=-DNATIVE_ADC_RESOLUTIE_BITS=0"
+set "VERWACHTE_FOUT=NATIVE_ADC_RESOLUTIE_BITS moet tussen 1 en 16 liggen."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=FSR_RFP_PROBE_SET_2 met een onbekende probe"
+set "TEST_FLAGS=-DFSR_RFP_PROBE_SET_2=99"
+set "VERWACHTE_FOUT=FSR_RFP_PROBE_SET_2 moet FSR_RFP_PROBE_RFP602, FSR_RFP_PROBE_FSR400 of FSR_RFP_PROBE_FSR402 zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=FSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1 met dalende aantallen"
+set "TEST_FLAGS=-DEXTENDER_ADS1115_AANTAL=1 -DFSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1={{5,3,5,10,20},{0UL,100UL,500UL,2000UL,10000UL},ScreenData::TYPE_FATAL,ScreenData::TYPE_CRITICAL}"
+set "VERWACHTE_FOUT=FSR_RFP_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Systeem\GedeeldeBus\Sensoren\Sensor_FsrRfp\Sensor_FsrRfp.ino"
+set "TEST_NAAM=FSR_RFP_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1 met dalende aantallen"
+set "TEST_FLAGS=-DEXTENDER_ADS1115_AANTAL=1 -DFSR_RFP_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1={{5,3,5,10,20},{0UL,100UL,500UL,2000UL,10000UL},ScreenData::TYPE_FATAL,ScreenData::TYPE_CRITICAL}"
+set "VERWACHTE_FOUT=FSR_RFP_CHANNEL_1_RUNTIME_DREMPELS_FOUTNIVEAU_SET_1: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL."
 call :EXPECT_FAIL
 
 echo Totaal !TESTS! - OK !OK! - FOUT !FAIL!

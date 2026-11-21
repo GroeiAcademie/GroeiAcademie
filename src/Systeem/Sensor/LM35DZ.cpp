@@ -14,7 +14,7 @@ void LM35DZ::MeetwaardeVerwerken(int32_t waarde, bool gelukt) {
 }
 
 float LM35DZ::TemperatuurC() {
-  if (!laatsteMetingGeldig || laatsteEffectiefBereikMillivolt == 0) return NAN;
+  if (!actief || !laatsteMetingGeldig || laatsteEffectiefBereikMillivolt == 0) return NAN;
   const int32_t waarde = laatsteMeetwaarde;
   // LM35: 10 mV / graad C. Gebruik de werkelijke ADC-fullscale,
   // niet het gevraagde maximale sensorsignaal (bv. 1500 versus 2048 mV).

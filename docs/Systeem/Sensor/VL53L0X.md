@@ -5,7 +5,7 @@
 - Broncode: `src/Systeem/Sensor/VL53L0X.h` en `VL53L0X.cpp`.
 - C++-component: `SensorVL53L0X`, afgeleid van `Sensor`.
 - Parent: `HardwareResourceTypeI2C*` in de constructor.
-- Componentcode: `VL53L0X` (0x93).
+- Componentcode: `VL53L0X` (0x8F).
 - Configuratie: `src/Configuratie/Sensoren/ConfigVL53L0X_template.h`; de optionele persoonlijke versie heet telkens zonder `_template`.
 - Data-kanalen: 1.
 - Externe library: `Adafruit_VL53L0X.h`.
@@ -51,7 +51,7 @@ SensorVL53L0X(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigVL53L0X.h` (het aanwezige `src/Configuratie/Sensoren/ConfigVL53L0X_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_VL53L0X_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_VL53L0X_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
+  - `SENSOR_VL53L0X_AANTAL`: sjabloonwaarde `1`.
   - `I2C_ADDRESS_SENSOR_VL53L0X_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -70,12 +70,44 @@ GedeeldeBusNewComponent<SensorVL53L0X>(&apparaat,GedeeldeBusComponent::VL53L0X);
 
 **Technische handleiding:** https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x
 
-## Runtime-meetgedrag
+### Niet-blokkerende afstandsmeting
 
-`SensorVL53L0X::LeesHoofdwaarde(float&)` start een meting met `vl.startRange()` en retourneert dan `false` met `waarde = NAN`. Volgende aanroepen wachten zonder blokkerende lus via `vl.isRangeComplete()`. Is de meting nog niet voltooid binnen `tijdslimietMeting`, dan wordt de status gereset en de mislukking als runtime-toegang verwerkt. De tijdslimiet wordt bij `Activeren()` afgeleid van het meetbudget indien geldig, met een terugval van 200 ms. Na voltooiing worden API-status, rangesstatus en resultaat (`!= 0xFFFF`) gecontroleerd; alleen dan levert de functie een afstandswaarde. `false` terwijl de tijdslimiet nog niet is verstreken is een normale wachttoestand.
+`LeesHoofdwaarde(float&)` start met `startRange()` eerst een enkele afstandsmeting en geeft bij die start `false` terug. Een volgende aanroep leest de afstand in millimeter pas als `isRangeComplete()` waar is en de status geldig is. Bij een mislukte start, foutstatus of overschreden meettijd wordt `false` geretourneerd; een geslaagde afstand gaat naar Data-kanaal 1 als Data ingeschakeld is. De meettijd is gebaseerd op het geldige timingbudget uit de driver, met een terugvalwaarde als dit niet betrouwbaar gelezen kon worden.
 
 ## Testen
 
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_VL53L0X/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Aanvullende Sensor × Extender-testvoorbeelden
+
+De onderstaande `.ino`-bestanden behoren tot de huidige v2.0.0-voorbeelden. Hun aanwezigheid is gecontroleerd; compilatie en fysieke hardwarevalidatie zijn hier nog **niet** aangetoond.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_VL53L0X_TCA9548A/Sensor_VL53L0X_TCA9548A.ino`
+
+### Functionele Sensor × Extender-voorbeelden
+
+De onderstaande voorbeelden bevatten **meetaanroepen na de activering**. Een getoonde waarde is geen bewijs van meetnauwkeurigheid of van een geslaagde hardwaretest.
+
+- **Fysieke test:** Verplaats een voorwerp; controleer afstand in mm.
+- **Huidige reikwijdte:** de `.ino` gebruikt uitsluitend reeds bestaande FrameWork-functies; niet-beschikbare meetkanalen, kalibraties of externe functies zijn niet toegevoegd.
+
+**Voorbeelden:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_VL53L0X_TCA9548A/Sensor_VL53L0X_TCA9548A.ino`
+
+**Validatie:** Arduino-compilatie, fysieke test, kalibratie en meetkwaliteitsvalidatie zijn hier nog niet aangetoond.
+
+## Native meetvoorbeeld
+
+`examples/Systeem/GedeeldeBus/Sensoren/Sensor_VL53L0X/Sensor_VL53L0X.ino` voert na de lifecycle daadwerkelijk uitlezingen uit via de bestaande Sensor-API.
+Gemeten of weergegeven in dit voorbeeld: **Afstand (mm)**.
+De seriële uitvoer wordt beperkt; de Sensor-uitlezing blijft in `loop()` plaatsvinden.
+Dit bevestigt bij geslaagde hardwaretests de ruwe of rechtstreeks beschikbare meetwaarde, niet automatisch alle fysische kanalen, kalibratie of nauwkeurigheid.
+Compilatie en fysieke meting zijn nog niet bevestigd.
+
+## Hulppinnen en routes via Extenders
+
+- `ReadGPIO1(bool& waarde)`: GPIO1 lezen via de tweede Extender (mixed); true = meting klaar (laag actief). `Activeren()` stelt GPIO1 in met `setGpioConfig()` (enkele meting, nieuwe meting klaar).
+- `WriteXSHUT(bool hoog)`: XSHUT hoog (aan) of laag (uit); na weer hoog opnieuw activeren.
+- Mixed constructor: `SensorVL53L0X(apparaat, component, extender, np_GPIO1, np_XSHUT)`. Vereist `GEDEELDE_BUS_MIXED_PINS`.

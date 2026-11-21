@@ -13,7 +13,7 @@ Huidige overerving:
 struct ExtenderSC16IS752SPI : HardwareResourceTypeSPI
 ```
 
-De huidige klasse voegt voornamelijk GedeeldeBus-/resource-integratie toe; er is geen aanvullende publieke chipspecifieke API geïnventariseerd die hier apart moet worden gedocumenteerd.
+Naast GedeeldeBus-resourcebeheer biedt de klasse de UART-parentfuncties `GetExtenderStream()` en `StartExtenderUART()`, de eigen GPIO-registerhelpers `SC16IS752LeesRegister()` en `SC16IS752SchrijfRegister()`, de digitale parent-methoden `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`, en de `ExtenderOneWire*`-functies voor 1-Wire via UART.
 
 ## UART-kanalen
 
@@ -110,3 +110,37 @@ ExtenderSC16IS752SPI extender(
 
 - Loopback op UART-kanaal A en B, gelijktijdig, met korte/lange pakketten, verschillende baudrates, volle RX/FIFO-buffer, ontbrekende bytes en SPI-storing. Vergelijk exacte bytes en controleer CS, IRQ en reset na herstel.
 - **Status:** fysieke proef vereist; nog geen hardwarebewijs.
+
+## Digitale pinnen (GPIO) en 1-Wire
+
+- GPIO0..GPIO7 (`EP_GPIO0..EP_GPIO7`) via eigen registers (IODir 0x0A, IOState 0x0B): `SC16IS752LeesRegister`, `SC16IS752SchrijfRegister`.
+- 1-Wire via een UART-channel (Maxim AN214): het 1-Wire-contract (`ExtenderOneWire*`); één apparaat per channel (READ ROM). Leden: `oneWireChannel`, `oneWireReadROMsearchDone`; functie `OneWireUARTbits`.
+
+## Kristal en RESET
+
+- `EXTENDER_SC16IS752_BRONKLOK_HZ` (SystemConfig.h, ConfigSC16IS752SPI.h): de werkelijke kristal- of klokfrequentie aan XTAL1, standaard 14745600 Hz. Een module met een ander kristal (bv. 1843200 of 3072000 Hz) heeft deze instelling nodig, anders klopt de baud niet.
+- `Activeren()` zet de RESET-pin hoog (actief laag), als ze ingesteld is.
+
+## Controle
+
+- `StartExtenderUART()`: `setBaudrate()` geeft geen resultaat (Appnostic_SC16IS752 1.0.0); daarom wordt daarna het scratchpadregister van het gekozen kanaal geschreven en teruggelezen. `ping()` alleen volstaat niet voor kanaal B.
+
+## Diagnose bij een mislukte activering
+
+- Een mislukte chipactivering roept de bestaande `FoutDiagnoseSPI()` aan, zoals bij de andere SPI-Extenders. De fout verschijnt als gewone GB-melding (GB301, met DEBUG GB304).
+- De controle op de parent blijft een gewone `return false`.
+
+## 1-Wire: leesfout bij de echo
+
+- `OneWireUARTbits()` bewaart de waarde van `read()` als `int`; een negatieve waarde (geen geldige byte) telt als mislukte echo en niet als aanwezigheidspuls bij `ExtenderOneWireReset()`.
+
+## CS altijd native
+
+- De library stuurt de CS-pin zelf aan met `pinMode()` en `digitalWrite()`, buiten `WriteCS()` van het FrameWork om.
+- De CS van deze Extender moet daarom een native pin van het board zijn. Een CS via een GPIO-Extender (`ConnectCStoExtender()`) werkt hier niet. Het FrameWork biedt daarvoor ook geen instelling: alleen FLASH en microSD ondersteunen een CS via een Extender.
+
+## Baud en 1-Wire
+
+- Na `setBaudrate()` schrijft en leest de library het scratchpad van het gekozen channel. `ping()` is daarvoor niet bruikbaar, want `ping()` test altijd channel A.
+- De ingestelde baud zelf wordt niet teruggelezen. Een juiste baud hangt af van de ingestelde kristalfrequentie.
+- 1-Wire via een UART-channel: vóór elke overdracht worden hoogstens 128 oude bytes weggegooid. Raakt de buffer niet leeg of mislukt een lezing, dan mislukt de 1-Wire-actie.

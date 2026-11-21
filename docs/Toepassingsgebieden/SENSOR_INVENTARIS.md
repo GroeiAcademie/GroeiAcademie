@@ -120,8 +120,6 @@ Voor huidtemperatuur moet nog per sensor worden bepaald welke werkelijk geschikt
 * LM3914, in jouw lijst aangeduid als lichtsensor
 * MAX30102, optische PPG (zie Hartslag, HRV en hartcoherentie)
 * VL53L0X en VL6180X, optische afstand (zie Aanwezigheid, afstand en locatie)
-* OV7670, camera (zie Visuele observatie en pupilgedrag)
-* AS608, vingerafdruk (zie Overige sensoren)
 
 Bij de LM3914 moet nog worden gecontroleerd welke exacte module je bezit: de LM3914 zelf is normaal een display-driver en geen lichtsensor.
 
@@ -135,8 +133,6 @@ Meet de omstandigheden van de ruimte, niet van de student zelf. Nodig om te wete
 
 ## Overige sensoren
 
-* AS608, optische vingerafdruksensor/module voor het scannen, registreren en verifiëren van vingerafdrukken
-* WATER-SENSOR, waterdetectie
 * HX711, loadcellversterker en gewichtsmeting (display, sensor, of volledige set met 1kg/5kg loadcell)
 * AHT10 en DHT22, temperatuur en vochtigheid
 * BMP280, luchtdruk en temperatuur
@@ -160,19 +156,6 @@ Mogelijke stemparameters:
 
 ## Visuele observatie en pupilgedrag
 
-* OV7670, CMOS VGA-cameramodule 640x480, 0.3MP, I2C-interface
+## Sensorcode in v2.0.0
 
-Mogelijke toepassingen:
-
-* oogbewegingen;
-* pupilverwijding;
-* knippergedrag;
-* gelaatsbeweging;
-* lichaamshouding.
-
-De OV7670 alleen garandeert nog niet dat pupil- of oogmetingen voldoende betrouwbaar uitgevoerd kunnen worden. Daarvoor zijn ook belichting, optiek en beeldverwerking bepalend.
-
-
-## Sensorcode in beta v2.0.0
-
-Los van deze hardware-inventaris bevat de huidige broncode 41 van de gemeenschappelijke Sensorbasisklassen afgeleide C++-klassen onder `src/Systeem/Sensor/` (inclusief `SensorAnaloog` en `SensorDigitaal`, dus 39 overige sensorklassen) (zie `docs/Systeem/Sensor/`). Stimulus gebruikt `FsrRfp` in `src/Systeem/Sensor/FsrRfp.h/.cpp`. Deze class beheert maximaal vier analoge kanalen voor Stimulus en wordt ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft. Dit is een softwarestatus en geen uitbreiding van de bovenstaande fysieke hardware-inventaris.
+Deze hardwarevoorraad is niet hetzelfde als de ondersteunde C++-sensortypen in `src/Systeem/Sensor/` en de handleidingen onder `docs/Systeem/Sensor/`. Stimulus gebruikt `FsrRfp` in `src/Systeem/Sensor/FsrRfp.h/.cpp`. Deze klasse beheert per set maximaal vier analoge kanalen en wordt ingeplugd op een geschikte ADC-Extender; de huidige Stimulusvoorbeelden gebruiken de ADS1115. De code biedt daarnaast, indien geconfigureerd, een tweede onafhankelijke FsrRfp-set. Dit is softwarefunctionaliteit en geen uitbreiding van de bovenstaande fysieke hardware-inventaris.

@@ -13,6 +13,8 @@ bool MCU6701::inpluggen() {
 }
 bool MCU6701::Activeren() {
   if (!ingeplugd || !parent || !parent->actief) return false;
+  // Na een herstel is er geen lopende meting meer; een oude vlag zou de meting van een andere sensor laten uitlezen.
+  metingGestart = false;
   if (methode == UitleesMethode::SPI) return true; // MCP3201 heeft geen chip-ID: niet als hardwarebewijs interpreteren
   return parent->StartExtenderReadAnalog(sensorPin, 0) == 1;
 }

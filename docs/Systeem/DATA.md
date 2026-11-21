@@ -19,12 +19,13 @@ Native
    ├─ EEPROM   : I2C
    ├─ FLASH    : SPI
    ├─ FRAM     : I2C
-   └─ microSD  : SPI
+   ├─ microSD  : SPI
+   └─ NRF24L01 : SPI
 ```
 
-Per medium is er één bestand met alle aansluitingen van dat medium: `EEPROM.h/.cpp`, `FLASH.h/.cpp`, `FRAM.h/.cpp` en `microSD.h/.cpp`.
+Per medium is er één bestand met alle aansluitingen van dat medium: `EEPROM.h/.cpp`, `FLASH.h/.cpp`, `FRAM.h/.cpp`, `microSD.h/.cpp` en `NRF24L01.h/.cpp`. `RedirectSerial.h/.cpp` bevat de optionele omleiding van `GA_SERIAL` naar microSD.
 
-`DIRECT` is geen opslagmedium, maar wel een kind van Data (`struct DataDIRECT`, component `DATA_DIRECT`, zonder claims). `DIRECT` gebruikt de Data-class voor real-time doorgeven. Elk channel van een sensor bewaart zijn eigen laatst gemeten waarde (`lastValue`). Met een grootte groter dan `0` worden de waarden bovendien via een RAM-QueueOrStack per channel (FIFO: oudste eerst, of LIFO: nieuwste eerst; de sensor kiest per channel) doorgegeven.
+`DIRECT` is geen opslagmedium, maar wel een kind van Data (`struct DataDIRECT`, component `DATA_DIRECT`, zonder claims). `DIRECT` gebruikt de Data-class voor real-time doorgeven. Elk channel van een sensor bewaart zijn eigen laatst gemeten waarde (`lastValue`). Met een QueueOrStack-grootte groter dan `0` bewaart Data daarnaast waarden in RAM per sensor-channel (FIFO: oudste eerst, of LIFO: nieuwste eerst; de sensor kiest per channel). Dit werkt ook wanneer andere Data-types dan DIRECT zijn geselecteerd.
 
 ## Configuratie
 
@@ -59,7 +60,7 @@ Eén bit staat voor een medium samen met zijn aansluiting. Gebruik altijd de naa
 
 ## NONE
 
-`DATA_TYPE_NONE` gebruikt geen Data-class. Voor FsrRfp blijft de bestaande route behouden:
+`DATA_TYPE_NONE` gebruikt in de gewone sensorroute geen Data-class. Uitzondering: `REDIRECT_SERIAL_TO_MICROSD` maakt via `GA_SERIAL.begin()` een eigen Data/microSD-route beschikbaar. Voor FsrRfp blijft de rechtstreekse route behouden:
 
 ```text
 RawAnalogRead(...)
@@ -96,7 +97,7 @@ De QueueOrStack-grootte en de keuze FIFO of LIFO horen bij de sensor. Voor ander
 
 Test op `ReadQueueOrStackStatus(...) >= 0` om te weten of er een waarde klaar is: `1` betekent dat de QueueOrStack vol is en dat de volgende `WriteQueueOrStack(...)` de oudste waarde overschrijft.
 
-Bewust niet voorzien, omdat er nu geen nood aan is: een waarde lezen zonder ze weg te nemen (peek), de QueueOrStack leegmaken, andere types dan `int`, en de waarden bewaren na een stroomonderbreking. Wie dat nodig heeft, kan bijvoorbeeld `FRAM_RINGBUFFER` van de FRAM_I2C-bibliotheek gebruiken op een FRAM-chip (alleen FIFO, weigert nieuwe waarden als hij vol is, schrijft byte per byte over I2C).
+Niet als afzonderlijke QueueOrStack-bewerking voorzien: een waarde lezen zonder ze weg te nemen (peek), de QueueOrStack expliciet leegmaken en RAM-inhoud behouden na stroomuitval. `int`, `float` en `uint32_t` zijn wél ondersteund; gebruik voor de laatste twee `ReadQueueOrStackFloat()` en `ReadQueueOrStackUInt32()`. Een lege QueueOrStack geeft via de passende typefunctie de laatst bewaarde waarde terug. `ReadQueueOrStackValue()` is de `int`-interface; bij `float` en `uint32_t` geeft die een geconverteerde laatste waarde terug, zonder de getypeerde buffer leeg te maken.
 
 ## EEPROM
 
@@ -155,12 +156,12 @@ SCK, MISO en MOSI komen uit de boardconfiguratie. De chips staan in `Data->FLASH
 ```
 
 - `0` (standaard): elke `StreamingWrite()` schrijft meteen naar FLASH. Er wordt geen buffer gecompileerd.
-- minstens `sizeof(int)` (`4` op de ondersteunde 32-bit boards) t/m `256`: de metingen worden in RAM verzameld en in één keer geschreven wanneer de buffer vol is, bij `StreamingStop()` en bij het afmelden van Data. Bij `StreamingStart()` vervalt wat nog in de buffer zat. `256` is één pagina en geeft de grootste winst.
-- Waarom: elke schrijfactie naar FLASH is een volledige "page program" (typisch rond 0,7 ms, aanname uit datasheets), ook voor één meting. Met een buffer van één pagina gebeurt dat één keer per 64 metingen van 4 bytes.
+- `sizeof(int)` (`4` op de ondersteunde 32-bit boards) t/m `256` is als buffergrootte toegestaan. **Vanaf 15 bytes** kan een volledig GB-record in de buffer: de records worden in RAM verzameld en weggeschreven wanneer het volgende record niet meer past, bij `StreamingStop()` en bij het afmelden van Data. Bij 4 t/m 14 bytes past geen volledig record en wordt rechtstreeks naar FLASH geschreven. Bij `StreamingStart()` probeert Data eerst een nog wachtende buffer op **dezelfde chip** weg te schrijven; bij een mislukte flush start die chip niet en blijft de buffer voor een volgende poging behouden. `256` bytes is één FLASH-pagina.
+- Waarom: een FLASH-schrijfactie heeft vaste overhead, ook bij één meting. Een record is 15 bytes (GB-record): in een buffer van 256 bytes passen 17 volledige records (255 bytes). Die 17 records kunnen samen in één `writeBuffer()` worden doorgegeven, in plaats van per record. De werkelijke tijdswinst hangt af van de chip en het transport.
 - Kleiner dan één `int` (maar groter dan 0) geeft een compileerfout.
-- `StreamingRead()` geeft ook de laatste meting terug als die nog in de buffer wacht.
-- Nadeel: bij stroomuitval gaat wat nog in de buffer zit verloren (maximaal de buffergrootte). De buffer kost per instantie de ingestelde grootte in RAM.
-- EEPROM I2C, FRAM en microSD hebben geen buffer: EEPROM I2C zit nog in geen enkele Data-route, FRAM schrijft zonder wachttijd, en SdFat heeft zelf een buffer van 512 bytes.
+- `StreamingRead()` probeert eerst de buffer weg te schrijven. Lukt dat niet, dan zoekt de functie eerst in de resterende RAM-buffer, van nieuw naar oud, en daarna in FLASH. Ook zonder actieve streaming kan zij oude records rechtstreeks uit FLASH lezen, inclusief na een herstart.
+- Nadeel: bij stroomuitval gaat wat nog in de buffer zit verloren (maximaal de ingestelde buffergrootte). Er is één statische RAM-buffer per geconfigureerde FLASH-plaats. Wordt een chip afgemeld of vernietigd, dan vervallen de wachtende records van zijn plaats; een vervangende chip krijgt die niet.
+- EEPROM I2C en FRAM hebben in Data geen afzonderlijke STREAMING-/RECORDING-buffer; hun geërfde library-API blijft beschikbaar. microSD gebruikt de buffering van SdFat zelf, niet de RAM-buffer van FLASH.
 
 Voor continue sensordata geldt:
 
@@ -173,7 +174,7 @@ RECORDING
 └─ microSD
 ```
 
-EEPROM blijft beschikbaar als Data-medium, maar wordt niet gebruikt voor continue sensorstromen.
+EEPROM en FRAM blijven beschikbaar als Data-media met hun geërfde library-API, maar worden niet gebruikt voor de bestaande continue STREAMING-/RECORDING-routes. Bij combinaties met meerdere opslaggebruikers wordt `DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF` door `SystemConfig.h` afgeleid; dit is geen instelling die de gebruiker zelf zet.
 
 ## FRAM
 
@@ -218,7 +219,7 @@ FLASH en microSD kunnen CS op een Extender hebben (PCF8574, PCF8575 of MCP23017)
 Zo ook `_2_` en `MICROSD_SPI`. Data zoekt de Extender in de boom op component en adres; de Extender moet dus vóór `Data` aangemaakt en geactiveerd zijn. Niet gevonden: GB108 (CS ontbreekt). `GEDEELDE_BUS_MIXED_PINS` wordt dan automatisch `1`.
 
 - FLASH: het transport schakelt CS via de Extender.
-- microSD: SdFat schakelt CS zelf met `sdCsInit()`/`sdCsWrite()`. Die functies kan de library alleen vervangen wanneer in `SdFatConfig.h` van "SdFat - Adafruit Fork" `SD_CHIP_SELECT_MODE` op `1` of `2` staat (standaard `1` in de hier gecontroleerde SdFat - Adafruit Fork 2.3.103). Staat het op `0`, dan geeft de compilatie een duidelijke `#error`. Pas die ene regel in `SdFatConfig.h` aan, of geef `-DSD_CHIP_SELECT_MODE=1` mee als compileerflag.
+- microSD: SdFat schakelt CS via `sdCsInit()`/`sdCsWrite()` wanneer CS op een Extender staat. Gebruik daarvoor **`SD_CHIP_SELECT_MODE=1`** in `SdFatConfig.h` van "SdFat - Adafruit Fork". Bij mode 0 blokkeert de FrameWork-code deze Extender-configuratie met een `#error`. De standaardwaarde in de onderzochte fork 2.3.103 is 0. Stel mode 1 in de geïnstalleerde fork in; controleer dit opnieuw bij een library-update. Een native CS-pin gebruikt de gewone SdFat-route.
 **CS-fouten bij microSD via een Extender (SdFat - Adafruit Fork 2.3.103):** `sdCsWrite()` heeft een `void`-resultaat en wordt door SdFat tijdens selectie en vrijgave aangeroepen. Een mislukte GPIO-schrijfactie wordt door de bestaande GedeeldeBus-Extender verwerkt; de callback probeert hetzelfde CS-niveau maximaal eenmaal opnieuw. Deze herhaalpoging is geen bevestiging dat de kaart correct geselecteerd of vrijgegeven werd. SdFat kan onmiddellijk daarna SPI-data versturen zonder deze fout te kennen. Bij een aanhoudende CS- of busfout kan de FrameWork-code een veilige voortzetting van de SD-overdracht niet garanderen; gegevensverlies of een onvolledige schrijfactie blijft mogelijk. Er wordt niet onvoorwaardelijk HIGH uitgegeven vóór iedere LOW-opdracht, omdat SdFat CS bewust laag houdt gedurende lopende overdrachten. Voor een harde stop vóór iedere volgende SPI-byte is een afzonderlijk foutdoorgevingsmechanisme nodig, binnen het huidige `void`-contract niet beschikbaar.
 
 - Snelheid: elke CS-wissel via een I2C-Extender kost ongeveer 0,05 ms (400 kHz) tot 0,2 ms (100 kHz) (berekend). CS op het board blijft de standaard.
@@ -227,9 +228,11 @@ Alternatief (niet gekozen): de originele `SdFat` van Bill Greiman (`#include <Sd
 
 Op de UNO R4 definieert SdFat een eigen `F()`-macro wanneer er nog geen is. De core van de R4 heeft `F()` als functie (en doet zelf `#undef F` in `Arduino.h`). Daarom staat in `microSD.h` na de include van SdFat `#undef F`, alleen op `ARDUINO_ARCH_RENESAS`. Bij elke upgrade van SdFat of van de R4-core opnieuw testen.
 
-Sensordata-recording op microSD schrijft naar `SENSOR.DAT`. Het bestand wordt geopend met `O_APPEND`: SdFat gaat vóór elke schrijfactie naar het einde van de laatste geslaagde schrijfactie. Volgens de positielogica van SdFat blijven de records zo uitgelijnd na een mislukte `write()`. Dat beschermt niet tegen een defecte sector op de kaart, en het resultaat van `write()` en `sync()` wordt nog niet gemeld.
+Sensordata-recording op microSD schrijft naar `SENSOR.DAT`, geopend met `O_APPEND`. Een mislukte of onderbroken `write()` kan een onvolledig record achterlaten; `O_APPEND` garandeert niet dat de bestandinhoud intact of correct uitgelijnd blijft. Bij teruglezen zoekt `RecordRead()` daarom byte voor byte opnieuw naar een geldig record. Een mislukte `write()` of `sync()` zet `recordingWriteFailed`, zodat `RecordingStop()` false geeft. Dit bewijst niet dat een kaart elke geschreven byte duurzaam heeft opgeslagen.
 
 Met een DS3231-klok (`SENSOR_DS3231_AANTAL 1`) krijgen `SENSOR.DAT` en elk ander bestand automatisch de echte datum en tijd als aanmaak- en wijzigingsdatum. Het recordformaat verandert niet. Zie `docs/Systeem/Sensor/DS3231.md`.
+
+Records bewaren de componentcode van de sensor. Opnames met andere componentcodes dan de huidige zijn niet terug te lezen.
 
 ## NRF24L01
 
@@ -253,11 +256,11 @@ DATA_LAYER_NRF24L01_SPI_1_ADRES         // precies 5 tekens (standaard "GROEI")
 
 ## HC-05
 
-De HC-05 (Bluetooth) is voor de Arduino een gewone seriële poort en heeft geen eigen klasse. Gebruik `Serial1` (D0/D1 op de UNO R4) of een UART-Extender met `GetExtenderStream()` en `StartExtenderUART()`. Voorbeeld: `examples/Systeem/Data/HC05/`.
+De HC-05 (Bluetooth) gebruikt een seriële UART en heeft geen eigen Data-klasse. Het voorbeeld `examples/Systeem/Data/HC05/` gebruikt `GA_SENSOR_SERIAL` met de hieronder vermelde boardpinnen. Ook een geschikte UART-Extender biedt de benodigde seriële interface via `GetExtenderStream()` en `StartExtenderUART()`; het meegeleverde HC-05-voorbeeld demonstreert de native UART-route.
 
 ## RAM-QueueOrStack
 
-De QueueOrStack is eigen code in Data (geen externe library). Het geheugen per channel wordt voorlopig door de sensor gereserveerd (FsrRfp: `ruweDataQueueOrStackChannel1..4`, in elk object apart; met set 2 is de grootte per channel de grootste van set 1 en set 2). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
+De QueueOrStack is eigen code in Data (geen externe library). Voor gewone sensorkanalen reserveert `Sensor::activeren()` automatisch de RAM-buffers wanneer Data actief is; bij FsrRfp blijven de bestaande tabellen `ruweDataQueueOrStackChannel1..4` van de sensor zelf (met set 2 is de gereserveerde grootte per channel de grootste van beide sets). Is de QueueOrStack vol, dan wordt de oudste waarde overschreven.
 
 De QueueOrStack-grootte wordt per sensor geconfigureerd, los van DIRECT. Voor FsrRfp:
 
@@ -269,7 +272,7 @@ Gelijktijdige toegang vanuit twee taken of cores vraagt een aparte analyse en sy
 
 De QueueOrStack bestaat alleen per sensor-channel. Een tweede QueueOrStack per medium bestaat niet: de oude, nooit gebruikte instellingen `DATA_LAYER_<MEDIUM>_<NR>_QUEUE_OR_STACK_SIZE` zijn verwijderd. Voor FLASH is er in de plaats een schrijfbuffer (zie "FLASH-buffer").
 
-`DATA_QUEUE_OR_STACK_ACTIEF` wordt niet door de gebruiker ingesteld. `SystemConfig.h` leidt deze compile-time waarde automatisch af uit de ingestelde QueueOrStack-groottes.
+`DATA_QUEUE_OR_STACK_ACTIEF` wordt niet door de gebruiker ingesteld. `SystemConfig.h` maakt de compile-time waarde **1 wanneer `DATA_LAYER_CONFIG != DATA_TYPE_NONE`**, anders 0. De QueueOrStack-grootte bepaalt apart of voor een specifiek channel werkelijk een RAM-buffer wordt gereserveerd. Voor automatische sensorbuffers gebruikt `DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE` standaard 16 elementen, of 32 op ESP32-S3 Ardi-32 en ESP32-S3 DEV. Met `DATA_LAYER_SENSOR_QUEUE_OR_STACK_SIZE_FOR(component, channel)` is de grootte per sensor en channel in te stellen (0 = alleen `lastValue`).
 
 ## Sensorgrens
 
@@ -283,30 +286,36 @@ WriteQueueOrStack(sensorNummer, ruweData);   // overgeërfd van Sensor
 
 Bij `DATA_TYPE_NONE` is er geen Data-class in de sensorroute en blijft de directe returnwaarde van `RawAnalogRead(...)` actief.
 
+## Recordformaat en getypeerde waarden
+
+`StreamingWrite()` schrijft hetzelfde **GB-record van 15 bytes** naar FLASH, `SENSOR.DAT` op microSD en (indien geconfigureerd) de NRF24L01: twee magic bytes `GB`, twee bytes componentcode, vier bytes vaste route-identiteit, één kanaalnummer, één waardetype (`0=int32`, `1=float32`, `2=uint32`), vier waardebytes en één XOR-controlebyte. Het record heeft geen tijdstempel. `RecordRead()` kan oudere GA-records van 12 bytes herkennen en overslaan, maar gebruikt hun tijdelijke runtime-ID niet als geldige identificatie voor de actuele sensor.
+
+Een sensor bewaart de actuele waarden getypeerd. `ReadQueueOrStackFloat()` en `ReadQueueOrStackUInt32()` lezen de bijbehorende QueueOrStack. Voor opgeslagen waarden zijn er getypeerde sensoroverloads `StreamingRead(uint8_t numberChannel, float& value)` en `StreamingRead(uint8_t numberChannel, uint32_t& value)`, en dezelfde twee vormen van `RecordRead()`. Deze geven `true` wanneer een geldig record van het gevraagde type gevonden is. De bestaande `int`-vorm retourneert de gevonden integerwaarde of de laatste integerwaarde van het channel als er geen match is; voor een niet-integer-type geeft die vorm geen getypeerde waarde terug.
+
 ## Data-interface
 
 ```cpp
 Data->StreamingStart();
-Data->StreamingWrite(...);
-Data->StreamingRead(channel);        // SensorQueueOrStack&: laatste waarde uit FLASH, anders lastValue van dit channel
+Data->StreamingWrite(sensor, numberChannel, channel);   // getypeerd record met sensor- en kanaalidentiteit
+bool gevonden = Data->StreamingRead(sensor, numberChannel, channel); // gelezen GB-record uit FLASH; false = geen match
 Data->StreamingStop();
 
 Data->RecordingStart();
-Data->RecordingWrite(...);
-Data->RecordRead(channel);           // SensorQueueOrStack&: eerste waarde uit het logbestand, anders lastValue van dit channel
+// Tijdens een opname (na RecordingStart()) schrijft StreamingWrite() ook naar SENSOR.DAT op microSD; er is geen aparte RecordingWrite().
+bool gevondenOpKaart = Data->RecordRead(sensor, numberChannel, channel); // uit SENSOR.DAT; false = geen match of opname actief
 Data->RecordingStop();
 
-sensor->StreamingRead(sensorNummer); // zelfde, via de sensor; sensor bestaat niet = 0
-sensor->RecordRead(sensorNummer);
+sensor->StreamingRead(sensorNummer); // int-interface; bij ontbreken van Data/kanaal: 0
+sensor->RecordRead(sensorNummer);    // int-interface; bij ontbreken van Data/kanaal: 0
 ```
 
-`StreamingRead` leest vandaag de laatst geschreven waarde over alle channels heen (één gemengde stroom). Per channel lezen hoort bij O43.
+`StreamingRead()` en `RecordRead()` lezen per component, vaste route-identiteit en kanaal. De vaste route-identiteit wordt bij `Sensor::activeren()` berekend op basis van de component, pinclaims en ouderketen; ze is niet de tijdelijke GedeeldeBus-runtime-ID. Bij meerdere FLASH-chips of microSD-kaarten doorloopt Data de plaatsen in hun geconfigureerde volgorde: de eerste plaats met een geldig passend record wordt gebruikt. Er is geen tijdsvergelijking tussen records op verschillende media.
 
 Per medium houdt Data een lijst van zijn chips bij: `Data->EEPROMviaNative`, `Data->EEPROMviaI2C[]`, `Data->FLASHviaSPI[]`, `Data->FRAMviaI2C[]`, `Data->MICROSDviaSPI[]`. Een lege plaats is `nullptr`. Elke chip wist bij het verwijderen zelf zijn plaats in de lijst (destructor).
 
 Data faalt alleen wanneer geen enkel kind overblijft. Een medium dat niet werkt, wordt afgemeld; de andere media blijven werken. DIRECT is ook een kind.
 
-microSD schrijft na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL` records (één record per meting in `SENSOR.DAT`), of na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS` milliseconden sinds de vorige flush, weg naar de kaart. Roep `RecordingStop()` aan voor je de stroom onderbreekt.
+microSD roept `sync()` aan na `DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL` geschreven records (standaard 50) of wanneer bij een nieuwe `StreamingWrite()` minstens `DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS` milliseconden sinds de vorige `sync()` zijn verlopen (standaard 5000 ms). Zonder nieuwe metingen volgt er geen tijdgestuurde `sync()`. Roep `RecordingStop()` aan voor je de stroom onderbreekt; onverwachte stroomuitval blijft een risico.
 
 De sensor gebruikt STREAMING en RECORDING niet rechtstreeks. De toepassing kiest die werking. De concrete media behouden daarnaast hun volledige geërfde library-API.
 
@@ -368,10 +377,10 @@ REDIRECT_SERIAL_FILE "serial.log"
 
 `REDIRECT_SERIAL_NONE` betekent geen redirect. `GA_SERIAL` blijft de bestaande `Serial` of `Serial0` gebruiken.
 
-`REDIRECT_SERIAL_TO_MICROSD` maakt de noodzakelijke Data/microSD-route automatisch beschikbaar. De toepassing hoeft daarvoor niet zelf `DATA_TYPE_MICROSD_SPI` aan `DATA_LAYER_CONFIG` toe te voegen en hoeft niet zelf `Data` aan te maken. De output wordt via de door `Data` aangemaakte microSD-route naar `REDIRECT_SERIAL_FILE` geschreven. Er wordt niet tegelijk naar de fysieke Serial geschreven.
+`REDIRECT_SERIAL_TO_MICROSD` maakt bij `GA_SERIAL.begin(...)` de noodzakelijke Data/microSD-route automatisch beschikbaar wanneer `Data` nog niet bestaat. De toepassing hoeft daarvoor niet zelf `DATA_TYPE_MICROSD_SPI` aan `DATA_LAYER_CONFIG` toe te voegen. De uitvoer wordt via de eerste microSD van `Data` toegevoegd aan `REDIRECT_SERIAL_FILE`; er wordt niet tegelijk naar de fysieke Serial geschreven. Bij een onbeschikbare kaart kan `RedirectSerial::write()` 0 bytes schrijven. Een regeleinde triggert `FileSerial.flush()`; dit is geen garantie tegen stroomuitval.
 
 
-Bij REDIRECT_SERIAL_TO_MICROSD moet GA_SERIAL.begin() aangeroepen worden vóór GedeeldeBusNewComponent<struct Screen>().
+Bij `REDIRECT_SERIAL_TO_MICROSD` moet `GA_SERIAL.begin()` worden aangeroepen vóór `GedeeldeBusNewComponent<struct Screen>()`.
 
 
 ### microSD: controle bij initialisatie en grenzen van de CS-callback
@@ -381,3 +390,84 @@ Voor CS via een GPIO-Extender controleert `DataMICROSDviaSPI::Activeren()` vóó
 De geïnstalleerde `SdFat - Adafruit Fork` 2.3.103 gebruikt bij `SD_CHIP_SELECT_MODE=1` de bestaande callbacks `void sdCsInit(SdCsPin_t)` en `void sdCsWrite(SdCsPin_t, bool)`. Bij het omschakelen van de chipselect tijdens kaarttransacties kan `sdCsWrite()` geen succes- of foutwaarde teruggeven. Het FrameWork herhaalt een gemelde mislukte schakeling maximaal eenmaal, maar kan **niet garanderen dat SdFat bij een tweede fout ophoudt met SPI-data versturen**. Dit is een harde integratiebeperking; een geslaagde `SdFat32`-aanroep is geen bewijs dat bij een CS-storing alle overgebrachte gegevens betrouwbaar zijn.
 
 Voor opslag die geen gegevensverlies mag tolereren: CS via een directe geschikte native uitgang gebruiken zolang er geen door de bibliotheek ondersteund, foutdoorgevend selectiemechanisme beschikbaar is. De broncode van de externe SdFat-bibliotheek is niet aangepast. Foutinjectie vereist fysieke validatie; bij een onzekere CS-toestand niet blijven schrijven.
+
+## Foutafhandeling, teruglezen en herstel
+
+- **Mislukte microSD-write:** `StreamingWrite()` controleert de returnwaarde van `write()` naar `SENSOR.DAT`. Een mislukte write telt niet mee in `aantalRegelsSindsFlush`, zet `recordingWriteFailed` en maakt `RecordingStop()` onwaar. Het ontbrekende record wordt niet automatisch opnieuw geschreven.
+
+### Beschadigde records en buffergedrag
+
+- **microSD, `RecordRead()` na een onvolledig record:** eerst de checksum. Is die fout, dan zoekt `RecordRead()` één byte na het begin van die header opnieuw. Ook zonder geldige header gaat het zoeken byte per byte verder. Zo worden de records na een onderbroken write weer gevonden. Een onvolledig record blijft wel in het bestand staan.
+- **FLASH, mislukte flush:** de nieuwste records blijven in de buffer in RAM. `StreamingRead()` zoekt daar eerst, van nieuw naar oud. Bij `StreamingStart()` blijft het schrijfadres staan, zodat een volgende start opnieuw op de juiste plaats probeert.
+- **microSD, tijdgrens van de flush:** `DATA_LAYER_MICROSD_SPI_FLUSH_NA_MS` wordt alleen nagekeken bij een nieuwe write. Zonder nieuwe metingen volgt geen tijdgestuurde `sync()`. `DATA_LAYER_MICROSD_SPI_FLUSH_NA_AANTAL_REGEL=1` vraagt een `sync()` na ieder geslaagd record en beperkt zo het risico op verlies van wachtende gegevens, maar biedt geen garantie bij stroomuitval of kaartfouten; de kaart wordt trager en kan sneller slijten.
+- **Teruglezen raakt de live waarde niet meer:** `StreamingRead()` en `RecordRead()` van een sensor werken op een kopie van het channel. De live waarde en de nog niet gelezen QueueOrStack blijven zoals ze waren.
+- **Lege QueueOrStack:** is de buffer van een channel leeg, dan geeft het lezen de laatst bewaarde waarde (`lastValue`), niet "niets". Een nieuwe meting herken je aan `ReadQueueOrStackStatus() >= 0`; -1 betekent een lege buffer. Dat geldt ook voor de ruwe waarde van BioAmpEXGPill en voor de bewaarde waarden van MAX30102 en NeuroSkyTGAM.
+- **EEG-kanalen:** de EEG-banden van BioAmpEXGPill en de berekende ruwe-golfbanden van NeuroSkyTGAM gaan alleen naar Data bij een aanroep van de functie die ze berekent. Zonder die aanroep blijft het channel op zijn vorige waarde.
+- **`RecordingStop()` geeft `bool` terug:** true vereist een daadwerkelijk lopende opname, zonder eerdere schrijf-/syncfouten, en het succesvol wegschrijven en sluiten van alle open bestanden. `flush()` van SdFat geeft hier geen resultaat, daarom gebruikt Data `sync()`.
+- **Uitgeschakelde microSD bij `RecordingStop()`:** geen `sync()` of `close()`, want die schrijven naar de kaart. Het bestandsobject wordt alleen in het geheugen losgelaten, en `RecordingStop()` geeft false. In "SdFat - Adafruit Fork" 2.3.103 doet die toewijzing geen kaarttoegang.
+- **Opnieuw starten na `RecordingStop()`:** `StreamingStart()` start de microSD-opname opnieuw als de streaming via een ander medium nog actief is. `StreamingStop()` beëindigt ook een lopende microSD-opname.
+- **microSD met CS via een Extender:** mislukt het schakelen van de CS twee keer na elkaar, dan zet de library de kaart uit (`actief` false). Data schrijft er dan niet meer naar. Een SPI-component heeft geen herstelpad: de kaart blijft uit tot een herstart. De SPI-overdracht die al liep, kan niemand stoppen.
+- **Testvoorbeelden:** `examples/Systeem/Data/FLASH/FLASH_StartStopRead` en `examples/Systeem/Data/microSD/microSD_StartStopRead` doen starten, stoppen, opnieuw starten en teruglezen na elkaar.
+
+### HC-05-aansluitingen
+
+- Het voorbeeld `examples/Systeem/Data/HC05/` gebruikt `GA_SENSOR_SERIAL` en zijn pinnen, dezelfde UART als de sensoren met een seriële poort. Het voorbeeld heeft boardafhankelijke UART-instellingen.
+- HC-05 TXD gaat naar `GA_SENSOR_SERIAL_PIN_RX`, HC-05 RXD naar `GA_SENSOR_SERIAL_PIN_TX`:
+  - UNO R4, UNO Q, ESP32-S3 Ardi-32 en RP2040: D0 (RX) en D1 (TX);
+  - ESP32 D1 R32 en ESP32-S3 DEV: D2 (RX) en D3 (TX), want D0 en D1 dragen `GA_SERIAL`;
+  - Nucleo F401RE: D2 (RX) en D8 (TX); het voorbeeld maakt daar zelf `Serial1` aan.
+- De RXD van de HC-05 verwacht 3,3 V: op een board met 5 V-logica via een spanningsdeler.
+- UNO Q: bij elke reset stuurt Zephyr een opstartmelding over `Serial1`; die komt ook op de gsm.
+
+### Start, schrijffouten en CS-fouten
+
+- **Alleen een gestarte FLASH-chip krijgt records:** een FLASH-chip krijgt pas records na een geslaagde reservering, het wegschrijven van een eventuele eigen wachtbuffer en de controle van de hele chip (`flashStreamingStarted`). De code wist geen bestaande sectoren: de nieuwe schrijfpositie ligt na de laatst gebruikte sector. Bij een volle chip of leesfout start die chip niet. Dit geldt met en zonder `DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF`.
+- **Een FLASH-chip die niet startte:** houdt een ander medium (microSD of nRF24L01) de streaming actief, dan probeert elke volgende `StreamingStart()` die chip opnieuw. Daarbij wordt telkens de hele chip gecontroleerd; bij een grote chip kan dat seconden duren.
+- **`RecordingStop()` geeft false als:**
+  - een write van deze opname mislukte;
+  - het opnamebestand niet openging;
+  - een tussentijdse `sync()` mislukte (`recordingWriteFailed`).
+- **Tussentijds wegschrijven:** `StreamingWrite()` gebruikt daarvoor nu `sync()` in plaats van `flush()`, want `flush()` geeft geen resultaat. Een nieuwe `RecordingStart()` begint zonder fout.
+- **Wat true nu betekent:** true betekent dat elke write van deze opname lukte, en dat alle open opnamebestanden met `sync()` weggeschreven en daarna gesloten zijn. Wat de kaart fysiek bewaard heeft, bewijst alleen een hardwaretest.
+- **`RecordingStop()` en `close()`:** valt de CS uit tijdens `sync()`, dan volgt geen `close()` meer. Bestaat het kaartobject niet meer, dan volgen geen `sync()` en geen `close()`. In beide gevallen wordt het bestandsobject alleen in het geheugen losgelaten, en `RecordingStop()` geeft false.
+- **microSD met CS via een Extender, fout tijdens de start:** mislukt de CS twee keer na elkaar tijdens `SdFat32::begin()`, dan mislukt de activering, ook als `begin()` true gaf (`chipSelectWriteFailed`). Een CS-lijn die fysiek vastzit, herstelt geen software; dat blijft een hardwaretest.
+- **De voorbeelden `FLASH_StartStopRead` en `microSD_StartStopRead`:**
+  - "RESULTAAT: OK" verschijnt alleen als elke meting lukte en elke teruglezing via Data de laatste meting teruggaf.
+  - Bij de FLASH kan een teruggelezen record na een mislukte flush ook uit de buffer in RAM komen.
+  - Geeft de sensor in de twee opnames dezelfde waarde, dan bewijst de laatste teruglezing niet dat de tweede opname nieuw is.
+
+### Resultaat van RecordingStop en FLASH-streaming
+
+- **`RecordingStop()` geeft true alleen als:**
+  - er een opname liep;
+  - elke geconfigureerde kaart volledig deelnam;
+  - elke write en `sync()` lukte;
+  - alle open bestanden gesloten zijn.
+- **`RecordingStop()` geeft false bij:**
+  - een stop zonder lopende opname, ook een tweede `RecordingStop()` na elkaar;
+  - een kaart die bij `RecordingStart()` ontbrak of niet startte, ook door exclusieve toegang van een andere node. Geconfigureerd betekent: elke kaart volgens `DATA_LAYER_MICROSD_SPI_AANTAL`. Een kaart die je niet gebruikt, haal je uit dat aantal;
+  - een CS-fout tijdens `close()`.
+- **`streamingWriteFailed` (FLASH) wordt true als:**
+  - een geconfigureerde FLASH-chip (volgens `DATA_LAYER_FLASH_SPI_AANTAL`) ontbreekt of niet start;
+  - een record na een mislukte flush nog steeds niet in de buffer past;
+  - de chip vol is;
+  - een write of een flush van de buffer mislukt;
+  - een gestarte chip uitvalt, gezien bij een nieuw record of bij `StreamingStop()`. Een tijdelijke uitval die herstelt zonder dat de software ze waarneemt, valt hier niet onder; de vlag garandeert dus geen detectie van iedere fysieke uitval.
+- **Wanneer de vlag terug false wordt:** bij `StreamingStart()` die een nieuwe streaming begint vanuit `streamingActief == false`. Een nieuwe poging terwijl de streaming via een ander medium al actief is, wist de eerdere fout niet: er kunnen records ontbreken.
+- **Wat false betekent:** er werd geen schrijffout en geen mislukte start vastgesteld. Dat bewijst geen duurzame opslag na een herstart.
+- **`FLASH_StartStopRead`** meldt "OK" alleen als:
+  - de chip startte (`flashStreamingStarted[0]`);
+  - er na elke stop geen schrijffout was;
+  - elke teruglezing de laatste meting gaf.
+- **`StartFlashStreaming()`** geeft false bij een ongeldige chipindex.
+- **`SD_CHIP_SELECT_MODE`:** bij microSD-CS via een Extender gebruikt het FrameWork de mode-1-callbacks (`sdCsInit()` en `sdCsWrite()`). Dit is een instelling van de geïnstalleerde SdFat-fork, niet van de aangesloten kaart. Mode 0 wordt in deze configuratie door `microSD.cpp` afgewezen.
+
+### Verdwenen opslagmedia en overgeslagen records
+
+- **microSD:** een geconfigureerde kaart die tijdens een lopende opname niet toegankelijk is, krijgt het record niet. Dat geldt voor een ontbrekende kaart, een kaart met `actief` false of een kaart zonder eigendom. Zo'n overgeslagen record zet nu `recordingWriteFailed`, en `RecordingStop()` geeft dan false, ook als de kaart bij de stop weer in orde is.
+- **FLASH, tijdens een record:** een gestarte chip die verdwenen is (`nullptr`), zet `streamingWriteFailed`. Een chip die nooit startte, wordt voor dat record overgeslagen; de mislukte start is al via `streamingWriteFailed` gemeld.
+- **FLASH, bij `StreamingStop()`:** ook een gestarte chip die zijn eigendom verloor (alleen met `DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF`), zet `streamingWriteFailed`. Zijn wachtende records worden dan niet weggeschreven.
+- **FLASH, een chip wordt afgemeld:** de destructor van de chip zet `flashStreamingStarted` van zijn eigen plaats op false, en `streamingWriteFailed` op true als hij gestart was. Dat gebeurt alleen voor de plaats waar hij zelf staat.
+  - Wachtende records in de buffer in RAM van een chip die verdwijnt, vervallen. Ze komen niet op een vervangende chip terecht. `DiscardBufferFLASH()` zet `streamingWriteFailed` als er nog records in die buffer stonden; bij een lege buffer verandert de functie deze vlag niet.
+  - Een nieuwe chip die op dezelfde plaats aanmeldt, krijgt pas records na zijn eigen geslaagde start, met de controle van de hele chip.
+  - Loopt de streaming nog via een ander medium, dan gebeurt die start bij de volgende `StreamingStart()`.

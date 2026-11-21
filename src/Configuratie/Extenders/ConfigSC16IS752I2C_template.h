@@ -2,6 +2,12 @@
 #define CONFIG_SC16IS752I2C_H
 
 // ============================================================================
+// Werkelijke kristal- of klokfrequentie aan XTAL1 (geldt voor I2C en SPI).
+#ifndef EXTENDER_SC16IS752_BRONKLOK_HZ
+// #define EXTENDER_SC16IS752_BRONKLOK_HZ 14745600UL  // standaard waarde: 14745600 (14,7456 MHz); bv. 1843200 of 3072000 bij een ander kristal
+#endif
+
+// ============================================================================
 // EXTENDER: SC16IS752 I2C
 // ============================================================================
 #ifndef EXTENDER_SC16IS752_I2C_AANTAL

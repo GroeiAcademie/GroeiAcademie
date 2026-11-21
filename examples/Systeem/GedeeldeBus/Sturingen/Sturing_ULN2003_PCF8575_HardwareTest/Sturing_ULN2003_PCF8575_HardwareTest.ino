@@ -87,8 +87,8 @@ String invoer;
 uint8_t testStap = 0;
 uint8_t testFase = 0;
 uint16_t stappenGedaan = 0;
-unsigned long testStartMillis = 0;
-unsigned long laatsteStapMillis = 0;
+unsigned long testStartMS = 0;
+unsigned long laatsteStapMS = 0;
 
 void toonStartInstructies() {
   GA_SERIAL.println(F("HARDWARETEST: Sturing_ULN2003_PCF8575_HardwareTest"));
@@ -171,7 +171,7 @@ void loop() {
         }
 
         testFase = 2;
-        laatsteStapMillis = millis();
+        laatsteStapMS = millis();
         return;
       }
 
@@ -186,8 +186,8 @@ void loop() {
       }
 
       GA_SERIAL.print(F("START TEST ")); GA_SERIAL.println(testStap + 1);
-      testStartMillis = millis();
-      laatsteStapMillis = millis();
+      testStartMS = millis();
+      laatsteStapMS = millis();
       stappenGedaan = 0;
       testFase = 0;
       bool ok = motorBesturing->StartMotor();
@@ -210,13 +210,13 @@ void loop() {
   const unsigned long nu = millis();
 
   if (testStap < 2) {
-    if (nu - testStartMillis >= 2000UL) rondTestAf(true);
+    if (nu - testStartMS >= 2000UL) rondTestAf(true);
     return;
   }
 
   if (testStap == 2) {
-    if (nu - laatsteStapMillis < 50UL) return;
-    laatsteStapMillis = nu;
+    if (nu - laatsteStapMS < 50UL) return;
+    laatsteStapMS = nu;
 
     if (!motorBesturing->VoerEenStapUit()) {
       rondTestAf(false);
@@ -227,8 +227,8 @@ void loop() {
     return;
   }
   if (testStap == 3 && testFase == 1) return;
-  if (nu - laatsteStapMillis < 50UL) return;
-  laatsteStapMillis = nu;
+  if (nu - laatsteStapMS < 50UL) return;
+  laatsteStapMS = nu;
 
   if (!motorBesturing->VoerEenStapUit()) {
     rondTestAf(false);

@@ -11,6 +11,8 @@
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
 #error DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze test.
 #endif
+HSR0x* sensor = nullptr;
+
 void setup() {
   GA_SERIAL.begin(SERIAL_BAUDRATE);
   #if defined(DEBUG)
@@ -23,8 +25,21 @@ void setup() {
   const bool parentOK = Native.aanmelden() && Native.controleren() && Native.inpluggen() && Native.activeren();
   GA_SERIAL.println(parentOK ? F("PARENT: OK") : F("PARENT: FOUT"));
   if (!parentOK) return;
-  HSR0x* sensor = GedeeldeBusNewComponent<HSR0x>(&Native, GedeeldeBusComponent::HYSRF05, HardwareResourcePin::NP_D2, HardwareResourcePin::NP_D3);
+  sensor = GedeeldeBusNewComponent<HSR0x>(&Native, GedeeldeBusComponent::HYSRF05, HardwareResourcePin::NP_D2, HardwareResourcePin::NP_D3);
   GA_SERIAL.println(sensor ? F("LIFECYCLE: OK") : F("LIFECYCLE: FOUT"));
-  GA_SERIAL.println(F("LET OP: geen fysieke detectie mogelijk zonder ECHO-meting."));
+  GA_SERIAL.println(F("LET OP: afstand alleen met aangesloten ECHO; minstens 100 ms tussen twee metingen."));
 }
-void loop() {}
+void loop() {
+  if (sensor == nullptr) return;
+  // De fabrikant vraagt minstens 60 ms tussen twee metingen.
+  static unsigned long lastMeasurementStartMS = 0;
+  if (millis() - lastMeasurementStartMS < 100UL) return;
+  lastMeasurementStartMS = millis();
+  float waarde = NAN;
+  if (!sensor->LeesHoofdwaarde(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Afstand (mm): "));
+  GA_SERIAL.println(waarde);
+}

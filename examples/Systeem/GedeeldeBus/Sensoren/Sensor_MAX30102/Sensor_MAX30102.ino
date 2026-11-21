@@ -36,4 +36,15 @@ void setup() {
   if(parentOK) sensor=GedeeldeBusNewComponent<MAX30102>(&apparaat,GedeeldeBusComponent::MAX30102);
   GA_SERIAL.println(sensor ? F("SENSOR LIBRARY INIT/LIFECYCLE: OK") : F("SENSOR LIBRARY INIT/LIFECYCLE: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensor == nullptr) return;
+  float waarde = NAN;
+  if (!sensor->LeesHoofdwaarde(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("IR (ruwe telling, geen hartslag of SpO2): "));
+  GA_SERIAL.println(waarde);
+  GA_SERIAL.print(F("Verloren FIFO-samples: "));
+  GA_SERIAL.println(sensor->aantalVerlorenSamples);
+}

@@ -24,9 +24,20 @@ struct ExtenderMCP23S17 : HardwareResourceTypeSPI, MCP23S17 {
   // ============================================================================
   // DEFAULT: MCP23S17 #1
   // ============================================================================
+  // INTA-uitgang van de MCP23S17 op een native pin (zoals np_INTA bij de MCP23017). NONE = niet aangesloten.
+  HardwareResourcePin np_INTA = HardwareResourcePin::NONE;
+  uint8_t exclusiefMetInt_[2];
+
   #if EXTENDER_MCP23S17_AANTAL == 1
   ExtenderMCP23S17(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender), MCP23S17(NativeArduinoPinVan(np_CS), 0x00, &SPI) {}
+  // Met INTA op een native pin, geclaimd door deze Extender (bv. voor de ECHO-timing van een HSR0x).
+  ExtenderMCP23S17(GedeeldeBusNode* parent, GedeeldeBusComponent component, HardwareResourcePin np_CS, HardwareResourcePin np_SCK, HardwareResourcePin np_MISO, HardwareResourcePin np_MOSI, HardwareResourcePin np_INTA, HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
+    : HardwareResourceTypeSPI(parent, component, np_CS, np_SCK, np_MISO, np_MOSI, Extender), MCP23S17(NativeArduinoPinVan(np_CS), 0x00, &SPI), np_INTA(np_INTA) {
+    exclusiefMetInt_[0] = static_cast<uint8_t>(np_CS);
+    exclusiefMetInt_[1] = static_cast<uint8_t>(np_INTA);
+    aangemeldePinnen = { gedeeld_, 3, exclusiefMetInt_, 2 };
+  }
   #endif
 
   // ============================================================================

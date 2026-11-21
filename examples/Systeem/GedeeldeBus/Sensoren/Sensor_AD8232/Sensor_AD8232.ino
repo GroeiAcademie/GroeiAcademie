@@ -46,4 +46,13 @@ void setup() {
     HardwareResourceToegang::GEDEELD);
   GA_SERIAL.println(sensorAD8232 ? F("AD8232 lifecycle: component aangemaakt (fysieke werking nog niet bewezen)") : F("AD8232 lifecycle: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensorAD8232 == nullptr) return;
+  int32_t waarde = 0;
+  if (!sensorAD8232->RawAnalogRead(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Ruwe ECG-ADC-sample (niet gekalibreerd): "));
+  GA_SERIAL.println(waarde);
+}

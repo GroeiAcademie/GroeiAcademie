@@ -81,6 +81,10 @@ struct Data : GedeeldeBusNode {
   int ReadQueueOrStackValue(SensorQueueOrStack& channel);       // volgende waarde; leeg = lastValue
 
   void StreamingStart();
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
+  bool StartFlashStreaming(uint8_t teller);   // één FLASH-chip starten; true = gestart en klaar voor records
+  void DiscardBufferFLASH(uint8_t teller);    // de wachtende records van één FLASH-plaats weggooien, als de chip verdwijnt
+#endif
   // Getypeerd record met sensor- en kanaalidentiteit.
 #if ((DATA_LAYER_CONFIG) & (DATA_TYPE_FLASH_SPI | DATA_TYPE_MICROSD_SPI | DATA_TYPE_NRF24L01_SPI))
   void StreamingWrite(const Sensor& sensor, uint8_t numberChannel, const SensorQueueOrStack& channel);
@@ -90,7 +94,7 @@ struct Data : GedeeldeBusNode {
 
   void RecordingStart();
   bool RecordRead(const Sensor& sensor, uint8_t numberChannel, SensorQueueOrStack& channel);
-  void RecordingStop();
+  bool RecordingStop();   // true = elke write van deze opname lukte, en alle open opnamebestanden zijn weggeschreven en gesloten
 
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE)
   // adres 0 = het eerste byte na het blok van HX1838. Buiten DATA_LAYER_EEPROM_NATIVE_SIZE: lezen geeft 0, schrijven doet niets.
@@ -101,6 +105,9 @@ struct Data : GedeeldeBusNode {
   uint16_t typesActief;
   bool streamingActief = false;
   bool recordingActief = false;
+#if ((DATA_LAYER_CONFIG) & DATA_TYPE_MICROSD_SPI)
+  bool recordingWriteFailed = false;   // true = een write of sync van deze opname mislukte; terug op false bij RecordingStart()
+#endif
 
   // Per medium de lijst van zijn chips (N7). nullptr = niet aangemaakt of afgemeld; de chip wist zijn plaats zelf in zijn destructor (N3 b).
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_EEPROM_NATIVE) && BOARD_VERSION != BOARD_UNO_Q
@@ -112,6 +119,10 @@ struct Data : GedeeldeBusNode {
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FLASH_SPI)
   struct DataFLASHviaSPI* FLASHviaSPI[DATA_LAYER_FLASH_SPI_AANTAL] = {};
   uint32_t adres[DATA_LAYER_FLASH_SPI_AANTAL] = {};
+  bool flashStreamingStarted[DATA_LAYER_FLASH_SPI_AANTAL] = {};   // true = deze chip is gestart en mag records krijgen
+  // true = een geconfigureerde chip ontbrak, startte niet of viel uit, of een record kon niet in de buffer of de FLASH; terug op false bij een nieuwe StreamingStart().
+  // false bewijst geen duurzame opslag na een herstart.
+  bool streamingWriteFailed = false;
 #endif
 #if ((DATA_LAYER_CONFIG) & DATA_TYPE_FRAM_I2C)
   struct DataFRAMviaI2C* FRAMviaI2C[DATA_LAYER_FRAM_I2C_AANTAL] = {};

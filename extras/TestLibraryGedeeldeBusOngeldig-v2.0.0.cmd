@@ -155,6 +155,24 @@ set "TEST_FLAGS=-DINPUT_KANAAL_CONFIG=0x80"
 set "VERWACHTE_FOUT=Geldige INPUT_KANAAL_CONFIG: INPUT_TYPE_NONE, INPUT_TYPE_PCF8574, INPUT_TYPE_HX1838 of INPUT_TYPE_PCF8574 | INPUT_TYPE_HX1838."
 call :EXPECT_FAIL
 
+set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
+set "TEST_NAAM=RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL buiten 1 tot 255"
+set "TEST_FLAGS=-DRUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL=0"
+set "VERWACHTE_FOUT=RUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL moet 1 tot 255 zijn."
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
+set "TEST_NAAM=RUNTIME-foutladder loopt niet op van WARNING naar FATAL"
+set "TEST_FLAGS=-DRUNTIME_WARNING_OPEENVOLGENDE_FOUTEN_NA_AANTAL=200"
+set "VERWACHTE_FOUT=RUNTIME_..._OPEENVOLGENDE_FOUTEN_NA_AANTAL en RUNTIME_..._SINDS_EERSTE_FOUT_NA_MS moeten oplopen van WARNING naar FATAL"
+call :EXPECT_FAIL
+
+set "TEST_INO=examples\Toepassingsgebieden\Stimulus\Tik_Enkele_Samen_Instortend_Cocktail\Tik_Enkele_Samen_Instortend_Cocktail.ino"
+set "TEST_NAAM=EXTENDER_ADS1115_RUNTIME_DREMPELS_FOUTNIVEAU met dalende aantallen"
+set "TEST_FLAGS=-DEXTENDER_ADS1115_RUNTIME_DREMPELS_FOUTNIVEAU={{5,3,5,10,20},{0UL,100UL,500UL,2000UL,10000UL},ScreenData::TYPE_FATAL,ScreenData::TYPE_CRITICAL}"
+set "VERWACHTE_FOUT=EXTENDER_ADS1115_RUNTIME_DREMPELS_FOUTNIVEAU: aantallen en tijden moeten oplopen, foutniveaus ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL."
+call :EXPECT_FAIL
+
 echo.
 set "VERWACHTE_FOUT=SCREEN_OUTPUT_CONFIG moet in SystemConfig.h worden gedefinieerd."
 

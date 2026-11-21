@@ -213,7 +213,7 @@ const MappingTussenToetsaanslagEnUitTeVoerenFunctie* Input::OpzoekenUitTeVoerenF
 unsigned long Input::_StandaardLangIndrukkenDrempelOpzoeker(const char* opschriftToetsAanslag) {
   const MappingTussenToetsaanslagEnUitTeVoerenFunctie* regel = ::Input->OpzoekenUitTeVoerenFunctieViaOpschriftToetsAanslag(opschriftToetsAanslag);
   if (regel == nullptr || regel->functieBijLangIndrukken == nullptr) return 0;
-  return regel->langIndrukkenDrempelMs;
+  return regel->langIndrukkenDrempelMS;
 }
 #else
 unsigned long Input::_StandaardLangIndrukkenDrempelOpzoeker(const char* opschriftToetsAanslag) {
@@ -229,7 +229,7 @@ unsigned long Input::_LangIndrukkenDrempelOpzoekerViaActieveMapping(const char* 
   for (byte i = 0; i < ::Input->_actieveMappingAantalVoorLangIndrukken; i++) {
     if (strcmp(::Input->_actieveMappingVoorLangIndrukken[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
       if (::Input->_actieveMappingVoorLangIndrukken[i].functieBijLangIndrukken == nullptr) return 0;
-      return ::Input->_actieveMappingVoorLangIndrukken[i].langIndrukkenDrempelMs;
+      return ::Input->_actieveMappingVoorLangIndrukken[i].langIndrukkenDrempelMS;
     }
   }
 
@@ -242,7 +242,7 @@ unsigned long Input::_LangIndrukkenDrempelOpzoekerViaActieveMappingMetArgumenten
   for (byte i = 0; i < ::Input->_actieveMappingMetArgumentenAantalVoorLangIndrukken; i++) {
     if (strcmp(::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].opschriftToetsAanslag, opschriftToetsAanslag) == 0) {
       if (::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].functieBijLangIndrukken == nullptr) return 0;
-      return ::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].langIndrukkenDrempelMs;
+      return ::Input->_actieveMappingMetArgumentenVoorLangIndrukken[i].langIndrukkenDrempelMS;
     }
   }
 
@@ -268,9 +268,9 @@ void Input::ControleerMappingVolledigheidIntern(const char* const opschriftToets
 
     if (!gevonden) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      Screen->Print(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
+      if (Screen != nullptr) Screen->Print(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
 #else
-      Screen->Print(_INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
+      if (Screen != nullptr) Screen->Print(_INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + KEY_LAYOUT[i].opschrift);
 #endif
       aantalOntbrekend++;
     }
@@ -286,9 +286,9 @@ void Input::ControleerMappingVolledigheidIntern(const char* const opschriftToets
 
     if (!gevonden) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-      Screen->Print(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
+      if (Screen != nullptr) Screen->Print(ScreenData::TYPE_WARNING, _INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
 #else
-      Screen->Print(_INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
+      if (Screen != nullptr) Screen->Print(_INPUT_MAPPINGCONTROLE_WAARSCHUWING, String(_INPUT_MAPPINGCONTROLE_ONTBREEKT) + ": " + IR_KEY_LAYOUT[i].opschrift);
 #endif
       aantalOntbrekend++;
     }
@@ -296,9 +296,9 @@ void Input::ControleerMappingVolledigheidIntern(const char* const opschriftToets
 #endif
   if (aantalOntbrekend == 0) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    Screen->Print(ScreenData::TYPE_INFO, _INPUT_MAPPINGCONTROLE_TITEL, _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK);
+    if (Screen != nullptr) Screen->Print(ScreenData::TYPE_INFO, _INPUT_MAPPINGCONTROLE_TITEL, _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK);
 #else
-    Screen->Print(_INPUT_MAPPINGCONTROLE_TITEL, _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK);
+    if (Screen != nullptr) Screen->Print(_INPUT_MAPPINGCONTROLE_TITEL, _INPUT_MAPPINGCONTROLE_OPSCHRIFTEN_OK);
 #endif
   }
 }
@@ -444,9 +444,9 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     pcf8574AdresBuffer[sizeof(pcf8574AdresBuffer) - 3] = hex[(I2C_ADDRESS_PCF8574 >> 4) & 0x0F];
     pcf8574AdresBuffer[sizeof(pcf8574AdresBuffer) - 2] = hex[I2C_ADDRESS_PCF8574 & 0x0F];
 #if (SCREEN_OUTPUT & SCREEN_TYPE_PIXELS)
-    Screen->Print(ScreenData::TYPE_FATAL, _FATAL_IN402, pcf8574AdresBuffer, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
+    if (Screen != nullptr) Screen->Print(ScreenData::TYPE_FATAL, _FATAL_IN402, pcf8574AdresBuffer, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
 #else
-    Screen->Print(_FATAL_IN402, pcf8574AdresBuffer, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
+    if (Screen != nullptr) Screen->Print(_FATAL_IN402, pcf8574AdresBuffer, GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS);
 #endif
   }
 
@@ -471,9 +471,10 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #if defined(KEYPAD_IS_DIRECT)
     int Input::PCF8574uitLezenPoortenP0totP7DirectAansluiting() {
       // Runtime-herstel: één keypadscan = één resultaat.
-      if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return 0;
+      // -1 = onbekend (leesfout of PCF8574 niet beschikbaar); dat is iets anders dan 0 = geen toets.
+      if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return -1;
       byte status = 0xFF;
-      if (!gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574poortPatroonUitlezen(status))) return 0;
+      if (!gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(PCF8574poortPatroonUitlezen(status))) return -1;
 
       for (byte i = 0; i < AANTAL_DIRECT_PINNEN; i++) {
         #if KEYPAD_TYPE == KEYPAD_TYPE_TOUCH_TTP224_DIRECT_1x4
@@ -502,7 +503,8 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
   #if defined(KEYPAD_IS_MATRIX)
     int Input::PCF8574uitLezenPoortenP0totP7MatrixAansluiting() {
       // Runtime-herstel: één keypadscan = één resultaat. Een geslaagde write mag een mislukte read niet wegpoetsen.
-      if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return 0;
+      // -1 = onbekend (leesfout of PCF8574 niet beschikbaar); dat is iets anders dan 0 = geen toets.
+      if (gedeeldeBusInputPCF8574 == nullptr || !gedeeldeBusInputPCF8574->ComponentBeschikbaarTijdensRuntime()) return -1;
       bool gelukt = true;
       int toets = 0;
 
@@ -512,7 +514,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
         if (!PCF8574poortPatroonMatrixUitlezenInstellen(uitgang)) {
           // Zoals voorheen: na een mislukte write niet terugzetten.
           gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(false);
-          return 0;
+          return -1;
         }
         delayMicroseconds(50);
         byte ingangen = 0xFF;
@@ -532,7 +534,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 
       if (!PCF8574poortPatroonMatrixUitlezenInstellen(0xFF)) gelukt = false;
       gedeeldeBusInputPCF8574->ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt);
-      return gelukt ? toets : 0;
+      return gelukt ? toets : -1;
     }
   #endif
 #endif
@@ -557,6 +559,8 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 
   int Input::KeypadUitLezenToetsAanslag() {
     int rauw = KeypadUitLezenRuweData();
+    // Onbekend (-1): de vorige toestand blijft, zodat een leesfout geen losgelaten toets wordt.
+    if (rauw < 0) return 0;
     unsigned long nu = millis();
 
     if (rauw != vorigeRauweKeypadPositie) {
@@ -598,12 +602,12 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     return resultaat;
   }
 
-  // Geeft de huidige, nog ingedrukte positie terug zodra ze langer dan drempelMs ingedrukt is,
+  // Geeft de huidige, nog ingedrukte positie terug zodra ze langer dan drempelMS ingedrukt is,
   // en meldt dat maar één keer per druk (niet herhaald bij elke aanroep).
-  int Input::KeypadUitLezenLangIngedruktePositie(unsigned long drempelMs) {
+  int Input::KeypadUitLezenLangIngedruktePositie(unsigned long drempelMS) {
     if (stabieleKeypadPositie == 0) return 0;
     if (langIndrukkenAlGemeldVoorHuidigeDruk) return 0;
-    if ((millis() - keypadDrukBeginTijd) < drempelMs) return 0;
+    if ((millis() - keypadDrukBeginTijd) < drempelMS) return 0;
     langIndrukkenAlGemeldVoorHuidigeDruk = true;
     return stabieleKeypadPositie;
   }
@@ -670,7 +674,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
         GA_SERIAL.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
 #endif
-        Screen->Print(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
+        if (Screen != nullptr) Screen->Print(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
         return;
       }
     }
@@ -678,7 +682,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     GA_SERIAL.println(_INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD_KOPIEER_REGEL " UserConfig.h:");
     HX1838toonTabelMetCodes();
 #endif
-    Screen->Print(_INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD, _INPUT_HX1838_GENERIEK_CODES_ZIE_SERIEEL, 0);
+    if (Screen != nullptr) Screen->Print(_INPUT_HX1838_GENERIEK_CODES_GEKALIBREERD, _INPUT_HX1838_GENERIEK_CODES_ZIE_SERIEEL, 0);
     while (true) { }
   }
 #endif
@@ -716,7 +720,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     GA_SERIAL.print(_INPUT_HX1838_DRUK_NU_OP_SERIAL);
     GA_SERIAL.println(IR_KEY_LAYOUT[index].weergavetekst);
 #endif
-    Screen->Print(_INPUT_HX1838_DRUK_NU_OP, IR_KEY_LAYOUT[index].weergavetekst, 0);
+    if (Screen != nullptr) Screen->Print(_INPUT_HX1838_DRUK_NU_OP, IR_KEY_LAYOUT[index].weergavetekst, 0);
 
     unsigned long startWachten = millis();
 
@@ -786,7 +790,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
     GA_SERIAL.println(_INPUT_HX1838_KALIBRATIE_OPGESLAGEN_SERIAL);
     HX1838toonTabelMetCodes();
 #endif
-    Screen->Print(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_OPGESLAGEN, 2000);
+    if (Screen != nullptr) Screen->Print(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_OPGESLAGEN, 2000);
   }
 
   bool Input::HX1838kalibratieLaden() {
@@ -819,6 +823,11 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       return false;
     }
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) EEPROM.get(EEPROM_ADRES_CODES + (i * sizeof(uint8_t)), irCodes[i]);
+    for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) {
+      // Een code 0 of een code die twee keer voorkomt, maakt de kalibratie ongeldig; dan volgt een nieuwe kalibratie.
+      if (irCodes[i] == 0) return false;
+      for (byte otherKey = i + 1; otherKey < AANTAL_IR_TOETSEN; otherKey++) if (irCodes[otherKey] == irCodes[i]) return false;
+    }
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
     GA_SERIAL.println(_INPUT_HX1838_MAPPING_EEPROM_GELADEN_SERIAL);
     HX1838toonTabelMetCodes();
@@ -830,7 +839,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
     GA_SERIAL.println(_INPUT_HX1838_KALIBRATIE_KLAAR_CONTROLE_SERIAL);
 #endif
-    Screen->Print(_INPUT_HX1838_CONTROLE, _INPUT_HX1838_DRUK_OP_ELKE_TOETS_VOOR_CONTROLE, 0);
+    if (Screen != nullptr) Screen->Print(_INPUT_HX1838_CONTROLE, _INPUT_HX1838_DRUK_OP_ELKE_TOETS_VOOR_CONTROLE, 0);
 
     bool geverifieerd[AANTAL_IR_TOETSEN];
     for (byte i = 0; i < AANTAL_IR_TOETSEN; i++) geverifieerd[i] = false;
@@ -857,7 +866,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
             GA_SERIAL.print(_INPUT_HX1838_TOETS_HERKEND_SERIAL);
             GA_SERIAL.println(IR_KEY_LAYOUT[index].weergavetekst);
 #endif
-            Screen->Print(IR_KEY_LAYOUT[index].weergavetekst, _INPUT_HX1838_TOETS_HERKEND, 500);
+            if (Screen != nullptr) Screen->Print(IR_KEY_LAYOUT[index].weergavetekst, _INPUT_HX1838_TOETS_HERKEND, 500);
           }
         }
 
@@ -867,7 +876,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
       }
     }
 
-    Screen->Print(_INPUT_HX1838_CONTROLE_GESLAAGD, "", 2000);
+    if (Screen != nullptr) Screen->Print(_INPUT_HX1838_CONTROLE_GESLAAGD, "", 2000);
     HX1838kalibratieOpslaan();
     return true;
   }
@@ -889,7 +898,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
         GA_SERIAL.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
 #endif
-        Screen->Print(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
+        if (Screen != nullptr) Screen->Print(_INPUT_HX1838_KALIBRATIE_UITVOEREN, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
         return;
       }
     }
@@ -901,7 +910,7 @@ void Input::UitVoerenFunctieVolgensMappingMetToetsAanslag(bool wachten) {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
       GA_SERIAL.println(_INPUT_HX1838_KALIBRATIE_TIMEOUT_SERIAL);
 #endif
-      Screen->Print(_INPUT_HX1838_CONTROLE, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
+      if (Screen != nullptr) Screen->Print(_INPUT_HX1838_CONTROLE, _INPUT_HX1838_KALIBRATIE_TIMEOUT, 2000);
     }
   }
 #endif
@@ -1030,7 +1039,15 @@ bool Input::aanmelden() {
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
       && gedeeldeBusInputHX1838 == nullptr
 #endif
-  ) return false;
+  ) {
+    // Geen enkel kanaal aangemeld: de parent weer afmelden, zonder het object te verwijderen.
+    // Een dynamische Input ruimt GedeeldeBusNewComponent() daarna zelf op; een vaste Input kan later opnieuw proberen.
+    const bool createdDynamically = componentCreated;
+    componentCreated = false;
+    GedeeldeBusNode::afmelden();
+    componentCreated = createdDynamically;
+    return false;
+  }
 
   return true;
 }
@@ -1096,7 +1113,7 @@ bool Input::inpluggen() {
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_HX1838)
   if (gedeeldeBusInputHX1838 != nullptr && (static_cast<HardwareResourcePin>(gedeeldeBusInputHX1838Pinnen[0]) == HardwareResourcePin::NONE
     || NativeArduinoPinVan(static_cast<HardwareResourcePin>(gedeeldeBusInputHX1838Pinnen[0])) == static_cast<uint8_t>(HardwareResourcePin::NONE))) {
-    Screen->Print(_CRITICAL_IN202, "", 2000);
+    if (Screen != nullptr) Screen->Print(_CRITICAL_IN202, "", 2000);
     gedeeldeBusInputHX1838->afmelden();
     gedeeldeBusInputHX1838 = nullptr;
   } else if (gedeeldeBusInputHX1838 != nullptr && !gedeeldeBusInputHX1838->inpluggen()) {
@@ -1113,7 +1130,7 @@ bool Input::inpluggen() {
     delay(5);
 
     if (digitalRead(HX1838_ONTVANGER_PIN) == LOW) {
-      Screen->Print(_CRITICAL_IN302, "", 2000);
+      if (Screen != nullptr) Screen->Print(_CRITICAL_IN302, "", 2000);
       gedeeldeBusInputHX1838->afmelden();
       gedeeldeBusInputHX1838 = nullptr;
     }
@@ -1128,14 +1145,14 @@ bool Input::inpluggen() {
 // TODO: Alex - IN304 op de 11 boards testen: controleer of deze interruptcontrole per core correct werkt.
 #if defined(USE_ATTACH_INTERRUPT) && defined(NOT_AN_INTERRUPT)
     if (gedeeldeBusInputHX1838 != nullptr && digitalPinToInterrupt(HX1838_ONTVANGER_PIN) == NOT_AN_INTERRUPT) {
-      Screen->Print(_CRITICAL_IN304, "", 2000);
+      if (Screen != nullptr) Screen->Print(_CRITICAL_IN304, "", 2000);
       gedeeldeBusInputHX1838->afmelden();
       gedeeldeBusInputHX1838 = nullptr;
     }
 #endif
     // TODO: Alex - IN303 op de 11 boards testen waar TinyIRReceiver gebruikt wordt.
     if (gedeeldeBusInputHX1838 != nullptr && !initPCIInterruptForTinyReceiver()) {
-      Screen->Print(_CRITICAL_IN303, "", 2000);
+      if (Screen != nullptr) Screen->Print(_CRITICAL_IN303, "", 2000);
       gedeeldeBusInputHX1838->afmelden();
       gedeeldeBusInputHX1838 = nullptr;
     }
@@ -1147,7 +1164,7 @@ bool Input::inpluggen() {
       delay(5);
 
       if (!IrReceiver.isIdle()) {
-        Screen->Print(_CRITICAL_IN305, "", 2000);
+        if (Screen != nullptr) Screen->Print(_CRITICAL_IN305, "", 2000);
         gedeeldeBusInputHX1838->afmelden();
         gedeeldeBusInputHX1838 = nullptr;
       }
@@ -1220,17 +1237,17 @@ bool Input::Activeren() {
         HX1838GeneriekCodesKalibreren();
       #else
         if (HX1838mappingUitUserConfigInladen()) {
-          Screen->Print(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
+          if (Screen != nullptr) Screen->Print(_INPUT_HX1838_MAPPING_GELADEN, "", 2000);
         } else {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
           GA_SERIAL.println(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG_SERIAL);
 #endif
-          Screen->Print(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG, "", 2000);
+          if (Screen != nullptr) Screen->Print(_INPUT_HX1838_MAPPING_CONFIG_ONVOLLEDIG, "", 2000);
         }
       #endif
     #elif HX1838_BRON_CODES == HX1838_BRON_CODES_EEPROM_ALTIJD
       if (HX1838kalibratieLaden()) {
-        Screen->Print(_INPUT_HX1838_MAPPING_EEPROM_GELADEN, "", 2000);
+        if (Screen != nullptr) Screen->Print(_INPUT_HX1838_MAPPING_EEPROM_GELADEN, "", 2000);
       } else {
 #if (SCREEN_OUTPUT & SCREEN_TYPE_SERIAL)
         GA_SERIAL.println(_INPUT_HX1838_GEEN_GELDIGE_KALIBRATIE_SERIAL);
@@ -1298,9 +1315,16 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
   #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
   if (gedeeldeBusInputPCF8574 != nullptr && wachten) {   // niet op actief: de scan zelf herstelt via ComponentBeschikbaarTijdensRuntime()
   #endif
-    while (KeypadUitLezenRuweData() != 0) delay(1);
-    vorigeRauweKeypadPositie = 0;
-    stabieleKeypadPositie = 0;
+    // Wachten tot de toets losgelaten is; een leesfout (-1) is geen loslaten.
+    // Blijft de PCF8574 onleesbaar, dan stopt het wachten na INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS.
+    keypadWijzigingSinds = millis();
+    while ((vorigeRauweKeypadPositie = KeypadUitLezenRuweData()) > 0 ||
+           (vorigeRauweKeypadPositie < 0 && millis() - keypadWijzigingSinds < INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS)) {
+      if (vorigeRauweKeypadPositie > 0) keypadWijzigingSinds = millis();
+      delay(1);
+    }
+    // Alleen een echte 0 is losgelaten; na een time-out blijft de toets als ingedrukt gelden.
+    if (vorigeRauweKeypadPositie == 0) stabieleKeypadPositie = 0;
     keypadWijzigingSinds = millis();
   }
 #endif
@@ -1319,9 +1343,16 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
           laatsteInvoerTijdstipVoorTimeout = millis();
         #endif
         if (wachten) {
-          while (KeypadUitLezenRuweData() != 0) delay(1);
-          vorigeRauweKeypadPositie = 0;
-          stabieleKeypadPositie = 0;
+          // Wachten tot de toets losgelaten is; een leesfout (-1) is geen loslaten.
+          // Blijft de PCF8574 onleesbaar, dan stopt het wachten na INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS.
+          keypadWijzigingSinds = millis();
+          while ((vorigeRauweKeypadPositie = KeypadUitLezenRuweData()) > 0 ||
+                 (vorigeRauweKeypadPositie < 0 && millis() - keypadWijzigingSinds < INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS)) {
+            if (vorigeRauweKeypadPositie > 0) keypadWijzigingSinds = millis();
+            delay(1);
+          }
+          // Alleen een echte 0 is losgelaten; na een time-out blijft de toets als ingedrukt gelden.
+          if (vorigeRauweKeypadPositie == 0) stabieleKeypadPositie = 0;
           keypadWijzigingSinds = millis();
         }
 
@@ -1346,10 +1377,10 @@ InputResultaat Input::OpvragenHuidigeToetsAanslagIntern(bool wachten, LangIndruk
 
         const char* opschriftVoorDrempel = (stabieleKeypadPositie > 0 && stabieleKeypadPositie <= AANTAL_KEYPAD_TOETSEN) ? KEY_LAYOUT[stabieleKeypadPositie - 1].opschrift : nullptr;
         if (opschriftVoorDrempel != nullptr) {
-          unsigned long langIndrukkenDrempelMs = drempelOpzoeker(opschriftVoorDrempel);
+          unsigned long langIndrukkenDrempelMS = drempelOpzoeker(opschriftVoorDrempel);
 
-          if (langIndrukkenDrempelMs > 0) {
-            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMs);
+          if (langIndrukkenDrempelMS > 0) {
+            int langIndrukkenPositie = KeypadUitLezenLangIngedruktePositie(langIndrukkenDrempelMS);
 
             if (langIndrukkenPositie > 0) {
               laatsteInvoerTijdstipVoorTimeout = millis();

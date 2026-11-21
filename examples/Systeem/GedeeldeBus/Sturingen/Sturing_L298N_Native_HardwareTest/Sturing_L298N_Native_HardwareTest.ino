@@ -22,7 +22,7 @@ bool testGestopt = false;
 String invoer;
 uint8_t testStap = 0;
 uint8_t testFase = 0;
-unsigned long testStartMillis = 0;
+unsigned long testStartMS = 0;
 
 void toonStartInstructies() {
   GA_SERIAL.println(F("HARDWARETEST: Sturing_L298N_Native_HardwareTest"));
@@ -192,7 +192,7 @@ void loop() {
       }
 
       testFase = 2;
-      testStartMillis = millis();
+      testStartMS = millis();
       return;
     }
 
@@ -220,7 +220,7 @@ void loop() {
 
       testActief = true;
       testFase = 0;
-      testStartMillis = millis();
+      testStartMS = millis();
       GA_SERIAL.println(F("FUNCTIEAANROEP: OK. Beweging heeft een automatische stoptijd."));
       return;
     }
@@ -229,7 +229,7 @@ void loop() {
   }
 
   if (!testActief) return;
-  const unsigned long verstreken = millis() - testStartMillis;
+  const unsigned long verstreken = millis() - testStartMS;
   if (testStap == 3 && testFase == 1) return;
   if (testStap == 3 && testFase == 0 && verstreken >= 800UL) {
     const bool ok = motorBesturing->PauzeerMotor();

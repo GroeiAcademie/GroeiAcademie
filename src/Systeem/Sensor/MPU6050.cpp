@@ -3,12 +3,29 @@
 
 // Officiële referentie voor register en identiteit: https://github.com/adafruit/Adafruit_MPU6050/blob/master/Adafruit_MPU6050.h
 bool SensorMPU6050::Activeren() {
+#if GEDEELDE_BUS_MIXED_PINS
+  // Mixed: hulppinnen op de tweede Extender instellen vóór de library-initialisatie.
+  if (viaMixed) {
+    if (extenderHulp_[0] == nullptr || !extenderHulp_[0]->actief) return false;
+    if (!extenderHulp_[0]->SetExtenderPinMode(np_INT, INPUT)) return false;   // INT: uitgang van de sensor
+  }
+#endif
   if (!parent || !parent->actief) return false;
   // Geen tweede businitialisatie: gebeurt tijdens inpluggen van de parent.
   HardwareResourceTypeI2C* const apparaat = static_cast<HardwareResourceTypeI2C*>(parent);
   // Officiele library-initialisatie. begin() kan Wire.begin() en wachttijden
   // bevatten; die gelden ook bij runtime-herstel binnen de bestaande lifecycle.
-  return mpu6050.begin(apparaat->adres, &Wire);
+  if (!mpu6050.begin(apparaat->adres, &Wire)) return false;
+#if GEDEELDE_BUS_MIXED_PINS
+  if (viaMixed) {
+    // INT_PIN_CFG 0x37 = 0x30: INT hoog actief, vergrendeld tot een lezing (LATCH_INT_EN, INT_ANYRD_2CLEAR); INT_ENABLE 0x38 = 0x01: data klaar.
+    Wire.beginTransmission(apparaat->adres); Wire.write(0x37); Wire.write(0x30);
+    if (Wire.endTransmission() != 0) return false;
+    Wire.beginTransmission(apparaat->adres); Wire.write(0x38); Wire.write(0x01);
+    if (Wire.endTransmission() != 0) return false;
+  }
+#endif
+  return true;
 }
 
 

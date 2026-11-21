@@ -2,19 +2,21 @@
 
 ## Doel
 
-Het centrale object `Screen` verstuurt via `Screen.Print()` één volledige schermopdracht naar alle tijdens het compileren geselecteerde uitvoerdoelen.
+Het centrale object `Screen` verwerkt via `Screen->Print()` één volledige schermopdracht voor de gecompileerde uitvoerdoelen die ook voor dit object geselecteerd en beschikbaar zijn.
 
 ```cpp
-Screen.Print(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+void Print(const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
 ```
+
+Dit zijn de declaraties van de publieke `Screen::Print()`-methoden. In een sketch roep je bijvoorbeeld `Screen->Print("Eerste regel", "Tweede regel");` aan.
 
 Wanneer PixelScreen meegecompileerd is, bestaat daarnaast:
 
 ```cpp
-Screen.Print(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
+void Print(ScreenData screenData, const String& eersteRegel, const String& tweedeRegel, unsigned long delayTime = 0, const String& action = "", const String& derdeRegel = "", const String& vierdeRegel = "", unsigned long delayTussenPaginas = 0);
 ```
 
-`Screen` gebruikt `GedeeldeBus` voor de lifecycle en resourcecontrole.
+`Screen` gebruikt `GedeeldeBus` voor de lifecycle en resourcecontrole. De interne lifecyclefuncties in het onderstaande schema worden door de bestaande GedeeldeBus-helper aangeroepen, niet rechtstreeks vanuit de sketch.
 
 ```text
 Native
@@ -24,12 +26,12 @@ Native
    └─ SerialOutput
 ```
 
-De publieke Screen-subobjecten zijn:
+De publieke subobjecten bestaan alleen wanneer hun uitvoertype in `SCREEN_OUTPUT` meegecompileerd is. `Screen` is een globale pointer; na geslaagde aanmaak gebruik je buiten memberfuncties `Screen->...`:
 
 ```text
-Screen.Character
-Screen.Pixel
-Screen.Serial
+Screen->Character
+Screen->Pixel
+Screen->Serial
 ```
 
 `CharacterScreen`, `PixelScreen` en `SerialOutput` zijn de bijhorende GedeeldeBus-objecten.
@@ -41,13 +43,15 @@ Screen.Serial
 ```text
 Screen
 ├─ actief
-├─ Aanmelden()
-├─ Afmelden()
-├─ Controleren()
-├─ Inpluggen()
+├─ aanmelden()          [intern]
+├─ afmelden()           [intern]
+├─ controleren()        [intern]
+├─ inpluggen()          [intern]
+├─ Activeren()          [intern]
+├─ ActivatiefoutWeergeven()
 ├─ Print(...)
-├─ Print(ScreenData, ...)
-├─ PrintPrivate()
+├─ Print(ScreenData, ...) [alleen met PixelScreen]
+├─ PrintPrivate()       [intern]
 │
 ├─ Character
 │  ├─ actief
@@ -89,10 +93,12 @@ Screen
 └─ Serial
    ├─ actief
    ├─ gedeeldeBus
+   ├─ foutmelding
+   ├─ foutmeldingWeergegeven
    └─ FoutmeldingWeergeven()
 ```
 
-Binnen ieder object staan eerst gegevens, statussen en objectreferenties alfabetisch, daarna functies alfabetisch.
+De precieze beschikbare velden en functies hangen af van de geselecteerde uitvoertypen.
 
 ---
 
@@ -141,12 +147,12 @@ this->Serial.gedeeldeBus
 Buiten een `Screen`-memberfunctie:
 
 ```cpp
-::Screen.Character
-::Screen.Pixel
-::Screen.Serial
+::Screen->Character
+::Screen->Pixel
+::Screen->Serial
 ```
 
-`Screen->Character` is niet correct.
+`Screen->Character` is de juiste toegang via de globale pointer nadat `Screen` is aangemaakt. Een puntnotatie zoals `Screen.Character` is onjuist.
 
 ---
 
@@ -175,7 +181,7 @@ Screen = GedeeldeBusNewComponent<struct Screen>(
 );
 ```
 
-De runtime-selectie staat in `Screen::typesActief`. De concrete children zijn, afhankelijk van `SCREEN_OUTPUT`, `SerialOutput`, `CharacterScreen` en `PixelScreen`.
+De runtime-selectie staat in `Screen::typesActief`. De concrete children zijn, afhankelijk van `SCREEN_OUTPUT` én de geselecteerde `typesActief`, `SerialOutput`, `CharacterScreen` en `PixelScreen`. `GedeeldeBusNewComponent()` voert aanmelden, controleren, inpluggen en activeren automatisch uit; de lifecyclefuncties zijn niet bedoeld als afzonderlijke publieke sketchaanroepen.
 
 `Diagnose()` is nog niet specifiek in `Screen` geïmplementeerd. Alleen de lege virtuele DEBUG-hook uit `GedeeldeBusNode` bestaat.
 
@@ -240,8 +246,8 @@ De huidige code zet de betrokken `actief`-statussen uit, meldt eerst Serial-, Pi
 Callbacks vervangen de standaardweergave, niet de lifecycle.
 
 ```cpp
-Screen.Character.RegistreerCallback(...)
-Screen.Pixel.RegistreerCallback(...)
+Screen->Character.RegistreerCallback(...)
+Screen->Pixel.RegistreerCallback(...)
 ```
 
 maakt een fysiek Screen-object niet automatisch aangemeld, gecontroleerd, ingeplugd of actief.
@@ -255,7 +261,7 @@ De bestaande callbackwerking en timing blijven behouden.
 De lifecycleherwerking verandert niet stilzwijgend:
 
 ```text
-Screen.Print()
+Screen->Print()
 ScreenData
 Character-callbacks
 Pixel-callbacks
@@ -298,7 +304,7 @@ SCREEN_TYPE_CHARACTER
 SCREEN_TYPE_PIXELS
 ```
 
-Meerdere uitvoerdoelen worden gecombineerd met `|`. De standaard seriële `Screen.Print()`-uitvoer via `SCREEN_TYPE_SERIAL` volgt de bestaande `DEBUG`-werking: wanneer `DEBUG` actief is, voegt `Screen.h` `SCREEN_TYPE_SERIAL` automatisch toe aan de effectieve `SCREEN_OUTPUT` en wordt de seriële debuguitvoer beschikbaar. Bij de eerste normale SerialScreen-verbinding wacht de library maximaal `SERIAL_CONNECT_TIMEOUT_MS`; na timeout wordt Serial voor die sessie als niet beschikbaar beschouwd en wordt `CRITICAL: SS001` rechtstreeks via beschikbare andere schermen/callbacks gemeld. De afzonderlijke foutfallback voor kritieke schermfouten kan Serial bewust rechtstreeks forceren; zie `SCREEN_FOUTCODES.md`.
+Meerdere uitvoerdoelen worden gecombineerd met `|`. Stel `SCREEN_OUTPUT_CONFIG` in de configuratie in, niet alleen met een `#define` in een `.ino`: `Screen.cpp` wordt afzonderlijk gecompileerd. Wanneer `DEBUG` actief is, voegt `Screen.h` `SCREEN_TYPE_SERIAL` toe aan de effectieve `SCREEN_OUTPUT`. `SerialOutput::Activeren()` start `GA_SERIAL` en wacht standaard zonder tijdslimiet op de verbinding. Alleen als `REDIRECT_SERIAL_CONNECT_TIMEOUT_MS` gedefinieerd is, geldt de grens `SERIAL_CONNECT_TIMEOUT_MS`; een mislukte activering levert `SS301` op. `SS001` betreft de aanmelding, niet een timeout. Het nood-terugvalpad voor fatale schermmeldingen schrijft rechtstreeks naar `GA_SERIAL`, zonder zelf `GA_SERIAL.begin()` aan te roepen; de seriële interface moet dus al bruikbaar zijn om die tekst te zien. Zie `SCREEN_FOUTCODES.md`.
 
 De concrete seriële interface loopt via `GA_SERIAL`: bij `BOARD_ESP32S3_ARDI32` en `BOARD_ESP32S3_DEV` is dat `Serial0`, op de andere boards `Serial`.
 
@@ -313,25 +319,19 @@ Regel 1 en regel 2 worden eerst weergegeven. Daarna wordt `delayTime` één keer
 
 Screen-fouten worden gemeld met lifecyclegebonden codes zoals `CS001`, `CS301`, `PS001`, `PS305` of `SS302`. De actuele codes en hun betekenis staan in [Screen-foutcodes](SCREEN_FOUTCODES.md). Waar mogelijk wordt een fout van één uitvoer via een andere nog werkende Screen-uitvoer gemeld.
 
-Vanaf v2.0.0 bezit `Screen` zelf het concrete schermobject (`Screen.Pixel.display`): `Adafruit_ST7789` bij `ACTIEF_PIXEL_SCREEN_CONTROLLER` `SCREEN_ST7789`, of `Adafruit_ST7735` bij `SCREEN_ST7735S` (geïnitialiseerd met `initR(INITR_BLACKTAB)`, de gangbare 1,8″-module van 128x160) en de algemene `Adafruit_GFX*`-pointer (`Screen.Pixel.gfx`). De sketch maakt geen afzonderlijk `pixelScreen`-object buiten `Screen` meer aan. De normale setup is:
+In v2.0.0 bezit `Screen` zelf het concrete schermobject (`Screen->Pixel.display`): `Adafruit_ST7789` bij `ACTIEF_PIXEL_SCREEN_CONTROLLER` `SCREEN_ST7789`, of `Adafruit_ST7735` bij `SCREEN_ST7735S` (geïnitialiseerd met `initR(INITR_BLACKTAB)`, de gangbare 1,8″-module van 128x160) en de algemene `Adafruit_GFX*`-pointer (`Screen->Pixel.gfx`). De sketch maakt geen afzonderlijk `pixelScreen`-object buiten `Screen` meer aan. In `setup()` maak je het Screen-object aan met `GedeeldeBusNewComponent<struct Screen>(...)`, zoals hierboven getoond. De helper doorloopt de vier lifecyclefasen automatisch. Rechtstreeks `Aanmelden()`, `Controleren()` of `Inpluggen()` aanroepen op `Screen` is niet de huidige publieke API.
 
-```cpp
-Screen.Aanmelden();
-Screen.Controleren();
-Screen.Inpluggen();
-```
+`Screen::inpluggen()` plugt de concrete Character-, Pixel- en Serial-children via GedeeldeBus in. Er bestaan geen afzonderlijke `Screen->Character.Inpluggen()`, `Screen->Pixel.Inpluggen()` of `Screen->Serial.Inpluggen()`-functies. Pas in `Screen::Activeren()` wordt het pixelscherm geïnitialiseerd: bij ST7735S met `initR(INITR_BLACKTAB)`, bij ST7789 met `init(breedte, hoogte)`. Daarna volgen `setRotation(...)`, uitsluitend bij ST7789 `invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0)` en de `Adafruit_GFX`-koppeling. In dezelfde activatiefase worden de afmetingen na rotatie 0 tot en met 3 gecontroleerd, de marges verrekend, het tekstgrid berekend en tekstgrootte, kleuren en tekstomloop ingesteld. ST7789 gebruikt standaard inversie `1` (bestaand Adafruit-gedrag); `0` schakelt die uit. ST7735S blijft ongewijzigd.
 
-`Screen::inpluggen()` plugt de concrete Character-, Pixel- en Serial-children via GedeeldeBus in. Er bestaan geen afzonderlijke `Screen.Character.Inpluggen()`, `Screen.Pixel.Inpluggen()` of `Screen.Serial.Inpluggen()`-functies. Pas in `Screen::Activeren()` wordt het pixelscherm geïnitialiseerd: bij ST7735S met `initR(INITR_BLACKTAB)`, bij ST7789 met `init(breedte, hoogte)`. Daarna volgen `setRotation(...)`, uitsluitend bij ST7789 `invertDisplay(ACTIEF_PIXEL_SCREEN_INVERSIE != 0)` en de `Adafruit_GFX`-koppeling. In dezelfde activatiefase worden de afmetingen na rotatie 0 tot en met 3 gecontroleerd, de marges verrekend, het tekstgrid berekend en tekstgrootte, kleuren en tekstomloop ingesteld. ST7789 gebruikt standaard inversie `1` (bestaand Adafruit-gedrag); `0` schakelt die uit. ST7735S blijft ongewijzigd.
+Omdat het concrete object onderdeel van `Screen` is, kan de actieve displaydriver nadien rechtstreeks worden aangesproken, bijvoorbeeld `Screen->Pixel.display.setRotation(1);`. Die rechtstreekse driveraanroep wijzigt het fysieke pixelscherm; de standaard `Screen->Print()`-gridberekening blijft gebaseerd op de activatie die door `Screen::Activeren()` is uitgevoerd.
 
-Omdat het concrete object onderdeel van `Screen` is, kan de actieve displaydriver nadien rechtstreeks worden aangesproken, bijvoorbeeld `Screen.Pixel.display.setRotation(1);`. Die rechtstreekse driveraanroep wijzigt het fysieke pixelscherm; de standaard `Screen.Print()`-gridberekening blijft gebaseerd op de activatie die door `Screen::Activeren()` is uitgevoerd.
-
-Zonder geregistreerde pixelcallback verwerkt de standaarduitvoer alleen `ScreenData::TYPE_NONE`. De tekst wordt met het ingebouwde vaste Adafruit_GFX-font in een gecentreerd grid van minimaal 16×2 en maximaal 40×4 geplaatst. Bij `SCREEN_128X160` vereist dat `PIXEL_SCREEN_TEXT_SIZE=1`; een grotere tekstgrootte wordt vooraf bij compilatie geweigerd, terwijl de runtimecontrole `PS305` voor andere te kleine grids behouden blijft. `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING` bepalen de extra witruimte tussen tekens en regels. Om karakterafstand mogelijk te maken, plaatst de standaarduitvoer ieder teken afzonderlijk op de berekende cursorpositie. Voor andere fonts, vrije pixelposities, grafieken of andere `ScreenData`-typen is een pixelcallback bedoeld. De standaard cursoradministratie gaat uit van eenvoudige tekens; UTF-8-tekens kunnen meerdere bytes tellen en worden niet volledig ondersteund.
+Zonder geregistreerde pixelcallback geeft de standaarduitvoer de tekst weer voor alle `ScreenData`-typen behalve `TYPE_DEBUG`, zonder typespecifieke opmaak. De tekst wordt met het ingebouwde vaste Adafruit_GFX-font in een gecentreerd grid van minimaal 16×2 en maximaal 40×4 geplaatst. Bij `SCREEN_128X160` vereist dat `PIXEL_SCREEN_TEXT_SIZE=1`; een grotere tekstgrootte wordt vooraf bij compilatie geweigerd, terwijl de runtimecontrole `PS305` voor andere te kleine grids behouden blijft. `PIXEL_SCREEN_MARGIN` bepaalt de minimale vrije ruimte aan iedere schermrand. `PIXEL_SCREEN_CHARACTER_SPACING` en `PIXEL_SCREEN_LINE_SPACING` bepalen de extra witruimte tussen tekens en regels. Om karakterafstand mogelijk te maken, plaatst de standaarduitvoer ieder teken afzonderlijk op de berekende cursorpositie. Voor andere fonts, vrije pixelposities, grafieken of andere `ScreenData`-typen is een pixelcallback bedoeld. De standaard cursoradministratie gaat uit van eenvoudige tekens; UTF-8-tekens kunnen meerdere bytes tellen en worden niet volledig ondersteund.
 
 Hardwarematig getest en werkend: de 1,8-inch ST7735S met `INITR_BLACKTAB` en rode tekst zonder ruis aan de randen; de 2,8-inch ST7789V via SPI met `ACTIEF_PIXEL_SCREEN_INVERSIE=0`. Dit bevestigt niet automatisch andere PixelScreen-resoluties of -modules.
 
 ## ScreenData
 
-`ScreenData` wordt alleen gecompileerd wanneer `SCREEN_TYPE_PIXELS` geselecteerd is. De huidige typen zijn:
+`ScreenData` is altijd gedefinieerd in `Screen.h`, omdat ook de runtime-foutafhandeling de foutniveaus gebruikt. De `Screen->Print(ScreenData, ...)`-overload en `PixelScreenCallback` bestaan daarentegen alleen wanneer `SCREEN_TYPE_PIXELS` is meegecompileerd. De typen zijn:
 
 ```cpp
 TYPE_NONE
@@ -357,7 +357,7 @@ TYPE_VIDEO
 
 ### Kleuren per type (PixelScreen)
 
-`SystemConfig.h` definieert vier `#ifndef`-beschermde RGB565-kleuren, bedoeld om in een zelfgeschreven PixelScreen-callback per `ScreenData`-type een andere tekstkleur te tonen:
+`SystemConfig.h` definieert zeven `#ifndef`-beschermde RGB565-kleuren, bedoeld om in een zelfgeschreven PixelScreen-callback per `ScreenData`-type een andere tekstkleur te tonen:
 
 ```cpp
 PIXEL_SCREEN_KLEUR_FATAL    // 0xF800, rood
@@ -371,9 +371,9 @@ PIXEL_SCREEN_KLEUR_PANIC    // 0xFFFF, wit
 
 Ruwe RGB565-hexwaarden, niet gebonden aan een specifieke driverbibliotheek (zoals `ST77XX_RED`), zodat ze werken ongeacht welk PixelScreen-driver gebruikt wordt. `examples/Systeem/Screen/Callback_PixelScreen/Callback_PixelScreen.ino` toont hoe dit in de callback toegepast wordt via een `switch` op `screenData`.
 
-### TYPE_FATAL, TYPE_PANIC, TYPE_ABORT, TYPE_CRITICAL: gegarandeerde Serial-terugval
+### TYPE_FATAL, TYPE_PANIC, TYPE_ABORT, TYPE_CRITICAL: rechtstreekse seriële nooduitvoer
 
-Wanneer `Screen.Print()` met een van deze vier types aangeroepen wordt terwijl geen enkel scherm en geen enkele callback beschikbaar is, forceert `Screen.PrintPrivate()` `GA_SERIAL.begin(SERIAL_BAUDRATE)` en toont de melding daar, naar analogie van de bestaande `FATAL: CSxxx`/`PSxxx`-terugval (zie `SCREEN_FOUTCODES.md`). Dit is een bewuste uitzondering: enkel voor deze vier types, en enkel onder deze specifieke voorwaarde. Is er wél een scherm of callback actief, dan lopen ze gewoon via het normale pad hierboven.
+Wanneer `Screen->Print(ScreenData, ...)` met een van deze vier typen wordt aangeroepen zonder beschikbare Character-/Pixel-uitvoer of callback, schrijft `Screen::PrintPrivate()` de niet-lege tekstregels rechtstreeks met `GA_SERIAL.println()`. Het start de seriële verbinding **niet** zelf. Deze fallback geldt alleen wanneer PixelScreen is meegecompileerd, want alleen dan bestaat de getypeerde `Print()`-overload. Is er wel Character-/Pixel-uitvoer of een callback beschikbaar, dan volgt de melding het gewone uitvoerpad. Zie `SCREEN_FOUTCODES.md`.
 
 ## Callbacktypen
 
@@ -387,11 +387,11 @@ typedef void (*PixelScreenCallback)(ScreenData screenData, const String& eersteR
 Registratie:
 
 ```cpp
-Screen.Character.RegistreerCallback(MijnCharacterScreen);
-Screen.Pixel.RegistreerCallback(MijnPixelScreen);
+Screen->Character.RegistreerCallback(MijnCharacterScreen);
+Screen->Pixel.RegistreerCallback(MijnPixelScreen);
 ```
 
-Met `nullptr` wordt voor beide schermtypen de standaardafhandeling gebruikt. Voor PixelScreen geldt die standaardafhandeling alleen voor `ScreenData::TYPE_NONE`.
+Met `nullptr` wordt voor beide schermtypen de standaardafhandeling gebruikt. De standaard PixelScreen-uitvoer toont de tekst voor alle `ScreenData`-typen behalve `TYPE_DEBUG`, zonder onderscheid in kleur of presentatie op basis van het type.
 
 Een CharacterScreen-callback en een PixelScreen-callback mogen tegelijk geregistreerd zijn. Ze kunnen dezelfde informatie synchroon weergeven of elk een ander doel hebben. De library dwingt tussen beide callbacks geen synchronisatie af. Wanneer synchroon gedrag gewenst is, is de gebruiker verantwoordelijk voor de onderlinge timing en voor het voorkomen dat `delayTime` of `delayTussenPaginas` door beide callbacks wordt uitgevoerd.
 
@@ -409,7 +409,7 @@ Een callback beheert zelf wissen, regelplaatsing, paginering, wachttijden, `acti
 
 Een I2C-characterscherm gebruikt `VCC`, `GND`, `SDA` en `SCL`. Controleer `I2C_ADDRESS_CHARACTER_SCREEN` en de spanning van de gebruikte backpack.
 
-Een SPI-PixelScreen op Arduino UNO gebruikt voor hardware-SPI standaard `D11` als MOSI en `D13` als SCK. `CS`, `DC` en `RST` worden ingesteld met `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`. De standaard `PIXEL_SCREEN_RST` is Arduino Uno-shieldpin `D7`. Controleer altijd de voedingsspanning en logicaniveaus van de concrete displaymodule.
+Een SPI-PixelScreen gebruikt de hardware-SPI-aansluitingen `NP_MOSI` en `NP_SCK` van het geselecteerde, ondersteunde board. `CS`, `DC` en `RST` worden ingesteld met `PIXEL_SCREEN_CS`, `PIXEL_SCREEN_DC` en `PIXEL_SCREEN_RST`. De standaard `PIXEL_SCREEN_RST` komt overeen met shieldpin `D7`. De Arduino UNO R3 behoort niet tot de ondersteunde v2.0.0-boards. Controleer altijd de voedingsspanning en logicaniveaus van de concrete displaymodule.
 
 De geteste 2,8-inch ST7789V SPI-module heeft ook een aanraaklaag: de `T_`-pinnen worden door de huidige Screen-laag niet ondersteund en blijven los. De microSD werkt via een afzonderlijke SD-header van 4 pinnen, met **aangesloten `SD_MISO`**. Zonder die verbinding mislukte de initialisatie in deze testopstelling (`GB304` bij `DEBUG`, anders `GB301`); de code is niet specifiek voor een ontbrekende MISO-verbinding. Ook microSD met CS via PCF8574-uitgang P0 is op hardware getest en werkt.
 
@@ -419,9 +419,7 @@ De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange w
 
 ## Uitvoeringscontract
 
-`Screen.Print()` verwerkt de standaarduitvoer in deze volgorde. Bij Serial-only geldt Serial eveneens als standaardscherm voor `delayTime` en `action`; wanneer CharacterScreen en/of PixelScreen meegecompileerd zijn, blijft hun bestaande timing-/callbackcontract bepalend en verandert een aanvullend Serial-doel dat contract niet.
-
-`Screen.Print()` verwerkt de standaarduitvoer in deze volgorde:
+`Screen->Print()` verwerkt de standaarduitvoer in deze volgorde. Bij Serial-only geldt Serial eveneens als standaardscherm voor `delayTime` en `action`; wanneer CharacterScreen en/of PixelScreen meegecompileerd zijn, blijft hun bestaande timing-/callbackcontract bepalend en verandert een aanvullend Serial-doel dat contract niet.
 
 1. regel 1 en regel 2 worden op alle actieve standaardschermen getoond;
 2. `delayTime` wordt exact één keer uitgevoerd;
@@ -431,7 +429,7 @@ De huidige standaardimplementatie gebruikt blokkerende `delay()`-logica. Lange w
 
 CharacterScreen en PixelScreen blijven bij gecombineerde standaarduitvoer synchroon. Een geregistreerde callback wordt exact één keer aangeroepen. `action`, `derdeRegel` en `vierdeRegel` worden ongewijzigd doorgegeven. Wanneer een standaardscherm actief is, ontvangt de callback voor `delayTime` en `delayTussenPaginas` de waarde `0`, omdat de standaarduitvoer de toepasselijke wachttijden al afhandelt. Wanneer geen standaardscherm actief is, ontvangt de callback de oorspronkelijke wachttijden. Bij gelijktijdige CharacterScreen- en PixelScreen-callbacks is de gebruiker verantwoordelijk voor de gewenste synchronisatie en voor het voorkomen van dubbele wachttijden.
 
-`PIXEL_SCREEN_ROTATION` bepaalt de rotatie waarmee `Screen::Activeren()` de standaard PixelScreen-uitvoer configureert. `Screen.Pixel.display` blijft daarnaast rechtstreeks toegankelijk voor driverbewerkingen. De standaard `Screen.Print()`-gridberekening hoort bij de activatie die via `Screen::Activeren()` uitgevoerd werd.
+`PIXEL_SCREEN_ROTATION` bepaalt de rotatie waarmee `Screen::Activeren()` de standaard PixelScreen-uitvoer configureert. `Screen->Pixel.display` blijft daarnaast rechtstreeks toegankelijk voor driverbewerkingen. De standaard `Screen->Print()`-gridberekening hoort bij de activatie die via `Screen::Activeren()` uitgevoerd werd.
 
 ## Doel van de Screen-voorbeelden
 

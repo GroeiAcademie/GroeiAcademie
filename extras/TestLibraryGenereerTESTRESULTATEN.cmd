@@ -276,6 +276,10 @@ if "!BD_PARSE_OK!"=="1" (
   set /a RELEASE_UNEXPECTED_FAIL+=BD_FAIL
   if /I not "!BD_EINDSTATUS!"=="GESLAAGD" set "BD_PARSE_OK=0"
   if not !BD_FAIL! EQU 0 set "BD_PARSE_OK=0"
+  rem Een lege of onlogische samenvatting telt niet als geslaagd.
+  if !BD_TOTAAL! LEQ 0 set "BD_PARSE_OK=0"
+  set /a BD_SUM=BD_OK+BD_EXPECTED_MEMORY+BD_FAIL
+  if not !BD_SUM! EQU !BD_TOTAAL! set "BD_PARSE_OK=0"
 )
 if "!BD_PARSE_OK!"=="0" (
   set "RESULTAAT_!BD_DOMEIN!_BASIC_EXTENDED=MISLUKT"
@@ -317,7 +321,7 @@ set "BO_LOG=%~1"
 set "BO_RESULTAAT=%~2"
 set "BO_SAMENVATTING=%~3"
 for /f "usebackq delims=" %%L in (`powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal ' | Select-Object -Last 1; if($m){$m.Line}"`) do set "%BO_SAMENVATTING%=%%L"
-powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal\s+(\d+)\s+-\s+OK\s+(\d+)\s+-\s+FOUT\s+(\d+)$' | Select-Object -Last 1; if(-not $m){exit 1}; $t=[int]$m.Matches[0].Groups[1].Value; $o=[int]$m.Matches[0].Groups[2].Value; $f=[int]$m.Matches[0].Groups[3].Value; if($t -eq $o -and $f -eq 0){exit 0}else{exit 1}" >nul 2>&1
+powershell -NoProfile -Command "$m=Select-String -LiteralPath '%BO_LOG%' -Pattern '^Totaal\s+(\d+)\s+-\s+OK\s+(\d+)\s+-\s+FOUT\s+(\d+)$' | Select-Object -Last 1; if(-not $m){exit 1}; $t=[int]$m.Matches[0].Groups[1].Value; $o=[int]$m.Matches[0].Groups[2].Value; $f=[int]$m.Matches[0].Groups[3].Value; if($t -gt 0 -and $t -eq $o -and $f -eq 0){exit 0}else{exit 1}" >nul 2>&1
 if errorlevel 1 (
   set "%BO_RESULTAAT%=MISLUKT"
   set /a RELEASE_FOUT+=1

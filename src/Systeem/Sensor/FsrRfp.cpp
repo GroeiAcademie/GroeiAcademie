@@ -11,6 +11,8 @@ struct FsrRfp* sensorFsrRfpSet2 = nullptr;   // 1b: set 2
 // V5: FsrRfp meet via de analoge functies van zijn parent en kent het type ADC niet meer.
 // Het meetbereik (6144 mV, vroeger ADS1X15_GAIN_6144MV) gaat mee bij elke meting; de ADC kiest zelf zijn versterking.
 bool FsrRfp::Activeren() {
+  // Nieuwe sessie: geen eigen lopende meting meer, want de ADC kan nu de meting van een andere sensor bevatten.
+  laatstePin = -1;
  // Bereik 0 = alleen nagaan of de parent een ondersteunde ADC-Extender is: geen I2C, geen meting.
   return parent != nullptr && parent->StartExtenderReadAnalog(static_cast<uint8_t>(sensorPin[0]), 0) == 1;
 }
@@ -178,7 +180,11 @@ bool FsrRfp::OpnieuwAanmeldenNaPauze() {
     if (!heraangemeldConflictGetoond) GedeeldeBusPrintEnVerwijderTijdelijkeConflicten(this);
     else GedeeldeBusVerwijderTijdelijkeConflicten();
     heraangemeldConflictGetoond = true;
+    // Afmelden zonder het object te verwijderen: de pointer in de sketch moet geldig blijven voor een volgende poging.
+    const bool createdDynamically = componentCreated;
+    componentCreated = false;
     afmelden();
+    componentCreated = createdDynamically;
     return false;
   }
   heraangemeldConflictGetoond = false;
@@ -255,13 +261,14 @@ bool FsrRfp::IsAnalogReadKlaar() {
 }
 
 int FsrRfp::GetAnalogRead() {
-  if (parent == nullptr) { laatsteWaarde = 0; return 0; }
+  // Geen eigen lopende meting: niets ophalen, want de ADC kan de meting van een andere sensor bevatten.
+  if (parent == nullptr || laatstePin < 0) { laatsteWaarde = 0; return 0; }
   int32_t waarde = 0;
   const bool gelukt = parent->GetExtenderReadAnalogValue(waarde);
   laatsteWaarde = static_cast<int>(waarde);
   // Het ene resultaat van deze meting.
   MetingTijdensRuntimeVerwerken(laatstePin, gelukt);
-  if (!gelukt) { laatsteWaarde = 0; return 0; }
+  if (!gelukt) { laatsteWaarde = 0; laatstePin = -1; return 0; }
 
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
   // lastValue en QueueOrStack van het channel van deze sensor: sensorNummer zoeken in sensorPin[].
@@ -269,5 +276,6 @@ int FsrRfp::GetAnalogRead() {
     if (sensorPin[sensorNummer - 1] == laatstePin) { WriteQueueOrStack(sensorNummer, laatsteWaarde); break; }
   }
 #endif
+  laatstePin = -1;   // de meting is afgesloten
   return laatsteWaarde;
 }

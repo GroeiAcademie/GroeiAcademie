@@ -22,12 +22,18 @@ struct SensorAnaloog : Sensor {
   }
 
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
+  bool IsAnalogChild() const override { return true; }    // leest via StartExtenderReadAnalog() van de parent
   bool Activeren() override;
   bool StartAnalogRead();
   bool IsAnalogReadKlaar();
   int GetAnalogRead();
   bool afmelden() override;
   bool RawAnalogRead(int32_t& waarde);
+  // Vast ritme: true als het volgende geplande sample aan de beurt is (sampleIntervalUS na het vorige geplande sample).
+  // Te laat (meer dan één periode achter): het ritme begint opnieuw vanaf nu, zonder in te halen. sampleIntervalUS 0 = altijd.
+  bool IsSampleDue();
+  unsigned long lastSampleUS = 0;
+  unsigned long sampleIntervalUS = 0;   // ingesteld door de afgeleide Sensor uit SENSOR_<NAAM>_SAMPLE_RATE_HZ
 
 protected:
   // Resultaat van één meting verwerken. Standaard: een geslaagde ADC-waarde naar Data-kanaal 1.

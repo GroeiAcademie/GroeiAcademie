@@ -29,7 +29,7 @@ struct ExtenderADS7828 : HardwareResourceTypeI2C {
     // De eerste meting mag pas gebeuren nadat de referentie gestabiliseerd is.
     Wire.beginTransmission(adres);
     Wire.write(static_cast<uint8_t>(EXTENDER_ADS7828_EXTERNE_REFERENTIE ? 0x84 : 0x8C)); // CH0; extern PD1=0, intern PD1=1
-    if (Wire.endTransmission() != 0) return false;
+    if (Wire.endTransmission() != 0) return FoutDiagnoseI2C(false, 0, false);
     tijdstipReferentieInschakelen = micros();
     return true; // Geen verborgen wachttijd, ook niet bij runtime-herstel.
   }

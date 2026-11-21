@@ -114,11 +114,25 @@ set TEST_TYPE="NIEUW"
 set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
+set TEST_INO="examples\Systeem\Data\FLASH\FLASH_StartStopRead\FLASH_StartStopRead.ino"
+set TEST_NAAM="Data FLASH SPI | starten, stoppen, opnieuw starten en teruglezen"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_FLASH_SPI"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
+set TEST_INO="examples\Systeem\Data\microSD\microSD_StartStopRead\microSD_StartStopRead.ino"
+set TEST_NAAM="Data microSD SPI | starten, stoppen, opnieuw starten en teruglezen"
+set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_MICROSD_SPI"
+set TEST_TYPE="NIEUW"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
+call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
+
 set TEST_INO="examples\Systeem\Data\HC05\HC05.ino"
-set TEST_NAAM="Data HC-05 | Serial1, alleen UNO R4"
+set TEST_NAAM="Data HC-05 | GA_SENSOR_SERIAL"
 set TEST_FLAGS="-DDATA_LAYER_CONFIG=DATA_TYPE_NONE"
 set TEST_TYPE="NIEUW"
-set WELKE_FQBN_TESTEN="BIJ_BASIC_FQBN"
+set WELKE_FQBN_TESTEN="BIJ_ALLE_FQBN"
 call "%~dp0TestLibraryCommon.cmd" --VOER_DEZE_TEST_UIT
 
 set TEST_INO="examples\Systeem\Data\microSD\microSD.ino"

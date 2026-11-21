@@ -34,7 +34,11 @@ struct DS18B20 : Sensor {
 
   bool inpluggen() override;
   // Alleen de DS2482 levert een hardware-1-Wire-bus; een generieke GPIO-Extender is fysiek ongeschikt (GB112).
-  bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const override { return extender->component == GedeeldeBusComponent::ONE_WIRE_DS2482v800; }
+  // Een UART-Extender (SC16IS752, MAX14830) als directe parent kan ook: 1-Wire via een UART-channel (Maxim AN214).
+  bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const override {
+    return extender->component == GedeeldeBusComponent::ONE_WIRE_DS2482v800 ||
+           (extender == parent && (extender->component == GedeeldeBusComponent::UART_SC16IS752 || extender->component == GedeeldeBusComponent::UART_MAX14830));
+  }
 
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
   bool Activeren() override;

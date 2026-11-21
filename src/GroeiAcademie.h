@@ -49,11 +49,8 @@
 #endif
 
 
-#if SENSOR_INMP441_AANTAL > 0
-  #include "Systeem/Sensor/INMP441.h"
-#endif
-#if SENSOR_OV7670_AANTAL > 0
-  #include "Systeem/Sensor/OV7670.h"
+#if SENSOR_INMP441_AANTAL > 0 || SENSOR_MS3625_AANTAL > 0
+  #include "Systeem/Sensor/INMP441_MS3625.h"
 #endif
 
 #if SENSOR_GSRGROVE_AANTAL > 0
@@ -64,9 +61,6 @@
 #endif
 #if SENSOR_PIEZO_AANTAL > 0
   #include "Systeem/Sensor/PIEZO.h"
-#endif
-#if SENSOR_WATER_AANTAL > 0
-  #include "Systeem/Sensor/WATER.h"
 #endif
 
 #if SENSOR_AD8232_AANTAL > 0
@@ -156,9 +150,6 @@
 #include "Systeem/Sensor/DHTxx.h"
 #endif
 
-#if SENSOR_AS608_AANTAL > 0
-#include "Systeem/Sensor/AS608.h"
-#endif
 #if SENSOR_NEUROSKYTGAM_AANTAL > 0
 #include "Systeem/Sensor/NeuroSkyTGAM.h"
 #endif

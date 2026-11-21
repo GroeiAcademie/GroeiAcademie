@@ -103,7 +103,7 @@ Voor SerialScreen gelden daarnaast:
 | `ACTIEF_CHARACTER_SCREEN` | Concreet schermtype: `SCREEN_LCD1602`, `SCREEN_LCD1604`, `SCREEN_LCD2002`, `SCREEN_LCD2004` of `SCREEN_LCD4002`. |
 | `GENERAL_MELDING_CRITICAL_LEESTIJD_MS` | Leestijd van een CRITICAL-melding bij de opstart; standaard `30000UL`. Vervangt `FATAL_LEESTIJD_MS`. |
 | `GENERAL_MELDING_FATAL_ABORT_PANIC_LEESTIJD_MS` | Leestijd van een FATAL-, ABORT- of PANIC-melding bij de opstart; standaard `30000UL`. Vervangt `FATAL_LEESTIJD_MS`. |
-Runtime-meldingen (GB400 tot GB410) gaan alleen naar Serial en hebben geen leestijd; de vroegere `RUNTIME_MELDING_..._LEESTIJD_MS`-defines zijn geschrapt (D042).
+Runtime-meldingen (GB400 tot GB410) gaan alleen naar Serial en hebben geen leestijd; de vroegere `RUNTIME_MELDING_..._LEESTIJD_MS`-defines bestaan niet meer.
 
 ## PixelScreen
 
@@ -220,7 +220,7 @@ Voor FsrRfp zijn daarnaast beschikbaar:
 | `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` .. `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` | Standaardkanalen van de vier FsrRfp-sensoren op de ADC-Extender. Bij ADS1115: `static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0)` tot `EP_AIN3`. Alleen gedefinieerd wanneer `EXTENDER_ADS1115_AANTAL > 0`. |
 | `WACHT_LOSLATEN_DELAY_MS` | Pauze in de wachtlus van `WachtTotAlleSensorsLosgelatenVoorTest()`, zodat de I2C-bus naar de ADC-Extender niet onafgebroken bevraagd wordt; standaard `5`. |
 
-FsrRfp meet via een ADC-Extender, net zoals elke andere Sensor op een Extender wordt ingeplugd. De `.ino` maakt de Extender aan en geeft hem als parent door; per FsrRfp-instantie kunnen ook vier eigen kanalen worden opgegeven. ADS1115 is momenteel de enige ondersteunde ADC-Extender voor FsrRfp en vereist de optionele library ADS1X15 van Rob Tillaart. Het I2C-adres staat bij de Extender: `I2C_ADDRESS_EXTENDER_ADS1115_1` (standaard `0x48`).
+FsrRfp meet via de analoge GedeeldeBus-functies van zijn ADC-parent. De `.ino` maakt de ADC-Extender aan en geeft hem als parent door; per FsrRfp-instantie kunnen vier eigen kanalen worden opgegeven. De actuele voorbeelden gebruiken ADS1115, ADS1158, ADS7828 en ADS7953. De standaardkanalen en de verkorte constructor zonder expliciete kanalen worden alleen onder `EXTENDER_ADS1115_AANTAL > 0` aangeboden; voor andere ADC-Extenders worden de kanalen expliciet meegegeven. Bij ADS1115 wordt `I2C_ADDRESS_EXTENDER_ADS1115_1` gebruikt (standaard `0x48`).
 
 ## BOARD_VERSION en ADC-resolutie
 
@@ -335,7 +335,7 @@ In de GedeeldeBus-API gebruiken `HardwareResourceType`-waarden de prefix `RT_`. 
 
 ### Extenderaantallen
 
-Voor iedere concrete Extender bestaat een `EXTENDER_<NAAM>_AANTAL`. De standaardwaarde is 0. De commentaar in de code markeert 0 of 1 als de standaardroute en `>= 2` als experimenteel.
+Voor iedere concrete Extender bestaat een `EXTENDER_<NAAM>_AANTAL`. De standaardwaarde is 0, behalve voor `EXTENDER_ADS1115_AANTAL` (standaard 1, zie hieronder). De commentaar in de code markeert 0 of 1 als de standaardroute en `>= 2` als experimenteel.
 
 Een Extender met `EXTENDER_<NAAM>_AANTAL == 0` wordt niet mee gecompileerd. Eén gedeelde codebasis vormt een uitzondering wanneer ze elders effectief nodig is: `ExtenderPCF8574` wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115 meet. Zo blijven niet gebruikte Extenders buiten de build.
 
@@ -366,10 +366,10 @@ Afhankelijk van het type worden per instantie I2C-adressen, CS-pinnen en/of cont
 
 ### ADC en FsrRfp
 
-FsrRfp kiest zijn ADC niet via een globale instelling, maar via zijn parent: de ADC-Extender die de `.ino` meegeeft. Welke ADC-Extenders gecompileerd worden, volgt uit `EXTENDER_<NAAM>_AANTAL`. In FsrRfp staat per ondersteunde ADC een meettak onder `#if EXTENDER_<NAAM>_AANTAL > 0`; momenteel alleen ADS1115, via `ADS1115viaParent()`. Een andere ADC-Extender ondersteunen vraagt alleen een aanpassing in FsrRfp. De standaardkanalen zijn `FSR_RFP_ADC_PIN_SENSOR_1_SET_1..4`.
+FsrRfp kiest de ADC via de parent die de `.ino` meegeeft en gebruikt `StartExtenderReadAnalog()`, `ExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue()` van die parent. De ADC-Extender wordt afzonderlijk geactiveerd via zijn `EXTENDER_<NAAM>_AANTAL`. De ingestelde standaardkanalen heten `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot en met `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` en zijn gekoppeld aan de verkorte ADS1115-constructor; andere parent-ADC-kanalen worden expliciet aan de constructor meegegeven.
 
 
-### Runtime-herstel (D042)
+### Runtime-herstel
 
 | Define | Betekenis |
 |---|---|
@@ -393,3 +393,10 @@ Voor L293D en L298N met `IN1`/`IN2` via een GPIO-Extender en `EN` via PCA9685 is
 De concrete compilerdefinities van deze twintig nieuwe tests staan in het bestaande `extras/TestLibrarySturingen-v2.0.0.cmd`.
 
 De afgeleide voorwaarde `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF` neemt ook L293D en L298N mee wanneer een digitale GPIO-Extender ingeschakeld is. Dat is noodzakelijk voor de nieuwe tweepins digitale aansturing zonder MIXED. Gemengde aansturing met afzonderlijk EN op PCA9685 blijft afhankelijk van `GEDEELDE_BUS_MIXED_PINS=1`.
+
+### Standaardwaarde, eigen override en gecompileerde configuratie
+
+- **Standaardwaarde:** wat `SystemConfig.h` gebruikt als niets anders de waarde zet. Voorbeeld: `EXTENDER_ADS1115_AANTAL` is daar 1.
+- **Eigen override:** wat in `UserConfig.h` of in een `Config<NAAM>.h` staat. Voorbeeld: het meegeleverde `ConfigADS1115.h` zet `EXTENDER_ADS1115_AANTAL` op 0.
+- **Gecompileerde configuratie:** de waarde die echt meecompileert. Dat is de override als die bestaat, anders de standaardwaarde.
+- De testscripts compileren met `GROEIACADEMIE_IGNORE_USER_CONFIG`, dus met de waarden uit de `_template`-bestanden en de standaardwaarden, niet met je eigen configuratie.

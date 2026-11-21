@@ -21,7 +21,8 @@ bool DCmotorBesturing::StopMotor() {
 #if STURING_L298N_AANTAL > 0
   if (l298n && l298n->actief) { l298n->StopSturing(); actief = true; }
 #endif
-  if (!actief) return false;
+  // Geen actieve sturing: de motor draait niet, dus de status ook niet meer op gestart laten staan.
+  if (!actief) { gestart = false; gepauzeerd = false; snelheidPWM = 0; return false; }
   gestart = false;
   gepauzeerd = false;
   snelheidPWM = 0;

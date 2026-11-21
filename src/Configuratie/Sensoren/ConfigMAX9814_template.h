@@ -10,4 +10,8 @@
 // #define SENSOR_MAX9814_ADC_BEREIK_MILLIVOLT 3300  // standaard waarde: 3300; pas aan aan de werkelijk aangesloten sensorspanning
 #endif
 
+#ifndef SENSOR_MAX9814_SAMPLE_RATE_HZ
+// #define SENSOR_MAX9814_SAMPLE_RATE_HZ 500  // standaard waarde: 500; samplefrequentie voor het geluidsniveau (vast ritme); venster = een kwart seconde
+#endif
+
 #endif

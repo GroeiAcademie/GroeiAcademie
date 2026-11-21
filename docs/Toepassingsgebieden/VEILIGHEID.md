@@ -42,7 +42,7 @@ Uit praktijkbronnen over hobbymatige AD8232-opstellingen (dezelfde module die di
 
 ## 4bis. Galvanische scheiding als alternatief voor de batterij-regel
 
-**[TOEGEVOEGD DOOR OPUS]** De batterij-regel uit punt 4 is niet de enige manier om het risicopad naar het net af te sluiten. Galvanische scheiding doorbreekt datzelfde pad elektrisch, ook wanneer het toestel wél op een net-hangende computer aangesloten is. Twee technieken die dit doen:
+De batterij-regel uit punt 4 is niet de enige manier om het risicopad naar het net af te sluiten. Galvanische scheiding doorbreekt datzelfde pad elektrisch, ook wanneer het toestel wél op een net-hangende computer aangesloten is. Twee technieken die dit doen:
 
 - **Optocouplers** (optische koppeling): een LED aan de ene kant, een fototransistor aan de andere, geen elektrische verbinding tussen beide zijden, enkel licht steekt de barrière over.
 - **iCoupler-chips** zoals de ADuM3160/ADuM4160 die eerder genoemd zijn: geen licht maar een kleine transformator, functioneel hetzelfde resultaat, een elektrisch onderbroken pad met enkel signaaloverdracht.
@@ -54,11 +54,11 @@ Als zo'n isolator tussen de computer en de microcontroller zit, en die isolator 
 1. De isolatiewaarde van consumentenmodules (1500 tot 5000V bij de ADuM-isolators) is een elektrische spanningswaarde, geen IEC 60601-1-certificering. De medische norm vraagt ook specifieke kruipafstanden op de printplaat en getest gedrag bij één enkele storing; dat garandeert een USB-isolator op zich niet.
 2. De isolatie moet **elk** pad dekken, niet enkel USB. Als het sensorbordje apart gevoed wordt met een adapter die niet ook geïsoleerd is, blijft daar een onbeschermd pad over, ook al is de USB-kant wel geïsoleerd.
 
-**Herziene richtlijn 1, ter vervanging van de eerdere formulering in punt 6:** elke opstelling met huidcontact werkt óf op batterij/powerbank, óf via een galvanisch geïsoleerde verbinding die alle paden (data én voeding) dekt, nooit rechtstreeks op een net-hangende computer zonder isolatie.
+**Aanvulling over galvanische scheiding:** elke opstelling met huidcontact werkt óf op batterij/powerbank, óf via een galvanisch geïsoleerde verbinding die alle paden (data én voeding) dekt, nooit rechtstreeks op een net-hangende computer zonder isolatie.
 
 ## 4ter. Druksensor versus elektrode, twee verschillende risiconiveaus
 
-**[TOEGEVOEGD DOOR OPUS]** Niet elke sensor met huidcontact valt onder hetzelfde risiconiveau. Er is een reëel onderscheid tussen twee categorieën in dit project:
+Niet elke sensor met huidcontact valt onder hetzelfde risiconiveau. Er is een reëel onderscheid tussen twee categorieën in dit project:
 
 **Categorie A, elektroden (biopotentiaal-meting)**: GSR-vingerelektroden (GSRGrove, MCU6701), ECG-elektroden (AD8232, BioAmp EXG Pill als ECG), EMG-elektroden (BioAmp EXG Pill als EMG, op frons, kaak, schouder of specifieke gezichtsspieren). Deze vormen elektrisch deel uit van de meetketen zelf: er loopt een meetstroom door het lichaam, en bij een storing kan daar in principe ook een foutstroom lopen. Dit is exact het scenario waarvoor de IEC 60601-1 Type BF-lekstroomlimieten (sectie 3 hierboven) geschreven zijn. Sectie 3 en 4 (en 4bis) van dit document zijn op deze categorie van toepassing.
 

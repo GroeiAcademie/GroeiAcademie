@@ -28,6 +28,13 @@ struct LD2450 : Sensor {
   bool positieGeldig = false;
   uint8_t frame[30] = {0};
   uint8_t framePositie = 0;
+  // Alle drie doelen van het laatste geldige frame (3 x 8 bytes: X, Y, snelheid, afstandsresolutie).
+  uint8_t lastFrameTargets[24] = {0};
+  unsigned long lastFrameMS = 0;  // tijdstip van het laatste geldige frame
+  // Doel 0, 1 of 2. targetPresent false: het doel is leeg in het frame. X en Y in mm, snelheid in cm/s (Hi-Link: bit 15 = 1 positief).
+  bool ReadTarget(uint8_t targetIndex, int16_t& xMillimeter, int16_t& yMillimeter, int16_t& speedCentimeterPerSecond, bool& targetPresent);
+  // true: langer dan SENSOR_LD2450_SILENT_TIMEOUT_MS geen geldig frame (of nog nooit). LeesHoofdwaarde() verwerkt de frames.
+  bool IsModuleSilent() { return lastFrameMS == 0 || millis() - lastFrameMS > SENSOR_LD2450_SILENT_TIMEOUT_MS; }
 };
 
 #endif

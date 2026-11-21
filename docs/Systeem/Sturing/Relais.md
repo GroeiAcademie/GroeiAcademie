@@ -9,7 +9,7 @@ Relais. De component is header-only geïmplementeerd.
 - Broncode: `src/Systeem/Sturing/Relais.h`.
 - C++-component: `Relais`, rechtstreeks afgeleid van `GedeeldeBusNode`.
 - Aansluiting: Native GPIO via `digitalWrite()` en `pinMode()`, of een digitaal Extender-kanaal via `WriteExtenderPin()` en `SetExtenderPinMode()`.
-- Bestaande aansturing: `setRelayStatusOnOff(bool aan)`.
+- Bestaande aansturing: `setRelayStatusOnOff(bool aan)`; `getRelayValueOn() const` geeft het geconfigureerde actieve HIGH/LOW-niveau terug, **niet** de fysiek gemeten relais- of contactstatus.
 - Lifecycle: de component bevat een `Activeren()`-override en een `StopSturing()`-override voor uitschakeling.
 - Configuratie: `src/Configuratie/Sturingen/ConfigRelais_template.h`; optioneel persoonlijk `ConfigRelais.h`.
 
@@ -99,7 +99,7 @@ De gebruikte hardware omvat **meerdere afzonderlijke relaismodules**. Het zijn *
 
 - Op het **16-kanaalsbord** staan relais met het opschrift **`SRD-12VDC-SL-C`**: dit beschrijft een **12V-relaisspoel**. Het bepaalt niet zonder het bordschema of de aansluiting voor de besturing 5 V, 12 V of een gescheiden voedingscircuit vereist.
 - Op andere modules staan **`SRD-05VDC-SL-C`** en een vierkanaalsbord met **5V-spoelrelais**. Ook hier blijft het actieve ingangs-`HIGH`/`LOW` en de eventuele jumper tussen logica- en spoelvoeding **per print** te controleren.
-- De bestaande FrameWork-`Relais`-klasse bestuurt **één relaisingang per object** via één GPIO-Extenderkanaal. Voor een bord met meerdere afzonderlijke ingangen moet elke gebruikt ingang een eigen kanaal en object krijgen, overeenkomstig de bestaande configuratie; de klasse heeft geen automatische 16-kanaalsborddetectie.
+- De FrameWork-`Relais`-klasse bestuurt **één relaisingang per object**, via een native GPIO-pin of één GPIO-Extenderkanaal. Voor een bord met meerdere afzonderlijke ingangen moet elke gebruikt ingang een eigen kanaal en object krijgen, overeenkomstig de bestaande configuratie; de klasse heeft geen automatische 16-kanaalsborddetectie.
 - De `COM`/`NO`/`NC`-aansluitingen behoren tot de **geschakelde lastzijde** en zijn nooit de logische `IN`- of GND-aansluiting. Verifieer altijd de echte schroefklemopschriften en contactbelastbaarheid.
 - Schakel de eerste test uitsluitend met een **laagspanningslast**. Een I²C-Extenderpin mag geen losse relaiswikkeling rechtstreeks voeden; de module moet een compatibele ingangsdriver hebben.
 
@@ -290,7 +290,7 @@ De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en
 
 Configuratie: `STURING_RELAIS_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.
 
-`Activeren()` ontvangt geen resultaat van `WriteExtenderPin()` of `SetExtenderPinMode()` (beide `void`); eventuele I²C-fouten worden door de bestaande Extender-runtimeafhandeling verwerkt.
+Bij de Extender-route retourneren `WriteExtenderPin()` en `SetExtenderPinMode()` elk een `bool`. `Activeren()` geeft `true` uitsluitend als beide opdrachten slagen. `StopSturing()` retourneert zelf `void` en gebruikt de `bool`-returnwaarde van `WriteExtenderPin()` niet; een fysieke uitschakeling kan dus niet uit deze aanroep worden afgeleid.
 
 ## Hardwaretestbediening
 
@@ -316,10 +316,25 @@ De vijf `Sturing_Relais_*_HardwareTest.ino`-voorbeelden gebruiken dezelfde bedie
 ### ISD1820 via MCP23017 zonder fysieke relais
 
 - Gewone test blijft `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820/Sturing_ISD1820.ino`.
-- Nieuwe begeleide hardwaretest: `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820_HardwareTest/Sturing_ISD1820_HardwareTest.ino`.
+- Begeleide hardwaretest: `examples/Systeem/GedeeldeBus/Sturingen/Sturing_ISD1820_HardwareTest/Sturing_ISD1820_HardwareTest.ino`.
 - MCP23017 GPA0 → REC, GPA1 → P-E / PLAYE, GPA2 → P-L / PLAYL en GPA3 → FT. Alle GND-aansluitingen gemeenschappelijk. De vier `Relais`-objecten sturen rechtstreeks digitale signalen, zonder fysieke relais.
 - Voor deze hardwaretest: `STURING_RELAIS_AANTAL=4` en `EXTENDER_MCP23017_AANTAL=1` (de gewone `Sturing_ISD1820.ino` blijft twee objecten gebruiken).
 - `START` bevestigt. `REC` neemt vijf seconden op, `PLAY` geeft een PLAYE-puls van 100 ms en `PLAYL` houdt P-L HIGH tot `PLAYLSTOP` of `STOP`; hierdoor kan het afspelen vroegtijdig gestopt worden. `FT` schakelt microfoon-doorluistering in tot `FTSTOP` of `STOP`.
 - Herhaal `REC` en `PLAY` voor meerdere proefopnames. Beoordeel afzonderlijk de afspeelkwaliteit, het afbreken via `PLAYLSTOP` en het in-/uitschakelen van FT. `OK` en `FOUT` vermelden de manuele beoordeling in Serial; leg per handeling de uitslag ook vast in het HTML-register. Een geslaagde levenscyclus bewijst geen hoorbaar resultaat.
 - Tijdens de synchrone opname van vijf seconden wordt `STOP` pas nadien gelezen. Bij een GPIO-fout kan LOW niet gegarandeerd worden; onderbreek zo nodig de modulevoeding.
 - Verwijder eventuele P-E/FT-jumpers van de module bij externe GPIO-bediening. Controleer dat het concrete bord zijn stuuringangen werkelijk beschikbaar heeft. Gebruik compatibele voeding en logicaniveaus; geen 5V-signalen rechtstreeks op een 3,3V-module.
+
+## Via een PCF8574 of PCF8575
+
+- Na power-on staan alle pinnen van een PCF HIGH tot de eerste write.
+- Bij een heractivering van de PCF na een storing tijdens runtime zet de library ook alle pinnen kort HIGH, tot deze Sturing bij haar eigen heractivering haar beginstand schrijft (uit).
+- Kies bedrading waarbij HIGH een veilige toestand is.
+
+## Na herstel van een PCF8574 of PCF8575
+
+- Na een uitval en herstel zet `Activeren()` van de PCF alle pinnen HIGH (`begin()`).
+- Bij een ULN2003 of een relais dat op HIGH schakelt, is HIGH niet vanzelf veilig. Daarvoor zijn een fysieke beveiliging en een hardwaretest nodig.
+
+## Resultaat van het uitschakelen
+
+- `StopSturing()` geeft geen resultaat. Via een Extender kan het uitschakelen mislukken zonder bevestiging aan de aanroeper. Ook een actief-LOW-relais valt bij verlies van buscommunicatie **niet gegarandeerd af**: de Extender kan zijn laatst geschreven LOW-niveau vasthouden. Gebruik waar vereist een onafhankelijke hardwarematige uitschakeling en verifieer de werkelijke contacttoestand.

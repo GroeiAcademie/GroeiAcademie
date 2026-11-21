@@ -23,6 +23,10 @@
 #if EXTENDER_ADS1115_AANTAL < 1
 #error Zet EXTENDER_ADS1115_AANTAL op minstens 1.
 #endif
+// De ADS1115 haalt hoogstens zoveel metingen per seconde als EXTENDER_ADS1115_DATARATE toelaat (4 = 128 SPS, 5 = 250, 6 = 475, 7 = 860).
+#if SENSOR_MAX4466_SAMPLE_RATE_HZ > (EXTENDER_ADS1115_DATARATE == 7 ? 860 : EXTENDER_ADS1115_DATARATE == 6 ? 475 : EXTENDER_ADS1115_DATARATE == 5 ? 250 : EXTENDER_ADS1115_DATARATE == 4 ? 128 : EXTENDER_ADS1115_DATARATE == 3 ? 64 : EXTENDER_ADS1115_DATARATE == 2 ? 32 : EXTENDER_ADS1115_DATARATE == 1 ? 16 : 8)
+#error EXTENDER_ADS1115_DATARATE is te traag voor SENSOR_MAX4466_SAMPLE_RATE_HZ; verhoog EXTENDER_ADS1115_DATARATE of verlaag de samplefrequentie.
+#endif
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
 #error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE.
 #endif
@@ -46,4 +50,13 @@ void setup() {
     HardwareResourceToegang::GEDEELD);
   GA_SERIAL.println(sensorMAX4466 ? F("MAX4466 lifecycle: component aangemaakt (fysieke werking nog niet bewezen)") : F("MAX4466 lifecycle: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensorMAX4466 == nullptr) return;
+  int32_t waarde = 0;
+  if (!sensorMAX4466->RawAnalogRead(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Ruwe audiosample (geen dB): "));
+  GA_SERIAL.println(waarde);
+}

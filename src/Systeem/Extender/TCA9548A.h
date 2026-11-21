@@ -59,7 +59,9 @@ struct ExtenderTCA9548A : HardwareResourceTypeI2C, TCA9548 {
 
   void ReleaseAccessForChild(GedeeldeBusNode* child) override {
     (void)child;
-    TCA9548::disableAllChannels();
+    // Een mislukte vrijgave laat een kanaal open; ze telt mee in de foutladder van de TCA9548A.
+    const bool gelukt = TCA9548::disableAllChannels();
+    if (actief) ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt);
   }
 
   bool SelectChannel(GedeeldeBusNode* child) {

@@ -5,7 +5,7 @@
 - Broncode: `src/Systeem/Sensor/SensorAnaloog.h` en `SensorAnaloog.cpp`.
 - C++-component: `SensorAnaloog`, afgeleid van `Sensor`.
 - Parent: `GedeeldeBusNode*` in de constructor.
-- Gebruikt door: `AD8232`, `BioAmpEXGPill`, `EGBOPulseSensor`, `GSRGrove`, `LM35DZ`, `MAX4466_9814`, `MF52x`, `PIEZO`, `WATER`.
+- Gebruikt door: `AD8232`, `BioAmpEXGPill`, `EGBOPulseSensor`, `GSRGrove`, `LM35DZ`, `MAX4466_9814`, `MF52x`, `PIEZO`.
 - Data-kanalen: 1.
 
 ## Uit de broncode
@@ -55,11 +55,21 @@ SensorAnaloog(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t s
 - **Proef:** meet 0 V (succes met waarde 0), meet een gekende referentiespanning (succes met niet-nul), verbreek de ADC-verbinding (foutstatus via `RawAnalogRead`), test te groot meetbereik (geweigerd). Noteer de ADC-referentie, werkelijke bits, ingestelde schaal en de eenheden van de Sensor.
 - **Status:** bestaande API biedt een afzonderlijke foutstatus; alle verbruikers van `GetAnalogRead()` moeten nog per gebruik gecontroleerd worden.
 
-### Samengesteld analoog voorbeeld zonder eigen Sensor-klasse
-
-- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_XYSTICK/Sensor_XYSTICK.ino` leest twee joystickassen via een ADS1115 en de drukknop via een native digitale pin. Dit is een voorbeeldsketch, geen implementatie van een nieuwe `SensorAnaloog`-subklasse; geregistreerd in Sensoren Geldig.
-
 ### ADC-time-outs en foutstatus
 
 - De bestaande `RawAnalogRead()` wacht maximaal 150 ms. Test bij iedere ADC-configuratie trage conversie, ontbrekende READY, losgekoppelde ingang en herstel. Controleer of time-outs als fout gerapporteerd worden en niet als geldige nul. Verhoog 150 ms niet algemeen zonder concrete meetresultaten.
 - **Status:** fysieke proef vereist; nog geen hardwarebewijs.
+
+## Vast ritme
+
+- `IsSampleDue()`: true als het volgende geplande sample aan de beurt is (`sampleIntervalUS` na het vorige). Meer dan één periode te laat: het ritme begint opnieuw, zonder in te halen. `sampleIntervalUS` 0 = altijd.
+- De afgeleide Sensor zet `sampleIntervalUS` uit `SENSOR_<NAAM>_SAMPLE_RATE_HZ` (AD8232, EGBOPulseSensor, MAX4466, MAX9814).
+
+## Analoge child
+
+- `IsAnalogChild()` geeft true: een Extender zoals de CD74HC4067 weet zo bij `SelectAccessForChild()` dat deze child analoog leest.
+
+## Heractivatie
+
+- `Activeren()` zet `metingGestart` en `lastSampleUS` terug.
+  Een meting die nog openstond, hoort niet meer bij deze child: de parent zette zijn meetstatus al terug bij zijn eigen heractivatie, en een Get zou nu de meting van een andere child kunnen ophalen.

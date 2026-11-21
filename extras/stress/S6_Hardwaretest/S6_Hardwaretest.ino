@@ -40,8 +40,8 @@ ExtenderADS1115 extenderADS1115(
 
 // Per bron: de langste duur, de som van alle duren en het aantal toegangen sinds het vorige rapport.
 struct BlokkeertijdPerBron {
-  unsigned long langsteDuurMicros = 0;
-  unsigned long totaleDuurMicros = 0;
+  unsigned long langsteDuurUS = 0;
+  unsigned long totaleDuurUS = 0;
   uint16_t aantalToegangen = 0;
 };
 
@@ -54,19 +54,19 @@ unsigned long tijdstipVorigeToegang = 0;
 unsigned long tijdstipVorigRapport = 0;
 unsigned long aantalRapporten = 0;
 
-void DuurVanToegangBijhouden(BlokkeertijdPerBron& bron, unsigned long startMicros) {
-  const unsigned long duurMicros = micros() - startMicros;
-  if (duurMicros > bron.langsteDuurMicros) bron.langsteDuurMicros = duurMicros;
-  bron.totaleDuurMicros += duurMicros;
+void DuurVanToegangBijhouden(BlokkeertijdPerBron& bron, unsigned long startUS) {
+  const unsigned long duurUS = micros() - startUS;
+  if (duurUS > bron.langsteDuurUS) bron.langsteDuurUS = duurUS;
+  bron.totaleDuurUS += duurUS;
   bron.aantalToegangen++;
 }
 
 void RapportRegelTonen(const __FlashStringHelper* naamBron, BlokkeertijdPerBron& bron) {
   GA_SERIAL.print(naamBron);
   GA_SERIAL.print(F(": langste "));
-  GA_SERIAL.print(bron.langsteDuurMicros / 1000.0, 2);
+  GA_SERIAL.print(bron.langsteDuurUS / 1000.0, 2);
   GA_SERIAL.print(F(" ms, gemiddeld "));
-  GA_SERIAL.print(bron.aantalToegangen > 0 ? (bron.totaleDuurMicros / bron.aantalToegangen) / 1000.0 : 0.0, 2);
+  GA_SERIAL.print(bron.aantalToegangen > 0 ? (bron.totaleDuurUS / bron.aantalToegangen) / 1000.0 : 0.0, 2);
   GA_SERIAL.print(F(" ms, toegangen "));
   GA_SERIAL.println(bron.aantalToegangen);
   bron = BlokkeertijdPerBron();
@@ -107,16 +107,16 @@ void loop() {
     tijdstipVorigeToegang = nu;
 
     if (sensorFsrRfpSet1 != nullptr) {
-      const unsigned long startMicros = micros();
+      const unsigned long startUS = micros();
       sensorFsrRfpSet1->RawAnalogRead(sensorFsrRfpSet1->sensorPin[0]);
-      DuurVanToegangBijhouden(blokkeertijdMetingADS1115, startMicros);
+      DuurVanToegangBijhouden(blokkeertijdMetingADS1115, startUS);
     }
 
 #if ((INPUT_KANAAL_CONFIG) & INPUT_TYPE_PCF8574)
     if (Input != nullptr) {
-      const unsigned long startMicros = micros();
+      const unsigned long startUS = micros();
       Input->OpvragenHuidigeToetsAanslag(false);   // één scan, niet wachten
-      DuurVanToegangBijhouden(blokkeertijdKeypadscanPCF8574, startMicros);
+      DuurVanToegangBijhouden(blokkeertijdKeypadscanPCF8574, startUS);
     }
 #endif
   }
@@ -132,10 +132,10 @@ void loop() {
 #endif
 
     // Ook het scherm meten: Print() test eerst het LCD (runtime-herstel) en schrijft dan. Een volgende Print() na een hotplug toont S6.
-    const unsigned long startMicros = micros();
+    const unsigned long startUS = micros();
     Screen->Print("Hersteltest", String(aantalRapporten));
     GA_SERIAL.print(F("  Screen->Print(): "));
-    GA_SERIAL.print((micros() - startMicros) / 1000.0, 2);
+    GA_SERIAL.print((micros() - startUS) / 1000.0, 2);
     GA_SERIAL.println(F(" ms"));
   }
 }

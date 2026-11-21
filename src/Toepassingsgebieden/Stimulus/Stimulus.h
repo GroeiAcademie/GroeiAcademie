@@ -159,14 +159,14 @@ struct Stimulus {
 
   int MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus,
                    int exitPin = -1, int exitOffset = 0,
-                   unsigned long timeoutMs = EXIT_TIKTIJD_MS);
+                   unsigned long timeoutMS = EXIT_TIKTIJD_MS);
 
   int MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[],
                             int aantalSensorenSimultaanTeMeten,
                             SynchronisatieProfiel synchronisatie[],
                             int MaskReedsActieveSensorsBijStart = 0,
                             int MaskGewensteActieveSensorsBijExit = 0,
-                            unsigned long timeoutMs = EXIT_TIKTIJD_MS,
+                            unsigned long timeoutMS = EXIT_TIKTIJD_MS,
                             bool testOpDRUKWAARDE = true);
 
   void ResetAlleTellers();

@@ -15,8 +15,8 @@
 #if SENSOR_VL53L0X_AANTAL != 1
 #error SENSOR_VL53L0X_AANTAL moet 1 zijn voor deze hardwaretest.
 #endif
-#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
-#error DATA_LAYER_CONFIG moet DATA_TYPE_NONE zijn voor deze hardwaretest.
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE && DATA_LAYER_CONFIG != DATA_TYPE_DIRECT
+#error DATA_LAYER_CONFIG moet DATA_TYPE_NONE of DATA_TYPE_DIRECT zijn voor deze hardwaretest.
 #endif
 HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::VL53L0X,
   I2C_ADDRESS_SENSOR_VL53L0X_1, HardwareResourcePin::NP_SDA,
@@ -31,9 +31,29 @@ void setup() {
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   #endif
   GA_SERIAL.println(F("TEST: Sensor_VL53L0X"));
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_LAYER_CONFIG);
+  GA_SERIAL.println(Data ? F("DATA: OK") : F("DATA: FOUT"));
+  if (Data == nullptr) return;
+#else
+  GA_SERIAL.println(F("LET OP: extra meetkanalen vereisen DATA_TYPE_DIRECT in UserConfig.h."));
+#endif
   const bool parentOK=apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
   GA_SERIAL.println(parentOK ? F("I2C RESOURCE: OK") : F("I2C RESOURCE: FOUT"));
   if(parentOK) sensor=GedeeldeBusNewComponent<SensorVL53L0X>(&apparaat,GedeeldeBusComponent::VL53L0X);
   GA_SERIAL.println(sensor ? F("SENSOR LIBRARY INIT/LIFECYCLE: OK") : F("SENSOR LIBRARY INIT/LIFECYCLE: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensor == nullptr) return;
+  float waarde = NAN;
+  if (!sensor->LeesHoofdwaarde(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Afstand (mm): "));
+  GA_SERIAL.println(waarde);
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  GA_SERIAL.print(F("Via Data, afstand (mm): "));
+  GA_SERIAL.println(sensor->ReadQueueOrStackFloat(1));
+#endif
+}

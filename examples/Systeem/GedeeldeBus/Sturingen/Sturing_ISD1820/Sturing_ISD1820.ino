@@ -13,7 +13,7 @@
 // Geen 5V-signaal op een ISD1820-ingang zetten zolang de modulecompatibiliteit niet vaststaat.
 // MCP23017 adres, RESET, INTA en INTB: bestaande ConfigMCP23017.h en werkelijke bedrading.
 // Deze .ino neemt meteen na initialisatie 5 seconden op en speelt daarna automatisch af.
-// RESULTAAT: OK bewijst uitsluitend de componentaanmaak, NIET de hoorbare opname of weergave.
+// RESULTAAT: OK bevestigt de componentaanmaak en de vier schakelopdrachten, NIET de hoorbare opname of weergave.
 // Extender-pinnen worden gekozen uit de parent van het Sturing-object; MIXED is hiervoor niet nodig.
 // I2C-aansluiting: SDA/SCL en GND op dezelfde bus; modulevoeding volgens het werkelijke Extender-bord.
 // UNO R4 Minima/WiFi en UNO Q: SDA/SCL op de gelijknamige boardaansluitingen.
@@ -67,15 +67,33 @@ void setup() {
   if (extenderMCP23017 != nullptr) opnemen = GedeeldeBusNewComponent<Relais>(extenderMCP23017, 0, HIGH);
   if (opnemen != nullptr) afspelen = GedeeldeBusNewComponent<Relais>(extenderMCP23017, 1, HIGH);
   bool gelukt = opnemen != nullptr && afspelen != nullptr;
-  GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
-  if (!gelukt) return;
+  if (!gelukt) {
+    GA_SERIAL.println(F("RESULTAAT: FOUT"));
+    return;
+  }
   GA_SERIAL.println(F("Opnemen: 5 seconden"));
-  opnemen->setRelayStatusOnOff(true);
+  if (!opnemen->setRelayStatusOnOff(true)) {
+    GA_SERIAL.println(F("Opnemen aan: FOUT"));
+    gelukt = false;
+  }
   delay(5000);
-  opnemen->setRelayStatusOnOff(false);
+  // Opnemen uit ook na een mislukte start, zodat REC zeker uit gaat.
+  if (!opnemen->setRelayStatusOnOff(false)) {
+    // REC kan nog aan staan; dan niet afspelen.
+    GA_SERIAL.println(F("Opnemen uit: FOUT; afspelen wordt niet gestart"));
+    GA_SERIAL.println(F("RESULTAAT: FOUT"));
+    return;
+  }
   GA_SERIAL.println(F("Afspelen"));
-  afspelen->setRelayStatusOnOff(true);
+  if (!afspelen->setRelayStatusOnOff(true)) {
+    GA_SERIAL.println(F("Afspelen aan: FOUT"));
+    gelukt = false;
+  }
   delay(100);
-  afspelen->setRelayStatusOnOff(false);
+  if (!afspelen->setRelayStatusOnOff(false)) {
+    GA_SERIAL.println(F("Afspelen uit: FOUT"));
+    gelukt = false;
+  }
+  GA_SERIAL.println(gelukt ? F("RESULTAAT: OK") : F("RESULTAAT: FOUT"));
 }
 void loop() {}

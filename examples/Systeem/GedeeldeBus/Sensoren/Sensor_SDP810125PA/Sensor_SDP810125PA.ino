@@ -23,6 +23,8 @@
 #endif
 HardwareResourceTypeI2C apparaat(&Native, GedeeldeBusComponent::SDP810125PA, 0x25,
  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD);
+SDP810125PA* sensor = nullptr;
+
 void setup() {
  GA_SERIAL.begin(SERIAL_BAUDRATE);
  #if defined(DEBUG)
@@ -35,8 +37,17 @@ void setup() {
  bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
  GA_SERIAL.println(parentOK ? F("PARENT: OK") : F("PARENT: FOUT"));
  if (!parentOK) return;
- SDP810125PA* sensor = GedeeldeBusNewComponent<SDP810125PA>(&apparaat,GedeeldeBusComponent::SDP810125PA);
+ sensor = GedeeldeBusNewComponent<SDP810125PA>(&apparaat,GedeeldeBusComponent::SDP810125PA);
  GA_SERIAL.println(sensor ? F("LIFECYCLE: OK") : F("LIFECYCLE: FOUT"));
  
 }
-void loop() {}
+void loop() {
+  if (sensor == nullptr) return;
+  float waarde = NAN;
+  if (!sensor->LeesHoofdwaarde(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Differentiele druk (Pa): "));
+  GA_SERIAL.println(waarde);
+}

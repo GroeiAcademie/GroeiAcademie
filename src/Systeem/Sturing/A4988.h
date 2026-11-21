@@ -54,14 +54,14 @@ struct A4988 : GedeeldeBusNode {
 #endif
   }
 
-  bool VoerEenStapUit(bool forward,uint16_t pulseMicroseconds=2) {
-    if (!actief || pulseMicroseconds<1) return false;
+  bool VoerEenStapUit(bool forward,uint16_t pulseUS=2) {
+    if (!actief || pulseUS<1) return false;
     if (parent==&Native) {
       if (enablePin!=static_cast<uint8_t>(HardwareResourcePin::NONE)) digitalWrite(enablePin,LOW);
       digitalWrite(dirPin,forward?HIGH:LOW);
       delayMicroseconds(1); // DIR setup >= 200 ns
       digitalWrite(stepPin,HIGH);
-      delayMicroseconds(pulseMicroseconds);
+      delayMicroseconds(pulseUS);
       digitalWrite(stepPin,LOW);
       delayMicroseconds(1); // STEP LOW >= 1 us voor een eventuele volgende puls
       return true;
@@ -72,9 +72,11 @@ struct A4988 : GedeeldeBusNode {
     if (enablePin!=static_cast<uint8_t>(HardwareResourcePin::NONE) && !parent->WriteExtenderPin(enablePin,LOW)) return false;
     if (!parent->WriteExtenderPin(dirPin,forward?HIGH:LOW)) return false;
     delayMicroseconds(1);
-    if (!parent->WriteExtenderPin(stepPin,HIGH)) return false;
-    delayMicroseconds(pulseMicroseconds);
-    if (!parent->WriteExtenderPin(stepPin,LOW)) return false;
+    // Mislukt STEP hoog: ook dan de sturing stoppen, zodat de motor niet bekrachtigd blijft na een fout.
+    if (!parent->WriteExtenderPin(stepPin,HIGH)) { StopSturing(); return false; }
+    delayMicroseconds(pulseUS);
+    // Mislukt STEP laag: de sturing stoppen, zodat STEP niet ongemerkt hoog blijft (zoals ULN2003).
+    if (!parent->WriteExtenderPin(stepPin,LOW)) { StopSturing(); return false; }
     delayMicroseconds(1);
     return true;
 #else

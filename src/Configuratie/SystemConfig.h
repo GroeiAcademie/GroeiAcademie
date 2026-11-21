@@ -162,9 +162,6 @@
     #if __has_include("Sensoren/ConfigAHT10.h")
       #include "Sensoren/ConfigAHT10.h"
     #endif
-    #if __has_include("Sensoren/ConfigAS608.h")
-      #include "Sensoren/ConfigAS608.h"
-    #endif
     #if __has_include("Sensoren/ConfigBioAmpEXGPill.h")
       #include "Sensoren/ConfigBioAmpEXGPill.h"
     #endif
@@ -255,14 +252,14 @@
     #if __has_include("Sensoren/ConfigMR60BHA2.h")
       #include "Sensoren/ConfigMR60BHA2.h"
     #endif
+    #if __has_include("Sensoren/ConfigMS3625.h")
+      #include "Sensoren/ConfigMS3625.h"
+    #endif
     #if __has_include("Sensoren/ConfigNeuroSkyTGAM.h")
       #include "Sensoren/ConfigNeuroSkyTGAM.h"
     #endif
     #if __has_include("Sensoren/ConfigOT3686.h")
       #include "Sensoren/ConfigOT3686.h"
-    #endif
-    #if __has_include("Sensoren/ConfigOV7670.h")
-      #include "Sensoren/ConfigOV7670.h"
     #endif
     #if __has_include("Sensoren/ConfigPIEZO.h")
       #include "Sensoren/ConfigPIEZO.h"
@@ -281,9 +278,6 @@
     #endif
     #if __has_include("Sensoren/ConfigVL6180X.h")
       #include "Sensoren/ConfigVL6180X.h"
-    #endif
-    #if __has_include("Sensoren/ConfigWATER.h")
-      #include "Sensoren/ConfigWATER.h"
     #endif
    
     // Sturingen: Persoonlijke configuratie (optioneel)  
@@ -409,6 +403,42 @@
   #define GA_SERIAL Serial
 #endif
 
+// GA_SENSOR_SERIAL is de hardware-UART voor sensoren met een seriële poort: LD2410D, LD2450, MR60BHA2 en NeuroSkyTGAM.
+// GA_SENSOR_SERIAL_PIN_RX en GA_SENSOR_SERIAL_PIN_TX zijn de native pinnen waarop de sensor aansluit.
+// Sensor TX gaat naar GA_SENSOR_SERIAL_PIN_RX; sensor RX gaat naar GA_SENSOR_SERIAL_PIN_TX.
+// UNO R4, UNO Q, ESP32-S3 ARDI32 en RP2040: Serial1 op D0/RX en D1/TX.
+// UNO Q: bij elke reset stuurt Zephyr een opstartmelding over Serial1.
+// ESP32 D1 R32 en ESP32-S3 DEV: D0/D1 dragen GA_SERIAL, daarom Serial1 op D2/RX en D3/TX.
+// Op een ESP32 geeft het sketch deze pinnen mee aan begin() of setPins().
+// Nucleo F401RE: D0/D1 gaan naar de ST-Link, daarom USART1 op D2/RX (PA10) en D8/TX (PA9).
+// Op de Nucleo maakt het sketch Serial1 zelf aan, want de STM32-core maakt standaard alleen Serial aan.
+// Dat gebeurt als Uart Serial1(...), en vraagt dus STM32duino 3.0.0 of nieuwer.
+#define GA_SENSOR_SERIAL Serial1
+// Het voorbeeld HC05 (Data) gebruikt dezelfde UART en dezelfde pinnen.
+// GA_SENSOR_SERIAL_PIN_RX en GA_SENSOR_SERIAL_PIN_TX zijn per pin te overschrijven vanuit UserConfig.h.
+#if BOARD_VERSION == BOARD_ESP32_D1_UNO_R32 || BOARD_VERSION == BOARD_ESP32S3_DEV
+  #ifndef GA_SENSOR_SERIAL_PIN_RX
+    #define GA_SENSOR_SERIAL_PIN_RX HardwareResourcePin::NP_D2
+  #endif
+  #ifndef GA_SENSOR_SERIAL_PIN_TX
+    #define GA_SENSOR_SERIAL_PIN_TX HardwareResourcePin::NP_D3
+  #endif
+#elif BOARD_VERSION == BOARD_STM32F4_NUCLEO64_F401RE
+  #ifndef GA_SENSOR_SERIAL_PIN_RX
+    #define GA_SENSOR_SERIAL_PIN_RX HardwareResourcePin::NP_D2
+  #endif
+  #ifndef GA_SENSOR_SERIAL_PIN_TX
+    #define GA_SENSOR_SERIAL_PIN_TX HardwareResourcePin::NP_D8
+  #endif
+#else
+  #ifndef GA_SENSOR_SERIAL_PIN_RX
+    #define GA_SENSOR_SERIAL_PIN_RX HardwareResourcePin::NP_D0
+  #endif
+  #ifndef GA_SENSOR_SERIAL_PIN_TX
+    #define GA_SENSOR_SERIAL_PIN_TX HardwareResourcePin::NP_D1
+  #endif
+#endif
+
 
 // ============================================================================
 // BOARD_ID: generieke, per-fysiek-bord-identiteit, bewust hier in SystemConfig.h en niet in een subsysteem-specifiek configuratiebestand, want "welk fysiek bord is dit" is geen eigenschap van één subsysteem.
@@ -434,6 +464,10 @@
 
 #ifndef INPUT_DEBOUNCE_MS
   #define INPUT_DEBOUNCE_MS 25UL
+#endif
+// Hoelang een wachtende Input hoogstens wacht op het loslaten van een toets, zolang het keypad onleesbaar is.
+#ifndef INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS
+  #define INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS 1000UL
 #endif
 
 #ifndef INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS
@@ -667,6 +701,11 @@
 #if SENSOR_AD8232_AANTAL != 0 && SENSOR_AD8232_AANTAL != 1
 #error SENSOR_AD8232_AANTAL moet 0 of 1 zijn.
 #endif
+// Samplefrequentie voor de hartslag (vast ritme); de ADC-Extender moet dit halen.
+// Standaard 125 Hz: haalbaar met een ADS1115 op 128 SPS en voldoende voor de hartslag.
+#ifndef SENSOR_AD8232_SAMPLE_RATE_HZ
+#define SENSOR_AD8232_SAMPLE_RATE_HZ 125
+#endif
 
 // I2C-sensor-identiteitstest. Standaard uitgeschakeld.
 #ifndef I2C_ADDRESS_SENSOR_ADXL345_1
@@ -687,13 +726,6 @@
 #endif
 #if SENSOR_AHT10_AANTAL != 0 && SENSOR_AHT10_AANTAL != 1
 #error SENSOR_AHT10_AANTAL moet 0 of 1 zijn.
-#endif
-
-#ifndef SENSOR_AS608_AANTAL
-#define SENSOR_AS608_AANTAL 0
-#endif
-#if SENSOR_AS608_AANTAL != 0 && SENSOR_AS608_AANTAL != 1
-#error SENSOR_AS608_AANTAL moet 0 of 1 zijn.
 #endif
 
 // Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
@@ -785,6 +817,10 @@
 #endif
 #if SENSOR_EGBOPULSESENSOR_AANTAL != 0 && SENSOR_EGBOPULSESENSOR_AANTAL != 1
 #error SENSOR_EGBOPULSESENSOR_AANTAL moet 0 of 1 zijn.
+#endif
+// Samplefrequentie voor de hartslag (vast ritme); de ADC-Extender moet dit halen.
+#ifndef SENSOR_EGBOPULSESENSOR_SAMPLE_RATE_HZ
+#define SENSOR_EGBOPULSESENSOR_SAMPLE_RATE_HZ 100
 #endif
 
 #ifndef FSR_RFP_ADC_BEREIK_MILLIVOLT
@@ -883,6 +919,10 @@
 #if SENSOR_GSRGROVE_AANTAL != 0 && SENSOR_GSRGROVE_AANTAL != 1
   #error SENSOR_GSRGROVE_AANTAL moet 0 of 1 zijn.
 #endif
+// Seeed-kalibratie: 10-bit waarde zonder huidcontact, na het instellen van de potentiometer.
+#ifndef SENSOR_GSRGROVE_CALIBRATION_VALUE
+#define SENSOR_GSRGROVE_CALIBRATION_VALUE 512
+#endif
 #ifndef SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT
 #define SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT 5000
 #endif
@@ -910,6 +950,17 @@
 #if SENSOR_HCSR501_AANTAL != 0 && SENSOR_HCSR501_AANTAL != 1
 #error SENSOR_HCSR501_AANTAL moet 0 of 1 zijn.
 #endif
+// OUT via een ADC-Extender zonder digitale pin (ADS1115, ADS7828, ADS7953, CD74HC4067): meetbereik en drempel voor hoog.
+// Standaard 2500 mV: dat aanvaarden ADS1115, ADS1158, ADS7828 (interne referentie) en ADS7953 zonder extra instelling.
+// Het werkelijke meetbereik hangt van de ADC af: ADS1115 kiest 4096 mV, ADS1158 meet tot ongeveer 5333 mV (bij 5000 mV referentie), ADS7828 en ADS7953 meten tot 2500 mV.
+// De drempel wordt met dat werkelijke bereik berekend; boven het werkelijke bereik geeft de ADC zijn maximale waarde (OUT dus hoog).
+// De toegelaten ingangsspanning staat in de datasheet van de ADC; een module op 5 V aan een ADC op 3,3 V is niet toegelaten.
+#ifndef SENSOR_HCSR501_ADC_MEASUREMENT_RANGE_MILLIVOLT
+#define SENSOR_HCSR501_ADC_MEASUREMENT_RANGE_MILLIVOLT 2500
+#endif
+#ifndef SENSOR_HCSR501_ANALOG_THRESHOLD_FOR_HIGH_MILLIVOLT
+#define SENSOR_HCSR501_ANALOG_THRESHOLD_FOR_HIGH_MILLIVOLT 1500
+#endif
 
 #ifndef SENSOR_HW201_AANTAL
 #define SENSOR_HW201_AANTAL 0
@@ -917,12 +968,36 @@
 #if SENSOR_HW201_AANTAL != 0 && SENSOR_HW201_AANTAL != 1
 #error SENSOR_HW201_AANTAL moet 0 of 1 zijn.
 #endif
+// OUT via een ADC-Extender zonder digitale pin, en AO via een ADC-Extender: meetbereik en drempel voor hoog.
+// Standaard 2500 mV: dat aanvaarden ADS1115, ADS1158, ADS7828 (interne referentie) en ADS7953 zonder extra instelling.
+// Het werkelijke meetbereik hangt van de ADC af: ADS1115 kiest 4096 mV, ADS1158 meet tot ongeveer 5333 mV (bij 5000 mV referentie), ADS7828 en ADS7953 meten tot 2500 mV.
+// AO boven het werkelijke bereik geeft de maximale ADC-waarde; stel bij een hogere AO-spanning een groter bereik in dat de ADC-Extender aanvaardt.
+// De toegelaten ingangsspanning staat in de datasheet van de ADC; een module op 5 V aan een ADC op 3,3 V is niet toegelaten.
+#ifndef SENSOR_HW201_ADC_MEASUREMENT_RANGE_MILLIVOLT
+#define SENSOR_HW201_ADC_MEASUREMENT_RANGE_MILLIVOLT 2500
+#endif
+#ifndef SENSOR_HW201_ANALOG_THRESHOLD_FOR_HIGH_MILLIVOLT
+#define SENSOR_HW201_ANALOG_THRESHOLD_FOR_HIGH_MILLIVOLT 1500
+#endif
 
 #ifndef SENSOR_HX711_AANTAL
 #define SENSOR_HX711_AANTAL 0
 #endif
 #if SENSOR_HX711_AANTAL != 0 && SENSOR_HX711_AANTAL != 1
 #error SENSOR_HX711_AANTAL moet 0 of 1 zijn.
+#endif
+// Ruwe tellingen per gram; bepaal met een gekend gewicht: (telling met gewicht - tarra) / gram.
+// Standaard 0: ReadWeightGram() geeft false tot je een eigen factor instelt.
+#ifndef SENSOR_HX711_CALIBRATION_FACTOR
+#define SENSOR_HX711_CALIBRATION_FACTOR 0.0f
+#endif
+// Aantal metingen dat Tare() middelt.
+#ifndef SENSOR_HX711_TARE_SAMPLE_COUNT
+#define SENSOR_HX711_TARE_SAMPLE_COUNT 10
+#endif
+// 0 zou een deling door nul geven; vanaf 256 eindigt de lus in Tare() niet.
+#if SENSOR_HX711_TARE_SAMPLE_COUNT < 1 || SENSOR_HX711_TARE_SAMPLE_COUNT > 255
+#error SENSOR_HX711_TARE_SAMPLE_COUNT moet tussen 1 en 255 liggen.
 #endif
 
 #ifndef SENSOR_HYSRF05_AANTAL
@@ -945,6 +1020,19 @@
 #if SENSOR_INMP441_SAMPLEFREQUENTIE_HZ < 8000 || SENSOR_INMP441_SAMPLEFREQUENTIE_HZ > 48000
 #error SENSOR_INMP441_SAMPLEFREQUENTIE_HZ moet tussen 8000 en 48000 Hz liggen.
 #endif
+// MS3625: compatibel met de INMP441, dezelfde klasse INMP441_MS3625, eigen aantal en samplefrequentie.
+#ifndef SENSOR_MS3625_AANTAL
+#define SENSOR_MS3625_AANTAL 0
+#endif
+#if SENSOR_MS3625_AANTAL != 0 && SENSOR_MS3625_AANTAL != 1
+#error SENSOR_MS3625_AANTAL moet 0 of 1 zijn.
+#endif
+#ifndef SENSOR_MS3625_SAMPLEFREQUENTIE_HZ
+#define SENSOR_MS3625_SAMPLEFREQUENTIE_HZ 16000
+#endif
+#if SENSOR_MS3625_SAMPLEFREQUENTIE_HZ < 8000 || SENSOR_MS3625_SAMPLEFREQUENTIE_HZ > 48000
+#error SENSOR_MS3625_SAMPLEFREQUENTIE_HZ moet tussen 8000 en 48000 Hz liggen.
+#endif
 
 #ifndef SENSOR_DHT11_AANTAL
 #define SENSOR_DHT11_AANTAL 0
@@ -966,12 +1054,20 @@
 #if SENSOR_LD2410D_AANTAL != 0 && SENSOR_LD2410D_AANTAL != 1
 #error SENSOR_LD2410D_AANTAL moet 0 of 1 zijn.
 #endif
+// Zonder geldig frame gedurende deze tijd geeft IsModuleSilent() true.
+#ifndef SENSOR_LD2410D_SILENT_TIMEOUT_MS
+#define SENSOR_LD2410D_SILENT_TIMEOUT_MS 1000
+#endif
 
 #ifndef SENSOR_LD2450_AANTAL
 #define SENSOR_LD2450_AANTAL 0
 #endif
 #if SENSOR_LD2450_AANTAL != 0 && SENSOR_LD2450_AANTAL != 1
 #error SENSOR_LD2450_AANTAL moet 0 of 1 zijn.
+#endif
+// Zonder geldig frame gedurende deze tijd geeft IsModuleSilent() true.
+#ifndef SENSOR_LD2450_SILENT_TIMEOUT_MS
+#define SENSOR_LD2450_SILENT_TIMEOUT_MS 1000
 #endif
 
 #ifndef SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT
@@ -1018,6 +1114,10 @@
 #if SENSOR_MAX4466_AANTAL != 0 && SENSOR_MAX4466_AANTAL != 1
 #error SENSOR_MAX4466_AANTAL moet 0 of 1 zijn.
 #endif
+// Samplefrequentie voor het geluidsniveau (vast ritme); venster = een kwart seconde.
+#ifndef SENSOR_MAX4466_SAMPLE_RATE_HZ
+#define SENSOR_MAX4466_SAMPLE_RATE_HZ 500
+#endif
 
 // Meetbereik afhankelijk van sensorvoeding en aangesloten ADC; geen bewezen modulegrens.
 #ifndef SENSOR_MAX9814_ADC_BEREIK_MILLIVOLT
@@ -1029,6 +1129,10 @@
 #endif
 #if SENSOR_MAX9814_AANTAL != 0 && SENSOR_MAX9814_AANTAL != 1
 #error SENSOR_MAX9814_AANTAL moet 0 of 1 zijn.
+#endif
+// Samplefrequentie voor het geluidsniveau (vast ritme); venster = een kwart seconde.
+#ifndef SENSOR_MAX9814_SAMPLE_RATE_HZ
+#define SENSOR_MAX9814_SAMPLE_RATE_HZ 500
 #endif
 
 #ifndef SENSOR_MCU6701_AANTAL
@@ -1060,6 +1164,18 @@
 #endif
 #if SENSOR_MF52D_AANTAL != 0 && SENSOR_MF52D_AANTAL != 1
   #error SENSOR_MF52D_AANTAL moet 0 of 1 zijn.
+#endif
+// B-waarde van de NTC (MF52A en MF52D), volgens het datablad van de module.
+#ifndef SENSOR_MF52X_NTC_BETA
+#define SENSOR_MF52X_NTC_BETA 3950
+#endif
+// Weerstand van de NTC bij 25 °C (MF52A en MF52D).
+#ifndef SENSOR_MF52X_NTC_RESISTANCE_AT_25C_OHM
+#define SENSOR_MF52X_NTC_RESISTANCE_AT_25C_OHM 10000
+#endif
+// Serieweerstand van de deler op de module (MF52A en MF52D).
+#ifndef SENSOR_MF52X_SERIES_RESISTOR_OHM
+#define SENSOR_MF52X_SERIES_RESISTOR_OHM 10000
 #endif
 #ifndef SENSOR_MF52D_ADC_BEREIK_MILLIVOLT
 #define SENSOR_MF52D_ADC_BEREIK_MILLIVOLT 5000
@@ -1094,6 +1210,10 @@
 #if SENSOR_MR60BHA2_AANTAL != 0 && SENSOR_MR60BHA2_AANTAL != 1
 #error SENSOR_MR60BHA2_AANTAL moet 0 of 1 zijn.
 #endif
+// Zonder geldig frame gedurende deze tijd geeft IsModuleSilent() true.
+#ifndef SENSOR_MR60BHA2_SILENT_TIMEOUT_MS
+#define SENSOR_MR60BHA2_SILENT_TIMEOUT_MS 3000
+#endif
 
 #ifndef SENSOR_NEUROSKYTGAM_AANTAL
 #define SENSOR_NEUROSKYTGAM_AANTAL 0
@@ -1127,18 +1247,15 @@
 #define SENSOR_OT3686_MINIMALE_PULSPERIODE_US 100
 #endif
 
-#ifndef SENSOR_OV7670_AANTAL
-#define SENSOR_OV7670_AANTAL 0
-#endif
-#if SENSOR_OV7670_AANTAL != 0 && SENSOR_OV7670_AANTAL != 1
-#error SENSOR_OV7670_AANTAL moet 0 of 1 zijn.
-#endif
-
 #ifndef SENSOR_PIEZO_AANTAL
   #define SENSOR_PIEZO_AANTAL 0
 #endif
 #if SENSOR_PIEZO_AANTAL != 0 && SENSOR_PIEZO_AANTAL != 1
   #error SENSOR_PIEZO_AANTAL moet 0 of 1 zijn.
+#endif
+// Vanaf deze piekspanning geeft ReadTapDetected() een tik.
+#ifndef SENSOR_PIEZO_TAP_THRESHOLD_MILLIVOLT
+#define SENSOR_PIEZO_TAP_THRESHOLD_MILLIVOLT 500
 #endif
 #ifndef SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT
 #define SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT 5000
@@ -1204,19 +1321,6 @@
 #endif
 #if SENSOR_VL6180X_AANTAL != 0 && SENSOR_VL6180X_AANTAL != 1
 #error SENSOR_VL6180X_AANTAL moet 0 of 1 zijn.
-#endif
-
-#ifndef SENSOR_WATER_AANTAL
-  #define SENSOR_WATER_AANTAL 0
-#endif
-#if SENSOR_WATER_AANTAL != 0 && SENSOR_WATER_AANTAL != 1
-  #error SENSOR_WATER_AANTAL moet 0 of 1 zijn.
-#endif
-#ifndef SENSOR_WATER_ADC_BEREIK_MILLIVOLT
-#define SENSOR_WATER_ADC_BEREIK_MILLIVOLT 5000
-#endif
-#if SENSOR_WATER_ADC_BEREIK_MILLIVOLT < 1
-#error SENSOR_WATER_ADC_BEREIK_MILLIVOLT moet groter dan 0 zijn (de maximale spanning van de sensoruitgang in mV).
 #endif
 
 // ****************************************************************************
@@ -1961,8 +2065,8 @@
 
 // AFGELEID (niet zelf instellen): exclusieve runtimeclaim op een FLASH- of microSD-object.
 // Alleen nodig wanneer minstens twee schrijvers naar opslag samen gebruikt worden:
-// Data (FLASH/microSD), REDIRECT_SERIAL naar microSD en OV7670 (beeld naar microSD).
-#if ((((DATA_LAYER_CONFIG) & (DATA_TYPE_FLASH_SPI | DATA_TYPE_MICROSD_SPI)) != 0) + (REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD) + (SENSOR_OV7670_AANTAL > 0)) >= 2
+// Data (FLASH/microSD) en REDIRECT_SERIAL naar microSD.
+#if ((((DATA_LAYER_CONFIG) & (DATA_TYPE_FLASH_SPI | DATA_TYPE_MICROSD_SPI)) != 0) + (REDIRECT_SERIAL == REDIRECT_SERIAL_TO_MICROSD)) >= 2
   #define DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF 1
 #else
   #define DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF 0
@@ -2811,6 +2915,12 @@
   #ifndef I2C_ADDRESS_EXTENDER_PCA9685_2
     #define I2C_ADDRESS_EXTENDER_PCA9685_2 I2C_ADDRESS_NONE
   #endif
+  // Activeren() kiest de frequentie en de OE-pin per I2C-adres.
+  // Twee PCA9685's op hetzelfde adres (achter verschillende TCA9548A-kanalen) zouden elkaars instellingen krijgen.
+  // Die combinatie met een eigen frequentie of OE-pin per chip wordt voorlopig niet ondersteund.
+  #if (I2C_ADDRESS_EXTENDER_PCA9685_1 == I2C_ADDRESS_EXTENDER_PCA9685_2) && (I2C_ADDRESS_EXTENDER_PCA9685_1 != I2C_ADDRESS_NONE) && (defined(EXTENDER_PCA9685_1_PWM_FREQUENTIE) || defined(EXTENDER_PCA9685_2_PWM_FREQUENTIE) || defined(EXTENDER_PCA9685_1_OE_PIN) || defined(EXTENDER_PCA9685_2_OE_PIN))
+    #error EXTENDER_PCA9685: twee PCA9685-modules met hetzelfde I2C-adres en een eigen PWM-frequentie of OE-pin per chip worden niet ondersteund. Kies twee verschillende adressen.
+  #endif
 #endif
 
 
@@ -2898,11 +3008,18 @@
 // AFGELEID: GPIO via een Extender (niet zelf instellen)
 // ============================================================================
 // 1 = SetExtenderPinMode(), WriteExtenderPin() en ReadExtenderPin() worden meegecompileerd:
-// bij gemengde pinnen, of wanneer HCSR501, HW201, A4988, L293D, L298N, MAX7219, Relais of ULN2003 samen met een GPIO-Extender gebruikt wordt.
-#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0 || STURING_A4988_AANTAL > 0 || STURING_L293D_AANTAL > 0 || STURING_L298N_AANTAL > 0 || STURING_MAX7219_AANTAL > 0 || STURING_RELAIS_AANTAL > 0 || STURING_ULN2003_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)))
+// bij gemengde pinnen, of wanneer HCSR501, HW201, TTP223, AD8232, MAX4466/MAX9814, LD2410D, OT3686, HSR0x, A4988, L293D, L298N, MAX7219, Relais of ULN2003 samen met een Extender met digitale pinnen gebruikt wordt (PCF8574, PCF8575, MCP23017, MCP23S17, ADS1158, SC16IS752, MAX14830).
+#if (GEDEELDE_BUS_MIXED_PINS || ((SENSOR_HCSR501_AANTAL > 0 || SENSOR_HW201_AANTAL > 0 || SENSOR_TTP223_AANTAL > 0 || SENSOR_AD8232_AANTAL > 0 || SENSOR_MAX4466_AANTAL > 0 || SENSOR_MAX9814_AANTAL > 0 || SENSOR_LD2410D_AANTAL > 0 || SENSOR_OT3686_AANTAL > 0 || SENSOR_HCSR04_AANTAL > 0 || SENSOR_HCSR04P_AANTAL > 0 || SENSOR_HYSRF05_AANTAL > 0 || STURING_A4988_AANTAL > 0 || STURING_L293D_AANTAL > 0 || STURING_L298N_AANTAL > 0 || STURING_MAX7219_AANTAL > 0 || STURING_RELAIS_AANTAL > 0 || STURING_ULN2003_AANTAL > 0) && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0 || EXTENDER_ADS1158_AANTAL > 0 || EXTENDER_SC16IS752_I2C_AANTAL > 0 || EXTENDER_SC16IS752_SPI_AANTAL > 0 || EXTENDER_MAX14830_I2C_AANTAL > 0 || EXTENDER_MAX14830_SPI_AANTAL > 0)))
   #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 1
 #else
   #define GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF 0
+#endif
+
+// ============================================================================
+// SC16IS752: werkelijke kristal- of klokfrequentie aan XTAL1, in Hz (geldt voor I2C en SPI).
+// De Appnostic-library rekent standaard met 14745600 Hz; een module met een ander kristal (bv. 1843200 of 3072000 Hz) heeft deze instelling nodig, anders klopt de baud niet.
+#ifndef EXTENDER_SC16IS752_BRONKLOK_HZ
+  #define EXTENDER_SC16IS752_BRONKLOK_HZ 14745600UL
 #endif
 
 // ============================================================================

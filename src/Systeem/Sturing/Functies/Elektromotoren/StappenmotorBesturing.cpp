@@ -22,7 +22,8 @@ bool StappenmotorBesturing::StopMotor() {
 #if STURING_ULN2003_AANTAL > 0
   if (uln2003 && uln2003->actief) { uln2003->StopSturing(); actief = true; }
 #endif
-  if (!actief) return false;
+  // Geen actieve sturing: de motor draait niet, dus de status ook niet meer op gestart laten staan.
+  if (!actief) { gestart = false; gepauzeerd = false; return false; }
   gestart = false;
   gepauzeerd = false;
   return true;

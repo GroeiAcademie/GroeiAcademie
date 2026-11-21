@@ -30,7 +30,7 @@ struct ServomotorBesturing {
   bool PositioneerAbsoluutNaarHoek(uint8_t hoek);
   bool DraaiRelatiefOverHoek(int16_t aantalGraden);
   bool PositioneerNaarMiddenpositie();
-  bool SetPulsLimitsMS(uint16_t minimumUs, uint16_t maximumUs);
+  bool SetPulsLimitsMS(uint16_t minimumUS, uint16_t maximumUS);
   bool SetAbsolutePulseWidthUS(uint16_t microseconden);
   bool CalibrationServomotor(uint16_t microseconden);
   bool ReadTargetAngle(uint8_t& hoek) const;

@@ -2,8 +2,28 @@
 #if SENSOR_TTP223_AANTAL > 0
 bool TTP223::inpluggen() {
   if (ingeplugd) return true;
-  if (firstExtenderNode() != nullptr || np_OUT == HardwareResourcePin::NONE ||
-      np_OUT == HardwareResourcePin::CUSTOM) return false;
+  if (np_OUT == HardwareResourcePin::NONE || np_OUT == HardwareResourcePin::CUSTOM) return false;
+  if (firstExtenderNode() != nullptr) {
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
+    // Zelfde regel als SensorDigitaal::inpluggen(): alleen een directe GPIO-Extender-parent.
+    if (parent == nullptr || parent != firstExtenderNode()) return false;
+    switch (parent->component) {
+      case GedeeldeBusComponent::DIGITAL_PINS_PCF8574:
+      case GedeeldeBusComponent::DIGITAL_PINS_PCF8575:
+      case GedeeldeBusComponent::DIGITAL_PINS_MCP23017:
+      case GedeeldeBusComponent::DIGITAL_PINS_MCP23S17:
+      case GedeeldeBusComponent::ADC_ADS1158:      // eigen GPIO0..GPIO7
+      case GedeeldeBusComponent::UART_SC16IS752:   // eigen GPIO0..GPIO7
+      case GedeeldeBusComponent::UART_MAX14830:    // eigen GPIO0..GPIO15
+        break;
+      default: return false;
+    }
+    if (!Sensor::inpluggen()) return false;
+    return parent->SetExtenderPinMode(static_cast<uint8_t>(np_OUT), INPUT);
+#else
+    return false;  // Buiten de bestaande compile-time mixed-pininterface.
+#endif
+  }
   if (!Sensor::inpluggen()) return false;
   pinMode(NativeArduinoPinVan(np_OUT), INPUT);
   return true;
@@ -12,8 +32,21 @@ bool TTP223::Activeren() {
   return ingeplugd && parent && parent->actief;
 }
 bool TTP223::WerkAanraakstatusBij() {
-  if (!actief || firstExtenderNode() != nullptr) return false;
-  const bool nuAangeraakt = digitalRead(NativeArduinoPinVan(np_OUT)) == HIGH;
+  if (!actief) return false;
+  bool nuAangeraakt = false;
+  if (firstExtenderNode() != nullptr) {
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
+    // Via een GPIO-Extender (zie inpluggen()): lezen met ReadExtenderPin(), zoals SensorDigitaal.
+    if (parent != firstExtenderNode()) return false;
+    const uint8_t niveau = parent->ReadExtenderPin(static_cast<uint8_t>(np_OUT));
+    if (niveau != LOW && niveau != HIGH) return false;
+    nuAangeraakt = niveau == HIGH;
+#else
+    return false;
+#endif
+  } else {
+    nuAangeraakt = digitalRead(NativeArduinoPinVan(np_OUT)) == HIGH;
+  }
   const unsigned long nu = millis();
   aanrakingBegonnen = false;
   aanrakingLosgelaten = false;

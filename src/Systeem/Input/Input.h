@@ -123,7 +123,7 @@ enum class InputKanaal : byte {
 enum class InputGebeurtenis : byte {
   TOETSAANSLAG        = 0,  // gewone, nieuwe druk (bestaand gedrag)
   LOSGELATEN          = 1,  // de toets die net actief was, is nu losgelaten
-  LANG_INDRUKKEN      = 2,  // de toets blijft ononderbroken ingedrukt, langer dan de ingestelde drempel (langIndrukkenDrempelMs)
+  LANG_INDRUKKEN      = 2,  // de toets blijft ononderbroken ingedrukt, langer dan de ingestelde drempel (langIndrukkenDrempelMS)
   TIMEOUT_GEEN_INVOER = 3   // gedurende INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS is er op geen enkel kanaal een toetsaanslag geweest
 };
 
@@ -162,7 +162,7 @@ struct MappingTussenToetsaanslagEnUitTeVoerenFunctie {
 #ifdef INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID
   InputFunctie functieBijLoslaten;
   InputFunctie functieBijLangIndrukken;
-  unsigned long langIndrukkenDrempelMs; // enkel relevant als functieBijLangIndrukken niet nullptr is
+  unsigned long langIndrukkenDrempelMS; // enkel relevant als functieBijLangIndrukken niet nullptr is
 #endif
 };
 
@@ -179,7 +179,7 @@ struct MappingTussenToetsaanslagEnUitTeVoerenFunctieMetArgumenten {
   void* argumentenBijLoslaten;
   InputFunctieMetArgumenten functieBijLangIndrukken;
   void* argumentenBijLangIndrukken;
-  unsigned long langIndrukkenDrempelMs;
+  unsigned long langIndrukkenDrempelMS;
 #endif
 };
 
@@ -332,7 +332,7 @@ private:
   unsigned long keypadDrukBeginTijd = 0;
   bool langIndrukkenAlGemeldVoorHuidigeDruk = false;
   int KeypadUitLezenLosgelatenPositie();
-  int KeypadUitLezenLangIngedruktePositie(unsigned long drempelMs);
+  int KeypadUitLezenLangIngedruktePositie(unsigned long drempelMS);
   #endif
 #endif
 

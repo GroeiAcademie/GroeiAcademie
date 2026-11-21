@@ -48,7 +48,7 @@ Een gepland toepassingsgebied mag niet als werkende libraryfunctionaliteit worde
 
 ## 1. Stimulus en conditionering
 
-In beta v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `FsrRfp`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op een ADC-Extender (nu: ADS1115) die de `.ino` als parent meegeeft.
+In v2.0.0 verloopt de directe Stimulus-sensoruitlezing via de concrete `FsrRfp`-Sensor onder `src/Systeem/Sensor/`, ingeplugd op een geschikte ADC-Extender. De vijf meegeleverde Stimulusvoorbeelden gebruiken hiervoor de ADS1115. De publieke meetfuncties en status behoren nu tot het globale `Stimulus`-object.
 
 
 ### Leerdoel
@@ -66,12 +66,9 @@ Een stimulus met vingertikken reproduceerbaar leren zetten en activeren.
 - start- en eindsynchronisatie;
 - afwijking tegenover een nulmeting of doel.
 
-### Geplande uitbreiding
+### Toepassingsscenario's en verdere ontwikkeling
 
-- één unieke stimulus conditioneren;
-- twee unieke stimuli simultaan conditioneren;
-- een ineenstortend anker;
-- een cocktail van ankers.
+De bestaande voorbeeldschetsen demonstreren een enkele tik, simultane tikken, een ineenstortend patroon en een cocktail, plus een gecombineerd voorbeeld. Het daadwerkelijk aantonen van conditionering en de didactische beoordeling daarvan blijven afzonderlijke toepassingsdoelen; de aanwezigheid van een `.ino` is op zichzelf geen validatie daarvan.
 
 ### Scenario's
 

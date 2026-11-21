@@ -54,8 +54,6 @@ GroeiAcademie/
 │   │   │   ├── ConfigADXL345_template.h
 │   │   │   ├── ConfigAHT10.h
 │   │   │   ├── ConfigAHT10_template.h
-│   │   │   ├── ConfigAS608.h
-│   │   │   ├── ConfigAS608_template.h
 │   │   │   ├── ConfigBME680.h
 │   │   │   ├── ConfigBME680_template.h
 │   │   │   ├── ConfigBME688.h
@@ -116,12 +114,12 @@ GroeiAcademie/
 │   │   │   ├── ConfigMPU6500_template.h
 │   │   │   ├── ConfigMR60BHA2.h
 │   │   │   ├── ConfigMR60BHA2_template.h
+│   │   │   ├── ConfigMS3625.h
+│   │   │   ├── ConfigMS3625_template.h
 │   │   │   ├── ConfigNeuroSkyTGAM.h
 │   │   │   ├── ConfigNeuroSkyTGAM_template.h
 │   │   │   ├── ConfigOT3686.h
 │   │   │   ├── ConfigOT3686_template.h
-│   │   │   ├── ConfigOV7670.h
-│   │   │   ├── ConfigOV7670_template.h
 │   │   │   ├── ConfigPIEZO.h
 │   │   │   ├── ConfigPIEZO_template.h
 │   │   │   ├── ConfigSCD41.h
@@ -133,9 +131,7 @@ GroeiAcademie/
 │   │   │   ├── ConfigVL53L0X.h
 │   │   │   ├── ConfigVL53L0X_template.h
 │   │   │   ├── ConfigVL6180X.h
-│   │   │   ├── ConfigVL6180X_template.h
-│   │   │   ├── ConfigWATER.h
-│   │   │   └── ConfigWATER_template.h
+│   │   │   └── ConfigVL6180X_template.h
 │   │   ├── Sturingen/
 │   │   │   ├── ConfigA4988.h
 │   │   │   ├── ConfigA4988_template.h
@@ -238,8 +234,6 @@ GroeiAcademie/
 │   │   │   ├── ADXL345.h
 │   │   │   ├── AHT10.cpp
 │   │   │   ├── AHT10.h
-│   │   │   ├── AS608.cpp
-│   │   │   ├── AS608.h
 │   │   │   ├── BioAmpEXGPill.cpp
 │   │   │   ├── BioAmpEXGPill.h
 │   │   │   ├── BME68x.cpp
@@ -255,6 +249,17 @@ GroeiAcademie/
 │   │   │   ├── EGBOPulseSensor.h
 │   │   │   ├── FsrRfp.cpp
 │   │   │   ├── FsrRfp.h
+│   │   │   ├── Functies/
+│   │   │   │   ├── BeatPeakDetector.cpp
+│   │   │   │   ├── BeatPeakDetector.h
+│   │   │   │   ├── EEGFrequencyBands.cpp
+│   │   │   │   ├── EEGFrequencyBands.h
+│   │   │   │   ├── HeartRateFromBeats.cpp
+│   │   │   │   ├── HeartRateFromBeats.h
+│   │   │   │   ├── SoundLevel.cpp
+│   │   │   │   ├── SoundLevel.h
+│   │   │   │   ├── VoltageDivider.cpp
+│   │   │   │   └── VoltageDivider.h
 │   │   │   ├── GSRGrove.h
 │   │   │   ├── HCSR501.h
 │   │   │   ├── HSR0x.cpp
@@ -262,8 +267,8 @@ GroeiAcademie/
 │   │   │   ├── HW201.h
 │   │   │   ├── HX711.cpp
 │   │   │   ├── HX711.h
-│   │   │   ├── INMP441.cpp
-│   │   │   ├── INMP441.h
+│   │   │   ├── INMP441_MS3625.cpp
+│   │   │   ├── INMP441_MS3625.h
 │   │   │   ├── LD2410D.cpp
 │   │   │   ├── LD2410D.h
 │   │   │   ├── LD2450.cpp
@@ -288,8 +293,6 @@ GroeiAcademie/
 │   │   │   ├── NeuroSkyTGAM.h
 │   │   │   ├── OT3686.cpp
 │   │   │   ├── OT3686.h
-│   │   │   ├── OV7670.cpp
-│   │   │   ├── OV7670.h
 │   │   │   ├── PIEZO.h
 │   │   │   ├── SCD41.cpp
 │   │   │   ├── SCD41.h
@@ -304,8 +307,7 @@ GroeiAcademie/
 │   │   │   ├── VL53L0X.cpp
 │   │   │   ├── VL53L0X.h
 │   │   │   ├── VL6180X.cpp
-│   │   │   ├── VL6180X.h
-│   │   │   └── WATER.h
+│   │   │   └── VL6180X.h
 │   │   ├── Sturing/
 │   │   │   ├── A4988.h
 │   │   │   ├── L293D.h
@@ -409,7 +411,6 @@ GroeiAcademie/
 │   │   │   │   ├── Sensor_AD8232/
 │   │   │   │   ├── Sensor_ADXL345/
 │   │   │   │   ├── Sensor_AHT10/
-│   │   │   │   ├── Sensor_AS608/
 │   │   │   │   ├── Sensor_BioAmpEXGPill/
 │   │   │   │   ├── Sensor_BioAmpEXGPill_ECG_Hartslag/
 │   │   │   │   ├── Sensor_BioAmpEXGPill_EMG_Envelop/
@@ -465,7 +466,6 @@ GroeiAcademie/
 │   │   │   │   ├── Sensor_TTP223_Metingen/
 │   │   │   │   ├── Sensor_VL53L0X/
 │   │   │   │   ├── Sensor_VL6180X/
-│   │   │   │   ├── Sensor_WATER/
 │   │   │   │   └── Sensor_XYSTICK/
 │   │   │   └── Sturingen/
 │   │   │       ├── Sturing_A4988/
@@ -592,7 +592,6 @@ GroeiAcademie/
 │   │   │   ├── AD8232.md
 │   │   │   ├── ADXL345.md
 │   │   │   ├── AHT10.md
-│   │   │   ├── AS608.md
 │   │   │   ├── BioAmpEXGPill.md
 │   │   │   ├── BME680.md
 │   │   │   ├── BME688.md
@@ -605,6 +604,12 @@ GroeiAcademie/
 │   │   │   ├── FSR400.md
 │   │   │   ├── FSR402.md
 │   │   │   ├── RFP602.md
+│   │   │   ├── Functies/
+│   │   │   │   ├── BeatPeakDetector.md
+│   │   │   │   ├── EEGFrequencyBands.md
+│   │   │   │   ├── HeartRateFromBeats.md
+│   │   │   │   ├── SoundLevel.md
+│   │   │   │   └── VoltageDivider.md
 │   │   │   ├── GSRGrove.md
 │   │   │   ├── HCSR501.md
 │   │   │   ├── HCSR04.md
@@ -626,9 +631,9 @@ GroeiAcademie/
 │   │   │   ├── MPU6050.md
 │   │   │   ├── MPU6500.md
 │   │   │   ├── MR60BHA2.md
+│   │   │   ├── MS3625.md
 │   │   │   ├── NeuroSkyTGAM.md
 │   │   │   ├── OT3686.md
-│   │   │   ├── OV7670.md
 │   │   │   ├── PIEZO.md
 │   │   │   ├── SCD41.md
 │   │   │   ├── SDP810125PA.md
@@ -636,12 +641,12 @@ GroeiAcademie/
 │   │   │   ├── SensorDigitaal.md
 │   │   │   ├── TTP223.md
 │   │   │   ├── VL53L0X.md
-│   │   │   ├── VL6180X.md
-│   │   │   └── WATER.md
+│   │   │   └── VL6180X.md
 │   │   ├── Sturing/
 │   │   │   ├── A4988.md
 │   │   │   ├── L293D.md
 │   │   │   ├── L298N.md
+│   │   │   ├── MAX7219.md
 │   │   │   ├── MG996R.md
 │   │   │   ├── Relais.md
 │   │   │   ├── RGBLED.md
@@ -676,7 +681,6 @@ GroeiAcademie/
 │   ├── SCIENTIFIC_INTEGRITY.md
 │   └── TERMINOLOGY.md
 ├── extras/
-├── .github/
 ├── .gitattributes
 ├── .gitignore
 ├── AUTHORS.md
@@ -727,13 +731,13 @@ De headers direct onder `src/` leiden door naar de interne moduleheaders. Gedeel
 De actuele componentdocumentatie is onderverdeeld volgens de broncode:
 
 - [Extenders](Systeem/Extender/): 16 componentdocumenten, met korte bestandsnamen zoals `ADS1115.md`.
-- [Sensoren](Systeem/Sensor/): 49 componentdocumenten voor afzonderlijke Sensoren en algemene Sensor-basisklassen, waaronder `FSR400.md`, `FSR402.md` en `RFP602.md`.
-- [Sturingen](Systeem/Sturing/): negen componentdocumenten voor A4988, L293D, L298N, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
+- [Sensoren](Systeem/Sensor/): 47 documenten in de hoofdmap, waaronder `FSR400.md`, `FSR402.md` en `RFP602.md`, en vijf aanvullende documenten onder `Sensor/Functies/`.
+- [Sturingen](Systeem/Sturing/): tien componentdocumenten voor A4988, L293D, L298N, MAX7219, MG996R, Relais, RGBLED, SG90, ULN2003 en WS2812.
 
 De Sturingen zijn nog ongetest; hun documentatie beschrijft uitsluitend de bestaande codevoorstellen.
 
 
-De actuele map `examples/Systeem/GedeeldeBus/Sturingen/` bevat 62 sketches, waaronder testvarianten voor A4988, L293D, L298N, MAX7219 en ULN2003. De bestaande pinclaim- en foutafhandelingslogica wordt hergebruikt; gemengde L293D/L298N-aansturing gebruikt digitale richting via PCF/MCP en EN via PCA9685. MAX7219 kan 16 bits bitbangen via een GPIO-Extender; MCP23S17 wordt niet als LOAD/CS op dezelfde hardware-SPI-bus ondersteund. De nieuwe testsketches zijn opgenomen in `extras/TestLibrarySturingen-v2.0.0.cmd`. Hardwarevalidatie blijft afzonderlijk vereist.
+De actuele map `examples/Systeem/GedeeldeBus/Sturingen/` bevat 62 sketches, waaronder testvarianten voor A4988, L293D, L298N, MAX7219 en ULN2003. De bestaande pinclaim- en foutafhandelingslogica wordt hergebruikt; gemengde L293D/L298N-aansturing gebruikt digitale richting via PCF/MCP en EN via PCA9685. MAX7219 kan 16 bits bitbangen via een GPIO-Extender; MCP23S17 wordt niet als LOAD/CS op dezelfde hardware-SPI-bus ondersteund. De Sturingen-testsketches zijn opgenomen in `extras/TestLibrarySturingen-v2.0.0.cmd`. Hardwarevalidatie blijft afzonderlijk vereist.
 
 ## Architectuurgrens van GedeeldeBus
 
@@ -934,7 +938,7 @@ vaste keuzewaarden die vóór UserConfig nodig zijn
 
 ### Systeem
 
-`src/Systeem/` bevat frameworkbrede voorzieningen. De huidige systeemdomeinen zijn `GedeeldeBus`, `Screen`, `Input` en `Sensor`. GedeeldeBus beheert de generieke boom/lifecycle/resources; concrete Screen-, Input-, Sensor- en Extenderlogica blijft bij de betreffende component.
+`src/Systeem/` bevat frameworkbrede voorzieningen. De huidige systeemdomeinen zijn `Data`, `Extender`, `GedeeldeBus`, `Input`, `Screen`, `Sensor` en `Sturing`. GedeeldeBus beheert de generieke boom/lifecycle/resources; de concrete Data-, Extender-, Input-, Screen-, Sensor- en Sturinglogica blijft in de eigen module.
 
 ### Toepassingsgebieden
 
@@ -946,17 +950,7 @@ vaste keuzewaarden die vóór UserConfig nodig zijn
 
 ## Afhankelijkheden
 
-`library.properties` declareert momenteel:
-
-- LiquidCrystal I2C;
-- Adafruit GFX Library;
-- Adafruit ST7735 and ST7789 Library;
-- ADS1X15 van Rob Tillaart;
-- PCF8574 (>=0.4.0);
-- FRAM_I2C van Rob Tillaart;
-- IRremote.
-
-Niet iedere build gebruikt alle dependencycode. Preprocessorconfiguratie bepaalt welke subsystemen werkelijk worden gecompileerd.
+De volledige actuele dependencylijst staat in het veld `depends` van `library.properties`. Daaronder vallen onder meer Screen-, Input-, Extender-, Sensor-, Sturing- en Data-libraries. De gedeclareerde minimumversie voor PCF8574 is `0.4.5`. Niet iedere build gebruikt alle dependencycode; de preprocessorconfiguratie bepaalt welke subsystemen werkelijk worden gecompileerd.
 
 ## Samenwerking tussen modules
 

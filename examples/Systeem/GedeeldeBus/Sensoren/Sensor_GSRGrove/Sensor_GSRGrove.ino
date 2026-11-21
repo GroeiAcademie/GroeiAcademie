@@ -4,7 +4,7 @@
 // Hardwaretest voor GSRGrove binnen de bestaande Sensor-architectuur.
 // Configuratie: Zet SENSOR_GSRGROVE_AANTAL op 1 voor deze hardwaretest.
 // Configuratie: Zet EXTENDER_ADS1115_AANTAL op minstens 1 voor deze hardwaretest.
-// Configuratie: Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE voor deze hardwaretest.
+// Configuratie: Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE of DATA_TYPE_DIRECT voor deze hardwaretest.
 // Serial toont de uitlezing van het in deze sketch gebruikte ADC-kanaal.
 // Aansluiting gebruikte I2C-parent/Extender: SDA -> board-SDA, SCL -> board-SCL; GND -> board-GND.
 // UNO R4 Minima/WiFi: fysieke SDA- en SCL-header (bij R4 Minima ook A4=SDA, A5=SCL); UNO Q: board-SDA/SCL.
@@ -25,8 +25,8 @@
 #if EXTENDER_ADS1115_AANTAL == 0
   #error Zet EXTENDER_ADS1115_AANTAL op minstens 1 voor deze hardwaretest.
 #endif
-#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
-  #error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE voor deze hardwaretest.
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE && DATA_LAYER_CONFIG != DATA_TYPE_DIRECT
+  #error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE of DATA_TYPE_DIRECT voor deze hardwaretest.
 #endif
 
 ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
@@ -44,6 +44,13 @@ void setup() {
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   #endif
   GA_SERIAL.println(F("TEST: Sensor_GSRGrove"));
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_LAYER_CONFIG);
+  GA_SERIAL.println(Data ? F("DATA: OK") : F("DATA: FOUT"));
+  if (Data == nullptr) return;
+#else
+  GA_SERIAL.println(F("LET OP: extra meetkanalen vereisen DATA_TYPE_DIRECT in UserConfig.h."));
+#endif
   sensorGSRGrove = GedeeldeBusNewComponent<GSRGrove>(
     &extenderADS1115, GedeeldeBusComponent::GSRGrove,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),
@@ -60,6 +67,10 @@ void loop() {
     bezig = false;
     GA_SERIAL.print(F("GSRGrove ADC: "));
     GA_SERIAL.println(waarde);
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+    GA_SERIAL.print(F("Via Data, GSRGrove ADC: "));
+    GA_SERIAL.println(sensorGSRGrove->ReadQueueOrStackValue(1));
+#endif
   }
   // Expliciet blokkerend alternatief: RawAnalogRead(waarde).
 }

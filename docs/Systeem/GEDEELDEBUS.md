@@ -2,7 +2,7 @@
 
 ## Status
 
-Deze pagina beschrijft de actuele implementatie in `src/Systeem/GedeeldeBus/GedeeldeBus.h/.cpp` en de 16 concrete Extenderbestanden van beta v2.0.0.
+Deze pagina beschrijft de actuele implementatie van GedeeldeBus in v2.0.0 en de samenwerking met de 16 concrete Extenders.
 
 ## Doel
 
@@ -13,23 +13,25 @@ GedeeldeBus verzorgt de gemeenschappelijke componentboom, lifecycle, businitiali
 ```text
 src/Systeem/GedeeldeBus/
 ├── GedeeldeBus.h
-├── GedeeldeBus.cpp
-├── ExtenderADS1115.h/.cpp
-├── ExtenderADS1158.h/.cpp
-├── ExtenderADS7828.h/.cpp
-├── ExtenderADS7953.h/.cpp
-├── ExtenderCD74HC4067.h/.cpp
-├── ExtenderDS2482v800.h/.cpp
-├── ExtenderMAX14830I2C.h/.cpp
-├── ExtenderMAX14830SPI.h/.cpp
-├── ExtenderMCP23017.h/.cpp
-├── ExtenderMCP23S17.h/.cpp
-├── ExtenderPCA9685.h/.cpp
-├── ExtenderPCF8574.h/.cpp
-├── ExtenderPCF8575.h/.cpp
-├── ExtenderSC16IS752I2C.h/.cpp
-├── ExtenderSC16IS752SPI.h/.cpp
-└── ExtenderTCA9548A.h/.cpp
+└── GedeeldeBus.cpp
+
+src/Systeem/Extender/
+├── ADS1115.h/.cpp
+├── ADS1158.h/.cpp
+├── ADS7828.h/.cpp
+├── ADS7953.h/.cpp
+├── CD74HC4067.h/.cpp
+├── DS2482v800.h/.cpp
+├── MAX14830I2C.h/.cpp
+├── MAX14830SPI.h/.cpp
+├── MCP23017.h/.cpp
+├── MCP23S17.h/.cpp
+├── PCA9685.h/.cpp
+├── PCF8574.h/.cpp
+├── PCF8575.h/.cpp
+├── SC16IS752I2C.h/.cpp
+├── SC16IS752SPI.h/.cpp
+└── TCA9548A.h/.cpp
 ```
 
 ## Boom
@@ -96,6 +98,7 @@ De GedeeldeBus-codes staan in `src/Language/Library_*.h`. Het niveau volgt `SCRE
 | GB109 | FATAL | `controleren()` | I2C-adres niet toegestaan voor dit hardwaretype | I2C-adres | alleen bij `GEDEELDE_BUS_FOUTINJECTIE` |
 | GB110 | FATAL | `controleren()` | ongeldig I2C-adres | I2C-adres | altijd |
 | GB111 | FATAL | `controleren()` | parent/extender biedt gevraagde resource niet aan | ExtenderPin | altijd |
+| GB112 | FATAL | `controleren()` | Sensorprotocol vereist Native-pinnen of een gespecialiseerde bridge; de gekozen generieke GPIO-Extender is fysiek ongeschikt | geen | altijd |
 | GB201 | CRITICAL | `inpluggen()` | inpluggen mislukt | I2C-adres | standaard |
 | GB202 | CRITICAL | `inpluggen()` | bus start niet | I2C-adres | DEBUG |
 | GB301 | CRITICAL | `activeren()` | activeren mislukt | I2C-adres of CS-pin | standaard |
@@ -124,7 +127,7 @@ Opmerkingen:
 - Paren: GB400 (communicatie faalt) en GB407 (component hersteld); GB408 (meting faalt) en GB410 (meting hersteld).
 - GB400 tot GB408 hebben geen vast niveau: de code zegt WAT er gebeurde, het foutniveau (WARNING tot FATAL) HOE ERNSTIG het nu is. Zie "Runtime-herstel" hieronder. GB402 tot GB406 spiegelen GB302 tot GB306 (zelfde laatste cijfer) en komen alleen bij de eerste mislukte herstelpoging.
 
-## Runtime-herstel (D042)
+## Runtime-herstel
 
 Een los contact tijdens het draaien maakt een I2C-component niet meer voor altijd onbruikbaar.
 
@@ -133,12 +136,12 @@ Een los contact tijdens het draaien maakt een I2C-component niet meer voor altij
 | Elke handeling | `ComponentBeschikbaarTijdensRuntime()` vooraf, één `ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt)` achteraf. Eén functionele handeling = één resultaat: één keypadscan, één sensormeting (ook niet-blokkerend: start, klaar en waarde samen), één Extender-pinread of -pinwrite, één LCD-melding. Niet elke library-oproep apart: een geslaagde write mag een mislukte read niet wegpoetsen. |
 | Fout | `aantalOpeenvolgendeFouten` +1. Een foutniveau komt er na het aantal fouten (`RUNTIME_<NIVEAU>_OPEENVOLGENDE_FOUTEN_NA_AANTAL`) OF na de tijd sinds de eerste fout (`RUNTIME_<NIVEAU>_SINDS_EERSTE_FOUT_NA_MS`), wat eerst bereikt is, nooit hoger dan `RUNTIME_HOOGST_TOEGELATEN_FOUTNIVEAU`. Alleen een hoger foutniveau geeft een melding (GB400). |
 | Vanaf `RUNTIME_COMPONENT_UITSCHAKELEN_VANAF_FOUTNIVEAU` | `actief = false` voor het component en alle onderliggende nodes. Lager: het component blijft actief en elke toegang probeert opnieuw. |
-| Uitgeschakeld | Bij de volgende toegang, maar nooit vaker dan elke `RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS`, een herstelpoging (er is geen herstel op eigen initiatief): de bus vrijmaken, alleen als SDA laag hangt (`VastgelopenGedeeldeBusVrijmaken()`; SDA hoog = de bus wordt niet aangeraakt). Blijft SDA laag: GB409, geen `activeren()` in die poging. Anders de bestaande `activeren()`. Mislukt die: tweede trap in dezelfde poging. Eerst SDA opnieuw beoordelen met `VastgelopenGedeeldeBusVrijmaken()` (de eerste `activeren()` kan de bus zelf laten vastlopen; blijft SDA laag: GB409), dan `Wire.end()`, Wire opnieuw initialiseren en nog één `activeren()`. Reden: na een timeout breekt de Wire van de UNO R4 de lopende transactie niet af (`setWireTimeout()` negeert de reset, nagekeken in Wire.cpp), waarna elke transactie naar elk adres faalt, ook met SDA hoog. Dat `Wire.end()` de driver sluit (`R_IIC_MASTER_Close`) staat in de code; dat de chip daarmee echt vrijkomt, moet de hardwaretest bewijzen. Na een busherstel initialiseert Wire zo twee keer na elkaar (bewust). Met DEBUG (of TRACE): `DEBUG: herstel trap 2, SDA hoog: Wire opnieuw` of `DEBUG: herstel trap 2, SDA laag: busherstel`. DEBUG is stil tijdens het draaien, TRACE niet: test daarom met DEBUG. Een mislukte poging telt als fout: de ladder klimt verder op aantal en tijd, tot het hoogst toegelaten foutniveau. Melding de eerste keer en bij elk hoger foutniveau, met de oorzaak als code (GB401, DEBUG GB402 tot GB406, of GB409). |
-| Hersteld | Melding GB407 (dit component zelf), daarna alle onderliggende nodes opnieuw `activeren()` (bv. FsrRfp zet opnieuw de gain), daarna toestand terug op 0, altijd, ook als een onderliggende node faalt. Is de parent van een node niet actief: geen eigen melding (de parent meldde al). Mislukt zijn eigen `Activeren()`: een I2C-node zet een stap op zijn eigen ladder; een node zonder eigen toestand meldt GB401 met het foutniveau en het I2C-adres van de I2C-node erboven die herstelt (de fout hoort bij de parent; nagekeken: geen `Activeren()` raakt de resultaatfunctie van de parent). Zo'n node blijft uit; alleen een node met een eigen herstelpad (I2C, of een sensor zoals FsrRfp) probeert later opnieuw. |
+| Uitgeschakeld | Bij de volgende toegang, maar nooit vaker dan elke `RUNTIME_PAUZE_TUSSEN_HERSTELPOGINGEN_MS`, een herstelpoging (er is geen herstel op eigen initiatief): de bus vrijmaken, alleen als SDA laag hangt (`VastgelopenGedeeldeBusVrijmaken()`; SDA hoog = de bus wordt niet aangeraakt). Blijft SDA laag: GB409, geen `activeren()` in die poging. Anders de bestaande `activeren()`. Mislukt die en ondersteunt de boardcore `WIRE_HAS_END`: tweede trap in dezelfde poging. Eerst SDA opnieuw beoordelen met `VastgelopenGedeeldeBusVrijmaken()` (de eerste `activeren()` kan de bus zelf laten vastlopen; blijft SDA laag: GB409), dan `Wire.end()`, Wire opnieuw initialiseren en nog één `activeren()`. Reden: na een timeout breekt de Wire van de UNO R4 de lopende transactie niet af (`setWireTimeout()` negeert de reset, nagekeken in Wire.cpp), waarna elke transactie naar elk adres faalt, ook met SDA hoog. Dat `Wire.end()` de driver sluit (`R_IIC_MASTER_Close`) staat in de code; dat de chip daarmee echt vrijkomt, moet de hardwaretest bewijzen. Na een busherstel initialiseert Wire zo twee keer na elkaar (bewust). Met DEBUG (of TRACE): `DEBUG: herstel trap 2, SDA hoog: Wire opnieuw` of `DEBUG: herstel trap 2, SDA laag: busherstel`. DEBUG is stil tijdens het draaien, TRACE niet: test daarom met DEBUG. Een mislukte poging telt als fout: de ladder klimt verder op aantal en tijd, tot het hoogst toegelaten foutniveau. Melding de eerste keer en bij elk hoger foutniveau, met de oorzaak als code (GB401, DEBUG GB402 tot GB406, of GB409). |
+| Hersteld | Eerst alle onderliggende nodes opnieuw `activeren()` (bv. FsrRfp stelt zijn gain opnieuw in). Daarna wordt waar nodig de TCA-toegang opnieuw geselecteerd. Pas na een geslaagde parent-herstelpoging volgt GB407 (dit component zelf) en gaat de toestand van de parent terug op 0, ook als een onderliggende node niet herstelde. Is de parent van een child niet actief, dan volgt voor dat child geen eigen melding. Mislukt `Activeren()` van een I2C-child, dan gaat zijn eigen foutladder verder; bij een niet-I2C-child wordt GB401 gemeld op het foutniveau en I2C-adres van de betrokken I2C-parent. Zo'n child blijft uit; alleen een child met een eigen herstelpad (I2C, of een sensor zoals FsrRfp) probeert later opnieuw. |
 
 **Meldingen:** GB400 tot GB410 gaan alleen naar Serial (of de redirect ervan), nooit naar het Character- of pixelscherm. Een melding op het scherm overschreef de opdracht van de schets (niets tekent ze terug) en testte het LCD via I2C midden in de afhandeling van een I2C-fout, waardoor een fout van de PCF8574 ook het LCD liet falen (cascade). Verloor het LCD zelf zijn stroom, dan is het leeg tot de volgende `Print()` van de schets.
 
-**LCD na een I2C-storing (S6):** `LiquidCrystal_I2C` geeft de waarde van `endTransmission()` niet door. Gaat tijdens een storing één nibble verloren, dan loopt het LCD in 4-bit-modus uit de pas en blijft het verminkt, ook na de volgende `Print()` (hardwaretest 19-10-2026: blijft na de volgende `Print()`, verdwijnt na reset of stroom weg). Daarom telt GedeeldeBus elke I2C-storing (`aantalI2CStoringenTijdensRuntime`, `uint16_t`): +1 bij de eerste mislukte toegang van een storing en +1 bij het herstel (GB407), in `ResultaatComponentToegangTijdensRuntimeVerwerken()` en `ComponentBeschikbaarTijdensRuntime()`; GB408 (functionele meetfout) telt niet. GedeeldeBus weet niet wie de teller leest. Screen onthoudt de stand bij zijn laatste `init()` van het LCD (`aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie`) en initialiseert het fysieke LCD één keer opnieuw vlak vóór de eerstvolgende `Print()` als de stand verschilt. Zo dekt het zowel het lostrekken als het terugsteken (twee glitchmomenten), met hoogstens één `init()` per gebeurtenis. Niet voor callbacks of het pixelscherm. Wat overblijft: een glitch midden in een `Print()` zonder geregistreerde fout; dan helpt een reset.
+**LCD na een I2C-storing:** `LiquidCrystal_I2C` geeft de waarde van `endTransmission()` niet door. Gaat tijdens een storing één nibble verloren, dan loopt het LCD in 4-bit-modus uit de pas en blijft het verminkt, ook na de volgende `Print()` (de ontregeling kan tot een nieuwe initialisatie blijven bestaan). Daarom telt GedeeldeBus elke I2C-storing (`aantalI2CStoringenTijdensRuntime`, `uint16_t`): +1 bij de eerste mislukte toegang van een storing en +1 bij het herstel (GB407), in `ResultaatComponentToegangTijdensRuntimeVerwerken()` en `ComponentBeschikbaarTijdensRuntime()`; GB408 (functionele meetfout) telt niet. GedeeldeBus weet niet wie de teller leest. Screen onthoudt de stand bij zijn laatste `init()` van het LCD (`aantalI2CStoringenBijLaatsteCharacterScreenInitialisatie`) en initialiseert het fysieke LCD één keer opnieuw vlak vóór de eerstvolgende `Print()` als de stand verschilt. Zo dekt het zowel het lostrekken als het terugsteken (twee glitchmomenten), met hoogstens één `init()` per gebeurtenis. Niet voor callbacks of het pixelscherm. Wat overblijft: een glitch midden in een `Print()` zonder geregistreerde fout; dan helpt een reset.
 
 **Waarnemer-effect:** een melding noemt het onderdeel waarvan de toegang mislukt, niet altijd het onderdeel dat de bus stoort. Voorbeeld uit de hardwaretest: de ADS1115 losgetrokken, maar de meldingen stonden op 0x20 (PCF8574), omdat alleen de keypadscan liep. Een onderdeel zonder voeding kan SDA laag trekken (zie `SDA laag: busherstel`). Het LCD wordt alleen getest bij een `Print()`: zonder `Print()` geen melding voor 0x27.
 
@@ -156,11 +159,11 @@ Een los contact tijdens het draaien maakt een I2C-component niet meer voor altij
 
 Herstel na een afwezige opstart is dus niet generiek voor alle subsystemen. FsrRfp vormt hier bewust de uitzondering doordat `OpnieuwAanmeldenNaPauze()` de volledige levenscyclus opnieuw doorloopt. Testen: Input, LCD en Serial alleen op uitval tijdens runtime; FsrRfp op beide. Komen Input, LCD of Serial na afwezigheid bij de opstart niet terug, dan is dat geen fout: het is niet beloofd.
 
-**Wat vanzelf werkt:** alles wat via het framework loopt: `ReadExtenderPin()`, `WriteExtenderPin()` en `SetExtenderPinMode()` van PCF8574, PCF8575 en MCP23017 (met `GEDEELDE_BUS_MIXED_PINS`), de ADS1115 via FsrRfp, Input PCF8574 en het LCD (vóór elke melding één test, omdat `LiquidCrystal_I2C` geen foutcode teruggeeft).
+**Wat vanzelf werkt:** de bestaande GedeeldeBus-paden voor `ReadExtenderPin()`, `WriteExtenderPin()` en `SetExtenderPinMode()` van PCF8574, PCF8575 en MCP23017 (wanneer `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF` ingeschakeld is), de ADS1115 via FsrRfp, Input PCF8574 en de LCD-toegangscontrole bij `Print()` (omdat `LiquidCrystal_I2C` geen foutcode per schrijftransactie teruggeeft).
 
 **Eigen oproepen in een sketch** (bv. `setPWM()` van de PCA9685): roep zelf `ComponentBeschikbaarTijdensRuntime()` vooraf en `ResultaatComponentToegangTijdensRuntimeVerwerken()` achteraf op. Voorbeeld: `examples/Systeem/GedeeldeBus/Extenders/Extender_PCA9685`.
 
-**Niet in v2.0.0:** FRAM en EEPROM via I2C (Data leest of schrijft ze tijdens runtime nog niet), ADS7828, ADS1158, ADS7953, MAX14830 en SC16IS752 (nog geen runtime-functies), SPI-componenten (een ontbrekende chip is via SPI niet te zien).
+**Geen generieke I2C-runtime-foutladder via GedeeldeBus voor:** FRAM en EEPROM (geen actieve I2C-Data-toegang tijdens runtime), ADS7828, ADS1158, ADS7953, MAX14830 en SC16IS752 (niet aangesloten op dit centrale herstelcontract), en SPI-componenten. Deze onderdelen kunnen wel eigen lees-, schrijf- en foutcontroles hebben; het ontbreken van deze foutladder betekent niet dat de Extender zelf ontbreekt.
 
 **Overrides** (alleen wie ze zet, betaalt ze; volgorde: exemplaar, type, algemeen):
 
@@ -196,11 +199,13 @@ De waarden van `HardwareResourceType` gebruiken overal `RT_`. De vijf groepswaar
 
 `BezettingPinnen` bevat gedeelde en exclusieve claims. I2C en SPI gebruiken daarnaast `HardwareResourceIdentiteit` voor de gedeelde lijnen.
 
-De conflictvergelijking werkt alleen binnen hetzelfde resourcegebied. `firstExtenderNode()` bepaalt of twee nodes Native resources of resources van dezelfde Extender gebruiken.
+De conflictvergelijking werkt alleen binnen hetzelfde resourcegebied. Voor I2C-adressen bepaalt `firstExtenderNode()` het adresgebied (ook achter een TCA9548A); voor fysieke pinclaims gebruikt de controle `firstPinExtenderNode()`, waarbij een TCA9548A geen eigen pinruimte vormt.
 
 **Gemengde pinnen** (`GEDEELDE_BUS_MIXED_PINS`; standaard `0`): een component mag per exclusieve pin een eigen gebied hebben, het board of een Extender. Voorbeeld: een SPI-chip met SCK, MISO en MOSI op het board en CS op een PCF8574. `ownerClaim` geeft per exclusieve claim de Extender (`nullptr` = het gewone gebied, zoals hierboven); `GetOwnerClaim()` geeft het gebied van één claim. De conflictcontrole vergelijkt dan per claim, en een pin op een eigen Extender moet op die Extender bestaan (GB111). Extenders met digitale pinnen (PCF8574, PCF8575, MCP23017) bieden daarvoor `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`. Staat de instelling op `0`, dan wordt niets hiervan gecompileerd en blijft het geheugengebruik gelijk. Een Data-chip met CS via een Extender zet de instelling automatisch op `1`. Sensoren kunnen dit gebruiken door `ownerClaim` te vullen; elke exclusieve pin kan naar een andere Extender wijzen. Voorbeeld: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_MixedPins/Sensor_MixedPins.ino` (2 pinnen op het board, 2 op een PCF8574). FsrRfp doet dat nog niet, en de ADC-routes blijven per backend gescheiden.
 
 I2C-adressen worden intern met bit `0x80` gemarkeerd en als exclusieve claim behandeld. Daardoor kan de generieke claimvergelijking pinnen en adressen onderscheiden.
+
+Wanneer `DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF` is ingeschakeld, gebruikt Data daarnaast de afzonderlijke runtime-reserveringen `ReserveerRuntime()`, `RuntimeToegang()`, `IsRuntimeEigenaar()` en `VrijgevenRuntime()`. Deze bepalen wie tijdens het opnemen een FLASH- of microSD-component mag gebruiken; ze vervangen de resourceclaims bij het aanmelden niet. Bij `afmelden()` worden tijdelijke reserveringen van de betrokken eigenaar vrijgegeven. Zonder exclusieve opslagconfiguratie wordt geen runtime-eigenaarschap bijgehouden.
 
 ## I2C en SPI
 
@@ -220,13 +225,13 @@ I2C-adressen worden intern met bit `0x80` gemarkeerd en als exclusieve claim beh
 
 ## Businitialisatie
 
-`InitialiserenGedeeldeBus()` bewaart aparte interne flags voor I2C en SPI. `ResettenGedeeldeBus()` zet beide flags terug op `false`. Op `BOARD_ESP32S3_ARDI32` en `BOARD_ESP32S3_DEV` wordt I2C expliciet gestart met de geconfigureerde SDA/SCL-pinnen; andere boards gebruiken `Wire.begin()`.
+`InitialiserenGedeeldeBus()` bewaart aparte interne flags voor I2C en SPI. `IsGedeeldeBusGeinitialiseerd()` geeft de interne toestand per bustype terug. `ResettenGedeeldeBus()` zet beide flags terug op `false`, zonder de fysieke bussen zelf te stoppen. Op `BOARD_ESP32S3_ARDI32` en `BOARD_ESP32S3_DEV` wordt I2C expliciet gestart met de geconfigureerde SDA/SCL-pinnen; andere boards gebruiken `Wire.begin()`.
 
 ## Extenders en ExtenderPins
 
 Alle 16 concrete Extenders staan in afzonderlijke `.h/.cpp`-bestanden. Iedere waarde in `enum class ExtenderPins` begint met `EP_`.
 
-Alleen Extenders die compile-time effectief gebruikt worden, worden mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`, omdat FsrRfp via de ADS1115 meet. `ExtenderPCF8574` wordt daarnaast mee gecompileerd wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat, omdat `InputPCF8574` dezelfde codebasis gebruikt. Niet gebruikte Extenderheaders worden niet geïncludeerd; de afzonderlijke Extender-`.cpp` levert alleen code wanneer de daarin benodigde meervoudige `ExtenderLijst` werkelijk nodig is.
+Alleen Extenders die compile-time effectief gebruikt worden, worden mee gecompileerd. Een `EXTENDER_<NAAM>_AANTAL` groter dan 0 activeert de overeenkomstige Extender. `EXTENDER_ADS1115_AANTAL` staat standaard op `1`; FsrRfp kan ook met een andere ondersteunde ADC-Extender als parent worden gebruikt. `ExtenderPCF8574` wordt daarnaast mee gecompileerd wanneer `INPUT_KANAAL_CONFIG` `INPUT_TYPE_PCF8574` bevat, omdat `InputPCF8574` dezelfde codebasis gebruikt. Niet gebruikte Extenderheaders worden niet geïncludeerd; de afzonderlijke Extender-`.cpp` levert alleen code wanneer de daarin benodigde meervoudige `ExtenderLijst` werkelijk nodig is.
 
 | Extender | actuele `ExtenderPins` uit de header |
 |---|---|
@@ -251,7 +256,7 @@ De concrete controlpinnen van een Extender, zoals CS, IRQ, RESET, START, PWDN of
 
 ## Uitwisselbaarheid van Extenders
 
-Een Extender vervangen betekent in dit FrameWork dat de **parent** van de aangesloten Sensor of Sturing verandert. Waar beide Extenders hetzelfde GedeeldeBus-contract uitvoeren, kan de logica van het child-object behouden blijven. Een gelijk contract garandeert niet dezelfde elektrische eigenschappen, het aantal kanalen, de resolutie of de bekabeling. De onderstaande beoordeling betreft de **actuele RC1-code**; een compileerbare variant is nog geen bewezen hardwaretest.
+Een Extender vervangen betekent in dit FrameWork dat de **parent** van de aangesloten Sensor of Sturing verandert. Waar beide Extenders hetzelfde GedeeldeBus-contract uitvoeren, kan de logica van het child-object behouden blijven. Een gelijk contract garandeert niet dezelfde elektrische eigenschappen, het aantal kanalen, de resolutie of de bekabeling. De onderstaande beoordeling betreft de **actuele code**; een compileerbare variant is nog geen bewezen hardwaretest.
 
 | Functiegroep | Uitwisselbare Extenders binnen het bestaande contract | Wat blijft gelijk? | Wat moet worden gecontroleerd of veranderd? |
 |---|---|---|---|
@@ -282,11 +287,11 @@ Zie voor de exacte `ExtenderPins`, de bestaande constructor en configuratienamen
 
 Een ADC is een gewone Extender; er bestaat geen statische ADC-parent meer. De `.ino` maakt bijvoorbeeld een `ExtenderADS1115` (componentcode `ADC_ADS1115`) aan en geeft die als parent aan FsrRfp door. De kanalen van de Sensor zijn `ExtenderPins` van die Extender (`EP_AIN0..EP_AIN3`) en worden als exclusieve claims onder die parent aangemeld.
 
-### Analoog meten via de parent (V8, R1 tot R3)
+### Analoog meten via de parent
 
-Een Sensor meet via drie functies van zijn parent, zonder het type ADC te kennen: `StartExtenderReadAnalog(pin, bereikMillivolt)`, `IsExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue(waarde)`. In de huidige RC1-headers vullen `ExtenderADS1115`, `ExtenderADS7828`, `ExtenderADS1158` en `ExtenderADS7953` dit contract alle vier in, elk met de eigen kanalen, bereik- en conversievoorwaarden.
+Een Sensor meet via drie functies van zijn parent, zonder het type ADC te kennen: `StartExtenderReadAnalog(pin, bereikMillivolt)`, `IsExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue(waarde)`. In de huidige headers vullen `ExtenderADS1115`, `ExtenderADS7828`, `ExtenderADS1158` en `ExtenderADS7953` dit contract alle vier in, elk met de eigen kanalen, bereik- en conversievoorwaarden.
 
-| `StartExtenderReadAnalog()` | Betekenis | Foutladder D042 |
+| `StartExtenderReadAnalog()` | Betekenis | Runtime-foutladder |
 |---|---|---|
 | `1` | Meting gestart | nog niets melden |
 | `0` | ADC bezet door een andere child | niet melden |
@@ -301,7 +306,7 @@ Een Sensor meet via drie functies van zijn parent, zonder het type ADC te kennen
 
 ### Beperkingen
 
-1. **Runtime-herstel alleen voor I2C.** D042 bestaat alleen voor I2C-componenten (`ComponentBeschikbaarTijdensRuntime()` staat op `HardwareResourceTypeI2C`). Een ADC-Extender op SPI krijgt geen foutladder; een Sensor daarop meet, maar herstelt niet automatisch.
+1. **Runtime-herstel alleen voor I2C.** De generieke runtime-foutladder bestaat alleen voor I2C-componenten (`ComponentBeschikbaarTijdensRuntime()` staat op `HardwareResourceTypeI2C`). Een ADC-Extender op SPI krijgt geen foutladder; een Sensor daarop meet, maar herstelt niet automatisch.
 2. **Genormaliseerde waarde, geen echte resolutie.** De waarde is geschaald naar `ADC_BITS` (`SystemConfig.h`). Een ADC met minder bits geeft na opschaling niet meer nauwkeurigheid; een Sensor die de echte resolutie nodig heeft, moet dat weten.
 3. **Digitale pinfuncties alleen met `GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF`.** `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()` worden meegecompileerd als deze afgeleide macro 1 is. `SystemConfig.h` activeert ze onder meer bij `GEDEELDE_BUS_MIXED_PINS` of bij bepaalde digitale Sensoren/Sturingen (waaronder `Relais` en ULN2003) samen met een van de vier GPIO-Extenders. De macro niet zelf instellen.
 
@@ -314,7 +319,7 @@ Een UART is een gewone Extender (SC16IS752, MAX14830). Het contract staat in `Ge
 | `GetExtenderStream(channel)` | De Stream van een UART-channel | `nullptr` |
 | `StartExtenderUART(channel, baud)` | De baud van een UART-channel instellen | `false` (niet ondersteund) |
 
-Een Sensor met een channel-constructor (LD2450, LD2410D, MR60BHA2, NeuroSkyTGAM, AS608) haalt zijn Stream in de constructor en zet in `Activeren()` zijn eigen baud: LD2450 256000, LD2410D 115200, MR60BHA2 115200, NeuroSkyTGAM 57600, AS608 57600. Lukt dat niet, dan mislukt `Activeren()`.
+Een Sensor met een channel-constructor (LD2450, LD2410D, MR60BHA2, NeuroSkyTGAM) haalt zijn Stream in de constructor en zet in `Activeren()` zijn eigen baud: LD2450 256000, LD2410D 115200, MR60BHA2 115200, NeuroSkyTGAM 57600. Lukt dat niet, dan mislukt `Activeren()`.
 
 ## Screen, Input en Sensor
 
@@ -328,13 +333,9 @@ De volledige Screen- en Inputlogica staat niet in GedeeldeBus maar in `src/Syste
 
 ## Tests die nu aanwezig zijn
 
-Onder `examples/Systeem/GedeeldeBus/Extenders/` bestaan per Extender:
+Onder `examples/Systeem/GedeeldeBus/Extenders/` staan 48 Extender-voorbeelden. Alle 16 concrete Extenders hebben een basisvoorbeeld voor lifecycle en resourceclaims. Bij 14 van de 16 zijn bovendien afzonderlijke voorbeelden met `_Test_ExtenderPins_Toegelaten` en `_Test_ExtenderPins_Geweigerd` aanwezig; `MCP23S17` en `PCA9685` hebben niet dat testpaar. Voor PCA9685 bestaat wel `Extender_PCA9685_Test_OE_Pin.ino`. De exacte voorbeeldnamen verschillen per Extender, onder andere bij `_I2C` en `_SPI`.
 
-- `Extender_<naam>.ino`: basis lifecycle/resource-test;
-- `Extender_<naam>_Test_ExtenderPins_Toegelaten.ino`;
-- `Extender_<naam>_Test_ExtenderPins_Geweigerd.ino`.
-
-Onder `examples/Systeem/GedeeldeBus/Sensoren/` staan `Sensor_FsrRfp.ino`, `Sensor_FsrRfp_DIRECT.ino`, `Sensor_FsrRfp_FLASH.ino` en `Sensor_FsrRfp_MICROSD.ino`.
+Onder `examples/Systeem/GedeeldeBus/Sensoren/` hebben de vier FsrRfp-voorbeelden elk hun eigen map: `Sensor_FsrRfp/`, `Sensor_FsrRfp_DIRECT/`, `Sensor_FsrRfp_FLASH/` en `Sensor_FsrRfp_MICROSD/`, telkens met een `.ino` met dezelfde naam als de map.
 
 Deze tests moeten niet worden geïnterpreteerd als een volledige elektronische functietest van alle chipfuncties. Zie `extras/TESTEN.md`.
 
@@ -355,15 +356,15 @@ Deze sketches testen generieke GedeeldeBus-regels en horen niet bij een specifie
 ### Indexcontrole van Extenders
 
 - Alle bestaande constructoren met `ExtenderLijst[teller]` hebben momenteel twee tabelingangen (index 0 en 1). De constructor controleert nu de index vóór toegang tot de tabel en gebruikt voor ongeldige index een ongeldig I²C-adres (`0xFF`) of `HardwareResourcePin::NONE`.
-- De bestaande GedeeldeBus-controle moet zo'n foutieve configuratie vóór activering weigeren. Dit moet nog met compileertests en foutinjectie op `teller=2` en `teller=255` bevestigd worden.
+- De bestaande GedeeldeBus-controle weigert een ongeldige configuratie vóór geslaagde activering. De specifieke indexgrenzen `teller=2` en `teller=255` vragen een afzonderlijke compileer- of foutinjectieproef; de broncontrole alleen bewijst de uitvoering op hardware niet.
 
 ### Meetresultaten en kalibratie
 
 - Leg voor elke Sensor vast of de waarde vers uit de hardware komt, wanneer deze werd gemeten en of een eerdere waarde nog geldig is. Bij een ontbrekende nieuwe sample blijft het testresultaat **onbewezen**; rapporteer geen oude waarde als nieuwe meting.
 - Leg per type vast wat ruwe eenheden zijn, welke kalibratie (nulpunt, schaalfactor, referentiespanning) vereist is en welke referentiemeting de sensor bewijst. Vermeng geen ruwe waarden met gevalideerde fysische metingen.
-- Houd de beoordelingsresultaten voor compilatie/statische analyse, normale hardwarewerking, foutinjectie en stresstests afzonderlijk. Bestaande ingevulde HTML-resultaten worden niet overschreven; de nieuwste HTML moet eerst als bron worden gecontroleerd.
-- Documenteer per hardwaretest het exacte bestaande `.ino`-pad, gebruikte `Config*.h`-definities, bedrading, voeding, concrete handeling en verwachte Serial-uitvoer. Dit moet bij de nieuwste HTML per test concreet worden gecontroleerd, niet via een generieke verwijzing.
-- De 70-punten-test voor Flash/RAM-regressie vereist dezelfde FQBN en buildinstellingen voor de vorige en de nieuwe versie. Zonder Arduino-compilatie zijn er nog geen betrouwbare bytes of percentages.
+- Houd de beoordelingsresultaten voor compilatie/statische analyse, normale hardwarewerking, foutinjectie en stresstests afzonderlijk. Bewaar eerder vastgelegde hardwaretestresultaten als afzonderlijk bewijs.
+- Documenteer per hardwaretest het exacte bestaande `.ino`-pad, gebruikte `Config*.h`-definities, bedrading, voeding, concrete handeling en verwachte Serial-uitvoer. Controleer de gegevens per test en niet alleen via een algemene verwijzing.
+- Voor een betrouwbare vergelijking van Flash-/RAM-gebruik zijn dezelfde FQBN, boardcore, libraries en buildinstellingen nodig. Zonder echte Arduino-compilatie kunnen geen betrouwbare geheugencijfers worden opgegeven.
 ## Aanvulling Sturingen en gemengde pinclaims
 
 - In de bestaande gemengde claimcontrole zijn de pinbereiken van `MCP23S17` (0–15) en `PCA9685` (0–15) opgenomen. De bestaande GedeeldeBus-architectuur blijft gelijk.
@@ -372,3 +373,20 @@ Deze sketches testen generieke GedeeldeBus-regels en horen niet bij een specifie
 - Een succesvolle GedeeldeBus-claim of schrijfactie is geen garantie voor een fysiek veilig uitschakelen bij communicatieverlies.
 
 De tweepins L293D/L298N-varianten gebruiken bestaande twee exclusieve IN-claims en `HardwareResourcePin::NONE` voor de optionele EN-claim. Ze gebruiken één parent (Native, geschikte GPIO-Extender of PCA9685); een tweede Extender is alleen voor de bestaande gemengde IN/EN-variant noodzakelijk.
+
+## Runtime-foutladder en de TCA9548A
+
+- `HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime()`: een mislukte `SelectAccessForChild()` geeft nu `ResultaatComponentToegangTijdensRuntimeVerwerken(false)` in plaats van alleen false. De fout telt mee in de bestaande ladder.
+
+## Herstel, afmelden en pinclaims
+
+- **Eerste herstelpoging pas na de pauze:** bij het uitschakelen van een Extender wordt het tijdstip van de herstelpoging nu vóór het uitschakelen van de kinderen gezet. Een schrijfactie van een kind tijdens `StopSturing()` start dus geen herstelpoging meer midden in het uitschakelen.
+- **Afmelden van een hulp-Extender:** met `GEDEELDE_BUS_MIXED_PINS` weigert `afmelden()` zolang een andere node deze Extender nog als hulp-Extender gebruikt (`ownerClaim`). Meld eerst die node af.
+- **Uitval van een hulp-Extender:** `AlleOnderliggendeNodesUitschakelen()` roept ook `StopSturing()` aan bij elke node in een andere tak die deze Extender als hulp-Extender gebruikt. Die node blijft actief; een L298N zet bijvoorbeeld IN1 en IN2 laag via zijn eigen parent.
+- **Pinclaims achter een TCA9548A:** een TCA9548A heeft geen pinnen, alleen kanalen. Een native pin (bv. RESET of INT) van een component achter een TCA9548A wordt nu vergeleken met de native pinnen van het board, via `firstPinExtenderNode()`. Adressen blijven per TCA-kanaal gescheiden. De kanaalclaim zelf (`I2C_TCA_CHANNEL`) is nooit een pinconflict.
+- **CS via een Extender:** `GedeeldeBusFindI2CExtender()` geeft ook `nullptr` als twee Extenders van hetzelfde type hetzelfde adres hebben, bijvoorbeeld op twee TCA-kanalen. De CS-koppeling mislukt dan met GB108, in plaats van stil de eerste te kiezen.
+- **CS via een Extender geldt alleen voor de FLASH en de microSD.** SC16IS752SPI en MCP23S17 gebruiken altijd een native CS-pin, want hun library schakelt CS zelf met `digitalWrite()`.
+- **Externe ADC: wie een meting start, leest ze ook.** Dezelfde Sensor sluit iedere geslaagde `StartExtenderReadAnalog()` af met `GetExtenderReadAnalogValue()`, ook na een time-out. Bij blokkerende metingen gebeurt dat binnen één meetaanroep; bij niet-blokkerende metingen mogen start, gereedcontrole en ophalen afzonderlijke aanroepen zijn. De ADC-Extender bewaart geen identiteit van de startende child en dwingt dit contract dus niet af. Dit geldt voor ADS1115, ADS1158, ADS7828, ADS7953 en CD74HC4067.
+- **CD74HC4067 onder een externe ADC:** niet ondersteund in v2.0.0; `controleren()` meldt GB111.
+- **Een kind dat na herstel niet terugkomt:** herstelt een parent, maar mislukt de heractivering van een kind, dan probeert alleen een kind met een eigen herstelpad het later opnieuw (zoals FsrRfp). Een ander kind blijft uit tot een herstart; er is geen generiek herstelmechanisme voor kinderen zonder eigen herstelpad.
+- **TCA9548A:** een mislukte vrijgave van de kanalen telt mee in de foutladder van de TCA9548A.

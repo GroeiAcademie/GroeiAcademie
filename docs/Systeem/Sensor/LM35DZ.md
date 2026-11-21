@@ -5,7 +5,7 @@
 - Broncode: `src/Systeem/Sensor/LM35DZ.h` en `LM35DZ.cpp`.
 - C++-component: `LM35DZ`, afgeleid van `SensorAnaloog`.
 - Parent: `GedeeldeBusNode*` in de constructor.
-- Componentcode: `LM35DZ` (0xD5).
+- Componentcode: `LM35DZ` (0xCD).
 - Configuratie: `src/Configuratie/Sensoren/ConfigLM35DZ_template.h`; de optionele persoonlijke versie heet telkens zonder `_template`.
 - Data-kanalen: 2.
 
@@ -52,7 +52,7 @@ LM35DZ(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensorPi
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigLM35DZ.h` (het aanwezige `src/Configuratie/Sensoren/ConfigLM35DZ_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_LM35DZ_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_LM35DZ_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
+  - `SENSOR_LM35DZ_AANTAL`: in het sjabloon staat `1` als uitgeschakeld voorbeeld; de effectieve standaardwaarde in `SystemConfig.h` is `0`.
   - `SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `1500 // standaard waarde: 1500 (LM35DZ: 10 mV/°C; meetbereik tot 150 °C)`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -80,3 +80,35 @@ GedeeldeBusNewComponent<LM35DZ>(
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Aanvullende Sensor × Extender-testvoorbeelden
+
+De onderstaande `.ino`-bestanden behoren tot de huidige v2.0.0-voorbeelden. Hun aanwezigheid is gecontroleerd; compilatie en fysieke hardwarevalidatie zijn hier nog **niet** aangetoond.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_ADS1158/Sensor_LM35DZ_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_ADS7828/Sensor_LM35DZ_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_ADS7953/Sensor_LM35DZ_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_CD74HC4067/Sensor_LM35DZ_CD74HC4067.ino`
+
+### Functionele Sensor × Extender-voorbeelden
+
+De onderstaande voorbeelden bevatten **meetaanroepen na de activering**. Een getoonde waarde is geen bewijs van meetnauwkeurigheid of van een geslaagde hardwaretest.
+
+- **Fysieke test:** Verwarm licht; vergelijk ruwe ADC met temperatuurconversie.
+- **Huidige reikwijdte:** de `.ino` gebruikt uitsluitend reeds bestaande FrameWork-functies; niet-beschikbare meetkanalen, kalibraties of externe functies zijn niet toegevoegd.
+
+**Voorbeelden:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_ADS1158/Sensor_LM35DZ_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_ADS7828/Sensor_LM35DZ_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_ADS7953/Sensor_LM35DZ_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_LM35DZ_CD74HC4067/Sensor_LM35DZ_CD74HC4067.ino`
+
+**Validatie:** Arduino-compilatie, fysieke test, kalibratie en meetkwaliteitsvalidatie zijn hier nog niet aangetoond.
+
+## Niet actief
+
+- `TemperatuurC()` geeft NAN als de sensor niet actief is: geen oude temperatuur tijdens een uitval .
+
+## Heractivering
+
+- `Activeren()` zet `laatsteMetingGeldig` terug op false. Na een herstel tijdens runtime geeft `TemperatuurC()` NAN tot er een nieuwe meting is, en niet de temperatuur van vóór de storing.

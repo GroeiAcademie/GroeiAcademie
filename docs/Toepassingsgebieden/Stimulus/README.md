@@ -22,7 +22,7 @@ of:
 
 ## v2.0.0 Sensorroute
 
-De huidige Stimuluscode neemt `src/Systeem/Sensor/FsrRfp.h` op en leest de analoge kanalen via de globale pointer `sensorFsrRfpSet1`. FsrRfp meet via een ADC-Extender (nu: ADS1115), zoals elke Sensor op een Extender wordt ingeplugd. De Stimulusvoorbeelden maken eerst de Extender aan en daarna de Sensor met die Extender als parent:
+De huidige Stimuluscode neemt `src/Systeem/Sensor/FsrRfp.h` op en leest de analoge kanalen via de globale pointer `sensorFsrRfpSet1`. De vijf meegeleverde Stimulusvoorbeelden gebruiken de ADS1115 als parent, maar `FsrRfp` werkt via de algemene analoge functies van een geschikte ADC-Extender. De module gebruikt het globale object `Stimulus`, met aanroepen zoals `Stimulus.MeetStimulus(...)`; de vroegere losse functies en globale Stimulus-status behoren niet meer tot de publieke interface. De Stimulusvoorbeelden maken eerst de Extender aan en daarna de Sensor met die Extender als parent:
 
 ```cpp
 ExtenderADS1115 extenderADS1115(
@@ -37,7 +37,7 @@ sensorFsrRfpSet1 = GedeeldeBusNewComponent<struct FsrRfp>(&extenderADS1115, Gede
 if (sensorFsrRfpSet1 == nullptr) exit(0);
 ```
 
-Zonder kanaalargumenten gebruikt FsrRfp de standaardkanalen `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` (ADS1115: `EP_AIN0` tot `EP_AIN3`). Een `.ino` kan ook vier eigen kanalen meegeven. `RawAnalogRead()` leest via `ExtenderADS1115::readADC()`.
+Zonder kanaalargumenten gebruikt FsrRfp de standaardkanalen `FSR_RFP_ADC_PIN_SENSOR_1_SET_1` tot `FSR_RFP_ADC_PIN_SENSOR_4_SET_1` (ADS1115: `EP_AIN0` tot `EP_AIN3`). Een `.ino` kan ook vier eigen kanalen meegeven. `RawAnalogRead()` gebruikt `StartExtenderReadAnalog()`, `IsExtenderReadAnalogReady()` en `GetExtenderReadAnalogValue()` van de parent, niet rechtstreeks `ExtenderADS1115::readADC()`. De blokkerende variant wacht maximaal circa 150 ms op het vrijgeven van de ADC en de conversie samen; bij een mislukte meting geeft de `int`-variant 0 terug. De `bool`-overload met `int32_t&` maakt succes of mislukking expliciet.
 
 ## Doel
 
@@ -66,6 +66,27 @@ De module registreert en vergelijkt vingertikken zodat duur, drukverloop en timi
 - aantal sensoren dat binnen de marge synchroon start of eindigt.
 
 De benaming `TikKracht` in de API verwijst in de huidige implementatie naar een ADC-gerelateerde drukwaarde. Zonder afzonderlijke kalibratie is dit geen absolute kracht in newton of gramkracht.
+
+### Publieke functies en status van Stimulus
+
+De volgende functies behoren tot het globale object `Stimulus` (`src/Toepassingsgebieden/Stimulus/Stimulus.h`):
+
+| Functie | Actuele werking |
+|---|---|
+| `AnalogReadMetGekorigeerdeOffsets(sensorPin, offset)` | Leest via `sensorFsrRfpSet1`, trekt de offset af en begrenst negatieve resultaten tot 0. |
+| `BepaalSensorOffsets()` | Meet de aanwezige sensoren gedurende `OFFSET_METING_TIJD_MS` en bewaart per sensor de hoogste uitgangswaarde plus `OFFSET_VEILIGHEIDSMARGE`. |
+| `EvalueerNulmeting(...)` | Controleert gemeten tikduur en gemiddelde druk tegen de ingestelde grenzen; retourneert **1** bij goedkeuring, **0** als een nieuwe poging nodig is en **-1** als het maximale aantal pogingen bereikt is. |
+| `MeetStimulus(sensorPin, OffsetSensor, gemetenStimulus, exitPin, exitOffset, timeoutMS)` | Meet één tik, inclusief loslaatcontrole, optionele exitsensor en tijdslimiet; vult `StimulusProfiel` en retourneert een `EXIT_STATUS_*`-waarde. |
+| `MeetStimulusSimultaan(gemetenStimulus, aantalSensorenSimultaanTeMeten, synchronisatie, MaskReedsActieveSensorsBijStart, MaskGewensteActieveSensorsBijExit, timeoutMS, testOpDRUKWAARDE)` | Meet **2 tot 4** sensoren, begrensd door `FSR_RFP_AANTAL_SENSOREN_BESCHIKBAAR_SET_1`; valideert start-/exitmaskers en levert een status plus profielen. |
+| `MaakSynchronisatieProfiel(...)` | Publieke voorbereidende bouwsteen voor een paar sensoren; de huidige voorbeelden gebruiken deze functie niet rechtstreeks. |
+| `VergelijkStimulus(...)` | Vergelijkt tikduur en druk met de nulmeting of een expliciet tijdsdoel; ondersteunt de drie `INSTORTEND_MOEILIJKHEIDSGRAAD_*`-waarden. |
+| `VergelijkSynchronisatie(...)` | Vergelijkt twee synchronisatieprofielen op basis van de ingestelde marges. |
+| `WachtTotAlleSensorsLosgelatenVoorTest(aantalSensoren)` | Wacht tot de betrokken sensoren onder de drukdrempel zijn. |
+| `ResetAlleTellers()` | Zet de publieke beoordelings- en synchronisatietellers van het Stimulus-object terug. |
+
+De variabelen voor de nulmeting, offsets, marges, modus en tellers zijn leden van `Stimulus`, bijvoorbeeld `Stimulus.offsetSensor1`, `Stimulus.TOEGESTANE_MARGE_TIKTIJD` en `Stimulus.stimulusVersie` (in plaats van de vroegere losse globale variabelen).
+
+`MeetStimulus()` wacht eerst tot een reeds ingedrukte sensor losgelaten is, en daarna op een nieuwe tik. Hiervoor geldt de grootste van `timeoutMS` en `EXIT_NO_ACTION_MS`. `MeetStimulusSimultaan()` controleert daarnaast de geldigheid van de start- en exitmaskers en onderscheidt onder meer een ongeldige starttoestand, een time-out en een niet-losgelaten sensor. De volledige statusconstanten staan in `Stimulus.h`; niet elke status betekent dat de registratie succesvol voltooid is.
 
 ## Elektronisch referentieschema
 
@@ -102,7 +123,7 @@ GND
 
 Voor sensor 1 wordt `AINx` bijvoorbeeld `AIN0`, voor sensor 2 `AIN1`.
 
-De vaste weerstand moet passen bij het weerstandsbereik van de werkelijk gebruikte sensor. De repository legt in versie `1.0.0` nog geen universele weerstandswaarde vast, omdat die afhangt van sensorvariant, gewenste gevoeligheid en voedingsspanning. Noteer de gekozen waarde bij iedere meetopstelling.
+De vaste weerstand moet passen bij het weerstandsbereik van de werkelijk gebruikte sensor. De huidige hardwaredocumentatie legt geen universele weerstandswaarde vast, omdat die afhangt van sensorvariant, gewenste gevoeligheid en voedingsspanning. Noteer de gekozen waarde bij iedere meetopstelling.
 
 Alle sensoren, de ADS1115 en de Arduino moeten een gemeenschappelijke massa gebruiken.
 
@@ -128,7 +149,7 @@ Het bord kies je met `BOARD_VERSION`, bijvoorbeeld:
 #define BOARD_VERSION BOARD_UNO_R4_MINIMA
 ```
 
-De meting zelf loopt op elk bord via de ADS1115: 15-bit schaal (`ADC_BITS 15`) en geen extra wachttijd tussen samples (`DELAY_US 0`), want de ADS1115 wacht zelf op de conversie. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar deze schaal.
+De meegeleverde Stimulusvoorbeelden meten via de ADS1115, met de bijbehorende 15-bit configuratieschaal (`ADC_BITS 15`) en `DELAY_US 0`; de ADS1115 handelt zijn conversie via de eigen driver af. Andere ADC-Extenders hebben hun eigen bereik en meetgedrag. De macro `ADC(x)` schaalt configuratiedrempels van de 10-bit referentiewaarden naar deze schaal.
 
 `Extender_ADS1115_Meetkwaliteit.ino` is een zelfstandig hardwarevalidatiescript voor de ADS1115-Extender. De gewone Stimulusvoorbeelden gebruiken de centrale configuratie uit `UserConfig.h` en `SystemConfig.h`.
 

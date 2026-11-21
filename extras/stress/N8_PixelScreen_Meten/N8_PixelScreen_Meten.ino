@@ -49,12 +49,12 @@ void setup() {
   unsigned long langsteClear = 0;
 
   for (uint16_t teller = 0; teller < AANTAL_METINGEN; teller++) {
-    const unsigned long startMicros = micros();
+    const unsigned long startUS = micros();
     Screen->Pixel.Clear();
-    const unsigned long duurMicros = micros() - startMicros;
+    const unsigned long duurUS = micros() - startUS;
 
-    totaalClear += duurMicros;
-    if (duurMicros > langsteClear) langsteClear = duurMicros;
+    totaalClear += duurUS;
+    if (duurUS > langsteClear) langsteClear = duurUS;
   }
 
   unsigned long totaalTekst = 0;
@@ -63,24 +63,24 @@ void setup() {
   for (uint16_t teller = 0; teller < AANTAL_METINGEN; teller++) {
     Screen->Pixel.SetCursor(0, 0);
 
-    const unsigned long startMicros = micros();
+    const unsigned long startUS = micros();
     Screen->Pixel.Print("ABCDEFGHIJKLMNOPQRST");
-    const unsigned long duurMicros = micros() - startMicros;
+    const unsigned long duurUS = micros() - startUS;
 
-    totaalTekst += duurMicros;
-    if (duurMicros > langsteTekst) langsteTekst = duurMicros;
+    totaalTekst += duurUS;
+    if (duurUS > langsteTekst) langsteTekst = duurUS;
   }
 
   unsigned long totaalVolledig = 0;
   unsigned long langsteVolledig = 0;
 
   for (uint16_t teller = 0; teller < AANTAL_METINGEN; teller++) {
-    const unsigned long startMicros = micros();
+    const unsigned long startUS = micros();
     Screen->Print("ABCDEFGHIJKLMNOPQRST", "ABCDEFGHIJKLMNOPQRST");
-    const unsigned long duurMicros = micros() - startMicros;
+    const unsigned long duurUS = micros() - startUS;
 
-    totaalVolledig += duurMicros;
-    if (duurMicros > langsteVolledig) langsteVolledig = duurMicros;
+    totaalVolledig += duurUS;
+    if (duurUS > langsteVolledig) langsteVolledig = duurUS;
   }
 
   GA_SERIAL.println(F("RESULTATEN"));

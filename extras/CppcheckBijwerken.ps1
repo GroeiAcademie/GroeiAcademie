@@ -590,7 +590,7 @@ if ($UpdateAll) {
             foreach ($job in $mislukt) { Write-Host "[CCPCHECK] Fout in $($job.Name): $($job.ChildJobs[0].JobStateInfo.Reason)" }
             throw "Verzamelen onvolledig ($voortgang/$aantal). Geldige snapshots behouden. Samenvoegen nog niet uitvoeren."
         }
-        Write-Host "[CCPCHECK] Verzamelen voltooid: $voortgang/$aantal. Start daarna extras\ccpcheckSamenvoegen.cmd."
+        Write-Host "[CCPCHECK] Verzamelen voltooid: $voortgang/$aantal. Start daarna extras\CppcheckBijwerken.cmd -Finalize."
     } finally {
         foreach ($job in $jobs) {
             if ($job.State -in @('Running','NotStarted')) { Stop-Job -Job $job -ErrorAction SilentlyContinue }
@@ -893,20 +893,9 @@ if ($Finalize -and -not $SnapshotRoot) {
         }
         Write-Host "[CCPCHECK] Samenvoegen OK: $($actueel.Count) actuele hashes, $aantal compileropdrachten."
 
-        # Proefmodus ruimt nooit snapshots op; normale volledige samenvoeging blijft ongewijzigd.
-        if ($ProefHashes) {
-            Write-Host '[CCPCHECK] Proefmodus: geen snapshots opgeruimd.'
-        } else {
-            # Verwijder alleen echte verouderde hashmappen na succesvolle samenvoeging.
-            $opgeruimd = 0
-            foreach ($map in @(Get-ChildItem -LiteralPath $basis -Directory -ErrorAction SilentlyContinue)) {
-                if ($map.Name -match '^[0-9a-f]{64}$' -and -not $actueel.Contains($map.Name)) {
-                    Remove-Item -LiteralPath $map.FullName -Recurse -Force
-                    $opgeruimd++
-                }
-            }
-            Write-Host "[CCPCHECK] Opruimen OK: $opgeruimd verouderde hashmappen verwijderd."
-        }
+        # Snapshotopruiming gebeurt uitsluitend via CppcheckOudeDataOpruimen.ps1,
+        # zodat ook historisch bewaarde ALL_BOARDS- en BOARD_PROEF-runs beschermd blijven.
+        Write-Host '[CCPCHECK] Geen snapshots verwijderd. Opruimen via CppcheckOudeDataOpruimen.cmd.'
     } finally {
         if (Test-Path -LiteralPath $tijdelijkeUitvoer) { Remove-Item -LiteralPath $tijdelijkeUitvoer -Force }
         if ($vergrendeld) { $mutex.ReleaseMutex() }

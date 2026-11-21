@@ -221,11 +221,14 @@ struct MAX7219 : GedeeldeBusNode {
   }
 
   void StopSturing() override {
-    if (!actief) return;
     if (!viaExtender) {
+      // Native: de library MD_MAX72XX mag pas na een geslaagde activering aangesproken worden.
+      if (!actief) return;
       matrix.clear();matrix.control(MD_MAX72XX::SHUTDOWN,MD_MAX72XX::ON);
       return;
     }
+    // Via een Extender ook na een mislukte activering uitschakelen, maar alleen met pinnen die bij het inpluggen gecontroleerd zijn.
+    if (!ingeplugd) return;
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF && (EXTENDER_PCF8574_AANTAL > 0 || EXTENDER_PCF8575_AANTAL > 0 || EXTENDER_MCP23017_AANTAL > 0 || EXTENDER_MCP23S17_AANTAL > 0)
     if (parent && parent->actief) schrijfRegister(0x0C,0);
 #endif

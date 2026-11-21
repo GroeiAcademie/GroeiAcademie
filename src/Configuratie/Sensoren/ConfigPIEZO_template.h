@@ -9,4 +9,8 @@
 // #define SENSOR_PIEZO_ADC_BEREIK_MILLIVOLT 5000  // standaard waarde: 5000 (module op 5 V; op 3,3 V gevoed: 3300); pas aan aan sensorvoeding/schakeling (geen aangenomen VREF)
 #endif
 
+#ifndef SENSOR_PIEZO_TAP_THRESHOLD_MILLIVOLT
+// #define SENSOR_PIEZO_TAP_THRESHOLD_MILLIVOLT 500  // standaard waarde: 500; vanaf deze piekspanning geeft ReadTapDetected() een tik
+#endif
+
 #endif

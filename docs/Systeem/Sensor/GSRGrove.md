@@ -5,13 +5,13 @@
 - Broncode: `src/Systeem/Sensor/GSRGrove.h` (geen `.cpp`).
 - C++-component: `GSRGrove`, afgeleid van `SensorAnaloog`.
 - Parent: `GedeeldeBusNode*` in de constructor.
-- Componentcode: `GSRGrove` (0xA3).
+- Componentcode: `GSRGrove` (0xA8).
 - Configuratie: `src/Configuratie/Sensoren/ConfigGSRGrove_template.h`; de optionele persoonlijke versie heet telkens zonder `_template`.
-- Data-kanalen: 1 (via SensorAnaloog).
+- Data-kanalen: 3 (kanaal 1 via SensorAnaloog; zie "Data-kanalen" verderop).
 
 ## Uit de broncode
 
-GSRGrove: Grove GSR analoge uitgang, uitsluitend ADC-waarde. Eén component voor één fysiek apparaat, via de bestaande ADC-Extender. De meetcode zit in SensorAnaloog; deze klasse geeft alleen de pin en het bereik door.
+GSRGrove leest een analoge waarde via de ADC-Extender en de basis `SensorAnaloog`. Daarnaast biedt deze klasse `ReadSkinResistanceOhm()` en `ReadSkinConductanceMicrosiemens()` aan. Die berekeningen gebruiken de Seeed-formule en ingestelde kalibratie; de waarden zijn niet zonder referentiemeting klinisch gevalideerd.
 
 ## Aansluiten
 
@@ -52,7 +52,7 @@ GSRGrove(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t sensor
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigGSRGrove.h` (het aanwezige `src/Configuratie/Sensoren/ConfigGSRGrove_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_GSRGROVE_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_GSRGROVE_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
+  - `SENSOR_GSRGROVE_AANTAL`: sjabloonwaarde `1`.
   - `SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `5000`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -83,3 +83,44 @@ Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySens
 ### Schaal en interpretatie
 - De bestaande ADC-waarde is geen automatisch gekalibreerde huidgeleiding in µS. Controleer spanning, effectieve ADC-referentie, bekende testweerstand en plausibele meetrange voordat een eenheid of interpretatie wordt toegekend.
 - **Status:** referentiemetingen open.
+
+### Aanvullende Sensor × Extender-testvoorbeelden
+
+De onderstaande `.ino`-bestanden behoren tot de huidige v2.0.0-voorbeelden. Hun aanwezigheid is gecontroleerd; compilatie en fysieke hardwarevalidatie zijn hier nog **niet** aangetoond.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_ADS1158/Sensor_GSRGrove_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_ADS7828/Sensor_GSRGrove_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_ADS7953/Sensor_GSRGrove_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_CD74HC4067/Sensor_GSRGrove_CD74HC4067.ino`
+
+### Functionele Sensor × Extender-voorbeelden
+
+De onderstaande voorbeelden bevatten **meetaanroepen na de activering**. Een getoonde waarde is geen bewijs van meetnauwkeurigheid of van een geslaagde hardwaretest.
+
+- **Fysieke test:** Controleer verandering van ruwe ADC bij contact; geen huidgeleidingskalibratie.
+- **Huidige reikwijdte:** de `.ino` gebruikt uitsluitend reeds bestaande FrameWork-functies; niet-beschikbare meetkanalen, kalibraties of externe functies zijn niet toegevoegd.
+
+**Voorbeelden:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_ADS1158/Sensor_GSRGrove_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_ADS7828/Sensor_GSRGrove_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_ADS7953/Sensor_GSRGrove_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_GSRGrove_CD74HC4067/Sensor_GSRGrove_CD74HC4067.ino`
+
+**Validatie:** Arduino-compilatie, fysieke test, kalibratie en meetkwaliteitsvalidatie zijn hier nog niet aangetoond.
+
+## Verwerking
+
+- `ReadSkinResistanceOhm(float&)`: Seeed-formule ((1024 + 2 x meting) x 10000) / (kalibratie - meting), met de meting herschaald naar 10 bit bij de voedingsspanning (`SENSOR_GSRGROVE_ADC_BEREIK_MILLIVOLT`).
+- `ReadSkinConductanceMicrosiemens(float&)`: 1 000 000 / huidweerstand.
+- `SENSOR_GSRGROVE_CALIBRATION_VALUE` (standaard 512): de 10-bit meting zonder huidcontact na het instellen van de potentiometer (Seeed-procedure).
+- Voorbeeld: `Sensor_GSRGrove_Verwerking.ino`.
+
+- `ReadSkinConductanceMicrosiemens()` doet zelf een nieuwe ADC-meting.
+  Wie weerstand en geleiding van hetzelfde sample wil, leest de weerstand en rekent 1 000 000 / weerstand, zoals `Sensor_GSRGrove_Verwerking.ino`.
+
+## Data-kanalen
+
+- Kanaal 1: ruwe ADC-waarde (int), kanaal 2: huidgeleiding in µS (float), kanaal 3: huidweerstand in ohm (float), telkens bij een geslaagde aanroep.
+- `ReadSkinConductanceMicrosiemens()` roept `ReadSkinResistanceOhm()` aan: dan komen beide kanalen van dezelfde meting. Worden ze apart gevraagd, dan komen ze van twee meetmomenten.
+- `Sensor_GSRGrove_Verwerking` gebruikt `ReadSkinConductanceMicrosiemens()` en leest beide kanalen via Data.

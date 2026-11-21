@@ -17,16 +17,16 @@
 ## 2026-10-31: microSD-uitlijning
 
 - `SENSOR.DAT` wordt geopend met `O_APPEND` in plaats van `O_AT_END` (in `RecordingStart()` en bij het heropenen in `StreamingWrite()`). Na een mislukte `write()` blijven de volgende records uitgelijnd; een half record wordt geen deel van het bestand. Geen bescherming tegen een defecte sector; foutmelding van `write()` en `sync()` blijft open (V109).
-- RC1-register: handmatige test "microSD schrijffout en uitlijning".
+- Testregister: handmatige test "microSD schrijffout en uitlijning".
 
 ## 2026-10-31: DS3231-afwerking
 
 - DS3231: de bestandsdatum controleert na het lezen of de chip nog antwoordt (zoals `LeesDatumTijd()`); zo niet, dan blijft de standaarddatum van SdFat staan. `ZetDatumTijd()` controleert eerst de beschikbaarheid tijdens het draaien (geen `adjust()` als de DS3231 niet beschikbaar is) en meldt het resultaat van de adrescontrole aan de foutafhandeling van GedeeldeBus, zoals `LeesDatumTijd()`.
-- RC1-register: de vaste starttekst van de teller vermeldt 266 testen (de teller wordt bij het openen nog altijd opnieuw berekend).
+- Testregister: de vaste starttekst van de teller vermeldt 266 testen (de teller wordt bij het openen nog altijd opnieuw berekend).
 
 ## 2026-10-31: correcties en testen
 
-- **Componentcodes alfabetisch binnen hun groep (nieuwe nummers):** Temperatuur en vochtigheid: `AHT10` 0xD0, `DHT11` 0xD1, `DHT22` 0xD2, `DS18B20` 0xD3, `DS3231` 0xD4, `LM35DZ` 0xD5, `LM75A` 0xD6, `MF52A` 0xD7, `MF52D` 0xD8. Geluid en trilling: `INMP441` 0xB5, `MAX4466` 0xB6, `MAX9814` 0xB7, `MS3625` 0xB8, `OV7670` 0xB9, `PIEZO` 0xBA. De code werkt met de namen; het nummer staat in nieuwe records van `SENSOR.DAT`/FLASH en in debugmeldingen. De docs per sensor zijn aangepast.
+- **Componentcodes alfabetisch binnen hun groep (nieuwe nummers):** Huidtemperatuur en omgevingsmetingen: `AHT10` 0xC8, `DHT11` 0xCA, `DHT22` 0xCB, `DS18B20` 0xCC, `LM35DZ` 0xCD, `LM75A` 0xCE, `MF52A` 0xCF, `MF52D` 0xD0. Tijd: `DS3231` 0xD8. Ademgeluid en stem: `INMP441` 0x98, `MAX4466` 0x99, `MAX9814` 0x9A, `MS3625` 0x9B. Aanraking, druk en kracht: `PIEZO` 0x83. De code werkt met de namen; het nummer staat in nieuwe records van `SENSOR.DAT`/FLASH en in debugmeldingen. De docs per sensor zijn aangepast.
 - DS3231: na `now()` en `adjust()` wordt gecontroleerd of de chip nog antwoordt (patroon van de MPU6500); alleen dat gaat naar de foutafhandeling van GedeeldeBus. Batterijverlies of een ongeldige tijd geeft `false` in `LeesDatumTijd()` zonder busfout. `ZetDatumTijd()` geeft het resultaat van die controle terug. De bestandsdatum vult eerst de standaardwaarden van SdFat in (SdFat initialiseert ze niet) en gebruikt de klok alleen met dezelfde geldigheid als `LeesDatumTijd()`, inclusief batterijverlies. Beperking gedocumenteerd.
 - Screen: `Screen::Pixel::Print()` rekent de nieuwe cursorpositie met een breder tussentype; cursorpositie plus tekstlengte boven 255 loopt niet meer over.
 - NRF24L01: DATA.md vermeldt expliciet best-effort zonder ontvangstgarantie en de meting van de duur van `write()` (gemiddeld en maximaal).

@@ -63,7 +63,7 @@ uint16_t kalibratieMinimumUS = 0;
 uint16_t kalibratieMaximumUS = 0;
 bool kalibratieMinimumBevestigd = false;
 bool kalibratieMaximumBevestigd = false;
-unsigned long testStartMillis = 0;
+unsigned long testStartMS = 0;
 
 void toonStartInstructies() {
   GA_SERIAL.println(F("HARDWARETEST: Sturing_SG90_HardwareTest"));
@@ -297,7 +297,7 @@ void loop() {
 
       testActief = true;
       testFase = 9;
-      testStartMillis = millis();
+      testStartMS = millis();
       GA_SERIAL.println(F("VOORBEREIDING: 0 graden opgedragen. De gekozen test start na 1,5 seconde."));
       return;
     }
@@ -330,7 +330,7 @@ void loop() {
         }
 
         testFase = invoer == "MIN" ? 7 : 8;
-        testStartMillis = millis();
+        testStartMS = millis();
         GA_SERIAL.print(F("TEST 0: ")); GA_SERIAL.print(invoer == "MIN" ? F("MIN") : F("MAX")); GA_SERIAL.print(F(" begint bij ")); GA_SERIAL.print(kalibratiePulsbreedteUS);
         GA_SERIAL.println(F(" us. De andere grens blijft behouden."));
         GA_SERIAL.println(F("+ = 10 us hoger; - = 10 us lager. Met MIN bevestig je MIN en met MAX bevestig je MAX."));
@@ -360,7 +360,7 @@ void loop() {
 
         kalibratiePulsbreedteUS = static_cast<uint16_t>(microseconden);
         testFase = (testFase == 5 || testFase == 7) ? 7 : 8;
-        testStartMillis = millis();
+        testStartMS = millis();
         GA_SERIAL.print(F("TEST 0: gekozen pulsbreedte = ")); GA_SERIAL.print(kalibratiePulsbreedteUS);
         GA_SERIAL.println(F(" us. Bevestig met MIN of MAX volgens de gekozen grens. STOP breekt de test af."));
         return;
@@ -434,7 +434,7 @@ void loop() {
       }
 
       testFase = 2;
-      testStartMillis = millis();
+      testStartMS = millis();
       return;
     }
 
@@ -444,7 +444,7 @@ void loop() {
   if (!testActief) return;
 
   if (testStap == 0) {
-    if ((testFase == 7 || testFase == 8) && millis() - testStartMillis >= 600UL) {
+    if ((testFase == 7 || testFase == 8) && millis() - testStartMS >= 600UL) {
       motorBesturing->StopMotor();
       testFase = testFase == 7 ? 5 : 6;
       GA_SERIAL.println(F("TEST 0: PWM uit. Beoordeel de beweging. Bevestig MIN met MIN of MAX met MAX. STOP breekt af."));
@@ -454,7 +454,7 @@ void loop() {
   }
 
   if (testFase == 9) {
-    if (millis() - testStartMillis < 1500UL) return;
+    if (millis() - testStartMS < 1500UL) return;
 
     bool ok = false;
     switch (testStap) {
@@ -472,14 +472,14 @@ void loop() {
     }
 
     testFase = 0;
-    testStartMillis = millis();
+    testStartMS = millis();
     GA_SERIAL.println(F("FUNCTIEAANROEP: OK. Controleer de reactie van de servo."));
     return;
   }
 
   if (testStap == 5 && testFase == 1) return;
 
-  if (testStap == 5 && testFase == 0 && millis() - testStartMillis >= 500UL) {
+  if (testStap == 5 && testFase == 0 && millis() - testStartMS >= 500UL) {
     const bool ok = motorBesturing->PauzeerMotor();
     GA_SERIAL.println(F("PauzeerMotor(): PWM uit. De fysieke stand is niet gemeten."));
     toonFunctieResultaat(ok);
@@ -494,5 +494,5 @@ void loop() {
     return;
   }
 
-  if (millis() - testStartMillis >= 2000UL) rondTestAf(true);
+  if (millis() - testStartMS >= 2000UL) rondTestAf(true);
 }

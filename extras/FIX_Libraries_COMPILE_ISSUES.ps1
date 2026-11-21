@@ -7,7 +7,8 @@ $targets = @(
     (Join-Path $root 'I2C_SCANNER\I2C_SCANNER.cpp'),
     (Join-Path $root 'Adafruit_ST7735_and_ST7789_Library\Adafruit_ST7796S.h'),
     (Join-Path $root 'Adafruit_ST7735_and_ST7789_Library\Adafruit_ST7796S.cpp'),
-    (Join-Path $root 'Adafruit_ST7735_and_ST7789_Library\Adafruit_ST77xx.cpp')
+    (Join-Path $root 'Adafruit_ST7735_and_ST7789_Library\Adafruit_ST77xx.cpp'),
+    (Join-Path $root 'Appnostic_SC16IS7XX_Arduino_Library\src\Appnostic_SC16IS7XX.cpp')
 )
 foreach ($path in $targets) { if (-not (Test-Path -LiteralPath $path)) { throw "Ontbrekend bibliotheekbestand: $path. Niets aangepast." } }
 $encoding = [System.Text.Encoding]::GetEncoding(28591)
@@ -49,6 +50,22 @@ if ($modified[$cpp].Contains($new)) { }
 elseif ([regex]::Matches($modified[$cpp],$pattern).Count -eq 1) { $modified[$cpp] = [regex]::Replace($modified[$cpp],$pattern,$new) }
 else { throw "Onbekende Adafruit_ST77xx.cpp-versie: $cpp. Niets aangepast." }
 
+# Appnostic SC16IS7XX: alleen de ESP-tak en de Due-tak; WIRE wordt Wire in plaats van Wire1, en SPI_SS wordt 10.
+# SPI_SS wordt alleen door begin_spi() zonder argument gebruikt; de FrameWork geeft de CS-pin altijd zelf mee.
+$cpp = $targets[5]
+$old = '#elif defined(ESP8266) || defined(ESP32) // ESP8266/ESP32'
+$pattern = '(?m)^(' + [regex]::Escape($old) + '\r?\n#define WIRE Wire\r?\n#define SPI_SS )PIN_SPI_SS[ \t]*(?=\r?$)'
+$new = '(?m)^' + [regex]::Escape($old) + '\r?\n#define WIRE Wire\r?\n#define SPI_SS 10[ \t]*\r?$'
+if ([regex]::IsMatch($modified[$cpp],$new)) { }
+elseif ([regex]::Matches($modified[$cpp],$pattern).Count -eq 1) { $modified[$cpp] = [regex]::Replace($modified[$cpp],$pattern,'${1}10') }
+else { throw "Onbekende Appnostic_SC16IS7XX.cpp-versie: $cpp. Niets aangepast." }
+$old = '#else // Arduino Due'
+$pattern = '(?m)^(' + [regex]::Escape($old) + '\r?\n#define WIRE )Wire1(\r?\n#define SPI_SS )PIN_SPI_SS[ \t]*(?=\r?$)'
+$new = '(?m)^' + [regex]::Escape($old) + '\r?\n#define WIRE Wire\r?\n#define SPI_SS 10[ \t]*\r?$'
+if ([regex]::IsMatch($modified[$cpp],$new)) { }
+elseif ([regex]::Matches($modified[$cpp],$pattern).Count -eq 1) { $modified[$cpp] = [regex]::Replace($modified[$cpp],$pattern,'${1}Wire${2}10') }
+else { throw "Onbekende Appnostic_SC16IS7XX.cpp-versie: $cpp. Niets aangepast." }
+
 $changed = @($targets | Where-Object { $modified[$_] -cne $original[$_] })
 foreach ($path in $changed) {
     $backup = "$path.RUN33.bak"
@@ -57,4 +74,4 @@ foreach ($path in $changed) {
 foreach ($path in $changed) { [System.IO.File]::WriteAllBytes("$path.RUN33.bak", [System.IO.File]::ReadAllBytes($path)) }
 foreach ($path in $changed) { [System.IO.File]::WriteAllBytes($path, $encoding.GetBytes($modified[$path])); Write-Host "GECORRIGEERD: $path" }
 Write-Host "GEREED: $($changed.Count) bibliotheekbestanden gecorrigeerd. Bestaande back-ups hebben suffix .RUN33.bak."
-Write-Host 'Voer nu de bestaande Tools- en Screen-test-CMD uit. Geen tests gewijzigd.'
+Write-Host 'Voer nu de bestaande Tools-, Screen- en Extenders-test-CMD uit. Geen tests gewijzigd.'

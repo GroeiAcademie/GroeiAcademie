@@ -30,7 +30,13 @@ void sdCsWrite(SdCsPin_t pin, bool level) {
     struct DataMICROSDviaSPI* card = linkCSviaExtender[pin - startValueCSviaExtender];   // de kaart met dit pinnummer
     // Bij een gemelde CS-schrijffout dezelfde toestand maximaal eenmaal opnieuw proberen.
     // SdFat heeft een void-callback: ook na een tweede fout kan SdFat de SPI-overdracht voortzetten.
-    if (card != nullptr && !card->WriteCS(level ? HIGH : LOW)) card->WriteCS(level ? HIGH : LOW);
+    if (card != nullptr && !card->WriteCS(level ? HIGH : LOW) && !card->WriteCS(level ? HIGH : LOW)) {
+      // Twee keer mislukt: de CS is onbetrouwbaar; de kaart uitschakelen, zodat Data er niet meer naar schrijft.
+      // Een SPI-component heeft geen herstelpad: de kaart blijft uit tot een herstart.
+      card->actief = false;
+      // Tijdens Activeren() is actief nog false; deze vlag bewaart de fout ook dan.
+      card->chipSelectWriteFailed = true;
+    }
     return;
   }
   digitalWrite(pin, level ? HIGH : LOW);
@@ -65,10 +71,17 @@ bool DataMICROSDviaSPI::Activeren() {
     // Nooit stilzwijgend terugvallen op een native CS-pin wanneer geen koppeling beschikbaar is.
     if (pinCS == startValueCSviaExtender + DATA_LAYER_MICROSD_SPI_AANTAL) return false;
   }
+  chipSelectWriteFailed = false;   // alleen een CS-fout tijdens deze initialisatie telt
 #endif
   // SdFat geeft een foutcode terug (sdErrorCode()), 0 = geen fout. Gedeelde SPI-bus, 4 MHz zoals voorheen.
   const bool gelukt = SdFat32::begin(SdSpiConfig(pinCS, SHARED_SPI, SD_SCK_MHZ(4)));
+#if MICROSD_CS_VIA_EXTENDER
+  // Een CS-fout tijdens begin() maakt de activering ongeldig, ook als begin() true gaf.
+  // Anders zou activeren() de kaart daarna toch actief zetten.
+  return FoutDiagnoseSPI(gelukt, SdFat32::sdErrorCode(), gelukt && !chipSelectWriteFailed);
+#else
   return FoutDiagnoseSPI(gelukt, SdFat32::sdErrorCode(), gelukt);
+#endif
 }
 
 #endif

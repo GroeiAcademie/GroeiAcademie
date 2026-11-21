@@ -50,4 +50,12 @@ SensorDigitaal(GedeeldeBusNode* parent, GedeeldeBusComponent component, Hardware
 
 ## Testen
 
+## Hulppinnen en routes via Extenders
 
+- `inpluggen()`: een ADC-kanaal (`StartExtenderReadAnalog(pin, 0) == 1`) wordt via de ADC gelezen; anders via `ReadExtenderPin()` op PCF8574, PCF8575, MCP23017, MCP23S17, ADS1158 (GPIO), SC16IS752 (GPIO) of MAX14830 (GPIO).
+- `ReadOUTviaAnalogThreshold(float& waarde)`: één meting; millivolt = ruwe waarde x effectief bereik / ADC_MAX; hoog vanaf `analogThresholdForHighMillivolt`.
+- Leden: `analogMeasurementRangeMillivolt` (0 = digitaal gelezen), `analogThresholdForHighMillivolt`.
+
+## ADC-route
+
+- `ReadOUTviaAnalogThreshold()` roept na een gestarte meting altijd `GetExtenderReadAnalogValue()` aan, ook na een time-out: die geeft de ADC vrij. Ready beslist alleen of de waarde geldig is .

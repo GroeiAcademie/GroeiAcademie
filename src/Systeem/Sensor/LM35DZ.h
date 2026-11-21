@@ -19,6 +19,13 @@ struct LM35DZ : SensorAnaloog {
          HardwareResourceToegang Extender = HardwareResourceToegang::GEDEELD)
     : SensorAnaloog(parent, component, sensorPin, SENSOR_LM35DZ_ADC_BEREIK_MILLIVOLT, Extender) {}
 
+  bool Activeren() override {
+    if (!SensorAnaloog::Activeren()) return false;
+    // Nieuwe sessie: geen temperatuur uit een vorige sessie, ook niet na een herstel tijdens runtime.
+    laatsteMetingGeldig = false;
+    return true;
+  }
+
   uint8_t AantalChannels() const override { return 2; }   // meetkanalen voor Data
   // De omrekening heeft het werkelijk geconfigureerde ADC-meetbereik nodig.
   float TemperatuurC();

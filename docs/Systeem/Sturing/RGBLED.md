@@ -44,7 +44,7 @@ Type RGB-module, gemeenschappelijke anode/kathode, stroombegrenzing en voedingss
 - **Kleurkanalen:** PCA9685-kanalen `red`, `green`, `blue` → de drie LED-kleurpaden via **geschikte stroombegrenzing**. Sluit de gemeenschappelijke anode/kathode overeenkomstig de feitelijke LED en constructorparameter `commonAnode` aan.
 - LED-stroom mag niet rechtstreeks uit een niet daarvoor gedimensioneerde controllerpin komen.
 - Constructorvolgorde: `red`, `green`, `blue`; dit moeten drie verschillende kanalen 0–15 van één PCA9685 zijn. Sluit de drie kleurkanalen met geschikte stroombegrenzing aan.
-- `setRGBcolor(uint16_t red, uint16_t green, uint16_t blue)` accepteert voor elke kleur 0–4095. Met constructorparameter `commonAnode=true` keert de code de PWM-waarden om (`4095 - waarde`). Controleer dus vóór het inschakelen of de LED gemeenschappelijke anode of kathode heeft.
+- `setRGBcolor(uint16_t red, uint16_t green, uint16_t blue)` accepteert voor elke kleur 0–4095. Met constructorparameter `commonAnode=true` keert de code de PWM-waarden om (`4095 - waarde`). Controleer dus vóór het inschakelen of de LED gemeenschappelijke anode of kathode heeft. De publieke hulpfunctie `switchPWMvalues(uint16_t v) const` voert uitsluitend deze eventuele inversie uit en schrijft zelf geen PWM-uitgangen aan.
 - Bij activeren en stoppen wordt de toestand voor **uit** volgens die gekozen polariteit naar elk van de drie kanalen geschreven.
 
 **Bestaande constructor (parameter-/pinvolgorde):**
@@ -163,13 +163,13 @@ De huidige implementatie bevat een voorbeeld voor deze Sturing in `examples/` en
 
 Configuratie: `STURING_RGBLED_AANTAL`: 0 = niet opgenomen; groter dan 0 = opgenomen; het aantal objecten wordt niet begrensd.
 
-## Uitval van I²C en veilige eindtoestand (RC1)
+## Uitval van I²C en veilige eindtoestand
 
 Deze Sturing gebruikt een PCA9685-parent. `StopSturing()` kan de output niet betrouwbaar wijzigen zolang de I²C-bus onbereikbaar is. Een softwarematig `RESULTAAT: OK` of een geslaagde aanroep bewijst niet dat de aangesloten actuator/uitgang werkelijk gestopt is.
 
 - Optionele OE-bedrading van de PCA9685 geeft onafhankelijk van I²C een gezamenlijke uitgangsvrijgave zolang het board en de OE-besturing functioneren. Zie `docs/Systeem/Extender/PCA9685.md` voor de noodzakelijke externe opstart-/resetbeveiliging en de afhankelijkheid van MODE2.OUTNE.
 - De **voeding van de aangesloten actuator** blijft een afzonderlijke veiligheidsvoorziening. Gebruik waar de toepassing dat vereist een apart hardwarematig uitschakelpad en controleer de eindtoestand met een fysieke meting.
-- RC1-hardwaretest: tijdens een actieve beweging/uitgang de I²C-bus tijdelijk onderbreken, veilig uitschakelen, de uitgang en voeding afzonderlijk meten, vervolgens herstellen. Herhaal met reset van de MCU. **Nog niet fysiek bewezen.**
+- Hardwaretest: tijdens een actieve beweging/uitgang de I²C-bus tijdelijk onderbreken, veilig uitschakelen, de uitgang en voeding afzonderlijk meten, vervolgens herstellen. Herhaal met reset van de MCU. **Nog niet fysiek bewezen.**
 
 ### Gedeeltelijke kleurupdate
 - `setRGBcolor()` schakelt bij een gemelde fout op R/G/B nu alle drie de kanalen via het bestaande `StopSturing()` uit (best effort), in plaats van een gedeeltelijke kleurupdate ongemerkt te laten staan.

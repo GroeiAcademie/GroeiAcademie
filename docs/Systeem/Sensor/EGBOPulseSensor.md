@@ -5,9 +5,9 @@
 - Broncode: `src/Systeem/Sensor/EGBOPulseSensor.h` (geen `.cpp`).
 - C++-component: `EGBOPulseSensor`, afgeleid van `SensorAnaloog`.
 - Parent: `GedeeldeBusNode*` in de constructor.
-- Componentcode: `EGBOPulseSensor` (0xA2).
+- Componentcode: `EGBOPulseSensor` (0xC0).
 - Configuratie: `src/Configuratie/Sensoren/ConfigEGBOPulseSensor_template.h`; de optionele persoonlijke versie heet telkens zonder `_template`.
-- Data-kanalen: 1 (via SensorAnaloog).
+- Data-kanalen: 2 (kanaal 1 via SensorAnaloog; zie "Data-kanalen" verderop).
 
 ## Aansluiten
 
@@ -47,7 +47,7 @@ EGBOPulseSensor(GedeeldeBusNode* parent, GedeeldeBusComponent component, uint8_t
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigEGBOPulseSensor.h` (het aanwezige `src/Configuratie/Sensoren/ConfigEGBOPulseSensor_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_EGBOPULSESENSOR_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_EGBOPULSESENSOR_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
+  - `SENSOR_EGBOPULSESENSOR_AANTAL`: sjabloonwaarde `1`.
   - `SENSOR_EGBOPULSESENSOR_ADC_BEREIK_MILLIVOLT`: sjabloonwaarde `5000`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -94,3 +94,59 @@ De FrameWork leest de analoge waarde; het feit dat de print een hartslaggolfsign
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Aanvullende Sensor × Extender-testvoorbeelden
+
+De onderstaande `.ino`-bestanden behoren tot de huidige v2.0.0-voorbeelden. Hun aanwezigheid is gecontroleerd; compilatie en fysieke hardwarevalidatie zijn hier nog **niet** aangetoond.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_ADS1158/Sensor_EGBOPulseSensor_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_ADS7828/Sensor_EGBOPulseSensor_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_ADS7953/Sensor_EGBOPulseSensor_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_CD74HC4067/Sensor_EGBOPulseSensor_CD74HC4067.ino`
+
+### Functionele Sensor × Extender-voorbeelden
+
+De onderstaande voorbeelden bevatten **meetaanroepen na de activering**. Een getoonde waarde is geen bewijs van meetnauwkeurigheid of van een geslaagde hardwaretest.
+
+- **Fysieke test:** Controleer het analoge pulssignaal tijdens en zonder contact; geen BPM-berekening.
+- **Huidige reikwijdte:** de `.ino` gebruikt uitsluitend reeds bestaande FrameWork-functies; niet-beschikbare meetkanalen, kalibraties of externe functies zijn niet toegevoegd.
+
+**Voorbeelden:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_ADS1158/Sensor_EGBOPulseSensor_ADS1158.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_ADS7828/Sensor_EGBOPulseSensor_ADS7828.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_ADS7953/Sensor_EGBOPulseSensor_ADS7953.ino`
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor_CD74HC4067/Sensor_EGBOPulseSensor_CD74HC4067.ino`
+
+**Validatie:** Arduino-compilatie, fysieke test, kalibratie en meetkwaliteitsvalidatie zijn hier nog niet aangetoond.
+
+### Uitleesstatus bij de ADC-Extender-tests
+
+De ADC-Extender-voorbeelden gebruiken de reeds bestaande `RawAnalogRead(int32_t& waarde)` om een meting uit te voeren en **het succes van die uitlezing afzonderlijk te controleren**. Een ADC-waarde van `0` blijft zo een geldige meetwaarde wanneer de functie `true` teruggeeft; bij `false` wordt een uitleesfout gemeld. Hiervoor is geen Data-kanaal nodig.
+
+Dit controleert de ADC-uitleesstatus, niet de fysieke meetnauwkeurigheid, de samplefrequentie of de sensorspecifieke kalibratie.
+
+## Native meetvoorbeeld
+
+`examples/Systeem/GedeeldeBus/Sensoren/Sensor_EGBOPulseSensor/Sensor_EGBOPulseSensor.ino` voert na de lifecycle daadwerkelijk uitlezingen uit via de bestaande Sensor-API.
+Gemeten of weergegeven in dit voorbeeld: **Ruwe pulssensor-ADC-sample (geen BPM)**.
+De seriële uitvoer wordt beperkt; de Sensor-uitlezing blijft in `loop()` plaatsvinden.
+Dit bevestigt bij geslaagde hardwaretests de ruwe of rechtstreeks beschikbare meetwaarde, niet automatisch alle fysische kanalen, kalibratie of nauwkeurigheid.
+Compilatie en fysieke meting zijn nog niet bevestigd.
+
+## Verwerking
+
+- `ReadHeartRateBeatsPerMinute(float&)`: hartslag via BeatPeakDetector en HeartRateFromBeats, op het vaste ritme `SENSOR_EGBOPULSESENSOR_SAMPLE_RATE_HZ` (standaard 100 Hz). Roep zo vaak mogelijk aan.
+- Voorbeeld: `Sensor_EGBOPulseSensor_Verwerking.ino`.
+
+- `Sensor_EGBOPulseSensor_Verwerking.ino` stopt de compilatie met `#error` als `SENSOR_EGBOPULSESENSOR_SAMPLE_RATE_HZ` hoger is dan wat `EXTENDER_ADS1115_DATARATE` toelaat (4 = 128 SPS, 5 = 250, 6 = 475, 7 = 860).
+
+## Data-kanalen
+
+- Kanaal 1: ruwe ADC-waarde (int), kanaal 2: hartslag (float).
+- Kanaal 2 wordt geschreven bij elke aanvaarde slag met een geldige hartslag, en alleen zolang de toepassing `ReadHeartRateBeatsPerMinute()` aanroept, want die functie neemt zelf de samples.
+- Niet actief: `ReadHeartRateBeatsPerMinute()` geeft false, ook als er eerder een hartslag berekend was.
+
+## Heractivatie
+
+- Eigen `Activeren()`: slagdetectie (`beatPeakDetector`) en hartslaggeschiedenis (`heartRateFromBeats`) beginnen opnieuw.
+- `SensorAnaloog::Activeren()` zet bovendien een nog openstaande meting en de sampleplanning terug.

@@ -39,4 +39,13 @@ void setup() {
   if (parentOK) sensor = GedeeldeBusNewComponent<BMP280>(&apparaat, GedeeldeBusComponent::BMP280);
   GA_SERIAL.println(sensor ? F("SENSOR IDENTITEIT/LIFECYCLE: OK") : F("SENSOR IDENTITEIT/LIFECYCLE: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensor == nullptr) return;
+  float waarde = NAN;
+  if (!sensor->LeesHoofdwaarde(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Temperatuur (C): "));
+  GA_SERIAL.println(waarde);
+}

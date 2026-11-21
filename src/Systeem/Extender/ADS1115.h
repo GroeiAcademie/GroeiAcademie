@@ -85,7 +85,8 @@ struct ExtenderADS1115 : HardwareResourceTypeI2C, ADS1115 {
     const int16_t ruw = ADS1115::getValue();
     if (ADS1115::getError() != ADS1X15_OK) return false;
     // Single-ended: 0 tot 32767 (15 bit). Geschaald naar ADC_BITS (SystemConfig.h).
-    waarde = static_cast<int32_t>(ruw) >> (15 - ADC_BITS);
+    // Rond 0 V kan de offset een kleine negatieve code geven; die telt als 0.
+    waarde = ruw < 0 ? 0 : static_cast<int32_t>(ruw) >> (15 - ADC_BITS);
     return true;
   }
 

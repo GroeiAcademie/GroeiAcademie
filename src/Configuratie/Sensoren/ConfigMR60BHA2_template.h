@@ -9,4 +9,8 @@
 // UART standaard 115200, hardware UART poort bij constructor aanleveren.
 // Geen UART-Extender-Stream geclaimd: daarvoor eerst interfacegoedkeuring.
 
+#ifndef SENSOR_MR60BHA2_SILENT_TIMEOUT_MS
+// #define SENSOR_MR60BHA2_SILENT_TIMEOUT_MS 3000  // standaard waarde: 3000; zonder geldig frame gedurende deze tijd geeft IsModuleSilent() true
+#endif
+
 #endif

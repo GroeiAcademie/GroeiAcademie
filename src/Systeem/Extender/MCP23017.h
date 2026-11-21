@@ -64,6 +64,11 @@ struct ExtenderMCP23017 : HardwareResourceTypeI2C, MCP23017 {
   #endif
 
   bool Activeren() override {
+    // RESET actief laag: hoog zetten, zoals de TCA9548A; de datasheet vraagt een extern hoog gehouden RESET.
+    if (np_RESET != HardwareResourcePin::NONE) {
+      digitalWrite(NativeArduinoPinVan(np_RESET), HIGH);
+      pinMode(NativeArduinoPinVan(np_RESET), OUTPUT);
+    }
     const bool gelukt = MCP23017::begin() && MCP23017::isConnected();
 
     // Teruglezen: IPOL A bewaren, testwaarde 0x55 schrijven en teruglezen, daarna altijd de oorspronkelijke waarde terugzetten.

@@ -1,6 +1,10 @@
 #include "SensorAnaloog.h"
 
 bool SensorAnaloog::Activeren() {
+  // Nieuwe sessie: een meting die nog openstond, hoort niet meer bij deze child.
+  // De parent zette zijn eigen meetstatus al terug bij zijn heractivatie; een Get zou nu de meting van een andere child kunnen ophalen.
+  metingGestart = false;
+  lastSampleUS = 0;
   // ADC-contract: bereik 0 controleert alleen de ADC-kanaalondersteuning.
   return parent != nullptr && parent->StartExtenderReadAnalog(sensorPin, 0) == 1;
 }
@@ -71,6 +75,13 @@ bool SensorAnaloog::RawAnalogRead(int32_t& waarde) {
   }
   MeetwaardeVerwerken(waarde, klaar && gelukt);
   if (!klaar || !gelukt) { waarde = 0; return false; }
+  return true;
+}
+
+bool SensorAnaloog::IsSampleDue() {
+  if (sampleIntervalUS == 0) return true;
+  if (lastSampleUS != 0 && micros() - lastSampleUS < sampleIntervalUS) return false;
+  lastSampleUS = (lastSampleUS == 0 || micros() - lastSampleUS >= 2 * sampleIntervalUS) ? micros() : lastSampleUS + sampleIntervalUS;
   return true;
 }
 

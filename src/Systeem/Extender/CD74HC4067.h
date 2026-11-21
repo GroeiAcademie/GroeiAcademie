@@ -27,24 +27,44 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
   // aan de eigen ADC-parent, via Z = de ADC-ingang op die parent.
   bool metingBezig = false;
   uint8_t metingChannel = 0;
+  // Eén kanaal tegelijk: een digitale child houdt Z doorlopend open, een analoge meting schakelt de chip daarna uit.
+  // Daarom nooit een analoge en een digitale child op dezelfde CD74HC4067: wie eerst aanmeldt of activeert, krijgt de chip.
+  // Geen bewaarde pointer naar een child (die kan met afmelden() verdwijnen): de CD74HC4067 zoekt telkens in de boom,
+  // zoals afmelden() dat doet, welke node een kanaal van hem claimt (bij gemengde pinnen: GetOwnerClaim() == deze node).
+  // Een digitale child houdt het kanaal alleen zolang hij actief is of aan het activeren is; een analoge child zolang hij aangemeld is.
   bool Activeren() override {
     metingBezig = false;
     return ingeplugd && parent != nullptr && parent->actief;
   }
   int8_t StartExtenderReadAnalog(uint8_t pin, uint16_t bereikMillivolt) override {
     if (pin > static_cast<uint8_t>(ExtenderPins::EP_Y15) || parent == nullptr || np_Z == HardwareResourcePin::NONE || np_Z == HardwareResourcePin::CUSTOM) return -2;
+    // Een analoge child (ook bij de aanmeldproef op bereik 0) wordt geweigerd zolang een digitale child Z gebruikt.
+    bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
+    GedeeldeBusNode* wortel = this;
+    while (wortel->parent != nullptr) wortel = wortel->parent;
+    for (const GedeeldeBusNode* node = wortel; node != nullptr; node = VolgendeInBoom(node, wortel)) {
+      if (node->IsAnalogChild() || !(node->actief || node->activerenBezig)) continue;
+      for (uint8_t index = 0; index < node->AantalClaims(); index++) {
+#if GEDEELDE_BUS_MIXED_PINS
+        if (node->ClaimWaarde(index, exclusief, identiteit) > static_cast<uint8_t>(ExtenderPins::EP_Y15) || !exclusief || node->GetOwnerClaim(index) != this) continue;
+#else
+        if (node->ClaimWaarde(index, exclusief, identiteit) > static_cast<uint8_t>(ExtenderPins::EP_Y15) || !exclusief || node->firstExtenderNode() != this) continue;
+#endif
+        return -2;
+      }
+    }
     // Native is geen ADC-Extender: Z moet fysiek op een echte analoge pin zitten.
     if (parent == &Native) {
       const uint8_t z = static_cast<uint8_t>(np_Z);
       if (z < static_cast<uint8_t>(HardwareResourcePin::NP_A0) ||
           z > static_cast<uint8_t>(HardwareResourcePin::NP_A5) ||
           NativeArduinoPinVan(np_Z) == static_cast<uint8_t>(HardwareResourcePin::NONE)) return -2;
-      if (bereikMillivolt == 0) return 1;
+      if (bereikMillivolt == 0) return 1;   // aanmeldproef van een analoge child
       if (EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT == 0 ||
           bereikMillivolt > EXTENDER_CD74HC4067_NATIVE_REFERENTIE_MILLIVOLT) return -2;
     } else {
       // Proef op bereik 0 verandert geen selectielijnen of parent-meetstatus.
-      if (bereikMillivolt == 0) return parent->StartExtenderReadAnalog(static_cast<uint8_t>(np_Z), 0);
+      if (bereikMillivolt == 0) return parent->StartExtenderReadAnalog(static_cast<uint8_t>(np_Z), 0);   // aanmeldproef van een analoge child
     }
     if (metingBezig) return 0;
     if (!actief) return -1;
@@ -56,6 +76,55 @@ struct ExtenderCD74HC4067 : GedeeldeBusNode {
     if (resultaat == 1) { metingBezig = true; metingChannel = pin; }
     else disable();
     return resultaat;
+  }
+  // Toegang voor een child: het kanaal EP_Yn kiezen dat de child bij deze CD74HC4067 claimt, en de chip inschakelen,
+  // zoals de TCA9548A zijn kanaal kiest. Een lopende analoge meting wordt niet verstoord.
+  // Het kanaal is een exclusieve claim in het gebied van deze CD74HC4067 (bij gemengde pinnen: GetOwnerClaim() == deze node).
+  // Gedeelde buspinnen (I2C SDA/SCL, SPI SCK/MISO/MOSI) gaan nooit via een CD74HC4067.
+  // Er is geen ReleaseAccessForChild(): het gekozen kanaal blijft open na Activeren().
+  // Een digitale child (DHTxx, OT3686, HSR0x, HX711, INMP441_MS3625, MR60BHA2) gebruikt Z doorlopend: één digitale child per CD74HC4067.
+  // Geen child, of een child zonder kanaal op deze CD74HC4067 (bij gemengde pinnen op een andere Extender): niets te kiezen, true.
+  bool SelectAccessForChild(GedeeldeBusNode* child) override {
+    if (child == nullptr) return true;
+    for (uint8_t i = 0; i < child->AantalClaims(); i++) {
+      bool exclusief = false; HardwareResourceIdentiteit identiteit = HardwareResourceIdentiteit::GEEN;
+      const uint8_t waarde = child->ClaimWaarde(i, exclusief, identiteit);
+      if (waarde > static_cast<uint8_t>(ExtenderPins::EP_Y15)) continue;
+      bool claimIsChannelOfThisCD74HC4067 = exclusief;
+#if GEDEELDE_BUS_MIXED_PINS
+      if (claimIsChannelOfThisCD74HC4067 && child->GetOwnerClaim(i) != this) claimIsChannelOfThisCD74HC4067 = false;
+#endif
+      if (claimIsChannelOfThisCD74HC4067) {
+        // Andere nodes met een kanaal op deze CD74HC4067 (exclusief en identiteit van deze claim zijn niet meer nodig).
+        GedeeldeBusNode* wortel = this;
+        while (wortel->parent != nullptr) wortel = wortel->parent;
+        for (const GedeeldeBusNode* node = wortel; node != nullptr; node = VolgendeInBoom(node, wortel)) {
+          if (node == child) continue;
+          for (uint8_t index = 0; index < node->AantalClaims(); index++) {
+#if GEDEELDE_BUS_MIXED_PINS
+            if (node->ClaimWaarde(index, exclusief, identiteit) > static_cast<uint8_t>(ExtenderPins::EP_Y15) || !exclusief || node->GetOwnerClaim(index) != this) continue;
+#else
+            if (node->ClaimWaarde(index, exclusief, identiteit) > static_cast<uint8_t>(ExtenderPins::EP_Y15) || !exclusief || node->firstExtenderNode() != this) continue;
+#endif
+            // Een analoge child naast een digitale child die het kanaal gebruikt: weigeren, anders schakelt zijn meting het kanaal uit.
+            if (child->IsAnalogChild() && !node->IsAnalogChild() && (node->actief || node->activerenBezig)) return false;
+            // Een digitale child naast een aangemelde analoge child, of naast een andere digitale child die het kanaal gebruikt: weigeren.
+            if (!child->IsAnalogChild() && (node->IsAnalogChild() || node->actief || node->activerenBezig)) return false;
+          }
+        }
+        if (child->IsAnalogChild()) {
+          // Een lopende analoge meting niet verstoren; de analoge child kiest zijn kanaal zelf bij StartExtenderReadAnalog().
+          if (metingBezig) return true;
+          selectChannel(static_cast<ExtenderPins>(waarde));
+          enable();
+          return true;
+        }
+        selectChannel(static_cast<ExtenderPins>(waarde));
+        enable();
+        return true;
+      }
+    }
+    return true;
   }
   bool IsExtenderReadAnalogReady() override { return !metingBezig || parent == nullptr || parent == &Native || parent->IsExtenderReadAnalogReady(); }
   bool GetExtenderReadAnalogValue(int32_t& waarde) override {

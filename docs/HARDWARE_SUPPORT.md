@@ -354,5 +354,5 @@ Deze acceptance-tests controleren de compileerbaarheid van de Ardi-32-ondersteun
 
 ### Ondersteunde boards
 
-- De klassieke 8-bit Arduino UNO R3 is geen ondersteund RC1-board. In code en documentatie gevonden `BOARD_ESP32_D1_UNO_R32` en `ESP32 D1 UNO R32` verwijzen naar een **ESP32-bord** en mogen niet worden verwijderd als verwijzing naar de klassieke UNO R3.
+- De klassieke 8-bit Arduino UNO R3 is geen ondersteund board. In code en documentatie gevonden `BOARD_ESP32_D1_UNO_R32` en `ESP32 D1 UNO R32` verwijzen naar een **ESP32-bord** en mogen niet worden verwijderd als verwijzing naar de klassieke UNO R3.
 - Controle van actuele `src/`, `docs/` en `examples/` vond geen expliciete `UNO R3`-ondersteuningsvermelding. De fysieke multi-board compileermatrix blijft de beslissende controle.

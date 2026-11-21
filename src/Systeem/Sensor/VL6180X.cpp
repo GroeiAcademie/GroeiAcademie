@@ -1,6 +1,15 @@
 #include "VL6180X.h"
 #if SENSOR_VL6180X_AANTAL > 0
 bool SensorVL6180X::Activeren() {
+#if GEDEELDE_BUS_MIXED_PINS
+  // Mixed: hulppinnen op de tweede Extender instellen vóór de library-initialisatie.
+  if (viaMixed) {
+    if (extenderHulp_[0] == nullptr || !extenderHulp_[0]->actief) return false;
+    if (!extenderHulp_[0]->SetExtenderPinMode(np_GPIO1, INPUT)) return false;   // GPIO1: uitgang van de sensor
+    if (extenderHulp_[1] == nullptr || !extenderHulp_[1]->actief) return false;
+    if (!extenderHulp_[1]->WriteExtenderPin(np_GPIO0, HIGH) || !extenderHulp_[1]->SetExtenderPinMode(np_GPIO0, OUTPUT)) return false;   // GPIO0/CE HIGH: sensor ingeschakeld
+  }
+#endif
   if (!parent || !parent->actief) return false;
   // Hardware-aanmelding via officiële library. Geen fictieve successtatus.
   metingGestart = false;

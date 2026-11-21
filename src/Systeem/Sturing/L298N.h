@@ -31,6 +31,11 @@ struct L298N : GedeeldeBusNode {
     if (parent == &Native) {
       if (in1>13 || in2>13 || in1==in2 || (en!=static_cast<uint8_t>(HardwareResourcePin::NONE) && (en>13 || in1==en || in2==en))) return false;
 
+#if defined(digitalPinHasPWM)
+      // EN stuurt de snelheid met analogWrite(); op een pin zonder PWM zou de motor alleen vol of niet draaien.
+      // Alleen op een board-core die digitalPinHasPWM() kent; op de andere boards geldt de pinout van het board.
+      if (en!=static_cast<uint8_t>(HardwareResourcePin::NONE) && !digitalPinHasPWM(NativeArduinoPinVan(static_cast<HardwareResourcePin>(en)))) return false;
+#endif
       if (en!=static_cast<uint8_t>(HardwareResourcePin::NONE)) {
 
         digitalWrite(NativeArduinoPinVan(static_cast<HardwareResourcePin>(en)),LOW);

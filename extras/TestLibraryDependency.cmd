@@ -57,7 +57,7 @@ del "%INSTALLED_LIBS_LOG%" >nul 2>&1
 echo ============================================================
 if !MISSING_COUNT! EQU 0 (
     echo Alle vereiste libraries zijn geinstalleerd.
-    echo LET OP: PCF8574 vereist minimaal versie 0.4.0, arduino-cli lib list
+    echo LET OP: PCF8574 vereist minimaal versie 0.4.5, arduino-cli lib list
     echo toont de geinstalleerde versie, controleer dit zelf indien nodig.
     popd
     pause

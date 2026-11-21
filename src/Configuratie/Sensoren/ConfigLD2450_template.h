@@ -7,4 +7,8 @@
 
 // UART-poort wordt extern aangeleverd. Standaard baudrate volgens Hi-Link: 256000.
 
+#ifndef SENSOR_LD2450_SILENT_TIMEOUT_MS
+// #define SENSOR_LD2450_SILENT_TIMEOUT_MS 1000  // standaard waarde: 1000; zonder geldig frame gedurende deze tijd geeft IsModuleSilent() true
+#endif
+
 #endif

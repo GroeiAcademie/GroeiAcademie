@@ -121,6 +121,7 @@ GedeeldeBusNode Native(nullptr, { nullptr, 0, nullptr, 0 }, GedeeldeBusComponent
 
 #if GEDEELDE_BUS_MIXED_PINS
 GedeeldeBusNode* GedeeldeBusFindI2CExtender(GedeeldeBusComponent extender, uint8_t extenderAdres) {
+  GedeeldeBusNode* foundExtender = nullptr;
   for (const GedeeldeBusNode* n = &Native; n != nullptr; n = GedeeldeBusNode::VolgendeInBoom(n, &Native)) {
     // Alleen de Extenders met digitale pinnen voor dit gebruik: PCF8574, PCF8575 en MCP23017. Die zijn alle drie I2C,
     // dus de omzetting naar HardwareResourceTypeI2C hieronder is alleen voor deze drie geldig. Elk ander component: overslaan.
@@ -129,9 +130,13 @@ GedeeldeBusNode* GedeeldeBusFindI2CExtender(GedeeldeBusComponent extender, uint8
                             n->component == GedeeldeBusComponent::DIGITAL_PINS_MCP23017;
     if (n->component != extender || !toegelaten) continue;
     const HardwareResourceTypeI2C* i2c = static_cast<const HardwareResourceTypeI2C*>(n);
-    if (i2c->adres == extenderAdres) return const_cast<GedeeldeBusNode*>(n);
+    if (i2c->adres == extenderAdres) {
+      // Twee passende Extenders, bv. hetzelfde adres op twee TCA-kanalen: de CS-Extender is niet eenduidig.
+      if (foundExtender != nullptr) return nullptr;
+      foundExtender = const_cast<GedeeldeBusNode*>(n);
+    }
   }
-  return nullptr;
+  return foundExtender;
 }
 
 bool HardwareResourceTypeSPI::ConnectCStoExtender(GedeeldeBusComponent extender, uint8_t extenderAdres) {
@@ -265,8 +270,12 @@ static void GedeeldeBusAanmakenTijdelijkConflict(const char* code, GedeeldeBusCo
 
 void GedeeldeBusNode::HardwareResourceClaimsBetweenTwoNodes(GedeeldeBusNode* a, const GedeeldeBusNode* b) {
 #if !GEDEELDE_BUS_MIXED_PINS
-  if (a->firstExtenderNode() != b->firstExtenderNode()) return;
-  const bool native = (a->firstExtenderNode() == nullptr);
+  // Adressen: het gebied van firstExtenderNode(), waarin een TCA9548A meetelt.
+  // Pinnen: het gebied van firstPinExtenderNode(), waarin een TCA9548A niet meetelt.
+  const bool sameAddressArea = a->firstExtenderNode() == b->firstExtenderNode();
+  const bool samePinArea = a->firstPinExtenderNode() == b->firstPinExtenderNode();
+  if (!sameAddressArea && !samePinArea) return;
+  const bool native = (a->firstPinExtenderNode() == nullptr);
 #endif
   const uint8_t geen = static_cast<uint8_t>(HardwareResourcePin::NONE);
 
@@ -283,8 +292,16 @@ void GedeeldeBusNode::HardwareResourceClaimsBetweenTwoNodes(GedeeldeBusNode* a, 
 #if GEDEELDE_BUS_MIXED_PINS
       // Per claim het gebied: alleen claims in hetzelfde gebied (het board of dezelfde Extender) kunnen botsen.
       const GedeeldeBusNode* gebied = a->GetOwnerClaim(x);
-      if (gebied != b->GetOwnerClaim(y)) continue;
+      const GedeeldeBusNode* claimAreaB = b->GetOwnerClaim(y);
+      // Een pin zonder eigen ownerClaim: een TCA9548A heeft geen pinnen, dus dan geldt firstPinExtenderNode().
+      if (!IsAdres(waardeA)) {
+        if (gebied == a->firstExtenderNode()) gebied = a->firstPinExtenderNode();
+        if (claimAreaB == b->firstExtenderNode()) claimAreaB = b->firstPinExtenderNode();
+      }
+      if (gebied != claimAreaB) continue;
       const bool native = (gebied == nullptr);
+#else
+      if (IsAdres(waardeA) ? !sameAddressArea : !samePinArea) continue;
 #endif
 
       if (IsAdres(waardeA)) {
@@ -301,6 +318,10 @@ void GedeeldeBusNode::HardwareResourceClaimsBetweenTwoNodes(GedeeldeBusNode* a, 
         
         continue;
       }
+#if EXTENDER_TCA9548A_AANTAL > 0
+      // Een TCA9548A-kanaal is geen pin: nooit als pinconflict vergelijken.
+      if (idA == HardwareResourceIdentiteit::I2C_TCA_CHANNEL || idB == HardwareResourceIdentiteit::I2C_TCA_CHANNEL) continue;
+#endif
 
       const bool zelfdePin = native ? NativeArduinoPinVan(static_cast<HardwareResourcePin>(waardeA)) == NativeArduinoPinVan(static_cast<HardwareResourcePin>(waardeB)) : waardeA == waardeB;
       if (!zelfdePin) continue;
@@ -696,7 +717,7 @@ static uint8_t FoutniveauTijdensRuntimeBerekenen(ToestandTijdensRuntime& toestan
   uint8_t nieuwFoutniveau = 0;
   for (uint8_t foutniveau = 5; foutniveau > 0; foutniveau--) {
     if (toestand.aantalOpeenvolgendeFouten >= drempels.opeenvolgendeFoutenNaAantal[foutniveau - 1] ||
-        (drempels.sindsEersteFoutNaMs[foutniveau - 1] > 0 && duur >= drempels.sindsEersteFoutNaMs[foutniveau - 1])) {
+        (drempels.sindsEersteFoutNaMS[foutniveau - 1] > 0 && duur >= drempels.sindsEersteFoutNaMS[foutniveau - 1])) {
       nieuwFoutniveau = foutniveau;
       break;
     }
@@ -795,6 +816,19 @@ void GedeeldeBusNode::AlleOnderliggendeNodesUitschakelen() {
   for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
     const_cast<GedeeldeBusNode*>(n)->StopSturing();
   }
+#if GEDEELDE_BUS_MIXED_PINS
+  {
+    // Een node in een andere tak die deze node als hulp-Extender gebruikt (ownerClaim), gaat ook veilig; ze blijft actief.
+    GedeeldeBusNode* wortel = this;
+    while (wortel->parent != nullptr) wortel = wortel->parent;
+    for (const GedeeldeBusNode* node = wortel; node != nullptr; node = VolgendeInBoom(node, wortel)) {
+      if (node == this || node->ownerClaim == nullptr) continue;
+      for (uint8_t index = 0; index < node->aangemeldePinnen.aantalExclusief; ++index) {
+        if (node->ownerClaim[index] == this) { const_cast<GedeeldeBusNode*>(node)->StopSturing(); break; }
+      }
+    }
+  }
+#endif
   for (const GedeeldeBusNode* n = VolgendeInBoom(this, this); n != nullptr; n = VolgendeInBoom(n, this)) {
     const_cast<GedeeldeBusNode*>(n)->actief = false;
   }
@@ -845,7 +879,8 @@ bool HardwareResourceTypeI2C::ComponentBeschikbaarTijdensRuntime() {
 #if EXTENDER_TCA9548A_AANTAL > 0
     // Bij runtime-I2C opnieuw het bestaande TCA9548A-kanaal selecteren.
     // activeren() sluit het kanaal immers na de initialisatie.
-    if (parent != nullptr && !parent->SelectAccessForChild(this)) return false;
+    // Een mislukte kanaalkeuze telt als runtimefout van deze node: zo start de bestaande foutladder, met herstel en heractivering.
+    if (parent != nullptr && !parent->SelectAccessForChild(this)) return ResultaatComponentToegangTijdensRuntimeVerwerken(false);
 #endif
     return true;
   }
@@ -923,10 +958,11 @@ bool HardwareResourceTypeI2C::ResultaatComponentToegangTijdensRuntimeVerwerken(b
   MeldingTijdensRuntimeTonen(resultaat, _GB400, this);
   if (actief && resultaat >= FoutniveauVanScreenData(drempels.uitschakelenVanafFoutniveau)) {
     actief = false;
+    toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze; aantal en tijd lopen door
+    // Het tijdstip staat vóór het uitschakelen, zodat een schrijfactie tijdens StopSturing() geen herstelpoging start.
     AlleOnderliggendeNodesUitschakelen();
     StopSturing();   // G3: daarna ook de node zelf, bv. de OE-pin van een PCA9685 die niet meer antwoordt
     toestandTijdensRuntime.oorzaakHerstelGemeld = false;
-    toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze; aantal en tijd lopen door
   }
   return false;
 }
@@ -964,10 +1000,11 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
     if (extenderToestand.huidigFoutniveau > extenderHoogste) extenderToestand.huidigFoutniveau = extenderHoogste;
     toestand = ToestandTijdensRuntime();
     extender->actief = false;
+    extender->toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze
+    // Het tijdstip staat vóór het uitschakelen, zodat een schrijfactie tijdens StopSturing() geen herstelpoging start.
     extender->AlleOnderliggendeNodesUitschakelen();
     extender->StopSturing();   // G3: daarna ook de Extender zelf, bv. de OE-pin van een PCA9685 die niet meer antwoordt
     extender->toestandTijdensRuntime.oorzaakHerstelGemeld = false;
-    extender->toestandTijdensRuntime.tijdstipLaatsteHerstelpoging = millis();   // de eerste herstelpoging na de pauze
   }
   return resultaat;
 }
@@ -1067,7 +1104,7 @@ bool GedeeldeBusNode::controleren() {
   }
   const uint8_t geen = static_cast<uint8_t>(HardwareResourcePin::NONE);
 #if !GEDEELDE_BUS_MIXED_PINS
-  const bool native = (firstExtenderNode() == nullptr);
+  const bool native = (firstPinExtenderNode() == nullptr);
 #endif
 
   for (uint8_t x = 0; x < AantalClaims(); x++) {
@@ -1081,6 +1118,10 @@ bool GedeeldeBusNode::controleren() {
       bool exclusiefB = false; HardwareResourceIdentiteit idB = HardwareResourceIdentiteit::GEEN;
       const uint8_t waardeB = ClaimWaarde(y, exclusiefB, idB);
       if (waardeB == geen || IsAdres(waardeB)) continue;
+#if EXTENDER_TCA9548A_AANTAL > 0
+      // Een TCA9548A-kanaal is geen pin: nooit als pinconflict vergelijken.
+      if (idA == HardwareResourceIdentiteit::I2C_TCA_CHANNEL || idB == HardwareResourceIdentiteit::I2C_TCA_CHANNEL) continue;
+#endif
 #if GEDEELDE_BUS_MIXED_PINS
       const GedeeldeBusNode* gebied = GetOwnerClaim(x);
       if (gebied != GetOwnerClaim(y)) continue;
@@ -1102,6 +1143,15 @@ bool GedeeldeBusNode::controleren() {
       }
     }
   }
+
+#if EXTENDER_CD74HC4067_AANTAL > 0
+  // Een CD74HC4067 onder een externe ADC (een Extender als parent) is voorlopig niet ondersteund.
+  // Daar zou Z als ADC-kanaal doorgegeven worden, en zouden S0 tot S3 en EN in het gebied van de ADC vallen.
+  if (component == GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067 && parent != nullptr && parent != &Native) {
+    conflictGevonden = true;
+    GedeeldeBusAanmakenTijdelijkConflict(_FATAL_GB111, component, parent->component, static_cast<uint8_t>(static_cast<const ExtenderCD74HC4067*>(this)->np_Z), false);
+  }
+#endif
 
   if (parent != nullptr && parent == firstExtenderNode()) {
     // Componentcodes 0x20 t/m 0x7F zijn Extenders.
@@ -1188,7 +1238,7 @@ bool GedeeldeBusNode::controleren() {
   }
 
 #if GEDEELDE_BUS_MIXED_PINS
-  // Exclusieve claims met een eigen Extender: de pin moet bestaan op de gekoppelde GPIO- of PWM-Extender.
+  // Exclusieve claims met een eigen Extender: de pin moet bestaan op de gekoppelde Extender (GPIO, PWM, ADC, UART-GPIO of CD74HC4067-kanaal).
   if (ownerClaim != nullptr) {
     for (uint8_t i = 0; i < aangemeldePinnen.aantalExclusief; i++) {
       const GedeeldeBusNode* extender = ownerClaim[i];
@@ -1211,6 +1261,39 @@ bool GedeeldeBusNode::controleren() {
   #endif
   #if EXTENDER_PCA9685_AANTAL > 0
         case GedeeldeBusComponent::PWM_PCA9685: geldig = waarde <= static_cast<uint8_t>(ExtenderPCA9685::ExtenderPins::EP_PWM15); break;
+  #endif
+  #if EXTENDER_ADS1115_AANTAL > 0
+        case GedeeldeBusComponent::ADC_ADS1115: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN3); break;
+  #endif
+  #if EXTENDER_ADS1158_AANTAL > 0
+        case GedeeldeBusComponent::ADC_ADS1158: geldig = waarde <= static_cast<uint8_t>(ExtenderADS1158::ExtenderPins::EP_GPIO7); break;
+  #endif
+  #if EXTENDER_ADS7828_AANTAL > 0
+        case GedeeldeBusComponent::ADC_ADS7828: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7828::ExtenderPins::EP_CH7); break;
+  #endif
+  #if EXTENDER_ADS7953_AANTAL > 0
+        case GedeeldeBusComponent::ADC_ADS7953: geldig = waarde <= static_cast<uint8_t>(ExtenderADS7953::ExtenderPins::EP_CH15); break;
+  #endif
+  #if EXTENDER_CD74HC4067_AANTAL > 0
+        case GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067: geldig = waarde <= static_cast<uint8_t>(ExtenderCD74HC4067::ExtenderPins::EP_Y15); break;
+  #endif
+  #if EXTENDER_MAX14830_I2C_AANTAL > 0 || EXTENDER_MAX14830_SPI_AANTAL > 0
+        case GedeeldeBusComponent::UART_MAX14830:
+    #if EXTENDER_MAX14830_I2C_AANTAL > 0
+          geldig = waarde >= static_cast<uint8_t>(ExtenderMAX14830I2C::ExtenderPins::EP_GPIO0) && waarde <= static_cast<uint8_t>(ExtenderMAX14830I2C::ExtenderPins::EP_GPIO15);
+    #else
+          geldig = waarde >= static_cast<uint8_t>(ExtenderMAX14830SPI::ExtenderPins::EP_GPIO0) && waarde <= static_cast<uint8_t>(ExtenderMAX14830SPI::ExtenderPins::EP_GPIO15);
+    #endif
+          break;
+  #endif
+  #if EXTENDER_SC16IS752_I2C_AANTAL > 0 || EXTENDER_SC16IS752_SPI_AANTAL > 0
+        case GedeeldeBusComponent::UART_SC16IS752:
+    #if EXTENDER_SC16IS752_I2C_AANTAL > 0
+          geldig = waarde >= static_cast<uint8_t>(ExtenderSC16IS752I2C::ExtenderPins::EP_GPIO0) && waarde <= static_cast<uint8_t>(ExtenderSC16IS752I2C::ExtenderPins::EP_GPIO7);
+    #else
+          geldig = waarde >= static_cast<uint8_t>(ExtenderSC16IS752SPI::ExtenderPins::EP_GPIO0) && waarde <= static_cast<uint8_t>(ExtenderSC16IS752SPI::ExtenderPins::EP_GPIO7);
+    #endif
+          break;
   #endif
         default: break;
       }

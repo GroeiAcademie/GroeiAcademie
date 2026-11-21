@@ -13,7 +13,7 @@ Huidige overerving:
 struct ExtenderMAX14830SPI : HardwareResourceTypeSPI
 ```
 
-De huidige klasse voegt voornamelijk GedeeldeBus-/resource-integratie toe; er is geen aanvullende publieke chipspecifieke API geïnventariseerd die hier apart moet worden gedocumenteerd.
+Naast GedeeldeBus-resourcebeheer biedt de klasse de UART-parentfuncties `GetExtenderStream()` en `StartExtenderUART()`, GPIO-functies `SetExtenderPinMode()`, `WriteExtenderPin()` en `ReadExtenderPin()`, en de `ExtenderOneWire*`-functies voor 1-Wire via een UART-kanaal.
 
 ## UART-kanalen en klok
 
@@ -128,3 +128,34 @@ ExtenderMAX14830SPI extender(
 
 - Bij vervanging door SC16IS752 blijven slechts twee UART-kanalen beschikbaar in plaats van vier. Controleer per client het gebruikte kanaal, de UART-stream, baudrate en buffergrootte. Een wissel tussen I²C en SPI vereist ook andere bedrading en pinclaims.
 - **Status:** fysieke proef vereist; nog geen hardwarebewijs.
+
+## Digitale pinnen (GPIO) en 1-Wire
+
+- GPIO0..GPIO15 (`EP_GPIO0..EP_GPIO15`), vier per UART, via GPIOConfg (0x18) en GPIOData (0x19).
+- 1-Wire via een UART-channel (Maxim AN214): het 1-Wire-contract (`ExtenderOneWire*`); één apparaat per channel (READ ROM). Leden: `oneWireChannel`, `oneWireReadROMsearchDone`; functie `OneWireUARTbits`.
+
+## Aanwezigheid
+
+- `Activeren()` leest CLKSource terug na het schrijven; zonder chip mislukt de activering meteen. RevID (0x25) is via SPI alleen met uitgebreide adressering bereikbaar.
+
+## Heractivatie
+
+- `Activeren()` wist een via `peek()` bewaarde byte van alle vier channels.
+
+## Diagnose bij een mislukte activering
+
+- Een mislukte chipactivering roept de bestaande `FoutDiagnoseSPI()` aan, zoals bij de andere SPI-Extenders. De fout verschijnt als gewone GB-melding (GB301, met DEBUG GB304).
+- De controle op de parent blijft een gewone `return false`.
+
+## Te hoge baud
+
+- `MAX14830StartUART()` weigert een baud hoger dan referentieklok / 4, omdat die ook in 4x-modus niet haalbaar is. Daardoor kan `factor * baud` niet door een onhaalbaar hoge baud overlopen naar een deling door nul.
+
+## 1-Wire: leesfout bij de echo
+
+- `OneWireUARTbits()` bewaart de waarde van `read()` als `int`. Een negatieve waarde (geen geldige byte) telt als mislukte echo en niet als aanwezigheidspuls bij `ExtenderOneWireReset()`.
+
+## Na een uitval en 1-Wire
+
+- Bij een inactieve MAX14830 geven `available()` en `read()` niets meer terug, ook geen byte die eerder via `peek()` bewaard werd.
+- 1-Wire via een UART-channel: vóór elke overdracht worden hoogstens 128 oude bytes weggegooid. Raakt de buffer niet leeg of mislukt een lezing, dan mislukt de 1-Wire-actie.

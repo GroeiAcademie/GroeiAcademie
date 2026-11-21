@@ -1,6 +1,8 @@
 ******************************************************************************
 
 > **Versiegrens:** dit document hoort bij de Stimulus Shield **hardware v2.0.0**. Voor de huidige softwarearchitectuur gelden `README.md`, `docs/ARCHITECTURE.md` en de code onder `src/`.
+>
+> **Status van de validatieprocedure:** de hoofdstukken hieronder beschrijven het beoogde volledige validatieprotocol. De library bevat momenteel vijf Stimulus-scenario's en de afzonderlijke `Extender_ADS1115_Meetkwaliteit.ino`. Er is geen geïntegreerde `.ino` die alle beschreven inventarisatie-, detectie- en gebruikersinteractierondes van dit document automatisch doorloopt. Beschouw zulke stappen dus niet als reeds uitgevoerde of bewezen tests.
 
 1. Inleiding
 ******************************************************************************
@@ -9,7 +11,7 @@
 1.1) Doel van dit document
 ==============================================================================
 
-Dit document beschrijft de volledige hardware-inventarisatie, automatische hardwaredetectie en hardwarevalidatie van het GroeiAcademie Stimulus Hardware Shield.
+Dit document beschrijft de voorziene volledige hardware-inventarisatie, automatische hardwaredetectie en hardwarevalidatie van het GroeiAcademie Stimulus Hardware Shield. De beschreven geautomatiseerde totaalprocedure is nog geen afzonderlijk beschikbaar voorbeeld in de huidige library.
 
 Deze handleiding begeleidt de gebruiker stap voor stap bij het inventariseren, aansluiten en valideren van het GroeiAcademie Stimulus Hardware Shield.
 
@@ -67,9 +69,7 @@ Bijhorende documenten zijn onder andere:
 1.5) Bijhorende software
 ==============================================================================
 
-De hardwarevalidatie wordt uitgevoerd met de officiële validatiesoftware van het GroeiAcademie FrameWork.
-
-De software bepaalt automatisch welke hardware aanwezig is, welke hardware ondersteund wordt en welke validatiestappen uitgevoerd moeten worden.
+Voor onderdelen van de hardwarevalidatie zijn momenteel de bestaande Stimulus-voorbeelden en `Extender_ADS1115_Meetkwaliteit.ino` beschikbaar. De automatische totaalvalidatie zoals dit protocol die beschrijft, is nog niet als afzonderlijke validatiesoftware aanwezig. De overige stappen moeten handmatig worden gecontroleerd of vereisen verdere implementatie.
 
 ==============================================================================
 1.6) Ondersteunde Arduino Uno R3-vormfactorborden
@@ -133,7 +133,7 @@ De hardwarevalidatie ondersteunt onder andere:
 1.8) Opbouw van dit document
 ==============================================================================
 
-Dit document bestaat uit drie opeenvolgende rondes.
+Het volledige voorgestelde validatieprotocol bestaat uit drie opeenvolgende rondes.
 
 Ronde 1: Hardware-inventarisatie.
 
@@ -203,8 +203,7 @@ Het GroeiAcademie Stimulus Hardware Shield waarvoor dit document opgesteld werd.
 2.1) Doel
 ==============================================================================
 
-Het doel van de hardware-inventarisatie is om vóór het GroeiAcademie Stimulus Hardware Shield op de Arduino geplaatst wordt, 
-automatisch vast te stellen welke hardware aanwezig is, hoe deze hardware opgebouwd is en welke configuratie gebruikt wordt.
+Het doel van de hardware-inventarisatie is om vóór het GroeiAcademie Stimulus Hardware Shield op de Arduino geplaatst wordt, vast te stellen welke hardware aanwezig is, hoe deze hardware opgebouwd is en welke configuratie gebruikt wordt. Een fysieke inventarisatie van een spanningsloos shield is niet automatisch softwarematig uitvoerbaar.
 
 Het GroeiAcademie Stimulus Hardware Shield v2.0.0 werd bewust modulair ontworpen. Niet iedere gebruiker zal alle uitbreidingen monteren. 
 Sommige toepassingen vereisen slechts twee FSR402/RFP602-sensoren, andere vier. 
@@ -1001,7 +1000,7 @@ Resultaat
 De software weet hierdoor of het PixelScreen via Quad Logic Level Shifters of via vaste draadbruggen aangesloten werd.
 
 ******************************************************************************
-4. Automatische hardwaredetectie
+4. Beoogde automatische hardwaredetectie
 ******************************************************************************
 
 ==============================================================================
@@ -1145,7 +1144,7 @@ Wanneer alle automatische controles succesvol doorlopen werden, kan de eigenlijk
 Wanneer één of meerdere controles mislukken, wordt de hardwarevalidatie onderbroken totdat de oorzaak opgelost is.
 
 ******************************************************************************
-5. Hardwarevalidatie zonder gebruikersinteractie
+5. Beoogde hardwarevalidatie zonder gebruikersinteractie
 ******************************************************************************
 
 ==============================================================================

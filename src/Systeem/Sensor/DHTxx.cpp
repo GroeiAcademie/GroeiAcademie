@@ -4,7 +4,8 @@
 bool DHTxx::inpluggen() {
   if (ingeplugd) return true;
   // Deze driver gebruikt native timing/pinnen: geen GPIO- of 1-Wire-Extenderprotocol.
-  if (firstExtenderNode() != nullptr) return false;
+  // Uitzondering: een directe CD74HC4067-parent (zie ExtenderFysiekGeschikt()).
+  if (firstExtenderNode() != nullptr && !ExtenderFysiekGeschikt(firstExtenderNode())) return false;
   if (this->np_DATA == HardwareResourcePin::NONE || this->np_DATA == HardwareResourcePin::CUSTOM) return false;
   if (!Sensor::inpluggen()) return false;
   dht.begin();

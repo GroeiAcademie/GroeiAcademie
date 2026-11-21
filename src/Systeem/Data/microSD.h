@@ -21,6 +21,9 @@ struct DataMICROSDviaSPI : HardwareResourceTypeSPI, SdFat32 {
   ~DataMICROSDviaSPI() override;   // wist de eigen plaats in de lijst van Data
 
   bool Activeren() override;
+#if GEDEELDE_BUS_MIXED_PINS && (defined(DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER) || defined(DATA_LAYER_MICROSD_SPI_2_CS_EXTENDER))
+  bool chipSelectWriteFailed = false;   // true = de CS via de Extender is twee keer na elkaar mislukt
+#endif
 };
 
 #endif

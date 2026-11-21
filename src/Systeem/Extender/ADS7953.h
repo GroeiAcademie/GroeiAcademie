@@ -44,10 +44,10 @@ struct ExtenderADS7953 : HardwareResourceTypeSPI {
     // ADS7953 manual mode: de gevraagde kanaaltag komt na de pijplijnvertraging terug.
     // Controleer twee verschillende kanalen zodat een vast laag/hoog MISO-signaal niet als chiprespons telt.
     uint16_t antwoord = 0;
-    if (!ADCTransferFrame(0x1800, antwoord) || !ADCTransferFrame(0x1800, antwoord)) return false;
-    if (!ADCTransferFrame(0x1800, antwoord) || (antwoord >> 12) != 0) return false;
-    if (!ADCTransferFrame(0x1880, antwoord) || !ADCTransferFrame(0x1880, antwoord)) return false;
-    return ADCTransferFrame(0x1880, antwoord) && (antwoord >> 12) == 1;
+    if (!ADCTransferFrame(0x1800, antwoord) || !ADCTransferFrame(0x1800, antwoord)) return FoutDiagnoseSPI(false, 0, false);
+    if (!ADCTransferFrame(0x1800, antwoord) || (antwoord >> 12) != 0) return FoutDiagnoseSPI(false, 0, false);
+    if (!ADCTransferFrame(0x1880, antwoord) || !ADCTransferFrame(0x1880, antwoord)) return FoutDiagnoseSPI(false, 0, false);
+    return (ADCTransferFrame(0x1880, antwoord) && (antwoord >> 12) == 1) || FoutDiagnoseSPI(false, 0, false);
   }
 
   // één SPI-frame: eigen CS gedurende de 16 klokslagen actief.

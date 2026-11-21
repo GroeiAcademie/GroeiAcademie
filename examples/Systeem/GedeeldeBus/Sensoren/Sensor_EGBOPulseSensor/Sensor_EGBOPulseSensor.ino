@@ -46,4 +46,13 @@ void setup() {
     HardwareResourceToegang::GEDEELD);
   GA_SERIAL.println(sensorEGBOPulseSensor ? F("EGBOPulseSensor lifecycle: component aangemaakt (fysieke werking nog niet bewezen)") : F("EGBOPulseSensor lifecycle: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensorEGBOPulseSensor == nullptr) return;
+  int32_t waarde = 0;
+  if (!sensorEGBOPulseSensor->RawAnalogRead(waarde)) return;
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Ruwe pulssensor-ADC-sample (geen BPM): "));
+  GA_SERIAL.println(waarde);
+}

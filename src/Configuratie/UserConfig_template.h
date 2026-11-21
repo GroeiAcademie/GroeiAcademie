@@ -120,6 +120,11 @@
 // #define INPUT_DEBOUNCE_MS 25UL                                   // standaard waarde: 25UL
 #endif
 
+// Hoelang een wachtende Input hoogstens wacht op het loslaten van een toets, zolang het keypad onleesbaar is.
+#ifndef INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS
+// #define INPUT_KEYPAD_READ_ERROR_TIMEOUT_MS 1000UL                // standaard waarde: 1000UL
+#endif
+
 // Enkel relevant wanneer INPUT_KANAAL_OPVRAGEN_HUIDIGE_TOETSAANSLAG_UITGEBREID aan staat.
 #ifndef INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS
 // #define INPUT_KANAAL_TIMEOUT_BIJ_GEEN_TOETSAANSLAG_BINNEN_MS 0UL // standaard waarde: 0UL = geen timeout, blijven wachten (huidig gedrag) 
@@ -355,6 +360,18 @@
 
 #ifndef REDIRECT_SERIAL_FILE
 // #define REDIRECT_SERIAL_FILE "serial.log"
+#endif
+
+
+// SensorSerial ---------------------------------------------------------------
+// Native pinnen van GA_SENSOR_SERIAL voor LD2410D, LD2450, MR60BHA2 en NeuroSkyTGAM.
+// De standaard per board staat in SystemConfig.h.
+#ifndef GA_SENSOR_SERIAL_PIN_RX
+// #define GA_SENSOR_SERIAL_PIN_RX HardwareResourcePin::NP_D0   // standaard waarde: per board, zie SystemConfig.h
+#endif
+
+#ifndef GA_SENSOR_SERIAL_PIN_TX
+// #define GA_SENSOR_SERIAL_PIN_TX HardwareResourcePin::NP_D1   // standaard waarde: per board, zie SystemConfig.h
 #endif
 
 
@@ -700,7 +717,11 @@
 #endif
 
 // CS via een Extender: zet de drie instellingen samen. DATA_LAYER_MICROSD_SPI_1_CS_PIN wordt dan de pin op de Extender.
-// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn. Trager dan CS op het board. Vereist SD_CHIP_SELECT_MODE 1 of 2 in SdFatConfig.h van SdFat - Adafruit Fork.
+// De Extender (PCF8574, PCF8575 of MCP23017) moet vóór Data aangemaakt zijn.
+// Trager dan CS op het board.
+// Gebruik SD_CHIP_SELECT_MODE 1 in SdFatConfig.h van SdFat - Adafruit Fork.
+// Mode 2 is uitsluitend geschikt voor configuraties waarin de toepassing zelf sdCsInit() en sdCsWrite() levert.
+// In het huidige FrameWork gebeurt dat alleen wanneer CS via een Extender geconfigureerd is.
 #ifndef DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER
 // #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER GedeeldeBusComponent::DIGITAL_PINS_PCF8574   // welke Extender CS schakelt
 // #define DATA_LAYER_MICROSD_SPI_1_CS_EXTENDER_I2C_ADDRESS 0x20                           // I2C-adres van die Extender

@@ -112,16 +112,16 @@ constexpr bool DrempelsFoutniveauGeldig(const DrempelsFoutniveauTijdensRuntime& 
   return d.opeenvolgendeFoutenNaAantal[0] >= 1 &&
          d.opeenvolgendeFoutenNaAantal[0] <= d.opeenvolgendeFoutenNaAantal[1] && d.opeenvolgendeFoutenNaAantal[1] <= d.opeenvolgendeFoutenNaAantal[2] &&
          d.opeenvolgendeFoutenNaAantal[2] <= d.opeenvolgendeFoutenNaAantal[3] && d.opeenvolgendeFoutenNaAantal[3] <= d.opeenvolgendeFoutenNaAantal[4] &&
-         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[1]) &&
-         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[2]) &&
-         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[3]) &&
-         (d.sindsEersteFoutNaMs[0] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[0] <= d.sindsEersteFoutNaMs[4]) &&
-         (d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[1] <= d.sindsEersteFoutNaMs[2]) &&
-         (d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[1] <= d.sindsEersteFoutNaMs[3]) &&
-         (d.sindsEersteFoutNaMs[1] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[1] <= d.sindsEersteFoutNaMs[4]) &&
-         (d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[2] <= d.sindsEersteFoutNaMs[3]) &&
-         (d.sindsEersteFoutNaMs[2] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[2] <= d.sindsEersteFoutNaMs[4]) &&
-         (d.sindsEersteFoutNaMs[3] == 0 || d.sindsEersteFoutNaMs[4] == 0 || d.sindsEersteFoutNaMs[3] <= d.sindsEersteFoutNaMs[4]) &&
+         (d.sindsEersteFoutNaMS[0] == 0 || d.sindsEersteFoutNaMS[1] == 0 || d.sindsEersteFoutNaMS[0] <= d.sindsEersteFoutNaMS[1]) &&
+         (d.sindsEersteFoutNaMS[0] == 0 || d.sindsEersteFoutNaMS[2] == 0 || d.sindsEersteFoutNaMS[0] <= d.sindsEersteFoutNaMS[2]) &&
+         (d.sindsEersteFoutNaMS[0] == 0 || d.sindsEersteFoutNaMS[3] == 0 || d.sindsEersteFoutNaMS[0] <= d.sindsEersteFoutNaMS[3]) &&
+         (d.sindsEersteFoutNaMS[0] == 0 || d.sindsEersteFoutNaMS[4] == 0 || d.sindsEersteFoutNaMS[0] <= d.sindsEersteFoutNaMS[4]) &&
+         (d.sindsEersteFoutNaMS[1] == 0 || d.sindsEersteFoutNaMS[2] == 0 || d.sindsEersteFoutNaMS[1] <= d.sindsEersteFoutNaMS[2]) &&
+         (d.sindsEersteFoutNaMS[1] == 0 || d.sindsEersteFoutNaMS[3] == 0 || d.sindsEersteFoutNaMS[1] <= d.sindsEersteFoutNaMS[3]) &&
+         (d.sindsEersteFoutNaMS[1] == 0 || d.sindsEersteFoutNaMS[4] == 0 || d.sindsEersteFoutNaMS[1] <= d.sindsEersteFoutNaMS[4]) &&
+         (d.sindsEersteFoutNaMS[2] == 0 || d.sindsEersteFoutNaMS[3] == 0 || d.sindsEersteFoutNaMS[2] <= d.sindsEersteFoutNaMS[3]) &&
+         (d.sindsEersteFoutNaMS[2] == 0 || d.sindsEersteFoutNaMS[4] == 0 || d.sindsEersteFoutNaMS[2] <= d.sindsEersteFoutNaMS[4]) &&
+         (d.sindsEersteFoutNaMS[3] == 0 || d.sindsEersteFoutNaMS[4] == 0 || d.sindsEersteFoutNaMS[3] <= d.sindsEersteFoutNaMS[4]) &&
          static_cast<uint8_t>(d.hoogstToegelatenFoutniveau) >= static_cast<uint8_t>(ScreenData::TYPE_WARNING) &&
          static_cast<uint8_t>(d.hoogstToegelatenFoutniveau) <= static_cast<uint8_t>(ScreenData::TYPE_FATAL) &&
          static_cast<uint8_t>(d.uitschakelenVanafFoutniveau) >= static_cast<uint8_t>(ScreenData::TYPE_WARNING) &&

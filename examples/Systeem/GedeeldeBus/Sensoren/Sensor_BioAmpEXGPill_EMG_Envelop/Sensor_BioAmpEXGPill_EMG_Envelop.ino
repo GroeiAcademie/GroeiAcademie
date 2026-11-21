@@ -27,8 +27,12 @@
 #if EXTENDER_ADS1115_AANTAL < 1
 #error Zet EXTENDER_ADS1115_AANTAL op minstens 1.
 #endif
-#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
-#error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE.
+// De ADS1115 haalt hoogstens zoveel metingen per seconde als EXTENDER_ADS1115_DATARATE toelaat (4 = 128 SPS, 5 = 250, 6 = 475, 7 = 860).
+#if 500 > (EXTENDER_ADS1115_DATARATE == 7 ? 860 : EXTENDER_ADS1115_DATARATE == 6 ? 475 : EXTENDER_ADS1115_DATARATE == 5 ? 250 : EXTENDER_ADS1115_DATARATE == 4 ? 128 : EXTENDER_ADS1115_DATARATE == 3 ? 64 : EXTENDER_ADS1115_DATARATE == 2 ? 32 : EXTENDER_ADS1115_DATARATE == 1 ? 16 : 8)
+#error EXTENDER_ADS1115_DATARATE is te traag voor de vaste EMG-frequentie van 500 Hz; verhoog EXTENDER_ADS1115_DATARATE.
+#endif
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE && DATA_LAYER_CONFIG != DATA_TYPE_DIRECT
+#error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE of DATA_TYPE_DIRECT.
 #endif
 ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
   I2C_ADDRESS_EXTENDER_ADS1115_1, HardwareResourcePin::NP_SDA,
@@ -44,6 +48,13 @@ void setup() {
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   #endif
   GA_SERIAL.println(F("TEST: Sensor_BioAmpEXGPill_EMG_Envelop"));
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_LAYER_CONFIG);
+  GA_SERIAL.println(Data ? F("DATA: OK") : F("DATA: FOUT"));
+  if (Data == nullptr) return;
+#else
+  GA_SERIAL.println(F("LET OP: extra meetkanalen vereisen DATA_TYPE_DIRECT in UserConfig.h."));
+#endif
   sensorBioAmpEXGPill = GedeeldeBusNewComponent<BioAmpEXGPill>(&extenderADS1115,
     GedeeldeBusComponent::BioAmpEXGPill,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),
@@ -62,4 +73,8 @@ void loop() {
   if (millis() - tijdstipLaatsteUitvoer < 20) return;
   tijdstipLaatsteUitvoer = millis();
   GA_SERIAL.println(envelop);
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  GA_SERIAL.print(F("Via Data, EMG-envelop: "));
+  GA_SERIAL.println(sensorBioAmpEXGPill->ReadQueueOrStackFloat(3));
+#endif
 }

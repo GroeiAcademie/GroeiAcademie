@@ -34,8 +34,19 @@ DS3231::~DS3231() {
 #endif
 }
 bool DS3231::Activeren() {
+#if GEDEELDE_BUS_MIXED_PINS
+  // Mixed: hulppinnen op de tweede Extender instellen vóór de library-initialisatie.
+  if (viaMixed) {
+    if (extenderHulp_[0] == nullptr || !extenderHulp_[0]->actief) return false;
+    if (!extenderHulp_[0]->SetExtenderPinMode(np_SQW, INPUT)) return false;   // INT/SQW: uitgang van de sensor
+  }
+#endif
   if (!parent || !parent->actief) return false;
   if (!ds3231.begin(&Wire)) return false;
+#if GEDEELDE_BUS_MIXED_PINS
+  // SQW: blokgolf van 1 Hz (INTCN = 0), zodat ReadSQW() iets te zien krijgt.
+  if (viaMixed) ds3231.writeSqwPinMode(DS3231_SquareWave1Hz);
+#endif
 #if DS3231_BESTANDSDATUM
   klokVoorBestandsdatum = this;
   FsDateTime::setCallback(BestandsdatumVanDS3231);

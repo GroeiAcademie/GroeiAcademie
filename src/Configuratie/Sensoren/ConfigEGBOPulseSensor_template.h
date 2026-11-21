@@ -13,4 +13,8 @@
 // #define SENSOR_EGBOPULSESENSOR_ADC_BEREIK_MILLIVOLT 5000  // standaard waarde: 5000 (module op 5 V; op 3,3 V gevoed: 3300); pas aan aan de werkelijk aangesloten sensorspanning
 #endif
 
+#ifndef SENSOR_EGBOPULSESENSOR_SAMPLE_RATE_HZ
+// #define SENSOR_EGBOPULSESENSOR_SAMPLE_RATE_HZ 100  // standaard waarde: 100; samplefrequentie voor de hartslag (vast ritme); de ADC-Extender moet dit halen
+#endif
+
 #endif

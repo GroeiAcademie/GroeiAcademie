@@ -1,0 +1,62 @@
+// Sensor: LM75A via TCA9548A.
+// Bestaande FrameWork-API en bestaande Extenderconstructor uit de actuele broncode.
+// Configuratie via UserConfig.h. Voeding, GND en signaalniveau fysiek controleren.
+// Hardwarewerking en compilatie zijn nog niet bewezen.
+// TCA-kanaal 0. Sensor-I2C-adres moet overeenkomen met de werkelijke module.
+
+#include <GroeiAcademie.h>
+
+#if SENSOR_LM75A_AANTAL != 1
+  #error Zet SENSOR_LM75A_AANTAL op 1 voor deze test.
+#endif
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  #error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE voor deze test.
+#endif
+
+#if EXTENDER_TCA9548A_AANTAL == 0
+  #error Zet EXTENDER_TCA9548A_AANTAL in UserConfig.h op minstens 1 voor deze test.
+#endif
+
+#if EXTENDER_TCA9548A_AANTAL == 1
+ExtenderTCA9548A extender(
+  &Native,
+  GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A,
+  I2C_ADDRESS_EXTENDER_TCA9548A_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, EXTENDER_TCA9548A_1_RESET
+);
+#else
+ExtenderTCA9548A extender(
+  &Native,
+  GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A,
+  HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, 0
+);
+#endif
+
+HardwareResourceTypeI2C apparaat(&extender, GedeeldeBusComponent::LM75A, I2C_ADDRESS_SENSOR_LM75A_1, HardwareResourcePin::NP_SDA, HardwareResourcePin::NP_SCL, HardwareResourceToegang::GEDEELD, 0);
+LM75A* sensor = nullptr;
+
+void setup() {
+  GA_SERIAL.begin(SERIAL_BAUDRATE);
+  while (!GA_SERIAL) { ; }
+  GA_SERIAL.println(F("TEST: Sensor_LM75A_TCA9548A"));
+  GA_SERIAL.println(F("MEETTEST: Verwarm licht; controleer temperatuur in C."));
+  const bool gelukt = extender.aanmelden() && extender.controleren() && extender.inpluggen() && extender.activeren();
+  GA_SERIAL.println(gelukt ? F("TCA: OK") : F("TCA: FOUT"));
+  if (!gelukt) return;
+  const bool parentOK = apparaat.aanmelden() && apparaat.controleren() && apparaat.inpluggen() && apparaat.activeren();
+  GA_SERIAL.println(parentOK ? F("I2C: OK") : F("I2C: FOUT"));
+  if (!parentOK) return;
+  sensor = GedeeldeBusNewComponent<LM75A>(&apparaat, GedeeldeBusComponent::LM75A);
+  GA_SERIAL.println(sensor ? F("LIFECYCLE: OK") : F("LIFECYCLE: FOUT"));
+}
+
+void loop() {
+  if (sensor == nullptr) return;
+  float waarde = NAN;
+  if (sensor->LeesHoofdwaarde(waarde)) {
+    GA_SERIAL.print(F("Temperatuur (C): "));
+    GA_SERIAL.println(waarde);
+
+  }
+  // Een false-resultaat kan ook betekenen: conversie nog bezig of geen verse sample.
+  delay(250);
+}

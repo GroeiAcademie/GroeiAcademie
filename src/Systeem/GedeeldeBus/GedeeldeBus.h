@@ -102,7 +102,7 @@ struct ToestandTijdensRuntime {
 // { {5 aantallen}, {5 tijden in ms}, hoogst toegelaten foutniveau, uitschakelen vanaf foutniveau }
 struct DrempelsFoutniveauTijdensRuntime {
   uint8_t opeenvolgendeFoutenNaAantal[5];   // WARNING tot FATAL: na zoveel opeenvolgende fouten
-  uint32_t sindsEersteFoutNaMs[5];          // WARNING tot FATAL: na zoveel ms sinds de eerste fout (0 = niet op tijd); OF met het aantal
+  uint32_t sindsEersteFoutNaMS[5];          // WARNING tot FATAL: na zoveel ms sinds de eerste fout (0 = niet op tijd); OF met het aantal
   ScreenData hoogstToegelatenFoutniveau;    // ScreenData::TYPE_WARNING tot ScreenData::TYPE_FATAL
   ScreenData uitschakelenVanafFoutniveau;   // vanaf dit foutniveau: actief = false en herstelpogingen met pauze
 };
@@ -132,7 +132,7 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
 // GedeeldeBus gebruikt de nummerbereiken om componentgroepen te herkennen.
 // Bij wijziging van deze nummering moet alle code die deze bereiken controleert mee worden aangepast.
 // Bereiken: 0x00-0x0F Input, 0x10-0x1F Output en Data, 0x20-0x7F Extender, 0x80-0xDF Sensor, 0xE0-0xFE Sturing, 0xFF ROOT.
-// Groepen binnen een bereik staan alfabetisch en beginnen op een waarde die eindigt op 0 of 5.
+// Groepen binnen een bereik staan alfabetisch en beginnen op een waarde die eindigt op 0 of 5; bij de sensoren begint elke groep op een veelvoud van 8.
 #define GEDEELDE_BUS_ELKE_COMPONENT(X) \
   /* INPUT ------------------------ */ \
   X(GC_INPUT,                     0x00) /* GedeeldeBusComponent::GC_INPUT */ \
@@ -186,71 +186,68 @@ uint8_t MetingSensorTijdensRuntimeVerwerken(ToestandTijdensRuntime& toestand, bo
   /*                                */ \
   /* SENSOR ----------------------- */ \
   X(GC_SENSOR,                    0x80) /* GedeeldeBusComponent::GC_SENSOR */ \
-  /* Aanwezigheid                   */ \
-  X(HCSR501,                      0x81) /* GedeeldeBusComponent::HCSR501 */ \
-  X(HW201,                        0x82) /* GedeeldeBusComponent::HW201 */ \
-  X(LD2410D,                      0x83) /* GedeeldeBusComponent::LD2410D */ \
-  X(LD2450,                       0x84) /* GedeeldeBusComponent::LD2450 */ \
-  X(OT3686,                       0x85) /* GedeeldeBusComponent::OT3686 */ \
-  X(TTP223,                       0x86) /* GedeeldeBusComponent::TTP223 */ \
+  /* Aanraking, druk en kracht      */ \
+  X(FsrRfp,                       0x81) /* GedeeldeBusComponent::FsrRfp */ \
+  X(HX711,                        0x82) /* GedeeldeBusComponent::HX711 */ \
+  X(PIEZO,                        0x83) /* GedeeldeBusComponent::PIEZO */ \
+  X(TTP223,                       0x84) /* GedeeldeBusComponent::TTP223 */ \
   /*                                */ \
-  /* Afstand                        */ \
-  X(HCSR04,                       0x90) /* GedeeldeBusComponent::HCSR04 */ \
-  X(HCSR04P,                      0x91) /* GedeeldeBusComponent::HCSR04P */ \
-  X(HYSRF05,                      0x92) /* GedeeldeBusComponent::HYSRF05 */ \
-  X(VL53L0X,                      0x93) /* GedeeldeBusComponent::VL53L0X */ \
-  X(VL6180X,                      0x94) /* GedeeldeBusComponent::VL6180X */ \
+  /* Aanwezigheid, afstand en locatie */ \
+  X(HCSR04,                       0x88) /* GedeeldeBusComponent::HCSR04 */ \
+  X(HCSR04P,                      0x89) /* GedeeldeBusComponent::HCSR04P */ \
+  X(HCSR501,                      0x8A) /* GedeeldeBusComponent::HCSR501 */ \
+  X(HW201,                        0x8B) /* GedeeldeBusComponent::HW201 */ \
+  X(HYSRF05,                      0x8C) /* GedeeldeBusComponent::HYSRF05 */ \
+  X(LD2410D,                      0x8D) /* GedeeldeBusComponent::LD2410D */ \
+  X(LD2450,                       0x8E) /* GedeeldeBusComponent::LD2450 */ \
+  X(VL53L0X,                      0x8F) /* GedeeldeBusComponent::VL53L0X */ \
+  X(VL6180X,                      0x90) /* GedeeldeBusComponent::VL6180X */ \
   /*                                */ \
-  /* Beweging                       */ \
-  X(ADXL345,                      0x95) /* GedeeldeBusComponent::ADXL345 */ \
-  X(MPU6050,                      0x96) /* GedeeldeBusComponent::MPU6050 */ \
-  X(MPU6500,                      0x97) /* GedeeldeBusComponent::MPU6500 */ \
+  /* Ademgeluid en stem             */ \
+  X(INMP441,                      0x98) /* GedeeldeBusComponent::INMP441 */ \
+  X(MAX4466,                      0x99) /* GedeeldeBusComponent::MAX4466 */ \
+  X(MAX9814,                      0x9A) /* GedeeldeBusComponent::MAX9814 */ \
+  X(MS3625,                       0x9B) /* GedeeldeBusComponent::MS3625 */ \
   /*                                */ \
-  /* Biosignalen                    */ \
-  X(AD8232,                       0xA0) /* GedeeldeBusComponent::AD8232 */ \
-  X(BioAmpEXGPill,                0xA1) /* GedeeldeBusComponent::BioAmpEXGPill */ \
-  X(EGBOPulseSensor,              0xA2) /* GedeeldeBusComponent::EGBOPulseSensor */ \
-  X(GSRGrove,                     0xA3) /* GedeeldeBusComponent::GSRGrove */ \
-  X(MAX30102,                     0xA4) /* GedeeldeBusComponent::MAX30102 */ \
-  X(MCU6701,                      0xA5) /* GedeeldeBusComponent::MCU6701 */ \
-  X(MR60BHA2,                     0xA6) /* GedeeldeBusComponent::MR60BHA2 */ \
-  X(NeuroSkyTGAM,                 0xA7) /* GedeeldeBusComponent::NeuroSkyTGAM */ \
+  /* Ademhaling                     */ \
+  X(BME680,                       0xA0) /* GedeeldeBusComponent::BME680 */ \
+  X(BME688,                       0xA1) /* GedeeldeBusComponent::BME688 */ \
+  X(MR60BHA2,                     0xA2) /* GedeeldeBusComponent::MR60BHA2 */ \
+  X(SCD41,                        0xA3) /* GedeeldeBusComponent::SCD41 */ \
+  X(SDP810125PA,                  0xA4) /* GedeeldeBusComponent::SDP810125PA */ \
   /*                                */ \
-  /* Druk en kracht                 */ \
-  X(FsrRfp,                       0xB0) /* GedeeldeBusComponent::FsrRfp */ \
-  X(HX711,                        0xB1) /* GedeeldeBusComponent::HX711 */ \
-  X(SDP810125PA,                  0xB2) /* GedeeldeBusComponent::SDP810125PA */ \
+  /* Autonome activatie en huidgeleiding */ \
+  X(GSRGrove,                     0xA8) /* GedeeldeBusComponent::GSRGrove */ \
+  X(MCU6701,                      0xA9) /* GedeeldeBusComponent::MCU6701 */ \
   /*                                */ \
-  /* Geluid en trilling             */ \
-  X(INMP441,                      0xB5) /* GedeeldeBusComponent::INMP441 */ \
-  X(MAX4466,                      0xB6) /* GedeeldeBusComponent::MAX4466 */ \
-  X(MAX9814,                      0xB7) /* GedeeldeBusComponent::MAX9814 */ \
-  X(MS3625,                       0xB8) /* GedeeldeBusComponent::MS3625 */ \
-  X(OV7670,                       0xB9) /* GedeeldeBusComponent::OV7670 */ \
-  X(PIEZO,                        0xBA) /* GedeeldeBusComponent::PIEZO */ \
+  /* Beweging, houding en lichaamsbeweging */ \
+  X(ADXL345,                      0xB0) /* GedeeldeBusComponent::ADXL345 */ \
+  X(MPU6050,                      0xB1) /* GedeeldeBusComponent::MPU6050 */ \
+  X(MPU6500,                      0xB2) /* GedeeldeBusComponent::MPU6500 */ \
+  X(OT3686,                       0xB3) /* GedeeldeBusComponent::OT3686 */ \
   /*                                */ \
-  /* Identificatie                  */ \
-  X(AS608,                        0xC0) /* GedeeldeBusComponent::AS608 */ \
+  /* Bio-elektrische en biopotentiële signalen */ \
+  X(AD8232,                       0xB8) /* GedeeldeBusComponent::AD8232 */ \
+  X(BioAmpEXGPill,                0xB9) /* GedeeldeBusComponent::BioAmpEXGPill */ \
+  X(NeuroSkyTGAM,                 0xBA) /* GedeeldeBusComponent::NeuroSkyTGAM */ \
   /*                                */ \
-  /* Omgevingslucht                 */ \
-  X(BME680,                       0xC5) /* GedeeldeBusComponent::BME680 */ \
-  X(BME688,                       0xC6) /* GedeeldeBusComponent::BME688 */ \
-  X(BMP280,                       0xC7) /* GedeeldeBusComponent::BMP280 */ \
-  X(SCD41,                        0xC8) /* GedeeldeBusComponent::SCD41 */ \
+  /* Hartcoherentie, hartslag en HRV */ \
+  X(EGBOPulseSensor,              0xC0) /* GedeeldeBusComponent::EGBOPulseSensor */ \
+  X(MAX30102,                     0xC1) /* GedeeldeBusComponent::MAX30102 */ \
   /*                                */ \
-  /* Temperatuur en vochtigheid     */ \
-  X(AHT10,                        0xD0) /* GedeeldeBusComponent::AHT10 */ \
-  X(DHT11,                        0xD1) /* GedeeldeBusComponent::DHT11 */ \
-  X(DHT22,                        0xD2) /* GedeeldeBusComponent::DHT22 */ \
-  X(DS18B20,                      0xD3) /* GedeeldeBusComponent::DS18B20 */ \
-  X(DS3231,                       0xD4) /* GedeeldeBusComponent::DS3231 */ \
-  X(LM35DZ,                       0xD5) /* GedeeldeBusComponent::LM35DZ */ \
-  X(LM75A,                        0xD6) /* GedeeldeBusComponent::LM75A */ \
-  X(MF52A,                        0xD7) /* GedeeldeBusComponent::MF52A */ \
-  X(MF52D,                        0xD8) /* GedeeldeBusComponent::MF52D */ \
+  /* Huidtemperatuur en omgevingsmetingen */ \
+  X(AHT10,                        0xC8) /* GedeeldeBusComponent::AHT10 */ \
+  X(BMP280,                       0xC9) /* GedeeldeBusComponent::BMP280 */ \
+  X(DHT11,                        0xCA) /* GedeeldeBusComponent::DHT11 */ \
+  X(DHT22,                        0xCB) /* GedeeldeBusComponent::DHT22 */ \
+  X(DS18B20,                      0xCC) /* GedeeldeBusComponent::DS18B20 */ \
+  X(LM35DZ,                       0xCD) /* GedeeldeBusComponent::LM35DZ */ \
+  X(LM75A,                        0xCE) /* GedeeldeBusComponent::LM75A */ \
+  X(MF52A,                        0xCF) /* GedeeldeBusComponent::MF52A */ \
+  X(MF52D,                        0xD0) /* GedeeldeBusComponent::MF52D */ \
   /*                                */ \
-  /* Vloeistof                      */ \
-  X(WATER,                        0xDA) /* GedeeldeBusComponent::WATER */ \
+  /* Tijd                           */ \
+  X(DS3231,                       0xD8) /* GedeeldeBusComponent::DS3231 */ \
   /*                                */ \
   /* STURING ---------------------- */ \
   X(A4988,                        0xE0) \
@@ -515,6 +512,9 @@ struct GedeeldeBusNode {
   virtual void ReleaseAccessForChild(GedeeldeBusNode* child) { (void)child; }
   // Kan deze node fysiek werken achter deze Extender? Standaard ja; timinggevoelige Sensoren overschrijven dit (GB112).
   virtual bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const { (void)extender; return true; }
+  // Leest deze node analoog via StartExtenderReadAnalog() van zijn parent? Standaard nee; SensorAnaloog geeft true.
+  // Zo kan een Extender bij SelectAccessForChild() een analoge child van een digitale onderscheiden (bv. CD74HC4067).
+  virtual bool IsAnalogChild() const { return false; }
 
   // UART-contract: de Stream van een UART-channel van deze node wanneer ze een UART-Extender is. Standaard: geen (nullptr).
   virtual Stream* GetExtenderStream(uint8_t channel) { (void)channel; return nullptr; }
@@ -601,6 +601,19 @@ struct GedeeldeBusNode {
 
     if (!aangemeld) return true;
     if (firstChild != nullptr) return false;  // heeft nog eigen kinderen: eerst die afmelden
+#if GEDEELDE_BUS_MIXED_PINS
+    {
+      // Een andere node gebruikt deze node nog als hulp-Extender (ownerClaim): eerst die node afmelden.
+      GedeeldeBusNode* wortel = this;
+      while (wortel->parent != nullptr) wortel = wortel->parent;
+      for (const GedeeldeBusNode* node = wortel; node != nullptr; node = VolgendeInBoom(node, wortel)) {
+        if (node == this || node->ownerClaim == nullptr) continue;
+        for (uint8_t index = 0; index < node->aangemeldePinnen.aantalExclusief; ++index) {
+          if (node->ownerClaim[index] == this) return false;
+        }
+      }
+    }
+#endif
     StopSturing();
 #if DATA_LAYER_EXCLUSIEVE_OPSLAG_ACTIEF
     // Ook claims op andere nodes die door dit object werden gereserveerd vrijgeven.
@@ -649,6 +662,15 @@ struct GedeeldeBusNode {
       if (IsExtenderComponent(voorouder->component)) return voorouder;
     }
 
+    return nullptr;
+  }
+
+  // Het gebied van een pinclaim: zoals firstExtenderNode(), maar een TCA9548A telt niet mee.
+  // Een TCA9548A heeft geen pinnen, alleen kanalen: een native pin van een component erachter blijft een pin op het board.
+  const GedeeldeBusNode* firstPinExtenderNode() const {
+    for (const GedeeldeBusNode* voorouder = parent; voorouder != nullptr; voorouder = voorouder->parent) {
+      if (IsExtenderComponent(voorouder->component) && voorouder->component != GedeeldeBusComponent::I2C_MULTIPLEXER_TCA9548A) return voorouder;
+    }
     return nullptr;
   }
 
@@ -1156,7 +1178,7 @@ struct Sensor : GedeeldeBusNode {
   int8_t ReadQueueOrStackStatus(uint8_t numberChannel);   // 1 = waarde klaar en vol, 0 = waarde klaar, -1 = leeg, -2 = sensor bestaat niet
   int ReadQueueOrStackValue(uint8_t numberChannel);       // volgende waarde; leeg = lastValue; sensor bestaat niet = 0
   int StreamingRead(uint8_t numberChannel);               // laatste waarde uit FLASH; anders lastValue van dit channel; sensor bestaat niet = 0
-  int RecordRead(uint8_t numberChannel);                  // eerste waarde uit SENSOR.DAT; anders lastValue van dit channel; sensor bestaat niet = 0
+  int RecordRead(uint8_t numberChannel);                  // laatste waarde van dit channel uit SENSOR.DAT; anders lastValue van dit channel; sensor bestaat niet = 0
   bool StreamingRead(uint8_t numberChannel, float& value);
   bool StreamingRead(uint8_t numberChannel, uint32_t& value);
   bool RecordRead(uint8_t numberChannel, float& value);
@@ -1167,6 +1189,7 @@ struct Sensor : GedeeldeBusNode {
 
 #if GEDEELDE_BUS_MIXED_PINS
 // GedeeldeBusFindI2CExtender: zoekt in de boom een I2C-Extender op component en adres. nullptr = niet gevonden.
+// Ook nullptr bij twee passende Extenders, want dan is de keuze niet eenduidig.
 GedeeldeBusNode* GedeeldeBusFindI2CExtender(GedeeldeBusComponent extender, uint8_t extenderAdres);
 #endif
 

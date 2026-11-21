@@ -22,6 +22,13 @@ void setup() {
   while (!GA_SERIAL && (millis() - startTijd) < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   #endif
   GA_SERIAL.println(F("TEST: Sensor_TTP223_Metingen"));
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_LAYER_CONFIG);
+  GA_SERIAL.println(Data ? F("DATA: OK") : F("DATA: FOUT"));
+  if (Data == nullptr) return;
+#else
+  GA_SERIAL.println(F("LET OP: extra meetkanalen vereisen DATA_TYPE_DIRECT in UserConfig.h."));
+#endif
   sensorAanraking = GedeeldeBusNewComponent<TTP223>(&Native, GedeeldeBusComponent::TTP223, HardwareResourcePin::NP_D2);
   GA_SERIAL.println(sensorAanraking ? F("TTP223 SENSOR: OK") : F("TTP223 SENSOR: FOUT"));
 }
@@ -39,6 +46,14 @@ void loop() {
       GA_SERIAL.print(F("aanraakstatus=")); GA_SERIAL.print(status);
       GA_SERIAL.print(F(" aantal=")); GA_SERIAL.print(aantal);
       GA_SERIAL.print(F(" duur_ms=")); GA_SERIAL.println(duur);
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+      GA_SERIAL.print(F("Via Data, aanraakstatus: "));
+      GA_SERIAL.println(sensorAanraking->ReadQueueOrStackFloat(1));
+      GA_SERIAL.print(F("Via Data, aantal: "));
+      GA_SERIAL.println(sensorAanraking->ReadQueueOrStackUInt32(2));
+      GA_SERIAL.print(F("Via Data, duur_ms: "));
+      GA_SERIAL.println(sensorAanraking->ReadQueueOrStackUInt32(3));
+#endif
     }
   }
 }

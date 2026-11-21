@@ -63,6 +63,9 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
     const uint32_t referentieklok = EXTENDER_MAX14830_PLL_VOORDELER
       ? (EXTENDER_MAX14830_BRONKLOK_HZ / EXTENDER_MAX14830_PLL_VOORDELER) * EXTENDER_MAX14830_PLL_VERMENIGVULDIGER
       : EXTENDER_MAX14830_BRONKLOK_HZ;
+    // Hoger dan referentieklok / 4 is ook in de 4x-modus niet haalbaar (divisor < 1): meteen weigeren.
+    // Dat voorkomt ook dat factor x baud hieronder overloopt naar 0 en een deling door nul geeft.
+    if (baud > referentieklok / 4UL) return false;
     // Datasheet: D = fREF / (factor x baud), DIV = TRUNC(D) in DIVLSB/DIVMSB, FRACT = ROUND(16 x (D - DIV)) in BRGConfig[3:0].
     // Te hoge baud voor factor 16: 2x-modus (factor 8, BRGConfig bit 4) of 4x-modus (factor 4, BRGConfig bit 5).
     uint32_t factor = 16;
@@ -93,14 +96,16 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
     int available() override {
       // Een al via peek() gelezen byte blijft beschikbaar, ook als het FIFO-niveau niet gelezen kan worden.
       const int bewaard = peekWaarde >= 0 ? 1 : 0;
-      if (!eigenaar || !eigenaar->actief) return bewaard;
+      // Bij een inactieve Extender is niets beschikbaar, ook geen bewaarde byte uit een vorige sessie.
+      if (!eigenaar || !eigenaar->actief) return 0;
       uint8_t aantal = 0;
       if (!eigenaar->MAX14830LeesRegister(channel, 0x12, aantal)) return bewaard;
       return aantal + bewaard;
     }
     int read() override {
-      if (peekWaarde >= 0) { const int v = peekWaarde; peekWaarde = -1; return v; }
+      // Eerst de Extender controleren: een bewaarde byte van vóór een uitval mag niet meer doorkomen.
       if (!eigenaar || !eigenaar->actief) return -1;
+      if (peekWaarde >= 0) { const int v = peekWaarde; peekWaarde = -1; return v; }
       uint8_t aantal = 0, resultaat = 0;
       if (!eigenaar->MAX14830LeesRegister(channel, 0x12, aantal) || !aantal ||
           !eigenaar->MAX14830LeesRegister(channel, 0x00, resultaat)) return -1;
@@ -145,6 +150,11 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
 
   bool Activeren() override {
     if (!ingeplugd || parent == nullptr || !parent->actief) return false;
+    // Nieuwe sessie: een via peek() bewaarde byte van een vorige sessie vervalt.
+    uartChannels[0].peekWaarde = -1;
+    uartChannels[1].peekWaarde = -1;
+    uartChannels[2].peekWaarde = -1;
+    uartChannels[3].peekWaarde = -1;
     // Klokbron (globaal, via UART0): CLKSource 0x1E, met de PLL ook PLLConfig 0x1A.
     // CLKSource: bit 4 externe klok aan, bit 1 kristal, bit 2 PLL aan, bit 3 PLL omzeilen.
     uint8_t klokbron = static_cast<uint8_t>(0x10 | (EXTENDER_MAX14830_BRONKLOK_KRISTAL ? 0x02 : 0x00));
@@ -152,12 +162,15 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
     // PLLConfig: bits 7:6 vermenigvuldiger (0 = 6, 1 = 48, 2 = 96, 3 = 144), bits 5:0 voordeler.
     const uint8_t pllFactor = EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 6 ? 0 : EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 48 ? 1 :
                               EXTENDER_MAX14830_PLL_VERMENIGVULDIGER == 96 ? 2 : 3;
-    if (!MAX14830SchrijfRegister(0, 0x1A, static_cast<uint8_t>((pllFactor << 6) | EXTENDER_MAX14830_PLL_VOORDELER))) return false;
+    if (!MAX14830SchrijfRegister(0, 0x1A, static_cast<uint8_t>((pllFactor << 6) | EXTENDER_MAX14830_PLL_VOORDELER))) return FoutDiagnoseSPI(false, 0, false);
     klokbron |= 0x04;
 #else
     klokbron |= 0x08;
 #endif
-    if (!MAX14830SchrijfRegister(0, 0x1E, klokbron)) return false;
+    if (!MAX14830SchrijfRegister(0, 0x1E, klokbron)) return FoutDiagnoseSPI(false, 0, false);
+    // Aanwezigheid: CLKSource teruglezen; RevID (0x25) is via SPI alleen met uitgebreide adressering bereikbaar.
+    uint8_t readBackClockSource = 0;
+    if (!MAX14830LeesRegister(0, 0x1E, readBackClockSource) || readBackClockSource != klokbron) return FoutDiagnoseSPI(false, 0, false);
 #if EXTENDER_MAX14830_BRONKLOK_KRISTAL
     // Wachten tot het kristal stabiel is: STSInt 0x08, bit 5 = CLKREADY; maximaal 20 ms.
     for (uint8_t poging = 0; poging < 20; ++poging) {
@@ -165,7 +178,7 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
       if (MAX14830LeesRegister(0, 0x08, status) && (status & 0x20)) return true;
       delay(1);
     }
-    return false;
+    return FoutDiagnoseSPI(false, 0, false);
 #else
     return true;
 #endif
@@ -208,6 +221,108 @@ struct ExtenderMAX14830SPI : HardwareResourceTypeSPI {
     for (uint8_t i = 0; i < 4; ++i) uartChannels[i].verbinden(this, i);
   }
   #endif
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
+  // GPIO0..GPIO15 (EP_GPIO0..EP_GPIO15): vier per UART. MAX14830: GPIOConfg 0x18 (bits 3:0 = uitgang),
+  // GPIOData 0x19 (bits 7:4 = ingangstoestand, bits 3:0 = uitgangswaarde). Geen pull-up: INPUT_PULLUP wordt geweigerd.
+  bool SetExtenderPinMode(uint8_t pin, uint8_t modus) override {
+    if (!actief || pin < static_cast<uint8_t>(ExtenderPins::EP_GPIO0) || pin > static_cast<uint8_t>(ExtenderPins::EP_GPIO15)) return false;
+    if (modus != INPUT && modus != OUTPUT) return false;
+    const uint8_t gpio = static_cast<uint8_t>(pin - static_cast<uint8_t>(ExtenderPins::EP_GPIO0));
+    uint8_t config = 0;
+    if (!MAX14830LeesRegister(gpio / 4, 0x18, config)) return false;
+    const uint8_t bit = static_cast<uint8_t>(1U << (gpio % 4));
+    config = modus == OUTPUT ? static_cast<uint8_t>(config | bit) : static_cast<uint8_t>(config & ~bit);
+    return MAX14830SchrijfRegister(gpio / 4, 0x18, config);
+  }
+  bool WriteExtenderPin(uint8_t pin, uint8_t niveau) override {
+    if (!actief || pin < static_cast<uint8_t>(ExtenderPins::EP_GPIO0) || pin > static_cast<uint8_t>(ExtenderPins::EP_GPIO15)) return false;
+    const uint8_t gpio = static_cast<uint8_t>(pin - static_cast<uint8_t>(ExtenderPins::EP_GPIO0));
+    uint8_t data = 0;
+    if (!MAX14830LeesRegister(gpio / 4, 0x19, data)) return false;
+    const uint8_t bit = static_cast<uint8_t>(1U << (gpio % 4));
+    data = static_cast<uint8_t>(data & 0x0F);   // alleen de uitgangsbits terugschrijven
+    data = niveau == HIGH ? static_cast<uint8_t>(data | bit) : static_cast<uint8_t>(data & ~bit);
+    return MAX14830SchrijfRegister(gpio / 4, 0x19, data);
+  }
+  uint8_t ReadExtenderPin(uint8_t pin) override {
+    if (!actief || pin < static_cast<uint8_t>(ExtenderPins::EP_GPIO0) || pin > static_cast<uint8_t>(ExtenderPins::EP_GPIO15)) return 0xFF;
+    const uint8_t gpio = static_cast<uint8_t>(pin - static_cast<uint8_t>(ExtenderPins::EP_GPIO0));
+    uint8_t data = 0;
+    if (!MAX14830LeesRegister(gpio / 4, 0x19, data)) return 0xFF;
+    return (data >> (4 + gpio % 4)) & 0x01 ? HIGH : LOW;
+  }
+#endif
+
+  // 1-Wire-contract via een UART-channel (Maxim AN214): reset op 9600 baud, bits op 115200 baud.
+  // Hardware: TX en RX van het channel samen op DQ via een open-drain schakeling (bv. diode of transistor) met pull-up.
+  // Eén 1-Wire-apparaat per channel: zoeken gebeurt met READ ROM (0x33), niet met het volledige zoekalgoritme.
+  uint8_t oneWireChannel = 0xFF;
+  bool oneWireReadROMsearchDone = false;
+  // aantal UART-bytes versturen en hun echo terug lezen (één byte = één 1-Wire-tijdslot).
+  bool OneWireUARTbits(const uint8_t* uit, uint8_t* in, uint8_t aantal) {
+    Stream* poort = GetExtenderStream(oneWireChannel);
+    if (poort == nullptr) return false;
+    // Hoogstens 128 oude bytes weggooien; raakt de buffer niet leeg of mislukt read(), dan is de UART niet bruikbaar.
+    for (uint8_t i = 0; poort->available() > 0; ++i) {
+      if (i >= 128 || poort->read() < 0) return false;
+    }
+    for (uint8_t i = 0; i < aantal; ++i) poort->write(uit[i]);
+    const unsigned long start = millis();
+    for (uint8_t i = 0; i < aantal; ++i) {
+      while (poort->available() <= 0) {
+        if (millis() - start > 20UL) return false;   // geen echo: TX/RX niet verbonden of busfout
+      }
+      const int waarde = poort->read();
+      if (waarde < 0) return false;   // read() gaf geen geldige byte: geen echo, dus ook geen aanwezigheidspuls
+      in[i] = static_cast<uint8_t>(waarde);
+    }
+    return true;
+  }
+  bool ExtenderOneWireSelectChannel(uint8_t channel) override {
+    if (!actief || GetExtenderStream(channel) == nullptr) return false;
+    oneWireChannel = channel;
+    return true;
+  }
+  bool ExtenderOneWireSearchReset() override { oneWireReadROMsearchDone = false; return oneWireChannel != 0xFF; }
+  bool ExtenderOneWireReset() override {
+    if (!StartExtenderUART(oneWireChannel, 9600UL)) return false;
+    const uint8_t puls = 0xF0;
+    uint8_t antwoord = 0xF0;
+    const bool gelukt = OneWireUARTbits(&puls, &antwoord, 1);
+    if (!StartExtenderUART(oneWireChannel, 115200UL)) return false;
+    return gelukt && antwoord != 0xF0;   // een gewijzigde echo is de aanwezigheidspuls
+  }
+  bool ExtenderOneWireWriteByte(uint8_t waarde) override {
+    uint8_t uit[8], in[8];
+    for (uint8_t i = 0; i < 8; ++i) uit[i] = ((waarde >> i) & 0x01) ? 0xFF : 0x00;   // LSB eerst
+    return OneWireUARTbits(uit, in, 8);
+  }
+  bool ExtenderOneWireReadByte(uint8_t* waarde) override {
+    uint8_t uit[8], in[8];
+    for (uint8_t i = 0; i < 8; ++i) uit[i] = 0xFF;
+    if (waarde == nullptr || !OneWireUARTbits(uit, in, 8)) return false;
+    *waarde = 0;
+    for (uint8_t i = 0; i < 8; ++i) if (in[i] == 0xFF) *waarde |= static_cast<uint8_t>(1U << i);
+    return true;
+  }
+  bool ExtenderOneWireSearch(uint8_t* adres) override {
+    if (adres == nullptr || oneWireReadROMsearchDone) return false;
+    oneWireReadROMsearchDone = true;
+    if (!ExtenderOneWireReset() || !ExtenderOneWireWriteByte(0x33)) return false;   // READ ROM
+    for (uint8_t i = 0; i < 8; ++i) if (!ExtenderOneWireReadByte(&adres[i])) return false;
+    // Dallas CRC8 over de eerste 7 bytes; meerdere apparaten op het channel geven een CRC-fout.
+    uint8_t crc = 0;
+    for (uint8_t i = 0; i < 7; ++i) {
+      uint8_t b = adres[i];
+      for (uint8_t j = 0; j < 8; ++j) {
+        const uint8_t mix = static_cast<uint8_t>((crc ^ b) & 0x01);
+        crc >>= 1;
+        if (mix) crc ^= 0x8C;
+        b >>= 1;
+      }
+    }
+    return crc == adres[7];
+  }
 };
 
 #endif

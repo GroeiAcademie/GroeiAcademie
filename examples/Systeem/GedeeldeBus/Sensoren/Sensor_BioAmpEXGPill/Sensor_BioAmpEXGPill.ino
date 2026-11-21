@@ -23,8 +23,12 @@
 #if EXTENDER_ADS1115_AANTAL < 1
 #error Zet EXTENDER_ADS1115_AANTAL op minstens 1.
 #endif
-#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
-#error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE.
+// De ADS1115 haalt hoogstens zoveel metingen per seconde als EXTENDER_ADS1115_DATARATE toelaat (4 = 128 SPS, 5 = 250, 6 = 475, 7 = 860).
+#if (SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EMG ? 500 : SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EEG ? 256 : SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG ? 75 : 125) > (EXTENDER_ADS1115_DATARATE == 7 ? 860 : EXTENDER_ADS1115_DATARATE == 6 ? 475 : EXTENDER_ADS1115_DATARATE == 5 ? 250 : EXTENDER_ADS1115_DATARATE == 4 ? 128 : EXTENDER_ADS1115_DATARATE == 3 ? 64 : EXTENDER_ADS1115_DATARATE == 2 ? 32 : EXTENDER_ADS1115_DATARATE == 1 ? 16 : 8)
+#error EXTENDER_ADS1115_DATARATE is te traag voor de samplefrequentie van de gekozen SENSOR_BIOAMPEXGPILL_MEETMETHODE; verhoog EXTENDER_ADS1115_DATARATE.
+#endif
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE && DATA_LAYER_CONFIG != DATA_TYPE_DIRECT
+#error Zet DATA_LAYER_CONFIG op DATA_TYPE_NONE of DATA_TYPE_DIRECT.
 #endif
 ExtenderADS1115 extenderADS1115(&Native, GedeeldeBusComponent::ADC_ADS1115,
   I2C_ADDRESS_EXTENDER_ADS1115_1, HardwareResourcePin::NP_SDA,
@@ -40,10 +44,52 @@ void setup() {
   while (!GA_SERIAL && millis() - startTijd < SERIAL_CONNECT_TIMEOUT_MS) { ; }
   #endif
   GA_SERIAL.println(F("TEST: Sensor_BioAmpEXGPill"));
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  if (Data == nullptr) Data = GedeeldeBusNewComponent<struct Data>(DATA_LAYER_CONFIG);
+  GA_SERIAL.println(Data ? F("DATA: OK") : F("DATA: FOUT"));
+  if (Data == nullptr) return;
+#else
+  GA_SERIAL.println(F("LET OP: extra meetkanalen vereisen DATA_TYPE_DIRECT in UserConfig.h."));
+#endif
   sensorBioAmpEXGPill = GedeeldeBusNewComponent<BioAmpEXGPill>(&extenderADS1115,
     GedeeldeBusComponent::BioAmpEXGPill,
     static_cast<uint8_t>(ExtenderADS1115::ExtenderPins::EP_AIN0),
     HardwareResourceToegang::GEDEELD);
   GA_SERIAL.println(sensorBioAmpEXGPill ? F("BioAmpEXGPill lifecycle: component aangemaakt (fysieke werking nog niet bewezen)") : F("BioAmpEXGPill lifecycle: FOUT"));
 }
-void loop() {}
+void loop() {
+  if (sensorBioAmpEXGPill == nullptr) return;
+  float waarde = NAN;
+  if (!sensorBioAmpEXGPill->LeesHoofdwaarde(waarde)) return;
+  // Een piek bij elke sample onthouden, zodat een korte piek tussen twee rapporten niet verloren gaat.
+  static bool peakDetectedSinceLastReport = false;
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
+  { bool piek = false; if (sensorBioAmpEXGPill->LeesHartslagPiek(piek) && piek) peakDetectedSinceLastReport = true; }
+#elif SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG
+  { bool knipper = false; if (sensorBioAmpEXGPill->LeesKnipperen(knipper) && knipper) peakDetectedSinceLastReport = true; }
+#endif
+  static unsigned long laatsteRapport = 0;
+  if (millis() - laatsteRapport < 250UL) return;
+  laatsteRapport = millis();
+  GA_SERIAL.print(F("Gefilterd biosignaal: "));
+  GA_SERIAL.println(waarde);
+#if DATA_LAYER_CONFIG != DATA_TYPE_NONE
+  GA_SERIAL.print(F("Via Data, ruwe ADC-waarde: "));
+  GA_SERIAL.println(sensorBioAmpEXGPill->ReadQueueOrStackValue(1));
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE != BIOAMPEXGPILL_MEETMETHODE_RAW
+  GA_SERIAL.print(F("Via Data, gefilterd biosignaal: "));
+  GA_SERIAL.println(sensorBioAmpEXGPill->ReadQueueOrStackFloat(2));
+#endif
+#endif
+#if SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EMG
+  if (sensorBioAmpEXGPill->LeesEMGEnvelop(waarde)) {
+    GA_SERIAL.print(F("EMG-envelop: ")); GA_SERIAL.println(waarde);
+  }
+#elif SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_ECG
+  GA_SERIAL.println(peakDetectedSinceLastReport ? F("ECG-piek sinds vorig rapport: JA") : F("ECG-piek sinds vorig rapport: NEE"));
+  peakDetectedSinceLastReport = false;
+#elif SENSOR_BIOAMPEXGPILL_MEETMETHODE == BIOAMPEXGPILL_MEETMETHODE_EOG
+  GA_SERIAL.println(peakDetectedSinceLastReport ? F("EOG-knipperpiek sinds vorig rapport: JA") : F("EOG-knipperpiek sinds vorig rapport: NEE"));
+  peakDetectedSinceLastReport = false;
+#endif
+}

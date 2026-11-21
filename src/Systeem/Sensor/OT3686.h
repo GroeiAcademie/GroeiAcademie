@@ -13,12 +13,17 @@ struct OT3686 : Sensor {
   const HardwareResourcePin np_OUT;
   uint8_t exclusief_[1];
   volatile uint32_t aantalPulsen = 0;
-  volatile unsigned long tijdstipLaatstePulsUs = 0;
-  volatile unsigned long periodeLaatstePulsUs = 0;
+  volatile unsigned long tijdstipLaatstePulsUS = 0;
+  volatile unsigned long periodeLaatstePulsUS = 0;
   volatile bool eerstePulsOntvangen = false;
   bool interruptActief = false;
+  // Via een Extender zonder interrupt (MCP23S17, MAX14830 ...): pulsen tellen door de ingang te lezen.
+  bool pulseCountingByPollingActive = false;
+  bool previousStateOUTforRisingEdge = false;   // vorige gelezen toestand, om een stijgende flank te herkennen
+  // Eén lezing van de ingang; telt een stijgende flank als puls. Zo vaak mogelijk oproepen (bv. in loop()).
+  bool PollPulseCount();
   uint32_t aantalPulsenVorigVenster = 0;
-  unsigned long tijdstipVorigVensterMs = 0;
+  unsigned long tijdstipVorigVensterMS = 0;
   float laatsteVensterRPM = NAN;
   static OT3686* actieveInterruptSensor;
   static void OntvangPuls();

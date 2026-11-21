@@ -13,16 +13,25 @@ set EXPERIMENTAL_FQBN_MAPPING_BOARDS="BOARD_UNO_Q"
 set "REGRESSIETEST=FALSE"
 set "NO_PAUSE=FALSE"
 set "IS_LOGGED=FALSE"
+set "SPLIT_TEST_PER_FQBN=FALSE"
 
 set "LOG_BESTAND=%~dp0!BESTANDSNAAM!.txt"
 set "CONTROLE_BESTAND=%~dp0!BESTANDSNAAM!.ino"
 set "TEST_SCRIPT_BESTAND=%~dp0!BESTANDSNAAM!.cmd"
 
-for %%A in (%*) do (
+for %%A in ("%~1" "%~2" "%~3" "%~4") do (
     if /I "%%~A"=="REGRESSIETEST=TRUE" set "REGRESSIETEST=TRUE"
     if /I "%%~A"=="--no-pause" set "NO_PAUSE=TRUE"
     if /I "%%~A"=="--logged" set "IS_LOGGED=TRUE"
+    if /I "%%~A"=="--split-test-per-fqbn" set "SPLIT_TEST_PER_FQBN=TRUE"
 )
+
+rem Alleen een tab van --split-test-per-fqbn krijgt een eigen log, met de FQBN in de naam en _ in plaats van : en =.
+rem Zonder --split-test-per-fqbn blijft het log altijd de ene gewone txt, ook met BEPERK_TEST_TOT_FQBN.
+if /I "!SPLIT_TEST_PER_FQBN!"=="TRUE" if defined BEPERK_TEST_TOT_FQBN for /f "delims=" %%S in ('powershell -NoProfile -Command "$env:BEPERK_TEST_TOT_FQBN -replace '[:=]','_'"') do set "LOG_BESTAND=%~dp0!BESTANDSNAAM!_%%S.txt"
+
+rem Splitsen gebeurt voor de opstart met Tee-Object, zodat het gewone log vrij blijft voor het samenvoegen.
+if /I "!SPLIT_TEST_PER_FQBN!"=="TRUE" if /I "!IS_LOGGED!"=="FALSE" if not defined BEPERK_TEST_TOT_FQBN goto :VOER_SPLIT_TEST_PER_FQBN_UIT
 
 if /I "!IS_LOGGED!"=="FALSE" (
     cls
@@ -32,6 +41,36 @@ if /I "!IS_LOGGED!"=="FALSE" (
 )
 
 goto :MAIN_SCRIPT
+
+:VOER_SPLIT_TEST_PER_FQBN_UIT
+rem Start per FQBN een tab met hetzelfde testscript, beperkt tot die FQBN via BEPERK_TEST_TOT_FQBN.
+rem De tab geeft zelf ook --split-test-per-fqbn mee, zodat alleen die tab een eigen log krijgt.
+rem Elke tab schrijft na het script zijn foutcode in een eigen statusbestand.
+rem REGRESSIETEST gaat expliciet als argument mee; REGRESSIE_PADEN blijft hetzelfde als bij een gewone run.
+for /f %%I in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString('N')"') do set "GA_RUN_ID=%%I"
+if exist "!LOG_BESTAND!" del /q "!LOG_BESTAND!" >nul 2>&1
+powershell -NoProfile -Command "$ErrorActionPreference='Stop'; $q=[char]34; $map=$env:TEMP+'\GA_Split_'+$env:GA_RUN_ID; New-Item -ItemType Directory -Path $map -Force | Out-Null; $dir=Split-Path -Parent $env:TEST_SCRIPT_BESTAND; $i=0; foreach($k in @('BASIC','EXTENDED','EXPERIMENTAL')){foreach($x in [regex]::Matches([Environment]::GetEnvironmentVariable($k+'_FQBN'),'\x22([^\x22]+)\x22')){$i++; $fq=$x.Groups[1].Value; $a='-w 0 new-tab --title {0}{1}: {2}{0} -d {0}{3}{0} powershell.exe -NoLogo -NoProfile -NoExit -Command {0}$env:BEPERK_TEST_TOT_FQBN=''{2}''\; $env:REGRESSIE_PADEN=''{7}''\; & ''{4}'' --no-pause --split-test-per-fqbn REGRESSIETEST={6}\; Set-Content -LiteralPath ''{5}'' -Value $LASTEXITCODE{0}' -f $q,($env:BESTANDSNAAM -replace '^TestLibrary','' -replace '-v2\.0\.0$',''),$fq,$dir,$env:TEST_SCRIPT_BESTAND,($map+'\'+$i+'.status'),$env:REGRESSIETEST,($env:REGRESSIE_PADEN -replace ';','\;'); Start-Process -FilePath 'wt.exe' -ArgumentList $a | Out-Null; Write-Host ('[SPLIT_TEST_PER_FQBN] Gestart '+$i+': '+$fq)}}; if($i -eq 0){throw 'Geen FQBN gevonden.'}"
+if errorlevel 1 (
+    echo [FOUT] De tabs per FQBN konden niet worden gestart.
+    exit /b 1
+)
+call :VOEG_SPLIT_LOGS_SAMEN
+set /A TOTAL_FAIL=!errorlevel!
+rmdir /s /q "%TEMP%\GA_Split_!GA_RUN_ID!" >nul 2>&1
+if /I "!NO_PAUSE!"=="FALSE" (
+    <nul set /p =[EINDE] Testen voltooid. Druk op een toets om af te sluiten... & pause >nul
+    echo.
+) else (
+    echo [EINDE] Testen voltooid. Druk op een toets om af te sluiten...
+)
+exit /b !TOTAL_FAIL!
+
+:VOEG_SPLIT_LOGS_SAMEN
+rem Wacht tot elke tab een statusbestand heeft, zonder tijdslimiet.
+rem Voeg daarna de logs per FQBN samen in het gewone log, met een TESTRESULTAAT met de opgetelde tellers.
+rem De regel [EINDE] komt alleen in het gewone log als alle logs per FQBN volledig zijn.
+powershell -NoProfile -Command "$map=$env:TEMP+'\GA_Split_'+$env:GA_RUN_ID; $fq=@(); foreach($k in @('BASIC','EXTENDED','EXPERIMENTAL')){foreach($x in [regex]::Matches([Environment]::GetEnvironmentVariable($k+'_FQBN'),'\x22([^\x22]+)\x22')){$fq+=$x.Groups[1].Value}}; Write-Host ('[SPLIT_TEST_PER_FQBN] Wachten op '+$fq.Count+' statusbestanden in '+$map); while(@(Get-ChildItem -LiteralPath $map -Filter '*.status' -File -ErrorAction SilentlyContinue).Count -lt $fq.Count){Start-Sleep -Seconds 2}; $basis=$env:LOG_BESTAND.Substring(0,$env:LOG_BESTAND.Length-4); $einde='[EINDE] Testen voltooid. Druk op een toets om af te sluiten...'; $over=New-Object System.Collections.Generic.List[string]; $uit=New-Object System.Collections.Generic.List[string]; $som=@{}; foreach($g in @('BASIC','EXTENDED','EXPERIMENTAL')){$som[$g]=@(0,0,0,0)}; $onvolledig=0; $gefaald=$false; $lintfout=$false; $statisch=New-Object System.Collections.Generic.List[string]; for($i=0;$i -lt $fq.Count;$i++){$log=$basis+'_'+($fq[$i] -replace '[:=]','_')+'.txt'; $code=@(Get-Content -LiteralPath ($map+'\'+($i+1)+'.status'))[0]; $over.Add('[SPLIT_TEST_PER_FQBN] '+$fq[$i]+' | foutcode '+$code+' | '+$log); if(([string]$code).Trim() -ne '0'){$gefaald=$true}; if(-not (Test-Path -LiteralPath $log -PathType Leaf)){$onvolledig++; $over.Add('[SPLIT_TEST_PER_FQBN] Log ontbreekt: '+$log); continue}; $r=@(Get-Content -LiteralPath $log); $raw=$r -join [char]10; if(-not ($r -contains $einde)){$onvolledig++; $over.Add('[SPLIT_TEST_PER_FQBN] Log onvolledig: '+$log)}; $uit.Add('============================================================'); $uit.Add('[SPLIT_TEST_PER_FQBN] '+$fq[$i]); $uit.Add('============================================================'); foreach($l in $r){if($l -ne $einde){$uit.Add($l)}}; if(-not ($r -contains 'Arduino LINT is geslaagd.')){$lintfout=$true}; $s=[array]::IndexOf($r,'[STATISCHE CONFIGURATIECONTROLES]'); if($s -lt 0){$statisch.Add('FOUT: geen statische controles in '+$log)}else{for($j=$s+1;$j -lt $r.Count;$j++){if($r[$j] -match '^\[(?:OK|FOUT)\]'){break}; if($r[$j] -match '^FOUT:' -and -not $statisch.Contains($r[$j])){$statisch.Add($r[$j])}}}; foreach($g in @('BASIC','EXTENDED','EXPERIMENTAL')){$m=[regex]::Matches($raw,'(?ms)^\['+$g+'_FQBN\].*?^Totaal getest\s*:\s*(\d+).*?^OK bevonden\s*:\s*(\d+).*?^Verwachte geheugenbeperkingen\s*:\s*(\d+).*?^Onverwacht mislukt\s*:\s*(\d+)'); if($m.Count -eq 0){$onvolledig++; continue}; $y=$m[$m.Count-1]; for($j=0;$j -lt 4;$j++){$som[$g][$j]+=[int]$y.Groups[$j+1].Value}}; if($raw -match '(?m)^Eindstatus BASIC \+ EXTENDED\s*:\s*GEFAALD'){$gefaald=$true}}; $st=@{}; foreach($g in @('BASIC','EXTENDED','EXPERIMENTAL')){$st[$g]=$(if($som[$g][3] -gt 0){'GEFAALD'}else{'GESLAAGD'})}; if($onvolledig -gt 0 -or $lintfout -or $statisch.Count -gt 0 -or $som['BASIC'][3] -gt 0 -or $som['EXTENDED'][3] -gt 0){$gefaald=$true}; $uit.Add('============================================================'); $uit.Add('[SPLIT_TEST_PER_FQBN] LINT en statische controles van alle tabs'); $uit.Add('============================================================'); $uit.Add($(if($lintfout){'Arduino LINT is mislukt.'}else{'Arduino LINT is geslaagd.'})); $uit.Add('------------------------------------------------------------'); $uit.Add('[STATISCHE CONFIGURATIECONTROLES]'); foreach($l in $statisch){$uit.Add($l)}; $eind=$(if($gefaald){'GEFAALD'}else{'GESLAAGD'}); $rap=New-Object System.Collections.Generic.List[string]; $rap.Add(''); $rap.Add('============================================================'); $rap.Add('TESTRESULTAAT'); $rap.Add('============================================================'); $rap.Add('Script                               : '+$env:BESTANDSNAAM); $rap.Add('CONTROLE_MODUS                       : '+$env:CONTROLE_MODUS); if($env:CONTROLE_MODUS -eq 'EXCLUDE'){$rap.Add('REGRESSIETEST                         : '+$env:REGRESSIETEST)}; $rap.Add(''); foreach($g in @('BASIC','EXTENDED')){$rap.Add('['+$g+'_FQBN]'); $rap.Add('Totaal getest                        : '+$som[$g][0]); $rap.Add('OK bevonden                          : '+$som[$g][1]); $rap.Add('Verwachte geheugenbeperkingen        : '+$som[$g][2]); $rap.Add('Onverwacht mislukt                   : '+$som[$g][3]); $rap.Add('------------------------------------------------------------'); $rap.Add($(if($g -eq 'BASIC'){'Tussenstatus BASIC_FQBN               : '}else{'Tussenstatus EXTENDED_FQBN           : '})+$st[$g]); $rap.Add('')}; $rap.Add('============================================================'); $rap.Add('Eindstatus BASIC + EXTENDED          : '+$eind); $rap.Add('============================================================'); $rap.Add(''); $rap.Add('[EXPERIMENTAL_FQBN]'); $rap.Add('Totaal getest                        : '+$som['EXPERIMENTAL'][0]); $rap.Add('OK bevonden                          : '+$som['EXPERIMENTAL'][1]); $rap.Add('Verwachte geheugenbeperkingen        : '+$som['EXPERIMENTAL'][2]); $rap.Add('Onverwacht mislukt                   : '+$som['EXPERIMENTAL'][3]); $rap.Add('------------------------------------------------------------'); $rap.Add('Status EXPERIMENTAL_FQBN             : '+$st['EXPERIMENTAL']); $rap.Add('============================================================'); $rap.Add('EINDE'); $rap.Add('============================================================'); $alles=New-Object System.Collections.Generic.List[string]; $alles.AddRange($over); $alles.AddRange($uit); $alles.AddRange($rap); if($onvolledig -eq 0){$alles.Add($einde)}; [IO.File]::WriteAllLines($env:LOG_BESTAND,[string[]]$alles.ToArray(),[Text.Encoding]::Unicode); foreach($l in $over){Write-Host $l}; foreach($l in $rap){Write-Host $l}; Write-Host ('[SPLIT_TEST_PER_FQBN] Samengevoegd log: '+$env:LOG_BESTAND); $c=$som['BASIC'][3]+$som['EXTENDED'][3]; if($gefaald -and $c -eq 0){$c=1}; exit $c"
+exit /b !errorlevel!
 
 :MAIN_SCRIPT
 setlocal enabledelayedexpansion
@@ -87,7 +126,7 @@ if errorlevel 1 (
 
 echo ------------------------------------------------------------
 echo [STATISCHE CONFIGURATIECONTROLES]
-set "STATIC_CHECK_LOG=%TEMP%\GroeiAcademieStaticCheck_!RANDOM!_!RANDOM!.txt"
+set "STATIC_CHECK_LOG=%TEMP%\GroeiAcademieStaticCheck_!GA_RUN_ID!.txt"
 findstr /S /N /R /C:"^[ ]*#define[ ]*PIN_TOETS_[1-4][ ]*D[0-9][0-9]*" examples\*.ino >"!STATIC_CHECK_LOG!"
 if not errorlevel 1 (
     echo FOUT: rechtstreekse D-pinmapping voor PIN_TOETS gevonden:
@@ -116,6 +155,17 @@ for %%K in (InputConfigureren OpvragenHuidigeToetsAanslag OpvragenHuidigeToetsAa
     )
 )
 
+rem Een onbekende BEPERK_TEST_TOT_FQBN zou nul compilaties geven en toch slagen.
+if defined BEPERK_TEST_TOT_FQBN (
+    powershell -NoProfile -Command "$f=@(); foreach($k in @('BASIC','EXTENDED','EXPERIMENTAL')){foreach($x in [regex]::Matches([Environment]::GetEnvironmentVariable($k+'_FQBN'),'\x22([^\x22]+)\x22')){$f+=$x.Groups[1].Value}}; if($f -contains $env:BEPERK_TEST_TOT_FQBN){exit 0}else{exit 1}"
+    if errorlevel 1 (
+        echo FOUT: BEPERK_TEST_TOT_FQBN is geen FQBN uit BASIC_FQBN, EXTENDED_FQBN of EXPERIMENTAL_FQBN: !BEPERK_TEST_TOT_FQBN!
+        set /A STATIC_FAIL+=1
+    )
+)
+
+set "TOTAAL_COMPILATIES="
+for /f %%N in ('powershell -NoProfile -Command "$b=@{};foreach($k in @('BASIC','EXTENDED','EXPERIMENTAL')){$f=[regex]::Matches([Environment]::GetEnvironmentVariable($k+'_FQBN'),'\x22([^\x22]+)\x22');$m=[regex]::Matches([Environment]::GetEnvironmentVariable($k+'_FQBN_MAPPING_BOARDS'),'\x22([^\x22]+)\x22');$a=@();for($i=0;$i -lt $f.Count;$i++){for($j=0;$j -lt $m[$i].Groups[1].Value.Split([char]124).Count;$j++){$a+=$f[$i].Groups[1].Value}}$b['BIJ_'+$k+'_FQBN']=$a};$b['BIJ_ALLE_FQBN']=$b['BIJ_BASIC_FQBN']+$b['BIJ_EXTENDED_FQBN']+$b['BIJ_EXPERIMENTAL_FQBN'];$p=@{};$n=0;foreach($l in [IO.File]::ReadAllLines($env:TEST_SCRIPT_BESTAND)){if($l -match '^set ([A-Z_]+)=(.*)$'){$p[$matches[1]]=$matches[2].Trim([char]34)}elseif($l -match '^call .*--VOER_DEZE_TEST_UIT'){$t=$p['TEST_TYPE'];$ok=($env:CONTROLE_MODUS -eq 'INCLUDE' -and $t -in @('NIEUW','EXPERIMENTEEL')) -or ($env:CONTROLE_MODUS -eq 'EXCLUDE' -and ($t -eq 'GERELEASED' -or ($t -eq 'REGRESSIE' -and $env:REGRESSIETEST -eq 'TRUE')));if($ok -and $t -eq 'REGRESSIE'){$ok=$false;foreach($r in ($env:REGRESSIE_PADEN -split '\s+')){if($r -and ([string]$p['TEST_INO']).StartsWith($r,[StringComparison]::OrdinalIgnoreCase)){$ok=$true;break}}};if($ok){$skip=','+$p['WELKE_FQBN_SKIPPEN']+',';$inc=','+$p['WELKE_FQBN_INCOMPATIBLE']+',';foreach($fq in $b[$p['WELKE_FQBN_TESTEN']]){if(-not $skip.Contains(','+$fq+',') -and -not $inc.Contains(','+$fq+',') -and (-not $env:BEPERK_TEST_TOT_FQBN -or $fq -eq $env:BEPERK_TEST_TOT_FQBN)){$n++}}};$p['WELKE_FQBN_SKIPPEN']='';$p['WELKE_FQBN_INCOMPATIBLE']=''}};$n"') do set "TOTAAL_COMPILATIES=%%N"
 call "!TEST_SCRIPT_BESTAND!" --TESTLIJST
 call :RAPPORT
 set /A TOTAL_FAIL=BASIC_FAIL+EXTENDED_FAIL+LINT_FAIL+STATIC_FAIL
@@ -123,16 +173,18 @@ popd
 if /I "!NO_PAUSE!"=="FALSE" (
     <nul set /p =[EINDE] Testen voltooid. Druk op een toets om af te sluiten... & pause >nul
     echo.
+) else (
+    echo [EINDE] Testen voltooid. Druk op een toets om af te sluiten...
 )
 exit /b !TOTAL_FAIL!
 
 :CONTROLEER_TESTLIJST
-set "LIJST_DIR=%TEMP%\GA_Testlijst_Dir_!RANDOM!_!RANDOM!.txt"
-set "LIJST_CMD=%TEMP%\GA_Testlijst_Cmd_!RANDOM!_!RANDOM!.txt"
-set "VERSCHIL_DIR=%TEMP%\GA_Testlijst_MistCmd_!RANDOM!_!RANDOM!.txt"
-set "VERSCHIL_CMD=%TEMP%\GA_Testlijst_MistDir_!RANDOM!_!RANDOM!.txt"
-set "TYPE_FOUT=%TEMP%\GA_TestType_Fout_!RANDOM!_!RANDOM!.txt"
-set "TYPE_NIEUW=%TEMP%\GA_TestType_Nieuw_!RANDOM!_!RANDOM!.txt"
+set "LIJST_DIR=%TEMP%\GA_Testlijst_Dir_!GA_RUN_ID!.txt"
+set "LIJST_CMD=%TEMP%\GA_Testlijst_Cmd_!GA_RUN_ID!.txt"
+set "VERSCHIL_DIR=%TEMP%\GA_Testlijst_MistCmd_!GA_RUN_ID!.txt"
+set "VERSCHIL_CMD=%TEMP%\GA_Testlijst_MistDir_!GA_RUN_ID!.txt"
+set "TYPE_FOUT=%TEMP%\GA_TestType_Fout_!GA_RUN_ID!.txt"
+set "TYPE_NIEUW=%TEMP%\GA_TestType_Nieuw_!GA_RUN_ID!.txt"
 set "GA_CONTROLE_MODUS=!CONTROLE_MODUS!"
 set "GA_CONTROLE_PADEN=!CONTROLE_PADEN!"
 set "GA_TEST_SCRIPT=!TEST_SCRIPT_BESTAND!"
@@ -239,8 +291,9 @@ set "WELKE_FQBN_SKIPPEN_ACTIEF=!WELKE_FQBN_SKIPPEN:"=!"
 set "WELKE_FQBN_INCOMPATIBLE="
 set "WELKE_FQBN_SKIPPEN="
 
+rem EXPERIMENTEEL wordt ook gecompileerd, maar telt in de tellers EXPERIMENTAL_* en blokkeert de vrijgave niet.
 if /I "!CONTROLE_MODUS!"=="INCLUDE" (
-    if /I not "!TEST_TYPE_ACTIEF!"=="NIEUW" exit /b 0
+    if /I not "!TEST_TYPE_ACTIEF!"=="NIEUW" if /I not "!TEST_TYPE_ACTIEF!"=="EXPERIMENTEEL" exit /b 0
 ) else if /I "!CONTROLE_MODUS!"=="EXCLUDE" (
     if /I "!TEST_TYPE_ACTIEF!"=="NIEUW" exit /b 0
     if /I "!TEST_TYPE_ACTIEF!"=="REGRESSIE" if /I not "!REGRESSIETEST!"=="TRUE" exit /b 0
@@ -331,11 +384,15 @@ set "TEST_DIR=!TEST_DIR:~0,-1!"
 set "OVERSLAAN=FALSE"
 if defined WELKE_FQBN_INCOMPATIBLE_ACTIEF echo(,!WELKE_FQBN_INCOMPATIBLE_ACTIEF!,| findstr /I /L /C:",!FQBN_ACTIEF!," >nul && set "OVERSLAAN=TRUE"
 if defined WELKE_FQBN_SKIPPEN_ACTIEF echo(,!WELKE_FQBN_SKIPPEN_ACTIEF!,| findstr /I /L /C:",!FQBN_ACTIEF!," >nul && set "OVERSLAAN=TRUE"
+rem Met BEPERK_TEST_TOT_FQBN wordt alleen op die ene FQBN gecompileerd.
+rem Leeg of niet gezet betekent: alle FQBN.
+if defined BEPERK_TEST_TOT_FQBN if /I not "!FQBN_ACTIEF!"=="!BEPERK_TEST_TOT_FQBN!" set "OVERSLAAN=TRUE"
 if /I "!OVERSLAAN!"=="TRUE" exit /b 0
 call :TEL_TEST
-set "COMPILE_LOG=%TEMP%\GroeiAcademieCompile_!RANDOM!_!RANDOM!.txt"
+set /A COMPILATIE_NUMMER=BASIC_TESTS+EXTENDED_TESTS+EXPERIMENTAL_TESTS
+set "COMPILE_LOG=%TEMP%\GroeiAcademieCompile_!GA_RUN_ID!.txt"
 echo ------------------------------------------------------------
-echo Compileren van: !TEST_INO_ACTIEF!
+echo Compileren !COMPILATIE_NUMMER! van !TOTAAL_COMPILATIES!: !TEST_INO_ACTIEF!
 echo TEST_TYPE: !TEST_TYPE_ACTIEF!
 echo FQBN: !FQBN_ACTIEF!
 echo BOARD_VERSION: !BOARD_VERSION_ACTIEF!
@@ -390,24 +447,44 @@ rmdir /s /q "%TEMP%\GA_Build_!GA_RUN_ID!" >nul 2>&1
 exit /b 0
 
 :TEL_TEST
+rem Een EXPERIMENTEEL-test telt op elk board in EXPERIMENTAL_*, nooit in BASIC_* of EXTENDED_*.
+if /I "!TEST_TYPE_ACTIEF!"=="EXPERIMENTEEL" (
+    set /A EXPERIMENTAL_TESTS+=1
+    exit /b 0
+)
 if "!FQBN_GROEP!"=="BASIC" set /A BASIC_TESTS+=1
 if "!FQBN_GROEP!"=="EXTENDED" set /A EXTENDED_TESTS+=1
 if "!FQBN_GROEP!"=="EXPERIMENTAL" set /A EXPERIMENTAL_TESTS+=1
 exit /b 0
 
 :TEL_OK
+rem Een EXPERIMENTEEL-test telt op elk board in EXPERIMENTAL_*, nooit in BASIC_* of EXTENDED_*.
+if /I "!TEST_TYPE_ACTIEF!"=="EXPERIMENTEEL" (
+    set /A EXPERIMENTAL_OK+=1
+    exit /b 0
+)
 if "!FQBN_GROEP!"=="BASIC" set /A BASIC_OK+=1
 if "!FQBN_GROEP!"=="EXTENDED" set /A EXTENDED_OK+=1
 if "!FQBN_GROEP!"=="EXPERIMENTAL" set /A EXPERIMENTAL_OK+=1
 exit /b 0
 
 :TEL_EXPECTED_MEMORY
+rem Een EXPERIMENTEEL-test telt op elk board in EXPERIMENTAL_*, nooit in BASIC_* of EXTENDED_*.
+if /I "!TEST_TYPE_ACTIEF!"=="EXPERIMENTEEL" (
+    set /A EXPERIMENTAL_EXPECTED_MEMORY+=1
+    exit /b 0
+)
 if "!FQBN_GROEP!"=="BASIC" set /A BASIC_EXPECTED_MEMORY+=1
 if "!FQBN_GROEP!"=="EXTENDED" set /A EXTENDED_EXPECTED_MEMORY+=1
 if "!FQBN_GROEP!"=="EXPERIMENTAL" set /A EXPERIMENTAL_EXPECTED_MEMORY+=1
 exit /b 0
 
 :TEL_FAIL
+rem Een EXPERIMENTEEL-test telt op elk board in EXPERIMENTAL_*, nooit in BASIC_* of EXTENDED_*.
+if /I "!TEST_TYPE_ACTIEF!"=="EXPERIMENTEEL" (
+    set /A EXPERIMENTAL_FAIL+=1
+    exit /b 0
+)
 if "!FQBN_GROEP!"=="BASIC" set /A BASIC_FAIL+=1
 if "!FQBN_GROEP!"=="EXTENDED" set /A EXTENDED_FAIL+=1
 if "!FQBN_GROEP!"=="EXPERIMENTAL" set /A EXPERIMENTAL_FAIL+=1

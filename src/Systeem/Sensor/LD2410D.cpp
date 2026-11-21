@@ -7,7 +7,7 @@
 bool LD2410D::inpluggen() {
   if (ingeplugd) return true;
   // Native: TX en RX moeten aangesloten zijn. Via een UART-Extender: één channel-claim.
-  if (aangemeldePinnen.aantalExclusief == 2 && (exclusief_[0] == static_cast<uint8_t>(HardwareResourcePin::NONE) ||
+  if (aangemeldePinnen.aantalExclusief == 2 && np_OUT == static_cast<uint8_t>(HardwareResourcePin::NONE) && (exclusief_[0] == static_cast<uint8_t>(HardwareResourcePin::NONE) ||
       exclusief_[0] == static_cast<uint8_t>(HardwareResourcePin::CUSTOM) ||
       exclusief_[1] == static_cast<uint8_t>(HardwareResourcePin::NONE) ||
       exclusief_[1] == static_cast<uint8_t>(HardwareResourcePin::CUSTOM))) return false;
@@ -17,7 +17,17 @@ bool LD2410D::inpluggen() {
 bool LD2410D::Activeren() {
   // Alleen interfacecontrole; een geldig frame moet bij het uitlezen worden gecontroleerd.
   if (parent == nullptr || !parent->actief || !ingeplugd) return false;
+  // Nieuwe sessie: parser leeg en geen frame uit een vorige sessie.
+  framePositie = 0;
+  verwachteLengte = 0;
+  lastFrameMS = 0;
   // Via een UART-Extender: de baud van deze Sensor (115200) op zijn channel instellen.
+#if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
+  // Via een UART-Extender met OUT op een GPIO van diezelfde Extender.
+  if (np_OUT != static_cast<uint8_t>(HardwareResourcePin::NONE)) {
+    return parent->StartExtenderUART(exclusief_[0], 115200UL) && parent->SetExtenderPinMode(np_OUT, INPUT);
+  }
+#endif
   return aangemeldePinnen.aantalExclusief != 1 || parent->StartExtenderUART(exclusief_[0], 115200UL);
 }
 
@@ -82,6 +92,7 @@ bool LD2410D::LeesHoofdwaarde(float& waarde) {
           frame[verwachteLengte-2] == 0x55 && frame[verwachteLengte-1] == 0x00 &&
           frame[2] <= 3) {
         waarde = static_cast<float>(frame[2]);
+        lastFrameMS = millis();
 #if DATA_LAYER_CONFIG != DATA_TYPE_NONE
         WriteQueueOrStack(1, waarde);
 #endif

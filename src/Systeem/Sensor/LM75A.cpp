@@ -2,6 +2,13 @@
 #if SENSOR_LM75A_AANTAL > 0
 // Fabrikant: https://www.ti.com/lit/ds/symlink/lm75a.pdf
 bool LM75A::Activeren() {
+#if GEDEELDE_BUS_MIXED_PINS
+  // Mixed: hulppinnen op de tweede Extender instellen vóór de library-initialisatie.
+  if (viaMixed) {
+    if (extenderHulp_[0] == nullptr || !extenderHulp_[0]->actief) return false;
+    if (!extenderHulp_[0]->SetExtenderPinMode(np_OS, INPUT)) return false;   // OS: uitgang van de sensor
+  }
+#endif
   if (!parent || !parent->actief) return false;
   lm75a.begin();
   return lm75a.isConnected();

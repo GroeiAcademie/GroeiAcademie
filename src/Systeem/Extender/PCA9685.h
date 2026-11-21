@@ -125,7 +125,18 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
 #if defined(EXTENDER_PCA9685_1_OE_PIN) || defined(EXTENDER_PCA9685_2_OE_PIN)
     PCA9685::setOutputEnable(false);
 #endif
+#if EXTENDER_TCA9548A_AANTAL > 0
+    // Achter een TCA9548A: het kanaal zelf openen.
+    // Bij een mislukte activering heeft GedeeldeBus het kanaal al gesloten voordat StopSturing() loopt.
+    // Is de TCA9548A zelf niet actief, dan opent SelectAccessForChild() niets en blijft alleen de OE-pin over.
+    // Alleen schrijven als het eigen kanaal echt open is; anders kan allOFF() een andere chip met hetzelfde adres raken.
+    if (parent == nullptr || parent->SelectAccessForChild(this)) {
+      PCA9685::allOFF();
+      if (parent != nullptr) parent->ReleaseAccessForChild(this);
+    }
+#else
     PCA9685::allOFF();
+#endif
   }
 
   bool ReadExtenderPWMFrequency(uint16_t& frequentie) override {
@@ -144,7 +155,9 @@ struct ExtenderPCA9685 : HardwareResourceTypeI2C, PCA9685 {
   bool WriteExtenderPWM(uint8_t pin, uint16_t waarde) override {
     if (pin > static_cast<uint8_t>(ExtenderPins::EP_PWM15)) return false;
     if (!ComponentBeschikbaarTijdensRuntime()) return false;
-    const bool gelukt = PCA9685::setPWM(pin, waarde > 4095 ? 4095 : waarde) == PCA9685_OK;
+    // Datasheet: volledig aan of uit vraagt de bit FULL_ON of FULL_OFF; 4095 met setPWM() is 4095/4096 aan. Daarom 4095 en 0 als FULL_ON en FULL_OFF.
+    const bool gelukt = (waarde >= 4095 ? PCA9685::setPWM(pin, 0x1000, 0x0000) :
+                         waarde == 0 ? PCA9685::setPWM(pin, 0x0000, 0x1000) : PCA9685::setPWM(pin, waarde)) == PCA9685_OK;
     ResultaatComponentToegangTijdensRuntimeVerwerken(gelukt);
     return gelukt;
   }

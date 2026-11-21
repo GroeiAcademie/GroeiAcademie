@@ -20,8 +20,22 @@ struct HSR0x : Sensor {
   }
 
   bool inpluggen() override;
-  // Timinggevoelig native protocol: niet via een generieke GPIO-Extender (GB112).
-  bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const override { (void)extender; return false; }
+  // Timinggevoelig native protocol: niet via een generieke GPIO-Extender (GB112). Wel als directe parent:
+  // - CD74HC4067: TRIG en ECHO zijn twee kanalen EP_Yn, na elkaar op de native Z-pin (één CD74HC4067);
+  // - MCP23017/MCP23S17: TRIG en ECHO op de MCP, de ECHO-timing via de INTA-uitgang op een native pin (np_INTA van de Extender).
+  bool ExtenderFysiekGeschikt(const GedeeldeBusNode* extender) const override {
+    return extender == parent && (
+#if EXTENDER_CD74HC4067_AANTAL > 0
+      extender->component == GedeeldeBusComponent::ADS_MULTIPLEXER_CD74HC4067 ||
+#endif
+#if EXTENDER_MCP23017_AANTAL > 0
+      extender->component == GedeeldeBusComponent::DIGITAL_PINS_MCP23017 ||
+#endif
+#if EXTENDER_MCP23S17_AANTAL > 0
+      extender->component == GedeeldeBusComponent::DIGITAL_PINS_MCP23S17 ||
+#endif
+      false);
+  }
 
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
   bool Activeren() override;
@@ -36,6 +50,8 @@ struct HSR0x : Sensor {
   unsigned long tijdstipTrigger = 0;
   bool echoMetingBezig = false;
   bool echoViaInterrupt = false;
+  // Via de INTA van een MCP23017/MCP23S17: elke flank van INTA is een wissel van ECHO; true na de eerste (ECHO hoog).
+  volatile bool echoStartEdgeSeenViaINTA = false;
   void EchoWijziging();   // aangeroepen vanuit de interrupt van de ECHO-pin
 };
 

@@ -62,7 +62,10 @@ struct ExtenderPCF8575 : HardwareResourceTypeI2C, PCF8575 {
   bool Activeren() override {
     // Geen teruglezen: de PCF8575 heeft geen register, alleen quasi-bidirectionele pinnen waarvan de stand van de aansluiting afhangt.
     const bool gelukt = PCF8575::begin() && PCF8575::isConnected();
-    return FoutDiagnoseI2C(gelukt, PCF8575::lastError(), gelukt);
+    // begin() geeft ook true als de beginwrite mislukt; die fout staat alleen in lastError().
+    // lastError() zet de fout terug op OK, dus één keer uitlezen; isConnected() verandert de fout niet.
+    const int fout = PCF8575::lastError();
+    return FoutDiagnoseI2C(gelukt, fout, gelukt && fout == PCF8575_OK);
   }
 
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF

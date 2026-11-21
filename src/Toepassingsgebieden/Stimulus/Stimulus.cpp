@@ -291,7 +291,7 @@ SynchronisatieProfiel Stimulus::MaakSynchronisatieProfielAlleSensoren(SensorMeet
   return synchronisatie;
 }
 
-int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin, int exitOffset, unsigned long timeoutMs) {
+int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gemetenStimulus, int exitPin, int exitOffset, unsigned long timeoutMS) {
   int exitStatus = EXIT_STATUS_GEEN;
   SensorMeetStatus sensor = {};
   ResetStimulusProfiel(gemetenStimulus);
@@ -299,12 +299,12 @@ int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gem
   // Eerste meting weggooien: kanaalwissel-artefact ligt structureel boven drempel
   sensorFsrRfpSet1->RawAnalogRead(sensorPin);
 
-  unsigned long timeoutNoActionMs = (timeoutMs > EXIT_NO_ACTION_MS) ? timeoutMs : EXIT_NO_ACTION_MS;
+  unsigned long timeoutNoActionMS = (timeoutMS > EXIT_NO_ACTION_MS) ? timeoutMS : EXIT_NO_ACTION_MS;
 
   // Wanneer de meetsensor bij het binnenkomen al ingedrukt is, eerst wachten tot die volledig wordt losgelaten.
   unsigned long startWachtenOpLoslaten = millis();
   while (AnalogReadMetGekorigeerdeOffsets(sensorPin, OffsetSensor) > TIK_MINIMALE_DRUKWAARDE) {
-    if (millis() - startWachtenOpLoslaten >= timeoutNoActionMs) return EXIT_STATUS_NO_ACTION_TIMEOUT;
+    if (millis() - startWachtenOpLoslaten >= timeoutNoActionMS) return EXIT_STATUS_NO_ACTION_TIMEOUT;
     delayMicroseconds(DELAY_US);
   }
 
@@ -315,7 +315,7 @@ int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gem
 
   while (sensor.actueleTikKracht <= TIK_MINIMALE_DRUKWAARDE) {
     sensor.actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorPin, OffsetSensor);
-    if (millis() - startWachtenOpActie >= timeoutNoActionMs) return EXIT_STATUS_NO_ACTION_TIMEOUT;
+    if (millis() - startWachtenOpActie >= timeoutNoActionMS) return EXIT_STATUS_NO_ACTION_TIMEOUT;
   }
 
   // Gebruik dezelfde initialisatie van SensorMeetStatus als MeetStimulusSimultaan().
@@ -346,7 +346,7 @@ int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gem
     }
 
     // Extra stopvoorwaarde: maximale meettijd bereikt
-    if (nu - sensor.startTikTijd >= timeoutMs) {
+    if (nu - sensor.startTikTijd >= timeoutMS) {
       sensor.eindTikTijd = nu;
       sensor.sensorKlaar = true;
       exitStatus = EXIT_STATUS_TIMEOUT;
@@ -404,7 +404,7 @@ int Stimulus::MeetStimulus(int sensorPin, int OffsetSensor, StimulusProfiel &gem
   return exitStatus;
 }
 
-int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart, int MaskGewensteActieveSensorsBijExit, unsigned long timeoutMs, bool testOpDRUKWAARDE) {
+int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aantalSensorenSimultaanTeMeten, SynchronisatieProfiel synchronisatie[], int MaskReedsActieveSensorsBijStart, int MaskGewensteActieveSensorsBijExit, unsigned long timeoutMS, bool testOpDRUKWAARDE) {
   const int offsetSensor[4] = { offsetSensor1, offsetSensor2, offsetSensor3, offsetSensor4 };
   SensorMeetStatus sensor[4] = {};
 
@@ -466,10 +466,10 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
     }
   } else {
     unsigned long startWachtenOpActie = millis();
-    unsigned long timeoutNoActionMs = (timeoutMs > EXIT_NO_ACTION_MS) ? timeoutMs : EXIT_NO_ACTION_MS;
+    unsigned long timeoutNoActionMS = (timeoutMS > EXIT_NO_ACTION_MS) ? timeoutMS : EXIT_NO_ACTION_MS;
 
     while (!minstensEenSensorGestart) {
-      if (millis() - startWachtenOpActie >= timeoutNoActionMs) return EXIT_STATUS_NO_ACTION_TIMEOUT;
+      if (millis() - startWachtenOpActie >= timeoutNoActionMS) return EXIT_STATUS_NO_ACTION_TIMEOUT;
 
       for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {
         sensor[sensorNummer].actueleTikKracht = AnalogReadMetGekorigeerdeOffsets(sensorFsrRfpSet1->sensorPin[sensorNummer], offsetSensor[sensorNummer]);
@@ -562,7 +562,7 @@ int Stimulus::MeetStimulusSimultaan(StimulusProfiel gemetenStimulus[], int aanta
     for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) VerwerkSensor(nu, sensorFsrRfpSet1->sensorPin[sensorNummer], offsetSensor[sensorNummer], sensor[sensorNummer]);
 
     // Stop wanneer de ingestelde timeout bereikt is.
-    if (nu - startMeting >= timeoutMs) {
+    if (nu - startMeting >= timeoutMS) {
       exitStatus = EXIT_STATUS_TIMEOUT;
 
       for (int sensorNummer = 0; sensorNummer < aantalSensorenSimultaanTeMeten; sensorNummer++) {

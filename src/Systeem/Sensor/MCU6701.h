@@ -41,6 +41,7 @@ struct MCU6701 : Sensor {
 
   bool inpluggen() override;
   uint8_t AantalChannels() const override { return 1; }   // meetkanalen voor Data
+  bool IsAnalogChild() const override { return true; }    // leest via StartExtenderReadAnalog() van de parent
   bool Activeren() override;
   bool StartAnalogRead();
   bool IsAnalogReadKlaar();

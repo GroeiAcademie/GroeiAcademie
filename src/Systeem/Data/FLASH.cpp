@@ -88,7 +88,13 @@ DataFLASHviaSPI::~DataFLASHviaSPI() {
   struct Data* data = static_cast<struct Data*>(parent);   // de ouder (Data) van deze chip
   if (data == nullptr) return;
   for (uint8_t teller = 0; teller < DATA_LAYER_FLASH_SPI_AANTAL; teller++) {
-    if (data->FLASHviaSPI[teller] == this) data->FLASHviaSPI[teller] = nullptr;
+    if (data->FLASHviaSPI[teller] == this) {
+      data->FLASHviaSPI[teller] = nullptr;
+      // Wachtende records van deze chip vervallen; ze mogen niet op een nieuwe chip op deze plaats komen.
+      data->DiscardBufferFLASH(teller);
+      // Een gestarte chip verdwijnt: de streaming is niet volledig, en een nieuwe chip op deze plaats moet eerst zelf starten.
+      if (data->flashStreamingStarted[teller]) { data->streamingWriteFailed = true; data->flashStreamingStarted[teller] = false; }
+    }
   }
 }
 

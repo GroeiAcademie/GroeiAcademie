@@ -5,7 +5,7 @@
 - Broncode: `src/Systeem/Sensor/AHT10.h` en `AHT10.cpp`.
 - C++-component: `AHT10`, afgeleid van `Sensor`.
 - Parent: `HardwareResourceTypeI2C*` in de constructor.
-- Componentcode: `AHT10` (0xD0).
+- Componentcode: `AHT10` (0xC8).
 - Configuratie: `src/Configuratie/Sensoren/ConfigAHT10_template.h`; de optionele persoonlijke versie heet telkens zonder `_template`.
 - Data-kanalen: 2.
 - Externe library: `Adafruit_AHTX0.h`.
@@ -51,7 +51,7 @@ AHT10(HardwareResourceTypeI2C* parent, GedeeldeBusComponent component)
 - Gebruik bij een eigen configuratie `src/Configuratie/Sensoren/ConfigAHT10.h` (het aanwezige `src/Configuratie/Sensoren/ConfigAHT10_template.h` is een kopieersjabloon en wordt niet rechtstreeks ingelezen).
 - Voor één aangesloten exemplaar: `SENSOR_AHT10_AANTAL` op **1**, behalve wanneer de bestaande groeps-/setconfiguratie uitdrukkelijk een andere betekenis heeft.
 - De bestaande configuratie bevat deze aansluitrelevante definities (gebruik de **werkelijke aangesloten** pinnen, adressen en referenties):
-  - `SENSOR_AHT10_AANTAL`: uitgecommentarieerd sjabloonvoorstel `1`; zonder actieve override geldt de fallback `0` uit `SystemConfig.h`.
+  - `SENSOR_AHT10_AANTAL`: sjabloonwaarde `1`.
   - `I2C_ADDRESS_SENSOR_AHT10_1`: sjabloonwaarde `I2C_ADDRESS_NONE`.
 
 **Letterlijk constructorfragment uit de bestaande voorbeeldsketch** (alle gebruikte parent-objecten moeten zelf correct aangesloten en geïnitialiseerd zijn):
@@ -70,12 +70,39 @@ GedeeldeBusNewComponent<AHT10>(&apparaat,GedeeldeBusComponent::AHT10);
 
 **Technische handleiding:** https://learn.adafruit.com/adafruit-aht20/pinouts
 
-## Runtime-meetgedrag
-
-`AHT10::LeesHoofdwaarde(float&)` start bij de eerste aanroep de AHTX0-trigger (`AHTX0_CMD_TRIGGER`) en retourneert dan `false` met `waarde = NAN`. Latere aanroepen bekijken de status: zolang de sensor BUSY is en de meetstart minder dan 200 ms geleden is, retourneert de functie opnieuw `false` zonder een runtime-toegangsfout te registreren. Zodra de meting klaar is, worden zes bytes gelezen, temperatuur als hoofdwaarde en bij ingeschakelde datalaag de relatieve vochtigheid als tweede kanaal verwerkt. Een ontbrekende status, niet beantwoorde busactie of niet-afgeronde meting na de wachttijd wordt wel als mislukte runtime-toegang verwerkt. `Activeren()` heeft daarnaast afzonderlijke begrensde initialisatiewachtlussen. Een enkele `false` tijdens de meetfase betekent dus niet automatisch een defect.
-
 ## Testen
 
 Voorbeelden: `examples/Systeem/GedeeldeBus/Sensoren/Sensor_AHT10/`.
 Compiletests: `extras/TestLibrarySensoren-v2.0.0.cmd` en `extras/TestLibrarySensorenOngeldig-v2.0.0.cmd`.
 
+### Aanvullende Sensor × Extender-testvoorbeelden
+
+De onderstaande `.ino`-bestanden behoren tot de huidige v2.0.0-voorbeelden. Hun aanwezigheid is gecontroleerd; compilatie en fysieke hardwarevalidatie zijn hier nog **niet** aangetoond.
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_AHT10_TCA9548A/Sensor_AHT10_TCA9548A.ino`
+
+### Functionele Sensor × Extender-voorbeelden
+
+De onderstaande voorbeelden bevatten **meetaanroepen na de activering**. Een getoonde waarde is geen bewijs van meetnauwkeurigheid of van een geslaagde hardwaretest.
+
+- **Fysieke test:** Verander temperatuur en relatieve vochtigheid. Via Data ook vochtigheid.
+- **Huidige reikwijdte:** de `.ino` gebruikt uitsluitend reeds bestaande FrameWork-functies; niet-beschikbare meetkanalen, kalibraties of externe functies zijn niet toegevoegd.
+- **Meerkanalige meting:** voor alle kanalen `DATA_LAYER_CONFIG` op `DATA_TYPE_DIRECT` configureren. De `.ino` maakt dan de bestaande Data-component aan en leest de kanalen uit. Met de standaardwaarde `DATA_TYPE_NONE` blijft de secundaire kanaaltest onvolledig.
+
+**Voorbeelden:**
+
+- `examples/Systeem/GedeeldeBus/Sensoren/Sensor_AHT10_TCA9548A/Sensor_AHT10_TCA9548A.ino`
+
+**Validatie:** Arduino-compilatie, fysieke test, kalibratie en meetkwaliteitsvalidatie zijn hier nog niet aangetoond.
+
+### Meetstart, status en twee Data-kanalen
+
+`LeesHoofdwaarde(float&)` gebruikt twee stappen: een eerste oproep start de AHTx-meting en geeft `false` terug; een volgende oproep haalt de meetgegevens op zodra de sensor gereed is. Zolang de sensor BUSY meldt (maximaal 200 ms sinds de start), wordt nog geen geldige waarde teruggegeven. Een meetfout wordt via de bestaande I²C-runtimefoutafhandeling gemeld. De hoofdwaarde is temperatuur in °C; bij een geslaagde uitlezing worden temperatuur (Data-kanaal 1) en relatieve vochtigheid (Data-kanaal 2) opgeslagen als Data actief is. `LeesStatus()` leest afzonderlijk de statusbyte en geeft `0xFF` terug bij een I²C-leesfout.
+
+## Native meetvoorbeeld
+
+`examples/Systeem/GedeeldeBus/Sensoren/Sensor_AHT10/Sensor_AHT10.ino` voert na de lifecycle daadwerkelijk uitlezingen uit via de bestaande Sensor-API.
+Gemeten of weergegeven in dit voorbeeld: **Temperatuur (C)**.
+De seriële uitvoer wordt beperkt; de Sensor-uitlezing blijft in `loop()` plaatsvinden.
+Dit bevestigt bij geslaagde hardwaretests de ruwe of rechtstreeks beschikbare meetwaarde, niet automatisch alle fysische kanalen, kalibratie of nauwkeurigheid.
+Compilatie en fysieke meting zijn nog niet bevestigd.

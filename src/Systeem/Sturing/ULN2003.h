@@ -47,14 +47,15 @@ struct ULN2003 : GedeeldeBusNode {
 
   bool VoerEenStapUit(bool forward) {
     if (!actief || !parent) return false;
-    phase=(phase+(forward?1:3))%4;
+    // De nieuwe fase pas bewaren nadat de vier uitgangen geschreven zijn.
+    const uint8_t nextPhase=(phase+(forward?1:3))%4;
     const uint8_t patterns[4]={0x03,0x06,0x0C,0x09};
     for (uint8_t i=0;i<4;i++) {
       if (parent==&Native) {
-        digitalWrite(NativeArduinoPinVan(static_cast<HardwareResourcePin>(p[i])),(patterns[phase]&(1<<i))?HIGH:LOW);
+        digitalWrite(NativeArduinoPinVan(static_cast<HardwareResourcePin>(p[i])),(patterns[nextPhase]&(1<<i))?HIGH:LOW);
       } else {
 #if GEDEELDE_BUS_EXTENDER_GPIO_ACTIEF
-        if (!parent->WriteExtenderPin(p[i],(patterns[phase]&(1<<i))?HIGH:LOW)) {
+        if (!parent->WriteExtenderPin(p[i],(patterns[nextPhase]&(1<<i))?HIGH:LOW)) {
           StopSturing();
           return false;
         }
@@ -63,6 +64,7 @@ struct ULN2003 : GedeeldeBusNode {
 #endif
       }
     }
+    phase=nextPhase;
     return true;
   }
 
